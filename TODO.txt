@@ -1,0 +1,75 @@
+/* 
+   TODO
+
+   CRITICAL - restart preload img
+   CRITICAL - watchdog
+
+   TEST (aum. il timeout) - carte giocate che restano girate
+
+   NORM - one player reject a game (to less points (<2)
+   NORM - tools dir with a main and some pages where check briscola tools.
+   NORM - help page
+   NORM - img -> div + css
+   NORM - (master concept) card selection 
+   NORM - internationalization
+   
+ WEB
+   - compatibility page
+   - homepage
+   - screenshots
+
+ MIDDLE TODO
+   WIP - info enhancement and related button (how win the last game and with how much points ?)
+   WIP - preload images: (finish the list)
+   - unload of the stream
+   - split server-side data 
+   - user assistant (with button to enable disable)
+   - who is playing now
+   - graphics enhancement 
+   - asta: highlight buttons (css hover)
+   - documentation
+
+   TO REVIEW - special chars in js
+
+   DONE - change name
+   DONE - automatic and manual logout
+   DONE - cache problems solved via .htaccess
+   DONE - all players out of the auction
+   DONE - time to send cards
+   DONE - hide cards before sends at a new game
+   DONE - well recognization of the browser and O.S.
+   DONE - login consistency !!!!
+   DONE - functionalization of garbage
+   DONE - call garbage function into login
+   DONE - game
+   DONE - manage the reload from scratch of the table page
+   DONE - table reset
+   DONE - sendcard => card_send(idx, ....)
+   DONE - show table for game
+   DONE - points calculation
+   DONE - make-up of the chooser
+   DONE - where place the briscola on the table
+   DONE - users info
+   DONE - show current auction position
+   DONE - table with internal management of the transition between pages.
+   DONE - server side page abort management  
+   DONE - cookie problem with Ajax
+   DONE - spostare il tasto "esco"
+
+DOC
+   CHAPTERS
+      HTTP Streaming
+      Local serializer
+      Database on shmem
+      Page abort (reload on http streaming case)
+      Chat
+      Cookies management
+
+CHECK ON NEW SERVERS
+.htaccess AllowOverwrite mode for Cache-Control directive
+
+
+
+
+*/
+

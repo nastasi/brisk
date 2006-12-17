@@ -1,0 +1,3 @@
+<FilesMatch "\.(js|css)$">
+header append Cache-Control "public, last-modified, must-revalidate"
+</FilesMatch>
