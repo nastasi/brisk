@@ -31,6 +31,7 @@ define(STREAM_TIMEOUT, 20);
 define(EXPIRE_TIME, 180);
 define(GARBAGE_TIMEOUT, 30);
 define(NICKSERV, "<i>SERVER</i>");
+define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
 function xcape($s)
@@ -569,43 +570,63 @@ function make_seed()
 }
 
 function log_main($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
   $fp = fopen("/tmp/brisk_main.log", 'a');
   fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
   fclose($fp);
 }
 
 function log_rd($sess, $log) {
-  // $fp = fopen("/tmp/brisk_rd.log", 'a');
-  // fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  // fclose($fp);
-	;
+  if (BRISK_DEBUG != TRUE)
+    return;
+
+  $fp = fopen("/tmp/brisk_rd.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_rd2($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
   $fp = fopen("/tmp/brisk_rd2.log", 'a');
   fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
   fclose($fp);
 }
 
 function log_send($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
   $fp = fopen("/tmp/brisk_send.log", 'a');
   fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
   fclose($fp);
 }
 
 function log_auth($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
   $fp = fopen("/tmp/brisk_auth.log", 'a');
   fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
   fclose($fp);
 }
 
 function log_wr($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
   $fp = fopen("/tmp/brisk_wr.log", 'a');
   fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
   fclose($fp);
 }
 
 function log_load($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
   $fp = fopen("/tmp/brisk_load.log", 'a');
   fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
   fclose($fp);
