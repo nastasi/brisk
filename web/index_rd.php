@@ -64,6 +64,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
       if (($user = &get_user($bri, $sess, $idx)) == FALSE) {
+	unlock_data($sem);
 	return (unrecerror());
       }
       log_auth($sess, "update lacc");
@@ -79,7 +80,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     unlock_data($sem);
   }
   else {
-    unlock_data($sem);
     return (FALSE);
   }
     
@@ -98,6 +98,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $sem = lock_data();
     $bri = &load_data();
     if (($user = &get_user($bri, $sess, $idx)) == FALSE) {
+      unlock_data($sem);
       return (unrecerror());
     }
     if ($user->the_end) 
@@ -141,13 +142,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $new_stat =  $user->stat;
     $new_subst = $user->subst;
     $new_step =  $user->step;
-	  
-    unlock_data($sem);
   }
   else {
     $sem = lock_data();
     $bri = &load_data();
     if (($user = &get_user($bri, $sess, $idx)) == FALSE) {
+      unlock_data($sem);
       return (unrecerror());
     }
     if ($cur_step < $user->step) {
