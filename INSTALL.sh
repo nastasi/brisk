@@ -3,6 +3,7 @@
 # Defaults
 #
 n_players=3
+brisk_debug="TRUE"
 ftok_path="/var/lib/brisk"
 web_path="$HOME/brisk"
 web_only=0
@@ -13,9 +14,10 @@ fi
 
 function usage () {
     echo
-    echo "$1 [-n 3|5] [-w web_dir] [-k <ftok_dir>] [-W]"
+    echo "$1 [-d TRUE|FALSE] [-n 3|5] [-w web_dir] [-k <ftok_dir>] [-W]"
     echo "  -h this help"
     echo "  -n number of players - def. $n_players"
+    echo "  -d activate dabug    - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
     echo "  -W install web files only"
@@ -43,6 +45,7 @@ while [ $# -gt 0 ]; do
     # echo aa $1 xx $2 bb
     case $1 in
 	-n*) n_players="`get_param "-n" "$1" "$2"`"; sh=$?;;
+	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
 	-W) web_only=1;;
@@ -102,7 +105,9 @@ sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" `find ${w
 # .ph[ph] substitutions
 sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
 
-sed -i "s@define *( *FTOK_PATH,[^)]*)@define( FTOK_PATH, \"$ftok_path\")@g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
+sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
+
+sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/brisk.phh
 
 # install -d ${web_path}/img
 # install -m 644 `ls img/*.{jpg,png} | grep -v 'img/src_'` ${web_path}/img
