@@ -78,8 +78,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
     unlock_data($sem);
   }
-  else
+  else {
+    unlock_data($sem);
     return (FALSE);
+  }
     
   if (($user = &get_user(&$bri, $sess, $idx)) == FALSE) {
     return (unrecerror());
@@ -113,6 +115,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
     else {
       log_rd2($sess, "TRANS NON ATTIVATO");
+      unlock_data($sem);
     }
   }
       
