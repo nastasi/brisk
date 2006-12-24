@@ -11,15 +11,20 @@ web_only=0
 if [ -f $HOME/.brisk_install ]; then
    . $HOME/.brisk_install
 fi
-
+if [ "x$cookie_path" = "x" ]; then
+   cookie_path=web_path
+fi
 function usage () {
     echo
-    echo "$1 [-d TRUE|FALSE] [-n 3|5] [-w web_dir] [-k <ftok_dir>] [-W]"
+    echo "$1 -h"
+    echo "$1 [-W] [-n 3|5] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-c <cookie_path>] [-W]"
     echo "  -h this help"
+    echo "  -W web files only"
     echo "  -n number of players - def. $n_players"
     echo "  -d activate dabug    - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
+    echo "  -c cookie path - def. \"$cookie_path\""
     echo "  -W install web files only"
     echo
 }
@@ -48,6 +53,7 @@ while [ $# -gt 0 ]; do
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
+	-c*) cookie_path="`get_param "-c" "$1" "$2"`"; sh=$?;;
 	-W) web_only=1;;
 	-h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
@@ -109,7 +115,6 @@ sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find
 
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/brisk.phh
 
-# install -d ${web_path}/img
-# install -m 644 `ls img/*.{jpg,png} | grep -v 'img/src_'` ${web_path}/img
+sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
 
 exit 0
