@@ -137,17 +137,33 @@ function send_mesg(mesg)
 
 /* Stat: CHAT and TABLE */
 
-function act_chatt()
+function chatt_checksend(obj,e)
 {
-    var obj = $("txt_in");
-    if (obj.value == "")
-	return (false);
-    send_mesg("chatt|"+encodeURIComponent(obj.value));
+    var keynum;
+    var keychar;
+    var numcheck;
+
+    if(window.event) { // IE
+	keynum = e.keyCode;
+    }
+    else if(e.which) { // Netscape/Firefox/Opera
+	keynum = e.which;
+    }
+    // alert("OBJ: "+obj);
+    if (keynum == 13 && obj.value != "") { // Enter
+	act_chatt(obj.value);
+	obj.value = "";
+    }
+}
+function act_chatt(value)
+{
+    send_mesg("chatt|"+encodeURIComponent(value));
+    /*
     obj.disabled = true;
     obj.value = "";
     obj.disabled = false;
     obj.focus();
-
+    */
     return false;
 }
 
