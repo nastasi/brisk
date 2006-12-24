@@ -36,7 +36,7 @@ define(BRISK_DEBUG, FALSE);
 
 function xcape($s)
 {
-  return (str_replace('@', '&#64;', str_replace('|', '&brvbar;', htmlentities($s,ENT_COMPAT,"UTF-8"))));
+  return (str_replace('\\', '\\\\', str_replace('@', '&#64;', str_replace('|', '&brvbar;', htmlentities($s,ENT_COMPAT,"UTF-8")))));
 }
 
 
@@ -541,8 +541,6 @@ class brisco {
       }
     }
     else {
-      $user_mesg = xcape($user_mesg);
-      
       for ($i = 0 ; $i < ($user->stat == 'room' ? MAX_PLAYERS : PLAYERS_N) ; $i++) {
 	if ($user->stat == 'room') {
 	  $user_cur = &$this->user[$i];
@@ -554,8 +552,8 @@ class brisco {
 	}
 	
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
-							     $dt.xcape($user->name), $user_mesg);
+	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s",\'%s\');',
+							     $dt.xcape($user->name), xcape($user_mesg));
 	$user_cur->step++;
       }
     }
