@@ -1,0 +1,9 @@
+2006-12-18      Matteo Nastasi (aka mop) <matteo.nastasi@milug.org>
+        * Refact: chat implementation (Opera compliant).
+
+2006-12-17      Matteo Nastasi (aka mop) <matteo.nastasi@milug.org>
+        * Release: 0.3.0 is out.
+
+
+
+
