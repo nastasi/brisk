@@ -124,7 +124,8 @@ function main()
 </SCRIPT>
 <img class="nobo" src="img/brisk_logo64.png">
 <div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div>
-<br><br>
+<br><a href="/briskhome.php">homepage</a>
+<br>
 <?php echo "$body"; ?>
 
 <br>
@@ -185,6 +186,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 </SCRIPT>
 <img class="nobo" src="img/brisk_logo64.png">
 <div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div><br>
+<a href="/briskhome.php">homepage</a>
 <!-- <div><input name="logout" value="Esco." onclick="act_logout();" type="button"></div> -->
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <?php echo "$tables"; ?>
@@ -192,7 +194,8 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <b>Chat</b>
 <div id="txt" class="chatt"></div>
 
-<table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onchange="act_chatt();" class="txtt"></td></tr></table>
+<!-- onchange="act_chatt();"  -->
+<table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
 
 <hr>
 <div id="imgct"></div>
