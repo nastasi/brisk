@@ -1,8 +1,9 @@
 /* 
    TODO
 
-   CRITICAL - restart preload img
-   CRITICAL - watchdog
+   URGENT - smammamorti
+   URGENT - restart preload img
+   URGENT - watchdog
 
    TEST (aum. il timeout) - carte giocate che restano girate
 
@@ -14,9 +15,10 @@
    NORM - internationalization
    
  WEB
-   - compatibility page
-   - homepage
-   - screenshots
+   - compatibility update
+   - link to stable/unstable
+   DONE - homepage
+   DONE - screenshots
 
  MIDDLE TODO
    WIP - info enhancement and related button (how win the last game and with how much points ?)
@@ -31,6 +33,7 @@
 
    TO REVIEW - special chars in js
 
+   DONE - installer to set cookie path
    DONE - change name
    DONE - automatic and manual logout
    DONE - cache problems solved via .htaccess
