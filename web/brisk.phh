@@ -552,7 +552,7 @@ class brisco {
 	}
 	
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s",\'%s\');',
+	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
 							     $dt.xcape($user->name), xcape($user_mesg));
 	$user_cur->step++;
       }
