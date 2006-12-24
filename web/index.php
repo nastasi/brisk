@@ -126,7 +126,7 @@ function main()
 </SCRIPT>
 <img class="nobo" src="img/brisk_logo64.png">
 <div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div>
-<div class="topmenu"><a href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
+<div class="topmenu"><a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
 <?php echo "$body"; ?>
 
 <br>
@@ -187,7 +187,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 </SCRIPT>
 <img class="nobo" src="img/brisk_logo64.png">
 <div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div><br>
-<div class="topmenu"><a href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
+<div class="topmenu"><a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
 <!-- <div><input name="logout" value="Esco." onclick="act_logout();" type="button"></div> -->
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <?php echo "$tables"; ?>
