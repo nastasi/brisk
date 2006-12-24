@@ -12,7 +12,7 @@ if [ -f $HOME/.brisk_install ]; then
    . $HOME/.brisk_install
 fi
 if [ "x$cookie_path" = "x" ]; then
-   cookie_path=web_path
+   cookie_path=$web_path
 fi
 function usage () {
     echo
