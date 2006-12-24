@@ -17,15 +17,14 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 [-W] [-n 3|5] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-c <cookie_path>] [-W]"
+    echo "$1 [-W] [-n 3|5] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-c <cookie_path>]"
     echo "  -h this help"
     echo "  -W web files only"
-    echo "  -n number of players - def. $n_players"
-    echo "  -d activate dabug    - def. $brisk_debug"
+    echo "  -n number of players            - def. $n_players"
+    echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
-    echo "  -c cookie path - def. \"$cookie_path\""
-    echo "  -W install web files only"
+    echo "  -c cookie path                  - def. \"$cookie_path\""
     echo
 }
 
