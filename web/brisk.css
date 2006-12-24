@@ -30,6 +30,12 @@ div {
 	position: relative;
 	}
 
+.topmenu {
+	position: absolute;
+	left: 16px;
+	top: 16px;
+}
+
 .room_td {
 	height: 200px;
 	width: 90px;
