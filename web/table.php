@@ -23,7 +23,7 @@
 ?>
 <html>
 <head>
-<title>Table</title>
+<title>Brisk - Tavolo</title>
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
