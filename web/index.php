@@ -131,13 +131,14 @@ function main()
 
 <br>
 <div style="text-align: center;">
+   <br><br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <form method="post" action="">
 <input id="nameid" name="name" type="text" maxlength="12" value="">
 </form>
 </div>
 <br><br>
-<hr>
+<br><br>
 <div id="imgct"></div>
 <div id="logz"></div>
 <div id="sandbox"></div>
