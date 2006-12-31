@@ -23,7 +23,7 @@
 body {
 	background-image: url('img/bg_capodanno.jpg'); 
 	background-repeat: no-repeat;
-	background-position: center; 
+	background-position: top center; 
 
 	align: center;
 	}
