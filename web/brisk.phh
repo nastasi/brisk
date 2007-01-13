@@ -28,8 +28,8 @@ define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
-define(EXPIRE_TIME, 120);
-define(GARBAGE_TIMEOUT, 30);
+define(EXPIRE_TIME, 180);
+define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
@@ -362,7 +362,7 @@ class brisco {
 
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($from_table && ($user_cur->table == $table_idx || $user_cur == $user)) {
-	$ret .= 'gst.st_loc++; the_end=true; document.location.assign("index.php");|';
+	$ret .= 'gst.st_loc++; the_end=true; window.onunload = null; document.location.assign("index.php");|';
 	// $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
 	log_main("DOCUMENT.index.php", "from table");
       }
@@ -862,7 +862,7 @@ function standup_content(&$bri, $user)
   }
   $content .= '</table>';
 	
-  $content .= '<div class=\\"esco\\"><input name=\\"logout\\" value=\\"Esco.\\" onclick=\\"act_logout();\\" type=\\"button\\"></div>';
+  $content .= '<div class=\\"esco\\"><input name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\"></div>';
 
   $ret .= sprintf('$("standup").innerHTML = "%s";', $content);
 
