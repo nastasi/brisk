@@ -46,7 +46,7 @@ function unrecerror()
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  return (sprintf('the_end=true; document.location.assign("index.php");'));
+  return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
 
