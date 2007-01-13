@@ -58,6 +58,7 @@ function main()
   else if (isset($name)) {
     $bri->garbage_manager(TRUE);
     /* try login */
+    $name = substr($name, 0, 12);
     if (($user = &add_user(&$bri, &$sess, &$idx, $name)) != FALSE) {
       $ACTION = "table";
 
@@ -137,8 +138,8 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <input id="nameid" name="name" type="text" maxlength="12" value="">
 </form>
 </div>
-<br><br>
-<br><br>
+<br><br><br><br>
+
 <div id="imgct"></div>
 <div id="logz"></div>
 <div id="sandbox"></div>
@@ -181,15 +182,18 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
      xhr_rd = createXMLHttpRequest();
      sess = "<?php echo "$sess"; ?>";
 
+     window.onunload = onunload_cb;
+
      setTimeout(xhr_rd_poll, 0, sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
    }
+
 </SCRIPT>
 <img class="nobo" src="img/brisk_logo64.png">
 <div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div><br>
 <div class="topmenu"><a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
-<!-- <div><input name="logout" value="Esco." onclick="act_logout();" type="button"></div> -->
+<!-- <div><input name="logout" value="Esco." onclick="window.onunload = null; act_logout();" type="button"></div> -->
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <?php echo "$tables"; ?>
 
@@ -200,11 +204,14 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
 
 <hr>
+<div id="heartbit"></div>
+<hr>
 <div id="imgct"></div>
 <div id="logz"></div>
 <div id="sandbox"></div>
 <div id="sandbox2"></div>
 <div id="response"></div>
+<div id="remark"></div>
 <div id="xhrstart"></div>
 <pre>
 <div id="xhrlog"></div>
