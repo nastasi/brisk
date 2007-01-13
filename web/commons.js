@@ -204,9 +204,32 @@ function act_tableinfo()
     send_mesg("tableinfo");
 }
 
+function safelogout()
+{
+    var res;
+
+    res = window.confirm("Sei sicuro di volere abbandonare la partita?");
+    if (res)
+	act_logout();
+}
 function act_logout()
 {
     send_mesg("logout");
+}
+
+function act_reload()
+{
+    window.onunload = null;
+    document.location.reload();
+}
+
+function act_shutdown()
+{
+    var c = 0;
+
+    send_mesg("shutdown");
+    while (xhr_wr.readyState != 4)
+	c++;
 }
 
 function act_preout()
@@ -248,9 +271,9 @@ function sleep(st, delay)
 function slowimg(img,x1,y1,deltat,free,action,srcend) {
     this.img = img;
 
-    this.x0  = parseInt(window.getComputedStyle(this.img, "").getPropertyValue("left"));
+    this.x0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("left"));
     // alert("img.x0 = "+this.x0);
-    this.y0  = parseInt(window.getComputedStyle(this.img, "").getPropertyValue("top"));
+    this.y0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("top"));
     this.x1  = x1;
     this.y1  = y1;
     this.deltat = deltat;
@@ -667,16 +690,29 @@ function eraseCookie(name) {
 	createCookie(name,"",-1);
 }
 
+var onunload_times = 0;
 
-/*
-window.onload = function() {
-    $("log").innerHTML += "            xxxxxxxxxxxxxxxxxxxxxONLOAD<br>";
 
-    // $("imm2").style.left = 600;
-    // $("imm2").style.top  = 400;
-    var zigu = new slowimg($("imm"),300,100,15,"fin");
-    zigu.settime(1000);
-    zigu.start();
-    //	   setTimeout(function() { alert("FIN:" + fin); }, 5000);
+function onunload_cb () {
+    var u = 0;
+    if (onunload_times == 0) {
+	var res = window.confirm("    Vuoi veramente abbandonare la briscola ?\n(clicca annulla o cancel se vuoi ricaricare la briscola)");
+	if (res == true) {
+	    the_end = true; 
+	    act_shutdown();
+	    for (i = 0 ; i < 1000000 ; i++)
+		u++;
+	}
+	else {
+	    try {
+		location = self.location;
+	    } catch (e) {
+		alert("Ripristino della briscola fallito, per non perdere la sessione ricaricare la pagina manualmente.");
+	    }
+	}
+	onunload_times++;
+    }
+    
+    return(false);
 }
-*/
+
