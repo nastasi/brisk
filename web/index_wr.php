@@ -44,7 +44,22 @@ if (($user = &get_user($bri, $sess, &$idx)) == FALSE) {
 }
 $argz = explode('|', $mesg);
 
-if ($user->stat == 'room') {
+if ($argz[0] == 'shutdown') {
+  log_auth($user_cur->sess, "Shutdown session.");
+  
+  $user->sess = "";
+  $user->name = "";
+  $user->the_end = FALSE;
+  
+  log_rd2($user->sess, "AUTO LOGOUT.");
+  if ($user->subst == 'sitdown' || $user->stat == 'table')
+    $bri->room_wakeup(&$user);
+  else if ($user->subst == 'standup')
+    $bri->room_outstandup(&$user);
+  else
+    log_rd2($sess, "SHUTDOWN FROM WHAT ???");
+}
+else if ($user->stat == 'room') {
   if ($argz[0] == 'logout') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
@@ -90,7 +105,7 @@ if ($user->stat == 'room') {
 	log_wr($sess, "Pre if!");
 	
 	$ret = "";
-	$ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; document.location.assign("table.php");|', $user_cur->step+1);
+	$ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
 	
 	$user_cur->comm[$user_cur->step % COMM_N] = $ret;
 	$user_cur->trans_step = $user_cur->step + 1;
