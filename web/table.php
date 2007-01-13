@@ -65,14 +65,17 @@ window.onload = function() {
   xhr_rd = createXMLHttpRequest();
   sess = "<?php echo "$sess"; ?>";
   
+  window.onunload = onunload_cb;  
+
   setTimeout(xhr_rd_poll, 0, sess); 
   setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
 }
 </SCRIPT>
 <div id="bg" class="area">
 
+<img id="tableinfo" src="img/reload.png" class="tablereload" onclick = 'act_reload();'>
 <img id="tableinfo" src="img/info.png" class="tableinfo" onclick = 'act_tableinfo();'>
-<img id="tableout" src="img/out.png" class="tableout" onclick = 'act_preout();'>
+<img id="tableout" src="img/out.png" class="tableout" onclick = 'safelogout();'>
 
 <div id="remark" class="remark0"></div>
 <img id="card0" src="img/00.png" class="card">
@@ -200,9 +203,11 @@ Hai vinto l'asta.<br> Scegli il seme:
 <div id="txt" class="chattshort"></div>
 <table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
 <hr>
+<div id="heartbit"></div>
+<hr>
 <div id="imgct"></div>
 <hr>
-<div id="sandbox">biriddo</div>
+<div id="sandbox"></div>
 <div id="sandbox2"></div>
 <div id="sandbox3"></div>
 <pre>
