@@ -24,7 +24,7 @@ var xhr_rd_cookiepath = "/brisk/";
 var xhr_rd = false;
 var xhr_rd_stopped = true;
 var xhr_rd_oldctx = "";
-var xhr_rd_newctx;
+var xhr_rd_newctx = "";
 
 var xhr_rd_cur_n = -1;
 var xhr_rd_old_n = -1;
@@ -89,9 +89,9 @@ function xhr_rd_poll(sess)
     
 
     /* heartbeat log */
-    $("sandbox2").innerHTML += "_";
-    if ($("sandbox2").innerHTML.length == 20)
-	$("sandbox2").innerHTML = "_";
+    $("heartbit").innerHTML += "_";
+    if ($("heartbit").innerHTML.length == 20)
+	$("heartbit").innerHTML = "_";
     
     do {
 	again = 0;
@@ -112,7 +112,10 @@ function xhr_rd_poll(sess)
 	else {
 	    xhrrestart = 1;
 	    try { 
-		xhr_rd_newctx = xhr_rd.responseText;
+	        if (xhr_rd == null)
+			throw "restart";
+		if (xhr_rd.responseText != null)
+			xhr_rd_newctx = xhr_rd.responseText;
 	    }
 	    catch (e) {
 		if (xhr_rd_stopped == true) {
@@ -126,9 +129,9 @@ function xhr_rd_poll(sess)
 		if (the_end != true) {
 		    watchdog = 0;
 		    setTimeout(xhr_rd_poll, tout, sess);
-		    $("sandbox2").innerHTML += "-";
-		    if ($("sandbox2").innerHTML.length == 20)
-			$("sandbox2").innerHTML = "-";
+		    $("heartbit").innerHTML += "-";
+		    if ($("heartbit").innerHTML.length == 20)
+			$("heartbit").innerHTML = "-";
 		}
 		return;
 	    }
@@ -215,9 +218,9 @@ function xhr_rd_poll(sess)
     // $("sandbox").innerHTML += "return 3<br>";
     if (the_end != true) {
 	setTimeout(xhr_rd_poll, tout, sess);
-	$("sandbox2").innerHTML += "-";
-	if ($("sandbox2").innerHTML.length == 20)
-	    $("sandbox2").innerHTML = "-";
+	$("heartbit").innerHTML += "-";
+	if ($("heartbit").innerHTML.length == 20)
+	    $("heartbit").innerHTML = "-";
     }
     return;
 };
