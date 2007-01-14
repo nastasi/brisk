@@ -1,9 +1,19 @@
 /* 
    TODO
 
+   nomi in primo piano se vai sul quadrato   
+   bottoni => immagini
+   URGENT - 8 tavoli
+   URGENT - nuovi bottoni gestione del "out"
+   URGENT - ban temporaneo dai tavoli
+   URGENT - test di download per la cache
+   URGENT - flash player to play sound
+
    URGENT - smammamorti
    URGENT - restart preload img
    URGENT - watchdog
+   URGENT - cambiare titolo al tavolo
+   URGENT - current player
 
    TEST (aum. il timeout) - carte giocate che restano girate
 
