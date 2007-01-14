@@ -25,11 +25,18 @@ body {
 	background-repeat: no-repeat;
 	background-position: top center; 
 
+	font-size: 12px;
+
 	align: center;
 	}
 
 div {
-	position: relative;
+	/* position: relative;*/
+	font-size: 12px;
+	}
+
+td {
+	font-size: 12px;
 	}
 
 .topmenu {
@@ -39,24 +46,21 @@ div {
 }
 
 .room_td {
-	height: 200px;
-	width: 90px;
+	height: 120px;
+	width: 170px;
 	vertical-align: "top";
+	background-color: yellow; 
+	padding: 6px;
 	}
 
 .room_standup {
-	height: 150px;
+	height: 120px;
 	vertical-align: "top";
 	}
 
 .room_ex_standup {
-	height: 150px;
+	height: 120px;
 	vertical-align: "top";
-	}
-
-.room_d_standup {
-	align: "top";
-	border: 1px solid grey;
 	}
 
 .chatt {
@@ -64,7 +68,7 @@ div {
 	overflow: auto;
 	border: 1px solid grey;
 	vertical-align: text-bottom;
-	font-size: 10pt;
+	/*	font-size: 10pt; */
 	}
 
 .chattshort {
@@ -72,11 +76,11 @@ div {
 	overflow: auto;
 	border: 1px solid grey;
 	vertical-align: text-bottom;
-	font-size: 10pt;
+	/*	font-size: 10pt;*/
 	}
 
 .txtt {
-	font-size: 10pt;
+	/*	font-size: 10pt;*/
 	}
 
 img {
@@ -101,7 +105,7 @@ img.nobo {
 
 img.tableinfo {
 	position:     absolute; 
-	left:         630;
+	left:         619;
 	top:          550;
 	border-width: 0px;
 	visibility:   visible;
@@ -109,7 +113,7 @@ img.tableinfo {
 
 img.tablereload {
 	position:     absolute; 
-	left:         700;
+	left:         667;
 	top:          550;
 	border-width: 0px;
 	visibility:   visible;
@@ -117,7 +121,7 @@ img.tablereload {
 
 img.tableout {
 	position:     absolute; 
-	left:         70;
+	left:         730;
 	top:          550;
 	border-width: 0px;
 	visibility:   visible;
@@ -232,7 +236,7 @@ img.seed3 {
     border-collapse: collapse;
     display: table-cell;
     text-align: right;
-    padding: 4px;
+    padding: 2px;
 }
 
 .remark0 { 
@@ -493,7 +497,7 @@ img.seed3 {
 	/*	background-color: red; */
 	/*	visibility: visible; */
 	position: absolute;
-	font-size: 10pt;
+	/*	font-size: 10pt;*/
 	left: 5px;
 	top: 55px;
 	width: 115px;
