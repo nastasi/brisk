@@ -20,7 +20,7 @@
  */
 
 define( FTOK_PATH, "/var/lib/brisk");
-define(TABLES_N, 4);
+define(TABLES_N, 8);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (PLAYERS_N * TABLES_N));
@@ -822,8 +822,10 @@ function table_content($bri, $user, $table_idx)
     
     $content .= sprintf("%s%s%s<br>",$hilion, xcape($user_cur->name), $hilioff);
   }
+  /*
   for ( ; $i < PLAYERS_N ; $i++)
     $content .= "<br>";
+  */
 
   $ret .= sprintf('$("table%d").innerHTML = "%s";', $table_idx, $content);
   
@@ -838,7 +840,7 @@ function standup_content(&$bri, $user)
   if ($user->stat != 'room')
     return;
 
-  $content .= '<table width=\\"100%\\">';
+  $content .= '<table class=\\"table_standup\\">';
   for ($e = 0 , $ct = 0 ; $e < MAX_PLAYERS ; $e++) {
     if ($bri->user[$e]->sess == "" || $bri->user[$e]->stat != "room" || $bri->user[$e]->name == "")
       continue;
@@ -862,9 +864,9 @@ function standup_content(&$bri, $user)
   }
   $content .= '</table>';
 	
-  $content .= '<div class=\\"esco\\"><input name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\"></div>';
-
-  $ret .= sprintf('$("standup").innerHTML = "%s";', $content);
+  $content2 = '<input name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\">';
+  $ret .= sprintf('$("standup").innerHTML = "%s";  $("esco").innerHTML = "%s";', 
+		  $content, $content2);
 
   return ($ret);
 }
