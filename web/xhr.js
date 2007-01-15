@@ -81,14 +81,12 @@ function xhr_rd_poll(sess)
 	xhr_rd.abort();	
     }
     */
-
     var zug = "XHR_RD_POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+gst.st+" step_loc = "+gst.st_loc+" step_loc_new = "+gst.st_loc_new+" STOP: "+xhr_rd_stopped;
 
     if (zug != $("sandbox").innerHTML)
 	$("sandbox").innerHTML = zug;
-    
 
-    /* heartbeat log */
+    /* heartbit log */
     $("heartbit").innerHTML += "_";
     if ($("heartbit").innerHTML.length == 20)
 	$("heartbit").innerHTML = "_";
@@ -129,9 +127,11 @@ function xhr_rd_poll(sess)
 		if (the_end != true) {
 		    watchdog = 0;
 		    setTimeout(xhr_rd_poll, tout, sess);
+		    
 		    $("heartbit").innerHTML += "-";
 		    if ($("heartbit").innerHTML.length == 20)
 			$("heartbit").innerHTML = "-";
+		    
 		}
 		return;
 	    }
@@ -218,9 +218,11 @@ function xhr_rd_poll(sess)
     // $("sandbox").innerHTML += "return 3<br>";
     if (the_end != true) {
 	setTimeout(xhr_rd_poll, tout, sess);
+	
 	$("heartbit").innerHTML += "-";
 	if ($("heartbit").innerHTML.length == 20)
 	    $("heartbit").innerHTML = "-";
+	
     }
     return;
 };
