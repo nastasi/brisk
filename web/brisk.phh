@@ -783,12 +783,12 @@ function table_act_content($isstanding, $sitted, $table, $cur_table)
 
   if ($isstanding) {
     if ($sitted < PLAYERS_N) {
-      $ret = sprintf('<input type=\\"button\\" name=\\"xhenter%d\\"  value=\\"Mi siedo.\\" onclick=\\"act_sitdown(%d);\\">', $table, $table);
+      $ret = sprintf('<input type=\\"button\\" class=\\"button\\" name=\\"xhenter%d\\"  value=\\"Mi siedo.\\" onclick=\\"act_sitdown(%d);\\">', $table, $table);
     }
   }
   else {
     if ($table == $cur_table)
-      $ret = sprintf('<input type=\\"button\\" name=\\"xwakeup\\"  value=\\"Mi alzo.\\" onclick=\\"act_wakeup();\\">');
+      $ret = sprintf('<input type=\\"button\\" class=\\"button\\" name=\\"xwakeup\\"  value=\\"Mi alzo.\\" onclick=\\"act_wakeup();\\">');
     else
       $ret = "";
   }
@@ -864,7 +864,7 @@ function standup_content(&$bri, $user)
   }
   $content .= '</table>';
 	
-  $content2 = '<input name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\">';
+  $content2 = '<input class=\\"button\\" name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\">';
   $ret .= sprintf('$("standup").innerHTML = "%s";  $("esco").innerHTML = "%s";', 
 		  $content, $content2);
 
