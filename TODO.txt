@@ -1,6 +1,7 @@
 /* 
    TODO
 
+   to pass explicit config file to INSTALL.sh
    wellcome lines in the chats (room and table)
    nomi in primo piano se vai sul quadrato   
    bottoni => immagini
