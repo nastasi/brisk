@@ -31,66 +31,74 @@ log_load($sess, "LOAD: index.php");
 
 function main()
 {
-  GLOBAL $sess, $name;
+  GLOBAL $sess, $name, $BRISK_DEBUG;
   
   $body = "";
   $ACTION = "login";
   
-  $is_table = false;
-  $sem = lock_data();
-  $bri = &load_data();
-  
-  /* Actions */
-  if (isset($sess)) {
-    $bri->garbage_manager(TRUE);
-    if (($user = &get_user(&$bri, $sess, &$idx)) != FALSE) {
-      if ($user->stat == "table") {
-	header ("Location: table.php");
-	unlock_data($sem);
-	exit;
+  if (isset($BRISK_DEBUG) == FALSE) {
+    $is_table = false;
+    $sem = lock_data();
+    $bri = &load_data();
+    
+    /* Actions */
+    if (isset($sess)) {
+      $bri->garbage_manager(TRUE);
+      if (($user = &get_user(&$bri, $sess, &$idx)) != FALSE) {
+	if ($user->stat == "table") {
+	  header ("Location: table.php");
+	  unlock_data($sem);
+	  exit;
+	}
+	$ACTION = "table";
       }
-      $ACTION = "table";
-    }
-    else {
-      setcookie ("sess", "", time() - 3600);
-    }
-  }
-  else if (isset($name)) {
-    $bri->garbage_manager(TRUE);
-    /* try login */
-    $name = substr($name, 0, 12);
-    if (($user = &add_user(&$bri, &$sess, &$idx, $name)) != FALSE) {
-      $ACTION = "table";
-
-      setcookie ("sess", "", time() + 180);      
-      standup_update(&$bri,&$user);
-
-      if (save_data(&$bri) == FALSE) {
-	echo "ERRORE SALVATAGGIO\n";
-	exit;
+      else {
+	setcookie ("sess", "", time() - 3600);
       }
     }
-    else {
-      /* Login Rendering */
-      if ($idx == -1) 
-	$body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
-      else
-	$body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
+    else if (isset($name)) {
+      $bri->garbage_manager(TRUE);
+      /* try login */
+      $name = substr($name, 0, 12);
+      if (($user = &add_user(&$bri, &$sess, &$idx, $name)) != FALSE) {
+	$ACTION = "table";
+	
+	setcookie ("sess", "", time() + 180);      
+	standup_update(&$bri,&$user);
+	
+	if (save_data(&$bri) == FALSE) {
+	  echo "ERRORE SALVATAGGIO\n";
+	  exit;
+	}
+      }
+      else {
+	/* Login Rendering */
+	if ($idx == -1) 
+	  $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
+	else
+	  $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
+      }
     }
+    unlock_data($sem);
   }
-  unlock_data($sem);
-
   /* Rendering. */
 
+  if ($BRISK_DEBUG == "debugtable") {
+    $ACTION = "table";
+  }
+  else if ($BRISK_DEBUG == "debuglogin") {
+    $ACTION = "login";
+  }
+
   if ($ACTION == "table") {
-    $tables .= '<table align="center" valign="center" border=1 cellpadding="12" cellspacing="0">';
+    $tables .= '<table class="room_tab" align="center">';
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       if ($i % 4 == 0)
 	$tables .= '<tr>';
-      $tables .= '<td valign="top" align="center" class="room_td"><b>Tavolo '.$i.'</b><br><br>';
+      $tables .= '<td valign="top" align="center" class="room_td"><div class="room_div"><b>Tavolo '.$i.'</b><br><br>';
       $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
-      $tables .= sprintf('<div class="proxhr" id="table_act%d"></div>', $i);
-      $tables .= '</td>';
+      $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
+      $tables .= '</div></td>'."\n";
       if ($i % 4 == 3)
 	$tables .= '</tr>';
     }
@@ -98,12 +106,30 @@ function main()
     $tables .= '<div class="room_ex_standup">';
     $tables .= '<b>Giocatori in piedi</b><br><br>';
     
-    $tables .= sprintf('<div id="standup"></div>');
-    $tables .= '</div>';
+    $tables .= sprintf('<div id="standup" class="room_standup"></div>');
+    $tables .= '<div id="esco" class="esco"></div>';
     $tables .= '</td></tr>';
     
     $tables .= '</table>';
   }
+
+$brisk_header = '<div class="container">
+<!-- =========== header ===========  -->
+<div class="header">
+<img class="nobo" src="img/brisk_logo64.png">
+briscola chiamata in salsa ajax<br><br>
+</div>
+
+<!--  =========== vertical menu ===========  -->
+<div class="topmenu">
+<a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a>
+<br><br><br>
+sponsored by:<br><br>
+<a target="_blank" href="http://www.alternativeoutput.it"><img class="nobo" src="img/altout80x15.png"></a><br>
+<a target="_blank" href="http://www.dynamica.it"><img class="nobo" src="img/dynamica.png"></a><br><br>
+supported by:<br><br>
+<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br>
+</div>';
     
   /* Templates. */
   if ($ACTION == 'login') {
@@ -117,7 +143,7 @@ function main()
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
-<link rel="stylesheet" type="text/css" href="brisk.css">
+<link rel="stylesheet" type="text/css" href="room.css">
 </head>
 <body>
 <SCRIPT type="text/javascript">
@@ -125,9 +151,12 @@ function main()
      $("nameid").focus();
    }
 </SCRIPT>
-<img class="nobo" src="img/brisk_logo64.png">
-<div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div>
-<div class="topmenu"><a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
+<?php
+    echo "$brisk_header";
+?> 
+
+<!--  =========== tables ===========  -->
+<div class="tables">
 <?php echo "$body"; ?>
 
 <br>
@@ -135,9 +164,10 @@ function main()
    <br><br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <form method="post" action="">
-<input id="nameid" name="name" type="text" maxlength="12" value="">
+<input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
 </form>
 </div>
+</div></div>
 <br><br><br><br>
 
 <div id="imgct"></div>
@@ -165,7 +195,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
-<link rel="stylesheet" type="text/css" href="brisk.css">
+<link rel="stylesheet" type="text/css" href="room.css">
 </head>
 <body>
 <SCRIPT type="text/javascript">
@@ -178,6 +208,14 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var g_imgtot = g_preload_img_arr.length;
    var myfrom = "index_php";
    window.onload = function() {
+<?php
+if ($BRISK_DEBUG == "debugtable") {
+?>
+     room_checkspace(12,8,50);
+<?php
+}
+else {
+?>
      // alert("INDEX START");
      xhr_rd = createXMLHttpRequest();
      sess = "<?php echo "$sess"; ?>";
@@ -187,36 +225,40 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
      setTimeout(xhr_rd_poll, 0, sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+     $("txt_in").focus();
+<?php
+}
+?>
    }
 
 </SCRIPT>
-<img class="nobo" src="img/brisk_logo64.png">
-<div style="text-align: center; font-size: 12px;">briscola chiamata in salsa ajax</div><br>
-<div class="topmenu"><a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a></div>
-<!-- <div><input name="logout" value="Esco." onclick="window.onunload = null; act_logout();" type="button"></div> -->
+<?php
+    echo "$brisk_header";
+?> 
+<!--  =========== tables ===========  -->
+<div class="tables">
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <?php echo "$tables"; ?>
+</div>
 
+<!--  =========== bottom ===========  -->
+<div class="bottom">
 <b>Chat</b>
-<div id="txt" class="chatt"></div>
-
-<!-- onchange="act_chatt();"  -->
-<table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
-
-<hr>
+<div id="txt" class="chatt">
+</div>
+<table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="90" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
+</div>
 <div id="heartbit"></div>
-<hr>
+<div id="sandbox"></div>
 <div id="imgct"></div>
 <div id="logz"></div>
-<div id="sandbox"></div>
 <div id="sandbox2"></div>
 <div id="response"></div>
 <div id="remark"></div>
 <div id="xhrstart"></div>
-<pre>
 <div id="xhrlog"></div>
-</pre>
 <div id="xhrdeltalog"></div>
+</div>
 </body>
 </html>
 <?php
