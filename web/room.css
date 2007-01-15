@@ -214,3 +214,19 @@ img.nobo {
     opacity: 0.90;  
 }
 
+input.button {
+  border: 1px solid gray;  
+  color: Black;
+  background-color: white;
+  vertical-align: middle;
+  text-decoration:none;
+  font-size: 100%;
+  cursor: pointer;
+  height: 20px ! important;
+  max-height: 20px ! important;
+  min-height: 20px ! important;
+  margin: 1px;
+  display: inline;
+}
+
+
