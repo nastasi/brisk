@@ -90,7 +90,7 @@ function reset_images()
 
 function update_images()
 {
-    $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
+    // $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
     if (g_imgct < g_preload_img_arr.length)
 	setTimeout(preload_images, 100, g_preload_img_arr, g_imgct);
     g_imgct++;
@@ -700,7 +700,7 @@ function onunload_cb () {
 	if (res == true) {
 	    the_end = true; 
 	    act_shutdown();
-	    for (i = 0 ; i < 1000000 ; i++)
+	    while (1) 
 		u++;
 	}
 	else {
@@ -716,3 +716,32 @@ function onunload_cb () {
     return(false);
 }
 
+
+function room_checkspace(emme,tables,inpe)
+{
+    nome = "<b>";
+    for (i = 0 ; i < emme ; i++) 
+	nome += "m";
+    nome += "</b>";
+
+    alta = "";
+    for (i = 0 ; i < 5 ; i++) 
+	alta += nome+"<br>";
+
+    for (i = 0 ; i < tables ; i++) {
+	$("table"+i).innerHTML = alta;
+	$("table_act"+i).innerHTML = "<input type=\"button\" class=\"button\" name=\"xhenter"+i+"\"  value=\"Mi siedo.\" onclick=\"act_sitdown(1);\">";
+	}
+
+    stand = "<table class=\"table_standup\"><tbody><tr>";
+    for (i = 0 ; i < inpe ; i++) {
+	stand += "<td class=\"td_standup\">"+nome+"</td>";
+	if ((i+1) % 4 == 0) {
+	    stand += "</tr><tr>";
+	}
+    }
+    stand += "</tr>";
+    $("standup").innerHTML = stand;
+
+    $("esco").innerHTML = "<input name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
+}
