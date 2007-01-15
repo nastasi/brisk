@@ -377,7 +377,7 @@ function card_mouseup_cb(o) {
 
 	for (i = 0 ; i < cards_n ; i++) {
 	    if (cards_pos[i] == idx) {
-		$("sandbox").innerHTML = "Pippo: "+ i;
+		/* $("sandbox").innerHTML = "Pippo: "+ i; */
 		for (e = i ; e < cards_n-1 ; e++) {
 		    cards_pos[e] = cards_pos[e+1];
 		}
