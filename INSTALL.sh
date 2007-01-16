@@ -6,7 +6,7 @@ n_players=3
 brisk_debug="TRUE"
 ftok_path="/var/lib/brisk"
 web_path="$HOME/brisk"
-web_only=0
+web_only="FALSE"
 
 if [ -f $HOME/.brisk_install ]; then
    . $HOME/.brisk_install
@@ -17,14 +17,17 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 [-W] [-n 3|5] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-c <cookie_path>]"
+    echo "$1 [-W] [-n 3|5] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-c <cookie_path>]"
     echo "  -h this help"
+    echo "  -f use this config file"
+    echo "  -p save preferences in the file"
     echo "  -W web files only"
     echo "  -n number of players            - def. $n_players"
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
     echo "  -c cookie path                  - def. \"$cookie_path\""
+    
     echo
 }
 
@@ -47,35 +50,62 @@ function get_param () {
 #
 while [ $# -gt 0 ]; do
     # echo aa $1 xx $2 bb
+    conffile=""
     case $1 in
+	-f*) conffile="`get_param "-f" "$1" "$2"`"; sh=$?;;
+	-p*) outconf="`get_param "-p" "$1" "$2"`"; sh=$?;;
 	-n*) n_players="`get_param "-n" "$1" "$2"`"; sh=$?;;
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
 	-c*) cookie_path="`get_param "-c" "$1" "$2"`"; sh=$?;;
-	-W) web_only=1;;
+	-W) web_only="TRUE";;
 	-h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
     esac
-    # echo "SH $sh"
+    if [ ! -z "$conffile" ]; then
+        if [ ! -f "$conffile" ]; then
+            echo "config file [$conffile] not found"
+   	    exit 1
+        fi
+        . "$conffile"
+    fi
     shift $sh
 done
 
 #
 #  Show parameters
 #
-echo "    web_path:  \"$web_path\""
-echo "    ftok_path: \"$ftok_path\""
+echo "    outconf:    \"$outconf\""
 echo "    n_players:   $n_players"
+echo "    brisk_debug:\"$brisk_debug\""
+echo "    web_path:   \"$web_path\""
+echo "    ftok_path:  \"$ftok_path\""
+echo "    cookie_path:\"$cookie_path\""
+echo "    web_only:   \"$web_only\""
 
+if [ ! -z "$outconf" ]; then
+  ( 
+    echo "#"
+    echo "#  Produced automatically by brisk::INSTALL.sh"
+    echo "#"
+    echo "n_players=$n_players"
+    echo "brisk_debug=\"$brisk_debug\""
+    echo "web_path=\"$web_path\""
+    echo "ftok_path=\"$ftok_path\""
+    echo "cookie_path=\"$cookie_path\""
+    echo "web_only=\"$web_only\""
+  ) > "$outconf"
+fi
 #
 #  Installation
 #
-if [ $web_only -eq 0 ]; then
-    if [ $n_players -ne 3 -a $n_players -ne 5 ]; then
-	echo "n_players ($n_players) out of range (3|5)"
-	exit 1
-    elif [ ! -d $ftok_path ]; then
+if [ $n_players -ne 3 -a $n_players -ne 5 ]; then
+    echo "n_players ($n_players) out of range (3|5)"
+    exit 1
+fi
+if [ "$web_only" = "FALSE" ]; then
+    if [ ! -d $ftok_path ]; then
 	echo "ftok_path (\"$ftok_path\") not exists"
 	exit 2
     fi
