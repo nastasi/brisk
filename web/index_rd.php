@@ -65,7 +65,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $bri = &load_data();
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
-      if (($user = &get_user($bri, $sess, $idx)) == FALSE) {
+      if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
 	unlock_data($sem);
 	return (unrecerror());
       }
@@ -85,7 +85,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     return (FALSE);
   }
     
-  if (($user = &get_user(&$bri, $sess, $idx)) == FALSE) {
+  if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
     return (unrecerror());
   }
 
@@ -99,7 +99,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // FUNZIONE from_scratch DA QUI 
     $sem = lock_data();
     $bri = &load_data();
-    if (($user = &get_user($bri, $sess, $idx)) == FALSE) {
+    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       unlock_data($sem);
       return (unrecerror());
     }
@@ -148,7 +148,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   else {
     $sem = lock_data();
     $bri = &load_data();
-    if (($user = &get_user($bri, $sess, $idx)) == FALSE) {
+    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       unlock_data($sem);
       return (unrecerror());
     }

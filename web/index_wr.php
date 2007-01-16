@@ -36,7 +36,7 @@ log_wr($sess, 'COMM: '.$mesg);
 
 $sem = lock_data();
 $bri = &load_data();
-if (($user = &get_user($bri, $sess, &$idx)) == FALSE) {
+if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
   log_wr($sess, "Get User Error");
   unlock_data($sem);
