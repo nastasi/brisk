@@ -42,28 +42,26 @@ function main()
     $bri = &load_data();
     
     /* Actions */
-    if (isset($sess)) {
+    if (validate_sess($sess)) {
       $bri->garbage_manager(TRUE);
-      if (($user = &get_user(&$bri, $sess, &$idx)) != FALSE) {
+      if (($user = &$bri->get_user($sess, &$idx)) != FALSE) {
 	if ($user->stat == "table") {
 	  header ("Location: table.php");
 	  unlock_data($sem);
 	  exit;
 	}
-	$ACTION = "table";
-      }
-      else {
-	setcookie ("sess", "", time() - 3600);
+	$ACTION = "room";
       }
     }
-    else if (isset($name)) {
+    
+    if ($ACTION == "login" && isset($name)) {
       $bri->garbage_manager(TRUE);
       /* try login */
       $name = substr($name, 0, 12);
-      if (($user = &add_user(&$bri, &$sess, &$idx, $name)) != FALSE) {
-	$ACTION = "table";
+      if (($user = &$bri->add_user(&$sess, &$idx, $name)) != FALSE) {
+	$ACTION = "room";
 	
-	setcookie ("sess", "", time() + 180);      
+	// setcookie ("sess", "", time() + 180);      
 	standup_update(&$bri,&$user);
 	
 	if (save_data(&$bri) == FALSE) {
@@ -84,13 +82,13 @@ function main()
   /* Rendering. */
 
   if ($BRISK_DEBUG == "debugtable") {
-    $ACTION = "table";
+    $ACTION = "room";
   }
   else if ($BRISK_DEBUG == "debuglogin") {
     $ACTION = "login";
   }
 
-  if ($ACTION == "table") {
+  if ($ACTION == "room") {
     $tables .= '<table class="room_tab" align="center">';
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       if ($i % 4 == 0)
@@ -184,7 +182,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 </html>
 <?php
   }
-  else if ($ACTION == 'table') {
+  else if ($ACTION == 'room') {
   ?>
 <html>
 <head>
@@ -224,7 +222,7 @@ else {
 
      setTimeout(xhr_rd_poll, 0, sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
-     setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+     // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();
 <?php
 }

@@ -244,7 +244,7 @@ function postact_logout()
 	xhr_rd.abort();
     } catch (e) {}
 
-    eraseCookie("sess");
+    // eraseCookie("sess");
     document.location.assign("index.php");
 }
 
@@ -457,6 +457,7 @@ function notify(st, ancestor, text, tout, butt)
 
     clo = document.createElement("input");
     clo.type = "submit";
+    clo.className = "button";
     clo.value = butt;
     clo.obj = this;
     clo.onclick = this.input_hide;
