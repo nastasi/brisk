@@ -53,7 +53,7 @@ function xhr_rd_start(sess,stat,subst,step)
 {
     if (the_end)
 	return;
-    createCookie("sess",sess,1,xhr_rd_cookiepath);
+    createCookie("sess", sess, 24*365, xhr_rd_cookiepath);
 
     /* NOTE document.uniqueID exists only under IE  */
     // alert("di qui3");
