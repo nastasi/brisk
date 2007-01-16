@@ -558,6 +558,88 @@ class brisco {
       }
     }
   }
+
+  function &get_user($sess, &$idx)
+  {
+    GLOBAL $PHP_SELF;
+    
+    if (strlen($sess) == SESS_LEN) {
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+	if (strcmp($sess, $this->user[$i]->sess) == 0) {
+	  // find it
+	  $idx = $i;
+	  return ($this->user[$i]);
+	}
+      }
+      log_main($sess, sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
+      // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
+      // log_main($sess, sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
+    }
+    else {
+      log_main($sess, sprintf("get_user: Wrong strlen [%s]",$sess));
+    }
+    return (FALSE);
+  }
+
+  /*
+   * function &add_user(&$bri, &$sess, &$idx, $name)
+   *
+   * RETURN VALUE:
+   *   if ($idx != -1 && ret == FALSE)  =>  duplicated nick
+   *   if ($idx == -1 && ret == FALSE)  =>  no space left
+   *   if (ret == TRUE)                 =>  SUCCESS
+   */
+  function &add_user(&$sess, &$idx, $name)
+  {
+    $idx = -1;
+    $idfree = -1;
+    
+    log_auth("XXX", sprintf("ARRIVA: [%s]", $sess));
+    if (validate_sess($sess) == FALSE) 
+      $sess = "";
+
+    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+      /* free user ? */
+      if (strcmp($sess, $this->user[$i]->sess) == 0) {
+	if ($idx == -1)
+	  $idx = $i;
+      }
+      if ($idfree == -1 && strcmp("", $this->user[$i]->sess) == 0) {
+	$idfree = $i;
+      }
+      if (strcmp($this->user[$i]->name, $name) == 0) {
+	$idx = $i;
+	break;
+      }
+    }
+    if ($idx == -1)
+      $idx = $idfree;
+
+    log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name));
+
+    if ($idx != -1 && $i == MAX_PLAYERS) {
+      /* SUCCESS */
+      if ($sess == "") {
+	$this->user[$idx]->sess = uniqid("");
+	$sess = $this->user[$idx]->sess;
+	
+      }
+      else {
+	$this->user[$idx]->sess = $sess;
+      }
+      $this->user[$idx]->name = $name;
+      $this->user[$idx]->stat = "room";
+      $this->user[$idx]->subst = "standup";
+      
+      log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name));
+      
+      return ($this->user[$idx]);
+    }
+
+    return (FALSE);
+  }
+  
+
   
 } // end class brisco
 
@@ -713,68 +795,6 @@ function save_data(&$bri)
     shm_detach($shm);
      
   return ($ret);
-}
-
-function &get_user(&$bri, $sess, &$idx)
-{
-  GLOBAL $PHP_SELF;
-
-  if (strlen($sess) == SESS_LEN) {
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      if (strcmp($sess, $bri->user[$i]->sess) == 0) {
-	// find it
-	$idx = $i;
-	return ($bri->user[$i]);
-      }
-    }
-    log_main($sess, sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
-    // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
-    // log_main($sess, sprintf("get_user: Wrong sess compared with [%s]",$bri->user[$i]->sess));
-  }
-  else {
-    log_main($sess, sprintf("get_user: Wrong strlen [%s]",$sess));
-  }
-  return (FALSE);
-}
-
-/*
- * function &add_user(&$bri, &$sess, &$idx, $name)
- *
- * RETURN VALUE:
- *   if ($idx != -1 && ret == FALSE)  =>  duplicated nick
- *   if ($idx == -1 && ret == FALSE)  =>  no space left
- *   if (ret == TRUE)                 =>  SUCCESS
- */
-function &add_user(&$bri, &$sess, &$idx, $name)
-{
-  $idx = -1;
-
-  for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-    /* free user ? */
-    if (strcmp($sess, $bri->user[$i]->sess) == 0) {
-      if ($idx == -1)
-	$idx = $i;
-    }
-    if (strcmp($bri->user[$i]->name, $name) == 0) {
-      $idx = $i;
-      break;
-    }
-  }
-  if ($idx != -1 && $i == MAX_PLAYERS) {
-    /* SUCCESS */
-    $bri->user[$idx]->sess = uniqid("");
-    $sess = $bri->user[$idx]->sess;
-    $bri->user[$idx]->name = $name;
-    $bri->user[$idx]->stat = "room";
-    $bri->user[$idx]->subst = "standup";
-
-    log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name));
-      
-    return ($bri->user[$idx]);
-  }
-  else {
-    return (FALSE);
-  }
 }
 
 function table_act_content($isstanding, $sitted, $table, $cur_table)
@@ -1339,4 +1359,10 @@ function calculate_points(&$table)
   $table->mult = 1;
 }
 
+function validate_sess($sess) {
+  if (strlen($sess) == SESS_LEN) 
+    return (TRUE);
+  else
+    return (FALSE);
+}
 ?>
