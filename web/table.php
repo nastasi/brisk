@@ -68,14 +68,10 @@ window.onload = function() {
   window.onunload = onunload_cb;  
 
   setTimeout(xhr_rd_poll, 0, sess); 
-  setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+  //  setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
 }
 </SCRIPT>
 <div id="bg" class="area">
-
-<img id="tableinfo" src="img/reload.png" class="tablereload" onclick = 'act_reload();'>
-<img id="tableinfo" src="img/info.png" class="tableinfo" onclick = 'act_tableinfo();'>
-<img id="tableout" src="img/out.png" class="tableout" onclick = 'safelogout();'>
 
 <div id="remark" class="remark0"></div>
 <img id="card0" src="img/00.png" class="card">
@@ -196,6 +192,12 @@ Hai vinto l'asta.<br> Scegli il seme:
 <div id="callerinfo" class="callerinfo">Info</div>
 <img id="callerimg" src="img/noimg.png" class="callerimg">
 </div>
+<div class="table_commands">
+<input type="button" class="button" name="xinfo"  value="Info." onclick="act_tableinfo();">
+<input type="button" class="button" name="xreload"  value="Reload." onclick="act_reload();">
+<input type="button" class="button" name="xout"  value="Out." onclick="safelogout();">
+</div>
+
 </div>
 
 
