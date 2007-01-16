@@ -217,7 +217,7 @@ img.nobo {
 input.button {
   border: 1px solid gray;  
   color: Black;
-  background-color: white;
+  background-color: RGB(240,240,240);
   vertical-align: middle;
   text-decoration:none;
   font-size: 100%;
@@ -227,6 +227,10 @@ input.button {
   min-height: 20px ! important;
   margin: 1px;
   display: inline;
+}
+
+input.button:hover {
+  background-color: white;
 }
 
 
