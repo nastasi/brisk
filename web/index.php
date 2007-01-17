@@ -63,7 +63,7 @@ function main()
 	$ACTION = "room";
 	
 	// setcookie ("sess", "", time() + 180);      
-	standup_update(&$bri,&$user);
+	$bri->standup_update(&$user);
 	
 	if (save_data(&$bri) == FALSE) {
 	  echo "ERRORE SALVATAGGIO\n";
