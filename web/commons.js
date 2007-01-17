@@ -567,10 +567,16 @@ function set_names(so,ea,ne,nw,we)
 {
 //    alert("EA: "+ea);
     $("name").innerHTML = so; 
+    $("name").title = so; 
     $("name_ea").innerHTML = ea;
+    $("name_ea").title = ea;
     $("name_ne").innerHTML = ne;
+    $("name_ne").title = ne;
     $("name_nw").innerHTML = nw;
+    $("name_nw").title = nw;
     $("name_we").innerHTML = we;
+    $("name_we").title = we;
+
     return;
 }
 
