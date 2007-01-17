@@ -514,7 +514,7 @@ class brisco {
 	    continue;
 	  if ($user_cur->stat == 'room') {
 	    if ($user->stat == 'room' && $user->subst == 'standup') {
-	      standup_update(&$this,&$user);
+	      $this->standup_update(&$user);
 	    }
 	    else if ($user->stat == 'room' && $user->subst == 'sitdown' ||
 		     $user->stat == 'table') {
@@ -642,8 +642,28 @@ class brisco {
     return (FALSE);
   }
   
+  function standup_update(&$user)
+  {
+    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+      $user_cur = &$this->user[$i];
+      if ($user_cur->sess == '')
+	continue;
 
-  
+      log_main("STANDUP START", $user_cur->stat);
+      
+      if ($user_cur->stat == 'room') {
+	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".standup_content($this, $user_cur);
+	if ($user_cur == $user)
+	  $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>: ";',  xcape($user->name));
+	
+	log_main("FROM STANDUP", "NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
+	
+	$user_cur->step++;
+      }
+    }
+  }
+
+
 } // end class brisco
 
 function make_seed()
@@ -894,27 +914,6 @@ function standup_content(&$bri, $user)
   return ($ret);
 }
 
-function standup_update(&$bri, &$user)
-{
-  for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-    $user_cur = &$bri->user[$i];
-    if ($user_cur->sess == '')
-      continue;
-
-    log_main("STANDUP START", $user_cur->stat);
-
-    if ($user_cur->stat == 'room') {
-      $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".standup_content($bri, $user_cur);
-      if ($user_cur == $user)
-	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>: ";',  xcape($user->name));
-
-      log_main("FROM STANDUP", "NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
-
-      $user_cur->step++;
-    }
-  }
-}
-
 
 
 
@@ -1061,11 +1060,28 @@ function show_table_info(&$bri, &$table, $table_pos)
 }
 
 
+function root_wellcome($user)
+{
+  //  $ret = sprintf('chatt_sub("BROBRO","BRUBRU");');
+  $ret = "";
+
+  return ($ret);
+}
+
+function table_wellcome($user)
+{
+  // $ret = sprintf('chatt_sub("TABU","BRUBRU");');
+  $ret = "";
+
+  return ($ret);
+}
 
 function show_room(&$bri, &$user)
 {
   $ret .= sprintf('gst.st = %d;',  $user->step);
   $ret .= sprintf('stat = "%s";',  $user->stat);
+
+  $ret .= root_wellcome($user);
   $ret .= sprintf('subst = "%s";', $user->subst);
   $ret .= sprintf('$("myname").innerHTML = "<b>%s</b>";', xcape($user->name,ENT_COMPAT,"UTF-8"));
   for ($i = 0 ; $i < TABLES_N ; $i++) {
@@ -1123,6 +1139,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
   /* NOTIFY FOR THE CARD MAKER */
   if ($is_transition) { //  && $user->subst ==  "asta" superfluo
     $ret .= show_table_info(&$bri, &$table, $user->table_pos);
+    $ret .= table_wellcome($user);
   }
 
   /* CARDS */
@@ -1141,7 +1158,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
 	}
 	log_rd($sess, "O ".$o." VAL ".$table->card[$o]->value." Owner: ".$table->card[$o]->owner);
 	
-	$ret .= sprintf( ' card_send(%d,%d,%d,%f,%d);|', ($table->gstart + $e) % PLAYERS_N, 
+	$ret .= sprintf( ' card_send(%d,%d,%d,%8.2f,%d);|', ($table->gstart + $e) % PLAYERS_N, 
 			 $i, ((($e + PLAYERS_N - $user->table_pos + $table->gstart) % PLAYERS_N) == 0 ?
 			      $table->card[$o]->value : -1), 
 			 ($i == 7 && $e == (PLAYERS_N - 1) ? 1 : 0.5),$i+1);
