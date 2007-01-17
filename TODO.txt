@@ -1,30 +1,30 @@
 /* 
    TODO
 
-   to pass explicit config file to INSTALL.sh
-   wellcome lines in the chats (room and table)
-   nomi in primo piano se vai sul quadrato   
-   bottoni => immagini
-   URGENT - 8 tavoli
-   URGENT - nuovi bottoni gestione del "out"
-   URGENT - ban temporaneo dai tavoli
-   URGENT - test di download per la cache
+   TRIVIAL- aggiungere bottone al login
+   NORM   - wellcome lines in the chats (room and table)
    URGENT - flash player to play sound
-
+   URGENT - ban temporaneo dai tavoli
    URGENT - smammamorti
+   URGENT - current player
+   URGENT - test di download per la cache
+
    URGENT - restart preload img
    URGENT - watchdog
    URGENT - cambiare titolo al tavolo
-   URGENT - current player
 
    TEST (aum. il timeout) - carte giocate che restano girate
 
-   NORM - one player reject a game (to less points (<2)
-   NORM - tools dir with a main and some pages where check briscola tools.
-   NORM - help page
-   NORM - img -> div + css
-   NORM - (master concept) card selection 
+   NORM   - chat vecchie in reload
+   NORM   - one player reject a game (to less points (<2)
+   NORM   - tools dir with a main and some pages where check briscola tools.
+   NORM   - help page
+   NORM   - (master concept) card selection 
+
+   FAR TODO
+
    NORM - internationalization
+   NORM - img -> div + css
    
  WEB
    - compatibility update
@@ -45,6 +45,8 @@
 
    TO REVIEW - special chars in js
 
+   ABORTED bottoni => immagini
+   DONE - nomi in primo piano se vai sul quadrato   
    DONE - installer to set cookie path
    DONE - change name
    DONE - automatic and manual logout
@@ -70,6 +72,9 @@
    DONE - server side page abort management  
    DONE - cookie problem with Ajax
    DONE - spostare il tasto "esco"
+   DONE to pass explicit config file to INSTALL.sh 
+   DONE - 8 tables
+   DONE - safety out management
 
 DOC
    CHAPTERS
@@ -79,6 +84,7 @@ DOC
       Page abort (reload on http streaming case)
       Chat
       Cookies management
+      CSS tricks
 
 CHECK ON NEW SERVERS
 .htaccess AllowOverwrite mode for Cache-Control directive
