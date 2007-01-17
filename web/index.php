@@ -58,6 +58,7 @@ function main()
       $bri->garbage_manager(TRUE);
       /* try login */
       $name = substr($name, 0, 12);
+      $name = str_replace(" ", "_", $name);
       if (($user = &$bri->add_user(&$sess, &$idx, $name)) != FALSE) {
 	$ACTION = "room";
 	

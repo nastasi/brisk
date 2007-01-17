@@ -36,7 +36,10 @@ define(BRISK_DEBUG, FALSE);
 
 function xcape($s)
 {
-  return (str_replace('\\', '\\\\', str_replace('@', '&#64;', str_replace('|', '&brvbar;', htmlentities($s,ENT_COMPAT,"UTF-8")))));
+  $from = array (   '\\',     '@',        '|' );
+  $to   = array ( '\\\\', '&#64;', '&brvbar;' );
+
+  return (str_replace($from, $to, htmlentities($s,ENT_COMPAT,"UTF-8")));
 }
 
 
