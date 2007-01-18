@@ -1,7 +1,9 @@
 /* 
    TODO
 
-   NORM WIP - wellcome lines in the chats (room and table)
+   BUG - se passano tutti al giro successivo chi vince l'asta
+         non sceglie il socio ma lo sceglie quello prima.
+
    URGENT - flash player to play sound
    URGENT - ban temporaneo dai tavoli
    URGENT - smammamorti
@@ -18,6 +20,7 @@
    NORM   - one player reject a game (to less points (<2)
    NORM   - tools dir with a main and some pages where check briscola tools.
    NORM   - help page
+   bottoni => immagini
    NORM   - (master concept) card selection 
 
    FAR TODO
@@ -44,6 +47,11 @@
 
    TO REVIEW - special chars in js
 
+   DONE - wellcome lines in the chats (room and table)
+   DONE - wellcome lines in the chats (room and table)
+   DONE - nomi in primo piano se vai sul quadrato   
+   DONE - to pass explicit config file to INSTALL.sh
+   DONE - flag to create a config file
    ABORTED bottoni => immagini
    DONE - aggiungere bottone al login
    DONE - nomi in primo piano se vai sul quadrato   
