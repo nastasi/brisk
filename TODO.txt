@@ -1,8 +1,7 @@
 /* 
    TODO
 
-   TRIVIAL- aggiungere bottone al login
-   NORM   - wellcome lines in the chats (room and table)
+   NORM WIP - wellcome lines in the chats (room and table)
    URGENT - flash player to play sound
    URGENT - ban temporaneo dai tavoli
    URGENT - smammamorti
@@ -46,6 +45,7 @@
    TO REVIEW - special chars in js
 
    ABORTED bottoni => immagini
+   DONE - aggiungere bottone al login
    DONE - nomi in primo piano se vai sul quadrato   
    DONE - installer to set cookie path
    DONE - change name

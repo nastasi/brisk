@@ -164,6 +164,7 @@ supported by:<br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <form method="post" action="">
 <input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
+<input id="sub"    value="login" type="submit" class="button">
 </form>
 </div>
 </div></div>

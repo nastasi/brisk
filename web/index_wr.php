@@ -89,9 +89,7 @@ else if ($user->stat == 'room') {
     // set new status
     $user->subst = "sitdown";
     $user->table = $table_idx;
-    $user->table_pos = $table->player_n;
-    $table->player[$table->player_n] = $idx;
-    $table->player_n++;
+    $user->table_pos = $table->user_add($idx);
 		
     if ($table->player_n == PLAYERS_N) {
       // Start game for this table.

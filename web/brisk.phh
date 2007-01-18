@@ -34,6 +34,14 @@ define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
+/*
+$root_wellarr = Array ( '<a href="http://www.google.com">GOOGLE</a>',
+			'pinollo lanollo',
+			'rorella liolla' );
+*/
+$root_wellarr = Array ( );
+$table_wellarr = Array ( );
+
 function xcape($s)
 {
   $from = array (   '\\',     '@',        '|' );
@@ -222,8 +230,37 @@ class Table {
   {
     $this->player[$idx] = $player;
   }
-}
 
+  function user_add($idx)
+  {
+    $this->player[$this->player_n] = $idx;
+    $this->player_n++;
+    
+    return ($this->player_n - 1);
+  }
+  
+  function user_rem(&$bri, &$user)
+  {
+    $tabpos = $user->table_pos;
+    
+    /* verifico la consistenza dei dati */
+    if ($bri->user[$this->player[$tabpos]] == $user) {
+      
+      /* aggiorna l'array dei giocatori al tavolo. */
+      for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
+	$this->player[$i] = $this->player[$i+1];
+	$user_cur = &$bri->user[$this->player[$i]];
+	$user_cur->table_pos = $i;
+      }
+      $this->player_n--;
+    }
+    else {
+      log_main($user->sess, "INCONSISTENCY ON TABLE.");
+    }
+  }
+
+} // End class Table
+  
 class User {
   var $name;       // name of the user
   var $sess;       // session of the user
@@ -346,14 +383,10 @@ class brisco {
 	}
       }
     }
+
     /* aggiorna l'array dei giocatori al tavolo. */
-    for ($i = $user->table_pos ; $i < $table->player_n-1 ; $i++) {
-      $table->player[$i] = $table->player[$i+1];
-      $user_cur = &$this->user[$table->player[$i]];
-      $user_cur->table_pos = $i;
-    }
-    $this->table[$table_idx]->player_n--;
-    
+    $table->user_rem(&$this, &$user);
+
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = &$this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
@@ -1059,19 +1092,22 @@ function show_table_info(&$bri, &$table, $table_pos)
   return ($ret);
 }
 
-
 function root_wellcome($user)
 {
-  //  $ret = sprintf('chatt_sub("BROBRO","BRUBRU");');
-  $ret = "";
+  GLOBAL $root_wellarr;
+
+  for ($i = 0 ; $i < count($root_wellarr) ; $i++)
+    $ret .= sprintf('chatt_sub("ChanServ: ","%s");', str_replace('"', '\"', $root_wellarr[$i]));
 
   return ($ret);
 }
 
 function table_wellcome($user)
 {
-  // $ret = sprintf('chatt_sub("TABU","BRUBRU");');
-  $ret = "";
+  GLOBAL $table_wellarr;
+
+  for ($i = 0 ; $i < count($table_wellarr) ; $i++)
+    $ret .= sprintf('chatt_sub("ChanServ: ","%s");', str_replace('"', '\"', $table_wellarr[$i]));
 
   return ($ret);
 }
