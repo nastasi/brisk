@@ -536,3 +536,7 @@ input.button {
 input.button:hover {
   background-color: white;
 }
+
+input.button:active {
+  background-color: RGB(255,255,153);
+}
