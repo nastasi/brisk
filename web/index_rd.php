@@ -61,12 +61,14 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   
   
   /* Sync check (read only without modifications */
+  ignore_user_abort(TRUE);
   if (($sem = lock_data()) != FALSE) { 
     $bri = &load_data();
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
       if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
 	unlock_data($sem);
+        ignore_user_abort(FALSE);
 	return (unrecerror());
       }
       log_auth($sess, "update lacc");
@@ -80,6 +82,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       save_data($bri);
     }
     unlock_data($sem);
+    ignore_user_abort(FALSE);
   }
   else {
     return (FALSE);
@@ -97,10 +100,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
   if ($cur_step == -1) {
     // FUNZIONE from_scratch DA QUI 
+    ignore_user_abort(TRUE);
     $sem = lock_data();
     $bri = &load_data();
     if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       unlock_data($sem);
+      ignore_user_abort(FALSE);
       return (unrecerror());
     }
     if ($user->the_end) 
@@ -115,10 +120,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
       save_data($bri);
       unlock_data($sem);
+      ignore_user_abort(FALSE);
     }
     else {
       log_rd2($sess, "TRANS NON ATTIVATO");
       unlock_data($sem);
+      ignore_user_abort(FALSE);
     }
   }
       
@@ -146,10 +153,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $new_step =  $user->step;
   }
   else {
+    ignore_user_abort(TRUE);
     $sem = lock_data();
     $bri = &load_data();
     if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       unlock_data($sem);
+      ignore_user_abort(FALSE);
       return (unrecerror());
     }
     if ($cur_step < $user->step) {
@@ -187,6 +196,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
 	  
     unlock_data($sem);
+    ignore_user_abort(FALSE);
   }
 
   
