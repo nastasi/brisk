@@ -516,7 +516,7 @@ class brisco {
     if (strncmp($user_mesg, "/nick ", 6) == 0) {
       log_main($user->sess, "chatt_send BEGIN");
 
-      $name_new = substr(trim(substr($user_mesg, 6)),0,12);
+      $name_new = str_replace(' ', '_', substr(trim(substr($user_mesg, 6)),0,12));
       $user_mesg = "COMMAND ".$user_mesg;
       // Search dup name
       // change
