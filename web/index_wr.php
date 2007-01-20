@@ -60,7 +60,15 @@ if ($argz[0] == 'shutdown') {
     log_rd2($sess, "SHUTDOWN FROM WHAT ???");
 }
 else if ($user->stat == 'room') {
-  if ($argz[0] == 'logout') {
+  if ($argz[0] == 'help') {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    $user->comm[$user->step % COMM_N] .=  show_notify("bottom", $G_room_help, 0, "torna ai tavoli");
+
+    log_wr($sess, $user->comm[$user->step % COMM_N]);
+    $user->step++;
+    
+  }
+  else if ($argz[0] == 'logout') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
     $user->the_end = TRUE;
@@ -152,10 +160,7 @@ else if ($user->stat == 'table' && $user->subst == 'asta') {
     log_wr($sess, "PER DI TABLEINFO");
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .= show_table_info(&$bri, &$table, $user->table_pos);
-
     log_wr($sess, $user->comm[$user->step % COMM_N]);
-
-
     $user->step++;
   }
   else if ($argz[0] == 'chatt') {
