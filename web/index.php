@@ -114,7 +114,7 @@ function main()
 
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
-<div class="header">
+<div id="header" class="header">
 <img class="nobo" src="img/brisk_logo64.png">
 briscola chiamata in salsa ajax<br><br>
 </div>
@@ -143,6 +143,7 @@ supported by:<br><br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
+<link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 </head>
 <body>
@@ -196,6 +197,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
+<link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 </head>
 <body>
@@ -234,7 +236,7 @@ else {
 
 </SCRIPT>
 <?php
-    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();">');
+    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">');
 ?> 
 <!--  =========== tables ===========  -->
 <div id="tables" class="tables">
