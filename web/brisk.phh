@@ -42,6 +42,15 @@ $root_wellarr = Array ( '<a href="http://www.google.com">GOOGLE</a>',
 $root_wellarr = Array ( );
 $table_wellarr = Array ( );
 
+$G_brisk_version = "0.4.2";
+
+/*$G_room_help = '
+Brisk - Ver. '.$G_brisk_version.'<br><br>
+Copyright 2006 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a><br><br>';
+*/
+$G_room_help = '<b>Brisk - Ver. '.$G_brisk_version.'</b><br><br>Copyright 2006 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a><br><br>';
+
+
 function xcape($s)
 {
   $from = array (   '\\',     '@',        '|' );
@@ -916,7 +925,14 @@ function standup_content(&$bri, $user)
   if ($user->stat != 'room')
     return;
 
-  $content .= '<table class=\\"table_standup\\">';
+  for ($e = 0 , $ct = 0 ; $ct < 4 && $e < MAX_PLAYERS ; $e++) {
+    if ($bri->user[$e]->sess == "" || $bri->user[$e]->stat != "room" || $bri->user[$e]->name == "")
+      continue;
+    $ct++;
+  }
+
+  $content .= sprintf('<table cols=\\"%d\\" class=\\"table_standup\\">', $ct);
+
   for ($e = 0 , $ct = 0 ; $e < MAX_PLAYERS ; $e++) {
     if ($bri->user[$e]->sess == "" || $bri->user[$e]->stat != "room" || $bri->user[$e]->name == "")
       continue;
@@ -931,7 +947,7 @@ function standup_content(&$bri, $user)
       else
 	{ $hilion = ""; $hilioff = ""; }
 
-      $content .= sprintf('<td style=\\"text-align: center\\">%s%s%s</td>',$hilion, xcape($bri->user[$e]->name), $hilioff);
+      $content .= sprintf('<td class=\\"room_standup\\">%s%s%s</td>',$hilion, xcape($bri->user[$e]->name), $hilioff);
       if (($ct % 4) == 3) {
 	$content .= '</tr>';
       }
@@ -951,10 +967,10 @@ function standup_content(&$bri, $user)
 
 
 
-function show_notify($text, $tout, $butt)
+function show_notify($anc, $text, $tout, $butt)
 {
   log_main("SHOW_NOTIFY", $text);
-  return sprintf('var noti = new notify(gst,$("bg"),"%s",%d,"%s");', $text, $tout,$butt);
+  return sprintf('var noti = new notify(gst,$("%s"),"%s",%d,"%s");', $anc, $text, $tout,$butt);
 }
 
 
@@ -1087,7 +1103,7 @@ function show_table_info(&$bri, &$table, $table_pos)
   }
   $noty .= "<hr><br>";
 
-  $ret .= show_notify($noty, 3000, "torna alla partita");
+  $ret .= show_notify("bg", $noty, 3000, "torna alla partita");
   
   return ($ret);
 }
