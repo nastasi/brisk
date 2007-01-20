@@ -204,6 +204,11 @@ function act_tableinfo()
     send_mesg("tableinfo");
 }
 
+function act_help()
+{
+    send_mesg("help");
+}
+
 function safelogout()
 {
     var res;
@@ -451,6 +456,7 @@ function notify(st, ancestor, text, tout, butt)
     var t = this;
     
     this.st = st;
+
     this.ancestor = ancestor;
     
     this.st.st_loc_new++;
