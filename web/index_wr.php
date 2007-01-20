@@ -62,7 +62,15 @@ if ($argz[0] == 'shutdown') {
 else if ($user->stat == 'room') {
   if ($argz[0] == 'help') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .=  show_notify("bottom", $G_room_help, 0, "torna ai tavoli");
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
+
+    log_wr($sess, $user->comm[$user->step % COMM_N]);
+    $user->step++;
+    
+  }
+  else if ($argz[0] == 'about') {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about), 0, "torna ai tavoli", 400, 200);
 
     log_wr($sess, $user->comm[$user->step % COMM_N]);
     $user->step++;
