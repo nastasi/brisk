@@ -112,7 +112,7 @@ function main()
     $tables .= '</table>';
   }
 
-$brisk_header = '<div class="container">
+$brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div class="header">
 <img class="nobo" src="img/brisk_logo64.png">
@@ -127,7 +127,8 @@ sponsored by:<br><br>
 <a target="_blank" href="http://www.alternativeoutput.it"><img class="nobo" src="img/altout80x15.png"></a><br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" src="img/dynamica.png"></a><br><br>
 supported by:<br><br>
-<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br>
+<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br><br>
+%s
 </div>';
     
   /* Templates. */
@@ -151,11 +152,11 @@ supported by:<br><br>
    }
 </SCRIPT>
 <?php
-    echo "$brisk_header";
+    printf($brisk_header_form, '');
 ?> 
 
 <!--  =========== tables ===========  -->
-<div class="tables">
+<div id="tables" class="tables">
 <?php echo "$body"; ?>
 
 <br>
@@ -233,16 +234,16 @@ else {
 
 </SCRIPT>
 <?php
-    echo "$brisk_header";
+    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();">');
 ?> 
 <!--  =========== tables ===========  -->
-<div class="tables">
+<div id="tables" class="tables">
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <?php echo "$tables"; ?>
 </div>
 
 <!--  =========== bottom ===========  -->
-<div class="bottom">
+<div id="bottom" class="bottom">
 <b>Chat</b>
 <div id="txt" class="chatt">
 </div>
