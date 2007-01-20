@@ -32,6 +32,7 @@
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="table.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
+<link rel="stylesheet" type="text/css" href="table.css">
 </head>
 <body>
 <SCRIPT type="text/javascript">
