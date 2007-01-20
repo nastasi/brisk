@@ -1,0 +1,422 @@
+/*
+ *  brisk - table.css
+ *
+ *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * $Id$
+ *
+ */
+
+.chattshort {
+	height: 70px;
+	overflow: auto;
+	border: 1px solid grey;
+	vertical-align: text-bottom;
+	/*	font-size: 10pt;*/
+	}
+
+.txtt {
+	/*	font-size: 10pt;*/
+	}
+
+img.tableinfo {
+	position:     absolute; 
+	left:         619;
+	top:          550;
+	border-width: 0px;
+	visibility:   visible;
+	}
+
+img.tablereload {
+	position:     absolute; 
+	left:         667;
+	top:          550;
+	border-width: 0px;
+	visibility:   visible;
+	}
+
+img.tableout {
+	position:     absolute; 
+	left:         730;
+	top:          550;
+	border-width: 0px;
+	visibility:   visible;
+	}
+
+img.card {
+	position:     absolute; 
+	border-style: solid;
+	border-width: 1px;
+	border-color: grey;
+	visibility:   hidden;
+	}
+
+
+img.astacard {
+	position:     absolute; 
+	/*	visibility:   visible; */
+	border-width: 0px;
+	}
+
+img.cover {
+	position:     absolute; 
+	border-style: solid;
+	border-width: 1px;
+	border-color: lightgrey;
+	visibility:   hidden;
+	}
+
+.chooseed {
+	/* background-color: yellow; */
+	visibility:   hidden;
+	position:absolute; 
+	width:  200px;
+	height: 200px;
+	top:  250px;
+	left: 300px;
+	}
+
+.asta {
+	/* background-color: yellow; */
+	visibility:   hidden;
+	position:     absolute; 
+	width:  200px;
+	height: 200px;
+	top:  250px;
+	left: 300px;
+	}
+
+img.seed0 {
+	position:     absolute; 
+	left: 0px;
+	top: 55px;
+	}
+
+img.seed1 {
+	position:     absolute; 
+	left: 43px;
+	top: 55px;
+	}
+
+img.seed2 {
+	position:     absolute; 
+	left: 93px;
+	top: 55px;
+	}
+
+img.seed3 {
+	position:     absolute; 
+	left: 143px;
+	top: 55px;
+	}
+
+.area {
+	display: block;	
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;  
+	text-align: center;
+	width:  800px;
+	height: 600px;
+	}
+
+.subarea {
+	top: 0px;	
+	}
+
+.points {
+    /*    position:     relative;  */
+    
+    margin-top: 8px; 
+    margin-left:auto; 
+    margin-right:auto;
+    border-style: solid;
+    border-width: 0px;
+    border-color: black;
+    border-collapse: collapse;
+}
+
+.td_points {
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+    border-collapse: collapse;
+    display: table-cell;
+    text-align: right;
+    padding: 2px;
+}
+
+div.table_commands {
+    display: inline;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+}
+
+.remark0 { 
+  position:     absolute; 
+  width:  200px;
+  height: 200px;
+  left: 299;
+  top:  249;
+  border-style: solid;
+  border-width: 0px;
+  border-color: green;
+  z-index: 0;
+   }
+
+.remark1 { 
+  position:     absolute; 
+  width:  200px;
+  height: 200px;
+  left: 296;
+  top:  246;
+  border-style: solid;
+  border-width: 4px;
+  border-color: green;
+  z-index: 0;
+  }
+
+.remark2 { 
+  position:     absolute; 
+  width:  200px;
+  height: 200px;
+  left: 298;
+  top:  248;
+  border-style: solid;
+  border-width: 2px;
+  border-color: green;
+  z-index: 0;
+  }
+
+.punti {
+  position:     absolute; 
+}
+
+.pubinfo {
+/*  background-color: red;  */
+  color: grey;
+  visibility: visible;
+  position: absolute;
+  top: 475px;
+  left: 200px;
+  width:  400px;
+  height: 125px;
+}
+
+.public {
+  /* background-color: red;  */
+  visibility: hidden;
+  position: absolute;
+  display: table;
+  top: 450px;
+  left: 300px;
+  width:  200px;
+  height: 100px;
+  overflow: hidden;
+  z-index: 8;
+}
+
+.pubacard {
+  border-width: 0px;
+  position: relative;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}  
+
+
+
+.pubinfo_we {
+  color: grey;
+  visibility: visible;
+  position: absolute;
+  top: 250px;
+  left: 175px;
+  width:  125px;
+  height: 200px;
+}
+
+.public_we {
+  /*  background-color: red;  */
+  visibility: hidden;
+  position: absolute;
+  top: 250px;
+  left: 175px;
+  display: table;
+  width:  125px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.pubinfo_nw {
+/*  background-color: red;  */
+  color: grey;
+  visibility: visible;
+  position: absolute;
+  top: 125px;
+  left: 200px;
+  width:  200px;
+  height: 125px;
+}
+
+.public_nw {
+/*  background-color: red;   */
+  visibility: hidden;
+  position: absolute;
+  top: 125px;
+  left: 200px;
+  display: table;
+  width:  200px;
+  height: 125px;
+  overflow: hidden;
+}
+
+.public_ne {
+/*  background-color: red;  */
+  visibility: hidden;
+  position: absolute;
+  top: 125px;
+  left: 400px;
+  display: table;
+  width:  200px;
+  height: 125px;
+  overflow: hidden;
+}
+
+.pubinfo_ne {
+/*  background-color: red;  */
+  color: grey;
+  visibility: visible;
+  position: absolute;
+  top: 125px;
+  left: 400px;
+  width:  200px;
+  height: 125px;
+}
+
+
+
+.public_ea {
+	/*  background-color: red; */
+  visibility: hidden;
+  position: absolute;
+  top: 250px;
+  left: 500px;
+  display: table;
+  width:  125px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.pubinfo_ea {
+/*  background-color: red; */
+  color: grey;
+  visibility: visible;
+  position: absolute;
+  top: 250px;
+  left: 500px;
+  width:  125px;
+  height: 200px;
+}
+
+.vert_midfloat {
+  position: relative;
+  #position: absolute;
+  _top: 50%;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.vert_innfloat {
+  #position: relative;
+  #top: -50%;
+  text-align: center;
+}
+
+.vert_innfloat_so {
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+
+/*  background-color: white; */
+  #position: relative;
+  #top: -50%;
+  text-align: center;
+}
+
+.pubacard_ea {
+  border-width: 0px;
+  position: relative;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}  
+
+.pubacard_ne {
+  border-width: 0px;
+  position: relative;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}  
+
+.pubacard_nw {
+  border-width: 0px;
+  position: relative;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}  
+
+.pubacard_we {
+  border-width: 0px;
+  position: relative;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}  
+
+
+/* CALLER */
+.caller {
+	background-repeat: no-repeat; 
+	visibility: hidden; 
+	position: absolute;
+	left: 0px;
+	top: 475px;
+	width: 200px;
+	height: 125px;
+	}
+
+.callerinfo {
+	/*	background-color: red; */
+	/*	visibility: visible; */
+	position: absolute;
+	/*	font-size: 10pt;*/
+	left: 5px;
+	top: 55px;
+	width: 115px;
+	height: 65px;
+	}
+
+img.callerimg {
+	position:     absolute; 
+	left: 133px;
+	top: 10px;
+	}
+
+

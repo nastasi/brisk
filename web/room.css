@@ -1,5 +1,5 @@
 /*
- *  brisk - brisk.css
+ *  brisk - room.css
  *
  *  Copyright (C) 2006 matteo.nastasi@milug.org
  *
@@ -20,18 +20,6 @@
  *
  */
 
-body {
-	background-image: url('img/bg_capodanno.jpg'); 
-	background-repeat: no-repeat;
-	background-position: top center; 
-	margin:0px;
-
-	font-size: 12px;
-	padding: 0px;
-
-	align: center;
-	}
-
 div.container {
 	width:100%;
 	margin:0px;
@@ -41,7 +29,7 @@ div.container {
 }
 
 div.header {
-	/*	border: 1px solid yellow; */
+/*	border: 1px solid yellow; */
 	align: center;
 	text-align: center;
 	font-size: 12px;
@@ -72,15 +60,6 @@ div.bottom {
 	padding:4px;	
 	clear:left;
 }
-
-div {
-	/* position: relative;*/
-	font-size: 12px;
-	}
-
-td {
-	font-size: 12px;
-	}
 
 table.room_tab {
 	border-style: solid;
@@ -133,6 +112,18 @@ div.room_standup {
 	vertical-align: "top";
 	}
 
+td.room_standup {
+/*
+	background-color: red;
+	border-style: solid;
+	border-width: 1px;
+	border-color: grey;
+*/
+	align: center;
+	text-align: center;
+	vertical-align: "top";
+	}
+
 div.room_ex_standup {
 	position: relative;
 	height: 120px;
@@ -145,13 +136,14 @@ div.room_ex_standup {
 table.table_standup {
 	/*	background-color: red;  */
 	border-spacing: 0px;
-	width: 100%;
+	width: 100%; 
 	margin: 0px;
 	padding:0px;
 	}
 
 td.td_standup {
 	text-align: center;
+	align: center;
 	padding: 0px;
 	margin: 0px;
 }
@@ -176,19 +168,6 @@ td.td_standup {
 	/*	font-size: 10pt;*/
 	}
 
-img {
-	position:     absolute; 
-	border-style: solid;
-	border-width: 1px;
-	border-color: grey;
-	}
-
-img.nobo {
-    position:     relative;
-    border-width: 0px;
-    display: block; margin: auto;
-}
-
 .urgmsg {
 	text-align: center;
 	}
@@ -196,45 +175,3 @@ img.nobo {
 .proxhr { 
 	/*	background-color: green; */
 	}
-
-.notify { 
-	border-style: solid;
-	border-width: 1px;
-  position:     absolute; 
-  width:  500px;
-  height: 400px;
-  text-align: center;
-  background-color: white;
-  left: 150;
-  top:  150;
-  z-index: 10;
-  visibility: hidden;
-    filter: alpha(opacity=90);
-  -moz-opacity: 0.90;
-    opacity: 0.90;  
-}
-
-input.button {
-  border: 1px solid gray;  
-  color: Black;
-  background-color: RGB(246,246,246);
-  vertical-align: middle;
-  text-decoration:none;
-  font-size: 100%;
-  cursor: pointer;
-  height: 20px ! important;
-  max-height: 20px ! important;
-  min-height: 20px ! important;
-  margin: 1px;
-  display: inline;
-}
-
-input.button:hover {
-  background-color: white;
-}
-
-input.button:active {
-  background-color: RGB(255,255,153);
-}
-
-
