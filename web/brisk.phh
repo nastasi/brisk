@@ -34,21 +34,42 @@ define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
-/*
-$root_wellarr = Array ( '<a href="http://www.google.com">GOOGLE</a>',
-			'pinollo lanollo',
-			'rorella liolla' );
-*/
-$root_wellarr = Array ( );
-$table_wellarr = Array ( );
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. 0.4.3).',
+                        'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
+$table_wellarr = Array ( 'In bocca al lupo e vinca il migliore.');
 
-$G_brisk_version = "0.4.2";
+$G_brisk_version = "0.4.3";
 
-/*$G_room_help = '
-Brisk - Ver. '.$G_brisk_version.'<br><br>
-Copyright 2006 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a><br><br>';
-*/
-$G_room_help = '<b>Brisk - Ver. '.$G_brisk_version.'</b><br><br>Copyright 2006 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a><br><br>';
+$G_room_help= '
+<div style=\\"text-align: left; padding: 8px;\\">
+<b>Descrizione</b><br>
+Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
+<a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
+<b>Uso del sito</b><br>
+Potete sedervi a un tavolo o rimanere in piedi.<br>
+Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
+<br>
+<b>Partita</b><br>
+All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>
+Chi vince l\'asta dovr&agrave; decidere il seme della carta scelta e inizier&agrave; la mano.<br>
+Per giocare le carte dovrete trascinarle nel quadrato al centro del vostro schermo.<br><br>
+Il vostro turno &egrave; sempre segnalato da una cornice verde lampeggiante intorno quadrato al centro del vostro schermo.<br><br>
+Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \\"reload\\" in basso a destra.<br>
+<dl>
+<dt><b>Comandi della chat</b>
+<dd><b>/nick <i>&lt;new_nick_name&gt;</i></b> - cambio di nickname
+<dd>.. to be continue ..
+</dl>
+</div>
+';
+
+$G_room_about= '<br>
+<div id=\\"header\\" class=\\"header\\">
+  <img class=\\"nobo\\" src=\\"img/brisk_logo64.png\\">
+  briscola chiamata in salsa ajax
+</div>
+<br><b>version '.$G_brisk_version.'</b><br><br>
+Copyright 2006-2007 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>';
 
 
 function xcape($s)
@@ -964,17 +985,11 @@ function standup_content(&$bri, $user)
 }
 
 
-
-
-
-function show_notify($anc, $text, $tout, $butt)
+function show_notify($text, $tout, $butt, $w, $h)
 {
   log_main("SHOW_NOTIFY", $text);
-  return sprintf('var noti = new notify(gst,$("%s"),"%s",%d,"%s");', $anc, $text, $tout,$butt);
+  return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
 }
-
-
-
 
 function briscola_show($bri, $table, $user)
 {
@@ -1033,6 +1048,8 @@ function multoval($mult)
 
 function show_table_info(&$bri, &$table, $table_pos)
 {
+  $user = &$bri->user[$table->player[$table_pos]];
+
   $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
   $noty = sprintf('<table class=\"points\"><tr><th></th>');
   
@@ -1092,10 +1109,29 @@ function show_table_info(&$bri, &$table, $table_pos)
     }
   }
   if ($table->mazzo == $table_pos) 
-    $noty .= "Fai <b>tu</b> il mazzo.";
+    $noty .= "Fai <b>tu</b> il mazzo,";
   else {
     $unam = xcape($bri->user[$table->player[$table->mazzo]]->name);
-    $noty .= "Il mazzo a <b>$unam</b>.";
+    $noty .= "Il mazzo a <b>$unam</b>,";
+  }
+
+  if ($user->subst == 'asta') {
+    if ($table->asta_win == -1)  // auction case
+      $curplayer = $table->gstart % PLAYERS_N;
+    else 
+      $curplayer = $table->asta_win;
+  }
+  else if ($user->subst == 'game') {
+    $curplayer = ($table->gstart + $table->turn) % PLAYERS_N;
+  }
+
+
+  if ($curplayer == $table_pos) {
+    $noty .= " tocca a <b>te</b> giocare.";
+  }
+  else {
+    $unam = xcape($bri->user[$table->player[$curplayer]]->name);
+    $noty .= " tocca a <b>$unam</b> giocare.";
   }
 
   if ($table->mult > 1) {
@@ -1103,7 +1139,7 @@ function show_table_info(&$bri, &$table, $table_pos)
   }
   $noty .= "<hr><br>";
 
-  $ret .= show_notify("bg", $noty, 3000, "torna alla partita");
+  $ret .= show_notify($noty, 3000, "torna alla partita", 500, 400);
   
   return ($ret);
 }
