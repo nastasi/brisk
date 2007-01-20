@@ -209,6 +209,11 @@ function act_help()
     send_mesg("help");
 }
 
+function act_about()
+{
+    send_mesg("about");
+}
+
 function safelogout()
 {
     var res;
@@ -450,31 +455,39 @@ function hide_asta()
     $("asta").style.visibility = "hidden"; 
 }
 
-function notify(st, ancestor, text, tout, butt)
+
+function notify(st, text, tout, butt, w, h)
 {
     var clo, box;
     var t = this;
     
     this.st = st;
 
-    this.ancestor = ancestor;
+    this.ancestor = document.body;
     
     this.st.st_loc_new++;
 
     clo = document.createElement("input");
     clo.type = "submit";
     clo.className = "button";
+    clo.style.bottom = "4px";
     clo.value = butt;
     clo.obj = this;
     clo.onclick = this.input_hide;
+    
+    clodiv = document.createElement("div");
+    clodiv.className = "notify_clo";
+    clodiv.appendChild(clo);
 
     box = document.createElement("div");
     box.className = "notify";
     box.innerHTML = text;
     box.style.zIndex = 200;
-    box.appendChild(clo);
+    box.style.width  = w+"px";
+    box.style.height = h+"px";
+    box.appendChild(clodiv);
     box.style.visibility = "visible";
-    
+
     this.notitag = box;
     
     this.ancestor.appendChild(box);
