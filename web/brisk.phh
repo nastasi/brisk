@@ -36,7 +36,7 @@ define(BRISK_DEBUG, FALSE);
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. 0.4.3).',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
-$table_wellarr = Array ( 'In bocca al lupo e vinca il migliore.');
+$table_wellarr = Array ( 'In bocca al lupo!');
 
 $G_brisk_version = "0.4.3";
 
@@ -57,7 +57,7 @@ Il vostro turno &egrave; sempre segnalato da una cornice verde lampeggiante into
 Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \\"reload\\" in basso a destra.<br>
 <dl>
 <dt><b>Comandi della chat</b>
-<dd><b>/nick <i>&lt;new_nick_name&gt;</i></b> - cambio di nickname
+<dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
 <dd>.. to be continue ..
 </dl>
 </div>
@@ -1188,6 +1188,12 @@ function show_room(&$bri, &$user)
 /* show table 
 is_transition (is from room to table ?)
 is_again      (is another game)
+
+Examles of $is_transition, $is_again:
+  from reload of the page:              FALSE, FALSE
+  from sitdown in room:                 TRUE, FALSE
+  from table: asta cmd e tutti passano: TRUE, TRUE
+  from table: fine partita:             TRUE, TRUE
  */
 function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
 {
@@ -1227,8 +1233,9 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
   /* NOTIFY FOR THE CARD MAKER */
   if ($is_transition) { //  && $user->subst ==  "asta" superfluo
     $ret .= show_table_info(&$bri, &$table, $user->table_pos);
-    $ret .= table_wellcome($user);
   }
+  if (!$is_again) 
+    $ret .= table_wellcome($user);
 
   /* CARDS */
   if ($is_transition) { //  && $user->subst ==  "asta" superfluo
