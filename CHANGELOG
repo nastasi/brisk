@@ -1,0 +1,14 @@
+0.4.3 - 21/01/2007
+	Protected critical sessions with ignore_user_abort func.
+	Enhanced INSTALL.sh (explicit configuration files).
+	Refact of the cookies policy.
+	Wellcome sentence in chats.
+	Enhanced info page with "current player".
+	Moved methods into classes.
+	Added "help" and "about" buttons.
+	Enhanced logout methods.
+	CSS-fication of all html pages.
+	Number of tables doubled.
+
+0.3.0 - 23/12/2006
+	First version.
