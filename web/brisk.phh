@@ -554,7 +554,8 @@ class brisco {
       // update remote graphs
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
-	if ($user_cur->sess == '' || $user_cur->stat != 'room')
+	// 	if ($user_cur->sess == '' || $user_cur->stat != 'room')
+	if ($user_cur->sess == '')
 	  continue;
 	if ($user_cur->name == $name_new) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
