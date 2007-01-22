@@ -238,8 +238,9 @@ else if ($user->stat == 'table' && $user->subst == 'asta') {
 	    $maxcard = $user_cur->asta_card;
 	}
 
-	if ($table->asta_pla_n > ($maxcard > -1 ? 1 : 0) &&
+	if (($table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
 	    !($table->asta_card == 9 && $table->asta_pnt == 120)) {
+	  log_wr($sess,"ALLOPPA QUI");
 	  for ($i = 1 ; $i < PLAYERS_N ; $i++) {
 	    $index_next = ($table->gstart + $i) % PLAYERS_N;
 	    if ($table->asta_pla[$index_next]) {
@@ -285,7 +286,7 @@ else if ($user->stat == 'table' && $user->subst == 'asta') {
 	else {
 	  log_wr($sess, "FINITA !");
 	  // if a_pnt == 120 supergame ! else abbandono
-	  if ($a_pnt == 120) {
+	  if ($a_pnt == 120 || $user->asta_card != -1) {
 	    $chooser = $index_cur;
 	    for ($i = 1 ; $i < PLAYERS_N ; $i++) 
 	      if ($i != $chooser)
