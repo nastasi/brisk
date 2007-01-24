@@ -1,58 +1,71 @@
 /* 
-   TODO
 
-   BUG - se passano tutti al giro successivo chi vince l'asta
-         non sceglie il socio ma lo sceglie quello prima.
+ TESTING
+ ======= 
 
+   BUG - se passano tutti tranne l'ultimo l'asta va al penultimo.
+         Corretto il codice, occorre verificare se questo
+	 ingenera qualche problema.
+
+   BUG - (aum. il timeout) - carte giocate che restano girate
+         Sembra non migliorare di molto la cosa, occorre fare
+	 uno studio più approfondito sulla gestione della cache.
+
+ TODO
+ ====
+
+   URGENT!- smammamorti
+   URGENT!- ban temporaneo dai tavoli
+   
    URGENT - flash player to play sound
-   URGENT - ban temporaneo dai tavoli
-   URGENT - smammamorti
-   URGENT - current player
    URGENT - test di download per la cache
 
    URGENT - restart preload img
    URGENT - watchdog
-   URGENT - cambiare titolo al tavolo
-
-   TEST (aum. il timeout) - carte giocate che restano girate
 
    NORM   - chat vecchie in reload
    NORM   - one player reject a game (to less points (<2)
    NORM   - tools dir with a main and some pages where check briscola tools.
    NORM   - help page
-   bottoni => immagini
+   NORM   - bottoni => immagini
    NORM   - (master concept) card selection 
 
-   FAR TODO
-
-   NORM - internationalization
-   NORM - img -> div + css
-   
- WEB
-   - compatibility update
-   - link to stable/unstable
-   DONE - homepage
-   DONE - screenshots
+   MIN  - cambiare titolo al tavolo
 
  MIDDLE TODO
-   WIP - info enhancement and related button (how win the last game and with how much points ?)
-   WIP - preload images: (finish the list)
-   - unload of the stream
+ ===========
+
    - split server-side data 
    - user assistant (with button to enable disable)
-   - who is playing now
-   - graphics enhancement 
    - asta: highlight buttons (css hover)
    - documentation
 
    TO REVIEW - special chars in js
 
+ FAR TODO
+ ========
+   NORM - internationalization
+   NORM - img -> div + css
+   
+ WEB
+ ===
+
+   - link to stable/unstable
+
+-------------------------------------------------------------------
+ DONE
+ ====
+
+   DONE - unload of the stream
+   DONE - standup centrati
+   DONE - current player - in info
+   DONE - HELP butt con ABOUT, REGOLE, VERSIONE
    DONE - wellcome lines in the chats (room and table)
    DONE - wellcome lines in the chats (room and table)
    DONE - nomi in primo piano se vai sul quadrato   
    DONE - to pass explicit config file to INSTALL.sh
    DONE - flag to create a config file
-   ABORTED bottoni => immagini
+   ABRT - bottoni => immagini
    DONE - aggiungere bottone al login
    DONE - nomi in primo piano se vai sul quadrato   
    DONE - installer to set cookie path
@@ -80,9 +93,15 @@
    DONE - server side page abort management  
    DONE - cookie problem with Ajax
    DONE - spostare il tasto "esco"
-   DONE to pass explicit config file to INSTALL.sh 
+   DONE - to pass explicit config file to INSTALL.sh 
    DONE - 8 tables
    DONE - safety out management
+   DONE - info enhancement and related button (how win the last game and
+          with how much points ?)
+
+ WEB
+   DONE - homepage
+   DONE - screenshots
 
 DOC
    CHAPTERS
