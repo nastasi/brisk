@@ -55,6 +55,10 @@ function xhr_rd_start(sess,stat,subst,step)
 	return;
     createCookie("sess", sess, 24*365, xhr_rd_cookiepath);
 
+    // NOTE: *ctx = "" to prevent konqueror stream commands duplication.
+    xhr_rd_oldctx = "";
+    xhr_rd_newctx = "";
+
     /* NOTE document.uniqueID exists only under IE  */
     // alert("di qui3");
     xhr_rd.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom, true);
