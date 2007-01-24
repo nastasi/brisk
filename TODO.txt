@@ -14,7 +14,6 @@
  TODO
  ====
 
-   URGENT!- smammamorti
    URGENT!- ban temporaneo dai tavoli
    
    URGENT - flash player to play sound
@@ -35,7 +34,7 @@
  MIDDLE TODO
  ===========
 
-   - split server-side data 
+   URGENT - split server-side data 
    - user assistant (with button to enable disable)
    - asta: highlight buttons (css hover)
    - documentation
@@ -56,6 +55,7 @@
  DONE
  ====
 
+   DONE - smammamorti
    DONE - unload of the stream
    DONE - standup centrati
    DONE - current player - in info

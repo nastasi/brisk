@@ -60,6 +60,8 @@ if ($argz[0] == 'shutdown') {
     log_rd2($sess, "SHUTDOWN FROM WHAT ???");
 }
 else if ($user->stat == 'room') {
+  $user->laccwr = time();
+
   if ($argz[0] == 'help') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
@@ -156,6 +158,7 @@ else if ($user->stat == 'room') {
  *             *
  ***************/
 else if ($user->stat == 'table' && $user->subst == 'asta') {
+  $user->laccwr = time();
   $table = &$bri->table[$user->table];
 
   if ($argz[0] == 'logout') {

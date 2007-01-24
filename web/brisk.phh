@@ -28,17 +28,19 @@ define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
-define(EXPIRE_TIME, 180);
+define(EXPIRE_TIME_RD, 180);
+define(EXPIRE_TIME_SMAMMA, 300); 
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. 0.4.3).',
-                        'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
-$table_wellarr = Array ( 'In bocca al lupo!');
+$G_brisk_version = "0.4.4";
 
-$G_brisk_version = "0.4.3";
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.').',
+                        'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
+$table_wellarr = Array ( 'Benvenuto al tavolo.');
+
 
 $G_room_help= '
 <div style=\\"text-align: left; padding: 8px;\\">
@@ -295,6 +297,7 @@ class User {
   var $name;       // name of the user
   var $sess;       // session of the user
   var $lacc;       // last access (for the cleanup)
+  var $laccwr;     // last access (for the cleanup)
   var $stat;       // status (outdoor, room, table, game, ...)
   var $subst;      // substatus for each status   
   var $step;       // step of the current status
@@ -309,7 +312,8 @@ class User {
   function User($name, $sess, $stat = "", $subst = "", $table = -1) {
     $this->name  = $name;
     $this->sess  = $sess;
-    $this->lacc  = time();
+    $this->lacc   = time();
+    $this->laccwr = time();
     $this->stat  = $stat;
     $this->subst  = $subst;
     $this->step  = 1;
@@ -352,15 +356,9 @@ class brisco {
 	if ($user_cur->sess == "")
 	  continue;
 	
-	if ($user_cur->lacc < $curtime) { // Auto logout dell'utente
+	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
 	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
-	  /*
-	  if ($user_cur->stat == 'table') {
-	      log_rd2($user_cur->sess, "AUTO LOGOUT: Yet not implemented in table stat!");
-	      continue;
-	    }
-	  else
-	  */
+
 	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
 	    log_auth($user_cur->sess, "Autologout session.");
 	    
@@ -379,6 +377,15 @@ class brisco {
 	  //    } // if (0 == 1) 
 	  
 	}
+
+	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < $curtime) { // lo rimettiamo in piedi
+	  if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
+	    $this->room_wakeup(&$user_cur);
+	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify("<br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", 0, "torna ai tavoli", 400, 100);
+	    $user_cur->step++;
+	  }
+	}
       }
       log_rd2($user_cur->sess, "GARBAGE UPDATED!");
       
@@ -392,12 +399,11 @@ class brisco {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
 
-    log_main("WAKEUP", "begin function table:".$table_idx);
+    log_main("WAKEUP", "begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
     $from_table = ($user->stat == "table");
     if ($from_table) {
       log_main("WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
-
       for ($i = 0 ; $i < $table->player_n ; $i++) {
 	$user_cur = &$this->user[$table->player[$i]];
 	log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
@@ -413,7 +419,10 @@ class brisco {
 	}
       }
     }
-
+    else {
+      $user->stat = "room";
+      $user->subst = "standup";
+    }
     /* aggiorna l'array dei giocatori al tavolo. */
     $table->user_rem(&$this, &$user);
 
@@ -424,8 +433,6 @@ class brisco {
       
       log_main("VALORI", "name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
-      // function show_room(&$bri, &$user)
-
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($from_table && ($user_cur->table == $table_idx || $user_cur == $user)) {
 	$ret .= 'gst.st_loc++; the_end=true; window.onunload = null; document.location.assign("index.php");|';
@@ -433,6 +440,8 @@ class brisco {
 	log_main("DOCUMENT.index.php", "from table");
       }
       else if ($user_cur->stat == "room") {
+	log_main("DOCUMENT.index.php", "from table");
+
 	$ret .= table_content($this, $user_cur, $table_idx);
 	$ret .= standup_content($this, $user_cur);
 	

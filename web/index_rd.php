@@ -72,7 +72,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	return (unrecerror());
       }
       log_auth($sess, "update lacc");
-      $user->lacc = time() + EXPIRE_TIME;
+      $user->lacc = time();
       save_data($bri);
       $first_loop = FALSE;
     
