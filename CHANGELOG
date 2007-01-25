@@ -1,3 +1,6 @@
+0.4.4 - 25/01/2007
+	Smammamorti
+
 0.4.3 - 21/01/2007
 	Protected critical sessions with ignore_user_abort func.
 	Enhanced INSTALL.sh (explicit configuration files).
