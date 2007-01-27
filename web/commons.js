@@ -90,7 +90,7 @@ function reset_images()
 
 function update_images()
 {
-    // $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
+    $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
     if (g_imgct < g_preload_img_arr.length)
 	setTimeout(preload_images, 100, g_preload_img_arr, g_imgct);
     g_imgct++;
