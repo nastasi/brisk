@@ -1,3 +1,7 @@
 <FilesMatch "\.(js|css)$">
 header append Cache-Control "public, last-modified, must-revalidate"
 </FilesMatch>
+ExpiresActive On
+ExpiresByType image/jpg "access plus 2 days"
+ExpiresByType image/png "access plus 2 days"
+
