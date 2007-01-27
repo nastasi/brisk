@@ -112,6 +112,20 @@ function main()
     $tables .= '</table>';
   }
 
+  $altout_propag = array( array ( 'url' => 'http://www.alternativeoutput.it',
+				  'content' => '<img class="nobo" src="img/altout80x15.png">' ),
+			  array ( 'url' => 'http://virtualsky.alternativeoutput.it',
+				  'content' => '<img class="nobo" src="img/virtualsky80x15.png">' )
+			  );
+  
+  // seed with microseconds since last "whole" second
+  srand ((double) microtime() * 1000000);
+  $randval = rand(0,count($altout_propag)-1);
+  $altout_carousel = sprintf('<a target="_blank" href="%s">%s</a>',
+			     $altout_propag[$randval]['url'],
+			     $altout_propag[$randval]['content']);
+			 
+
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
@@ -123,8 +137,7 @@ briscola chiamata in salsa ajax<br><br>
 <div class="topmenu">
 <a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a>
 <br><br><br>
-sponsored by:<br><br>
-<a target="_blank" href="http://www.alternativeoutput.it"><img class="nobo" src="img/altout80x15.png"></a><br>
+sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" src="img/dynamica.png"></a><br><br>
 supported by:<br><br>
 <a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br><br>
@@ -227,7 +240,7 @@ else {
 
      setTimeout(xhr_rd_poll, 0, sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
-     // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+     setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();
 <?php
 }
