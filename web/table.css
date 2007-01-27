@@ -348,11 +348,11 @@ div.table_commands {
 }
 
 .vert_innfloat_so {
-  border-style: solid;
+/*  border-style: solid;
   border-width: 1px;
   border-color: black;
 
-/*  background-color: white; */
+  background-color: white; */
   #position: relative;
   #top: -50%;
   text-align: center;
