@@ -22,12 +22,14 @@
    URGENT - restart preload img
    URGENT - watchdog
 
+   NORM   - pubblic announcement
    NORM   - chat vecchie in reload
    NORM   - one player reject a game (to less points (<2)
    NORM   - tools dir with a main and some pages where check briscola tools.
    NORM   - help page
    NORM   - bottoni => immagini
    NORM   - (master concept) card selection 
+   NORM   - show changelog
 
    MIN  - cambiare titolo al tavolo
 
@@ -55,6 +57,7 @@
  DONE
  ====
 
+   DONE - carosello pubblicità altout
    DONE - smammamorti
    DONE - unload of the stream
    DONE - standup centrati
