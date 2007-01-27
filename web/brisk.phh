@@ -29,7 +29,7 @@ define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
 define(EXPIRE_TIME_RD, 180);
-define(EXPIRE_TIME_SMAMMA, 300); 
+define(EXPIRE_TIME_SMAMMA, 180); 
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
@@ -374,8 +374,6 @@ class brisco {
 	    else
 	      log_rd2($sess, "LOGOUT FROM WHAT ???");
 	  }
-	  //    } // if (0 == 1) 
-	  
 	}
 
 	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < $curtime) { // lo rimettiamo in piedi
@@ -401,6 +399,8 @@ class brisco {
 
     log_main("WAKEUP", "begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
+    $curtime = time();
+
     $from_table = ($user->stat == "table");
     if ($from_table) {
       log_main("WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
@@ -411,10 +411,12 @@ class brisco {
 	if ($user_cur != $user) {
 	  $user_cur->stat = "room";
 	  $user_cur->subst = "sitdown";
+	  $user_cur->laccwr = $curtime;
 	}
 	else if ($user->sess != "") {
 	  $user_cur->stat = "room";
 	  $user_cur->subst = "standup";
+	  $user_cur->laccwr = $curtime;
 	  $user_cur->table = -1;
 	}
       }
@@ -422,6 +424,7 @@ class brisco {
     else {
       $user->stat = "room";
       $user->subst = "standup";
+      $user->laccwr = $curtime;
     }
     /* aggiorna l'array dei giocatori al tavolo. */
     $table->user_rem(&$this, &$user);
@@ -706,6 +709,7 @@ class brisco {
       $this->user[$idx]->name = $name;
       $this->user[$idx]->stat = "room";
       $this->user[$idx]->subst = "standup";
+      $this->user[$idx]->laccwr = time();
       
       log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name));
       

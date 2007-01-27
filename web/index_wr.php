@@ -115,7 +115,8 @@ else if ($user->stat == 'room') {
       
       $table->init();
       $table->game_init(&$bri);
-      
+      $curtime = time();
+
       for ($i = 0 ; $i < $table->player_n ; $i++) {
 	$user_cur = &$bri->user[$table->player[$i]];
 	log_wr($sess, "Pre if!");
@@ -129,6 +130,7 @@ else if ($user->stat == 'room') {
 	
 	$user_cur->stat =  'table';
 	$user_cur->subst = 'asta';
+	$user_cur->laccwr = $curtime;
 	$user_cur->step++;
 	
 	$user_cur->comm[$user_cur->step % COMM_N] = show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, FALSE);
