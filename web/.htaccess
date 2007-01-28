@@ -2,6 +2,6 @@
 header append Cache-Control "public, last-modified, must-revalidate"
 </FilesMatch>
 ExpiresActive On
-ExpiresByType image/jpg "access plus 2 days"
-ExpiresByType image/png "access plus 2 days"
+ExpiresByType image/jpg "access plus 4 days"
+ExpiresByType image/png "access plus 4 days"
 
