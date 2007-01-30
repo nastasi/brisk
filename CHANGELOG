@@ -1,5 +1,14 @@
+0.4.6 - 30/01/2007
+        Number of chat lines doubled.
+	Refactored nickname management.
+
+0.4.5 - 28/01/2007
+        Il browser Konqueror ora e' supportato (non so da che versione).
+        Cache delle immagini gestita efficacemente (expire a 4 gg).
+        Bug corretto per l'ultimo giocatore che vinceva l'asta.
+
 0.4.4 - 25/01/2007
-	Smammamorti
+	I tavoli vengono liberati per inattivita' degli utenti (3 minuti).
 
 0.4.3 - 21/01/2007
 	Protected critical sessions with ignore_user_abort func.

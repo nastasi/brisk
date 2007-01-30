@@ -3,13 +3,9 @@
  TESTING
  ======= 
 
-   BUG - se passano tutti tranne l'ultimo l'asta va al penultimo.
-         Corretto il codice, occorre verificare se questo
-	 ingenera qualche problema.
-
    BUG - (aum. il timeout) - carte giocate che restano girate
-         Sembra non migliorare di molto la cosa, occorre fare
-	 uno studio più approfondito sulla gestione della cache.
+         Sembra non migliorare di molto la cosa, gestita la cache
+	 correttamente, dovrebbe essere apposto.
 
  TODO
  ====
@@ -17,7 +13,6 @@
    URGENT!- ban temporaneo dai tavoli
    
    URGENT - flash player to play sound
-   URGENT - test di download per la cache
 
    URGENT - restart preload img
    URGENT - watchdog
@@ -26,7 +21,6 @@
    NORM   - chat vecchie in reload
    NORM   - one player reject a game (to less points (<2)
    NORM   - tools dir with a main and some pages where check briscola tools.
-   NORM   - help page
    NORM   - bottoni => immagini
    NORM   - (master concept) card selection 
    NORM   - show changelog
@@ -57,6 +51,13 @@
  DONE
  ====
 
+   DONE - help page
+   DONE - test di download per la cache
+   DONE - se passano tutti tranne l'ultimo l'asta va al penultimo.
+          Corretto il codice, occorre verificare se questo
+	  ingenera qualche problema.
+   DONE - raddoppiato il numero di righe nella chat
+   DONE - corretto bug del /nick
    DONE - carosello pubblicità altout
    DONE - smammamorti
    DONE - unload of the stream
