@@ -666,13 +666,15 @@ function table_init() {
 var chatt_lines = new Array();
 var chatt_lines_n = 0;
 
+var CHATT_MAXLINES = 40;
+
 /* PRO CHATT */
 function chatt_sub(name,str)
 {
   // alert("ARRIVA NAME: "+ name + "  STR:"+str);
-  if (chatt_lines_n == 20) {
+  if (chatt_lines_n == CHATT_MAXLINES) {
     $("txt").innerHTML = "";
-    for (i = 0 ; i < 19 ; i++) {
+    for (i = 0 ; i < (CHATT_MAXLINES - 1) ; i++) {
       chatt_lines[i] = chatt_lines[i+1];
       $("txt").innerHTML += chatt_lines[i];
     }
