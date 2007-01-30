@@ -57,8 +57,6 @@ function main()
     if ($ACTION == "login" && isset($name)) {
       $bri->garbage_manager(TRUE);
       /* try login */
-      $name = substr($name, 0, 12);
-      $name = str_replace(" ", "_", $name);
       if (($user = &$bri->add_user(&$sess, &$idx, $name)) != FALSE) {
 	$ACTION = "room";
 	
@@ -72,7 +70,9 @@ function main()
       }
       else {
 	/* Login Rendering */
-	if ($idx == -1) 
+	if ($idx == -2)
+	  $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
+	else if ($idx == -1) 
 	  $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
 	else
 	  $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
