@@ -23,7 +23,7 @@
 
 require_once("brisk.phh");
 
-log_load($sess, "LOAD: index_rd.php");
+log_load($sess, "LOAD: index_rd.php ".$QUERY_STRING);
 
 $first_loop = TRUE;
 $the_end = FALSE;
