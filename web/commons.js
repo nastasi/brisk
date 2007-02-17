@@ -60,6 +60,39 @@ function $(id) { return document.getElementById(id); }
 	    throw Error('setInterval Error\nInvalid function type');
 	};
     };
+
+    /*Copy the default setTimeout behavior*/
+    var nativeSetTimeout = window.setTimeout;
+    window.setTimeout = function(fn,ms) {		
+	var param = [];
+	if(arguments.length <= 2)	{
+	    return nativeSetTimeout(fn,ms);
+	}
+	else {
+	    for(var i=2;i<arguments.length;i+=1) {
+		param[i-2] =  arguments[i];
+	    }	
+	}
+	
+	if(typeof(fn)=='function') {
+	    
+	    return (function (fn,ms,param) {
+		var fo = function () {								
+		    fn.apply(window,param);
+		};			
+		return nativeSetTimeout(fo,ms); 
+	    })(fn,ms,param);
+	}
+	else if(typeof(fn)=='string')
+	{
+	    return  nativeSetTimeout(fn,ms);
+	}
+	else
+	{
+	    throw Error('setTimeout Error\nInvalid function type');
+	};
+    };
+
 })()
 
     // var card_pos = RANGE 0 <= x < cards_ea_n
