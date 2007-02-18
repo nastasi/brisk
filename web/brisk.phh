@@ -30,17 +30,19 @@ define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
 define(EXPIRE_TIME_RD, 180);
 define(EXPIRE_TIME_SMAMMA, 360); 
+// BAN_TIME da allineare anche in commons.js
+define(BAN_TIME, 900); 
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.4.6";
+$G_brisk_version = "0.5.0";
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.').',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
-$table_wellarr = Array ( 'Benvenuto al tavolo.');
+$table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
 
 $G_room_help= '
@@ -343,6 +345,7 @@ class User {
   var $sess;       // session of the user
   var $lacc;       // last access (for the cleanup)
   var $laccwr;     // last access (for the cleanup)
+  var $bantime;    // timeout to temporary ban
   var $stat;       // status (outdoor, room, table, game, ...)
   var $subst;      // substatus for each status   
   var $step;       // step of the current status
@@ -360,6 +363,7 @@ class User {
     $this->sess  = $sess;
     $this->lacc   = time();
     $this->laccwr = time();
+    $this->bantime = 0;
     $this->stat  = $stat;
     $this->subst  = $subst;
     $this->step  = 1;
@@ -416,8 +420,7 @@ class brisco {
 	    
 	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
 	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
-	      $this->room_wakeu
-p(&$user_cur);
+	      $this->room_wakeup(&$user_cur);
 	    else if ($user_cur->subst == 'standup')
 	      $this->room_outstandup(&$user_cur);
 	    else
@@ -453,11 +456,6 @@ p(&$user_cur);
     $from_table = ($user->stat == "table");
     if ($from_table) {
       log_main("WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
-      $lockcalc = $table->exitlock_calc(&$this->user, $table_pos);
-      if ($lockcalc < 3) {
-	// BAN TEMP!
-asdasdasdas
-      }
 
       for ($i = 0 ; $i < $table->player_n ; $i++) {
 	$user_cur = &$this->user[$table->player[$i]];
@@ -1579,6 +1577,19 @@ function validate_name($name)
 function playsound($filename)
 {
   return (sprintf('playsound("flasou", "%s");', $filename));
+}
+
+function secstoword($secs)
+{
+  $mins = floor($secs / 60);
+  $secs = $secs % 60;
+  if ($mins > 0) 
+    $ret = sprintf("%d minut%s%s", $mins, ($mins > 1 ? "i" : "o"), ($secs > 0 ? " e " : ""));
+  
+  if ($secs > 0)
+    $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "i" : "o"));
+  
+  return ($ret);
 }
 
 ?>

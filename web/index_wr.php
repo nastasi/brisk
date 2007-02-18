@@ -94,10 +94,20 @@ else if ($user->stat == 'room') {
       exit;
     }
 		
+    if ($user->bantime > $user->laccwr) {
+      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            $user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "Torna in piedi.", 400, 100);
+      
+      $user->step++;
+      save_data($bri);
+      unlock_data($sem);
+      exit;
+    }
+    
     // Take parameters
     $table_idx = $argz[1];
     $table = &$bri->table[$table_idx];
-		
+    
     if ($table->player_n == PLAYERS_N) {
       log_wr($sess, "Warning ! unreachable, table full.");
       unlock_data($sem);
@@ -174,7 +184,32 @@ else if ($user->stat == 'table') {
     $bri->chatt_send(&$user,$mesg);
   }
   else if ($argz[0] == 'logout') {
-    $bri->room_wakeup(&$user);
+    $remcalc = $argz[1];
+
+    if ($user->exitislock == TRUE) {
+      $remcalc++;
+      $user->exitislock = FALSE;
+    }
+
+    $logout_cont = TRUE;
+    if ($remcalc >= 3) {
+      $lockcalc = $table->exitlock_calc(&$bri->user, $user->table_pos);
+      if ($lockcalc < 3) {
+	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+	$user->comm[$user->step % COMM_N] .= $table->exitlock_show();
+	$user->comm[$user->step % COMM_N] .=  show_notify("<br>I dati presenti sul server non erano allineati con quelli inviati dal tuo browser, adesso lo sono. Riprova ora.", 2000, "Torna alla partita.", 400, 100);
+	
+	log_wr($sess, $user->comm[$user->step % COMM_N]);
+	$user->step++;
+	$logout_cont = FALSE;
+      }
+    }
+    else 
+      $user->bantime = $user->laccwr + BAN_TIME;
+    
+    if ($logout_cont == TRUE) {
+      $bri->room_wakeup(&$user);
+    }
   }
   else if ($argz[0] == 'exitlock') {
     $user->exitislock = ($user->exitislock == TRUE ? FALSE : TRUE);
