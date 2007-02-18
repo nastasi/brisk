@@ -31,6 +31,7 @@
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="table.js"></script>
+<script type="text/javascript" src="AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="table.css">
 </head>
@@ -41,6 +42,7 @@
    var subst = "none";
    var table_pos = "";
    var myfrom = "table_php";
+   var g_withflash = false;
 
 var asta_ptr;
 var area_ptr;
@@ -61,6 +63,7 @@ var g_imgct= 0;
 var g_imgtot = g_preload_img_arr.length;
 
 window.onload = function() {
+  g_withflash = DetectFlashVer(6,0,0);
   remark_off();
   table_init();
   xhr_rd = createXMLHttpRequest();
@@ -205,6 +208,7 @@ Hai vinto l'asta.<br> Scegli il seme:
 <div class="subarea">
 <div id="txt" class="chattshort"></div>
 <table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
+<div id="flasou"></div>
 <hr>
 <div id="heartbit"></div>
 <hr>

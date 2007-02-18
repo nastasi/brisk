@@ -140,7 +140,9 @@ briscola chiamata in salsa ajax<br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" src="img/dynamica.png"></a><br><br>
 supported by:<br><br>
-<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br><br>
+<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br>
+<div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
+</div><br><br></div>
 %s
 </div>';
     
@@ -156,12 +158,21 @@ supported by:<br><br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
+<script type="text/javascript" src="AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 </head>
 <body>
 <SCRIPT type="text/javascript">
+   var g_withflash = false;
+
    window.onload = function() {
+     g_withflash = DetectFlashVer(6,0,0);
+     if (g_withflash == false) {
+       $("proflash").innerHTML = 'Audio con Flash.<br><a href="http://www.macromedia.com/"><img class="nobo" style="padding: 4px; width:73; height: 19;" src="img/download_now_flash.gif"></a>';
+     }
+     else
+       $("proflashext").innerHTML = "";
      $("nameid").focus();
    }
 </SCRIPT>
@@ -210,6 +221,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
+<script type="text/javascript" src="AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 </head>
@@ -220,6 +232,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var subst = "";
    var gst  = new globst();
 
+   var g_withflash = false;
    var g_imgct= 0;
    var g_imgtot = g_preload_img_arr.length;
    var myfrom = "index_php";
@@ -237,7 +250,12 @@ else {
      sess = "<?php echo "$sess"; ?>";
 
      window.onunload = onunload_cb;
-
+     g_withflash = DetectFlashVer(6,0,0);
+     if (g_withflash == false) {
+       $("proflash").innerHTML = 'Audio con Flash.<br><a href="http://www.macromedia.com/"><img class="nobo" style="padding: 4px; width:73; height: 19;" src="img/download_now_flash.gif"></a>';
+     }
+     else
+       $("proflashext").innerHTML = "";
      setTimeout(xhr_rd_poll, 0, sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
@@ -249,7 +267,7 @@ else {
 
 </SCRIPT>
 <?php
-    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">');
+    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();"><br><br><br>');
 ?> 
 <!--  =========== tables ===========  -->
 <div id="tables" class="tables">
