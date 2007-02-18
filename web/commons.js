@@ -21,7 +21,7 @@
  */
 
 var PLAYERS_N = 3;
-var EXIT_BAN_TIME = 15;
+var EXIT_BAN_TIME = 900;
 
 function $(id) { return document.getElementById(id); }
 
@@ -258,7 +258,7 @@ function safelogout()
     var res;
     
     if (g_exitlock < 3) 
-	res = window.confirm("Sei sicuro di volere abbandonare la partita?\nATTENZIONE: se esci adesso senza il consenso degli altri giocatori non potrai sederti ai tavoli per "+EXIT_BAN_TIME+" minuti.");    
+	res = window.confirm("Sei sicuro di volere abbandonare la partita?\nATTENZIONE: se esci adesso senza il consenso degli altri giocatori non potrai sederti ai tavoli per "+(floor(EXIT_BAN_TIME/60))+" minuti.");    
     else 
 	res = window.confirm("Sei sicuro di volere abbandonare la partita?");
     if (res)
