@@ -40,7 +40,7 @@ define(BRISK_DEBUG, FALSE);
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
 $G_brisk_version = "0.5.0";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.').',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: audio a inizio partita, uscita concordata dai tavoli e "lascio" per troppo pochi punti in mano.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -60,6 +60,7 @@ Chi vince l\'asta dovr&agrave; decidere il seme della carta scelta e inizier&agr
 Per giocare le carte dovrete trascinarle nel quadrato al centro del vostro schermo.<br><br>
 Il vostro turno &egrave; sempre segnalato da una cornice verde lampeggiante intorno quadrato al centro del vostro schermo.<br><br>
 Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \\"reload\\" in basso a destra.<br>
+Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri giocatori di sbloccarla cliccando sul lucchetto. Se non si segue questa prassi, una volta usciti, non vi potrete sedere a nessun tavolo per '.floor(BAN_TIME/60).' minuti.
 <dl>
 <dt><b>Comandi della chat</b>
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
