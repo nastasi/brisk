@@ -882,7 +882,6 @@ function room_checkspace(emme,tables,inpe)
 function playsound(tag, sound) {
    // g_withflash is a global var
    if (g_withflash) {
-      alert("PLAYSOUND "+sound);
       $(tag).innerHTML = '<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '+
 'codebase="http://active.macromedia.com/flash2/cabs/swflash.cab#version=4,0,0,0" id="mysound" WIDTH=1 HEIGHT=1>' +
 '<PARAM NAME="movie" VALUE="playsound.swf"><PARAM NAME="PLAY" VALUE="true"><PARAM NAME="LOOP" VALUE="false">' +
