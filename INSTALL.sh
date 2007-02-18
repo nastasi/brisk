@@ -121,7 +121,7 @@ if [ "$web_only" = "FALSE" ]; then
     chmod 666 ${ftok_path}/main
 fi
 install -d $web_path
-install -m 644 web/*.{php,phh,css,js} ${web_path}
+install -m 644 web/*.{php,phh,css,js,mp3,swf} ${web_path}
 cd web
 find . -name '.htaccess' -exec install -m 644 {} ${web_path}/{} \;
 cd -
