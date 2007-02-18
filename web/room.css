@@ -42,6 +42,17 @@ div.topmenu {
 	width:90px;
 	margin:0;
 	text-align: center;
+	align: center;
+	font-size: 10px;
+	padding:4px;	
+	}
+
+div.proflash {
+	/*	border: 1px solid red; */
+        border: 1px solid gray;  
+        background-color: RGB(246,246,246);
+	text-align: center;
+	align: center;
 	font-size: 10px;
 	padding:4px;	
 	}
