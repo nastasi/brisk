@@ -29,7 +29,7 @@ define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
 define(EXPIRE_TIME_RD, 180);
-define(EXPIRE_TIME_SMAMMA, 180); 
+define(EXPIRE_TIME_SMAMMA, 360); 
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
