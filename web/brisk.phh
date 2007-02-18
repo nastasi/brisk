@@ -1263,6 +1263,11 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
   if (!$is_again) 
     $ret .= table_wellcome($user);
 
+  if ($is_transition && !$is_again) { // appena seduti al tavolo, play della mucca
+    $ret .= playsound("cow.mp3");
+  }
+
+
   /* CARDS */
   if ($is_transition) { //  && $user->subst ==  "asta" superfluo
     $ret .= "|";
@@ -1519,6 +1524,11 @@ function validate_name($name)
   }
 
   return (FALSE);
+}
+
+function playsound($filename)
+{
+  return (sprintf('playsound("flasou", "%s");', $filename));
 }
 
 ?>

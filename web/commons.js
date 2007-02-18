@@ -806,3 +806,16 @@ function room_checkspace(emme,tables,inpe)
 
     $("esco").innerHTML = "<input name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
 }
+
+function playsound(tag, sound) {
+   // g_withflash is a global var
+   if (g_withflash) {
+      alert("PLAYSOUND "+sound);
+      $(tag).innerHTML = '<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '+
+'codebase="http://active.macromedia.com/flash2/cabs/swflash.cab#version=4,0,0,0" id="mysound" WIDTH=1 HEIGHT=1>' +
+'<PARAM NAME="movie" VALUE="playsound.swf"><PARAM NAME="PLAY" VALUE="true"><PARAM NAME="LOOP" VALUE="false">' +
+'<PARAM NAME=FlashVars VALUE="streamUrl='+sound+'">' +
+'<EMBED swliveconnect="true" name="mysound" src="playsound.swf" FlashVars="streamUrl='+sound+'" PLAY="true" LOOP="false" '+
+' WIDTH=1 HEIGHT=1 TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"></OBJECT>';
+   }
+}
