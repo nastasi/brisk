@@ -103,3 +103,7 @@ input.button:hover {
 input.button:active {
   background-color: RGB(255,255,153);
 }
+
+img.button:hover {
+  cursor: pointer;
+}
