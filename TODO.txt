@@ -19,7 +19,6 @@
 
    NORM   - pubblic announcement
    NORM   - chat vecchie in reload
-   NORM   - one player reject a game (to less points (<2)
    NORM   - tools dir with a main and some pages where check briscola tools.
    NORM   - bottoni => immagini
    NORM   - (master concept) card selection 
@@ -51,6 +50,7 @@
  DONE
  ====
 
+   DONE - one player reject a game, to less points (<= 2)
    DONE - help page
    DONE - test di download per la cache
    DONE - se passano tutti tranne l'ultimo l'asta va al penultimo.
