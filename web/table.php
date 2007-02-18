@@ -61,6 +61,7 @@ echo $laststate;
 
 var g_imgct= 0;
 var g_imgtot = g_preload_img_arr.length;
+var g_exitlock = 0;
 
 window.onload = function() {
   g_withflash = DetectFlashVer(6,0,0);
@@ -135,10 +136,11 @@ window.onload = function() {
   <img id="asta8" src="img/asta8.png" class="astacard">
   <img id="asta9" src="img/asta9.png" class="astacard">
   <div id="astaptdiv" class="punti">
-    <input id="astapt" name="astapt" type="text" maxsize="3" size="3" value="61"> 
+    <input class="puntifield" id="astapt" name="astapt" type="text" maxsize="3" size="3" value="61"> 
   </div>
   <img  id="astaptsub" src="img/astaptsub_ro.png" class="astacard">
-  <img  id="astapasso2" src="img/astapasso_ro.png" class="astacard"> 
+  <img  id="astapasso" src="img/astapasso_ro.png" class="astacard"> 
+  <img  id="astalascio" src="img/astalascio_ro.png" class="astacard"> 
 </div>
 <div id="name" class="pubinfo"></div>
 <div id="public" class="public">
@@ -199,7 +201,9 @@ Hai vinto l'asta.<br> Scegli il seme:
 <div class="table_commands">
 <input type="button" class="button" name="xinfo"  value="Info." onclick="act_tableinfo();">
 <input type="button" class="button" name="xreload"  value="Reload." onclick="act_reload();">
-<input type="button" class="button" name="xout"  value="Out." onclick="safelogout();">
+<div style="vertical-align: top;">
+<img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"><input type="button" class="button" name="xout"  value="Out." onclick="safelogout();">
+</div>
 </div>
 
 </div>
