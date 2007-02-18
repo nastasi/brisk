@@ -21,6 +21,7 @@
  */
 
 var PLAYERS_N = 3;
+var EXIT_BAN_TIME = 15;
 
 function $(id) { return document.getElementById(id); }
 
@@ -247,17 +248,40 @@ function act_about()
     send_mesg("about");
 }
 
+function act_exitlock()
+{
+    send_mesg("exitlock");
+}
+
 function safelogout()
 {
     var res;
-
-    res = window.confirm("Sei sicuro di volere abbandonare la partita?");
+    
+    if (g_exitlock < 3) 
+	res = window.confirm("Sei sicuro di volere abbandonare la partita?\nATTENZIONE: se esci adesso senza il consenso degli altri giocatori non potrai sederti ai tavoli per "+EXIT_BAN_TIME+" minuti.");    
+    else 
+	res = window.confirm("Sei sicuro di volere abbandonare la partita?");
     if (res)
-	act_logout();
+	act_logout(g_exitlock);
 }
-function act_logout()
+
+function act_lascio()
 {
-    send_mesg("logout");
+    send_mesg("lascio");
+}
+
+function safelascio()
+{
+    var res;
+
+    res = window.confirm("Sei sicuro di volere lasciare questa mano?");
+    if (res)
+	act_lascio();
+}
+
+function act_logout(exitlock)
+{
+    send_mesg("logout|"+exitlock);
 }
 
 function act_reload()
@@ -418,14 +442,14 @@ slowimg.prototype = {
     }
 }
 
-var asta_xarr = new Array(0,66,133);
+var asta_xarr = new Array(0,66,132);
 
 /* TODO: impostare gli onclick */
-function dispose_asta(idx, pnt)
+function dispose_asta(idx, pnt, nopoint)
 {
     var i, btn, pass;
-    
     var btn;
+
     for (i = 0 ; i < 10 ; i++) {
 	btn = $("asta"+i);
 	if (i < idx) {
@@ -442,18 +466,21 @@ function dispose_asta(idx, pnt)
 	    btn.style.left = asta_xarr[(i+1) % 3];
 	
 	btn.style.top  = parseInt(i / 3) * 50+1;
-	// btn.style.visibility  = "visible";
-	
-	if (pnt >= 0)
+
+	if (pnt >= 0) {
 	    eval("btn.onclick = function () { act_asta("+pass+",61); }");
-	else
+	    btn.style.hover_cursor = "pointer";
+	}
+	else {
 	    btn.onclick = null;
+	    btn.style.hover_cursor = "";
+	}
     }
     
     
     btn = $("astaptdiv");
     btn.style.left = asta_xarr[i % 3];
-    btn.style.top = parseInt(i / 3) * 50;
+    btn.style.top = parseInt(i / 3) * 50 - 2;
     // btn.style.visibility  = "visible";
     
     btn = $("astapt");
@@ -462,24 +489,59 @@ function dispose_asta(idx, pnt)
     
     btn = $("astaptsub");
     btn.style.left = asta_xarr[i % 3];
-    btn.style.top = 25 + parseInt(i / 3) * 50;;
+    btn.style.top = 25 + parseInt(i / 3) * 50 - 1;
     btn.src = "img/astaptsub"+(pnt >= 0 ? "" : "_ro")+".png";
     // btn.style.visibility  = "visible";
-    if (pnt >= 0)
+    if (pnt >= 0) {
 	btn.onclick = function () { act_asta(9,$("astapt").value); };
-    else
+	// btn.stylehover.cursor = "pointer";
+    }
+    else {
 	btn.onclick = null;
+	// btn.stylehover.cursor = "";
+    }
     
     i+=1;
-    btn = $("astapasso2");
-    btn.style.left = asta_xarr[i % 3];
-    btn.style.top = parseInt(i / 3) * 50;;
-    btn.src = "img/astapasso"+(pnt >= 0 ? "" : "_ro")+".png";
-    // btn.style.visibility  = "visible";
-    if (pnt >= 0)
-	btn.onclick = function () { act_asta(-1,0); };
-    else
+    if (nopoint) {
+	btn = $("astapasso");
+	btn.style.left = asta_xarr[i % 3];
+	btn.style.top = parseInt(i / 3) * 50;
+	btn.src = "img/astapashalf"+(pnt >= 0 ? "" : "_ro")+".png";
+	if (pnt >= 0) {
+	    btn.onclick = function () { act_asta(-1,0); };
+	    // btn.stylehover.cursor = "pointer";
+	}
+	else {		
+	    btn.onclick = null;
+	    // btn.stylehover.cursor = "";
+	}
+
+	btn = $("astalascio");
+	btn.style.left = asta_xarr[i % 3];
+	btn.style.top = parseInt(i / 3) * 50 + 24;
+	btn.src = "img/astalascio.png";
+	btn.style.visibility = "visible";
+	btn.onclick = function () { safelascio(); };
+	}
+    else {
+	btn = $("astapasso");
+	btn.style.left = asta_xarr[i % 3];
+	btn.style.top = parseInt(i / 3) * 50;;
+	btn.src = "img/astapasso"+(pnt >= 0 ? "" : "_ro")+".png";
+	if (pnt >= 0) {
+	    btn.onclick = function () { act_asta(-1,0); };
+	    // btn.stylehover.cursor = "pointer";
+	}
+	else {
+	    btn.onclick = null;
+	    // btn.stylehover.cursor = "";
+	}
+
+	btn = $("astalascio");
+	btn.style.visibility = "hidden";
 	btn.onclick = null;
+    }
+    // btn.style.visibility  = "visible";
     $("asta").style.visibility = "visible";
 }
 
@@ -664,17 +726,27 @@ function show_astat(zer,uno,due,tre,qua)
     }
 }
 
+function exitlock_show(num, islock)
+{
+    g_exitlock = num;
+
+    num = (num < 3 ? num : 3);
+    $("exitlock").src = "img/exitlock"+num+(islock ? "n" : "y")+".png";
+    // alert("EXITLOCK: "+$("exitlock").src);
+    $("exitlock").style.visibility = "visible";
+}
+
 var fin = 0;
+
+//    exitlock_show(0, true);
 
 function table_init() {
     var sux = new Array("", "_ea", "_ne", "_nw", "_we");
 
     remark_off();
-
     $("asta").style.visibility = "hidden";
     $("caller").style.visibility = "hidden";
     show_astat(-2,-2,-2,-2,-2);
-
     for (i=0 ; i < 8 ; i++) {
 	Drag.init($("card" + i), card_mouseup_cb);
 	for (e = 0 ; e < PLAYERS_N ; e++)
