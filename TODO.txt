@@ -3,35 +3,26 @@
  TESTING
  ======= 
 
-   BUG - (aum. il timeout) - carte giocate che restano girate
-         Sembra non migliorare di molto la cosa, gestita la cache
-	 correttamente, dovrebbe essere apposto.
-
  TODO
  ====
 
-   URGENT!- ban temporaneo dai tavoli
    
-   URGENT - flash player to play sound
-
-   URGENT - restart preload img
    URGENT - watchdog
+   URGENT - split server-side data (stat + others)
+   NORM   - pubblic announcements
+   NORM   - asta: highlight buttons (css hover)
 
-   NORM   - pubblic announcement
+   NORM   - restart preload img
    NORM   - chat vecchie in reload
    NORM   - tools dir with a main and some pages where check briscola tools.
    NORM   - bottoni => immagini
-   NORM   - (master concept) card selection 
-   NORM   - show changelog
 
    MIN  - cambiare titolo al tavolo
 
  MIDDLE TODO
  ===========
 
-   URGENT - split server-side data 
    - user assistant (with button to enable disable)
-   - asta: highlight buttons (css hover)
    - documentation
 
    TO REVIEW - special chars in js
@@ -49,6 +40,12 @@
 -------------------------------------------------------------------
  DONE
  ====
+
+   DONE - ban temporaneo dai tavoli
+   DONE - flash player to play sound
+   DONEBUG - (aum. il timeout) - carte giocate che restano girate
+         Sembra non migliorare di molto la cosa, gestita la cache
+	 correttamente, sono apposto.
 
    DONE - one player reject a game, to less points (<= 2)
    DONE - help page
