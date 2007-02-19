@@ -36,7 +36,7 @@ rm -f $OUTFILE
 echo "var g_preload_img_arr = new Array( "
 first=1
 spa="            "
-for i in `ls -S $IMGPATH/*.{jpg,png} | grep -v '/src_'`; do
+for i in `ls -S $IMGPATH/*.{jpg,png,gif} | grep -v '/src_'`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
       if [ $ct -eq 4 ]; then
