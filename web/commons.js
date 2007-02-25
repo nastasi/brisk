@@ -25,6 +25,16 @@ var EXIT_BAN_TIME = 900;
 
 function $(id) { return document.getElementById(id); }
 
+function getStyle(x,IEstyleProp, MozStyleProp) 
+{
+    if (x.currentStyle) {
+	var y = x.currentStyle[IEstyleProp];
+    } else if (window.getComputedStyle) {
+	var y = document.defaultView.getComputedStyle(x,null).getPropertyValue(MozStyleProp);
+    }
+    return y;
+}
+
 /* replacement of setInterval on IE */
 (function(){
     /*if not IE, do nothing*/
@@ -338,9 +348,11 @@ function sleep(st, delay)
 function slowimg(img,x1,y1,deltat,free,action,srcend) {
     this.img = img;
 
-    this.x0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("left"));
-    // alert("img.x0 = "+this.x0);
-    this.y0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("top"));
+    // this.x0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("left"));
+    this.x0 = parseInt(getStyle(this.img,"left", "left"));
+// alert("img.x0 = "+this.x0);
+    // this.y0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("top"));
+    this.y0  = parseInt(getStyle(this.img,"top", "top"));
     this.x1  = x1;
     this.y1  = y1;
     this.deltat = deltat;
@@ -379,13 +391,14 @@ slowimg.prototype = {
 	this.action = act;
     },
     
+
     settime: function(time) 
     {
-	this.time = time;
-	this.step_n = parseInt(time / this.deltat);
+	this.time = (time < this.deltat ? this.deltat : time);
+	this.step_n = parseInt(this.time / this.deltat);
 	this.dx = (this.x1 - this.x0) / this.step_n;
 	this.dy = (this.y1 - this.y0) / this.step_n;
-	if (this.step_n * this.deltat == time) {
+	if (this.step_n * this.deltat == this.time) {
 	    this.step_n--;
 	}
 	this.step_free = parseInt(this.step_n * this.free);
