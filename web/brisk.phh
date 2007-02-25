@@ -62,7 +62,7 @@ Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la parti
 All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>
 Chi vince l\'asta dovr&agrave; decidere il seme della carta scelta e inizier&agrave; la mano.<br>
 Per giocare le carte dovrete trascinarle nel quadrato al centro del vostro schermo.<br><br>
-Il vostro turno &egrave; sempre segnalato da una cornice verde lampeggiante intorno quadrato al centro del vostro schermo.<br><br>
+Il vostro turno &egrave; sempre segnalato da una cornice verde lampeggiante intorno al quadrato al centro del vostro schermo.<br><br>
 Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \\"reload\\" in basso a destra.<br>
 Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri giocatori di sbloccarla cliccando sul lucchetto. Se non si segue questa prassi, una volta usciti, non vi potrete sedere a nessun tavolo per '.floor(BAN_TIME/60).' minuti.
 <dl>
