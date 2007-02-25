@@ -21,47 +21,47 @@
  */
 
 body {
-/*	background-image: url('img/probrisco.jpg'); */
-	background-repeat: no-repeat;
-	}
+    /*	background-image: url('img/probrisco.jpg'); */
+    background-repeat: no-repeat;
+}
 
 /*
-img {
-	position:     absolute; 
-	border-style: solid;
-	border-width: 1px;
-	border-color: grey;
-	}
+  img {
+  position:     absolute; 
+  border-style: solid;
+  border-width: 1px;
+  border-color: grey;
+  }
 */
 img.card {
-	position:     absolute; 
-	border-style: solid;
-	border-width: 1px;
-	border-color: grey;
-	visibility:   hidden;
-	left: 100;
-	top:  200;
-	}
+    position:     absolute; 
+    border-style: solid;
+    border-width: 1px;
+    border-color: grey;
+    visibility:   hidden;
+    left: 100;
+    top:  200;
+}
 
 img.cover {
-	position:     absolute; 
-	border-style: solid;
-	border-width: 1px;
-	border-color: lightgrey;
-	visibility:   hidden;
-	}
+    position:     absolute; 
+    border-style: solid;
+    border-width: 1px;
+    border-color: lightgrey;
+    visibility:   hidden;
+}
 
 
 .area {
-	position:absolute; 
-	width:  800px;
-	height: 600px;
-	}
+    position:absolute; 
+    width:  800px;
+    height: 600px;
+}
 
 .proxhr { 
-	background-color: green;
-	}
+    background-color: green;
+}
 
 .superfront {
-	z-index: 20;
-	}
+    z-index: 20;
+}

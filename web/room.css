@@ -21,169 +21,169 @@
  */
 
 div.container {
-	width:100%;
-	margin:0px;
-	padding: 0px;
-	/* border:1px solid gray;
-	   line-height:150%; */
+    width:100%;
+    margin:0px;
+    padding: 0px;
+    /* border:1px solid gray;
+       line-height:150%; */
 }
 
 div.header {
-/*	border: 1px solid yellow; */
-	align: center;
-	text-align: center;
-	font-size: 12px;
-	clear:left;
-	}
+    /*	border: 1px solid yellow; */
+    align: center;
+    text-align: center;
+    font-size: 12px;
+    clear:left;
+}
 
 div.topmenu {
-	/*	border: 1px solid red; */
-	float:left;
-	width:90px;
-	margin:0;
-	text-align: center;
-	align: center;
-	font-size: 10px;
-	padding:4px;	
-	}
+    /*	border: 1px solid red; */
+    float:left;
+    width:90px;
+    margin:0;
+    text-align: center;
+    align: center;
+    font-size: 10px;
+    padding:4px;	
+}
 
 div.proflash {
-	/*	border: 1px solid red; */
-        border: 1px solid gray;  
-        background-color: RGB(246,246,246);
-	text-align: center;
-	align: center;
-	font-size: 10px;
-	padding:4px;	
-	}
+    /*	border: 1px solid red; */
+    border: 1px solid gray;  
+    background-color: RGB(246,246,246);
+    text-align: center;
+    align: center;
+    font-size: 10px;
+    padding:4px;	
+}
 
 div.tables {
-	/*	border: 1px solid gray; */
-	margin-left:100px;
-	padding:4px;
-	}
+    /*	border: 1px solid gray; */
+    margin-left:100px;
+    padding:4px;
+}
 
 div.bottom {
-	/* border: 1px solid green; */
-	position: relative;
-	top: -16px;
-	text-align: left;
-	padding:4px;	
-	clear:left;
+    /* border: 1px solid green; */
+    position: relative;
+    top: -16px;
+    text-align: left;
+    padding:4px;	
+    clear:left;
 }
 
 table.room_tab {
-	border-style: solid;
-	border-width: 1px;
-	border-color: grey;
-    	border-collapse: collapse;
-	border-spacing: 0px;
-	align: center;
-	padding: 0px;
-	width: 680px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: grey;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    align: center;
+    padding: 0px;
+    width: 680px;
 }
 
 td.room_td {
-	/*	background-color: yellow;*/
-	width:  170px;
-	height: 140px;
-	vertical-align: "top";
-	border-width: 1px;
+    /*	background-color: yellow;*/
+    width:  170px;
+    height: 140px;
+    vertical-align: "top";
+    border-width: 1px;
 
-	border-style: solid;
-	border-width: 1px;
-	border-color: grey;
-	border-collapse: collapse;
-	margin: 0px;
-	padding:0px;
-	}
+    border-style: solid;
+    border-width: 1px;
+    border-color: grey;
+    border-collapse: collapse;
+    margin: 0px;
+    padding:0px;
+}
 
 div.room_div {
-	position: relative;
-	align: center;
-	text-align: center;
-	width:  170px;
-	height: 140px;
-	margin: 0px;
-	padding: 4px;
-	}
+    position: relative;
+    align: center;
+    text-align: center;
+    width:  170px;
+    height: 140px;
+    margin: 0px;
+    padding: 4px;
+}
 
 div.table_act { 
-	position: absolute;
-	align: center;
-	width: 100%;
-	left: 0px;
-	bottom:  4px;
-	}
+    position: absolute;
+    align: center;
+    width: 100%;
+    left: 0px;
+    bottom:  4px;
+}
 
 
 div.room_standup {
-	height: 68px;
-	align: left;
-	overflow: auto;
-	vertical-align: "top";
-	}
+    height: 68px;
+    align: left;
+    overflow: auto;
+    vertical-align: "top";
+}
 
 td.room_standup {
-/*
-	background-color: red;
-	border-style: solid;
-	border-width: 1px;
-	border-color: grey;
-*/
-	align: center;
-	text-align: center;
-	vertical-align: "top";
-	}
+    /*
+      background-color: red;
+      border-style: solid;
+      border-width: 1px;
+      border-color: grey;
+    */
+    align: center;
+    text-align: center;
+    vertical-align: "top";
+}
 
 div.room_ex_standup {
-	position: relative;
-	height: 120px;
-	align: left;
-	text-align: left;
-	padding: 4px;
-	/* vertical-align: "top"; */
-	}
+    position: relative;
+    height: 120px;
+    align: left;
+    text-align: left;
+    padding: 4px;
+    /* vertical-align: "top"; */
+}
 
 table.table_standup {
-	/*	background-color: red;  */
-	border-spacing: 0px;
-	width: 100%; 
-	margin: 0px;
-	padding:0px;
-	}
+    /*	background-color: red;  */
+    border-spacing: 0px;
+    width: 100%; 
+    margin: 0px;
+    padding:0px;
+}
 
 td.td_standup {
-	text-align: center;
-	align: center;
-	padding: 0px;
-	margin: 0px;
+    text-align: center;
+    align: center;
+    padding: 0px;
+    margin: 0px;
 }
 
 .esco {
-	position: absolute;
-	text-align: center; 	
-	bottom:  4px;
-	right: 4px;
-	}
+    position: absolute;
+    text-align: center; 	
+    bottom:  4px;
+    right: 4px;
+}
 
 
 .chatt {
-	height: 100px;
-	overflow: auto;
-	border: 1px solid grey;
-	padding: 2px;
-	vertical-align: text-bottom;
-	}
+    height: 100px;
+    overflow: auto;
+    border: 1px solid grey;
+    padding: 2px;
+    vertical-align: text-bottom;
+}
 
 .txtt {
-	/*	font-size: 10pt;*/
-	}
+    /*	font-size: 10pt;*/
+}
 
 .urgmsg {
-	text-align: center;
-	}
+    text-align: center;
+}
 
 .proxhr { 
-	/*	background-color: green; */
-	}
+    /*	background-color: green; */
+}
