@@ -76,11 +76,11 @@ img.nobo {
 }
 
 div.notify_clo { 
-    position: absolute;
+/*     position: absolute; */
     align: center;
     width: 100%;
     left: 0px;
-    bottom:  4px;
+/*    bottom:  4px;*/
 }
 
 input.button {
