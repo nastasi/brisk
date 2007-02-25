@@ -46,15 +46,23 @@ var Drag = {
 		o.root = oRoot && oRoot != null ? oRoot : o ;
 
 		if (o.hmode && isNaN(parseInt(o.root.style.left  ))) {
-			o.root.style.left = document.defaultView.getComputedStyle(o, "").getPropertyValue("left");
-			if (isNaN(parseInt(o.root.style.left)))
-              			o.root.style.left   = "0px";
-			}
+                    var res = parseInt(getStyle(o, "left", "left"));
+		    if (isNaN(res)) {
+			o.root.style.left   = "0px";
+		    }
+		    else {
+			o.root.style.left   = res;
+		    }
+		}
 		if (o.vmode  && isNaN(parseInt(o.root.style.top   ))) {
-			o.root.style.top = document.defaultView.getComputedStyle(o, "").getPropertyValue("top");
-			if (isNaN(parseInt(o.root.style.top)))
-              			o.root.style.top   = "0px";
-			}
+                    var res = parseInt(getStyle(o, "top", "top"));
+		    if (isNaN(res)) {
+			o.root.style.top   = "0px";
+		    }
+		    else {
+			o.root.style.top   = res;
+		    }
+		}
 		if (!o.hmode && isNaN(parseInt(o.root.style.right ))) o.root.style.right  = "0px";
 		if (!o.vmode && isNaN(parseInt(o.root.style.bottom))) o.root.style.bottom = "0px";
 
