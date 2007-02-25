@@ -1,3 +1,11 @@
+0.6.0 - 25/02/2007
+	Internet Explorer 6 and 7 added
+
+0.5.0 - 10/02/2007
+	Cooperative exit added
+	Sound added
+	No point in hand managed
+
 0.4.6 - 30/01/2007
         Number of chat lines doubled.
 	Refactored nickname management.
