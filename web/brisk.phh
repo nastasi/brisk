@@ -38,9 +38,9 @@ define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.5.0";
+$G_brisk_version = "0.6.0";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: audio a inizio partita, uscita concordata dai tavoli e "lascio" per troppo pochi punti in mano.',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Internet Explorer 6 e 7 supportati (guarda l\'help per maggiori Info).',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -50,6 +50,10 @@ $G_room_help= '
 <b>Descrizione</b><br>
 Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
+<b>Configurazione del browser.</b><br>
+Occorre abilitare i cookies.<br>
+Se usate Internet Explorer dovete anche settare: strumenti->cronologia_esplorazioni->impostazioni ad \\"apertura alla pagina web\\".<br>
+<br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
 Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
