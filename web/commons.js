@@ -592,6 +592,7 @@ function notify(st, text, tout, butt, w, h)
     box.innerHTML = text;
     box.style.zIndex = 200;
     box.style.width  = w+"px";
+    box.style.marginLeft  = -parseInt(w/2)+"px";
     box.style.height = h+"px";
     box.appendChild(clodiv);
     box.style.visibility = "visible";
