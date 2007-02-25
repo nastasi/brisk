@@ -220,7 +220,7 @@ else if ($user->stat == 'table') {
     }
     for ($i = 0 ; $i < PLAYERS_N ; $i++) {
       $ret = sprintf('gst.st = %d;', $user_cur[$i]->step+1);
-      $ret = sprintf('exitlock_show(%d, %s);', $ct, 
+      $ret .= sprintf('exitlock_show(%d, %s);', $ct, 
 		     ($user_cur[$i]->exitislock ? 'true' : 'false'));
       $user_cur[$i]->comm[$user_cur[$i]->step % COMM_N] = $ret;
       log_wr($sess, $user_cur[$i]->comm[$user_cur[$i]->step % COMM_N]);
