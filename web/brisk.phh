@@ -780,6 +780,7 @@ class brisco {
       $this->user[$idx]->stat = "room";
       $this->user[$idx]->subst = "standup";
       $this->user[$idx]->laccwr = time();
+      $this->user[$idx]->bantime = 0;
       
       log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
       
