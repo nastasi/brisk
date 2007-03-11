@@ -196,7 +196,7 @@ else if ($user->stat == 'table') {
       $lockcalc = $table->exitlock_calc(&$bri->user, $user->table_pos);
       if ($lockcalc < 3) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	$user->comm[$user->step % COMM_N] .= $table->exitlock_show();
+	$user->comm[$user->step % COMM_N] .= $table->exitlock_show(&$bri->user, $user->table_pos);
 	$user->comm[$user->step % COMM_N] .=  show_notify("<br>I dati presenti sul server non erano allineati con quelli inviati dal tuo browser, adesso lo sono. Riprova ora.", 2000, "Torna alla partita.", 400, 100);
 	
 	log_wr($sess, $user->comm[$user->step % COMM_N]);
