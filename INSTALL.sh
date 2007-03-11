@@ -17,7 +17,7 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 [-W] [-n 3|5] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-c <cookie_path>]"
+    echo "$1 [-W] [-n 3|5] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-c <cookie_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -26,6 +26,7 @@ function usage () {
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
+    echo "  -l dir where save logs          - def. \"$legal_path\""
     echo "  -c cookie path                  - def. \"$cookie_path\""
     
     echo
@@ -143,6 +144,8 @@ sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `fi
 sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
 
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/brisk.phh
+
+sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, $legal_path)@g" ${web_path}/brisk.phh
 
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
 
