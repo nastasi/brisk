@@ -19,7 +19,8 @@
  *
  */
 
-define( FTOK_PATH, "/var/lib/brisk");
+define(FTOK_PATH, "/var/lib/brisk");
+define(LEGAL_PATH, "/tmp/legal_brisk");
 define(TABLES_N, 8);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
@@ -38,9 +39,9 @@ define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.6.0";
+$G_brisk_version = "0.6.1";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Internet Explorer 6 e 7 supportati (guarda l\'help per maggiori Info).',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: log per il tracciamento di eventuali illeciti.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -612,7 +613,9 @@ class brisco {
     
     $user_mesg = substr($mesg,6);
     
-    $dt = date("H:i ",time());
+    $timecur = time();
+    
+    $dt = date("H:i ", $timecur);
     if (strncmp($user_mesg, "/nick ", 6) == 0) {
       log_main($user->sess, "chatt_send BEGIN");
 
@@ -699,6 +702,8 @@ class brisco {
 							     $dt.xcape($user->name), xcape($user_mesg));
 	$user_cur->step++;
       }
+      log_legal($timecur, $user->sess, $user->name, 
+		($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
     }
   }
 
@@ -882,6 +887,18 @@ function log_load($sess, $log) {
   fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
   fclose($fp);
 }
+
+function log_legal($timecur, $sess, $name, $where, $mesg) 
+{
+  GLOBAL $_SERVER;
+
+  $fp = fopen(LEGAL_PATH, 'a');
+  /* Unix time | session | nickname | IP | where was | mesg */
+  fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $timecur, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+  fclose($fp);
+}
+
+
 
 function init_data()
 {
