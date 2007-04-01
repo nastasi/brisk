@@ -33,6 +33,14 @@ var the_end = false;
 var ct = 0;
 var watchdog = 0;
 
+function hbit(symb)
+{
+    if ($("heartbit").innerHTML.length >= 40)
+	$("heartbit").innerHTML = symb;
+    else
+	$("heartbit").innerHTML += symb;
+}
+
 function xhr_rd_cb(xhr_rd) 
 {
     var ret;
@@ -91,9 +99,7 @@ function xhr_rd_poll(sess)
 	$("sandbox").innerHTML = zug;
 
     /* heartbit log */
-    $("heartbit").innerHTML += "_";
-    if ($("heartbit").innerHTML.length == 20)
-	$("heartbit").innerHTML = "_";
+    hbit("_");
     
     do {
 	again = 0;
@@ -108,6 +114,8 @@ function xhr_rd_poll(sess)
 	    singlecomm = gst.comms.shift();
 	    // alert("EXE"+gugu);
 	    // $("xhrdeltalog").innerHTML = "EVALL: "+singlecomm.replace("<", "&lt;", "g"); +"<br>";
+	    hbit("+");
+
 	    eval(singlecomm);
 	    again = 1;
 	}
@@ -132,9 +140,7 @@ function xhr_rd_poll(sess)
 		    watchdog = 0;
 		    setTimeout(xhr_rd_poll, tout, sess);
 		    
-		    $("heartbit").innerHTML += "-";
-		    if ($("heartbit").innerHTML.length == 20)
-			$("heartbit").innerHTML = "-";
+		    // hbit(".");
 		    
 		}
 		return;
@@ -158,6 +164,8 @@ function xhr_rd_poll(sess)
 		var i;
 		var delta = 0;
 		var match_lines = /^_*$/;
+
+		hbit("/\\");
 
 		// check for the same command group
 		if (xhr_rd_old_n != xhr_rd_cur_n) {
@@ -223,9 +231,7 @@ function xhr_rd_poll(sess)
     if (the_end != true) {
 	setTimeout(xhr_rd_poll, tout, sess);
 	
-	$("heartbit").innerHTML += "-";
-	if ($("heartbit").innerHTML.length == 20)
-	    $("heartbit").innerHTML = "-";
+	// hbit(".");
 	
     }
     return;
