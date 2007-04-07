@@ -190,10 +190,11 @@ class Table {
     $ret = array();
 
     for ($i = 0 ; $i < 40 ; $i++) {
-      $ret[$i] = new Card($i, 'bunch', 'no_owner');
+      $ret[$i] =& new Card($i, 'bunch', 'no_owner');
     }
 
-    return ($ret);
+    $oret = &$ret;
+    return ($oret);
   }
 
   function bunch_make()
@@ -395,10 +396,10 @@ class brisco {
     $this->user = array();
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $this->user[$i] = new User("", "");
+      $this->user[$i] =& new User("", "");
     }
     for ($i = 0 ; $i < TABLES_N ; $i++) 
-      $this->table[$i] = new Table();
+      $this->table[$i] =& new Table();
     $this->garbage_timeout = 0;
   }
 
@@ -716,7 +717,8 @@ class brisco {
 	if (strcmp($sess, $this->user[$i]->sess) == 0) {
 	  // find it
 	  $idx = $i;
-	  return ($this->user[$i]);
+	  $ret = &$this->user[$i];
+	  return ($ret);
 	}
       }
       log_main($sess, sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
@@ -773,6 +775,7 @@ class brisco {
 
     if ($idx != -1 && $i == MAX_PLAYERS) {
       /* SUCCESS */
+      $curtime = time();
       if ($sess == "") {
 	$this->user[$idx]->sess = uniqid("");
 	$sess = $this->user[$idx]->sess;
@@ -784,7 +787,8 @@ class brisco {
       $this->user[$idx]->name = $name_new;
       $this->user[$idx]->stat = "room";
       $this->user[$idx]->subst = "standup";
-      $this->user[$idx]->laccwr = time();
+      $this->user[$idx]->lacc =   $curtime;
+      $this->user[$idx]->laccwr = $curtime;
       $this->user[$idx]->bantime = 0;
       
       log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
@@ -902,7 +906,7 @@ function log_legal($timecur, $sess, $name, $where, $mesg)
 
 function init_data()
 {
-  $brisco = new brisco();
+  $brisco =& new brisco();
 
   return $brisco;
 }
@@ -949,7 +953,8 @@ function &load_data()
     
     shm_detach($shm);
 
-    return ($bri);
+    $ret = &$bri;
+    return ($ret);
   }
 
   return (NULL);
