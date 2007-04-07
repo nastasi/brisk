@@ -60,6 +60,7 @@ while [ $# -gt 0 ]; do
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
 	-c*) cookie_path="`get_param "-c" "$1" "$2"`"; sh=$?;;
+	-l*) legal_path="`get_param "-l" "$1" "$2"`"; sh=$?;;
 	-W) web_only="TRUE";;
 	-h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
@@ -147,7 +148,7 @@ sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find
 
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/brisk.phh
 
-sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, $legal_path)@g" ${web_path}/brisk.phh
+sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}/brisk.phh
 
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
 
