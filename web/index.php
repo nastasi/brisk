@@ -126,6 +126,10 @@ function main()
 			     $altout_propag[$randval]['content']);
 			 
 
+  $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
+  if ($brisk_donate == FALSE)
+    $brisk_donate = "";
+
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
@@ -143,6 +147,7 @@ supported by:<br><br>
 <a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br>
 <div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
 </div><br><br></div>
+%s
 %s
 </div>';
     
@@ -177,7 +182,7 @@ supported by:<br><br>
    }
 </SCRIPT>
 <?php
-    printf($brisk_header_form, '');
+    printf($brisk_header_form, '', '');
 ?> 
 
 <!--  =========== tables ===========  -->
@@ -267,7 +272,8 @@ else {
 
 </SCRIPT>
 <?php
-    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();"><br><br><br>');
+    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();"><br><br><br>',
+	   $brisk_donate);
 ?> 
 <!--  =========== tables ===========  -->
 <div id="tables" class="tables">
