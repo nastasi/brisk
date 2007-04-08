@@ -73,13 +73,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       }
       log_auth($sess, "update lacc");
       $user->lacc = time();
-      save_data($bri);
-      $first_loop = FALSE;
-    
-      
+
       $bri->garbage_manager(FALSE);
       
       save_data($bri);
+      $first_loop = FALSE;
     }
     unlock_data($sem);
     ignore_user_abort(FALSE);
