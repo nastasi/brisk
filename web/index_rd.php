@@ -49,6 +49,13 @@ function unrecerror()
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
+function page_sync($page)
+{
+  GLOBAL $is_page_streaming;
+
+  $is_page_streaming = TRUE;
+  return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
+}
 
 
 
@@ -162,6 +169,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if ($cur_step < $user->step) {
       do {
 	if ($cur_step + COMM_N < $user->step) {
+	  if (($cur_stat != $user->stat)) {
+	    $to_stat = $user->stat;
+	    unlock_data($sem);
+	    ignore_user_abort(FALSE);
+	    return (page_sync($to_stat == "table" ? "table.php" : "index.php"));
+	  }
 	  log_rd2($sess, "lost history, refresh from scratch");
 	  $new_step = -1;
 	  break;
