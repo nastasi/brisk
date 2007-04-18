@@ -31,12 +31,12 @@ log_load($sess, "LOAD: index.php");
 
 function main()
 {
-  GLOBAL $sess, $name, $BRISK_DEBUG;
+  GLOBAL $sess, $name, $BRISK_SHOWHTML;
   
   $body = "";
   $ACTION = "login";
   
-  if (isset($BRISK_DEBUG) == FALSE) {
+  if (isset($BRISK_SHOWHTML) == FALSE) {
     $is_table = false;
     $sem = lock_data();
     $bri = &load_data();
@@ -82,10 +82,10 @@ function main()
   }
   /* Rendering. */
 
-  if ($BRISK_DEBUG == "debugtable") {
+  if ($BRISK_SHOWHTML == "debugtable") {
     $ACTION = "room";
   }
-  else if ($BRISK_DEBUG == "debuglogin") {
+  else if ($BRISK_SHOWHTML == "debuglogin") {
     $ACTION = "login";
   }
 
@@ -243,7 +243,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var myfrom = "index_php";
    window.onload = function() {
 <?php
-if ($BRISK_DEBUG == "debugtable") {
+if ($BRISK_SHOWHTML == "debugtable") {
 ?>
      room_checkspace(12,8,50);
 <?php
