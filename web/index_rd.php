@@ -65,14 +65,16 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   GLOBAL $is_page_streaming, $first_loop;
   
   $ret = FALSE;
-  
-  
+  $bri = FALSE;
+
+  log_rd2($sess, "M");
   /* Sync check (read only without modifications */
   ignore_user_abort(TRUE);
   if (($sem = lock_data()) != FALSE) { 
-    $bri = &load_data();
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
+      log_rd2($sess, "F");
+      $bri = &load_data();
       if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
 	unlock_data($sem);
         ignore_user_abort(FALSE);
@@ -93,12 +95,25 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     return (FALSE);
   }
     
+  if (validate_sess($sess)) {
+    $proxy_step = step_get($sess);
+    // log_rd2($sess, "Postget".$proxy_step."zizi");
+
+    if ($cur_step == $proxy_step) {
+      log_rd2($sess, "P");
+      return;
+    }
+  }
+
+  if ($bri == FALSE)
+    $bri = &load_data();
+
   if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
     return (unrecerror());
   }
 
   /* Nothing changed, return. */
-  if ($cur_stat == $user->stat && $cur_step == $user->step) 
+  if ($cur_step == $user->step) 
     return;
 
   log_rd2($sess, "do other ++".$cur_stat."++".$user->stat."++".$cur_step."++".$user->step);
@@ -191,7 +206,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if ($user->the_end == TRUE) {
 	log_rd2($sess, "LOGOUT BYE BYE!!");
 	log_auth($user->sess, "Explicit logout.");
+	$tmp_sess = $user->sess;
 	$user->sess = "";
+	step_unproxy($tmp_sess);
+	
 	$user->name = "";
 	$user->the_end = FALSE;
 	
@@ -257,7 +275,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   $old_step =  $step;
   // log_rd($sess, "POST MAIN ".$step);;
   usleep(200000);
-  if (($i % 5) == 0) {
+  if (($i % 10) == 0) {
     // log_rd2($sess, "TIME: ".time());
     echo '_';
     flush();
