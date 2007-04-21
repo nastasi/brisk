@@ -31,8 +31,8 @@ log_load($sess, "LOAD: index.php");
 
 function main()
 {
-  GLOBAL $sess, $name, $BRISK_SHOWHTML;
-  
+  GLOBAL $sess, $name, $BRISK_SHOWHTML, $_SERVER;
+
   $body = "";
   $ACTION = "login";
   
@@ -57,7 +57,7 @@ function main()
     if ($ACTION == "login" && isset($name)) {
       $bri->garbage_manager(TRUE);
       /* try login */
-      if (($user = &$bri->add_user(&$sess, &$idx, $name)) != FALSE) {
+      if (($user = &$bri->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
 	$ACTION = "room";
 	
 	// setcookie ("sess", "", time() + 180);      
