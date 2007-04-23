@@ -95,8 +95,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     return (FALSE);
   }
     
-  if (validate_sess($sess)) {
-    $proxy_step = step_get($sess);
+  if (($proxy_step = step_get($sess)) != FALSE) {
     // log_rd2($sess, "Postget".$proxy_step."zizi");
 
     if ($cur_step == $proxy_step) {
