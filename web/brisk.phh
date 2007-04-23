@@ -401,11 +401,14 @@ class User {
   function step_set($step) {
     $this->step = $step;
     
-    if (validate_sess($this->sess)) {
-      $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
+    do {
+      if (validate_sess($this->sess) == FALSE)
+	break;
+      if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
+	break;
       fwrite($fp, pack("l",$this->step), 4);
       fclose($fp);
-    }
+    } while (0);
   }
 
   function step_inc() {
@@ -420,12 +423,33 @@ class User {
 }
 
 function step_get($sess) {
-  $fp = fopen(PROXY_PATH."/".$sess.".step", 'r');
-  $arr = unpack('l', fread($fp, 4));
-  fclose($fp);
+  $fp = FALSE;
+  $ct = 0;
+  do {
+    if (validate_sess($sess) == FALSE)
+      break;
+  $ct = 1;
+    if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
+      break;
+  $ct = 2;
+    if (($s = fread($fp, 4)) == FALSE)
+      break;
+  $ct = 3;
+    if (strlen($s) != 4)
+      break;
+  $ct = 4;
+    $arr = unpack('l', $s);
+    fclose($fp);
 
-  // log_rd2($sess, "A0: ".$arr[0]."  A1: ".$arr[1]);
-  return ($arr[1]);
+    // log_rd2($sess, "A0: ".$arr[0]."  A1: ".$arr[1]);
+    return ($arr[1]);
+  } while (0);
+
+  if ($fp != FALSE)
+    fclose($fp);
+
+  log_rd2($sess, "STEP_GET: return false ".$ct);
+  return (FALSE);
 }
 
 function step_unproxy($sess) {
@@ -887,73 +911,81 @@ function log_main($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_main.log", 'a');
-  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_main.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_rd($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_rd.log", 'a');
-  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_rd.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_rd2($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_rd2.log", 'a');
-  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_rd2.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_send($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_send.log", 'a');
-  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_send.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_auth($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_auth.log", 'a');
-  fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_auth.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_wr($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_wr.log", 'a');
-  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_wr.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_load($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  $fp = fopen("/tmp/brisk_load.log", 'a');
-  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-  fclose($fp);
+  if (($fp = @fopen("/tmp/brisk_load.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_legal($timecur, $sess, $name, $where, $mesg) 
 {
   GLOBAL $_SERVER;
 
-  $fp = fopen(LEGAL_PATH, 'a');
-  /* Unix time | session | nickname | IP | where was | mesg */
-  fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $timecur, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
-  fclose($fp);
+  if (($fp = @fopen(LEGAL_PATH, 'a')) != FALSE) {
+    /* Unix time | session | nickname | IP | where was | mesg */
+    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $timecur, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+    fclose($fp);
+  }
 }
 
 
