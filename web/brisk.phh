@@ -42,7 +42,7 @@ define(BRISK_DEBUG, FALSE);
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
 $G_brisk_version = "0.7.0";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: "donate" e piccole rifiniture.',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: ottimizzazione della CPU e chiuso il bug di mancato cambio pagina.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -54,7 +54,8 @@ Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
 <b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
-Se usate Internet Explorer dovete anche settare: strumenti->cronologia_esplorazioni->impostazioni ad \\"apertura alla pagina web\\".<br>
+Se usate <b>Internet Explorer 6</b> dovete settare: strumenti -> opzioni internet -> file temporanei:impostazioni->\\"verifica per nuove versioni della pagina scaricata\\" ad: \\"ogni volta che si visita la pagina\\".<br>
+Se usate <b>Internet Explorer 7</b> dovete settare: strumenti -> cronologia esplorazioni -> impostazioni ad \\"apertura alla pagina web\\".<br>
 <br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
@@ -367,9 +368,10 @@ class User {
   var $table;      // id of the current table (if in table state)
   var $table_pos;  // idx on the table
 
-  function User($name, $sess, $stat = "", $subst = "", $table = -1) {
+  function User($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     $this->name  = $name;
     $this->sess  = $sess;
+    $this->ip    = $ip;
     $this->lacc   = time();
     $this->laccwr = time();
     $this->bantime = 0;
