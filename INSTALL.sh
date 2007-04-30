@@ -8,8 +8,8 @@ ftok_path="/var/lib/brisk"
 web_path="$HOME/brisk"
 web_only="FALSE"
 
-if [ -f $HOME/.brisk_install ]; then
-   . $HOME/.brisk_install
+if [ -f $HOME/.brisk06_install ]; then
+   . $HOME/.brisk06_install
 fi
 if [ "x$cookie_path" = "x" ]; then
    cookie_path=$web_path
@@ -17,7 +17,7 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 [-W] [-n 3|5] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
+    echo "$1 [-W] [-n 3|5] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-c <cookie_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -27,7 +27,6 @@ function usage () {
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
     echo "  -l dir where save logs          - def. \"$legal_path\""
-    echo "  -y dir where place proxy files  - def. \"$proxy_path\""
     echo "  -c cookie path                  - def. \"$cookie_path\""
     
     echo
@@ -60,7 +59,6 @@ while [ $# -gt 0 ]; do
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
-	-y*) proxy_path="`get_param "-y" "$1" "$2"`"; sh=$?;;
 	-c*) cookie_path="`get_param "-c" "$1" "$2"`"; sh=$?;;
 	-l*) legal_path="`get_param "-l" "$1" "$2"`"; sh=$?;;
 	-W) web_only="TRUE";;
@@ -85,8 +83,7 @@ echo "    n_players:   $n_players"
 echo "    brisk_debug:\"$brisk_debug\""
 echo "    web_path:   \"$web_path\""
 echo "    ftok_path:  \"$ftok_path\""
-echo "    legal_path: \"$legal_path\""
-echo "    proxy_path: \"$proxy_path\""
+echo "    legal_path:  \"$legal_path\""
 echo "    cookie_path:\"$cookie_path\""
 echo "    web_only:   \"$web_only\""
 
@@ -99,7 +96,6 @@ if [ ! -z "$outconf" ]; then
     echo "brisk_debug=\"$brisk_debug\""
     echo "web_path=\"$web_path\""
     echo "ftok_path=\"$ftok_path\""
-    echo "proxy_path=\"$proxy_path\""
     echo "legal_path=\"$legal_path\""
     echo "cookie_path=\"$cookie_path\""
     echo "web_only=\"$web_only\""
@@ -153,8 +149,6 @@ sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/brisk.phh
 
 sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}/brisk.phh
-
-sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}/brisk.phh
 
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
 
