@@ -31,12 +31,12 @@ log_load($sess, "LOAD: index.php");
 
 function main()
 {
-  GLOBAL $sess, $name, $BRISK_SHOWHTML, $_SERVER;
-
+  GLOBAL $sess, $name, $BRISK_DEBUG;
+  
   $body = "";
   $ACTION = "login";
   
-  if (isset($BRISK_SHOWHTML) == FALSE) {
+  if (isset($BRISK_DEBUG) == FALSE) {
     $is_table = false;
     $sem = lock_data();
     $bri = &load_data();
@@ -57,7 +57,7 @@ function main()
     if ($ACTION == "login" && isset($name)) {
       $bri->garbage_manager(TRUE);
       /* try login */
-      if (($user = &$bri->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
+      if (($user = &$bri->add_user(&$sess, &$idx, $name)) != FALSE) {
 	$ACTION = "room";
 	
 	// setcookie ("sess", "", time() + 180);      
@@ -82,10 +82,10 @@ function main()
   }
   /* Rendering. */
 
-  if ($BRISK_SHOWHTML == "debugtable") {
+  if ($BRISK_DEBUG == "debugtable") {
     $ACTION = "room";
   }
-  else if ($BRISK_SHOWHTML == "debuglogin") {
+  else if ($BRISK_DEBUG == "debuglogin") {
     $ACTION = "login";
   }
 
@@ -133,10 +133,63 @@ function main()
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
-<img class="nobo" src="img/brisk_logo64.png">
-briscola chiamata in salsa ajax<br><br>
-</div>
+<table width="100%%" border="0" cols="3"><tr>
+<td align="left"><div style="padding-left: 8px;">
 
+
+
+<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+
+
+
+</div></td>
+<td align="center"><div>
+    <img class="nobo" src="img/brisk_logo64.png">
+    briscola chiamata in salsa ajax<br><br>
+    </div></td>
+<td align="right"><div style="padding-right: 8px;">
+
+
+
+<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+
+
+
+</div></td>
+</td></table>
+</div>
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
 <a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a>
@@ -243,7 +296,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var myfrom = "index_php";
    window.onload = function() {
 <?php
-if ($BRISK_SHOWHTML == "debugtable") {
+if ($BRISK_DEBUG == "debugtable") {
 ?>
      room_checkspace(12,8,50);
 <?php

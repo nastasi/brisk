@@ -2,7 +2,7 @@
 /*
  *  brisk - brisk.phh
  *
- *  Copyright (C) 2006-2007 matteo.nastasi@milug.org
+ *  Copyright (C) 2006 matteo.nastasi@milug.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
-define(PROXY_PATH, "/var/lib/brisk_proxy");
 define(TABLES_N, 8);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
@@ -40,9 +39,9 @@ define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.7.0";
+$G_brisk_version = "0.6.3";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: ottimizzazione della CPU e chiuso il bug di mancato cambio pagina.',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: "donate" e piccole rifiniture.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -54,8 +53,7 @@ Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
 <b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
-Se usate <b>Internet Explorer 6</b> dovete settare: strumenti -> opzioni internet -> file temporanei:impostazioni->\\"verifica per nuove versioni della pagina scaricata\\" ad: \\"ogni volta che si visita la pagina\\".<br>
-Se usate <b>Internet Explorer 7</b> dovete settare: strumenti -> cronologia esplorazioni -> impostazioni ad \\"apertura alla pagina web\\".<br>
+Se usate Internet Explorer dovete anche settare: strumenti->cronologia_esplorazioni->impostazioni ad \\"apertura alla pagina web\\".<br>
 <br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
@@ -105,13 +103,13 @@ class Card {
   function Card($value, $stat, $owner)
   {
     $this->value = $value;
-    $this->stat  = $stat; // Card stat
+    $this->stat  = $stat;
     $this->owner = $owner;
   }
 
   function assign($stat,$owner)
   {
-    $this->stat  = $stat; // Card stat
+    $this->stat  = $stat;
     $this->owner = $owner;
   }
 
@@ -122,14 +120,14 @@ class Card {
 
   function play($x,$y)
   {
-    $this->stat = 'table'; // Card stat
+    $this->stat = 'table';
     $this->x = $x;
     $this->y = $y;
   }
 
   function take($newown)
   {
-    $this->stat = 'take'; // Card stat
+    $this->stat = 'take';
     $this->owner = $newown;
   }
 }
@@ -352,7 +350,6 @@ class Table {
 class User {
   var $name;       // name of the user
   var $sess;       // session of the user
-  var $ip;         // ip of the user
   var $lacc;       // last access (for the cleanup)
   var $laccwr;     // last access (for the cleanup)
   var $bantime;    // timeout to temporary ban
@@ -368,10 +365,9 @@ class User {
   var $table;      // id of the current table (if in table state)
   var $table_pos;  // idx on the table
 
-  function User($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+  function User($name, $sess, $stat = "", $subst = "", $table = -1) {
     $this->name  = $name;
     $this->sess  = $sess;
-    $this->ip    = $ip;
     $this->lacc   = time();
     $this->laccwr = time();
     $this->bantime = 0;
@@ -384,81 +380,10 @@ class User {
     $this->asta_pnt  = -1;
     $this->handpt = -1;
     $this->exitislock = TRUE;
-    
+
     $this->table = $table;
   }
-
-  function stat_set($stat) {
-    $this->stat = "$stat";
-    
-    /*
-    if (validate_sess($this->sess)) {
-      $fp = fopen(PROXY_PATH."/".$this->sess.".stat", 'w');
-      fwrite($fp, sprintf("%s\n",$this->stat));
-      fclose($fp);
-    }
-    */
-  }
-
-  function step_set($step) {
-    $this->step = $step;
-    
-    do {
-      if (validate_sess($this->sess) == FALSE)
-	break;
-      if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
-	break;
-      fwrite($fp, pack("l",$this->step), 4);
-      fclose($fp);
-    } while (0);
-  }
-
-  function step_inc() {
-    $this->step++;
-    
-    if (validate_sess($this->sess)) {
-      $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
-      fwrite($fp, pack("l",$this->step), 4);
-      fclose($fp);
-    }
-  }
 }
-
-function step_get($sess) {
-  $fp = FALSE;
-  $ct = 0;
-  do {
-    if (validate_sess($sess) == FALSE)
-      break;
-  $ct = 1;
-    if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
-      break;
-  $ct = 2;
-    if (($s = fread($fp, 4)) == FALSE)
-      break;
-  $ct = 3;
-    if (strlen($s) != 4)
-      break;
-  $ct = 4;
-    $arr = unpack('l', $s);
-    fclose($fp);
-
-    // log_rd2($sess, "A0: ".$arr[0]."  A1: ".$arr[1]);
-    return ($arr[1]);
-  } while (0);
-
-  if ($fp != FALSE)
-    fclose($fp);
-
-  log_rd2($sess, "STEP_GET: return false ".$ct);
-  return (FALSE);
-}
-
-function step_unproxy($sess) {
-  log_rd2($sess, "UNPROXY: ".PROXY_PATH."/".$sess.".step");
-  unlink(PROXY_PATH."/".$sess.".step");
-}
-
 
 class brisco {
   var $user;
@@ -496,9 +421,7 @@ class brisco {
 	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
 	    log_auth($user_cur->sess, "Autologout session.");
 	    
-	    $tmp_sess = $user_cur->sess;
 	    $user_cur->sess = "";
-	    step_unproxy($tmp_sess);
 	    $user_cur->name = "";
 	    $user_cur->the_end = FALSE;
 	    
@@ -517,7 +440,7 @@ class brisco {
 	    $this->room_wakeup(&$user_cur);
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
 	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify("<br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", 0, "torna ai tavoli", 400, 100);
-	    $user_cur->step_inc();
+	    $user_cur->step++;
 	  }
 	}
       }
@@ -525,9 +448,6 @@ class brisco {
       
       $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
     }
-
-    // BAN_IP_CLEAN
-
   }
 
 
@@ -549,12 +469,12 @@ class brisco {
 	log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
 
 	if ($user_cur != $user) {
-	  $user_cur->stat_set("room");
+	  $user_cur->stat = "room";
 	  $user_cur->subst = "sitdown";
 	  $user_cur->laccwr = $curtime;
 	}
 	else if ($user->sess != "") {
-	  $user_cur->stat_set("room");
+	  $user_cur->stat = "room";
 	  $user_cur->subst = "standup";
 	  $user_cur->laccwr = $curtime;
 	  $user_cur->table = -1;
@@ -562,7 +482,7 @@ class brisco {
       }
     }
     else {
-      $user->stat_set("room");
+      $user->stat = "room";
       $user->subst = "standup";
       $user->laccwr = $curtime;
     }
@@ -608,7 +528,7 @@ class brisco {
       }
       log_wr($user_cur->sess, "ROOM_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
+      $user_cur->step++;
     }
   }
   
@@ -643,7 +563,7 @@ class brisco {
 	$ret .= sprintf('$("myname").innerHTML = "<b>%s</b>: ";',  xcape($user->name));
       }
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
+      $user_cur->step++;
     }
 
     log_main("table_update", "post");
@@ -682,7 +602,7 @@ class brisco {
 	}
       }
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
+      $user_cur->step++;
     }
   }
 
@@ -703,7 +623,7 @@ class brisco {
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera o una cifra.");', $dt.NICKSERV, xcape($name_new));
-	  $user->step_inc();
+	  $user->step++;
 
 	  return;
       }
@@ -720,7 +640,7 @@ class brisco {
 	if ($user_cur->name == $name_new) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Nickname <b>%s</b> gi&agrave; in uso.");', $dt.NICKSERV, xcape($name_new));
-	  $user->step_inc();
+	  $user->step++;
 	  break;
 	}
       }
@@ -762,7 +682,7 @@ class brisco {
 	    if ($user_cur == $user)
 	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>";', 
 								   xcape($user->name,ENT_COMPAT,"UTF-8"));
-	    $user_cur->step_inc();
+	    $user_cur->step++;
 	  }
 	}
       }
@@ -781,7 +701,7 @@ class brisco {
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
 	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
 							     $dt.xcape($user->name), xcape($user_mesg));
-	$user_cur->step_inc();
+	$user_cur->step++;
       }
       log_legal($timecur, $user->sess, $user->name, 
 		($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
@@ -791,8 +711,8 @@ class brisco {
   function &get_user($sess, &$idx)
   {
     GLOBAL $PHP_SELF;
-
-    if (validate_sess($sess)) {
+    
+    if (strlen($sess) == SESS_LEN) {
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
 	if (strcmp($sess, $this->user[$i]->sess) == 0) {
 	  // find it
@@ -812,7 +732,7 @@ class brisco {
   }
 
   /*
-   * function &add_user(&$bri, &$sess, &$idx, $name, $ip)
+   * function &add_user(&$bri, &$sess, &$idx, $name)
    *
    * RETURN VALUE:
    *   if ($idx != -1 && ret == FALSE)  =>  duplicated nick
@@ -820,7 +740,7 @@ class brisco {
    *   if ($idx == -1 && ret == FALSE)  =>  no space left
    *   if (ret == TRUE)                 =>  SUCCESS
    */
-  function &add_user(&$sess, &$idx, $name, $ip)
+  function &add_user(&$sess, &$idx, $name)
   {
     $idx = -1;
     $idfree = -1;
@@ -865,12 +785,12 @@ class brisco {
 	$this->user[$idx]->sess = $sess;
       }
       $this->user[$idx]->name = $name_new;
-      $this->user[$idx]->stat_set("room");
+      $this->user[$idx]->stat = "room";
       $this->user[$idx]->subst = "standup";
       $this->user[$idx]->lacc =   $curtime;
       $this->user[$idx]->laccwr = $curtime;
       $this->user[$idx]->bantime = 0;
-      $this->user[$idx]->ip = $ip;
+      
       log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
       
       return ($this->user[$idx]);
@@ -895,7 +815,7 @@ class brisco {
 	
 	log_main("FROM STANDUP", "NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
 	
-	$user_cur->step_inc();
+	$user_cur->step++;
       }
     }
   }
@@ -913,81 +833,73 @@ function log_main($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_main.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_main.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_rd($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_rd.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_rd.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_rd2($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_rd2.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_rd2.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_send($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_send.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_send.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_auth($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_auth.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_auth.log", 'a');
+  fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
+  fclose($fp);
 }
 
 function log_wr($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_wr.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_wr.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_load($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_load.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
+  $fp = fopen("/tmp/brisk_load.log", 'a');
+  fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  fclose($fp);
 }
 
 function log_legal($timecur, $sess, $name, $where, $mesg) 
 {
   GLOBAL $_SERVER;
 
-  if (($fp = @fopen(LEGAL_PATH, 'a')) != FALSE) {
-    /* Unix time | session | nickname | IP | where was | mesg */
-    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $timecur, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
-    fclose($fp);
-  }
+  $fp = fopen(LEGAL_PATH, 'a');
+  /* Unix time | session | nickname | IP | where was | mesg */
+  fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $timecur, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+  fclose($fp);
 }
 
 
@@ -1019,28 +931,6 @@ function lock_data()
 }
 
 function unlock_data($res)
-{
-  return (sem_release($res));
-}
-
-
-function lock_banlist()
-{
-  if (($tok = ftok(FTOK_PATH."/main", "L")) == -1) {
-    echo "FTOK FAILED";
-    exit;
-  }
-  if (($res = sem_get($tok)) == FALSE) {
-    echo "SEM_GET FAILED";
-    exit;
-  }
-  if (sem_acquire($res)) 
-    return ($res);
-  else
-    return (false);
-}
-
-function unlock_banlist($res)
 {
   return (sem_release($res));
 }
@@ -1623,7 +1513,7 @@ function calculate_winner(&$table)
 
   for ($i = 0 ; $i < PLAYERS_N ; $i++) {
     $table->card[$ontid[$i]]->owner = $cur_win;
-    $table->card[$ontid[$i]]->stat =  "take"; // Card stat
+    $table->card[$ontid[$i]]->stat =  "take";
   }
   return ($cur_win);
 }
