@@ -959,6 +959,16 @@ function log_auth($sess, $log) {
   }
 }
 
+function log_lock($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+
+  if (($fp = @fopen("/tmp/brisk_lock.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
+    fclose($fp);
+  }
+}
+
 function log_wr($sess, $log) {
   if (BRISK_DEBUG != TRUE)
     return;
@@ -1012,14 +1022,17 @@ function lock_data()
     echo "SEM_GET FAILED";
     exit;
   }
-  if (sem_acquire($res)) 
+  if (sem_acquire($res)) {
+    log_lock($sess, "LOCK");
     return ($res);
+  }
   else
     return (false);
 }
 
 function unlock_data($res)
 {
+  log_lock($sess, "UNLOCK");
   return (sem_release($res));
 }
 
@@ -1053,7 +1066,7 @@ function &load_data()
     exit;
   }
 
-  if ($shm = shm_attach($tok,100000 * TABLES_N)) {
+  if ($shm = shm_attach($tok,200000 * TABLES_N)) {
     if(($bri = @shm_get_var($shm, $tok)) == false) {
       log_main("XXX", "INIT MAIN DATA");
 
@@ -1085,11 +1098,13 @@ function save_data(&$bri)
   do {
     $isacq = TRUE;
     
-    if (($shm = shm_attach($tok,100000 * TABLES_N)) == FALSE)
+    if (($shm = shm_attach($tok,200000 * TABLES_N)) == FALSE)
       break;
     
-    if (shm_put_var($shm, $tok, $bri) == FALSE)
+    if (shm_put_var($shm, $tok, $bri) == FALSE) {
+      echo "DANNO: ".strlen(serialize($bri));
       break;
+    }
     // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
     $ret = TRUE;
   } while (0);
