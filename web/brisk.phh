@@ -55,7 +55,7 @@ Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &
 <b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
 Se usate <b>Internet Explorer 6</b> dovete settare: strumenti -> opzioni internet -> file temporanei:impostazioni->\\"verifica per nuove versioni della pagina scaricata\\" ad: \\"ogni volta che si visita la pagina\\".<br>
-Se usate <b>Internet Explorer 7</b> dovete settare: strumenti -> cronologia esplorazioni -> impostazioni ad \\"apertura alla pagina web\\".<br>
+Se usate <b>Internet Explorer 7</b> dovete settare: strumenti -> opzioni internet -> etichetta \\"Generale\\" -> cronologia esplorazioni -> impostazioni ad \\"apertura alla pagina web\\".<br>
 <br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
