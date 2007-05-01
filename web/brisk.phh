@@ -53,7 +53,8 @@ Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
 <b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
-Se usate Internet Explorer dovete anche settare: strumenti->cronologia_esplorazioni->impostazioni ad \\"apertura alla pagina web\\".<br>
+Se usate <b>Internet Explorer 6</b> dovete settare: strumenti -> opzioni internet -> file temporanei:impostazioni->\\"verifica per nuove versioni della pagina scaricata\\" ad: \\"ogni volta che si visita la pagina\\".<br>
+Se usate <b>Internet Explorer 7</b> dovete settare: strumenti -> cronologia esplorazioni -> impostazioni ad \\"apertura alla pagina web\\".<br>
 <br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
