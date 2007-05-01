@@ -569,6 +569,7 @@ else if ($user->stat == 'table') {
 }
 log_wr($sess, "before save data");
 save_data($bri);
+log_wr($sess, "after save data");
 
 unlock_data($sem);
 exit;
