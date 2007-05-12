@@ -570,6 +570,9 @@ class brisco {
     log_main("table_update", "post");
   }
 
+  /*
+   *  $table_idx == -1: rimuove dal gruppo degli 'standup'
+   */
   function room_sitdown(&$user, $table_idx)
   {
     log_main("room_sitdown", ($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
@@ -580,6 +583,7 @@ class brisco {
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $ret = "";
       $user_cur = &$this->user[$i];
+      /* solo per user nella room */
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
       continue;
       
@@ -944,7 +948,7 @@ function &load_data()
     exit;
   }
 
-  if ($shm = shm_attach($tok,100000 * TABLES_N)) {
+  if ($shm = shm_attach($tok,200000 * TABLES_N)) {
     if(($bri = @shm_get_var($shm, $tok)) == false) {
       log_main("XXX", "INIT MAIN DATA");
 
@@ -976,7 +980,7 @@ function save_data(&$bri)
   do {
     $isacq = TRUE;
     
-    if (($shm = shm_attach($tok,100000 * TABLES_N)) == FALSE)
+    if (($shm = shm_attach($tok,200000 * TABLES_N)) == FALSE)
       break;
     
     if (shm_put_var($shm, $tok, $bri) == FALSE)
