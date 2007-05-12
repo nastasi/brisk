@@ -1,24 +1,25 @@
-0.7.0 - 21/4/2007
-	Step proxy added
-	Fix change page recovery bug.
-        Changed bg.
+0.6.4 - 12/5/2007
+	Major bug fixed (user duplication).
+
+0.6.3 - 25/5/2007
+	Google adsense added.
 
 0.6.2 - 8/4/2007
-	Donate
-	Minor bug fixed
-	Graphical keepalive changed 
+	Donate added.
+	Minor bug fixed.
+	Graphical keepalive changed.
 
 0.6.1 - 11/03/2007
-	Minor bug fixed
-	Enabled legal logging
+	Minor bug fixed.
+	Enabled legal logging.
 
 0.6.0 - 25/02/2007
-	Internet Explorer 6 and 7 added
+	Internet Explorer 6 and 7 added.
 
 0.5.0 - 10/02/2007
-	Cooperative exit added
-	Sound added
-	No point in hand managed
+	Cooperative exit added.
+	Sound added.
+	No point in hand managed.
 
 0.4.6 - 30/01/2007
         Number of chat lines doubled.
