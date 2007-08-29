@@ -60,6 +60,11 @@ if ($argz[0] == 'shutdown') {
   else
     log_rd2($sess, "SHUTDOWN FROM WHAT ???");
 }
+/******************
+ *                *
+ *   STAT: room   *
+ *                *
+ ******************/
 else if ($user->stat == 'room') {
   $user->laccwr = time();
 
@@ -79,98 +84,110 @@ else if ($user->stat == 'room') {
     $user->step_inc();
     
   }
-  else if ($argz[0] == 'logout') {
-    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
-    $user->the_end = TRUE;
-    $user->step_inc();
-  }
   else if ($argz[0] == 'chatt') {
     $bri->chatt_send(&$user,$mesg);
   }
-  else if ($argz[0] == 'sitdown') {
-    if ($user->stat != 'room' || $user->subst != 'standup') {
-      log_wr($sess, "Warning ! sitdown out fsm");
-      unlock_data($sem);
-      exit;
-    }
-		
-    // BAN_IP_CHECK
-    if ($user->bantime > $user->laccwr) {
-      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-      $user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "Torna in piedi.", 400, 100);
-      
-      $user->step_inc();
-      save_data($bri);
-      unlock_data($sem);
-      exit;
-    }
-    
-    // Take parameters
-    $table_idx = $argz[1];
-    $table = &$bri->table[$table_idx];
-    
-    if ($table->player_n == PLAYERS_N) {
-      log_wr($sess, "Warning ! unreachable, table full.");
-      unlock_data($sem);
-      exit;
-    } 
-
-    // set new status
-    $user->subst = "sitdown";
-    $user->table = $table_idx;
-    $user->table_pos = $table->user_add($idx);
-		
-    if ($table->player_n == PLAYERS_N) {
-      // Start game for this table.
-      log_wr($sess, "Start game!");
-      
-      $table->init(&$bri->user);
-      $table->game_init(&$bri->user);
-      $curtime = time();
-
-      for ($i = 0 ; $i < $table->player_n ; $i++) {
-	$user_cur = &$bri->user[$table->player[$i]];
-	log_wr($sess, "Pre if!");
-	
-	$ret = "";
-	$ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
-	
-	$user_cur->comm[$user_cur->step % COMM_N] = $ret;
-	$user_cur->trans_step = $user_cur->step + 1;
-	log_wr($sess, "TRANS ATTIVATO");
-	
-	$user_cur->stat_set('table');
-	$user_cur->subst = 'asta';
-	$user_cur->laccwr = $curtime;
-	$user_cur->step_inc();
-	
-	$user_cur->comm[$user_cur->step % COMM_N] = show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, FALSE);
-	$user_cur->step_inc();
+  /**********************
+   *                    *
+   *   SUBST: standup   *
+   *                    *
+   **********************/
+  else if ($user->subst == 'standup') {
+   
+    if ($argz[0] == 'sitdown') {
+      if ($user->the_end == TRUE) {
+	log_wr($sess, "INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
+	unlock_data($sem);
+	exit;
       }
+      /* TODO: refact to a function */
+      if ($user->bantime > $user->laccwr) {
+	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+	$user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "Torna in piedi.", 400, 100);
+	
+	$user->step_inc();
+	save_data($bri);
+	unlock_data($sem);
+	exit;
+      }
+    
+      // Take parameters
+      $table_idx = $argz[1];
+      $table = &$bri->table[$table_idx];
+    
+      if ($table->player_n == PLAYERS_N) {
+	log_wr($sess, "WARN:FSM: Sitdown unreachable, table full.");
+	unlock_data($sem);
+	exit;
+      } 
+
+      // set new status
+      $user->subst = "sitdown";
+      $user->table = $table_idx;
+      $user->table_pos = $table->user_add($idx);
+      
+      if ($table->player_n == PLAYERS_N) {
+	// Start game for this table.
+	log_wr($sess, "Start game!");
+	
+	$table->init(&$bri->user);
+	$table->game_init(&$bri->user);
+	$curtime = time();
+	
+	for ($i = 0 ; $i < $table->player_n ; $i++) {
+	  $user_cur = &$bri->user[$table->player[$i]];
+	  log_wr($sess, "Pre if!");
+	  
+	  $ret = "";
+	  $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
+	  
+	  $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+	  $user_cur->trans_step = $user_cur->step + 1;
+	  log_wr($sess, "TRANS ATTIVATO");
+	  
+
+	  $user_cur->stat_set('table');
+	  $user_cur->subst = 'asta';
+	  $user_cur->laccwr = $curtime;
+	  $user_cur->step_inc();
+	  
+	  $user_cur->comm[$user_cur->step % COMM_N] = show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, FALSE);
+	  $user_cur->step_inc();
+	}
+      }
+      
+      $bri->room_sitdown(&$user, $table_idx);
     }
-		
-    $bri->room_sitdown(&$user, $table_idx);
+    else if ($argz[0] == 'logout') {
+      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+      $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
+      $user->the_end = TRUE;
+      $user->step_inc();
+    }
   }
-  else if ($argz[0] == 'wakeup') {
-    if ($user->stat != 'room' || $user->subst != 'sitdown') {
-      log_wr($sess, "Warning ! wakeup out fsm.");
-      unlock_data($sem);
-      exit;
+  /**********************
+   *                    *
+   *   SUBST: sitdown   *
+   *                    *
+   **********************/
+  else if ($user->subst == 'sitdown') {
+    if ($argz[0] == 'wakeup') {
+      $bri->room_wakeup(&$user);      
     }
-		
-    // set new status
-
-    $user->subst = "standup";
-
-    $bri->room_wakeup(&$user);
+    else if ($argz[0] == 'logout') {
+      $bri->room_wakeup(&$user);      
+      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+      $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
+      $user->the_end = TRUE;
+      $user->step_inc();
+    }
   }
 }
-/***************
- *             *
- *    TABLE    *
- *             *
- ***************/
+/*********************
+ *                   *
+ *    STAT: table    *
+ *                   *
+ *********************/
 else if ($user->stat == 'table') {
   $user->laccwr = time();
   $table = &$bri->table[$user->table];
@@ -206,10 +223,9 @@ else if ($user->stat == 'table') {
 	$logout_cont = FALSE;
       }
     }
-    else {
+    else 
       $user->bantime = $user->laccwr + BAN_TIME;
-      // BAN_IP_SET
-    }
+    
     if ($logout_cont == TRUE) {
       $bri->room_wakeup(&$user);
     }
@@ -569,7 +585,6 @@ else if ($user->stat == 'table') {
 }
 log_wr($sess, "before save data");
 save_data($bri);
-log_wr($sess, "after save data");
 
 unlock_data($sem);
 exit;
