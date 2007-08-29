@@ -46,6 +46,7 @@ function unrecerror()
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
+  // log_rd2("UNREC_ERROR");
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
