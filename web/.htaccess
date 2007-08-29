@@ -1,6 +1,10 @@
 <FilesMatch "\.(js|css)$">
 header append Cache-Control "public, last-modified, must-revalidate"
 </FilesMatch>
+<FilesMatch "\.php$">
+header append Pragma "no-cache"
+header append Expires "-1"
+</FilesMatch>
 ExpiresActive On
 ExpiresByType image/jpg "access plus 4 days"
 ExpiresByType image/png "access plus 4 days"
