@@ -25,7 +25,8 @@ define(PROXY_PATH, "/var/lib/brisk_proxy");
 define(TABLES_N, 8);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
-define(MAX_PLAYERS, (PLAYERS_N * TABLES_N));
+define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
+define(SHM_DIMS, (50000 * MAX_PLAYERS));
 define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
@@ -40,7 +41,7 @@ define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.7.1";
+$G_brisk_version = "0.7.2";
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: ottimizzazione della CPU e chiuso il bug di mancato cambio pagina.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
@@ -54,8 +55,6 @@ Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
 <b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
-Se usate <b>Internet Explorer 6</b> dovete settare: strumenti -> opzioni internet -> file temporanei:impostazioni->\\"verifica per nuove versioni della pagina scaricata\\" ad: \\"ogni volta che si visita la pagina\\".<br>
-Se usate <b>Internet Explorer 7</b> dovete settare: strumenti -> opzioni internet -> etichetta \\"Generale\\" -> cronologia esplorazioni -> impostazioni ad \\"apertura alla pagina web\\".<br>
 <br>
 <b>Uso del sito</b><br>
 Potete sedervi a un tavolo o rimanere in piedi.<br>
@@ -1066,7 +1065,7 @@ function &load_data()
     exit;
   }
 
-  if ($shm = shm_attach($tok,200000 * TABLES_N)) {
+  if ($shm = shm_attach($tok, SHM_DIMS)) {
     if(($bri = @shm_get_var($shm, $tok)) == false) {
       log_main("XXX", "INIT MAIN DATA");
 
@@ -1098,7 +1097,7 @@ function save_data(&$bri)
   do {
     $isacq = TRUE;
     
-    if (($shm = shm_attach($tok,200000 * TABLES_N)) == FALSE)
+    if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
       break;
     
     if (shm_put_var($shm, $tok, $bri) == FALSE) {
