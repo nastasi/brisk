@@ -2,7 +2,7 @@
 /*
  *  brisk - index_rd.php
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2007 matteo.nastasi@milug.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ function unrecerror()
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  // log_rd2("UNREC_ERROR");
+  log_rd2("XXX", "UNREC_ERROR");
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
@@ -55,6 +55,7 @@ function page_sync($page)
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
+  // log_rd2("PAGE_SYNC");
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
 }
 
@@ -250,6 +251,10 @@ $is_page_streaming =  ((stristr($HTTP_USER_AGENT, "linux") &&
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
+if (!isset($myfrom))
+     $myfrom = "";
+if (!isset($subst))
+     $subst = "";
 log_rd2($sess, "FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming);
 
 

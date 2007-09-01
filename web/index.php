@@ -27,17 +27,18 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   exit;
 }
 
-log_load($sess, "LOAD: index.php");
+log_load((isset($sess) ? $sess : "XXX"), "LOAD: index.php");
 
 function main()
 {
   GLOBAL $sess, $name, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   
   $body = "";
+  $tables = "";
   $ACTION = "login";
   
   if (isset($BRISK_SHOWHTML) == FALSE) {
-    $is_table = false;
+    $is_table = FALSE;
     $sem = lock_data();
     $bri = &load_data();
     

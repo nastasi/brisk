@@ -309,11 +309,6 @@ function act_shutdown()
 	c++;
 }
 
-function act_preout()
-{
-    act_logout();
-}
-
 function postact_logout()
 {
     // alert("postact_logout");

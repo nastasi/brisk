@@ -26,7 +26,8 @@ define(TABLES_N, 8);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
-define(SHM_DIMS, (50000 * MAX_PLAYERS));
+define(SHM_DIMS, (80000 * MAX_PLAYERS));
+// define(COMM_N, 6);
 define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
@@ -39,6 +40,8 @@ define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
 define(BRISK_DEBUG, FALSE);
 // define(DEBUGGING, "local");
+
+$G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
 $G_brisk_version = "0.7.2";
@@ -209,7 +212,7 @@ class Table {
 
     for ($i = 39 ; $i >= 0 ; $i--) {
       $rn = rand(0, $i);
-
+      
       if ($rn == 0)
 	log_main("RND ZERO", "");
       
@@ -219,7 +222,7 @@ class Table {
       $this->card[$id]->assign('hand', $owner);
 
       $rest[$rn] = $rest[$i];
-      $pubbpos[$rn2] = $pubbpos[$i];
+      // $pubbpos[$rn2] = $pubbpos[$i];
     }
   }
 
@@ -241,7 +244,7 @@ class Table {
 
   function game_init(&$userarr)
   {
-    log_rd2($sess,"GSTART 4");
+    log_rd2("XXX", "GSTART 4");
 
     $this->gstart = ($this->mazzo+1) % PLAYERS_N;
     $this->bunch_make();
@@ -366,6 +369,7 @@ class User {
   var $exitislock; // Player can exit from the table ?
   var $table;      // id of the current table (if in table state)
   var $table_pos;  // idx on the table
+  var $the_end;    // Flag to change the end of the session
 
   function User($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     $this->name  = $name;
@@ -409,7 +413,11 @@ class User {
 	break;
       fwrite($fp, pack("l",$this->step), 4);
       fclose($fp);
+
+      return (TRUE);
     } while (0);
+
+    return (FALSE);
   }
 
   function step_inc() {
@@ -419,7 +427,11 @@ class User {
       $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
       fwrite($fp, pack("l",$this->step), 4);
       fclose($fp);
+
+      return (TRUE);
     }
+    
+    return (FALSE);
   }
 }
 
@@ -587,7 +599,7 @@ class brisco {
 	$ret .= table_content($this, $user_cur, $table_idx);
 	$ret .= standup_content($this, $user_cur);
 	
-	$act_content = table_act_content(FALSE, 0, $e, $user->table);
+	$act_content = table_act_content(FALSE, 0, $table_idx, $user->table);
 	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
 	
@@ -789,7 +801,7 @@ class brisco {
 
   function &get_user($sess, &$idx)
   {
-    GLOBAL $PHP_SELF;
+    GLOBAL $PHP_SELF, $G_false;
 
     if (validate_sess($sess)) {
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
@@ -807,7 +819,8 @@ class brisco {
     else {
       log_main($sess, sprintf("get_user: Wrong strlen [%s]",$sess));
     }
-    return (FALSE);
+
+    return ($G_false);
   }
 
   /*
@@ -821,12 +834,14 @@ class brisco {
    */
   function &add_user(&$sess, &$idx, $name, $ip)
   {
+    GLOBAL $G_false;
+
     $idx = -1;
     $idfree = -1;
     
     if (($name_new = validate_name($name)) == FALSE) {
       $idx = -2;
-      return (FALSE);
+      return ($G_false);
     }
 
     log_auth("XXX", sprintf("ARRIVA: [%s]", $sess));
@@ -865,6 +880,7 @@ class brisco {
       }
       $this->user[$idx]->name = $name_new;
       $this->user[$idx]->stat_set("room");
+      // MOP $this->user[$idx]->step_set(0);
       $this->user[$idx]->subst = "standup";
       $this->user[$idx]->lacc =   $curtime;
       $this->user[$idx]->laccwr = $curtime;
@@ -875,7 +891,7 @@ class brisco {
       return ($this->user[$idx]);
     }
 
-    return (FALSE);
+    return ($G_false);
   }
   
   function standup_update(&$user)
@@ -906,6 +922,18 @@ function make_seed()
 {
   list($usec, $sec) = explode(' ', microtime());
   return (float) $sec + ((float) $usec * 100000);
+}
+
+function log_only($sess, $log) {
+  /*
+  if (BRISK_DEBUG != TRUE)
+    return;
+  */
+
+  if (($fp = @fopen("/tmp/brisk_only.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_main($sess, $log) {
@@ -1021,17 +1049,17 @@ function lock_data()
     echo "SEM_GET FAILED";
     exit;
   }
-  if (sem_acquire($res)) {
-    log_lock($sess, "LOCK");
+  if (sem_acquire($res)) {   
+    log_lock("XXX", "LOCK");
     return ($res);
   }
   else
-    return (false);
+    return (FALSE);
 }
 
 function unlock_data($res)
 {
-  log_lock($sess, "UNLOCK");
+  log_lock("XXX", "UNLOCK");
   return (sem_release($res));
 }
 
@@ -1049,7 +1077,7 @@ function lock_banlist()
   if (sem_acquire($res)) 
     return ($res);
   else
-    return (false);
+    return (FALSE);
 }
 
 function unlock_banlist($res)
@@ -1060,17 +1088,22 @@ function unlock_banlist($res)
 
 function &load_data() 
 {
+  GLOBAL $G_false;
+
   if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
     echo "FTOK FAILED";
     exit;
   }
 
   if ($shm = shm_attach($tok, SHM_DIMS)) {
-    if(($bri = @shm_get_var($shm, $tok)) == false) {
-      log_main("XXX", "INIT MAIN DATA");
+    if(($bri = @shm_get_var($shm, $tok)) == FALSE) {
+      log_only("XXX", "INIT MAIN DATA");
 
       $bri = init_data();
-      shm_put_var($shm, $tok, $bri);
+      if (shm_put_var($shm, $tok, $bri) == FALSE) {
+	log_only("XX2", "PUT_VAR FALLITA ".strlen(serialize($bri)));
+	log_only("XX2", serialize($bri));
+      }
     }
     
     shm_detach($shm);
@@ -1079,7 +1112,7 @@ function &load_data()
     return ($ret);
   }
 
-  return (NULL);
+  return ($G_false);
 }
 
 
@@ -1101,7 +1134,8 @@ function save_data(&$bri)
       break;
     
     if (shm_put_var($shm, $tok, $bri) == FALSE) {
-      echo "DANNO: ".strlen(serialize($bri));
+      log_only("XXX", "PUT_VAR FALLITA ".strlen(serialize($bri)));
+      log_only("XXX", serialize($bri));
       break;
     }
     // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
@@ -1135,7 +1169,7 @@ function table_act_content($isstanding, $sitted, $table, $cur_table)
 function table_content($bri, $user, $table_idx)
 {
   $content = "";
-
+  $ret = "";
   // TODO
   //
   //   Si possono usare i dati nella classe table
@@ -1155,7 +1189,7 @@ function table_content($bri, $user, $table_idx)
       else
 	{ $hilion = ""; $hilioff = ""; }
 
-    log_main($bri->user[$e]->name, sprintf("IN TABLE [%d]", $table_idx));
+    log_main($user_cur->name, sprintf("IN TABLE [%d]", $table_idx));
     
     $content .= sprintf("%s%s%s<br>",$hilion, xcape($user_cur->name), $hilioff);
   }
@@ -1280,6 +1314,7 @@ function multoval($mult)
 
 function show_table_info(&$bri, &$table, $table_pos)
 {
+  $ret = "";
   $user = &$bri->user[$table->player[$table_pos]];
 
   $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
@@ -1383,6 +1418,7 @@ function show_table_info(&$bri, &$table, $table_pos)
 function root_wellcome($user)
 {
   GLOBAL $root_wellarr;
+  $ret = "";
 
   for ($i = 0 ; $i < count($root_wellarr) ; $i++)
     $ret .= sprintf('chatt_sub("ChanServ: ","%s");', str_replace('"', '\"', $root_wellarr[$i]));
@@ -1393,6 +1429,7 @@ function root_wellcome($user)
 function table_wellcome($user)
 {
   GLOBAL $table_wellarr;
+  $ret = "";
 
   for ($i = 0 ; $i < count($table_wellarr) ; $i++)
     $ret .= sprintf('chatt_sub("ChanServ: ","%s");', str_replace('"', '\"', $table_wellarr[$i]));
@@ -1402,7 +1439,7 @@ function table_wellcome($user)
 
 function show_room(&$bri, &$user)
 {
-  $ret .= sprintf('gst.st = %d;',  $user->step);
+  $ret = sprintf('gst.st = %d;',  $user->step);
   $ret .= sprintf('stat = "%s";',  $user->stat);
 
   $ret .= root_wellcome($user);
@@ -1481,7 +1518,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
 	      break;
 	  }
 	}
-	log_rd($sess, "O ".$o." VAL ".$table->card[$o]->value." Owner: ".$table->card[$o]->owner);
+	log_rd($user->sess, "O ".$o." VAL ".$table->card[$o]->value." Owner: ".$table->card[$o]->owner);
 	
 	$ret .= sprintf( ' card_send(%d,%d,%d,%8.2f,%d);|', ($table->gstart + $e) % PLAYERS_N, 
 			 $i, ((($e + PLAYERS_N - $table_pos + $table->gstart) % PLAYERS_N) == 0 ?
