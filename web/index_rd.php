@@ -50,12 +50,12 @@ function unrecerror()
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
-function page_sync($page)
+function page_sync($sess, $page)
 {
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  // log_rd2("PAGE_SYNC");
+  log_rd2($sess, "PAGE_SYNC");
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
 }
 
@@ -75,7 +75,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   if (($sem = lock_data()) != FALSE) { 
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
-      log_rd2($sess, "F");
+      log_only($sess, "F");
       $bri = &load_data();
       if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
 	unlock_data($sem);
@@ -90,6 +90,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       save_data($bri);
       $first_loop = FALSE;
     }
+
+    log_only($sess, "U");
     unlock_data($sem);
     ignore_user_abort(FALSE);
   }
@@ -102,13 +104,23 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
     if ($cur_step == $proxy_step) {
       log_rd2($sess, "P");
-      return;
+      return (FALSE);
     }
   }
 
-  if ($bri == FALSE)
-    $bri = &load_data();
-
+  if ($bri == FALSE) {
+    ignore_user_abort(TRUE);
+    if (($sem = lock_data()) != FALSE) { 
+      log_only($sess, "P");
+      $bri = &load_data();
+      unlock_data($sem);
+      ignore_user_abort(FALSE);
+    }
+    else {
+      return (FALSE);
+    }
+  }
+  
   if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
     return (unrecerror());
   }
@@ -189,7 +201,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    $to_stat = $user->stat;
 	    unlock_data($sem);
 	    ignore_user_abort(FALSE);
-	    return (page_sync($to_stat == "table" ? "table.php" : "index.php"));
+	    return (page_sync($user->sess, $to_stat == "table" ? "table.php" : "index.php"));
 	  }
 	  log_rd2($sess, "lost history, refresh from scratch");
 	  $new_step = -1;

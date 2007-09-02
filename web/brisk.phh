@@ -26,7 +26,7 @@ define(TABLES_N, 8);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
-define(SHM_DIMS, (80000 * MAX_PLAYERS));
+define(SHM_DIMS, (50000 * MAX_PLAYERS));
 // define(COMM_N, 6);
 define(COMM_N, 12);
 define(COMM_GEN_N, 50);
@@ -44,7 +44,7 @@ define(BRISK_DEBUG, FALSE);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.7.2";
+$G_brisk_version = "0.7.3";
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: ottimizzazione della CPU e chiuso il bug di mancato cambio pagina.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
@@ -925,10 +925,9 @@ function make_seed()
 }
 
 function log_only($sess, $log) {
-  /*
   if (BRISK_DEBUG != TRUE)
     return;
-  */
+  
 
   if (($fp = @fopen("/tmp/brisk_only.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
@@ -1038,6 +1037,8 @@ function init_data()
 
 function lock_data()
 {
+  GLOBAL $sess; 
+
 	//  echo "LOCK: ".FTOK_PATH."/main";
 	//  exit;
   if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
@@ -1050,7 +1051,7 @@ function lock_data()
     exit;
   }
   if (sem_acquire($res)) {   
-    log_lock("XXX", "LOCK");
+    log_only($sess, "LOCK");
     return ($res);
   }
   else
@@ -1059,7 +1060,9 @@ function lock_data()
 
 function unlock_data($res)
 {
-  log_lock("XXX", "UNLOCK");
+  GLOBAL $sess; 
+
+  log_only($sess, "UNLOCK");
   return (sem_release($res));
 }
 
@@ -1088,7 +1091,7 @@ function unlock_banlist($res)
 
 function &load_data() 
 {
-  GLOBAL $G_false;
+  GLOBAL $G_false, $sess;
 
   if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
     echo "FTOK FAILED";
@@ -1096,13 +1099,19 @@ function &load_data()
   }
 
   if ($shm = shm_attach($tok, SHM_DIMS)) {
-    if(($bri = @shm_get_var($shm, $tok)) == FALSE) {
-      log_only("XXX", "INIT MAIN DATA");
-
+    $bri = @shm_get_var($shm, $tok);
+    
+    log_only($sess, "bri ==  ".($bri == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($bri === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($bri) ?   "TRUE" : "FALSE"));
+    if (isset($bri)) 
+      log_only($sess, "bri count ".count($bri));
+    
+    if ($bri == FALSE) {
+      log_only($sess, "INIT MAIN DATA");
+      
       $bri = init_data();
       if (shm_put_var($shm, $tok, $bri) == FALSE) {
-	log_only("XX2", "PUT_VAR FALLITA ".strlen(serialize($bri)));
-	log_only("XX2", serialize($bri));
+	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
+	log_only($sess, serialize($bri));
       }
     }
     
@@ -1118,6 +1127,8 @@ function &load_data()
 
 function save_data(&$bri) 
 {
+  GLOBAL $sess;
+
   $ret =   FALSE;
   $shm =   FALSE;
   $isacq = FALSE;
@@ -1133,9 +1144,10 @@ function save_data(&$bri)
     if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
       break;
     
+    log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
     if (shm_put_var($shm, $tok, $bri) == FALSE) {
-      log_only("XXX", "PUT_VAR FALLITA ".strlen(serialize($bri)));
-      log_only("XXX", serialize($bri));
+      log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
+      log_only($sess, serialize($bri));
       break;
     }
     // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
