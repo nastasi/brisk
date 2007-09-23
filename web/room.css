@@ -20,12 +20,16 @@
  *
  */
 
+body.* {
+    margin:0px;
+    padding: 0px;
+}
+
 div.container {
+    /* border:1px solid gray; */
     width:100%;
     margin:0px;
     padding: 0px;
-    /* border:1px solid gray;
-       line-height:150%; */
 }
 
 div.header {
@@ -66,107 +70,132 @@ div.tables {
 div.bottom {
     /* border: 1px solid green; */
     position: relative;
-    top: -16px;
+    top: -24px;
     text-align: left;
     padding:4px;	
     clear:left;
 }
 
-table.room_tab {
-    border-style: solid;
-    border-width: 1px;
-    border-color: grey;
-    border-collapse: collapse;
-    border-spacing: 0px;
-    align: center;
-    padding: 0px;
-    width: 680px;
-}
-
-td.room_td {
-    /*	background-color: yellow;*/
-    width:  170px;
-    height: 140px;
-    vertical-align: "top";
-    border-width: 1px;
-
-    border-style: solid;
-    border-width: 1px;
-    border-color: grey;
-    border-collapse: collapse;
+div.room_tit {
+    /* background-color: orange; */
+    align: left;
+    text-align: left;
     margin: 0px;
-    padding:0px;
+    padding: 6px;
 }
 
-div.room_div {
-    position: relative;
+table.macro {
+    /* border: 1px solid orange; */
+    align: center;
+    width: 100%;
+    padding: 0px;
+}
+	
+table.macro td {
+    /* border: 1px solid green; */
     align: center;
     text-align: center;
-    width:  170px;
-    height: 140px;
-    margin: 0px;
-    padding: 4px;
+}
+
+div.room_tab {
+    /* border: 1px solid blue; */ 
+    /* background-color: green; */
+    height: 346px;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 680px;
+    max-width: 900px;
+    overflow: auto;
+}
+
+table.room_tab {
+    width: 100%;
+    border: 0px solid red;
+    border-collapse: separate;
+    border-spacing: 4px;
+    border-style: none;
+}
+
+table.room_tab td {
+    /* background-color: yellow; */
+    height: 110px;
+    vertical-align: top;
+    border: 1px solid gray;
+ }
+
+
+
+div.room_div {
+    /* background-color: orange; */
+    position: relative; 
 }
 
 div.table_act { 
     position: absolute;
-    align: center;
+    align: right;
+    text-align: right;
     width: 100%;
-    left: 0px;
-    bottom:  4px;
+    right: 4px;
+    top:   2px;
 }
 
 
 div.room_standup {
-    height: 68px;
+    position: absolute; 
+    top:   26px;
+    width: 100%;
+    height: 80px;
     align: left;
     overflow: auto;
+    padding: 0px;
+    margin: 0px;
     vertical-align: "top";
 }
 
-td.room_standup {
-    /*
-      background-color: red;
-      border-style: solid;
-      border-width: 1px;
-      border-color: grey;
-    */
-    align: center;
-    text-align: center;
-    vertical-align: "top";
+table.room_standup {
+    margin-left: 4px;
+    width: 100%;
+    border: 1px solid grey;
 }
+
+table.room_standup td {
+    /* background-color: yellow; */
+    border: 0px none gray; 
+    vertical-align: top;
+ }
 
 div.room_ex_standup {
     position: relative;
-    height: 120px;
+    height: 106px;
     align: left;
     text-align: left;
-    padding: 4px;
-    /* vertical-align: "top"; */
+    padding: 0px;
+    margin: 0px;
 }
 
 table.table_standup {
     /*	background-color: red;  */
+    /* background-color: green; */
+
     border-spacing: 0px;
     width: 100%; 
     margin: 0px;
     padding:0px;
 }
 
-td.td_standup {
+table.table_standup td {
     text-align: center;
     align: center;
     padding: 0px;
     margin: 0px;
 }
 
-.esco {
+div.esco {
     position: absolute;
-    text-align: center; 	
-    bottom:  4px;
+    text-align: right; 	
+    top:  2px;
     right: 4px;
 }
-
 
 .chatt {
     height: 100px;
@@ -178,6 +207,10 @@ td.td_standup {
 
 .txtt {
     /*	font-size: 10pt;*/
+    position: relative;
+
+    top: 2px;
+    /* rows: 1; */
 }
 
 .urgmsg {
@@ -186,4 +219,9 @@ td.td_standup {
 
 .proxhr { 
     /*	background-color: green; */
+    position: absolute;
+    align: center;
+    text-align: center;
+    width: 100%;
+    top:  28px;
 }

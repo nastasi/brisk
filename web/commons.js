@@ -877,7 +877,7 @@ function room_checkspace(emme,tables,inpe)
 
     stand = "<table class=\"table_standup\"><tbody><tr>";
     for (i = 0 ; i < inpe ; i++) {
-	stand += "<td class=\"td_standup\">"+nome+"</td>";
+	stand += "<td>"+nome+"</td>";
 	if ((i+1) % 4 == 0) {
 	    stand += "</tr><tr>";
 	}
@@ -885,7 +885,7 @@ function room_checkspace(emme,tables,inpe)
     stand += "</tr>";
     $("standup").innerHTML = stand;
 
-    $("esco").innerHTML = "<input name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
+    $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
 }
 
 function playsound(tag, sound) {
