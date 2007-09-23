@@ -22,7 +22,7 @@
 define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
 define(PROXY_PATH, "/var/lib/brisk_proxy");
-define(TABLES_N, 8);
+define(TABLES_N, 12);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
