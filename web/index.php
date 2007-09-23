@@ -35,6 +35,7 @@ function main()
   
   $body = "";
   $tables = "";
+  $standup = "";
   $ACTION = "login";
   
   if (isset($BRISK_SHOWHTML) == FALSE) {
@@ -91,26 +92,44 @@ function main()
   }
 
   if ($ACTION == "room") {
+    $tables .= '<div class="room_tab">';
     $tables .= '<table class="room_tab" align="center">';
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       if ($i % 4 == 0)
 	$tables .= '<tr>';
-      $tables .= '<td valign="top" align="center" class="room_td"><div class="room_div"><b>Tavolo '.$i.'</b><br><br>';
+      $tables .= '<td>';
+      $tables .= '<div class="room_div"><div class="room_tit"><b>Tavolo '.$i.'</b></div>';
       $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
       $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
-      $tables .= '</div></td>'."\n";
+      $tables .= '</div>';
+      $tables .= '</td>'."\n";
       if ($i % 4 == 3)
 	$tables .= '</tr>';
     }
-    $tables .= '<tr><td colspan="4">';
+    $tables .= '</table></div>';
+
+
+    $standup .= '<table class="room_standup" align="center"><tr><td>';
+    $standup .= '<div class="room_ex_standup">';
+    $standup .= '<div class="room_tit"><b>Giocatori in piedi</b></div>';
+    
+    $standup .= sprintf('<div id="standup" class="room_standup"></div>');
+    $standup .= '<div id="esco" class="esco"></div>';
+    $standup .= '</div></td></tr></table>';
+    
+    // $tables .= '</td></tr></table>';
+
+    /*
+    $tables .= '</td></tr><tr><td>';
+    $tables .= '<table class="room_tab" align="center">';
+    $tables .= '<tr><td>';
     $tables .= '<div class="room_ex_standup">';
-    $tables .= '<b>Giocatori in piedi</b><br><br>';
+    $tables .= '<b>Giocatori in piedi</b>';
     
     $tables .= sprintf('<div id="standup" class="room_standup"></div>');
     $tables .= '<div id="esco" class="esco"></div>';
-    $tables .= '</td></tr>';
-    
-    $tables .= '</table>';
+    */
+    // $tables .= '</td></tr></table>';
   }
 
   $altout_propag = array( array ( 'url' => 'http://www.alternativeoutput.it',
@@ -162,7 +181,7 @@ google_color_url = "000000";
 </div></td>
 <td align="center"><div>
     <img class="nobo" src="img/brisk_logo64.png">
-    briscola chiamata in salsa ajax<br><br>
+    briscola chiamata in salsa ajax<br>
     </div></td>
 <td align="right"><div style="padding-right: 8px;">
 
@@ -242,7 +261,6 @@ supported by:<br><br>
 <!--  =========== tables ===========  -->
 <div id="tables" class="tables">
 <?php echo "$body"; ?>
-
 <br>
 <div style="text-align: center;">
    <br><br><br>
@@ -299,7 +317,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <?php
 if ($BRISK_SHOWHTML == "debugtable") {
 ?>
-     room_checkspace(12,8,50);
+     room_checkspace(12, <?php echo TABLES_N; ?>, 50);
 <?php
 }
 else {
@@ -332,15 +350,24 @@ else {
 <!--  =========== tables ===========  -->
 <div id="tables" class="tables">
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
+<table class="macro"><tr><td>
 <?php echo "$tables"; ?>
+</td></tr><tr><td>
+    <?php echo "$standup"; ?>
+</td></tr></table>
 </div>
 
 <!--  =========== bottom ===========  -->
-<div id="bottom" class="bottom">
-<b>Chat</b>
+    <div id="bottom" class="bottom" style="padding: 6px; /*  background-color: green; */">
+<b>Chat</b><br>
 <div id="txt" class="chatt">
 </div>
-<table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="90" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
+
+    <table style="width: 100%;"><tr><td style="width:13em; text-align: right;">
+    <div id="myname"></div>
+    </td><td>
+    <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    </td></tr></table>
 </div>
 <div id="heartbit"></div>
 <div id="sandbox"></div>
