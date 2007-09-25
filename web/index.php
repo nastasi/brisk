@@ -209,7 +209,9 @@ google_color_url = "000000";
 
 </div></td>
 </td></table>
-</div>
+</div>';
+
+$brisk_vertical_menu = '
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
 <a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a>
@@ -255,11 +257,13 @@ supported by:<br><br>
    }
 </SCRIPT>
 <?php
-    printf($brisk_header_form, '', '');
+    printf($brisk_header_form);
+    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
+    printf($brisk_vertical_menu, '', '');
+    printf("</td><td>");
 ?> 
 
 <!--  =========== tables ===========  -->
-<div id="tables" class="tables">
 <?php echo "$body"; ?>
 <br>
 <div style="text-align: center;">
@@ -269,8 +273,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
 <input id="sub"    value="entra" type="submit" class="button">
 </form>
-</div>
-</div></div>
+</div></td></tr></table>
 <br><br><br><br>
 
 <div id="imgct"></div>
@@ -344,21 +347,23 @@ else {
 
 </SCRIPT>
 <?php
-    printf($brisk_header_form, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();"><br><br><br>',
+   printf($brisk_header_form);
+   printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
+   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();"><br><br><br>',
 	   $brisk_donate);
+   printf("</td><td>");
 ?> 
 <!--  =========== tables ===========  -->
-<div id="tables" class="tables">
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <table class="macro"><tr><td>
 <?php echo "$tables"; ?>
 </td></tr><tr><td>
     <?php echo "$standup"; ?>
 </td></tr></table>
-</div>
+</td></tr></table>
 
 <!--  =========== bottom ===========  -->
-    <div id="bottom" class="bottom" style="padding: 6px; /*  background-color: green; */">
+    <div id="bottom" class="bottom" style="/*  background-color: green; */">
 <b>Chat</b><br>
 <div id="txt" class="chatt">
 </div>
