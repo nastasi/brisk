@@ -180,8 +180,10 @@ div.table_commands {
 
 .remark1 { 
     position:     absolute; 
-    width:  199px;
-    height: 200px;
+    width:  199px !important;
+    width:  207px;
+    height: 200px !important;
+    height: 208px;
     left: 296;
     top:  246;
     border-style: solid;
@@ -192,8 +194,10 @@ div.table_commands {
 
 .remark2 { 
     position:     absolute; 
-    width:  199px;
-    height: 200px;
+    width:  199px !important;
+    width:  203px;
+    height: 200px !important;
+    height: 204px;
     left: 298;
     top:  248;
     border-style: solid;
