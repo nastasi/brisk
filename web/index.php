@@ -367,8 +367,7 @@ else {
 <b>Chat</b><br>
 <div id="txt" class="chatt">
 </div>
-
-    <table style="width: 100%;"><tr><td style="width:13em; text-align: right;">
+    <table align=center style="width: 98%; margin: auto;"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
