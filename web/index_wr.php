@@ -287,14 +287,11 @@ else if ($user->stat == 'table') {
 	  $again = FALSE;
 	}
 	else if ($a_card <= 9) {
-	  if ($table->asta_card == 9) {
-	    if ($a_card == 9 && $a_pnt <= 120 && $a_pnt > $table->asta_pnt)
-	      $again = FALSE;
-	  }
-	  else {
-	    if ($a_card >= 0 && $a_card <= 9 && $a_card > $table->asta_card)
-	      $again = FALSE;
-	  }
+	  if ($a_card >= 0 && $a_card < 9 && $a_card > $table->asta_card)
+	    $again = FALSE;
+	  else if ($a_card == 9 && $a_pnt > ($table->asta_pnt >= 61 ? $table->asta_pnt : 60) && $a_pnt <= 120)
+	    $again = FALSE;
+	  
 
 	  if ($again == FALSE) {
 	    log_wr($sess, "NUOVI ORZI.");
@@ -310,6 +307,11 @@ else if ($user->stat == 'table') {
       
       
 	if ($again) { // Qualcosa non andato bene, rifare
+	  $ret = sprintf('gst.st = %d; asta_pnt_set(%d);', $user->step+1, 
+                         ($table->asta_pnt > 60 ? $table->asta_pnt + 1 : 61) );
+	  $user->comm[$user->step % COMM_N] = $ret;
+	  $user->step_inc();
+
 	  log_wr($sess, "Ripetere.");
 	}
 	else {
