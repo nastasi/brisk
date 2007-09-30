@@ -211,7 +211,12 @@ Hai vinto l'asta.<br> Scegli il seme:
 
 <div class="subarea">
 <div id="txt" class="chattshort"></div>
-<table><tr><td><div id="myname" class="txtt"></div></td><td><input id="txt_in" type="text" size="80" maxlength="256" onkeypress="chatt_checksend(this,event);" class="txtt"></td></tr></table>
+    <table align=center style="width: 98%; margin: auto;"><tr><td style="width:1%; text-align: right;">
+    <div id="myname"></div>
+    </td><td>
+    <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    </td></tr></table>
+
 <div id="flasou"></div>
 <hr>
 <div id="heartbit"></div>
