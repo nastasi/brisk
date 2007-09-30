@@ -103,9 +103,15 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // log_rd2($sess, "Postget".$proxy_step."zizi");
 
     if ($cur_step == $proxy_step) {
-      log_rd2($sess, "P");
+      log_only2($sess, "P");
       return (FALSE);
     }
+    else {
+      log_only2($sess, "R");
+    }
+  }
+  else {
+      log_only2($sess, "R");
   }
 
   if ($bri == FALSE) {
@@ -291,8 +297,8 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   $old_subst = $subst;
   $old_step =  $step;
   // log_rd($sess, "POST MAIN ".$step);;
-  usleep(200000);
-  if (($i % 10) == 0) {
+  usleep(400000);
+  if (($i % 5) == 0) {
     // log_rd2($sess, "TIME: ".time());
     echo '_';
     flush();
