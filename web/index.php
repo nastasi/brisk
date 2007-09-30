@@ -140,7 +140,8 @@ function main()
   
   // seed with microseconds since last "whole" second
   srand ((double) microtime() * 1000000);
-  $randval = rand(0,count($altout_propag)-1);
+  // $randval = rand(0,count($altout_propag)-1);
+  $randval = 1;
   $altout_carousel = sprintf('<a target="_blank" href="%s">%s</a>',
 			     $altout_propag[$randval]['url'],
 			     $altout_propag[$randval]['content']);
