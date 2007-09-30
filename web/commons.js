@@ -462,10 +462,12 @@ function dispose_asta(idx, pnt, nopoint)
 	btn = $("asta"+i);
 	if (i < idx) {
 	    btn.src = "img/astapasso"+(pnt >= 0 ? "" : "_ro")+".png";
+            btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
 	    pass = -1;
 	}
 	else {
 	    btn.src = "img/asta"+i+(pnt >= 0 ? "" : "_ro")+".png";
+            btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
 	    pass = i;
 	}
 	if (i < 19)
@@ -473,15 +475,15 @@ function dispose_asta(idx, pnt, nopoint)
 	else
 	    btn.style.left = asta_xarr[(i+1) % 3];
 	
-	btn.style.top  = parseInt(i / 3) * 50+1;
+	btn.style.top  = parseInt(i / 3) * 50 + (i == 9 ? 0 : 1);
 
 	if (pnt >= 0) {
 	    eval("btn.onclick = function () { act_asta("+pass+",61); }");
-	    btn.style.hover_cursor = "pointer";
+	    btn.style.cursor = "pointer";
 	}
 	else {
 	    btn.onclick = null;
-	    btn.style.hover_cursor = "";
+	    btn.style.cursor = "default";
 	}
     }
     
@@ -499,14 +501,14 @@ function dispose_asta(idx, pnt, nopoint)
     btn.style.left = asta_xarr[i % 3];
     btn.style.top = 25 + parseInt(i / 3) * 50 - 1;
     btn.src = "img/astaptsub"+(pnt >= 0 ? "" : "_ro")+".png";
-    // btn.style.visibility  = "visible";
+    btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
     if (pnt >= 0) {
 	btn.onclick = function () { act_asta(9,$("astapt").value); };
-	// btn.stylehover.cursor = "pointer";
+	btn.style.cursor = "pointer";
     }
     else {
 	btn.onclick = null;
-	// btn.stylehover.cursor = "";
+	btn.style.cursor = "default";
     }
     
     i+=1;
@@ -515,13 +517,12 @@ function dispose_asta(idx, pnt, nopoint)
 	btn.style.left = asta_xarr[i % 3];
 	btn.style.top = parseInt(i / 3) * 50;
 	btn.src = "img/astapashalf"+(pnt >= 0 ? "" : "_ro")+".png";
+        btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
 	if (pnt >= 0) {
 	    btn.onclick = function () { act_asta(-1,0); };
-	    // btn.stylehover.cursor = "pointer";
 	}
 	else {		
 	    btn.onclick = null;
-	    // btn.stylehover.cursor = "";
 	}
 
 	btn = $("astalascio");
@@ -536,13 +537,12 @@ function dispose_asta(idx, pnt, nopoint)
 	btn.style.left = asta_xarr[i % 3];
 	btn.style.top = parseInt(i / 3) * 50;;
 	btn.src = "img/astapasso"+(pnt >= 0 ? "" : "_ro")+".png";
+        btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
 	if (pnt >= 0) {
 	    btn.onclick = function () { act_asta(-1,0); };
-	    // btn.stylehover.cursor = "pointer";
 	}
 	else {
 	    btn.onclick = null;
-	    // btn.stylehover.cursor = "";
 	}
 
 	btn = $("astalascio");
@@ -551,6 +551,13 @@ function dispose_asta(idx, pnt, nopoint)
     }
     // btn.style.visibility  = "visible";
     $("asta").style.visibility = "visible";
+}
+
+function asta_pnt_set(pnt)
+{
+    btn = $("astapt");
+    var rpnt = (pnt < 0 ? -pnt : pnt);
+    btn.value = (rpnt < 61 ? 61 : (rpnt > 120 ? 120 : rpnt));
 }
 
 function hide_asta()
