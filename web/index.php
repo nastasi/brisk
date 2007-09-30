@@ -135,7 +135,7 @@ function main()
   $altout_propag = array( array ( 'url' => 'http://www.alternativeoutput.it',
 				  'content' => '<img class="nobo" src="img/altout80x15.png">' ),
 			  array ( 'url' => 'http://virtualsky.alternativeoutput.it',
-				  'content' => '<img class="nobo" src="img/virtualsky80x15.png">' )
+				  'content' => '<img class="nobo" src="img/virtualsky80x15a.gif">' )
 			  );
   
   // seed with microseconds since last "whole" second
