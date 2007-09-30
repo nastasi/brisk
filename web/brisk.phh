@@ -764,7 +764,7 @@ class brisco {
 	    $table = &$this->table[$user->table];
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	    $user_cur->comm[$user_cur->step % COMM_N] = sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
+	    $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
 	        xcape($this->user[$table->player[($user_cur->table_pos)%PLAYERS_N]]->name),
 	        xcape($this->user[$table->player[($user_cur->table_pos+1)%PLAYERS_N]]->name),
 	        xcape($this->user[$table->player[($user_cur->table_pos+2)%PLAYERS_N]]->name),
@@ -922,6 +922,17 @@ function make_seed()
 {
   list($usec, $sec) = explode(' ', microtime());
   return (float) $sec + ((float) $usec * 100000);
+}
+
+function log_only2($sess, $log) {
+  if (BRISK_DEBUG != TRUE)
+    return;
+  
+
+  if (($fp = @fopen("/tmp/brisk_only2.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+    fclose($fp);
+  }
 }
 
 function log_only($sess, $log) {
