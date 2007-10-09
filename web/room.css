@@ -242,9 +242,41 @@ div.esco {
 }
 
 .proxhr { 
-    /*background-color: green;  */
+    /* background-color: green; */
     align: center;
     text-align: center;
     width: 100%;
     top:  28px;
+}
+
+.webstart {
+    position: absolute;
+    background-color: white;
+    left: 100px;
+    visibility: hidden;
+    border: 1px solid gray;
+    align: left;
+    text-align: left;
+    /* width: 100px;
+     height: 300px; */
+    padding: 8px;
+    
+}
+
+.webstart a:link {
+    color: black;
+    line-height: 20px;
+    text-decoration: none;
+}
+
+.webstart a:visited {
+    color: black;
+    line-height: 20px;
+    text-decoration: none;
+}
+
+.webstart a:hover {
+    color: RGB(255,174,0);
+    line-height: 20px;
+    text-decoration: none;
 }

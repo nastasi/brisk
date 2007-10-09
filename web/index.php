@@ -215,7 +215,21 @@ google_color_url = "000000";
 $brisk_vertical_menu = '
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
-<a target="_blank" href="/briskhome.php"><img class="nobo" src="img/brisk_homebutt.png"></a>
+<!-- <a target="_blank" href="/briskhome.php"></a> -->
+<img class="nobo" src="img/brisk_start.png" onmouseover="$(\'webstart\').style.visibility = \'visible\';">
+<div class="webstart" id="webstart" onmouseover="this.style.visibility = \'visible\';" onmouseout="this.style.visibility = \'hidden\';">
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" title="homepage del progetto">homepage</a><br>
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#cose" title="di cosa si tratta">cos\'&egrave;</a><br>
+<a target="_blank" href="http://it.wikipedia.org/wiki/Briscola#Gioco_a_5" title="come si gioca">regole</a><br>
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#shots" title="screenshots dell\'applicazione">screenshoots</a><br>
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#comp" title="compatibilit&agrave; con i browser">compatibilit&agrave;</a><br>
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#sources" title="sorgenti dell\'applicazione">sorgenti</a><br>
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#mailing" title="come iscriversi alla mailing list">mailing&nbsp;list</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" title="come fare pubblicit&agrave; a brisk!">propaganda</a><br>
+<a href="#" title="credits" onclick="act_about();">about</a><br>
+
+</div>
 <br><br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" src="img/dynamica.png"></a><br><br>
@@ -350,7 +364,7 @@ else {
 <?php
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
-   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();"><br><br><br>',
+   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br><br><br>',
 	   $brisk_donate);
    printf("</td><td>");
 ?> 
