@@ -228,6 +228,7 @@ $brisk_vertical_menu = '
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" title="come fare pubblicit&agrave; a brisk!">propaganda</a><br>
 <a href="#" title="credits" onclick="act_about();">about</a><br>
+<a href="mailto:brisk@alternativeoutput.it" title="contatti">contatti</a><br>
 
 </div>
 <br><br><br>
