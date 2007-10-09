@@ -5,19 +5,17 @@
 
  TODO
  ====
-
    
-   URGENT - watchdog
-   URGENT - split server-side data (stat + others)
-   NORM   - pubblic announcements
-   NORM   - asta: highlight buttons (css hover)
+   URGENT - tables spawn
 
+   NORM   - pubblic announcements
    NORM   - restart preload img
    NORM   - chat vecchie in reload
    NORM   - tools dir with a main and some pages where check briscola tools.
    NORM   - bottoni => immagini
+   NORM   - watchdog
 
-   MIN  - cambiare titolo al tavolo
+   MIN    - cambiare titolo al tavolo
 
  MIDDLE TODO
  ===========
@@ -25,7 +23,6 @@
    - user assistant (with button to enable disable)
    - documentation
 
-   TO REVIEW - special chars in js
 
  FAR TODO
  ========
@@ -41,6 +38,9 @@
  DONE
  ====
 
+   ABORTED - asta: highlight buttons (css hover) - change pointer when over
+   DONE - step proxy
+   DONE - special chars in js
    DONE - ban temporaneo dai tavoli
    DONE - flash player to play sound
    DONEBUG - (aum. il timeout) - carte giocate che restano girate
