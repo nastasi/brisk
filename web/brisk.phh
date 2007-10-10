@@ -1155,7 +1155,7 @@ function save_data(&$bri)
     if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
       break;
     
-    log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
+    // log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
     if (shm_put_var($shm, $tok, $bri) == FALSE) {
       log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
       log_only($sess, serialize($bri));
