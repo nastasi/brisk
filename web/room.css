@@ -252,7 +252,8 @@ div.esco {
 .webstart {
     position: absolute;
     background-color: white;
-    left: 100px;
+    left: 80px;
+    z-index: 20;
     visibility: hidden;
     border: 1px solid gray;
     align: left;
