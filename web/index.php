@@ -180,10 +180,15 @@ google_color_url = "000000";
 
 
 </div></td>
-<td align="center"><div>
+<td align="center">
+<!-- <table><tr><td>  -->
+<div>
     <img class="nobo" src="img/brisk_logo64.png">
     briscola chiamata in salsa ajax<br>
-    </div></td>
+    </div>
+<!-- </td><td><div style="align: center; text-align:center; background-color: #f8f8f8; padding: 2px; border: 1px solid #ffae00;"><a href="http://www.linuxday.it"><img class="nobo" src="img/ld66.png"></a> 27/10/2007<br>OGGI! 
+    </td></tr></table>-->
+</td>
 <td align="right"><div style="padding-right: 8px;">
 
 
