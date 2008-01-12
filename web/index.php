@@ -40,16 +40,16 @@ function main()
   
   if (isset($BRISK_SHOWHTML) == FALSE) {
     $is_table = FALSE;
-    $sem = lock_data();
-    $bri = &load_data();
+    $sem = Room::lock_data();
+    $room = &Room::load_data();
     
     /* Actions */
     if (validate_sess($sess)) {
-      $bri->garbage_manager(TRUE);
-      if (($user = &$bri->get_user($sess, &$idx)) != FALSE) {
+      $room->garbage_manager(TRUE);
+      if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
 	if ($user->stat == "table") {
 	  header ("Location: table.php");
-	  unlock_data($sem);
+	  Room::unlock_data($sem);
 	  exit;
 	}
 	$ACTION = "room";
@@ -57,15 +57,15 @@ function main()
     }
     
     if ($ACTION == "login" && isset($name)) {
-      $bri->garbage_manager(TRUE);
+      $room->garbage_manager(TRUE);
       /* try login */
-      if (($user = &$bri->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
+      if (($user = &$room->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
 	$ACTION = "room";
 	
 	// setcookie ("sess", "", time() + 180);      
-	$bri->standup_update(&$user);
+	$room->standup_update(&$user);
 	
-	if (save_data(&$bri) == FALSE) {
+	if (Room::save_data(&$room) == FALSE) {
 	  echo "ERRORE SALVATAGGIO\n";
 	  exit;
 	}
@@ -80,7 +80,7 @@ function main()
 	  $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
       }
     }
-    unlock_data($sem);
+    Room::unlock_data($sem);
   }
   /* Rendering. */
 

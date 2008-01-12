@@ -9,7 +9,7 @@ web_path="$HOME/brisk"
 web_only="FALSE"
 
 if [ -f $HOME/.brisk_install ]; then
-   . $HOME/.brisk_install
+   . $HOME/.spawn_install
 fi
 if [ "x$cookie_path" = "x" ]; then
    cookie_path=$web_path

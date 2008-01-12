@@ -166,27 +166,37 @@ class Table {
 
   function Table() 
   {
-    $this->player    =   array();
-    $this->player_n  =   0;
-    $this->card      =  &$this->bunch_create();
-    $this->asta_pla  =   array(); // TRUE: in auction, FALSE: out of the auction
-    $this->asta_pla_n=  -1;
-    $this->asta_card =  -1;
-    $this->asta_pnt  =  -1;
-    $this->mult      =   1;
-    $this->points    =   array( );
-    $this->points_n  =   0;
-    $this->total     =   array( 0, 0, 0, 0, 0);
-    $this->asta_win  =  -1;
-    $this->briscola  =  -1;
-    $this->friend    =  -1;
-    $this->turn      =   0;
-    $this->old_reason = "";
-    $this->old_asta_pnt = -1;
-    $this->old_pnt      = -1;
-    $this->old_win   =  -1;
-    $this->old_friend=  -1;
+  }
+  
+  function &create() 
+  {
+    GLOBAL $G_false;
 
+    if (($thiz = new Table()) == FALSE)
+      return ($G_false);
+
+    $thiz->player    =   array();
+    $thiz->player_n  =   0;
+    $thiz->card      =  &$thiz->bunch_create();
+    $thiz->asta_pla  =   array(); // TRUE: in auction, FALSE: out of the auction
+    $thiz->asta_pla_n=  -1;
+    $thiz->asta_card =  -1;
+    $thiz->asta_pnt  =  -1;
+    $thiz->mult      =   1;
+    $thiz->points    =   array( );
+    $thiz->points_n  =   0;
+    $thiz->total     =   array( 0, 0, 0, 0, 0);
+    $thiz->asta_win  =  -1;
+    $thiz->briscola  =  -1;
+    $thiz->friend    =  -1;
+    $thiz->turn      =   0;
+    $thiz->old_reason = "";
+    $thiz->old_asta_pnt = -1;
+    $thiz->old_pnt      = -1;
+    $thiz->old_win   =  -1;
+    $thiz->old_friend=  -1;
+
+    return ($thiz);
   }
 
   function &bunch_create()
@@ -292,17 +302,17 @@ class Table {
     return ($this->player_n - 1);
   }
   
-  function user_rem(&$bri, &$user)
+  function user_rem(&$room, &$user)
   {
     $tabpos = $user->table_pos;
     
     /* verifico la consistenza dei dati */
-    if ($bri->user[$this->player[$tabpos]] == $user) {
+    if ($room->user[$this->player[$tabpos]] == $user) {
       
       /* aggiorna l'array dei giocatori al tavolo. */
       for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
 	$this->player[$i] = $this->player[$i+1];
-	$user_cur = &$bri->user[$this->player[$i]];
+	$user_cur = &$room->user[$this->player[$i]];
 	$user_cur->table_pos = $i;
       }
       $this->player_n--;
@@ -371,24 +381,34 @@ class User {
   var $table_pos;  // idx on the table
   var $the_end;    // Flag to change the end of the session
 
-  function User($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
-    $this->name  = $name;
-    $this->sess  = $sess;
-    $this->ip    = $ip;
-    $this->lacc   = time();
-    $this->laccwr = time();
-    $this->bantime = 0;
-    $this->stat  = $stat;
-    $this->subst  = $subst;
-    $this->step  = 1;
-    $this->trans_step  = -1;
-    $this->comm  = array();
-    $this->asta_card = -2;
-    $this->asta_pnt  = -1;
-    $this->handpt = -1;
-    $this->exitislock = TRUE;
+  function User() {
+  }
+
+  function &create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+    GLOBAL $G_false;
+
+    if (($thiz = new User()) == FALSE)
+      return ($G_false);
+
+    $thiz->name  = $name;
+    $thiz->sess  = $sess;
+    $thiz->ip    = $ip;
+    $thiz->lacc   = time();
+    $thiz->laccwr = time();
+    $thiz->bantime = 0;
+    $thiz->stat  = $stat;
+    $thiz->subst  = $subst;
+    $thiz->step  = 1;
+    $thiz->trans_step  = -1;
+    $thiz->comm  = array();
+    $thiz->asta_card = -2;
+    $thiz->asta_pnt  = -1;
+    $thiz->handpt = -1;
+    $thiz->exitislock = TRUE;
     
-    $this->table = $table;
+    $thiz->table = $table;
+    
+    return ($thiz);
   }
 
   function stat_set($stat) {
@@ -471,21 +491,22 @@ function step_unproxy($sess) {
 }
 
 
-class brisco {
+class Room {
   var $user;
   var $table;
   var $comm; // commands for many people
   var $step; // current step of the comm array
   var $garbage_timeout;
 
-  function brisco () {
+  function Room () {
     $this->user = array();
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $this->user[$i] =& new User("", "");
+      $this->user[$i] =& User::create("", "");
     }
+
     for ($i = 0 ; $i < TABLES_N ; $i++) 
-      $this->table[$i] =& new Table();
+      $this->table[$i] =& Table::create();
     $this->garbage_timeout = 0;
   }
 
@@ -824,7 +845,7 @@ class brisco {
   }
 
   /*
-   * function &add_user(&$bri, &$sess, &$idx, $name, $ip)
+   * function &add_user(&$room, &$sess, &$idx, $name, $ip)
    *
    * RETURN VALUE:
    *   if ($idx != -1 && ret == FALSE)  =>  duplicated nick
@@ -915,8 +936,118 @@ class brisco {
     }
   }
 
+  // Static functions
+  function &init_data()
+  {
+    $room =& new Room();
+    
+    return $room;
+  }
+  
 
-} // end class brisco
+  function &load_data() 
+  {
+    GLOBAL $G_false, $sess;
+    
+    if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+    
+    if ($shm = shm_attach($tok, SHM_DIMS)) {
+      $room = @shm_get_var($shm, $tok);
+      
+      log_only($sess, "bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
+      if (isset($room)) 
+	log_only($sess, "bri count ".count($room));
+      
+      if ($room == FALSE) {
+	log_only($sess, "INIT MAIN DATA");
+	
+	$room =& Room::init_data();
+	if (shm_put_var($shm, $tok, $room) == FALSE) {
+	  log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($room)));
+	  log_only($sess, serialize($room));
+	}
+      }
+      
+      shm_detach($shm);
+      
+      $ret = &$room;
+      return ($ret);
+    }
+    
+    return ($G_false);
+  }
+  
+
+  function save_data(&$room) 
+  {
+    GLOBAL $sess;
+    
+    $ret =   FALSE;
+    $shm =   FALSE;
+    $isacq = FALSE;
+    
+    // var_dump($room);
+    
+    if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) 
+      return (FALSE);
+    
+    do {
+      $isacq = TRUE;
+      
+      if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
+	break;
+      
+      // log_only($sess, "PUT_VAR DI ".strlen(serialize($room)));
+      if (shm_put_var($shm, $tok, $room) == FALSE) {
+	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($room)));
+	log_only($sess, serialize($room));
+	break;
+      }
+      // log_main("XXX", "QUI CI ARRIVA [".$room->user[0]->name."]");
+      $ret = TRUE;
+    } while (0);
+    
+    if ($shm)
+      shm_detach($shm);
+    
+    return ($ret);
+  }
+
+  function lock_data()
+  {
+    GLOBAL $sess; 
+    
+    //  echo "LOCK: ".FTOK_PATH."/main";
+    //  exit;
+    if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+    // echo "FTOK ".$tok."<br>";
+    if (($res = sem_get($tok)) == FALSE) {
+      echo "SEM_GET FAILED";
+      exit;
+    }
+    if (sem_acquire($res)) {   
+      log_only($sess, "LOCK");
+      return ($res);
+    }
+    else
+      return (FALSE);
+  }
+  
+  function unlock_data($res)
+  {
+    GLOBAL $sess; 
+    
+    log_only($sess, "UNLOCK");
+
+    return (sem_release($res));
+  }
+} // end class Room
 
 function make_seed()
 {
@@ -1039,44 +1170,6 @@ function log_legal($timecur, $sess, $name, $where, $mesg)
 
 
 
-function init_data()
-{
-  $brisco =& new brisco();
-
-  return $brisco;
-}
-
-function lock_data()
-{
-  GLOBAL $sess; 
-
-	//  echo "LOCK: ".FTOK_PATH."/main";
-	//  exit;
-  if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
-    echo "FTOK FAILED";
-    exit;
-  }
-  // echo "FTOK ".$tok."<br>";
-  if (($res = sem_get($tok)) == FALSE) {
-    echo "SEM_GET FAILED";
-    exit;
-  }
-  if (sem_acquire($res)) {   
-    log_only($sess, "LOCK");
-    return ($res);
-  }
-  else
-    return (FALSE);
-}
-
-function unlock_data($res)
-{
-  GLOBAL $sess; 
-
-  log_only($sess, "UNLOCK");
-  return (sem_release($res));
-}
-
 
 function lock_banlist()
 {
@@ -1099,78 +1192,6 @@ function unlock_banlist($res)
   return (sem_release($res));
 }
 
-
-function &load_data() 
-{
-  GLOBAL $G_false, $sess;
-
-  if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
-    echo "FTOK FAILED";
-    exit;
-  }
-
-  if ($shm = shm_attach($tok, SHM_DIMS)) {
-    $bri = @shm_get_var($shm, $tok);
-    
-    log_only($sess, "bri ==  ".($bri == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($bri === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($bri) ?   "TRUE" : "FALSE"));
-    if (isset($bri)) 
-      log_only($sess, "bri count ".count($bri));
-    
-    if ($bri == FALSE) {
-      log_only($sess, "INIT MAIN DATA");
-      
-      $bri = init_data();
-      if (shm_put_var($shm, $tok, $bri) == FALSE) {
-	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
-	log_only($sess, serialize($bri));
-      }
-    }
-    
-    shm_detach($shm);
-
-    $ret = &$bri;
-    return ($ret);
-  }
-
-  return ($G_false);
-}
-
-
-function save_data(&$bri) 
-{
-  GLOBAL $sess;
-
-  $ret =   FALSE;
-  $shm =   FALSE;
-  $isacq = FALSE;
-
-  // var_dump($bri);
-
-  if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) 
-    return (FALSE);
-
-  do {
-    $isacq = TRUE;
-    
-    if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
-      break;
-    
-    // log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
-    if (shm_put_var($shm, $tok, $bri) == FALSE) {
-      log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
-      log_only($sess, serialize($bri));
-      break;
-    }
-    // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
-    $ret = TRUE;
-  } while (0);
-  
-  if ($shm)
-    shm_detach($shm);
-     
-  return ($ret);
-}
-
 function table_act_content($isstanding, $sitted, $table, $cur_table)
 {
   $ret = "";
@@ -1189,7 +1210,7 @@ function table_act_content($isstanding, $sitted, $table, $cur_table)
   return ($ret);
 }
 
-function table_content($bri, $user, $table_idx)
+function table_content($room, $user, $table_idx)
 {
   $content = "";
   $ret = "";
@@ -1199,13 +1220,13 @@ function table_content($bri, $user, $table_idx)
   //
 
   $sess = $user->sess;
-  $table = &$bri->table[$table_idx];
+  $table = &$room->table[$table_idx];
 
   if ($user->stat != 'room')
     return;
 
   for ($i = 0 ; $i < $table->player_n ; $i++) {
-    $user_cur = &$bri->user[$table->player[$i]];
+    $user_cur = &$room->user[$table->player[$i]];
 
     if ($user_cur == $user) 
 	{ $hilion = "<b>"; $hilioff = "</b>"; }
@@ -1226,7 +1247,7 @@ function table_content($bri, $user, $table_idx)
   return ($ret);
 }
 
-function standup_content(&$bri, $user)
+function standup_content(&$room, $user)
 {
   $ret = "";
   $content = "";
@@ -1235,7 +1256,7 @@ function standup_content(&$bri, $user)
     return;
 
   for ($e = 0 , $ct = 0 ; $ct < 4 && $e < MAX_PLAYERS ; $e++) {
-    if ($bri->user[$e]->sess == "" || $bri->user[$e]->stat != "room" || $bri->user[$e]->name == "")
+    if ($room->user[$e]->sess == "" || $room->user[$e]->stat != "room" || $room->user[$e]->name == "")
       continue;
     $ct++;
   }
@@ -1243,20 +1264,20 @@ function standup_content(&$bri, $user)
   $content .= sprintf('<table cols=\\"%d\\" class=\\"table_standup\\">', $ct);
 
   for ($e = 0 , $ct = 0 ; $e < MAX_PLAYERS ; $e++) {
-    if ($bri->user[$e]->sess == "" || $bri->user[$e]->stat != "room" || $bri->user[$e]->name == "")
+    if ($room->user[$e]->sess == "" || $room->user[$e]->stat != "room" || $room->user[$e]->name == "")
       continue;
 
 
-    if ($bri->user[$e]->subst == "standup") {
+    if ($room->user[$e]->subst == "standup") {
       if (($ct % 4) == 0) {
 	$content .= '<tr>';
       }
-      if ($bri->user[$e] == $user) 
+      if ($room->user[$e] == $user) 
 	{ $hilion = "<b>"; $hilioff = "</b>"; }
       else
 	{ $hilion = ""; $hilioff = ""; }
 
-      $content .= sprintf('<td class=\\"room_standup\\">%s%s%s</td>',$hilion, xcape($bri->user[$e]->name), $hilioff);
+      $content .= sprintf('<td class=\\"room_standup\\">%s%s%s</td>',$hilion, xcape($room->user[$e]->name), $hilioff);
       if (($ct % 4) == 3) {
 	$content .= '</tr>';
       }
@@ -1279,7 +1300,7 @@ function show_notify($text, $tout, $butt, $w, $h)
   return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
 }
 
-function briscola_show($bri, $table, $user)
+function briscola_show($room, $table, $user)
 {
   $ptnadd = "";
   $ret = "";
@@ -1292,7 +1313,7 @@ function briscola_show($bri, $table, $user)
     $ret .= sprintf('$("callerinfo").innerHTML = "Chiami%s:";', $ptnadd);
   else 
     $ret .= sprintf('$("callerinfo").innerHTML = "Chiama %s%s:";', 
-		    xcape($bri->user[$table->player[$table->asta_win]]->name), $ptnadd);
+		    xcape($room->user[$table->player[$table->asta_win]]->name), $ptnadd);
 
   $ret .= sprintf('$("caller").style.backgroundImage = \'url("img/brisk_caller_sand%d.png")\';',
 		  $table->asta_win);
@@ -1335,17 +1356,17 @@ function multoval($mult)
     return (sprintf("%d-plo", $mult));
 }
 
-function show_table_info(&$bri, &$table, $table_pos)
+function show_table_info(&$room, &$table, $table_pos)
 {
   $ret = "";
-  $user = &$bri->user[$table->player[$table_pos]];
+  $user = &$room->user[$table->player[$table_pos]];
 
   $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
   $noty = sprintf('<table class=\"points\"><tr><th></th>');
   
   // Names.
   for ($i = 0 ; $i < PLAYERS_N ; $i++) 
-    $noty .= sprintf('<th class=\"td_points\">%s</th>', xcape($bri->user[$table->player[$i]]->name));
+    $noty .= sprintf('<th class=\"td_points\">%s</th>', xcape($room->user[$table->player[$i]]->name));
   $noty .= sprintf("</tr>");
 
   // Points.
@@ -1376,8 +1397,8 @@ function show_table_info(&$bri, &$table, $table_pos)
 
     if ($win != $fri) {
       $noty .= sprintf("<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", 
-		       xcape($bri->user[$win]->name),
-		       xcape($bri->user[$fri]->name));
+		       xcape($room->user[$win]->name),
+		       xcape($room->user[$fri]->name));
       if ($table->old_pnt == 120) {
 	$noty .= sprintf("hanno fatto <b>cappotto</b> EBBRAVI!.<hr>");
       }
@@ -1390,7 +1411,7 @@ function show_table_info(&$bri, &$table, $table_pos)
     }
     else {
       $noty .= sprintf("<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", 
-		       xcape($bri->user[$win]->name));
+		       xcape($room->user[$win]->name));
       if ($table->old_pnt == 120) {
 	$noty .= sprintf("ha fatto <b>cappotto</b> EBBRAVO!.<hr>");
       }
@@ -1405,7 +1426,7 @@ function show_table_info(&$bri, &$table, $table_pos)
   if ($table->mazzo == $table_pos) 
     $noty .= "Fai <b>tu</b> il mazzo,";
   else {
-    $unam = xcape($bri->user[$table->player[$table->mazzo]]->name);
+    $unam = xcape($room->user[$table->player[$table->mazzo]]->name);
     $noty .= "Il mazzo a <b>$unam</b>,";
   }
 
@@ -1424,7 +1445,7 @@ function show_table_info(&$bri, &$table, $table_pos)
     $noty .= " tocca a <b>te</b> giocare.";
   }
   else {
-    $unam = xcape($bri->user[$table->player[$curplayer]]->name);
+    $unam = xcape($room->user[$table->player[$curplayer]]->name);
     $noty .= " tocca a <b>$unam</b> giocare.";
   }
 
@@ -1460,7 +1481,7 @@ function table_wellcome($user)
   return ($ret);
 }
 
-function show_room(&$bri, &$user)
+function show_room(&$room, &$user)
 {
   $ret = sprintf('gst.st = %d;',  $user->step);
   $ret .= sprintf('stat = "%s";',  $user->stat);
@@ -1469,12 +1490,12 @@ function show_room(&$bri, &$user)
   $ret .= sprintf('subst = "%s";', $user->subst);
   $ret .= sprintf('$("myname").innerHTML = "<b>%s</b>";', xcape($user->name,ENT_COMPAT,"UTF-8"));
   for ($i = 0 ; $i < TABLES_N ; $i++) {
-    $ret .= table_content($bri, $user, $i);
+    $ret .= table_content($room, $user, $i);
     $act_content = table_act_content(($user->subst == 'standup'), 
-				     $bri->table[$i]->player_n, $i, $user->table);
+				     $room->table[$i]->player_n, $i, $user->table);
     $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $i, $act_content);
   }
-  $ret .= standup_content($bri, $user);
+  $ret .= standup_content($room, $user);
   
   return ($ret);
 }
@@ -1491,14 +1512,14 @@ Examples                    of $is_transition, $is_again:
   from table: asta cmd e tutti passano:  TRUE, TRUE
   from table: fine partita:              TRUE, TRUE
  */
-function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
+function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 {
   $table_idx = $user->table;
-  $table = &$bri->table[$table_idx];
+  $table = &$room->table[$table_idx];
   $table_pos = $user->table_pos;
 
   $ret = "table_init();";
-  $ret .= $table->exitlock_show(&$bri->user, $table_pos);
+  $ret .= $table->exitlock_show(&$room->user, $table_pos);
   if (!$is_again) {
     /* GENERAL STATUS */
     $ret .= sprintf( 'gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
@@ -1509,15 +1530,15 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
     /* USERS INFO */
     $ret .= sprintf('$("myname").innerHTML = "<b>%s</b>";', xcape($user->name,ENT_COMPAT,"UTF-8"));
     $ret .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
-		    xcape($bri->user[$table->player[($table_pos)%PLAYERS_N]]->name),
-		    xcape($bri->user[$table->player[($table_pos+1)%PLAYERS_N]]->name),
-		    xcape($bri->user[$table->player[($table_pos+2)%PLAYERS_N]]->name),
-		    (PLAYERS_N == 3 ? "" :  xcape($bri->user[$table->player[($table_pos+3)%PLAYERS_N]]->name)),
-		    (PLAYERS_N == 3 ? "" :  xcape($bri->user[$table->player[($table_pos+4)%PLAYERS_N]]->name)));
+		    xcape($room->user[$table->player[($table_pos)%PLAYERS_N]]->name),
+		    xcape($room->user[$table->player[($table_pos+1)%PLAYERS_N]]->name),
+		    xcape($room->user[$table->player[($table_pos+2)%PLAYERS_N]]->name),
+		    (PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+3)%PLAYERS_N]]->name)),
+		    (PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+4)%PLAYERS_N]]->name)));
   }
   /* NOTIFY FOR THE CARD MAKER */
   if ($is_transition) { //  && $user->subst ==  "asta" superfluo
-    $ret .= show_table_info(&$bri, &$table, $table_pos);
+    $ret .= show_table_info(&$room, &$table, $table_pos);
   }
   if (!$is_again) 
     $ret .= table_wellcome($user);
@@ -1605,7 +1626,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
     /* show users auction status */
     $showst = "";
     for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-      $user_cur = &$bri->user[$table->player[$i]];
+      $user_cur = &$room->user[$table->player[$i]];
       $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "), 
 			 ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
     }
@@ -1651,7 +1672,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
       $ret .= "remark_off();";
     
     /* WHO CALL AND WATH */
-    $ret .= briscola_show($bri, $table, $user);
+    $ret .= briscola_show($room, $table, $user);
     
   }
   return ($ret);

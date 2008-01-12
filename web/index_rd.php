@@ -67,32 +67,32 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   GLOBAL $is_page_streaming, $first_loop;
   
   $ret = FALSE;
-  $bri = FALSE;
+  $room = FALSE;
 
   log_rd2($sess, "M");
   /* Sync check (read only without modifications */
   ignore_user_abort(TRUE);
-  if (($sem = lock_data()) != FALSE) { 
+  if (($sem = Room::lock_data()) != FALSE) { 
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
       log_only($sess, "F");
-      $bri = &load_data();
-      if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-	unlock_data($sem);
+      $room = &Room::load_data();
+      if (($user = &$room->get_user($sess, $idx)) == FALSE) {
+	Room::unlock_data($sem);
         ignore_user_abort(FALSE);
 	return (unrecerror());
       }
       log_auth($sess, "update lacc");
       $user->lacc = time();
 
-      $bri->garbage_manager(FALSE);
+      $room->garbage_manager(FALSE);
       
-      save_data($bri);
+      Room::save_data($room);
       $first_loop = FALSE;
     }
 
     log_only($sess, "U");
-    unlock_data($sem);
+    Room::unlock_data($sem);
     ignore_user_abort(FALSE);
   }
   else {
@@ -114,12 +114,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       log_only2($sess, "R");
   }
 
-  if ($bri == FALSE) {
+  if ($room == FALSE) {
     ignore_user_abort(TRUE);
-    if (($sem = lock_data()) != FALSE) { 
+    if (($sem = Room::lock_data()) != FALSE) { 
       log_only($sess, "P");
-      $bri = &load_data();
-      unlock_data($sem);
+      $room = &Room::load_data();
+      Room::unlock_data($sem);
       ignore_user_abort(FALSE);
     }
     else {
@@ -127,7 +127,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
   }
   
-  if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
+  if (($user = &$room->get_user($sess, $idx)) == FALSE) {
     return (unrecerror());
   }
 
@@ -140,10 +140,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   if ($cur_step == -1) {
     // FUNZIONE from_scratch DA QUI 
     ignore_user_abort(TRUE);
-    $sem = lock_data();
-    $bri = &load_data();
-    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-      unlock_data($sem);
+    $sem = Room::lock_data();
+    $room = &Room::load_data();
+    if (($user = &$room->get_user($sess, $idx)) == FALSE) {
+      Room::unlock_data($sem);
       ignore_user_abort(FALSE);
       return (unrecerror());
     }
@@ -157,13 +157,13 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       $user->trans_step = -1;
 
 
-      save_data($bri);
-      unlock_data($sem);
+      Room::save_data($room);
+      Room::unlock_data($sem);
       ignore_user_abort(FALSE);
     }
     else {
       log_rd2($sess, "TRANS NON ATTIVATO");
-      unlock_data($sem);
+      Room::unlock_data($sem);
       ignore_user_abort(FALSE);
     }
   }
@@ -173,7 +173,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
     if ($user->stat == 'room') {
       log_rd($sess, "roomma");
-      $ret .= show_room(&$bri, &$user);
+      $ret .= show_room(&$room, &$user);
     }
     /***************
      *             *
@@ -181,7 +181,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
      *             *
      ***************/
     else if ($user->stat == 'table') {      
-      $ret = show_table(&$bri,&$user,$user->step,FALSE,FALSE);
+      $ret = show_table(&$room,&$user,$user->step,FALSE,FALSE);
 
       log_rd2($sess, "SENDED TO THE STREAM: ".$ret);
     }
@@ -193,10 +193,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   }
   else {
     ignore_user_abort(TRUE);
-    $sem = lock_data();
-    $bri = &load_data();
-    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-      unlock_data($sem);
+    $sem = Room::lock_data();
+    $room = &Room::load_data();
+    if (($user = &$room->get_user($sess, $idx)) == FALSE) {
+      Room::unlock_data($sem);
       ignore_user_abort(FALSE);
       return (unrecerror());
     }
@@ -205,7 +205,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	if ($cur_step + COMM_N < $user->step) {
 	  if (($cur_stat != $user->stat)) {
 	    $to_stat = $user->stat;
-	    unlock_data($sem);
+	    Room::unlock_data($sem);
 	    ignore_user_abort(FALSE);
 	    return (page_sync($user->sess, $to_stat == "table" ? "table.php" : "index.php"));
 	  }
@@ -233,17 +233,17 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	$user->the_end = FALSE;
 	
 	if ($user->subst == 'sitdown')
-	  $bri->room_wakeup(&$user);
+	  $room->room_wakeup(&$user);
 	else if ($user->subst == 'standup')
-	  $bri->room_outstandup(&$user);
+	  $room->room_outstandup(&$user);
 	else
 	  log_rd2($sess, "LOGOUT FROM WHAT ???");
 	  
-	save_data($bri);
+	Room::save_data($room);
       }
     }
 	  
-    unlock_data($sem);
+    Room::unlock_data($sem);
     ignore_user_abort(FALSE);
   }
 

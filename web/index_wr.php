@@ -34,12 +34,12 @@ log_load($sess, "LOAD: index_wr.php");
  */
 log_wr($sess, 'COMM: '.$mesg);
 
-$sem = lock_data();
-$bri = &load_data();
-if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
+$sem = Room::lock_data();
+$room = &Room::load_data();
+if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
   log_wr($sess, "Get User Error");
-  unlock_data($sem);
+  Room::unlock_data($sem);
   exit;
 }
 $argz = explode('|', $mesg);
@@ -54,9 +54,9 @@ if ($argz[0] == 'shutdown') {
   
   log_rd2($user->sess, "AUTO LOGOUT.");
   if ($user->subst == 'sitdown' || $user->stat == 'table')
-    $bri->room_wakeup(&$user);
+    $room->room_wakeup(&$user);
   else if ($user->subst == 'standup')
-    $bri->room_outstandup(&$user);
+    $room->room_outstandup(&$user);
   else
     log_rd2($sess, "SHUTDOWN FROM WHAT ???");
 }
@@ -85,7 +85,7 @@ else if ($user->stat == 'room') {
     
   }
   else if ($argz[0] == 'chatt') {
-    $bri->chatt_send(&$user,$mesg);
+    $room->chatt_send(&$user,$mesg);
   }
   /**********************
    *                    *
@@ -97,7 +97,7 @@ else if ($user->stat == 'room') {
     if ($argz[0] == 'sitdown') {
       if ($user->the_end == TRUE) {
 	log_wr($sess, "INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
-	unlock_data($sem);
+	Room::unlock_data($sem);
 	exit;
       }
       /* TODO: refact to a function */
@@ -106,18 +106,18 @@ else if ($user->stat == 'room') {
 	$user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "Torna in piedi.", 400, 100);
 	
 	$user->step_inc();
-	save_data($bri);
-	unlock_data($sem);
+	Room::save_data($room);
+	Room::unlock_data($sem);
 	exit;
       }
     
       // Take parameters
       $table_idx = $argz[1];
-      $table = &$bri->table[$table_idx];
+      $table = &$room->table[$table_idx];
     
       if ($table->player_n == PLAYERS_N) {
 	log_wr($sess, "WARN:FSM: Sitdown unreachable, table full.");
-	unlock_data($sem);
+	Room::unlock_data($sem);
 	exit;
       } 
 
@@ -130,33 +130,44 @@ else if ($user->stat == 'room') {
 	// Start game for this table.
 	log_wr($sess, "Start game!");
 	
-	$table->init(&$bri->user);
-	$table->game_init(&$bri->user);
-	$curtime = time();
-	
-	for ($i = 0 ; $i < $table->player_n ; $i++) {
-	  $user_cur = &$bri->user[$table->player[$i]];
-	  log_wr($sess, "Pre if!");
-	  
-	  $ret = "";
-	  $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
-	  
-	  $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-	  $user_cur->trans_step = $user_cur->step + 1;
-	  log_wr($sess, "TRANS ATTIVATO");
-	  
+	//
+	//  START THE SPAWN HERE!!!!
+	//
 
-	  $user_cur->stat_set('table');
-	  $user_cur->subst = 'asta';
-	  $user_cur->laccwr = $curtime;
-	  $user_cur->step_inc();
-	  
-	  $user_cur->comm[$user_cur->step % COMM_N] = show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, FALSE);
-	  $user_cur->step_inc();
+	if (TRUE) { // WITH SPAWN
 	}
+	else { // BEFORE SPAWN
+	  // init table
+	  $table->init(&$room->user);
+	  $table->game_init(&$room->user);
+	  $curtime = time();
+	  
+	  // init users
+	  for ($i = 0 ; $i < $table->player_n ; $i++) {
+	    $user_cur = &$room->user[$table->player[$i]];
+	    log_wr($sess, "Pre if!");
+	    
+	    $ret = "";
+	    $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
+	    
+	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+	    $user_cur->trans_step = $user_cur->step + 1;
+	    log_wr($sess, "TRANS ATTIVATO");
+	    
+	    
+	    $user_cur->stat_set('table');
+	    $user_cur->subst = 'asta';
+	    $user_cur->laccwr = $curtime;
+	    $user_cur->step_inc();
+	    
+	    $user_cur->comm[$user_cur->step % COMM_N] = show_table(&$room,&$user_cur,$user_cur->step+1,TRUE, FALSE);
+	    $user_cur->step_inc();
+	  }
+	} // end else {  BEFORE SPAWN
+	
+	// change room
+	$room->room_sitdown(&$user, $table_idx);
       }
-      
-      $bri->room_sitdown(&$user, $table_idx);
     }
     else if ($argz[0] == 'logout') {
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
@@ -172,10 +183,10 @@ else if ($user->stat == 'room') {
    **********************/
   else if ($user->subst == 'sitdown') {
     if ($argz[0] == 'wakeup') {
-      $bri->room_wakeup(&$user);      
+      $room->room_wakeup(&$user);      
     }
     else if ($argz[0] == 'logout') {
-      $bri->room_wakeup(&$user);      
+      $room->room_wakeup(&$user);      
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
       $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
       $user->the_end = TRUE;
@@ -190,17 +201,17 @@ else if ($user->stat == 'room') {
  *********************/
 else if ($user->stat == 'table') {
   $user->laccwr = time();
-  $table = &$bri->table[$user->table];
+  $table = &$room->table[$user->table];
 
   if ($argz[0] == 'tableinfo') {
     log_wr($sess, "PER DI TABLEINFO");
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .= show_table_info(&$bri, &$table, $user->table_pos);
+    $user->comm[$user->step % COMM_N] .= show_table_info(&$room, &$table, $user->table_pos);
     log_wr($sess, $user->comm[$user->step % COMM_N]);
     $user->step_inc();
   }
   else if ($argz[0] == 'chatt') {
-    $bri->chatt_send(&$user,$mesg);
+    $room->chatt_send(&$user,$mesg);
   }
   else if ($argz[0] == 'logout') {
     $remcalc = $argz[1];
@@ -212,10 +223,10 @@ else if ($user->stat == 'table') {
 
     $logout_cont = TRUE;
     if ($remcalc >= 3) {
-      $lockcalc = $table->exitlock_calc(&$bri->user, $user->table_pos);
+      $lockcalc = $table->exitlock_calc(&$room->user, $user->table_pos);
       if ($lockcalc < 3) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	$user->comm[$user->step % COMM_N] .= $table->exitlock_show(&$bri->user, $user->table_pos);
+	$user->comm[$user->step % COMM_N] .= $table->exitlock_show(&$room->user, $user->table_pos);
 	$user->comm[$user->step % COMM_N] .=  show_notify("<br>I dati presenti sul server non erano allineati con quelli inviati dal tuo browser, adesso lo sono. Riprova ora.", 2000, "Torna alla partita.", 400, 100);
 	
 	log_wr($sess, $user->comm[$user->step % COMM_N]);
@@ -227,13 +238,13 @@ else if ($user->stat == 'table') {
       $user->bantime = $user->laccwr + BAN_TIME;
     
     if ($logout_cont == TRUE) {
-      $bri->room_wakeup(&$user);
+      $room->room_wakeup(&$user);
     }
   }
   else if ($argz[0] == 'exitlock') {
     $user->exitislock = ($user->exitislock == TRUE ? FALSE : TRUE);
     for ($ct = 0, $i = 0 ; $i < PLAYERS_N ; $i++) {	
-      $user_cur[$i] = &$bri->user[$table->player[$i]];
+      $user_cur[$i] = &$room->user[$table->player[$i]];
       if ($user_cur[$i]->exitislock == FALSE)
 	$ct++;
     }
@@ -256,13 +267,13 @@ else if ($user->stat == 'table') {
       $table->old_reason = sprintf("Ha lasciato %s perche` aveva al massimo 2 punti.", $user->name);
 
       $table->game_next();
-      $table->game_init(&$bri->user);
+      $table->game_init(&$room->user);
     
       for ($i = 0 ; $i < PLAYERS_N ; $i++) {	
-	$user_cur = &$bri->user[$table->player[$i]];
+	$user_cur = &$room->user[$table->player[$i]];
 
 	$ret = sprintf('gst.st = %d;', $user_cur->step+1);
-	$ret .= show_table(&$bri,&$user_cur,$user_cur->step+1, TRUE, TRUE);
+	$ret .= show_table(&$room,&$user_cur,$user_cur->step+1, TRUE, TRUE);
 	$user_cur->comm[$user_cur->step % COMM_N] = $ret;
 	$user_cur->step_inc();	    
       }
@@ -318,7 +329,7 @@ else if ($user->stat == 'table') {
 	  /* next step */
 	  $showst = "show_astat("; 
 	  for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-	    $user_cur = &$bri->user[$table->player[$i]];
+	    $user_cur = &$room->user[$table->player[$i]];
 	    $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "), 
 			       ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
 	  }
@@ -328,7 +339,7 @@ else if ($user->stat == 'table') {
 
 	  $maxcard = -2;
 	  for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-	    $user_cur = &$bri->user[$table->player[$i]];
+	    $user_cur = &$room->user[$table->player[$i]];
 	    if ($maxcard < $user_cur->asta_card)
 	      $maxcard = $user_cur->asta_card;
 	  }
@@ -347,7 +358,7 @@ else if ($user->stat == 'table') {
 	  
 	  
 	    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-	      $user_cur = &$bri->user[$table->player[$i]];
+	      $user_cur = &$room->user[$table->player[$i]];
 	      $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
 	      if ($user_cur->table_pos == ($table->gstart % PLAYERS_N)) 
 		$ret .= sprintf('dispose_asta(%d,%d, %s); remark_on();', 
@@ -368,13 +379,13 @@ else if ($user->stat == 'table') {
 	    $table->mult *= 2; 
 
 	    $table->game_next();
-	    $table->game_init(&$bri->user);
+	    $table->game_init(&$room->user);
 	  
 	    for ($i = 0 ; $i < PLAYERS_N ; $i++) {	
-	      $user_cur = &$bri->user[$table->player[$i]];
+	      $user_cur = &$room->user[$table->player[$i]];
 
 	      $ret = sprintf('gst.st = %d;', $user_cur->step+1);
-	      $ret .= show_table(&$bri,&$user_cur,$user_cur->step+1, TRUE, TRUE);
+	      $ret .= show_table(&$room,&$user_cur,$user_cur->step+1, TRUE, TRUE);
 	      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
 	      $user_cur->step_inc();	    
 	    }
@@ -402,7 +413,7 @@ else if ($user->stat == 'table') {
 	    $table->asta_win = $chooser;
 
 	    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-	      $user_cur = &$bri->user[$table->player[$i]];
+	      $user_cur = &$room->user[$table->player[$i]];
 	      $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
 
 	      if ($i == $chooser) {
@@ -435,15 +446,15 @@ else if ($user->stat == 'table') {
 	  log_wr($sess, "Setta la briscola a ".$a_brisco);
 
 	  $chooser = $table->asta_win;
-	  $user_chooser = &$bri->user[$table->player[$chooser]];
+	  $user_chooser = &$room->user[$table->player[$chooser]];
 	  for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-	    $user_cur = &$bri->user[$table->player[$i]];
+	    $user_cur = &$room->user[$table->player[$i]];
 	    $user_cur->subst = 'game';
 	    $ret = sprintf('gst.st = %d; subst = "game";', $user_cur->step+1);
 	  
 
 	    /* bg of caller cell */
-	    $ret .= briscola_show($bri, $table, $user_cur);
+	    $ret .= briscola_show($room, $table, $user_cur);
 
 	    /* first gamer */
 	    if ($i == ($table->gstart % PLAYERS_N))
@@ -513,7 +524,7 @@ else if ($user->stat == 'table') {
 	  $table->gstart = $winner;
 	  $turn_nex = ($table->gstart + $table->turn) % PLAYERS_N;
 
-	  log_wr($sess, sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
+	  log_wr($sess, sprintf("The winner is: [%d] [%s]", $winner, $room->user[$table->player[$winner]]->name));
 	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);|cards_hidetake($d);",
 			       $winner, $winner);
 	  $player_cur = "remark_off();" . $card_take . "|"; 
@@ -528,7 +539,7 @@ else if ($user->stat == 'table') {
 
 	log_wr($sess, sprintf("Turn Cur %d Turn Nex %d",$turn_cur, $turn_nex));
 	for ($i = 0 ; $i < PLAYERS_N ; $i++) {	
-	  $user_cur = &$bri->user[$table->player[$i]];
+	  $user_cur = &$room->user[$table->player[$i]];
 
 	  $ret = sprintf('gst.st = %d; ', $user_cur->step+1);
 
@@ -558,17 +569,17 @@ else if ($user->stat == 'table') {
 	  calculate_points(&$table);
 
 	  $table->game_next();
-	  $table->game_init(&$bri->user);
+	  $table->game_init(&$room->user);
 	  
 	  for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-	    $user_cur = &$bri->user[$table->player[$i]];
-	    $retar[$i] .= show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, TRUE);
+	    $user_cur = &$room->user[$table->player[$i]];
+	    $retar[$i] .= show_table(&$room,&$user_cur,$user_cur->step+1,TRUE, TRUE);
 	  }
 	}
 
 
 	for ($i = 0 ; $i < PLAYERS_N ; $i++) {	
-	  $user_cur = &$bri->user[$table->player[$i]];
+	  $user_cur = &$room->user[$table->player[$i]];
 	
 	  $user_cur->comm[$user_cur->step % COMM_N] = $retar[$i];
 	  $user_cur->step_inc();	    
@@ -586,8 +597,8 @@ else if ($user->stat == 'table') {
   }
 }
 log_wr($sess, "before save data");
-save_data($bri);
+Room::save_data($room);
 
-unlock_data($sem);
+Room::unlock_data($sem);
 exit;
 ?>
