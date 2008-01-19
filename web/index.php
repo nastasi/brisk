@@ -21,7 +21,7 @@
  *
  */
 
-require_once("brisk.phh");
+require_once("Obj/brisk.phh");
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   echo "Debugging time!";
   exit;
@@ -266,7 +266,7 @@ supported by:<br><br>
 <body>
 <SCRIPT type="text/javascript">
    var g_withflash = false;
-
+   var g_is_spawn = 0; 
    window.onload = function() {
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
@@ -332,6 +332,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var stat = "";
    var subst = "";
    var gst  = new globst();
+   var g_is_spawn = 0; 
 
    var g_withflash = false;
    var g_imgct= 0;
