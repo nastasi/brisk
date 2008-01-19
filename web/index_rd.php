@@ -21,7 +21,7 @@
  *
  */
 
-require_once("brisk.phh");
+require_once("Obj/brisk.phh");
 
 log_load($sess, "LOAD: index_rd.php ".$QUERY_STRING);
 
