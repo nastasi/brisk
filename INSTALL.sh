@@ -129,7 +129,14 @@ if [ "$web_only" = "FALSE" ]; then
     chmod 666 ${ftok_path}/main
 fi
 install -d $web_path
-install -m 644 web/*.{php,phh,css,js,mp3,swf} ${web_path}
+for i in `find web -type d | grep -v /CVS | sed 's/^....//g'`; do
+    install -d ${web_path}/$i 
+done
+
+for i in `find web -name '*.php' -o -name '*.phh' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'`; do
+    install -m 644 web/$i ${web_path}/$i
+done
+
 cd web
 find . -name '.htaccess' -exec install -m 644 {} ${web_path}/{} \;
 cd -
@@ -150,11 +157,11 @@ sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `fi
 
 sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
 
-sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/brisk.phh
+sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/Obj/brisk.phh
 
-sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}/brisk.phh
+sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}/Obj/brisk.phh
 
-sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}/brisk.phh
+sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}/Obj/brisk.phh
 
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
 
