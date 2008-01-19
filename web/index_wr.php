@@ -21,7 +21,9 @@
  *
  */
 
-require_once("brisk.phh");
+require_once("Obj/brisk.phh");
+require_once("briskin5/Obj/briskin5.phh");
+
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   echo "Debugging time!";
   exit;
@@ -32,6 +34,8 @@ log_load($sess, "LOAD: index_wr.php");
 /*
  *  MAIN
  */
+$is_spawn = FALSE;
+
 log_wr($sess, 'COMM: '.$mesg);
 
 $sem = Room::lock_data();
@@ -43,6 +47,8 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   exit;
 }
 $argz = explode('|', $mesg);
+
+log_wr($sess, 'POSTSPLIT: '.$argz[0]);
 
 if ($argz[0] == 'shutdown') {
   log_auth($user_cur->sess, "Shutdown session.");
@@ -95,6 +101,8 @@ else if ($user->stat == 'room') {
   else if ($user->subst == 'standup') {
    
     if ($argz[0] == 'sitdown') {
+      log_wr($sess, "SITDOWN command");
+
       if ($user->the_end == TRUE) {
 	log_wr($sess, "INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
 	Room::unlock_data($sem);
@@ -120,13 +128,17 @@ else if ($user->stat == 'room') {
 	Room::unlock_data($sem);
 	exit;
       } 
-
+      
       // set new status
       $user->subst = "sitdown";
       $user->table = $table_idx;
       $user->table_pos = $table->user_add($idx);
       
+      log_wr($sess, "MOP before");
+
       if ($table->player_n == PLAYERS_N) {
+	log_wr($sess, "MOP inall");
+
 	// Start game for this table.
 	log_wr($sess, "Start game!");
 	
@@ -135,6 +147,58 @@ else if ($user->stat == 'room') {
 	//
 
 	if (TRUE) { // WITH SPAWN
+	  $curtime = time();
+	  // Create new spawned table
+	  $bri_sem = Briskin5::lock_data($table_idx);
+	  if (($bri =& new Briskin5(&$room, $table_idx)) == FALSE)
+	    log_wr($sess, "bri create: FALSE");
+	  else
+	    log_wr($sess, "bri create: ".serialize($bri));
+	
+	  // init table
+	  $bri_table =& $bri->table[0];
+	  $bri_table->init(&$bri->user);
+	  $bri_table->game_init(&$bri->user);
+	  $curtime = time();
+
+	  
+	  // init spawned users
+	  for ($i = 0 ; $i < $table->player_n ; $i++) {
+	    $bri_user_cur = &$bri->user[$i];
+	    $user_cur = &$room->user[$table->player[$i]];
+
+	    $bri_user_cur->trans_step = $user_cur->step + 1;
+	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
+	    $bri_user_cur->step_inc();
+	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = show_table(&$bri,&$bri_user_cur,$bri_user_cur->step+1,TRUE, FALSE);
+
+	    $bri_user_cur->stat_set('table');
+	    $bri_user_cur->subst = 'asta';
+	    $bri_user_cur->laccwr = $curtime;
+
+	    $bri_user_cur->step_inc();
+
+	    log_wr($bri_user_cur->sess, "TRY PRESAVE: ".$bri_user_cur->step." TRANS STEP: ".$bri_user_cur->trans_step);
+
+	    log_wr($sess, "Pre if!");
+	    
+	    $ret = "";
+	    $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("briskin5/briskin5.php?table_idx=%d");|', $user_cur->step+1, $table_idx);
+	    
+	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+	    $user_cur->trans_step = $user_cur->step + 1;
+	    log_wr($sess, "TRANS ATTIVATO");
+	    
+	    
+	    $user_cur->stat_set('table');
+	    $user_cur->subst = 'asta';
+	    $user_cur->laccwr = $curtime;
+	    $user_cur->step_inc();
+	  }
+	  log_wr($sess, "presave bri");
+	  Briskin5::save_data($bri);
+	  Briskin5::unlock_data($bri_sem);
+	  log_wr($sess, "postsave bri");
 	}
 	else { // BEFORE SPAWN
 	  // init table
@@ -165,9 +229,15 @@ else if ($user->stat == 'room') {
 	  }
 	} // end else {  BEFORE SPAWN
 	
-	// change room
-	$room->room_sitdown(&$user, $table_idx);
+	log_wr($sess, "MOP after");
+
       }
+      // change room
+      $room->room_sitdown(&$user, $table_idx);
+
+      log_wr($sess, "MOP finish");
+
+      
     }
     else if ($argz[0] == 'logout') {
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
