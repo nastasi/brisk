@@ -1,0 +1,218 @@
+<?php
+define(MAX_BRISKIN5_PLAYERS, 3);
+
+class Briskin5 {
+  var $user;
+  var $table;
+  var $table_idx;
+  var $comm; // commands for many people
+  var $step; // current step of the comm array
+  var $garbage_timeout;
+
+  function Briskin5 (&$room, $table_idx) {
+    $this->user = array();
+    $this->table = array();
+
+    $user  =& $room->user;
+    $table =& $room->table[$table_idx];
+
+    log_wr("xxx", "Briskin5 constructor");
+
+    for ($i = 0 ; $i < $table->player_n ; $i++) 
+      $this->user[$i] =& User::spawn(&$user[$table->player[$i]], 0, $i);
+    
+    $this->table[0] =& Table::spawn(&$table);
+    $this->table_idx = $table_idx;
+    $this->garbage_timeout = 0;
+    
+    log_wr("xxx", "Briskin5 constructor end");
+  }
+
+
+  function &get_user($sess, &$idx)
+  {
+    GLOBAL $PHP_SELF, $G_false;
+
+    if (validate_sess($sess)) {
+      for ($i = 0 ; $i < MAX_BRISKIN5_PLAYERS ; $i++) {
+	if (strcmp($sess, $this->user[$i]->sess) == 0) {
+	  // find it
+	  $idx = $i;
+	  $ret = &$this->user[$i];
+	  return ($ret);
+	}
+      }
+      log_main($sess, sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
+      // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
+      // log_main($sess, sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
+    }
+    else {
+      log_main($sess, sprintf("get_user: Wrong strlen [%s]",$sess));
+    }
+
+    return ($G_false);
+  }
+
+
+  function garbage_manager($force)
+  {
+    
+    /* Garbage collector degli utenti in timeout */
+    $curtime = time();
+    if ($force || $this->garbage_timeout < $curtime) {
+      
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+	$user_cur = &$this->user[$i];
+	if ($user_cur->sess == "")
+	  continue;
+	
+	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
+	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
+
+	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
+	    log_auth($user_cur->sess, "Autologout session.");
+	    
+	    $tmp_sess = $user_cur->sess;
+	    $user_cur->sess = "";
+	    step_unproxy($tmp_sess);
+	    $user_cur->name = "";
+	    $user_cur->the_end = FALSE;
+	    
+	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
+	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
+	      $this->room_wakeup(&$user_cur);
+	    else if ($user_cur->subst == 'standup')
+	      $this->room_outstandup(&$user_cur);
+	    else
+	      log_rd2($sess, "LOGOUT FROM WHAT ???");
+	  }
+	}
+
+	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < $curtime) { // lo rimettiamo in piedi
+	  if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
+	    $this->room_wakeup(&$user_cur);
+	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify("<br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", 0, "torna ai tavoli", 400, 100);
+	    $user_cur->step_inc();
+	  }
+	}
+      }
+      log_rd2($user_cur->sess, "GARBAGE UPDATED!");
+      
+      $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
+    }
+
+    // BAN_IP_CLEAN
+
+  }
+
+
+
+
+  //
+  //  static functions
+  //
+  function &load_data($table_idx) 
+  {
+    GLOBAL $G_false, $sess;
+    $shm = FALSE;
+
+    log_wr($sess, "TABLE_IDX ".FTOK_PATH."/table".$table_idx);
+    if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+    
+    do {
+      if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
+	break;
+
+      if (($bri = @shm_get_var($shm, $tok)) == FALSE) 
+	break;
+      
+      shm_detach($shm);
+	
+      $ret = &$bri;
+      return ($ret); 
+    } while (FALSE);
+
+    if ($shm != FALSE)
+      shm_detach($shm);
+    
+    return ($G_false);
+  }
+  
+
+  function save_data(&$bri) 
+  {
+    GLOBAL $sess;
+    
+    $ret =   FALSE;
+    $shm =   FALSE;
+    $isacq = FALSE;
+    
+    // var_dump($bri);
+    
+    if (($tok = ftok(FTOK_PATH."/table".$bri->table_idx, "B")) == -1) 
+      return (FALSE);
+    
+    do {
+      $isacq = TRUE;
+      
+      if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
+	break;
+      
+      // log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
+      if (shm_put_var($shm, $tok, $bri) == FALSE) {
+	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
+	log_only($sess, serialize($bri));
+	break;
+      }
+      // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
+      $ret = TRUE;
+    } while (0);
+    
+    if ($shm)
+      shm_detach($shm);
+    
+    return ($ret);
+  }
+
+  function lock_data($table_idx)
+  {
+    GLOBAL $sess; 
+    
+    log_wr($sess, "LOCK_DATA ".FTOK_PATH."/table".$table_idx);
+    //  echo "LOCK: ".FTOK_PATH."/main";
+    //  exit;
+    if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+    // echo "FTOK ".$tok."<br>";
+    if (($res = sem_get($tok)) == FALSE) {
+      echo "SEM_GET FAILED";
+      exit;
+    }
+    if (sem_acquire($res)) {   
+      log_only($sess, "LOCK");
+      return ($res);
+    }
+    else
+      return (FALSE);
+  }
+  
+  function unlock_data($res)
+  {
+    GLOBAL $sess; 
+    
+    log_only($sess, "UNLOCK");
+
+    return (sem_release($res));
+  }
+
+
+
+}
+
+?>
