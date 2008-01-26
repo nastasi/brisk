@@ -161,8 +161,9 @@ else if ($user->stat == 'room') {
 	  $bri_table->game_init(&$bri->user);
 	  $curtime = time();
 
-	  
-	  // init spawned users
+	  //
+	  // Init spawned users.
+	  //
 	  for ($i = 0 ; $i < $table->player_n ; $i++) {
 	    $bri_user_cur = &$bri->user[$i];
 	    $user_cur = &$room->user[$table->player[$i]];
@@ -183,7 +184,7 @@ else if ($user->stat == 'room') {
 	    log_wr($sess, "Pre if!");
 	    
 	    $ret = "";
-	    $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("briskin5/briskin5.php?table_idx=%d");|', $user_cur->step+1, $table_idx);
+	    $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/briskin5.php");|', $user_cur->step+1, $table_idx);
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
 	    $user_cur->trans_step = $user_cur->step + 1;
