@@ -15,6 +15,11 @@ class Briskin5 {
     $this->user = array();
     $this->table = array();
 
+    if (($this->tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+
     $user  =& $room->user;
     $table =& $room->table[$table_idx];
 
