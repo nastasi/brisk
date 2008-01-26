@@ -8,11 +8,19 @@
    
    URGENT - tables spawn
             DONE - spawn of a table
+	    DONE - data to cookies (removed table_idx from xhr calls also)
             closure of a table
+	        DONE set subst to shutdowner/shutdowned
+	        DONE return to index.php
+
+		recover of users
+                flush of the table (after all recovers we can decide where and how destroy the table)
+
             game's token
             security checks for right scope access
             garbage collector management
             optimizations
+	    inheritance
             
 
    NORM   - pubblic announcements
