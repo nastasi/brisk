@@ -22,6 +22,7 @@
  */
 
 require_once("Obj/brisk.phh");
+require_once("briskin5/Obj/briskin5.phh");
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   echo "Debugging time!";
   exit;
@@ -31,7 +32,7 @@ log_load((isset($sess) ? $sess : "XXX"), "LOAD: index.php");
 
 function main()
 {
-  GLOBAL $sess, $name, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
+  GLOBAL $sess, $name, $table_idx, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   
   $body = "";
   $tables = "";
@@ -41,23 +42,66 @@ function main()
   if (isset($BRISK_SHOWHTML) == FALSE) {
     $is_table = FALSE;
     $sem = Room::lock_data();
+    log_load($sess, "lock Room");
     $room = &Room::load_data();
     
     /* Actions */
     if (validate_sess($sess)) {
-      $room->garbage_manager(TRUE);
+      // FIXME uncomment $room->garbage_manager(TRUE);
       if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
 	if ($user->stat == "table") {
-	  header ("Location: table.php");
-	  Room::unlock_data($sem);
-	  exit;
+	  $change_page = TRUE;
+	  log_load($sess, "resync from index.php");
+
+	  if (isset($table_idx)) {
+	    $table_idx = (int)$table_idx;
+	    log_load($sess, "SET TABLE_IDX <yy".$table_idx.">".TABLES_N);
+	    if ($table_idx >= 0 && $table_idx < TABLES_N) {
+	      log_load($sess, "SET TABLE_IDX GOOD VALUE");
+	      $bri_sem = Briskin5::lock_data($table_idx);
+	      $bri = &Briskin5::load_data($table_idx);
+
+	      if (($bri_user = &$bri->get_user($sess, &$bri_idx)) != FALSE) {
+		if ($bri_user->subst == "shutdowned" || $bri_user->subst == "shutdowner") {
+		  // QUI WAKEUP
+		  $table     = &$room->table[$user->table];
+		  $bri_table = &$bri->table[0];
+
+		  for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+		    $room->user[$table->player[$i]]->subst = $bri->user[$i]->subst;
+		    $room->user[$table->player[$i]]->step = $bri->user[$i]->step;
+		    $room->user[$table->player[$i]]->trans_step = $bri->user[$i]->step+1;
+		    log_load($sess, "from table bri subst[".$i."]: ".$bri->user[$i]->subst);
+		    log_load($sess, "from table roo subst[".$i."]: ".$room->user[$table->player[$i]]->subst);
+		  }
+
+		  $room->room_join_wakeup(&$user);
+
+		  if (Room::save_data(&$room) == FALSE) {
+		    echo "ERRORE SALVATAGGIO\n";
+		    exit;
+		  }
+
+		  $change_page = FALSE;
+		}
+		log_load($sess, "from table subst: ".$bri_user->subst);
+	      }
+	      Briskin5::unlock_data($bri_sem);
+	    }
+	  }
+	  log_load($sess, "unlock Room");
+	  if ($change_page) {
+	    Room::unlock_data($sem);
+	    header ("Location: table.php");
+	    exit;
+	  }
 	}
 	$ACTION = "room";
       }
     }
     
     if ($ACTION == "login" && isset($name)) {
-      $room->garbage_manager(TRUE);
+      // FIXME uncomment $room->garbage_manager(TRUE);
       /* try login */
       if (($user = &$room->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
 	$ACTION = "room";
