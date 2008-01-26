@@ -9,6 +9,8 @@ class Briskin5 {
   var $step; // current step of the comm array
   var $garbage_timeout;
 
+  var $tok;
+
   function Briskin5 (&$room, $table_idx) {
     $this->user = array();
     $this->table = array();
@@ -129,7 +131,9 @@ class Briskin5 {
 
       if (($bri = @shm_get_var($shm, $tok)) == FALSE) 
 	break;
-      
+
+      $bri->tok = $tok;
+
       shm_detach($shm);
 	
       $ret = &$bri;
@@ -153,18 +157,52 @@ class Briskin5 {
     
     // var_dump($bri);
     
-    if (($tok = ftok(FTOK_PATH."/table".$bri->table_idx, "B")) == -1) 
+    if (!isset($bri->tok))
       return (FALSE);
     
     do {
       $isacq = TRUE;
       
-      if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
+      if (($shm = shm_attach($bri->tok, SHM_DIMS)) == FALSE)
 	break;
       
       // log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
-      if (shm_put_var($shm, $tok, $bri) == FALSE) {
+      if (shm_put_var($shm, $bri->tok, $bri) == FALSE) {
 	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
+	log_only($sess, serialize($bri));
+	break;
+      }
+      // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
+      $ret = TRUE;
+    } while (0);
+    
+    if ($shm)
+      shm_detach($shm);
+    
+    return ($ret);
+  }
+
+  function destroy_data(&$bri) 
+  {
+    GLOBAL $sess;
+    
+    $ret =   FALSE;
+    $shm =   FALSE;
+    $isacq = FALSE;
+    
+    // var_dump($bri);
+    
+    if (!isset($bri->tok))
+      return (FALSE);
+    
+    do {
+      $isacq = TRUE;
+      
+      if (($shm = shm_attach($bri->tok, SHM_DIMS)) == FALSE)
+	break;
+      
+      if (shm_remove($shm) == FALSE) {
+	log_only($sess, "REMOVE FALLITA ".strlen(serialize($bri)));
 	log_only($sess, serialize($bri));
 	break;
       }
@@ -212,7 +250,138 @@ class Briskin5 {
   }
 
 
+  function chatt_send(&$user, $mesg)
+  {
+    if ($user->stat == 'table') {
+      $table = &$this->table[$user->table];
+    }
+    
+    $user_mesg = substr($mesg,6);
+    
+    $timecur = time();
+    
+    $dt = date("H:i ", $timecur);
+    if (strncmp($user_mesg, "/nick ", 6) == 0) {
+      log_main($user->sess, "chatt_send BEGIN");
 
-}
+      if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
+	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera o una cifra.");', $dt.NICKSERV, xcape($name_new));
+	  $user->step_inc();
+
+	  return;
+      }
+      $user_mesg = "COMMAND ".$user_mesg;
+      // Search dup name
+      // change
+      // update local graph
+      // update remote graphs
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+	$user_cur = &$this->user[$i];
+	// 	if ($user_cur->sess == '' || $user_cur->stat != 'room')
+	if ($user_cur->sess == '')
+	  continue;
+	if ($user_cur->name == $name_new) {
+	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Nickname <b>%s</b> gi&agrave; in uso.");', $dt.NICKSERV, xcape($name_new));
+	  $user->step_inc();
+	  break;
+	}
+      }
+      if ($i == MAX_PLAYERS) {
+	$user->name = $name_new;
+
+      log_main($user->sess, "chatt_send start set");
+	
+
+	for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+	  log_main($user->sess, "chatt_send set loop");
+	  
+	  $user_cur = &$this->user[$i];
+	  if ($user_cur->sess == '')
+	    continue;
+	  if ($user_cur->stat == 'room') {
+	    if ($user->stat == 'room' && $user->subst == 'standup') {
+	      $this->standup_update(&$user);
+	    }
+	    else if ($user->stat == 'room' && $user->subst == 'sitdown' ||
+		     $user->stat == 'table') {
+	      log_main($user->sess, "chatt_send pre table update");
+
+	      $this->table_update(&$user);
+
+	      log_main($user->sess, "chatt_send post table update");
+	    }
+	  }
+	  else if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
+	    $table = &$this->table[$user->table];
+	    
+	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+	    $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
+	        xcape($this->user[$table->player[($user_cur->table_pos)%PLAYERS_N]]->name),
+	        xcape($this->user[$table->player[($user_cur->table_pos+1)%PLAYERS_N]]->name),
+	        xcape($this->user[$table->player[($user_cur->table_pos+2)%PLAYERS_N]]->name),
+	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3)%PLAYERS_N]]->name)),
+	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4)%PLAYERS_N]]->name)));
+	    if ($user_cur == $user)
+	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>";', 
+								   xcape($user->name,ENT_COMPAT,"UTF-8"));
+	    $user_cur->step_inc();
+	  }
+	}
+      }
+    }
+    else {
+      for ($i = 0 ; $i < ($user->stat == 'room' ? MAX_PLAYERS : PLAYERS_N) ; $i++) {
+	if ($user->stat == 'room') {
+	  $user_cur = &$this->user[$i];
+	  if ($user_cur->sess == '' || $user_cur->stat != 'room')
+	    continue;
+	}
+	else {
+	  $user_cur = &$this->user[$table->player[$i]];
+	}
+	
+	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
+							     $dt.xcape($user->name), xcape($user_mesg));
+	$user_cur->step_inc();
+      }
+      log_legal($timecur, $user->sess, $user->name, 
+		($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
+    }
+  }
+
+  function table_wakeup(&$user)
+  {
+    $table = &$this->table[0];
+
+    log_main("WAKEUP", "begin function table  stat: ".$user->stat."  subst: ".$user->subst);
+
+    $curtime = time();
+
+    log_main("WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+    
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+      $user_cur = &$this->user[$i];
+      log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
+      
+      if ($user_cur == $user)
+	$user_cur->subst = "shutdowner";
+      else
+	$user_cur->subst = "shutdowned";
+      $user_cur->laccwr = $curtime;
+
+      $ret = "gst.st = ".($user_cur->step+1)."; ";
+      $ret .= 'gst.st_loc++; the_end=true; window.onunload = null; document.location.assign("../index.php");|';
+
+      log_wr($user_cur->sess, "BRISKIN5_WAKEUP: ".$ret);
+      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+      $user_cur->step_inc();
+    }
+  }
+
+
+} // end of class Briskin5
 
 ?>
