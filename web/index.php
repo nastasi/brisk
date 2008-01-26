@@ -92,7 +92,7 @@ function main()
 	  log_load($sess, "unlock Room");
 	  if ($change_page) {
 	    Room::unlock_data($sem);
-	    header ("Location: table.php");
+	    header ("Location: briskin5/briskin5.php");
 	    exit;
 	  }
 	}
