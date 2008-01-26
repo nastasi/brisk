@@ -796,9 +796,76 @@ class Room {
       $user_cur->step_inc();
     }
   }
-  
 
+  function room_join_wakeup(&$user)
+  {
+    $table_idx = $user->table;
+    $table = &$this->table[$table_idx];
 
+    log_main("JOIN_WAKEUP", "begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
+
+    $curtime = time();
+    
+    log_main("JOIN WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+    
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+      $user_cur = &$this->user[$table->player[$i]];
+      log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
+      if ($user_cur->sess != "") {
+	$user_cur->laccwr = $curtime;
+	if ($user_cur->subst == "shutdowned") {
+	  $user_cur->stat_set("room");
+	  $user_cur->subst = "sitdown";
+	}
+	else if ($user_cur->subst == "shutdowner") {
+	  $user_cur->stat_set("room");
+	  $user_cur->subst = "standup";
+	  $user_cur->table = -1;
+	  $user_wup = &$user_cur;
+	}
+      }
+    }
+
+    /* aggiorna l'array dei giocatori al tavolo. */
+    $table->user_rem(&$this, &$user_wup);
+
+    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+      $user_cur = &$this->user[$i];
+      if ($user_cur->sess == '' || $user_cur->stat != 'room')
+	continue;
+      
+      log_main("VALORI", "name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+
+      $ret = "gst.st = ".($user_cur->step+1)."; ";
+      if ($user_cur->stat == "room") {
+	log_main("DOCUMENT.index.php", "from table");
+
+	$ret .= table_content($this, $user_cur, $table_idx);
+	$ret .= standup_content($this, $user_cur);
+	
+	$act_content = table_act_content(FALSE, 0, $table_idx, $user->table);
+	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	
+	
+	if ($user_cur == $user_wup) {
+	  // set the new status 
+	  $ret .=  'subst = "standup"; ';
+	  // clean the action buttons in other tables
+	  for ($e = 0 ; $e < TABLES_N ; $e++) {
+	    if ($this->table[$e]->player_n < PLAYERS_N)
+	      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user->table));
+	  }
+	}
+	else {
+	  $act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
+	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	}
+      }
+      log_wr($user_cur->sess, "ROOM_JOIN_WAKEUP: ".$ret);
+      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+      $user_cur->step_inc();
+    }
+  }
 
   function room_outstandup(&$user)
   {
@@ -1291,7 +1358,7 @@ function log_lock($sess, $log) {
 }
 
 function log_wr($sess, $log) {
-  if (BRISK_DEBUG != TRUE && FALSE)
+  if (BRISK_DEBUG != TRUE)
     return;
 
   if (($fp = @fopen("/tmp/brisk_wr.log", 'a')) != FALSE) {
