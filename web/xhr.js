@@ -70,7 +70,7 @@ function xhr_rd_start(sess,stat,subst,step)
     /* NOTE document.uniqueID exists only under IE  */
     // if (g_is_spawn == 1)
     // alert("di qui3: "+(g_is_spawn == 1 ? "&table_idx="+g_table_idx : ""));
-    xhr_rd.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom+(g_is_spawn == 1 ? "&table_idx="+g_table_idx : ""), true);
+    xhr_rd.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom, true);
     //    try { 
     xhr_rd.onreadystatechange = function() { xhr_rd_cb(xhr_rd); }
     xhr_rd.send(null);
