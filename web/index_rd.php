@@ -85,7 +85,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       log_auth($sess, "update lacc");
       $user->lacc = time();
 
-      $room->garbage_manager(FALSE);
+      // FIXME uncomment $room->garbage_manager(FALSE);
       
       Room::save_data($room);
       $first_loop = FALSE;
@@ -174,6 +174,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if ($user->stat == 'room') {
       log_rd($sess, "roomma");
       $ret .= show_room(&$room, &$user);
+
+      /* NOTE the sets went common */
+      $new_stat =  $user->stat;
+      $new_subst = $user->subst;
+      $new_step =  $user->step;
     }
     /***************
      *             *
@@ -181,15 +186,21 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
      *             *
      ***************/
     else if ($user->stat == 'table') {      
-      $ret = show_table(&$room,&$user,$user->step,FALSE,FALSE);
+      /* FIXME we need to decide what do in this case 
+
+      if ($user->subst != "shutdowned" && $user->subst != "shutdowner")
+	$ret = show_table(&$room,&$user,$user->step,FALSE,FALSE);
 
       log_rd2($sess, "SENDED TO THE STREAM: ".$ret);
+
+
+      $new_stat =  $user->stat;
+      $new_subst = $user->subst;
+      $new_step =  $user->step;
+      */
     }
     log_rd2($sess, "NEWSTAT: ".$user->stat);
 
-    $new_stat =  $user->stat;
-    $new_subst = $user->subst;
-    $new_step =  $user->step;
   }
   else {
     ignore_user_abort(TRUE);
@@ -207,6 +218,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    $to_stat = $user->stat;
 	    Room::unlock_data($sem);
 	    ignore_user_abort(FALSE);
+	    log_load($user->sess, "RESYNC");
 	    return (page_sync($user->sess, $to_stat == "table" ? "table.php" : "index.php"));
 	  }
 	  log_rd2($sess, "lost history, refresh from scratch");
