@@ -164,5 +164,6 @@ sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${
 sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}/Obj/brisk.phh
 
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
+sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}/commons.js
 
 exit 0
