@@ -269,7 +269,7 @@ else if ($user->stat == 'table') {
       $user->bantime = $user->laccwr + BAN_TIME;
     
     if ($logout_cont == TRUE) {
-      $bri->room_wakeup(&$user);
+      $bri->table_wakeup(&$user);
     }
   }
   else if ($argz[0] == 'exitlock') {
