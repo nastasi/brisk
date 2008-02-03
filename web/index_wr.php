@@ -150,7 +150,8 @@ else if ($user->stat == 'room') {
 	  $curtime = time();
 	  // Create new spawned table
 	  $bri_sem = Briskin5::lock_data($table_idx);
-	  if (($bri =& new Briskin5(&$room, $table_idx)) == FALSE)
+	  $table_token = uniqid("");
+	  if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
 	    log_wr($sess, "bri create: FALSE");
 	  else
 	    log_wr($sess, "bri create: ".serialize($bri));
@@ -167,7 +168,7 @@ else if ($user->stat == 'room') {
 	  for ($i = 0 ; $i < $table->player_n ; $i++) {
 	    $bri_user_cur = &$bri->user[$i];
 	    $user_cur = &$room->user[$table->player[$i]];
-
+	    
 	    $bri_user_cur->trans_step = $user_cur->step + 1;
 	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
 	    $bri_user_cur->step_inc();
@@ -184,7 +185,7 @@ else if ($user->stat == 'room') {
 	    log_wr($sess, "Pre if!");
 	    
 	    $ret = "";
-	    $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/briskin5.php");|', $user_cur->step+1, $table_idx);
+	    $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/briskin5.php");|', $user_cur->step+1, $table_idx, $table_token);
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
 	    $user_cur->trans_step = $user_cur->step + 1;

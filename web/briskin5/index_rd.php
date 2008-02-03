@@ -36,7 +36,7 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 
 function shutta()
 {
-  log_rd2("SHUTTA!", connection_status());
+  log_rd2("bin5 SHUTTA!", connection_status());
 }
 
 
@@ -48,7 +48,7 @@ function unrecerror()
 
   $is_page_streaming = TRUE;
   log_rd2("XXX", "UNREC_ERROR");
-  return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
+  return (sprintf('the_end=true; window.onunload = null; document.location.assign("../index.php");'));
 }
 
 function page_sync($sess, $page)
@@ -63,21 +63,28 @@ function page_sync($sess, $page)
 
 
 
-function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx)
+function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx, $table_token)
 {
   GLOBAL $is_page_streaming, $first_loop;
   
   $ret = FALSE;
   $bri = FALSE;
 
-  log_rd2($sess, "M");
+  // log_rd2($sess, "M");
   /* Sync check (read only without modifications */
   ignore_user_abort(TRUE);
   if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
       log_only($sess, "F");
-      $bri = &Briskin5::load_data($table_idx);
+
+      // VERIFICARE TUTTE LE LOAD_DATA E PRENDERE CONTROMISURE NEL CASO FALLISCANO //
+
+      if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) {
+	Briskin5::unlock_data($sem);
+        ignore_user_abort(FALSE);
+	return (unrecerror());
+      }
       if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
 	Briskin5::unlock_data($sem);
         ignore_user_abort(FALSE);
@@ -99,10 +106,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   else {
     return (FALSE);
   }
-    
+  
   if (($proxy_step = step_get($sess)) != FALSE) {
     // log_rd2($sess, "Postget".$proxy_step."zizi");
-
+    
     if ($cur_step == $proxy_step) {
       log_only2($sess, "P");
       return (FALSE);
@@ -112,20 +119,26 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
   }
   else {
-      log_only2($sess, "R");
+    log_only2($sess, "R");
   }
-
+  
   if ($bri == FALSE) {
-    ignore_user_abort(TRUE);
-    if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
+    do {
+      ignore_user_abort(TRUE);
+      if (($sem = Briskin5::lock_data($table_idx)) == FALSE) 
+	break;
+      
       log_only($sess, "P");
-      $bri = &Briskin5::load_data($table_idx);
+      if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) 
+	break;
+    } while (0);
+    
+    if ($sem != FALSE)
       Briskin5::unlock_data($sem);
-      ignore_user_abort(FALSE);
-    }
-    else {
-      return (FALSE);
-    }
+    
+    ignore_user_abort(FALSE);
+    if ($bri == FALSE) 
+      return (unrecerror());
   }
   
   if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
@@ -142,7 +155,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // FUNZIONE from_scratch DA QUI 
     ignore_user_abort(TRUE);
     $sem = Briskin5::lock_data($table_idx);
-    $bri = &Briskin5::load_data($table_idx);
+    $bri = &Briskin5::load_data($table_idx, $table_token);
     if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
@@ -195,7 +208,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   else {
     ignore_user_abort(TRUE);
     $sem = Briskin5::lock_data($table_idx);
-    $bri = &Briskin5::load_data($table_idx);
+    $bri = &Briskin5::load_data($table_idx, $table_token);
     if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
@@ -265,7 +278,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 */
 
 $is_page_streaming =  ((stristr($HTTP_USER_AGENT, "linux") && 
-			stristr($HTTP_USER_AGENT, "firefox")) ? FALSE : TRUE);
+			(stristr($HTTP_USER_AGENT, "firefox") || stristr($HTTP_USER_AGENT, "iceweasel"))) ? FALSE : TRUE);
 
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
@@ -275,7 +288,7 @@ if (!isset($myfrom))
      $myfrom = "";
 if (!isset($subst))
      $subst = "";
-log_rd2($sess, "FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming);
+log_rd2($sess, "FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming."USER_AGENT:".$HTTP_USER_AGENT);
 
 
 $endtime = time() + STREAM_TIMEOUT;
@@ -285,7 +298,7 @@ $old_step =  $ext_step = $step;
 
 for ($i = 0 ; time() < $endtime ; $i++) {
   // log_rd($sess, "PRE MAIN ".$step);;
-  if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step, $table_idx)) != FALSE) {
+  if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step, $table_idx, $table_token)) != FALSE) {
     echo '@BEGIN@';
     // log_rd2($sess, sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
     echo "$ret";

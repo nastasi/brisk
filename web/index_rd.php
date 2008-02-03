@@ -69,7 +69,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   $ret = FALSE;
   $room = FALSE;
 
-  log_rd2($sess, "M");
+  // log_rd2($sess, "M");
   /* Sync check (read only without modifications */
   ignore_user_abort(TRUE);
   if (($sem = Room::lock_data()) != FALSE) { 
@@ -115,16 +115,22 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   }
 
   if ($room == FALSE) {
-    ignore_user_abort(TRUE);
-    if (($sem = Room::lock_data()) != FALSE) { 
+    do {
+      ignore_user_abort(TRUE);
+      if (($sem = Room::lock_data()) == FALSE) 
+	break;
+      
       log_only($sess, "P");
-      $room = &Room::load_data();
+      if (($room = &Room::load_data()) == FALSE) 
+	break;
+    } while (0);
+    
+    if ($sem != FALSE)
       Room::unlock_data($sem);
-      ignore_user_abort(FALSE);
-    }
-    else {
+    
+    ignore_user_abort(FALSE);
+    if ($room == FALSE) 
       return (FALSE);
-    }
   }
   
   if (($user = &$room->get_user($sess, $idx)) == FALSE) {
@@ -169,7 +175,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   }
       
   if ($cur_step == -1) {
-    log_rd2($sess, "PRE-NEWSTAT.");
+    log_rd2($sess, "PRE-NEWSTAT: ".$user->stat);
 
     if ($user->stat == 'room') {
       log_rd($sess, "roomma");
@@ -198,6 +204,9 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       $new_subst = $user->subst;
       $new_step =  $user->step;
       */
+      log_rd2($sess, "ALL COMMENTED: ".$ret);
+
+
     }
     log_rd2($sess, "NEWSTAT: ".$user->stat);
 
@@ -244,8 +253,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	$user->name = "";
 	$user->the_end = FALSE;
 	
-	if ($user->subst == 'sitdown')
+	if ($user->subst == 'sitdown') {
+	  log_load($user->sess, "ROOM WAKEUP");
 	  $room->room_wakeup(&$user);
+	}
 	else if ($user->subst == 'standup')
 	  $room->room_outstandup(&$user);
 	else
@@ -275,7 +286,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 */
 
 $is_page_streaming =  ((stristr($HTTP_USER_AGENT, "linux") && 
-			stristr($HTTP_USER_AGENT, "firefox")) ? FALSE : TRUE);
+			(stristr($HTTP_USER_AGENT, "firefox") || stristr($HTTP_USER_AGENT, "iceweasel"))) ? FALSE : TRUE);
 
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1

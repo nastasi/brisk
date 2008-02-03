@@ -40,7 +40,7 @@ if ($table_idx < 0 || $table_idx >= TABLE_N)
      exit;
 
 $sem = Briskin5::lock_data($table_idx);
-$bri = &Briskin5::load_data($table_idx);
+$bri = &Briskin5::load_data($table_idx,$table_token);
 if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
   log_wr($sess, "Get User Error");
@@ -61,7 +61,7 @@ if ($argz[0] == 'shutdown') {
   
   log_rd2($user->sess, "AUTO LOGOUT.");
   if ($user->subst == 'sitdown' || $user->stat == 'table')
-    $bri->room_wakeup(&$user);
+    $bri->table_wakeup(&$user);
   else if ($user->subst == 'standup')
     $bri->room_outstandup(&$user);
   else
@@ -214,10 +214,10 @@ else if ($user->stat == 'room') {
    **********************/
   else if ($user->subst == 'sitdown') {
     if ($argz[0] == 'wakeup') {
-      $bri->room_wakeup(&$user);      
+      $bri->table_wakeup(&$user);      
     }
     else if ($argz[0] == 'logout') {
-      $bri->room_wakeup(&$user);      
+      $bri->table_wakeup(&$user);      
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
       $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
       $user->the_end = TRUE;

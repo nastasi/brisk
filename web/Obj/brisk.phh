@@ -459,6 +459,7 @@ class User {
   var $exitislock; // Player can exit from the table ?
   var $table;      // id of the current table (if in table state)
   var $table_pos;  // idx on the table
+  var $table_token;// token that identify a game on a table
   var $the_end;    // Flag to change the end of the session
 
   function User() {
@@ -487,7 +488,9 @@ class User {
     $thiz->exitislock = TRUE;
     
     $thiz->table = $table;
-    
+    $thiz->table_pos = -1;
+    $thiz->table_token = "";
+
     return ($thiz);
   }
 
@@ -498,30 +501,31 @@ class User {
     if (($thiz = new User()) == FALSE)
       return ($G_false);
     
-    $thiz->name = $from->name;
-    $thiz->sess = $from->sess;
-    $thiz->ip = $from->ip;
-    $thiz->lacc = $from->lacc;
-    $thiz->laccwr = $from->laccwr;
-    $thiz->bantime = $from->bantime;
-    $thiz->stat = $from->stat;
-    $thiz->subst = $from->subst;
-    $thiz->step = $from->step;
+    $thiz->name       = $from->name;
+    $thiz->sess       = $from->sess;
+    $thiz->ip         = $from->ip;
+    $thiz->lacc       = $from->lacc;
+    $thiz->laccwr     = $from->laccwr;
+    $thiz->bantime    = $from->bantime;
+    $thiz->stat       = $from->stat;
+    $thiz->subst      = $from->subst;
+    $thiz->step       = $from->step;
     $thiz->trans_step = $from->trans_step;
-    $thiz->comm = array();
+    $thiz->comm       = array();
 
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
     for ($i = $i_start ; $i < $from->step ; $i++) {
       $ii = $i % COMM_N;
-      $thiz->comm[$ii]   = $from->comm[$ii];
+      $thiz->comm[$ii] = $from->comm[$ii];
     }
-    $thiz->asta_card = $from->asta_card;
-    $thiz->asta_pnt = $from->asta_pnt;
-    $thiz->handpt = $from->handpt;
+    $thiz->asta_card  = $from->asta_card;
+    $thiz->asta_pnt   = $from->asta_pnt;
+    $thiz->handpt     = $from->handpt;
     $thiz->exitislock = $from->exitislock;
-    $thiz->table = $from->table;
-    $thiz->table_pos = $from->table_pos;
-    $thiz->the_end = $from->the_end;
+    $thiz->table      = $from->table;
+    $thiz->table_pos  = $from->table_pos;
+    $thiz->table_token = $from->table_token;
+    $thiz->the_end    = $from->the_end;
 
     return ($thiz);
   }
@@ -560,6 +564,7 @@ class User {
 
     $thiz->table      = $table;
     $thiz->table_pos  = $table_pos;
+    $thiz->table_token = $from->table_token;
 
     return ($thiz);
   }
@@ -802,17 +807,19 @@ class Room {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
 
-    log_main("JOIN_WAKEUP", "begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
+    log_main($user->sess, "JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
-    
-    log_main("JOIN WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+    $user_wup = array();
+    $user_wup_n = 0;
+    log_main($user->sess, "JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
     
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user_cur = &$this->user[$table->player[$i]];
-      log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
+      log_main($user->sess, "PREIMPOST INLOOP name: ".$user_cur->name);
       if ($user_cur->sess != "") {
 	$user_cur->laccwr = $curtime;
+	log_load($user->sess, "cur: ".$user_cur->name."  subst: ".$user_cur->subst);
 	if ($user_cur->subst == "shutdowned") {
 	  $user_cur->stat_set("room");
 	  $user_cur->subst = "sitdown";
@@ -821,47 +828,62 @@ class Room {
 	  $user_cur->stat_set("room");
 	  $user_cur->subst = "standup";
 	  $user_cur->table = -1;
-	  $user_wup = &$user_cur;
+	  $user_wup[$user_wup_n++] = &$user_cur;
 	}
       }
     }
 
+    for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
+      $table->user_rem(&$this, &$user_wup[$wup_idx]);
+
     /* aggiorna l'array dei giocatori al tavolo. */
-    $table->user_rem(&$this, &$user_wup);
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+      log_main($user_cur->sess, "START LOOP");
       $user_cur = &$this->user[$i];
-      if ($user_cur->sess == '' || $user_cur->stat != 'room')
+      if ($user_cur->sess == '' || $user_cur->stat != 'room') {
+	log_main($user_cur->sess, "name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
 	continue;
-      
-      log_main("VALORI", "name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+      }
+
+      log_main($user->sess, "___");
+      log_main($user->sess, "VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($user_cur->stat == "room") {
-	log_main("DOCUMENT.index.php", "from table");
+	log_main($user->sess, "DOCUMENT.index.php from table");
 
 	$ret .= table_content($this, $user_cur, $table_idx);
 	$ret .= standup_content($this, $user_cur);
 	
-	$act_content = table_act_content(FALSE, 0, $table_idx, $user->table);
+	$act_content = table_act_content(FALSE, 0, $table_idx, $user_cur->table);
 	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
-	
-	if ($user_cur == $user_wup) {
+	for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
+	  if ($user_cur == $user_wup[$wup_idx]) 
+	    break;
+
+	log_main($user->sess, "JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
+
+	if ($wup_idx < $user_wup_n) {
+	  log_main($user->sess, "JOIN_WAKEUP less");
 	  // set the new status 
 	  $ret .=  'subst = "standup"; ';
 	  // clean the action buttons in other tables
 	  for ($e = 0 ; $e < TABLES_N ; $e++) {
 	    if ($this->table[$e]->player_n < PLAYERS_N)
-	      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user->table));
+	      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user_cur->table));
 	  }
+	  log_main($user->sess, "JOIN_WAKEUP end less");
 	}
 	else {
+	  log_main($user->sess, "JOIN_WAKEUP more");
 	  $act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
 	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	  log_main($user->sess, "JOIN_WAKEUP end more");
 	}
       }
-      log_wr($user_cur->sess, "ROOM_JOIN_WAKEUP: ".$ret);
+      log_wr($user->sess, "ROOM_JOIN_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
       $user_cur->step_inc();
     }

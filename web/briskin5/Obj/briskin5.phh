@@ -5,13 +5,15 @@ class Briskin5 {
   var $user;
   var $table;
   var $table_idx;
+  var $table_token;
+
   var $comm; // commands for many people
   var $step; // current step of the comm array
   var $garbage_timeout;
 
   var $tok;
 
-  function Briskin5 (&$room, $table_idx) {
+  function Briskin5 (&$room, $table_idx, $table_token) {
     $this->user = array();
     $this->table = array();
 
@@ -25,11 +27,13 @@ class Briskin5 {
 
     log_wr("xxx", "Briskin5 constructor");
 
-    for ($i = 0 ; $i < $table->player_n ; $i++) 
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+      $user[$table->player[$i]]->table_token = $table_token;
       $this->user[$i] =& User::spawn(&$user[$table->player[$i]], 0, $i);
-    
+    }
     $this->table[0] =& Table::spawn(&$table);
     $this->table_idx = $table_idx;
+    $this->table_token = $table_token;
     $this->garbage_timeout = 0;
     
     log_wr("xxx", "Briskin5 constructor end");
@@ -119,7 +123,7 @@ class Briskin5 {
   //
   //  static functions
   //
-  function &load_data($table_idx) 
+  function &load_data($table_idx,$table_token) 
   {
     GLOBAL $G_false, $sess;
     $shm = FALSE;
@@ -137,6 +141,11 @@ class Briskin5 {
       if (($bri = @shm_get_var($shm, $tok)) == FALSE) 
 	break;
 
+      if ($bri->table_token != $table_token) {
+	log_wr($sess, "bri->table_token: ".$bri->table_token."table_token: ".$table_token);
+	
+	break;
+      }
       $bri->tok = $tok;
 
       shm_detach($shm);
@@ -147,6 +156,8 @@ class Briskin5 {
 
     if ($shm != FALSE)
       shm_detach($shm);
+
+    log_wr($sess, "briskin5 load_data failed");
     
     return ($G_false);
   }
@@ -160,6 +171,7 @@ class Briskin5 {
     $shm =   FALSE;
     $isacq = FALSE;
     
+    log_main("XXX", "SAVE BRISKIN5 DATA");
     // var_dump($bri);
     
     if (!isset($bri->tok))
@@ -197,19 +209,26 @@ class Briskin5 {
     
     // var_dump($bri);
     
+    log_main("XXX", "DESTROY BRISKIN5 DATA");
+
     if (!isset($bri->tok))
       return (FALSE);
     
     do {
       $isacq = TRUE;
       
-      if (($shm = shm_attach($bri->tok, SHM_DIMS)) == FALSE)
+      log_main("XXX", "DESTROY2 BRISKIN5 DATA");
+      if (($shm = shm_attach($bri->tok, SHM_DIMS)) === FALSE)
 	break;
       
-      if (shm_remove($shm) == FALSE) {
+      if (shm_remove($shm) === FALSE) {
 	log_only($sess, "REMOVE FALLITA ".strlen(serialize($bri)));
 	log_only($sess, serialize($bri));
 	break;
+      }
+      else {
+	$shm = FALSE;
+	log_main("XXX", "DESTROY2 BRISKIN5 DATA SUCCESS");
       }
       // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
       $ret = TRUE;
@@ -361,11 +380,11 @@ class Briskin5 {
   {
     $table = &$this->table[0];
 
-    log_main("WAKEUP", "begin function table  stat: ".$user->stat."  subst: ".$user->subst);
+    log_main("BRISKIN5_WAKEUP", "begin function table  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
 
-    log_main("WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+    log_main("BRISKIN5_WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
     
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user_cur = &$this->user[$i];
