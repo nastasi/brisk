@@ -44,10 +44,10 @@ function main()
     $sem = Room::lock_data();
     log_load($sess, "lock Room");
     $room = &Room::load_data();
-    
+    $curtime = time();
     /* Actions */
     if (validate_sess($sess)) {
-      // FIXME uncomment $room->garbage_manager(TRUE);
+      $room->garbage_manager(TRUE);
       if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
 	if ($user->stat == "table") {
 	  $change_page = TRUE;
@@ -57,12 +57,13 @@ function main()
 
 	  log_load($sess, "SET TABLE_IDX GOOD VALUE");
 	  $bri_sem = Briskin5::lock_data($user->table);
-	  if (($bri = &Briskin5::load_data($user->table, $table_token)) == FALSE) {
-	    // table data error: recovery
-
+	  if (($bri = &Briskin5::load_data($user->table, $user->table_token)) == FALSE) {
+	    /*
+	     *  CASE: TABLE DATA ERROR - RECOVERY
+	     */
 	    log_load($sess, "table data error: recovery".$user->table);
 
-	    $table     = &$room->table[$user->table];
+	    $table = &$room->table[$user->table];
 	    for ($i = 0 ; $i < $table->player_n ; $i++) {
 	      $user_cur = &$room->user[$table->player[$i]];
 	      $user_cur->subst = "shutdowner";
@@ -76,18 +77,22 @@ function main()
 	      $user_cur->step_inc();
 	    }
 
-	    $room->room_join_wakeup(&$user);
+	    $room->room_join_wakeup(&$user, TRUE);
+	    $table->table_token = "";
+// 	    if (Room::save_data(&$room) == FALSE) {
+// 	      echo "ERRORE SALVATAGGIO\n";
+// 	      exit;
+// 	    }
 	    
-	    if (Room::save_data(&$room) == FALSE) {
-	      echo "ERRORE SALVATAGGIO\n";
-	      exit;
-	    }
+	    Briskin5::destroy_data($user->table);
 	    
 	    $change_page = FALSE;
-	  }
+	  }  //  if (($bri = &Briskin5::load_data($user->table, ...
 	  else if (($bri_user = &$bri->get_user($sess, &$bri_idx)) != FALSE) {
 	    if ($bri_user->subst == "shutdowned" || $bri_user->subst == "shutdowner") {
-	      // QUI WAKEUP
+	      /*
+               *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
+               */
 	      $table     = &$room->table[$user->table];
 	      $bri_table = &$bri->table[0];
 	      
@@ -95,37 +100,50 @@ function main()
 		$room->user[$table->player[$i]]->subst = $bri->user[$i]->subst;
 		$room->user[$table->player[$i]]->step = $bri->user[$i]->step;
 		$room->user[$table->player[$i]]->trans_step = $bri->user[$i]->step+1;
+		$room->user[$table->player[$i]]->lacc = $bri->user[$i]->lacc;
+		$room->user[$table->player[$i]]->laccwr = $bri->user[$i]->laccwr;
+		
 		log_load($sess, "from table bri subst[".$i."]: ".$bri->user[$i]->subst);
 		log_load($sess, "from table roo subst[".$i."]: ".$room->user[$table->player[$i]]->subst);
 	      }
 	      
 	      $room->room_join_wakeup(&$user);
-	      
-	      if (Room::save_data(&$room) == FALSE) {
-		echo "ERRORE SALVATAGGIO\n";
-		exit;
-	      }
+	      $table->table_token = "";
+// 	      if (Room::save_data(&$room) == FALSE) {
+// 		echo "ERRORE SALVATAGGIO\n";
+// 		exit;
+// 	      }
 	      
 	      $change_page = FALSE;
-	      Briskin5::destroy_data(&$bri);
+	      Briskin5::destroy_data($user->table);
 	    }
-	    log_load($sess, "from table subst: ".$bri_user->subst);
 	  }
 	  Briskin5::unlock_data($bri_sem);
 	  
-	  log_load($sess, "unlock Room");
 	  if ($change_page) {
+	    if (Room::save_data(&$room) == FALSE) {
+	      echo "ERRORE SALVATAGGIO\n";
+	      exit;
+	    }
+	    log_load($sess, "unlock Room");
 	    Room::unlock_data($sem);
+ 	    setcookie("table_token", $user->table_token, $curtime + 31536000);
+	    setcookie("table_idx", $user->table_idx, $curtime + 31536000);
 	    header ("Location: briskin5/briskin5.php");
 	    exit;
 	  }
 	}
 	$ACTION = "room";
       }
+
+      if (Room::save_data(&$room) == FALSE) {
+	echo "ERRORE SALVATAGGIO\n";
+	exit;
+      }
     }
     
     if ($ACTION == "login" && isset($name)) {
-      // FIXME uncomment $room->garbage_manager(TRUE);
+      $room->garbage_manager(TRUE);
       /* try login */
       if (($user = &$room->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
 	$ACTION = "room";

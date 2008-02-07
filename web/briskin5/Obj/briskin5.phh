@@ -69,10 +69,11 @@ class Briskin5 {
   {
     
     /* Garbage collector degli utenti in timeout */
+    $ismod = FALSE;
     $curtime = time();
     if ($force || $this->garbage_timeout < $curtime) {
       
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+      for ($i = 0 ; $i < MAX_BRISKIN5_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
 	if ($user_cur->sess == "")
 	  continue;
@@ -80,41 +81,32 @@ class Briskin5 {
 	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
 	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
 
-	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
+	  if ($user_cur->stat == 'table') {
 	    log_auth($user_cur->sess, "Autologout session.");
-	    
+
+	    /* SI DELEGA AL garbage_manager principale LA RIMOZIONE DELL'UTENTE 
+
 	    $tmp_sess = $user_cur->sess;
 	    $user_cur->sess = "";
 	    step_unproxy($tmp_sess);
 	    $user_cur->name = "";
 	    $user_cur->the_end = FALSE;
 	    
-	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
-	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
-	      $this->room_wakeup(&$user_cur);
-	    else if ($user_cur->subst == 'standup')
-	      $this->room_outstandup(&$user_cur);
-	    else
-	      log_rd2($sess, "LOGOUT FROM WHAT ???");
-	  }
-	}
+            */
 
-	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < $curtime) { // lo rimettiamo in piedi
-	  if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
-	    $this->room_wakeup(&$user_cur);
-	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify("<br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", 0, "torna ai tavoli", 400, 100);
-	    $user_cur->step_inc();
+	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
+
+	    $this->table_wakeup(&$user_cur);
 	  }
 	}
       }
       log_rd2($user_cur->sess, "GARBAGE UPDATED!");
       
-      $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
+      $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
+      $ismod = TRUE;
     }
 
-    // BAN_IP_CLEAN
-
+    return ($ismod);
   }
 
 
@@ -123,7 +115,7 @@ class Briskin5 {
   //
   //  static functions
   //
-  function &load_data($table_idx,$table_token) 
+  function &load_data($table_idx, $table_token = "") 
   {
     GLOBAL $G_false, $sess;
     $shm = FALSE;
@@ -135,13 +127,17 @@ class Briskin5 {
     }
     
     do {
+      //      if (shmchk_exists($tok) == FALSE)
+      if (locshm_exists($tok) == FALSE)
+	break;
+
       if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
 	break;
 
       if (($bri = @shm_get_var($shm, $tok)) == FALSE) 
 	break;
 
-      if ($bri->table_token != $table_token) {
+      if ($table_token != "" && $bri->table_token != $table_token) {
 	log_wr($sess, "bri->table_token: ".$bri->table_token."table_token: ".$table_token);
 	
 	break;
@@ -199,26 +195,26 @@ class Briskin5 {
     return ($ret);
   }
 
-  function destroy_data(&$bri) 
+  function destroy_data($table_idx) 
   {
     GLOBAL $sess;
-    
+
     $ret =   FALSE;
     $shm =   FALSE;
     $isacq = FALSE;
-    
-    // var_dump($bri);
-    
+
     log_main("XXX", "DESTROY BRISKIN5 DATA");
 
-    if (!isset($bri->tok))
-      return (FALSE);
     
     do {
       $isacq = TRUE;
       
       log_main("XXX", "DESTROY2 BRISKIN5 DATA");
-      if (($shm = shm_attach($bri->tok, SHM_DIMS)) === FALSE)
+
+      if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) 
+	break;
+
+      if (($shm = shm_attach($tok, SHM_DIMS)) === FALSE)
 	break;
       
       if (shm_remove($shm) === FALSE) {
@@ -226,10 +222,10 @@ class Briskin5 {
 	log_only($sess, serialize($bri));
 	break;
       }
-      else {
-	$shm = FALSE;
-	log_main("XXX", "DESTROY2 BRISKIN5 DATA SUCCESS");
-      }
+   
+      $shm = FALSE;
+      log_main("XXX", "DESTROY2 BRISKIN5 DATA SUCCESS");
+      
       // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
       $ret = TRUE;
     } while (0);
@@ -404,8 +400,47 @@ class Briskin5 {
       $user_cur->step_inc();
     }
   }
+  
+  /*
+   *  If all players are freezed the room garbage_manager clean up table and users.
+   */ 
+  function is_abandoned() 
+  {
+    $is_ab = TRUE;
+    $curtime = time();
 
+    $table = &$this->table[0];
 
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+      $user_cur = &$this->user[$i];
+
+      if ($user_cur->lacc + (EXPIRE_TIME_RD * 2) >= $curtime) { 
+	$is_ab = FALSE;
+	break;
+      }
+    }
+
+    return ($is_ab);
+  }
 } // end of class Briskin5
+
+function locshm_exists($tok)
+{
+  // return (TRUE);
+
+  if (($id = shmop_open($tok,"a", 0, 0)) == FALSE) {
+    log_main($tok, "SHM NOT exists");
+
+    return (FALSE);
+  }
+  else {
+    shmop_close($id);
+    log_main($tok, "SHM exists");
+
+    return (TRUE);
+  }
+    
+}
+
 
 ?>

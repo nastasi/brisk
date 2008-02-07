@@ -15,13 +15,16 @@
 	    DONE - recover of corrupted table data
 
             DONE - closure of a table
-            HALF - flush of the table (remove the shm ??)
+            DONE - flush of the table
+
+            DONE - security checks for right scope access
 
             garbage collector management
-
-            HALF - security checks for right scope access
+	        recursive garbage - howto ?
+	    remove unused parts
+	    move images
             optimizations
-	    inheritance
+	    inheritances
             
 
    NORM   - pubblic announcements

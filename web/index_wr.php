@@ -151,6 +151,7 @@ else if ($user->stat == 'room') {
 	  // Create new spawned table
 	  $bri_sem = Briskin5::lock_data($table_idx);
 	  $table_token = uniqid("");
+	  $room->table[$table_idx]->table_token = $table_token;
 	  if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
 	    log_wr($sess, "bri create: FALSE");
 	  else
@@ -169,14 +170,14 @@ else if ($user->stat == 'room') {
 	    $bri_user_cur = &$bri->user[$i];
 	    $user_cur = &$room->user[$table->player[$i]];
 	    
+	    $bri_user_cur->stat_set('table');
+	    $bri_user_cur->subst = 'asta';
+	    $bri_user_cur->laccwr = $curtime;
+
 	    $bri_user_cur->trans_step = $user_cur->step + 1;
 	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
 	    $bri_user_cur->step_inc();
 	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = show_table(&$bri,&$bri_user_cur,$bri_user_cur->step+1,TRUE, FALSE);
-
-	    $bri_user_cur->stat_set('table');
-	    $bri_user_cur->subst = 'asta';
-	    $bri_user_cur->laccwr = $curtime;
 
 	    $bri_user_cur->step_inc();
 

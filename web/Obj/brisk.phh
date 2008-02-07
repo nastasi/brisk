@@ -32,7 +32,8 @@ define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
-define(EXPIRE_TIME_RD, 180);
+// FIXME original: define(EXPIRE_TIME_RD, 180);
+define(EXPIRE_TIME_RD, 60);
 define(EXPIRE_TIME_SMAMMA, 360); 
 // BAN_TIME da allineare anche in commons.js
 define(BAN_TIME, 900); 
@@ -44,7 +45,7 @@ define(BRISK_DEBUG, FALSE);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "0.8.2";
+$G_brisk_version = "spawn-0.0.3";
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuovo layout che permette pi&ugrave; tavoli, pi&ugrave; tavoli.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
@@ -658,6 +659,7 @@ class Room {
 
   function Room () {
     $this->user = array();
+    $this->table = array();
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $this->user[$i] =& User::create("", "");
@@ -670,11 +672,74 @@ class Room {
 
   function garbage_manager($force)
   {
-    
+    $ismod = FALSE;
+
     /* Garbage collector degli utenti in timeout */
     $curtime = time();
     if ($force || $this->garbage_timeout < $curtime) {
       
+      // Before all align times with table timeout
+      for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+	$table_cur =& $this->table[$table_idx];
+	// if the table is complete and exists its shared mem we get the info about users lacc
+	if ($table_cur->player_n == PLAYERS_N) {
+	  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
+	    if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+	      if ($bri->garbage_manager(TRUE) == TRUE) {
+		// if garbaged you need to save data
+		Briskin5::save_data(&$bri);
+		if ($bri->is_abandoned()) {
+		  // FIXME recovery of room and clean of the table
+		  /*
+
+		  #
+		  #  KILL USERS
+                  #
+
+	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
+	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
+
+	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
+	    log_auth($user_cur->sess, "Autologout session.");
+	    
+	    $tmp_sess = $user_cur->sess;
+	    $user_cur->sess = "";
+	    step_unproxy($tmp_sess);
+	    $user_cur->name = "";
+	    $user_cur->step = 0;
+	    $user_cur->the_end = FALSE;
+	    
+	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
+	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
+	      $this->room_wakeup(&$user_cur);
+	    else if ($user_cur->subst == 'standup')
+	      $this->room_outstandup(&$user_cur);
+	    else
+	      log_rd2($sess, "LOGOUT FROM WHAT ???");
+	  }
+	}
+
+                #
+                # destroy shared
+                #
+
+	    Briskin5::destroy_data($user->table);
+
+
+		   */
+		}
+	      }
+	      $table_bri = &$bri->table[0];
+	      for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+		$this->user[$table_cur->player[$i]]->lacc = 
+		  $bri->user[$table_bri->player[$i]]->lacc;
+	      }
+	    }
+	    Briskin5::unlock_data($sem);
+	  }
+	}
+      }
+
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
 	if ($user_cur->sess == "")
@@ -690,6 +755,7 @@ class Room {
 	    $user_cur->sess = "";
 	    step_unproxy($tmp_sess);
 	    $user_cur->name = "";
+	    $user_cur->step = 0;
 	    $user_cur->the_end = FALSE;
 	    
 	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
@@ -714,10 +780,10 @@ class Room {
       log_rd2($user_cur->sess, "GARBAGE UPDATED!");
       
       $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
+      $ismod = TRUE;
     }
 
-    // BAN_IP_CLEAN
-
+    return ($ismod);
   }
 
 
@@ -802,11 +868,11 @@ class Room {
     }
   }
 
-  function room_join_wakeup(&$user)
+  function room_join_wakeup(&$user, $update_lacc = FALSE)
   {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
-
+    
     log_main($user->sess, "JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
@@ -818,7 +884,9 @@ class Room {
       $user_cur = &$this->user[$table->player[$i]];
       log_main($user->sess, "PREIMPOST INLOOP name: ".$user_cur->name);
       if ($user_cur->sess != "") {
-	$user_cur->laccwr = $curtime;
+	if ($update_lacc == TRUE) {
+	  $user_cur->laccwr = $curtime;
+	}
 	log_load($user->sess, "cur: ".$user_cur->name."  subst: ".$user_cur->subst);
 	if ($user_cur->subst == "shutdowned") {
 	  $user_cur->stat_set("room");
@@ -1766,6 +1834,10 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     /* GENERAL STATUS */
     $ret .= sprintf( 'gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
 		     $sendstep, $user->stat, $user->subst, $table_pos);
+
+    log_rd($user->sess, sprintf( 'SHOW_TABLE: gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
+		     $sendstep, $user->stat, $user->subst, $table_pos));
+
     /* BACKGROUND */
     $ret .= "background_set();";
     

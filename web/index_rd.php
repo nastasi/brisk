@@ -85,7 +85,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       log_auth($sess, "update lacc");
       $user->lacc = time();
 
-      // FIXME uncomment $room->garbage_manager(FALSE);
+      $room->garbage_manager(FALSE);
       
       Room::save_data($room);
       $first_loop = FALSE;
