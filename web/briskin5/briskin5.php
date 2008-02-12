@@ -51,7 +51,7 @@ var gst  = new globst();
 gst.st = <?php 
 require_once("../Obj/brisk.phh");
 
-log_load($sess, "LOAD: briskin5.php");
+log_load("bin5/briskin5.php");
 
 if (isset($laststate) == false) {
   $laststate = -1;

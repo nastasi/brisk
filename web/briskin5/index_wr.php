@@ -29,12 +29,12 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   exit;
 }
 
-log_load($sess, "LOAD: index_wr.php");
+log_load("bin5/index_wr.php");
 
 /*
  *  MAIN
  */
-log_wr($sess, 'COMM: '.$mesg);
+log_wr('COMM: '.$mesg);
 
 if ($table_idx < 0 || $table_idx >= TABLE_N)
      exit;
@@ -43,13 +43,13 @@ $sem = Briskin5::lock_data($table_idx);
 $bri = &Briskin5::load_data($table_idx,$table_token);
 if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
-  log_wr($sess, "Get User Error");
+  log_wr("Get User Error");
   Briskin5::unlock_data($sem);
   exit;
 }
 $argz = explode('|', $mesg);
 
-log_wr($sess, 'POSTSPLIT: '.$argz[0]);
+log_wr('POSTSPLIT: '.$argz[0]);
 
 if ($argz[0] == 'shutdown') {
   log_auth($user_cur->sess, "Shutdown session.");
@@ -59,13 +59,13 @@ if ($argz[0] == 'shutdown') {
   $user->name = "";
   $user->the_end = FALSE;
   
-  log_rd2($user->sess, "AUTO LOGOUT.");
+  log_rd2("AUTO LOGOUT.");
   if ($user->subst == 'sitdown' || $user->stat == 'table')
     $bri->table_wakeup(&$user);
   else if ($user->subst == 'standup')
     $bri->room_outstandup(&$user);
   else
-    log_rd2($sess, "SHUTDOWN FROM WHAT ???");
+    log_rd2("SHUTDOWN FROM WHAT ???");
 }
 /******************
  *                *
@@ -79,7 +79,7 @@ else if ($user->stat == 'room') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
 
-    log_wr($sess, $user->comm[$user->step % COMM_N]);
+    log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
     
   }
@@ -87,7 +87,7 @@ else if ($user->stat == 'room') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about), 0, "torna ai tavoli", 400, 200);
 
-    log_wr($sess, $user->comm[$user->step % COMM_N]);
+    log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
     
   }
@@ -102,10 +102,10 @@ else if ($user->stat == 'room') {
   else if ($user->subst == 'standup') {
    
     if ($argz[0] == 'sitdown') {
-      log_wr($sess, "SITDOWN command");
+      log_wr("SITDOWN command");
 
       if ($user->the_end == TRUE) {
-	log_wr($sess, "INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
+	log_wr("INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
 	Briskin5::unlock_data($sem);
 	exit;
       }
@@ -125,7 +125,7 @@ else if ($user->stat == 'room') {
       $table = &$bri->table[$table_idx];
     
       if ($table->player_n == PLAYERS_N) {
-	log_wr($sess, "WARN:FSM: Sitdown unreachable, table full.");
+	log_wr("WARN:FSM: Sitdown unreachable, table full.");
 	Briskin5::unlock_data($sem);
 	exit;
       } 
@@ -135,13 +135,13 @@ else if ($user->stat == 'room') {
       $user->table = $table_idx;
       $user->table_pos = $table->user_add($idx);
       
-      log_wr($sess, "MOP before");
+      log_wr("MOP before");
 
       if ($table->player_n == PLAYERS_N) {
-	log_wr($sess, "MOP inall");
+	log_wr("MOP inall");
 
 	// Start game for this table.
-	log_wr($sess, "Start game!");
+	log_wr("Start game!");
 	
 	//
 	//  START THE SPAWN HERE!!!!
@@ -154,9 +154,9 @@ else if ($user->stat == 'room') {
 	  for ($i = 0 ; $i < BRISCOLAIN5_PLAYERS_N ; $i++)
 	    $us[$i] = &$bri->user[$table->player[$i]];
 	  if (($bri =& new Briskin5(&$us, &$table, $table_idx)) == FALSE)
-	    log_wr($sess, "bri create: FALSE");
+	    log_wr("bri create: FALSE");
 	  else
-	    log_wr($sess, "bri create: ".serialize($bri));
+	    log_wr("bri create: ".serialize($bri));
 	
 
 	  // Set root table and users
@@ -170,14 +170,14 @@ else if ($user->stat == 'room') {
 	  // init users
 	  for ($i = 0 ; $i < $table->player_n ; $i++) {
 	    $user_cur = &$bri->user[$table->player[$i]];
-	    log_wr($sess, "Pre if!");
+	    log_wr("Pre if!");
 	    
 	    $ret = "";
 	    $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
 	    $user_cur->trans_step = $user_cur->step + 1;
-	    log_wr($sess, "TRANS ATTIVATO");
+	    log_wr("TRANS ATTIVATO");
 	    
 	    
 	    $user_cur->stat_set('table');
@@ -190,13 +190,13 @@ else if ($user->stat == 'room') {
 	  }
 	} // end else {  BEFORE SPAWN
 	
-	log_wr($sess, "MOP after");
+	log_wr("MOP after");
 
       }
       // change room
       $bri->room_sitdown(&$user, $table_idx);
 
-      log_wr($sess, "MOP finish");
+      log_wr("MOP finish");
 
       
     }
@@ -235,10 +235,10 @@ else if ($user->stat == 'table') {
   $table = &$bri->table[$user->table];
 
   if ($argz[0] == 'tableinfo') {
-    log_wr($sess, "PER DI TABLEINFO");
+    log_wr("PER DI TABLEINFO");
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .= show_table_info(&$bri, &$table, $user->table_pos);
-    log_wr($sess, $user->comm[$user->step % COMM_N]);
+    log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
   }
   else if ($argz[0] == 'chatt') {
@@ -260,7 +260,7 @@ else if ($user->stat == 'table') {
 	$user->comm[$user->step % COMM_N] .= $table->exitlock_show(&$bri->user, $user->table_pos);
 	$user->comm[$user->step % COMM_N] .=  show_notify("<br>I dati presenti sul server non erano allineati con quelli inviati dal tuo browser, adesso lo sono. Riprova ora.", 2000, "Torna alla partita.", 400, 100);
 	
-	log_wr($sess, $user->comm[$user->step % COMM_N]);
+	log_wr($user->comm[$user->step % COMM_N]);
 	$user->step_inc();
 	$logout_cont = FALSE;
       }
@@ -284,7 +284,7 @@ else if ($user->stat == 'table') {
       $ret .= sprintf('exitlock_show(%d, %s);', $ct, 
 		     ($user_cur[$i]->exitislock ? 'true' : 'false'));
       $user_cur[$i]->comm[$user_cur[$i]->step % COMM_N] = $ret;
-      log_wr($sess, $user_cur[$i]->comm[$user_cur[$i]->step % COMM_N]);
+      log_wr($user_cur[$i]->comm[$user_cur[$i]->step % COMM_N]);
       $user_cur[$i]->step_inc();
     }
   }
@@ -292,7 +292,7 @@ else if ($user->stat == 'table') {
     if ($argz[0] == 'lascio' && $user->handpt <= 2) {
       $index_cur = $table->gstart % PLAYERS_N;
     
-      log_wr($sess, sprintf("GIOCO FINITO !!!"));
+      log_wr(sprintf("GIOCO FINITO !!!"));
     
       $table->mult *= 2; 
       $table->old_reason = sprintf("Ha lasciato %s perche` aveva al massimo 2 punti.", $user->name);
@@ -318,11 +318,11 @@ else if ($user->stat == 'table') {
 	$a_card = $argz[1];
 	$a_pnt  = $argz[2];
       
-	log_wr($sess, "CI SIAMO  a_card ".$a_card."  asta_card ".$table->asta_card);
+	log_wr("CI SIAMO  a_card ".$a_card."  asta_card ".$table->asta_card);
       
 	// Abbandono dell'asta
 	if ($a_card <= -1) {
-	  log_wr($sess, "Abbandona l'asta.");
+	  log_wr("Abbandona l'asta.");
 	  $table->asta_pla[$index_cur] = FALSE;
 	  $user->asta_card  = -1;
 	  $table->asta_pla_n--;
@@ -336,7 +336,7 @@ else if ($user->stat == 'table') {
 	  
 
 	  if ($again == FALSE) {
-	    log_wr($sess, "NUOVI ORZI.");
+	    log_wr("NUOVI ORZI.");
 	    $user->asta_card  = $a_card;
 	    $table->asta_card = $a_card;
 	    if ($a_card == 9) {
@@ -354,7 +354,7 @@ else if ($user->stat == 'table') {
 	  $user->comm[$user->step % COMM_N] = $ret;
 	  $user->step_inc();
 
-	  log_wr($sess, "Ripetere.");
+	  log_wr("Ripetere.");
 	}
 	else {
 	  /* next step */
@@ -377,11 +377,11 @@ else if ($user->stat == 'table') {
 
 	  if (($table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
 	      !($table->asta_card == 9 && $table->asta_pnt == 120)) {
-	    log_wr($sess,"ALLOPPA QUI");
+	    log_wr("ALLOPPA QUI");
 	    for ($i = 1 ; $i < PLAYERS_N ; $i++) {
 	      $index_next = ($table->gstart + $i) % PLAYERS_N;
 	      if ($table->asta_pla[$index_next]) {
-		log_wr($sess,"GSTART 1");
+		log_wr("GSTART 1");
 		$table->gstart += $i;
 		break;
 	      }
@@ -402,9 +402,9 @@ else if ($user->stat == 'table') {
 	    }
 	  }
 	  else if ($table->asta_pla_n == 0) {
-	    log_wr($sess, "PASSANO TUTTI!");
+	    log_wr("PASSANO TUTTI!");
 
-	    log_wr($sess, sprintf("GIOCO FINITO !!!"));
+	    log_wr(sprintf("GIOCO FINITO !!!"));
 	  
 	    $table->old_reason = "Hanno passato tutti.";
 	    $table->mult *= 2; 
@@ -422,7 +422,7 @@ else if ($user->stat == 'table') {
 	    }
 	  }
 	  else {
-	    log_wr($sess, "FINITA !");
+	    log_wr("FINITA !");
 	    // if a_pnt == 120 supergame ! else abbandono
 	    if ($a_pnt == 120 || $user->asta_card != -1) {
 	      $chooser = $index_cur;
@@ -461,7 +461,7 @@ else if ($user->stat == 'table') {
 	}
       }
       else {
-	log_wr($sess, "NON CI SIAMO");
+	log_wr("NON CI SIAMO");
       }
     }
     /*  asta::choose */
@@ -472,9 +472,9 @@ else if ($user->stat == 'table') {
 	if ($a_brisco >= 0 && $a_brisco < 40) {
 	  $table->briscola = $a_brisco;
 	  $table->friend   = $table->card[$a_brisco]->owner;
-	  log_wr($sess,"GSTART 2");
+	  log_wr("GSTART 2");
 	  $table->gstart = ($table->mazzo+1) % PLAYERS_N;
-	  log_wr($sess, "Setta la briscola a ".$a_brisco);
+	  log_wr("Setta la briscola a ".$a_brisco);
 
 	  $chooser = $table->asta_win;
 	  $user_chooser = &$bri->user[$table->player[$chooser]];
@@ -506,7 +506,7 @@ else if ($user->stat == 'table') {
     }
   }
   else if ($user->subst == 'game') {
-    log_wr($sess, "state: table::game".$argz[0]);
+    log_wr("state: table::game".$argz[0]);
 
     if ($argz[0] == 'play') {
       $a_play = $argz[1];
@@ -522,14 +522,14 @@ else if ($user->stat == 'table') {
 		       $a_play, $user->table_pos, ($table->gstart % PLAYERS_N),
 		       $table->mazzo, $table->gstart,
 		       $table->card[$a_play]->stat, $table->card[$a_play]->owner);
-      log_wr($sess, "CIC".$loggo);
+      log_wr("CIC".$loggo);
 			  
       /* se era il suo turno e la carta era sua ed era in mano */
       if ($a_play >=0 && $a_play < 40 &&
 	  ($user->table_pos == (($table->gstart + $table->turn) % PLAYERS_N)) &&
 	  $table->card[$a_play]->stat == 'hand' &&
 	  $table->card[$a_play]->owner == $user->table_pos) {
-	log_wr($sess, sprintf("User: %s Play: %d",$user->name, $a_play));
+	log_wr(sprintf("User: %s Play: %d",$user->name, $a_play));
 
 	/* Change the card status. */
 	$table->card[$a_play]->play($a_x, $a_y);
@@ -551,11 +551,11 @@ else if ($user->stat == 'table') {
 	}
 	else if ($table->turn <= (PLAYERS_N * 8)) { /* manche finished */
 	  $winner = calculate_winner($table);
-	  log_wr($sess,"GSTART 3");
+	  log_wr("GSTART 3");
 	  $table->gstart = $winner;
 	  $turn_nex = ($table->gstart + $table->turn) % PLAYERS_N;
 
-	  log_wr($sess, sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
+	  log_wr(sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
 	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);|cards_hidetake($d);",
 			       $winner, $winner);
 	  $player_cur = "remark_off();" . $card_take . "|"; 
@@ -568,7 +568,7 @@ else if ($user->stat == 'table') {
 	  $player_oth = $card_play . $card_take;
 	}
 
-	log_wr($sess, sprintf("Turn Cur %d Turn Nex %d",$turn_cur, $turn_nex));
+	log_wr(sprintf("Turn Cur %d Turn Nex %d",$turn_cur, $turn_nex));
 	for ($i = 0 ; $i < PLAYERS_N ; $i++) {	
 	  $user_cur = &$bri->user[$table->player[$i]];
 
@@ -592,7 +592,7 @@ else if ($user->stat == 'table') {
 
 
 	if ($table->turn == (PLAYERS_N * 8)) { /* game finished */
-	  log_wr($sess, sprintf("GIOCO FINITO !!!"));
+	  log_wr(sprintf("GIOCO FINITO !!!"));
 
 	  /* ************************************************ */
 	  /*    PRIMA LA PARTE PER LO SHOW DI CHI HA VINTO    */
@@ -616,7 +616,7 @@ else if ($user->stat == 'table') {
 	  $user_cur->step_inc();	    
 	}
 
-	log_wr($sess, sprintf("TURN: %d",$table->turn));
+	log_wr(sprintf("TURN: %d",$table->turn));
 	/* Have played all the players ? */
 	/* NO:  switch the focus and enable the next player to play. */
       
@@ -624,10 +624,10 @@ else if ($user->stat == 'table') {
       }
     }
     else
-      log_wr($sess, "NOSENSE");
+      log_wr("NOSENSE");
   }
 }
-log_wr($sess, "before save data");
+log_wr("before save data");
 Briskin5::save_data($bri);
 
 Briskin5::unlock_data($sem);
