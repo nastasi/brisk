@@ -22,8 +22,9 @@
  */
 
 require_once("Obj/brisk.phh");
+require_once("briskin5/Obj/briskin5.phh");
 
-log_load($sess, "LOAD: index_rd.php ".$QUERY_STRING);
+log_load("index_rd.php");
 
 $first_loop = TRUE;
 $the_end = FALSE;
@@ -35,7 +36,7 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 
 function shutta()
 {
-  log_rd2("SHUTTA!", connection_status());
+  log_rd2("SHUTTA!".connection_status());
 }
 
 
@@ -46,7 +47,7 @@ function unrecerror()
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  log_rd2("XXX", "UNREC_ERROR");
+  log_rd2("UNREC_ERROR:".var_export(debug_backtrace()));
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
@@ -54,8 +55,10 @@ function page_sync($sess, $page)
 {
   GLOBAL $is_page_streaming;
 
+  log_rd2("page_sync:".var_export(debug_backtrace()));
+
   $is_page_streaming = TRUE;
-  log_rd2($sess, "PAGE_SYNC");
+  log_rd2("PAGE_SYNC");
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
 }
 
@@ -69,13 +72,13 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   $ret = FALSE;
   $room = FALSE;
 
-  // log_rd2($sess, "M");
+  // log_rd2("M");
   /* Sync check (read only without modifications */
   ignore_user_abort(TRUE);
   if (($sem = Room::lock_data()) != FALSE) { 
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
-      log_only($sess, "F");
+      log_only("F");
       $room = &Room::load_data();
       if (($user = &$room->get_user($sess, $idx)) == FALSE) {
 	Room::unlock_data($sem);
@@ -91,7 +94,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       $first_loop = FALSE;
     }
 
-    log_only($sess, "U");
+    log_only("U");
     Room::unlock_data($sem);
     ignore_user_abort(FALSE);
   }
@@ -100,18 +103,18 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   }
     
   if (($proxy_step = step_get($sess)) != FALSE) {
-    // log_rd2($sess, "Postget".$proxy_step."zizi");
+    // log_rd2("Postget".$proxy_step."zizi");
 
     if ($cur_step == $proxy_step) {
-      log_only2($sess, "P");
+      log_only2("P");
       return (FALSE);
     }
     else {
-      log_only2($sess, "R");
+      log_only2("R");
     }
   }
   else {
-      log_only2($sess, "R");
+      log_only2("R");
   }
 
   if ($room == FALSE) {
@@ -120,7 +123,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if (($sem = Room::lock_data()) == FALSE) 
 	break;
       
-      log_only($sess, "P");
+      log_only("P");
       if (($room = &Room::load_data()) == FALSE) 
 	break;
     } while (0);
@@ -141,7 +144,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   if ($cur_step == $user->step) 
     return;
 
-  log_rd2($sess, "do other ++".$cur_stat."++".$user->stat."++".$cur_step."++".$user->step);
+  log_rd2("do other ++".$cur_stat."++".$user->stat."++".$cur_step."++".$user->step);
 
   if ($cur_step == -1) {
     // FUNZIONE from_scratch DA QUI 
@@ -153,12 +156,13 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       ignore_user_abort(FALSE);
       return (unrecerror());
     }
-    if ($user->the_end) 
+    if ($user->the_end) { 
+      log_rd2("main_check: the end".var_export(debug_backtrace()));
       $is_page_streaming = TRUE;
-
+    }
 
     if ($user->trans_step != -1) {
-      log_rd2($sess, "TRANS USATO ".$user->trans_step);
+      log_rd2("TRANS USATO ".$user->trans_step);
       $cur_step = $user->trans_step;
       $user->trans_step = -1;
 
@@ -168,17 +172,17 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       ignore_user_abort(FALSE);
     }
     else {
-      log_rd2($sess, "TRANS NON ATTIVATO");
+      log_rd2("TRANS NON ATTIVATO");
       Room::unlock_data($sem);
       ignore_user_abort(FALSE);
     }
   }
       
   if ($cur_step == -1) {
-    log_rd2($sess, "PRE-NEWSTAT: ".$user->stat);
+    log_rd2("PRE-NEWSTAT: ".$user->stat);
 
     if ($user->stat == 'room') {
-      log_rd($sess, "roomma");
+      log_rd("roomma");
       $ret .= show_room(&$room, &$user);
 
       /* NOTE the sets went common */
@@ -197,18 +201,18 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if ($user->subst != "shutdowned" && $user->subst != "shutdowner")
 	$ret = show_table(&$room,&$user,$user->step,FALSE,FALSE);
 
-      log_rd2($sess, "SENDED TO THE STREAM: ".$ret);
+      log_rd2("SENDED TO THE STREAM: ".$ret);
 
 
       $new_stat =  $user->stat;
       $new_subst = $user->subst;
       $new_step =  $user->step;
       */
-      log_rd2($sess, "ALL COMMENTED: ".$ret);
+      log_rd2("ALL COMMENTED: ".$ret);
 
 
     }
-    log_rd2($sess, "NEWSTAT: ".$user->stat);
+    log_rd2("NEWSTAT: ".$user->stat);
 
   }
   else {
@@ -227,15 +231,15 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    $to_stat = $user->stat;
 	    Room::unlock_data($sem);
 	    ignore_user_abort(FALSE);
-	    log_load($user->sess, "RESYNC");
+	    log_load("RESYNC");
 	    return (page_sync($user->sess, $to_stat == "table" ? "table.php" : "index.php"));
 	  }
-	  log_rd2($sess, "lost history, refresh from scratch");
+	  log_rd2("lost history, refresh from scratch");
 	  $new_step = -1;
 	  break;
 	} 
 	for ($i = $cur_step ; $i < $user->step ; $i++) {
-	  log_rd2($sess, "ADDED TO THE STREAM: ".$user->comm[$i % COMM_N]);
+	  log_rd2("ADDED TO THE STREAM: ".$user->comm[$i % COMM_N]);
 	  $ret .= $user->comm[$i % COMM_N];
 	}
 	$new_stat =  $user->stat;
@@ -244,7 +248,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       } while (0);
       
       if ($user->the_end == TRUE) {
-	log_rd2($sess, "LOGOUT BYE BYE!!");
+	log_rd2("LOGOUT BYE BYE!!");
 	log_auth($user->sess, "Explicit logout.");
 	$tmp_sess = $user->sess;
 	$user->sess = "";
@@ -254,13 +258,13 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	$user->the_end = FALSE;
 	
 	if ($user->subst == 'sitdown') {
-	  log_load($user->sess, "ROOM WAKEUP");
+	  log_load("ROOM WAKEUP");
 	  $room->room_wakeup(&$user);
 	}
 	else if ($user->subst == 'standup')
 	  $room->room_outstandup(&$user);
 	else
-	  log_rd2($sess, "LOGOUT FROM WHAT ???");
+	  log_rd2("LOGOUT FROM WHAT ???");
 	  
 	Room::save_data($room);
       }
@@ -296,7 +300,7 @@ if (!isset($myfrom))
      $myfrom = "";
 if (!isset($subst))
      $subst = "";
-log_rd2($sess, "FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming);
+log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming);
 
 
 $endtime = time() + STREAM_TIMEOUT;
@@ -305,13 +309,13 @@ $old_subst = $subst;
 $old_step =  $ext_step = $step;
 
 for ($i = 0 ; time() < $endtime ; $i++) {
-  // log_rd($sess, "PRE MAIN ".$step);;
+  // log_rd("PRE MAIN ".$step);;
   if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step)) != FALSE) {
     echo '@BEGIN@';
-    // log_rd2($sess, sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
+    // log_rd2(sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
     echo "$ret";
     echo ' @END@'; 
-    log_send($sess, "EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
+    log_send("IS_PAGE: ".($is_page_streaming == TRUE ? "TRUE" : "FALSE")."EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
     flush();
     if ($is_page_streaming)
       break;
@@ -319,10 +323,10 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   $old_stat =  $stat;
   $old_subst = $subst;
   $old_step =  $step;
-  // log_rd($sess, "POST MAIN ".$step);;
+  // log_rd("POST MAIN ".$step);;
   usleep(400000);
   if (($i % 5) == 0) {
-    // log_rd2($sess, "TIME: ".time());
+    // log_rd2("TIME: ".time());
     echo '_';
     flush();
   }
