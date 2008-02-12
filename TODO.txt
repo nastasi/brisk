@@ -19,9 +19,14 @@
 
             DONE - security checks for right scope access
 
+	    URGENT - verify lacc and laccwr setting
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	    WRITE the list of test case
+
             garbage collector management
 	        recursive garbage - howto ?
 	    remove unused parts
+                bonificare 
 	    move images
             optimizations
 	    inheritances
