@@ -32,14 +32,25 @@ define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
-// FIXME original: define(EXPIRE_TIME_RD, 180);
-define(EXPIRE_TIME_RD, 60);
+define(EXPIRE_TIME_RD, 180);
 define(EXPIRE_TIME_SMAMMA, 360); 
 // BAN_TIME da allineare anche in commons.js
 define(BAN_TIME, 900); 
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>SERVER</i>");
-define(BRISK_DEBUG, FALSE);
+
+define(DBG_ONL2, 0x0001);
+define(DBG_ONLY, 0x0002);
+define(DBG_MAIN, 0x0004);
+define(DBG_READ, 0x0008);
+define(DBG_REA2, 0x0010);
+define(DBG_SEND, 0x0020);
+define(DBG_LOCK, 0x0040);
+define(DBG_WRIT, 0x0080);
+define(DBG_LOAD, 0x0100);
+define(DBG_AUTH, 0x0200);
+
+define(BRISK_DEBUG, 0);
 // define(DEBUGGING, "local");
 
 $G_false = FALSE;
@@ -165,6 +176,9 @@ class Table {
   var $old_win;
   var $old_friend;
 
+  var $table_token;
+  var $table_start;
+
   function Table() 
   {
   }
@@ -191,11 +205,14 @@ class Table {
     $thiz->briscola  =  -1;
     $thiz->friend    =  -1;
     $thiz->turn      =   0;
-    $thiz->old_reason = "";
+    $thiz->old_reason   = "";
     $thiz->old_asta_pnt = -1;
     $thiz->old_pnt      = -1;
-    $thiz->old_win   =  -1;
-    $thiz->old_friend=  -1;
+    $thiz->old_win      = -1;
+    $thiz->old_friend   = -1;
+
+    $thiz->table_token  = "";
+    $thiz->table_start  = 0;
 
     return ($thiz);
   }
@@ -235,6 +252,9 @@ class Table {
     $thiz->old_pnt = $from->old_pnt;
     $thiz->old_win = $from->old_win;
     $thiz->old_friend = $from->old_friend;
+
+    $thiz->table_token  = $from->table_token;
+    $thiz->table_start  = $from->table_start;
 
     return ($thiz);
   }
@@ -277,6 +297,9 @@ class Table {
     for ($i = 0 ; $i < $from->player_n ; $i++)
       $thiz->player[$i] = $i;
 
+    $thiz->table_token  = $from->table_token;
+    $thiz->table_start  = $from->table_start;
+
     return ($thiz);
   }
   
@@ -305,7 +328,7 @@ class Table {
       $rn = rand(0, $i);
       
       if ($rn == 0)
-	log_main("RND ZERO", "");
+	log_main("RND ZERO");
       
       $id = $rest[$rn];
 
@@ -330,12 +353,12 @@ class Table {
       $user_cur->exitislock = TRUE;
     }
 
-    log_main("table::init","ci siamo");
+    log_main("table::init: ci siamo");
   }
 
   function game_init(&$userarr)
   {
-    log_rd2("XXX", "GSTART 4");
+    log_rd2("GSTART 4");
 
     $this->gstart = ($this->mazzo+1) % PLAYERS_N;
     $this->bunch_make();
@@ -399,7 +422,7 @@ class Table {
       $this->player_n--;
     }
     else {
-      log_main($user->sess, "INCONSISTENCY ON TABLE.");
+      log_main("INCONSISTENCY ON TABLE.");
     }
   }
 
@@ -552,7 +575,7 @@ class User {
 
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
     for ($i = $i_start ; $i < $from->step ; $i++) {
-      log_wr("XX", "TRY PUSH:".$i);
+      log_wr("TRY PUSH:".$i);
       $ii = $i % COMM_N;
       $thiz->comm[$ii]   = $from->comm[$ii];
     }
@@ -571,6 +594,7 @@ class User {
   }
   
   function stat_set($stat) {
+    log_main("sess: [".$this->sess. "] NEW STAT: [".$stat."]"); 
     $this->stat = "$stat";
     
     /*
@@ -633,19 +657,19 @@ function step_get($sess) {
     $arr = unpack('l', $s);
     fclose($fp);
 
-    // log_rd2($sess, "A0: ".$arr[0]."  A1: ".$arr[1]);
+    // log_rd2("A0: ".$arr[0]."  A1: ".$arr[1]);
     return ($arr[1]);
   } while (0);
 
   if ($fp != FALSE)
     fclose($fp);
 
-  log_rd2($sess, "STEP_GET: return false ".$ct);
+  log_rd2("STEP_GET: return false ".$ct);
   return (FALSE);
 }
 
 function step_unproxy($sess) {
-  log_rd2($sess, "UNPROXY: ".PROXY_PATH."/".$sess.".step");
+  log_rd2("UNPROXY: ".PROXY_PATH."/".$sess.".step");
   @unlink(PROXY_PATH."/".$sess.".step");
 }
 
@@ -674,6 +698,8 @@ class Room {
   {
     $ismod = FALSE;
 
+    log_rd2("garbage_manager START");
+
     /* Garbage collector degli utenti in timeout */
     $curtime = time();
     if ($force || $this->garbage_timeout < $curtime) {
@@ -682,72 +708,80 @@ class Room {
       for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
 	$table_cur =& $this->table[$table_idx];
 	// if the table is complete and exists its shared mem we get the info about users lacc
+
 	if ($table_cur->player_n == PLAYERS_N) {
+	  log_main("PLAYERS == N TABLE ".$table_idx);
+	  
 	  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
+	    log_main("bin5 lock data success");
+	    
 	    if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
-	      if ($bri->garbage_manager(TRUE) == TRUE) {
-		// if garbaged you need to save data
-		Briskin5::save_data(&$bri);
-		if ($bri->is_abandoned()) {
-		  // FIXME recovery of room and clean of the table
-		  /*
-
-		  #
-		  #  KILL USERS
-                  #
-
-	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
-	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
-
-	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
-	    log_auth($user_cur->sess, "Autologout session.");
-	    
-	    $tmp_sess = $user_cur->sess;
-	    $user_cur->sess = "";
-	    step_unproxy($tmp_sess);
-	    $user_cur->name = "";
-	    $user_cur->step = 0;
-	    $user_cur->the_end = FALSE;
-	    
-	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
-	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
-	      $this->room_wakeup(&$user_cur);
-	    else if ($user_cur->subst == 'standup')
-	      $this->room_outstandup(&$user_cur);
-	    else
-	      log_rd2($sess, "LOGOUT FROM WHAT ???");
-	  }
-	}
-
-                #
-                # destroy shared
-                #
-
-	    Briskin5::destroy_data($user->table);
-
-
-		   */
-		}
-	      }
-	      $table_bri = &$bri->table[0];
-	      for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-		$this->user[$table_cur->player[$i]]->lacc = 
-		  $bri->user[$table_bri->player[$i]]->lacc;
+	      if ($table_cur->table_token != $bri->table_token) {
+		log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
+		log_main("ERROR: not matching table_start. Room: ".$table_cur->table_start."  Table: ".$bri->table_start);
+		$bri = FALSE;
 	      }
 	    }
-	    Briskin5::unlock_data($sem);
-	  }
-	}
-      }
+	    
+	    if ($bri != FALSE) {
+	      log_main("garbage_manager: bri loaded successfully.");
+	      $bri->garbage_manager(TRUE);
+	      
+	      $bri_table = &$bri->table[0];
 
+	      // is the end of the table
+	      if ($bri->the_end == TRUE) {
+		/*
+		 *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
+		 */
+		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+		  // stat must be "table" by definition
+		  $user_cur =& $this->user[$table_cur->player[$i]];
+		  $bri_user =& $bri->user[$i];
+
+		  $user_cur->subst      = $bri_user->subst;
+		  $user_cur->step       = $bri_user->step;
+		  $user_cur->trans_step = $bri_user->step;
+		  $user_cur->lacc       = $bri_user->lacc;
+		  $user_cur->laccwr     = $bri_user->lacc;
+		}
+	      
+		$this->room_join_wakeup(&$user_cur); 
+		$table_cur->table_token = "";
+
+		Briskin5::destroy_data($table_idx);
+	      }
+	      else {
+		log_main("gm:: save_data");
+
+		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+		  $this->user[$table_cur->player[$i]]->lacc = $bri->user[$i]->lacc;
+		}
+	      
+		Briskin5::save_data(&$bri);
+	      }
+	    } // else if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+	    else {
+	      log_main("ERROR: table ".$table_idx." unrecoverable join");
+	    }
+	  } // bri::lock_data
+	} //  if ($table_cur->player_n == PLAYERS_N) {
+      } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+    
+      log_rd2("out new loop.");
+		
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
-	if ($user_cur->sess == "")
+	
+	log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
+	  
+	if ($user_cur->sess == "") 
 	  continue;
 	
-	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
-	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
-
+	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) {
+	  // Auto logout dell'utente
+	  log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime ".$curtime);
+	  
 	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
 	    log_auth($user_cur->sess, "Autologout session.");
 	    
@@ -758,13 +792,13 @@ class Room {
 	    $user_cur->step = 0;
 	    $user_cur->the_end = FALSE;
 	    
-	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
+	    log_rd2("AUTO LOGOUT.");
 	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
 	      $this->room_wakeup(&$user_cur);
 	    else if ($user_cur->subst == 'standup')
 	      $this->room_outstandup(&$user_cur);
 	    else
-	      log_rd2($sess, "LOGOUT FROM WHAT ???");
+	      log_rd2("LOGOUT FROM WHAT ???");
 	  }
 	}
 
@@ -777,7 +811,7 @@ class Room {
 	  }
 	}
       }
-      log_rd2($user_cur->sess, "GARBAGE UPDATED!");
+      log_rd2("GARBAGE UPDATED!");
       
       $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
       $ismod = TRUE;
@@ -792,17 +826,17 @@ class Room {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
 
-    log_main("WAKEUP", "begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
+    log_main("WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
 
     $from_table = ($user->stat == "table");
     if ($from_table) {
-      log_main("WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+      log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
       for ($i = 0 ; $i < $table->player_n ; $i++) {
 	$user_cur = &$this->user[$table->player[$i]];
-	log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
+	log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
 
 	if ($user_cur != $user) {
 	  $user_cur->stat_set("room");
@@ -830,16 +864,16 @@ class Room {
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	continue;
       
-      log_main("VALORI", "name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+      log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($from_table && ($user_cur->table == $table_idx || $user_cur == $user)) {
 	$ret .= 'gst.st_loc++; the_end=true; window.onunload = null; document.location.assign("index.php");|';
 	// $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
-	log_main("DOCUMENT.index.php", "from table");
+	log_main("DOCUMENT.index.php: from table");
       }
       else if ($user_cur->stat == "room") {
-	log_main("DOCUMENT.index.php", "from table");
+	log_main("DOCUMENT.index.php: from table");
 
 	$ret .= table_content($this, $user_cur, $table_idx);
 	$ret .= standup_content($this, $user_cur);
@@ -862,7 +896,7 @@ class Room {
 	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	}
       }
-      log_wr($user_cur->sess, "ROOM_WAKEUP: ".$ret);
+      log_wr("ROOM_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
       $user_cur->step_inc();
     }
@@ -873,21 +907,21 @@ class Room {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
     
-    log_main($user->sess, "JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
+    log_main("JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
     $user_wup = array();
     $user_wup_n = 0;
-    log_main($user->sess, "JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+    log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
     
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user_cur = &$this->user[$table->player[$i]];
-      log_main($user->sess, "PREIMPOST INLOOP name: ".$user_cur->name);
+      log_main("PREIMPOST INLOOP name: ".$user_cur->name);
       if ($user_cur->sess != "") {
 	if ($update_lacc == TRUE) {
 	  $user_cur->laccwr = $curtime;
 	}
-	log_load($user->sess, "cur: ".$user_cur->name."  subst: ".$user_cur->subst);
+	log_main("cur: ".$user_cur->name."  subst: ".$user_cur->subst);
 	if ($user_cur->subst == "shutdowned") {
 	  $user_cur->stat_set("room");
 	  $user_cur->subst = "sitdown";
@@ -907,19 +941,19 @@ class Room {
     /* aggiorna l'array dei giocatori al tavolo. */
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      log_main($user_cur->sess, "START LOOP");
+      log_main("START LOOP");
       $user_cur = &$this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room') {
-	log_main($user_cur->sess, "name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
+	log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
 	continue;
       }
 
-      log_main($user->sess, "___");
-      log_main($user->sess, "VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+      log_main("___");
+      log_main("VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($user_cur->stat == "room") {
-	log_main($user->sess, "DOCUMENT.index.php from table");
+	log_main("DOCUMENT.index.php from table");
 
 	$ret .= table_content($this, $user_cur, $table_idx);
 	$ret .= standup_content($this, $user_cur);
@@ -931,10 +965,10 @@ class Room {
 	  if ($user_cur == $user_wup[$wup_idx]) 
 	    break;
 
-	log_main($user->sess, "JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
+	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
 	if ($wup_idx < $user_wup_n) {
-	  log_main($user->sess, "JOIN_WAKEUP less");
+	  log_main("JOIN_WAKEUP less");
 	  // set the new status 
 	  $ret .=  'subst = "standup"; ';
 	  // clean the action buttons in other tables
@@ -942,16 +976,16 @@ class Room {
 	    if ($this->table[$e]->player_n < PLAYERS_N)
 	      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user_cur->table));
 	  }
-	  log_main($user->sess, "JOIN_WAKEUP end less");
+	  log_main("JOIN_WAKEUP end less");
 	}
 	else {
-	  log_main($user->sess, "JOIN_WAKEUP more");
+	  log_main("JOIN_WAKEUP more");
 	  $act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
 	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
-	  log_main($user->sess, "JOIN_WAKEUP end more");
+	  log_main("JOIN_WAKEUP end more");
 	}
       }
-      log_wr($user->sess, "ROOM_JOIN_WAKEUP: ".$ret);
+      log_wr("ROOM_JOIN_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
       $user_cur->step_inc();
     }
@@ -964,7 +998,7 @@ class Room {
   
   function table_update(&$user)
   {
-    log_main("table_update", "pre - USER: ".$user->name);
+    log_main("table_update: pre - USER: ".$user->name);
 
     $table_idx = $user->table;
 
@@ -988,12 +1022,12 @@ class Room {
       $user_cur->step_inc();
     }
 
-    log_main("table_update", "post");
+    log_main("table_update: post");
   }
 
   function room_sitdown(&$user, $table_idx)
   {
-    log_main("room_sitdown", ($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
+    log_main("room_sitdown ".($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
 
     if ($table_idx > -1) 
       $table = &$this->table[$table_idx];
@@ -1040,7 +1074,7 @@ class Room {
     
     $dt = date("H:i ", $timecur);
     if (strncmp($user_mesg, "/nick ", 6) == 0) {
-      log_main($user->sess, "chatt_send BEGIN");
+      log_main("chatt_send BEGIN");
 
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
@@ -1069,11 +1103,11 @@ class Room {
       if ($i == MAX_PLAYERS) {
 	$user->name = $name_new;
 
-      log_main($user->sess, "chatt_send start set");
+      log_main("chatt_send start set");
 	
 
 	for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-	  log_main($user->sess, "chatt_send set loop");
+	  log_main("chatt_send set loop");
 	  
 	  $user_cur = &$this->user[$i];
 	  if ($user_cur->sess == '')
@@ -1084,11 +1118,11 @@ class Room {
 	    }
 	    else if ($user->stat == 'room' && $user->subst == 'sitdown' ||
 		     $user->stat == 'table') {
-	      log_main($user->sess, "chatt_send pre table update");
+	      log_main("chatt_send pre table update");
 
 	      $this->table_update(&$user);
 
-	      log_main($user->sess, "chatt_send post table update");
+	      log_main("chatt_send post table update");
 	    }
 	  }
 	  else if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
@@ -1143,12 +1177,12 @@ class Room {
 	  return ($ret);
 	}
       }
-      log_main($sess, sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
+      log_main(sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
       // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
-      // log_main($sess, sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
+      // log_main(sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
     }
     else {
-      log_main($sess, sprintf("get_user: Wrong strlen [%s]",$sess));
+      log_main(sprintf("get_user: Wrong strlen [%s]",$sess));
     }
 
     return ($G_false);
@@ -1217,7 +1251,7 @@ class Room {
       $this->user[$idx]->laccwr = $curtime;
       $this->user[$idx]->bantime = 0;
       $this->user[$idx]->ip = $ip;
-      log_main("XXX", sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
+      log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
       
       return ($this->user[$idx]);
     }
@@ -1232,14 +1266,14 @@ class Room {
       if ($user_cur->sess == '')
 	continue;
 
-      log_main("STANDUP START", $user_cur->stat);
+      log_main("STANDUP START: ".$user_cur->stat);
       
       if ($user_cur->stat == 'room') {
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".standup_content($this, $user_cur);
 	if ($user_cur == $user)
 	  $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>: ";',  xcape($user->name));
 	
-	log_main("FROM STANDUP", "NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
+	log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
 	
 	$user_cur->step_inc();
       }
@@ -1267,17 +1301,17 @@ class Room {
     if ($shm = shm_attach($tok, SHM_DIMS)) {
       $room = @shm_get_var($shm, $tok);
       
-      log_only($sess, "bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
+      log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
       if (isset($room)) 
-	log_only($sess, "bri count ".count($room));
+	log_only("bri count ".count($room));
       
       if ($room == FALSE) {
-	log_only($sess, "INIT MAIN DATA");
+	log_only("INIT MAIN DATA");
 	
 	$room =& Room::init_data();
 	if (shm_put_var($shm, $tok, $room) == FALSE) {
-	  log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($room)));
-	  log_only($sess, serialize($room));
+	  log_only("PUT_VAR FALLITA ".strlen(serialize($room)));
+	  log_only(serialize($room));
 	}
       }
       
@@ -1310,13 +1344,13 @@ class Room {
       if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
 	break;
       
-      // log_only($sess, "PUT_VAR DI ".strlen(serialize($room)));
+      // log_only("PUT_VAR DI ".strlen(serialize($room)));
       if (shm_put_var($shm, $tok, $room) == FALSE) {
-	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($room)));
-	log_only($sess, serialize($room));
+	log_only("PUT_VAR FALLITA ".strlen(serialize($room)));
+	log_only(serialize($room));
 	break;
       }
-      // log_main("XXX", "QUI CI ARRIVA [".$room->user[0]->name."]");
+      // log_main("QUI CI ARRIVA [".$room->user[0]->name."]");
       $ret = TRUE;
     } while (0);
     
@@ -1342,7 +1376,7 @@ class Room {
       exit;
     }
     if (sem_acquire($res)) {   
-      log_only($sess, "LOCK");
+      log_lock("LOCK room");
       return ($res);
     }
     else
@@ -1353,7 +1387,7 @@ class Room {
   {
     GLOBAL $sess; 
     
-    log_only($sess, "UNLOCK");
+    log_lock("UNLOCK room");
 
     return (sem_release($res));
   }
@@ -1365,107 +1399,189 @@ function make_seed()
   return (float) $sec + ((float) $usec * 100000);
 }
 
-function log_only2($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+
+function log_only2($log) {
+  if ((BRISK_DEBUG & DBG_ONL2) == 0)
     return;
   
+  GLOBAL $sess;
 
-  if (($fp = @fopen("/tmp/brisk_only2.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //   if (($fp = @fopen("/tmp/brisk_only2.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("ONL2: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
 
-function log_only($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+function log_only($log) {
+  if ((BRISK_DEBUG & DBG_ONLY) == 0)
     return;
   
+  GLOBAL $sess;
 
-  if (($fp = @fopen("/tmp/brisk_only.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_only.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("ONLY: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
 
-function log_main($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+function log_main($log) {
+  if ((BRISK_DEBUG & DBG_MAIN) == 0)
     return;
+  
+  GLOBAL $sess;
 
-  if (($fp = @fopen("/tmp/brisk_main.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_main.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("MAIN: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
 
-function log_rd($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+function log_rd($log) {
+  if ((BRISK_DEBUG & DBG_READ) == 0)
     return;
+  
+  GLOBAL $sess;
 
-  if (($fp = @fopen("/tmp/brisk_rd.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_rd.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("READ: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
 
-function log_rd2($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+function log_rd2($log) {
+  if ((BRISK_DEBUG & DBG_REA2) == 0)
     return;
+  
+  GLOBAL $sess;
 
-  if (($fp = @fopen("/tmp/brisk_rd2.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_rd2.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("REA2: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
 
-function log_send($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+function log_send($log) {
+  if ((BRISK_DEBUG & DBG_SEND) == 0)
     return;
+  
+  GLOBAL $sess;
 
-  if (($fp = @fopen("/tmp/brisk_send.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_send.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("SEND: [%s] [%s]\n", $ssess, $log));
+    fclose($fp);
+  }
+}
+
+function log_lock($log) {
+  if ((BRISK_DEBUG & DBG_LOCK) == 0)
+    return;
+  
+  GLOBAL $sess;
+
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_lock.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("LOCK: [%s] [%s]\n", $ssess, $log));
+    fclose($fp);
+  }
+}
+
+function log_wr($log) {
+  if ((BRISK_DEBUG & DBG_WRIT) == 0)
+    return;
+  
+  GLOBAL $sess;
+
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_wr.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("WRIT: [%s] [%s]\n", $ssess, $log));
+    fclose($fp);
+  }
+}
+
+function log_load($log) {
+  if ((BRISK_DEBUG & DBG_LOAD) == 0)
+    return;
+  
+  GLOBAL $sess;
+
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+      
+
+  //  if (($fp = @fopen("/tmp/brisk_load.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("LOAD: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
 
 function log_auth($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
+  if ((BRISK_DEBUG & DBG_AUTH) == 0)
     return;
 
-  if (($fp = @fopen("/tmp/brisk_auth.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
+  //  if (($fp = @fopen("/tmp/brisk_auth.log", 'a')) != FALSE) {
+  if (($fp = @fopen("/tmp/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("AUTH: [%s] [%d] [%s]\n", $sess, time(), $log));
     fclose($fp);
   }
 }
 
-function log_lock($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
-    return;
-
-  if (($fp = @fopen("/tmp/brisk_lock.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%d] [%s] [%s]\n", time(), $sess, $log));
-    fclose($fp);
-  }
-}
-
-function log_wr($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
-    return;
-
-  if (($fp = @fopen("/tmp/brisk_wr.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
-}
-
-function log_load($sess, $log) {
-  if (BRISK_DEBUG != TRUE)
-    return;
-
-  if (($fp = @fopen("/tmp/brisk_load.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SESS: [%s] [%s]\n", $sess, $log));
-    fclose($fp);
-  }
-}
 
 function log_legal($timecur, $sess, $name, $where, $mesg) 
 {
@@ -1543,7 +1659,7 @@ function table_content($room, $user, $table_idx)
       else
 	{ $hilion = ""; $hilioff = ""; }
 
-    log_main($user_cur->name, sprintf("IN TABLE [%d]", $table_idx));
+    log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
     
     $content .= sprintf("%s%s%s<br>",$hilion, xcape($user_cur->name), $hilioff);
   }
@@ -1606,7 +1722,7 @@ function standup_content(&$room, $user)
 
 function show_notify($text, $tout, $butt, $w, $h)
 {
-  log_main("SHOW_NOTIFY", $text);
+  log_main("SHOW_NOTIFY: ".$text);
   return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
 }
 
@@ -1680,7 +1796,7 @@ function show_table_info(&$room, &$table, $table_pos)
   $noty .= sprintf("</tr>");
 
   // Points.
-  log_main("show_table_info", "pnt_min: ".$pnt_min."   Points_n: ".$table->points_n);
+  log_main("show_table_info: pnt_min: ".$pnt_min."   Points_n: ".$table->points_n);
 
   for ($i = $pnt_min ; $i < $table->points_n ; $i++) {
     $noty .= sprintf('<tr><th class=\"td_points\">%d</th>', $i+1);
@@ -1835,7 +1951,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     $ret .= sprintf( 'gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
 		     $sendstep, $user->stat, $user->subst, $table_pos);
 
-    log_rd($user->sess, sprintf( 'SHOW_TABLE: gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
+    log_rd(sprintf( 'SHOW_TABLE: gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
 		     $sendstep, $user->stat, $user->subst, $table_pos));
 
     /* BACKGROUND */
@@ -1876,7 +1992,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 	      break;
 	  }
 	}
-	log_rd($user->sess, "O ".$o." VAL ".$table->card[$o]->value." Owner: ".$table->card[$o]->owner);
+	log_rd("O ".$o." VAL ".$table->card[$o]->value." Owner: ".$table->card[$o]->owner);
 	
 	$ret .= sprintf( ' card_send(%d,%d,%d,%8.2f,%d);|', ($table->gstart + $e) % PLAYERS_N, 
 			 $i, ((($e + PLAYERS_N - $table_pos + $table->gstart) % PLAYERS_N) == 0 ?
@@ -1899,7 +2015,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 	$inhand[$table->card[$i]->owner]++;
       }
       else if ($table->card[$i]->stat == 'take') {
-	log_main("Card taked:", $table->card[$i]->value."OWN: ".$table->card[$i]->owner);
+	log_main("Card taked: ".$table->card[$i]->value."OWN: ".$table->card[$i]->owner);
 	$taked[$table->card[$i]->owner]++;
       }
       else if ($table->card[$i]->stat == 'table') {
@@ -1910,7 +2026,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     for ($i = 0 ; $i < PLAYERS_N ; $i++) {
       $logg .= sprintf("INHAND: %d   IN TABLE %d   TAKED %d\n", $inhand[$i], $ontabl[$i], $taked[$i]);
     }
-    log_main("Stat table:", $logg);
+    log_main("Stat table: ".$logg);
 
     /* Set ours cards. */
     $oursarg = "";
@@ -2005,7 +2121,7 @@ function calculate_winner(&$table)
     if ($table->card[$i]->stat != "table")
       continue;
 
-    log_wr($sess, sprintf("Card On table: [%d]", $i));
+    log_wr(sprintf("Card On table: [%d]", $i));
 
     $v = $table->card[$i]->value; 
     $ontab[$table->card[$i]->owner] = $v;
@@ -2058,7 +2174,7 @@ function calculate_points(&$table)
       $pro += $G_all_points[$ctt];
   }
 
-  log_wr("XXX", sprintf("PRO: [%d]", $pro));
+  log_wr(sprintf("PRO: [%d]", $pro));
 
   
   if ($table->asta_pnt == 61 && $pro == 60) { // PATTA !
@@ -2086,11 +2202,11 @@ function calculate_points(&$table)
     else
       $pt = -1;
 
-    log_wr("XXX", sprintf("PRO: pt[%d][%d] = %d", $table->points_n % MAX_POINTS, $i, $pt));
+    log_wr(sprintf("PRO: pt[%d][%d] = %d", $table->points_n % MAX_POINTS, $i, $pt));
 
     $pt = $pt * $sig * $table->mult * ($pro == 120 ? 2 : 1);
 
-    log_wr("XXX", sprintf("PRO:[%d][%d][%d]", $sig, $table->mult, ($pro == 120 ? 2 : 1)));
+    log_wr(sprintf("PRO:[%d][%d][%d]", $sig, $table->mult, ($pro == 120 ? 2 : 1)));
     
     $table->points[$table->points_n % MAX_POINTS][$i] = $pt;
     $table->total[$i] += $pt;
