@@ -28,7 +28,7 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   exit;
 }
 
-log_load((isset($sess) ? $sess : "XXX"), "LOAD: index.php");
+log_load("index.php");
 
 function main()
 {
@@ -42,96 +42,29 @@ function main()
   if (isset($BRISK_SHOWHTML) == FALSE) {
     $is_table = FALSE;
     $sem = Room::lock_data();
-    log_load($sess, "lock Room");
+    log_main("lock Room");
     $room = &Room::load_data();
     $curtime = time();
+
     /* Actions */
+
     if (validate_sess($sess)) {
+      log_main("pre garbage_manager");
       $room->garbage_manager(TRUE);
+      log_main("post garbage_manager");
       if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
+	log_main("user stat: ".$user->stat);
 	if ($user->stat == "table") {
-	  $change_page = TRUE;
-	  log_load($sess, "resync from index.php");
-
-	  log_load($sess, "SET TABLE_IDX <yy".$user->table.">".TABLES_N);
-
-	  log_load($sess, "SET TABLE_IDX GOOD VALUE");
-	  $bri_sem = Briskin5::lock_data($user->table);
-	  if (($bri = &Briskin5::load_data($user->table, $user->table_token)) == FALSE) {
-	    /*
-	     *  CASE: TABLE DATA ERROR - RECOVERY
-	     */
-	    log_load($sess, "table data error: recovery".$user->table);
-
-	    $table = &$room->table[$user->table];
-	    for ($i = 0 ; $i < $table->player_n ; $i++) {
-	      $user_cur = &$room->user[$table->player[$i]];
-	      $user_cur->subst = "shutdowner";
-	      $user_cur->step_inc();
-	      $user_cur->trans_step = $user_cur->step;
-
-	      $ret = sprintf('stat = "%s"; subst = "%s";',  $cur_user->stat, $cur_user->subst);
-	      $ret .= "gst.st = ".($user_cur->step+1)."; ";
-	      $ret .= show_notify("<br>I dati del tavolo n&deg;".$user->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>", 2000, "Chiudi.", 400, 110);
-	      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-	      $user_cur->step_inc();
-	    }
-
-	    $room->room_join_wakeup(&$user, TRUE);
-	    $table->table_token = "";
-// 	    if (Room::save_data(&$room) == FALSE) {
-// 	      echo "ERRORE SALVATAGGIO\n";
-// 	      exit;
-// 	    }
-	    
-	    Briskin5::destroy_data($user->table);
-	    
-	    $change_page = FALSE;
-	  }  //  if (($bri = &Briskin5::load_data($user->table, ...
-	  else if (($bri_user = &$bri->get_user($sess, &$bri_idx)) != FALSE) {
-	    if ($bri_user->subst == "shutdowned" || $bri_user->subst == "shutdowner") {
-	      /*
-               *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
-               */
-	      $table     = &$room->table[$user->table];
-	      $bri_table = &$bri->table[0];
-	      
-	      for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
-		$room->user[$table->player[$i]]->subst = $bri->user[$i]->subst;
-		$room->user[$table->player[$i]]->step = $bri->user[$i]->step;
-		$room->user[$table->player[$i]]->trans_step = $bri->user[$i]->step+1;
-		$room->user[$table->player[$i]]->lacc = $bri->user[$i]->lacc;
-		$room->user[$table->player[$i]]->laccwr = $bri->user[$i]->laccwr;
-		
-		log_load($sess, "from table bri subst[".$i."]: ".$bri->user[$i]->subst);
-		log_load($sess, "from table roo subst[".$i."]: ".$room->user[$table->player[$i]]->subst);
-	      }
-	      
-	      $room->room_join_wakeup(&$user);
-	      $table->table_token = "";
-// 	      if (Room::save_data(&$room) == FALSE) {
-// 		echo "ERRORE SALVATAGGIO\n";
-// 		exit;
-// 	      }
-	      
-	      $change_page = FALSE;
-	      Briskin5::destroy_data($user->table);
-	    }
-	  }
-	  Briskin5::unlock_data($bri_sem);
-	  
-	  if ($change_page) {
-	    if (Room::save_data(&$room) == FALSE) {
-	      echo "ERRORE SALVATAGGIO\n";
-	      exit;
-	    }
-	    log_load($sess, "unlock Room");
-	    Room::unlock_data($sem);
- 	    setcookie("table_token", $user->table_token, $curtime + 31536000);
-	    setcookie("table_idx", $user->table_idx, $curtime + 31536000);
-	    header ("Location: briskin5/briskin5.php");
+	  if (Room::save_data(&$room) == FALSE) {
+	    echo "ERRORE SALVATAGGIO\n";
 	    exit;
 	  }
+	  log_main("unlock Room");
+	  Room::unlock_data($sem);
+	  setcookie("table_token", $user->table_token, $curtime + 31536000);
+	  setcookie("table_idx", $user->table, $curtime + 31536000);
+	  header ("Location: briskin5/briskin5.php");
+	  exit;
 	}
 	$ACTION = "room";
       }
