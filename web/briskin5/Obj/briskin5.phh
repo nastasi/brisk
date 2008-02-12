@@ -11,11 +11,15 @@ class Briskin5 {
   var $step; // current step of the comm array
   var $garbage_timeout;
 
+  var $the_end;
+
   var $tok;
 
   function Briskin5 (&$room, $table_idx, $table_token) {
     $this->user = array();
     $this->table = array();
+
+    $this->the_end = FALSE;
 
     if (($this->tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
       echo "FTOK FAILED";
@@ -25,7 +29,7 @@ class Briskin5 {
     $user  =& $room->user;
     $table =& $room->table[$table_idx];
 
-    log_wr("xxx", "Briskin5 constructor");
+    log_wr("Briskin5 constructor");
 
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user[$table->player[$i]]->table_token = $table_token;
@@ -36,7 +40,7 @@ class Briskin5 {
     $this->table_token = $table_token;
     $this->garbage_timeout = 0;
     
-    log_wr("xxx", "Briskin5 constructor end");
+    log_wr("Briskin5 constructor end");
   }
 
 
@@ -53,12 +57,12 @@ class Briskin5 {
 	  return ($ret);
 	}
       }
-      log_main($sess, sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
+      log_main(sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
       // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
-      // log_main($sess, sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
+      // log_main(sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
     }
     else {
-      log_main($sess, sprintf("get_user: Wrong strlen [%s]",$sess));
+      log_main(sprintf("get_user: Wrong strlen [%s]",$sess));
     }
 
     return ($G_false);
@@ -75,14 +79,15 @@ class Briskin5 {
       
       for ($i = 0 ; $i < MAX_BRISKIN5_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
-	if ($user_cur->sess == "")
+	if ($user_cur->sess == "" || 
+	    ($user_cur->stat == 'table' && ($user_cur->subst == 'shutdowned' || $user_cur->subst == 'shutdowner')))
 	  continue;
 	
 	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
-	  log_rd2($user_cur->sess, "AUTO LOGOUT.");
+	  log_rd2($user_cur->sess." bin5 AUTO LOGOUT.");
 
 	  if ($user_cur->stat == 'table') {
-	    log_auth($user_cur->sess, "Autologout session.");
+	    log_auth($user_cur->sess," bin5 Autologout session.");
 
 	    /* SI DELEGA AL garbage_manager principale LA RIMOZIONE DELL'UTENTE 
 
@@ -94,13 +99,11 @@ class Briskin5 {
 	    
             */
 
-	    log_rd2($user_cur->sess, "AUTO LOGOUT.");
-
 	    $this->table_wakeup(&$user_cur);
 	  }
 	}
       }
-      log_rd2($user_cur->sess, "GARBAGE UPDATED!");
+      log_rd2($user_cur->sess." GARBAGE UPDATED!");
       
       $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
       $ismod = TRUE;
@@ -120,7 +123,7 @@ class Briskin5 {
     GLOBAL $G_false, $sess;
     $shm = FALSE;
 
-    log_wr($sess, "TABLE_IDX ".FTOK_PATH."/table".$table_idx);
+    log_wr("TABLE_IDX ".FTOK_PATH."/table".$table_idx);
     if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
       echo "FTOK FAILED";
       exit;
@@ -138,7 +141,7 @@ class Briskin5 {
 	break;
 
       if ($table_token != "" && $bri->table_token != $table_token) {
-	log_wr($sess, "bri->table_token: ".$bri->table_token."table_token: ".$table_token);
+	log_wr("bri->table_token: ".$bri->table_token."table_token: ".$table_token);
 	
 	break;
       }
@@ -153,7 +156,7 @@ class Briskin5 {
     if ($shm != FALSE)
       shm_detach($shm);
 
-    log_wr($sess, "briskin5 load_data failed");
+    log_wr("briskin5 load_data failed");
     
     return ($G_false);
   }
@@ -167,7 +170,7 @@ class Briskin5 {
     $shm =   FALSE;
     $isacq = FALSE;
     
-    log_main("XXX", "SAVE BRISKIN5 DATA");
+    log_main("SAVE BRISKIN5 DATA");
     // var_dump($bri);
     
     if (!isset($bri->tok))
@@ -179,13 +182,13 @@ class Briskin5 {
       if (($shm = shm_attach($bri->tok, SHM_DIMS)) == FALSE)
 	break;
       
-      // log_only($sess, "PUT_VAR DI ".strlen(serialize($bri)));
+      // log_only("PUT_VAR DI ".strlen(serialize($bri)));
       if (shm_put_var($shm, $bri->tok, $bri) == FALSE) {
-	log_only($sess, "PUT_VAR FALLITA ".strlen(serialize($bri)));
-	log_only($sess, serialize($bri));
+	log_only("PUT_VAR FALLITA ".strlen(serialize($bri)));
+	log_only(serialize($bri));
 	break;
       }
-      // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
+      // log_main("QUI CI ARRIVA [".$bri->user[0]->name."]");
       $ret = TRUE;
     } while (0);
     
@@ -203,13 +206,13 @@ class Briskin5 {
     $shm =   FALSE;
     $isacq = FALSE;
 
-    log_main("XXX", "DESTROY BRISKIN5 DATA");
+    log_main("DESTROY BRISKIN5 DATA");
 
     
     do {
       $isacq = TRUE;
       
-      log_main("XXX", "DESTROY2 BRISKIN5 DATA");
+      log_main("DESTROY2 BRISKIN5 DATA");
 
       if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) 
 	break;
@@ -218,15 +221,15 @@ class Briskin5 {
 	break;
       
       if (shm_remove($shm) === FALSE) {
-	log_only($sess, "REMOVE FALLITA ".strlen(serialize($bri)));
-	log_only($sess, serialize($bri));
+	log_only("REMOVE FALLITA ".strlen(serialize($bri)));
+	log_only(serialize($bri));
 	break;
       }
    
       $shm = FALSE;
-      log_main("XXX", "DESTROY2 BRISKIN5 DATA SUCCESS");
+      log_main("DESTROY2 BRISKIN5 DATA SUCCESS");
       
-      // log_main("XXX", "QUI CI ARRIVA [".$bri->user[0]->name."]");
+      // log_main("QUI CI ARRIVA [".$bri->user[0]->name."]");
       $ret = TRUE;
     } while (0);
     
@@ -240,7 +243,7 @@ class Briskin5 {
   {
     GLOBAL $sess; 
     
-    log_wr($sess, "LOCK_DATA ".FTOK_PATH."/table".$table_idx);
+    log_wr("LOCK_DATA ".FTOK_PATH."/table".$table_idx);
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
     if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
@@ -253,18 +256,20 @@ class Briskin5 {
       exit;
     }
     if (sem_acquire($res)) {   
-      log_only($sess, "LOCK");
+      log_lock("LOCK table ".$table_idx."[res: ".$res."]");
       return ($res);
     }
-    else
+    else {
+      log_lock("LOCK table ".$table_idx.":FAILED");
       return (FALSE);
+    }
   }
   
   function unlock_data($res)
   {
     GLOBAL $sess; 
     
-    log_only($sess, "UNLOCK");
+    log_lock("UNLOCK table [res: ".$res."]");
 
     return (sem_release($res));
   }
@@ -282,7 +287,7 @@ class Briskin5 {
     
     $dt = date("H:i ", $timecur);
     if (strncmp($user_mesg, "/nick ", 6) == 0) {
-      log_main($user->sess, "chatt_send BEGIN");
+      log_main($user->sess." chatt_send BEGIN");
 
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
@@ -311,11 +316,11 @@ class Briskin5 {
       if ($i == MAX_PLAYERS) {
 	$user->name = $name_new;
 
-      log_main($user->sess, "chatt_send start set");
+      log_main($user->sess." chatt_send start set");
 	
 
 	for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-	  log_main($user->sess, "chatt_send set loop");
+	  log_main($user->sess." chatt_send set loop");
 	  
 	  $user_cur = &$this->user[$i];
 	  if ($user_cur->sess == '')
@@ -326,11 +331,11 @@ class Briskin5 {
 	    }
 	    else if ($user->stat == 'room' && $user->subst == 'sitdown' ||
 		     $user->stat == 'table') {
-	      log_main($user->sess, "chatt_send pre table update");
+	      log_main($user->sess." chatt_send pre table update");
 
 	      $this->table_update(&$user);
 
-	      log_main($user->sess, "chatt_send post table update");
+	      log_main($user->sess." chatt_send post table update");
 	    }
 	  }
 	  else if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
@@ -376,15 +381,15 @@ class Briskin5 {
   {
     $table = &$this->table[0];
 
-    log_main("BRISKIN5_WAKEUP", "begin function table  stat: ".$user->stat."  subst: ".$user->subst);
+    log_main("BRISKIN5_WAKEUP begin function table  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
 
-    log_main("BRISKIN5_WAKEUP", "from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+    log_main("BRISKIN5_WAKEUP from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
     
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user_cur = &$this->user[$i];
-      log_main("PREIMPOST", "INLOOP name: ".$user_cur->name);
+      log_main("PREIMPOST INLOOP name: ".$user_cur->name);
       
       if ($user_cur == $user)
 	$user_cur->subst = "shutdowner";
@@ -395,10 +400,12 @@ class Briskin5 {
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       $ret .= 'gst.st_loc++; the_end=true; window.onunload = null; document.location.assign("../index.php");|';
 
-      log_wr($user_cur->sess, "BRISKIN5_WAKEUP: ".$ret);
+      log_wr($user_cur->sess." BRISKIN5_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
       $user_cur->step_inc();
     }
+
+    $this->the_end = TRUE;
   }
   
   /*
@@ -429,13 +436,13 @@ function locshm_exists($tok)
   // return (TRUE);
 
   if (($id = shmop_open($tok,"a", 0, 0)) == FALSE) {
-    log_main($tok, "SHM NOT exists");
+    log_main($tok." SHM NOT exists");
 
     return (FALSE);
   }
   else {
     shmop_close($id);
-    log_main($tok, "SHM exists");
+    log_main($tok." SHM exists");
 
     return (TRUE);
   }
