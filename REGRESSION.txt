@@ -1,0 +1,17 @@
+v - partita avviata 
+v - partita conclusa
+v - partita avviata con un quarto in piedi 
+v - partita conclusa con un quarto in piedi
+v - partita avviata con un giocatore freeze
+v - partita avviata con un giocatore freeze e un quarto in piedi
+v - partita avviata con tutti i giocatori freeze e un quarto in piedi 
+v - partita avviata, browser killato e rientro in index.php
+v - al tavolo, browser killato e rientro in briskin5/index.php
+v - gestione dei ban temporanei
+v - gestione degli stati sui browser
+    v - dal login
+    v - ritorno in room dopo un kill
+    v - ritorno al tavolo dopo un kill
+v - al tavolo, chiusura finestra
+v - partita avviata, chiusura finestra      
+
