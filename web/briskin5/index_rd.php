@@ -185,16 +185,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   if ($cur_step == -1) {
     log_rd2("PRE-NEWSTAT.");
 
-    if ($user->stat == 'room') {
-      log_rd("roomma");
-      $ret .= show_room(&$bri, &$user);
-    }
     /***************
      *             *
      *    TABLE    *
      *             *
      ***************/
-    else if ($user->stat == 'table') {      
+    if ($user->stat == "table") {      
       $ret = show_table(&$bri,&$user,$user->step,FALSE,FALSE);
 
       log_rd2("SENDED TO THE STREAM: ".$ret);
@@ -221,7 +217,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    $to_stat = $user->stat;
 	    Briskin5::unlock_data($sem);
 	    ignore_user_abort(FALSE);
-	    return (page_sync($user->sess, $to_stat == "table" ? "table.php" : "index.php"));
+	    return (page_sync($user->sess, $to_stat == "table" ? "index.php" : "../index.php"));
 	  }
 	  log_rd2("lost history, refresh from scratch");
 	  $new_step = -1;

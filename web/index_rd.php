@@ -51,15 +51,16 @@ function unrecerror()
   return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
 }
 
-function page_sync($sess, $page)
+function page_sync($sess, $page, $table_idx, $table_token)
 {
   GLOBAL $is_page_streaming;
 
   log_rd2("page_sync:".var_export(debug_backtrace()));
 
   $is_page_streaming = TRUE;
+
   log_rd2("PAGE_SYNC");
-  return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
+  return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
 }
 
 
@@ -142,7 +143,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
   /* Nothing changed, return. */
   if ($cur_step == $user->step) 
-    return;
+    return (FALSE);
 
   log_rd2("do other ++".$cur_stat."++".$user->stat."++".$cur_step."++".$user->step);
 
@@ -195,25 +196,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
      *    TABLE    *
      *             *
      ***************/
-    else if ($user->stat == 'table') {      
-      /* FIXME we need to decide what do in this case 
-
-      if ($user->subst != "shutdowned" && $user->subst != "shutdowner")
-	$ret = show_table(&$room,&$user,$user->step,FALSE,FALSE);
-
-      log_rd2("SENDED TO THE STREAM: ".$ret);
-
-
-      $new_stat =  $user->stat;
-      $new_subst = $user->subst;
-      $new_step =  $user->step;
-      */
-      log_rd2("ALL COMMENTED: ".$ret);
-
-
+    else if ($user->stat == 'table') {
+      log_load("RESYNC");
+      return (page_sync($user->sess, "briskin5/index.php", $user->table, $user->table_token));
     }
     log_rd2("NEWSTAT: ".$user->stat);
-
   }
   else {
     ignore_user_abort(TRUE);
@@ -232,7 +219,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    Room::unlock_data($sem);
 	    ignore_user_abort(FALSE);
 	    log_load("RESYNC");
-	    return (page_sync($user->sess, $to_stat == "table" ? "table.php" : "index.php"));
+	    return (page_sync($user->sess, $to_stat == "table" ? "briskin5/index.php" : "index.php"));
 	  }
 	  log_rd2("lost history, refresh from scratch");
 	  $new_step = -1;

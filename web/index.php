@@ -63,7 +63,7 @@ function main()
 	  Room::unlock_data($sem);
 	  setcookie("table_token", $user->table_token, $curtime + 31536000);
 	  setcookie("table_idx", $user->table, $curtime + 31536000);
-	  header ("Location: briskin5/briskin5.php");
+	  header ("Location: briskin5/index.php");
 	  exit;
 	}
 	$ACTION = "room";

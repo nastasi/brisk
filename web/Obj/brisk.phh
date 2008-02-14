@@ -146,7 +146,7 @@ class Card {
     $this->stat = 'take'; // Card stat
     $this->owner = $newown;
   }
-}
+} // end class Card
 
 class Table {
   var $player;
@@ -187,12 +187,12 @@ class Table {
   {
     GLOBAL $G_false;
 
-    if (($thiz = new Table()) == FALSE)
+    if (($thiz =& new Table()) == FALSE)
       return ($G_false);
 
     $thiz->player    =   array();
     $thiz->player_n  =   0;
-    $thiz->card      =  &$thiz->bunch_create();
+    $thiz->card      =   FALSE;
     $thiz->asta_pla  =   array(); // TRUE: in auction, FALSE: out of the auction
     $thiz->asta_pla_n=  -1;
     $thiz->asta_card =  -1;
@@ -221,7 +221,7 @@ class Table {
   {
     GLOBAL $G_false;
     
-    if (($thiz = new Table()) == FALSE)
+    if (($thiz =& new Table()) == FALSE)
       return ($G_false);
     
     $thiz->player = array();
@@ -267,7 +267,7 @@ class Table {
       return ($G_false);
     
     $thiz->player_n = $from->player_n;
-    $thiz->card = $from->card;
+    $thiz->card = &$thiz->bunch_create();
     $thiz->mazzo = $from->mazzo;
     $thiz->gstart = $from->gstart;
     $thiz->turn = $from->turn;
@@ -463,7 +463,7 @@ class Table {
 
     return ($ct);
   }
-} // End class Table
+} // end class Table
   
 class User {
   var $name;       // name of the user
@@ -522,7 +522,7 @@ class User {
   {
     GLOBAL $G_false;
     
-    if (($thiz = new User()) == FALSE)
+    if (($thiz =& new User()) == FALSE)
       return ($G_false);
     
     $thiz->name       = $from->name;
@@ -636,7 +636,8 @@ class User {
     
     return (FALSE);
   }
-}
+} // end class User
+
 
 function step_get($sess) {
   $fp = FALSE;
@@ -724,6 +725,9 @@ class Room {
 	    }
 	    
 	    if ($bri != FALSE) {
+	      //
+	      //  SPAWN: JOIN
+	      //
 	      log_main("garbage_manager: bri loaded successfully.");
 	      $bri->garbage_manager(TRUE);
 	      
@@ -744,6 +748,7 @@ class Room {
 		  $user_cur->trans_step = $bri_user->step;
 		  $user_cur->lacc       = $bri_user->lacc;
 		  $user_cur->laccwr     = $bri_user->lacc;
+		  $user_cur->bantime    = $bri_user->bantime;
 		}
 	      
 		$this->room_join_wakeup(&$user_cur); 

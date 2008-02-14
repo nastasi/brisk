@@ -429,7 +429,7 @@ class Briskin5 {
 
     return ($is_ab);
   }
-} // end of class Briskin5
+} // end class Briskin5
 
 function locshm_exists($tok)
 {
