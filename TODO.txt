@@ -19,17 +19,26 @@
 
             DONE - security checks for right scope access
 
-	    URGENT - verify lacc and laccwr setting
-	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	    WRITE the list of test case
+            DONE - garbage collector management
+	    DONE -    recursive garbage - howto ?
 
-            garbage collector management
-	        recursive garbage - howto ?
+	    URGENT - stat & subst in browser -> ritorna alla room e non risetta stat e subst
+
+	    TESTING - laccwr setting and exit if all players are unactive for some time
+	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	    WIP - the list of test case
+	    CHECK of browser status for reloading
+
 	    remove unused parts
                 bonificare 
+		briskin5/index_rd.php
+		briskin5/index_wr.php
+		index_rd.php
 	    move images
             optimizations
 	    inheritances
+
+	    testament
             
 
    NORM   - pubblic announcements
