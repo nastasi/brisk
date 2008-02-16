@@ -20,6 +20,20 @@
  *
  */
 
+body {
+    background-image: url(null);
+/* inherit from brisk.css
+    background-repeat: no-repeat;
+    background-position: top center;
+    margin:0px;
+
+    font-size: 12px;
+    padding: 0px;
+
+    align: center;
+*/
+}
+
 .chattshort {
     height: 70px;
     overflow: auto;
