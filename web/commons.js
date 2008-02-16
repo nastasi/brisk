@@ -269,7 +269,7 @@ function safelogout()
 {
     var res;
     
-    if (g_exitlock < 3) 
+    if (g_exitlock < 2) 
 	res = window.confirm("Sei sicuro di volere abbandonare la partita?\nATTENZIONE: se esci adesso senza il consenso degli altri giocatori non potrai sederti ai tavoli per "+(Math.floor(EXIT_BAN_TIME/60))+" minuti.");    
     else 
 	res = window.confirm("Sei sicuro di volere abbandonare la partita?");
