@@ -1,5 +1,5 @@
 /*
- *  brisk - table.js
+ *  brisk - briskin5.js
  *
  *  Copyright (C) 2006 matteo.nastasi@milug.org
  *
