@@ -1,5 +1,7 @@
 <?php
-define(MAX_BRISKIN5_PLAYERS, 3);
+define(BRISKIN5_PLAYERS_N, 3);
+define(BRISKIN5_MAX_PLAYERS, BRISKIN5_PLAYERS_N);
+define(BRISKIN5_SHM_DIMS, (50000 * BRISKIN5_MAX_PLAYERS));
 
 class Briskin5 {
   var $user;
@@ -49,7 +51,7 @@ class Briskin5 {
     GLOBAL $PHP_SELF, $G_false;
 
     if (validate_sess($sess)) {
-      for ($i = 0 ; $i < MAX_BRISKIN5_PLAYERS ; $i++) {
+      for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) {
 	if (strcmp($sess, $this->user[$i]->sess) == 0) {
 	  // find it
 	  $idx = $i;
@@ -58,7 +60,7 @@ class Briskin5 {
 	}
       }
       log_main(sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
-      // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
+      // for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) 
       // log_main(sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
     }
     else {
@@ -77,7 +79,7 @@ class Briskin5 {
     $curtime = time();
     if ($force || $this->garbage_timeout < $curtime) {
       
-      for ($i = 0 ; $i < MAX_BRISKIN5_PLAYERS ; $i++) {
+      for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
 	if ($user_cur->sess == "" || 
 	    ($user_cur->stat == 'table' && ($user_cur->subst == 'shutdowned' || $user_cur->subst == 'shutdowner')))
@@ -134,7 +136,7 @@ class Briskin5 {
       if (locshm_exists($tok) == FALSE)
 	break;
 
-      if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
+      if (($shm = shm_attach($tok, BRISKIN5_SHM_DIMS)) == FALSE)
 	break;
 
       if (($bri = @shm_get_var($shm, $tok)) == FALSE) 
@@ -179,7 +181,7 @@ class Briskin5 {
     do {
       $isacq = TRUE;
       
-      if (($shm = shm_attach($bri->tok, SHM_DIMS)) == FALSE)
+      if (($shm = shm_attach($bri->tok, BRISKIN5_SHM_DIMS)) == FALSE)
 	break;
       
       // log_only("PUT_VAR DI ".strlen(serialize($bri)));
@@ -217,7 +219,7 @@ class Briskin5 {
       if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) 
 	break;
 
-      if (($shm = shm_attach($tok, SHM_DIMS)) === FALSE)
+      if (($shm = shm_attach($tok, BRISKIN5_SHM_DIMS)) === FALSE)
 	break;
       
       if (shm_remove($shm) === FALSE) {
@@ -301,7 +303,7 @@ class Briskin5 {
       // change
       // update local graph
       // update remote graphs
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+      for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) {
 	$user_cur = &$this->user[$i];
 	// 	if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	if ($user_cur->sess == '')
@@ -313,13 +315,13 @@ class Briskin5 {
 	  break;
 	}
       }
-      if ($i == MAX_PLAYERS) {
+      if ($i == BRISKIN5_MAX_PLAYERS) {
 	$user->name = $name_new;
 
       log_main($user->sess." chatt_send start set");
 	
 
-	for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+	for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) {
 	  log_main($user->sess." chatt_send set loop");
 	  
 	  $user_cur = &$this->user[$i];
@@ -343,11 +345,11 @@ class Briskin5 {
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
 	    $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
-	        xcape($this->user[$table->player[($user_cur->table_pos)%PLAYERS_N]]->name),
-	        xcape($this->user[$table->player[($user_cur->table_pos+1)%PLAYERS_N]]->name),
-	        xcape($this->user[$table->player[($user_cur->table_pos+2)%PLAYERS_N]]->name),
-	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3)%PLAYERS_N]]->name)),
-	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4)%PLAYERS_N]]->name)));
+	        xcape($this->user[$table->player[($user_cur->table_pos) % BRISKIN5_PLAYERS_N]]->name),
+	        xcape($this->user[$table->player[($user_cur->table_pos+1) % BRISKIN5_PLAYERS_N]]->name),
+	        xcape($this->user[$table->player[($user_cur->table_pos+2) % BRISKIN5_PLAYERS_N]]->name),
+	        (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3) % BRISKIN5_PLAYERS_N]]->name)),
+	        (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4) % BRISKIN5_PLAYERS_N]]->name)));
 	    if ($user_cur == $user)
 	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>";', 
 								   xcape($user->name,ENT_COMPAT,"UTF-8"));
@@ -357,7 +359,7 @@ class Briskin5 {
       }
     }
     else {
-      for ($i = 0 ; $i < ($user->stat == 'room' ? MAX_PLAYERS : PLAYERS_N) ; $i++) {
+      for ($i = 0 ; $i < ($user->stat == 'room' ? BRISKIN5_MAX_PLAYERS : BRISKIN5_PLAYERS_N) ; $i++) {
 	if ($user->stat == 'room') {
 	  $user_cur = &$this->user[$i];
 	  if ($user_cur->sess == '' || $user_cur->stat != 'room')
