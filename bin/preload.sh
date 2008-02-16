@@ -40,10 +40,9 @@ ltri="`echo "$IMGPATH" | wc -c`"
 for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
-      if [ $ct -eq 3 ]; then
+      if [ $((ct % 2)) -eq 0 ]; then
          echo
          echo -n "$spa"
-         ct=0
       fi
    else
       echo -n "$spa"
@@ -53,7 +52,7 @@ for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' 
    ct=$((ct + 1))
    first=0
 done
-
+echo "CT: $ct" >&2
 echo ");"
 ) >> $OUTFILE
 
@@ -71,10 +70,9 @@ done
 for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
-      if [ $ct -eq 8 ]; then
+      if [ $((ct % 8)) -eq 0 ]; then
          echo
          echo -n "$spa"
-         ct=0
       fi
    else
       echo -n "$spa"
@@ -86,6 +84,8 @@ for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' 
    ct=$((ct + 1))
    first=0
 done
+
+echo "CT2: $ct" >&2
 
 echo ");"
 ) >> $OUTFILE
