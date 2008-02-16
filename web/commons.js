@@ -179,7 +179,7 @@ function send_mesg(mesg)
     var xhr_wr = createXMLHttpRequest();
 
     
-    xhr_wr.open('GET', 'index_wr.php?sess='+sess+'&mesg='+encodeURIComponent(mesg), true);
+    xhr_wr.open('GET', 'index_wr.php?sess='+sess+'&mesg='+mesg, true);
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(null);
 
