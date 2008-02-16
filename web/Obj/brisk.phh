@@ -26,8 +26,7 @@ define(TABLES_N, 12);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
-define(SHM_DIMS, (50000 * MAX_PLAYERS));
-// define(COMM_N, 6);
+define(SHM_DIMS, (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
 define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
@@ -975,7 +974,7 @@ class Room {
 	if ($wup_idx < $user_wup_n) {
 	  log_main("JOIN_WAKEUP less");
 	  // set the new status 
-	  $ret .=  'subst = "standup"; ';
+	  $ret .=  'stat = "room"; subst = "standup"; ';
 	  // clean the action buttons in other tables
 	  for ($e = 0 ; $e < TABLES_N ; $e++) {
 	    if ($this->table[$e]->player_n < PLAYERS_N)
