@@ -23,8 +23,8 @@
 ?>
 <html>
 <head>
-<title>Brisk - Tavolo</title>
-<link rel="shortcut icon" href="img/brisk_ico.png">
+<title>Brisk - Tavolo <?php echo "$table_idx";?></title>
+<link rel="shortcut icon" href="../img/brisk_ico.png">
 <script type="text/javascript" src="../dnd.js"></script>
 <script type="text/javascript" src="../dom-drag.js"></script>
 <script type="text/javascript" src="../commons.js"></script> 
