@@ -125,8 +125,15 @@ if [ "$web_only" = "FALSE" ]; then
     rm $ftok_path/spy.txt
     
     # create the fs subtree to enable ftok-ing
+    if [ ! -d ${ftok_path} ]; then
+        mkdir  ${ftok_path}
+    fi
     touch ${ftok_path}/main
     chmod 666 ${ftok_path}/main
+    for i in `seq 1 100`; do 
+        touch ${ftok_path}/table$i
+        chmod 666 ${ftok_path}/table$i
+    done
 fi
 install -d $web_path
 for i in `find web -type d | grep -v /CVS | sed 's/^....//g'`; do
