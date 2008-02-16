@@ -135,10 +135,12 @@ function reset_images()
 
 function update_images()
 {
+    //    if (g_imgct % 10 == 0) alert("g_imgct: "+g_imgct+" xx "+g_preload_img_arr[g_imgct]);
     $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
-    if (g_imgct < g_preload_img_arr.length)
-	setTimeout(preload_images, 100, g_preload_img_arr, g_imgct);
-    g_imgct++;
+    if (g_imgct+1 < g_preload_img_arr.length) {
+        g_imgct++;
+        setTimeout(preload_images, 100, g_preload_img_arr, g_imgct-1);
+    }
     // $("imgct").innerHTML += "U";
 }
 
