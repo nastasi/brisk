@@ -39,7 +39,12 @@ $is_spawn = FALSE;
 log_wr('COMM: '.$mesg);
 
 $sem = Room::lock_data();
-$room = &Room::load_data();
+if (($room = &Room::load_data()) == FALSE) {
+  echo "Load data error";
+  log_wr("Load data error");
+  Room::unlock_data($sem);
+  exit;
+}
 if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
   log_wr("Get User Error");

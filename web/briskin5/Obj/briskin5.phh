@@ -437,7 +437,7 @@ function locshm_exists($tok)
 {
   // return (TRUE);
 
-  if (($id = shmop_open($tok,"a", 0, 0)) == FALSE) {
+  if (($id = @shmop_open($tok,"a", 0, 0)) == FALSE) {
     log_main($tok." SHM NOT exists");
 
     return (FALSE);

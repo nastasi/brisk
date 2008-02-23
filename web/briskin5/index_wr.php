@@ -40,7 +40,14 @@ if ($table_idx < 0 || $table_idx >= TABLE_N)
      exit;
 
 $sem = Briskin5::lock_data($table_idx);
-$bri = &Briskin5::load_data($table_idx,$table_token);
+
+if (($bri = &Briskin5::load_data($table_idx,$table_token)) == FALSE) {
+  echo "Bin5 Load data error";
+  log_wr("Bin5 Load data error");
+  Briskin5::unlock_data($sem);
+  exit;
+}
+
 if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
   log_wr("Get User Error");
