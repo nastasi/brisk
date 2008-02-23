@@ -21,7 +21,8 @@
  */
 
 body {
-    background-image: url('img/bg_capodanno.jpg'); 
+    background-image: url('img/bg_spawn.jpg'); 
+    background-color: #fafafa;
     background-repeat: no-repeat;
     background-position: top center; 
     margin:0px;

@@ -22,6 +22,7 @@
 
 body {
     background-image: url(null);
+    background-color: #fafafa;
 /* inherit from brisk.css
     background-repeat: no-repeat;
     background-position: top center;
