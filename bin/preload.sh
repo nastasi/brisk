@@ -30,6 +30,10 @@ IMGPATH=../brisk-img
 # echo '?>'
 # ) > $OUTFILE
 
+function imglist () {
+    ls -S `find $1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`
+}
+
 rm -f $OUTFILE
 
 (
@@ -37,7 +41,7 @@ echo "var g_preload_img_arr = new Array( "
 first=1
 spa="            "
 ltri="`echo "$IMGPATH" | wc -c`"
-for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`; do
+for i in `imglist $IMGPATH`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
       if [ $((ct % 2)) -eq 0 ]; then
@@ -62,12 +66,12 @@ first=1
 sum=0
 spa="            "
 tot=0
-for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`; do
+for i in `imglist $IMGPATH`; do
    sz="`stat -c '%s' $IMGPATH/$i`"
    tot=$((tot + sz))
 done
 
-for i in `find $IMGPATH -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`; do
+for i in `imglist $IMGPATH`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
       if [ $((ct % 8)) -eq 0 ]; then
