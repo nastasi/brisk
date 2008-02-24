@@ -127,7 +127,7 @@ if [ "$web_only" = "FALSE" ]; then
     # create the fs subtree to enable ftok-ing
     touch ${ftok_path}/main
     chmod 666 ${ftok_path}/main
-    for i in `seq 1 100`; do 
+    for i in `seq 0 99`; do 
         touch ${ftok_path}/table$i
         chmod 666 ${ftok_path}/table$i
     done
