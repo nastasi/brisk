@@ -916,6 +916,8 @@ class Room {
     $curtime = time();
     $user_wup = array();
     $user_wup_n = 0;
+    $user_tab = array();
+    $user_tab_n = 0;
     log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
     
     for ($i = 0 ; $i < $table->player_n ; $i++) {
@@ -936,6 +938,7 @@ class Room {
 	  $user_cur->table = -1;
 	  $user_wup[$user_wup_n++] = &$user_cur;
 	}
+	$user_tab[$user_tab_n++] = &$user_cur;
       }
     }
 
@@ -965,33 +968,20 @@ class Room {
 	$act_content = table_act_content(FALSE, 0, $table_idx, $user_cur->table);
 	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
-	for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
-	  if ($user_cur == $user_wup[$wup_idx]) 
+	for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
+	  if ($user_cur == $user_tab[$tab_idx]) 
 	    break;
 
 	// for users that wakeup the room will be reconstructed by index_rd.php
-	if ($user_cur == $user_wup[$wup_idx]) 
+	if ($tab_idx < $user_tab_n) 
 	  continue;
 
 	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
-	if ($wup_idx < $user_wup_n) {
-	  log_main("JOIN_WAKEUP less");
-	  // set the new status 
-	  $ret .=  'stat = "room"; subst = "standup"; ';
-	  // clean the action buttons in other tables
-	  for ($e = 0 ; $e < TABLES_N ; $e++) {
-	    if ($this->table[$e]->player_n < PLAYERS_N)
-	      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user_cur->table));
-	  }
-	  log_main("JOIN_WAKEUP end less");
-	}
-	else {
-	  log_main("JOIN_WAKEUP more");
-	  $act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
-	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
-	  log_main("JOIN_WAKEUP end more");
-	}
+	log_main("JOIN_WAKEUP more");
+	$act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
+	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	log_main("JOIN_WAKEUP end more");
       }
       log_wr("ROOM_JOIN_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
