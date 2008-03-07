@@ -701,15 +701,15 @@ function set_names(so,ea,ne,nw,we)
 {
 //    alert("EA: "+ea);
     $("name").innerHTML = so; 
-    $("name").title = so; 
+    $("name").title = unescapeHTML(so); 
     $("name_ea").innerHTML = ea;
-    $("name_ea").title = ea;
+    $("name_ea").title = unescapeHTML(ea);
     $("name_ne").innerHTML = ne;
-    $("name_ne").title = ne;
+    $("name_ne").title = unescapeHTML(ne);
     $("name_nw").innerHTML = nw;
-    $("name_nw").title = nw;
+    $("name_nw").title = unescapeHTML(nw);
     $("name_we").innerHTML = we;
-    $("name_we").title = we;
+    $("name_we").title = unescapeHTML(we);
 
     return;
 }
@@ -897,6 +897,36 @@ function room_checkspace(emme,tables,inpe)
     $("standup").innerHTML = stand;
 
     $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
+}
+
+function  unescapeHTML(cont) {
+    var div = document.createElement('div');
+    var memo = "";
+    var i;
+
+    div.innerHTML = cont;
+    if (div.childNodes[0]) {
+        if (div.childNodes.length > 1) {
+            if (div.childNodes.toArray)
+                alert("si puo");
+            else {
+                var length = div.childNodes.length, results = new Array(length);
+            while (length--)
+                results[length] = div.childNodes[length];
+                
+            for (i=0 ; i<results.length ; i++)
+	        memo = memo + results[i].nodeValue;
+            }
+
+            return (memo);
+        }
+        else {
+            return (div.childNodes[0].nodeValue);
+        }
+    }
+    else {
+        return ('');
+    }
 }
 
 function playsound(tag, sound) {

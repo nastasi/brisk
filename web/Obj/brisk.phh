@@ -768,6 +768,7 @@ class Room {
 	    else {
 	      log_main("ERROR: table ".$table_idx." unrecoverable join");
 	    }
+	    Briskin5::unlock_data($sem);
 	  } // bri::lock_data
 	} //  if ($table_cur->player_n == PLAYERS_N) {
       } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {

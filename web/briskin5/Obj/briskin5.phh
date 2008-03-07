@@ -248,12 +248,13 @@ class Briskin5 {
     log_wr("LOCK_DATA ".FTOK_PATH."/table".$table_idx);
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
-    if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+    // FIXME monitor this step
+    if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
       echo "FTOK FAILED";
       exit;
     }
-    // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok)) == FALSE) {
+    // FIXME monitor this step
+    if (($res = @sem_get($tok)) == FALSE) {
       echo "SEM_GET FAILED";
       exit;
     }

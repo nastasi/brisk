@@ -219,7 +219,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    Room::unlock_data($sem);
 	    ignore_user_abort(FALSE);
 	    log_load("RESYNC");
-	    return (page_sync($user->sess, $to_stat == "table" ? "briskin5/index.php" : "index.php"));
+	    return (page_sync($user->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $user->table, $user->table_token));
 	  }
 	  log_rd2("lost history, refresh from scratch");
 	  $new_step = -1;
