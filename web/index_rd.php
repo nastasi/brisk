@@ -89,6 +89,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       log_auth($sess, "update lacc");
       $user->lacc = time();
 
+      log_main("pre garbage_manager TRE");
       $room->garbage_manager(FALSE);
       
       Room::save_data($room);
@@ -183,8 +184,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     log_rd2("PRE-NEWSTAT: ".$user->stat);
 
     if ($user->stat == 'room') {
-      log_rd("roomma");
-      $ret .= show_room(&$room, &$user);
+      log_rd("roomma ".$user->step);
+      $ret .= show_room(&$room, $user->step, &$user);
 
       /* NOTE the sets went common */
       $new_stat =  $user->stat;
