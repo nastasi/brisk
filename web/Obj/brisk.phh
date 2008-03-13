@@ -715,10 +715,12 @@ class Room {
 	  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
 	    log_main("bin5 lock data success");
 	    
+	    $no_recovery = FALSE;
 	    if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
 	      if ($table_cur->table_token != $bri->table_token) {
 		log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
 		log_main("ERROR: not matching table_start. Room: ".$table_cur->table_start."  Table: ".$bri->table_start);
+		$no_recovery = TRUE;
 		$bri = FALSE;
 	      }
 	    }
@@ -737,20 +739,21 @@ class Room {
 		/*
 		 *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
 		 */
+		log_main("garbage_manager: INSIDE THE END.");
+
 		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
 		  // stat must be "table" by definition
 		  $user_cur =& $this->user[$table_cur->player[$i]];
 		  $bri_user =& $bri->user[$i];
-
+		  
 		  $user_cur->subst      = $bri_user->subst;
 		  $user_cur->step       = $bri_user->step;
-		  $user_cur->trans_step = $bri_user->step;
 		  $user_cur->lacc       = $bri_user->lacc;
 		  $user_cur->laccwr     = $bri_user->lacc;
 		  $user_cur->bantime    = $bri_user->bantime;
 		}
 	      
-		$this->room_join_wakeup(&$user_cur); 
+		$this->room_join_wakeup(&$user_cur, FALSE, 0); 
 		$table_cur->table_token = "";
 
 		Briskin5::destroy_data($table_idx);
@@ -765,9 +768,25 @@ class Room {
 		Briskin5::save_data(&$bri);
 	      }
 	    } // else if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
-	    else {
+	    else if ($no_recovery == FALSE) {
 	      log_main("ERROR: table ".$table_idx." unrecoverable join");
+
+	      for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+		$user_cur = &$this->user[$table_cur->player[$i]];
+		$user_cur->subst = "shutdowner";
+		$user_cur->step_inc();
+		
+		$ret = sprintf('stat = "%s"; subst = "%s";',  $cur_user->stat, $cur_user->subst);
+		$ret .= "gst.st = ".($user_cur->step+1)."; ";
+		$ret .= show_notify("<br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>", 2000, "Chiudi.", 400, 110);
+		$user_cur->comm[$user_cur->step % COMM_N] = $ret;
+		$user_cur->step_inc();
+	      }
+
+	      $this->room_join_wakeup(&$user_cur, TRUE, -2); 
+	      $table_cur->table_token = "";
 	    }
+
 	    Briskin5::unlock_data($sem);
 	  } // bri::lock_data
 	} //  if ($table_cur->player_n == PLAYERS_N) {
@@ -907,7 +926,7 @@ class Room {
     }
   }
 
-  function room_join_wakeup(&$user, $update_lacc = FALSE)
+  function room_join_wakeup(&$user, $update_lacc = FALSE, $trans_delta)
   {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
@@ -974,9 +993,17 @@ class Room {
 	    break;
 
 	// for users that wakeup the room will be reconstructed by index_rd.php
-	if ($tab_idx < $user_tab_n) 
-	  continue;
+	if ($tab_idx < $user_tab_n) {
+	  log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
+	  $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
+	  $user_cur->comm[$user_cur->step % COMM_N] = "";
+	  $user_cur->step_inc();
+	  $user_cur->comm[$user_cur->step % COMM_N] = show_room(&$this, ($user_cur->step + 1), &$user_cur);
+	  $user_cur->step_inc();
+	  log_main("POST show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
+	  continue;
+	}
 	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
 	log_main("JOIN_WAKEUP more");
@@ -1244,7 +1271,8 @@ class Room {
       }
       $this->user[$idx]->name = $name_new;
       $this->user[$idx]->stat_set("room");
-      // MOP $this->user[$idx]->step_set(0);
+      $this->user[$idx]->step_set(0);
+      while (array_pop($this->user[$idx]->comm) != NULL);
       $this->user[$idx]->subst = "standup";
       $this->user[$idx]->lacc =   $curtime;
       $this->user[$idx]->laccwr = $curtime;
@@ -1888,9 +1916,12 @@ function table_wellcome($user)
   return ($ret);
 }
 
-function show_room(&$room, &$user)
+function show_room(&$room, $user_step, &$user)
 {
-  $ret = sprintf('gst.st = %d;',  $user->step);
+  log_main("show_room: username: ".$user->name);
+
+
+  $ret = sprintf('gst.st = %d;',  $user_step);
   $ret .= sprintf('stat = "%s";',  $user->stat);
 
   $ret .= root_wellcome($user);
