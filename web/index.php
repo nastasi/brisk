@@ -49,7 +49,7 @@ function main()
     /* Actions */
 
     if (validate_sess($sess)) {
-      log_main("pre garbage_manager");
+      log_main("pre garbage_manager UNO");
       $room->garbage_manager(TRUE);
       log_main("post garbage_manager");
       if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
@@ -76,6 +76,8 @@ function main()
     }
     
     if ($ACTION == "login" && isset($name)) {
+      
+      log_main("pre garbage_manager DUE");
       $room->garbage_manager(TRUE);
       /* try login */
       if (($user = &$room->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
