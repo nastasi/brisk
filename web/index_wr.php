@@ -116,7 +116,7 @@ else if ($user->stat == 'room') {
       /* TODO: refact to a function */
       if ($user->bantime > $user->laccwr) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	$user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "Torna in piedi.", 400, 100);
+	$user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "resta in piedi.", 400, 100);
 	
 	$user->step_inc();
 	Room::save_data($room);
