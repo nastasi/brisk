@@ -96,7 +96,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       $first_loop = FALSE;
     }
 
-    log_only("U");
+    log_lock("U");
     Room::unlock_data($sem);
     ignore_user_abort(FALSE);
   }
@@ -108,7 +108,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // log_rd2("Postget".$proxy_step."zizi");
 
     if ($cur_step == $proxy_step) {
-      log_only2("P");
+      log_lock("P");
       return (FALSE);
     }
     else {
@@ -125,7 +125,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if (($sem = Room::lock_data()) == FALSE) 
 	break;
       
-      log_only("P");
+      log_lock("P");
       if (($room = &Room::load_data()) == FALSE) 
 	break;
     } while (0);

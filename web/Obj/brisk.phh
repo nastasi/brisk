@@ -50,6 +50,9 @@ define(DBG_LOAD, 0x0100);
 define(DBG_AUTH, 0x0200);
 
 define(BRISK_DEBUG, 0);
+
+define(BRISK_SINGLE_DEBUG,0);
+define(BRISK_SINGLE_SESS, "");
 // define(DEBUGGING, "local");
 
 $G_false = FALSE;
@@ -1428,15 +1431,18 @@ function make_seed()
 
 
 function log_only2($log) {
-  if ((BRISK_DEBUG & DBG_ONL2) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONL2) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONL2) == 0)
+    return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("ONL2: [%s] [%s]\n", $ssess, $log));
@@ -1445,15 +1451,18 @@ function log_only2($log) {
 }
 
 function log_only($log) {
-  if ((BRISK_DEBUG & DBG_ONLY) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONLY) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONLY) == 0)
+    return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("ONLY: [%s] [%s]\n", $ssess, $log));
@@ -1462,15 +1471,18 @@ function log_only($log) {
 }
 
 function log_main($log) {
-  if ((BRISK_DEBUG & DBG_MAIN) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_MAIN) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_MAIN) == 0)
+    return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("MAIN: [%s] [%s]\n", $ssess, $log));
@@ -1479,16 +1491,19 @@ function log_main($log) {
 }
 
 function log_rd($log) {
-  if ((BRISK_DEBUG & DBG_READ) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_READ) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
-      
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_READ) == 0)
+    return;
+
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("READ: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
@@ -1496,16 +1511,18 @@ function log_rd($log) {
 }
 
 function log_rd2($log) {
-  if ((BRISK_DEBUG & DBG_REA2) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_REA2) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
       
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_REA2) == 0)
+    return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("REA2: [%s] [%s]\n", $ssess, $log));
@@ -1514,16 +1531,19 @@ function log_rd2($log) {
 }
 
 function log_send($log) {
-  if ((BRISK_DEBUG & DBG_SEND) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SEND) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
       
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_SEND) == 0)
+    return;
+
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("SEND: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
@@ -1531,15 +1551,18 @@ function log_send($log) {
 }
 
 function log_lock($log) {
-  if ((BRISK_DEBUG & DBG_LOCK) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOCK) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOCK) == 0)
+    return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("LOCK: [%s] [%s]\n", $ssess, $log));
@@ -1548,16 +1571,19 @@ function log_lock($log) {
 }
 
 function log_wr($log) {
-  if ((BRISK_DEBUG & DBG_WRIT) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_WRIT) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
       
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_WRIT) == 0)
+    return;
+
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("WRIT: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
@@ -1565,15 +1591,18 @@ function log_wr($log) {
 }
 
 function log_load($log) {
-  if ((BRISK_DEBUG & DBG_LOAD) == 0)
-    return;
-  
   GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOAD) == 0)
+    return;
 
   if (isset($sess) == FALSE)
     $ssess = "XXXX";
   else
     $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOAD) == 0)
+    return;
       
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("LOAD: [%s] [%s]\n", $ssess, $log));
@@ -1582,7 +1611,10 @@ function log_load($log) {
 }
 
 function log_auth($sess, $log) {
-  if ((BRISK_DEBUG & DBG_AUTH) == 0)
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_AUTH) == 0)
+    return;
+
+  if (( (BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_AUTH) == 0)
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
