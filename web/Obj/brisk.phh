@@ -1320,7 +1320,7 @@ class Room {
   {
     GLOBAL $G_false, $sess;
     
-    if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
+    if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
       echo "FTOK FAILED";
       exit;
     }
@@ -1362,7 +1362,7 @@ class Room {
     
     // var_dump($room);
     
-    if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) 
+    if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) 
       return (FALSE);
     
     do {
@@ -1393,7 +1393,7 @@ class Room {
     
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
-    if (($tok = ftok(FTOK_PATH."/main", "B")) == -1) {
+    if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
       echo "FTOK FAILED";
       exit;
     }
@@ -1608,7 +1608,7 @@ function log_legal($timecur, $sess, $name, $where, $mesg)
 
 function lock_banlist()
 {
-  if (($tok = ftok(FTOK_PATH."/main", "L")) == -1) {
+  if (($tok = @ftok(FTOK_PATH."/main", "L")) == -1) {
     echo "FTOK FAILED";
     exit;
   }

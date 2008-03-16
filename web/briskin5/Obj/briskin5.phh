@@ -23,7 +23,7 @@ class Briskin5 {
 
     $this->the_end = FALSE;
 
-    if (($this->tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+    if (($this->tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
       echo "FTOK FAILED";
       exit;
     }
@@ -126,7 +126,7 @@ class Briskin5 {
     $shm = FALSE;
 
     log_wr("TABLE_IDX ".FTOK_PATH."/table".$table_idx);
-    if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+    if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
       echo "FTOK FAILED";
       exit;
     }
@@ -216,7 +216,7 @@ class Briskin5 {
       
       log_main("DESTROY2 BRISKIN5 DATA");
 
-      if (($tok = ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) 
+      if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) 
 	break;
 
       if (($shm = shm_attach($tok, BRISKIN5_SHM_DIMS)) === FALSE)
