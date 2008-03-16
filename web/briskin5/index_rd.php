@@ -204,7 +204,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   else {
     ignore_user_abort(TRUE);
     $sem = Briskin5::lock_data($table_idx);
-    $bri = &Briskin5::load_data($table_idx, $table_token);
+    if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) {
+      Briskin5::unlock_data($sem);
+      ignore_user_abort(FALSE);
+      return (unrecerror());
+    }
     if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
       Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
