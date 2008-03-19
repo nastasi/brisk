@@ -190,6 +190,8 @@ else if ($user->stat == 'room') {
 
 	    log_wr("Pre if!");
 	    
+	    // CHECK
+	    while (array_pop($user_cur->comm) != NULL);
 	    $ret = "";
 	    $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token);
 	    
