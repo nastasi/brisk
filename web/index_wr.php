@@ -56,7 +56,7 @@ $argz = explode('|', $mesg);
 log_wr('POSTSPLIT: '.$argz[0]);
 
 if ($argz[0] == 'shutdown') {
-  log_auth($user_cur->sess, "Shutdown session.");
+  log_auth($user->sess, "Shutdown session.");
   $tmp_sess = $user->sess;
   $user->sess = "";
   step_unproxy($tmp_sess);

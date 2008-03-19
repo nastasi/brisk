@@ -177,6 +177,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
     else {
       log_rd2("TRANS NON ATTIVATO");
+      while (array_pop($user->comm) != NULL);
+      // $user->step_inc(COMM_N + 1);
+
+      Briskin5::save_data($bri);
       Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
     }
