@@ -132,17 +132,17 @@ if [ "$web_only" = "FALSE" ]; then
         chmod 666 ${ftok_path}/table$i
     done
 fi
-install -d $web_path
+install -d ${web_path}__
 for i in `find web -type d | grep -v /CVS | sed 's/^....//g'`; do
-    install -d ${web_path}/$i 
+    install -d ${web_path}__/$i 
 done
 
 for i in `find web -name '*.php' -o -name '*.phh' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'`; do
-    install -m 644 web/$i ${web_path}/$i
+    install -m 644 web/$i ${web_path}__/$i
 done
 
 cd web
-find . -name '.htaccess' -exec install -m 644 {} ${web_path}/{} \;
+find . -name '.htaccess' -exec install -m 644 {} ${web_path}__/{} \;
 cd -
 
 if [ $n_players -eq 5 ]; then
@@ -152,24 +152,39 @@ else
 fi
 
 # .js substitutions
-sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $n_players/g" `find ${web_path} -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;`
+sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $n_players/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;`
 
-sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" `find ${web_path} -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;`
+sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;`
 
 # .ph[ph] substitutions
-sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
+sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
 
-sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $n_players)/g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;`
+sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $n_players)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;`
 
-sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path} -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
+sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
 
-sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}/Obj/brisk.phh
+sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}__/Obj/brisk.phh
 
-sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}/Obj/brisk.phh
+sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}__/Obj/brisk.phh
 
-sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}/Obj/brisk.phh
+sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}__/Obj/brisk.phh
 
-sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}/xhr.js
-sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}/commons.js
+sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}__/xhr.js
+sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}__/commons.js
+
+if [ -d ${web_path} ]; then
+    mv ${web_path} ${web_path}.old
+fi
+
+if [ -d ../brisk-img ]; then
+    cd ../brisk-img
+    ./INSTALL.sh -w ${web_path}__
+    cd -
+fi
+
+mv ${web_path}__ ${web_path}
+if [ -d ${web_path}.old ]; then
+    rm -rf ${web_path}.old
+fi
 
 exit 0
