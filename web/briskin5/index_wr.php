@@ -401,7 +401,7 @@ else if ($user->stat == 'table') {
 	  $turn_nex = ($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N;
 
 	  log_wr(sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
-	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);|cards_hidetake($d);",
+	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);",
 			       $winner, $winner);
 	  $player_cur = "remark_off();" . $card_take . "|"; 
 	  if ($turn_cur != $turn_nex)
