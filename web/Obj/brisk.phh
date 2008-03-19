@@ -26,7 +26,10 @@ define(TABLES_N, 20);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
-define(SHM_DIMS, (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
+define(SHM_DIMS_MIN, (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
+define(SHM_DIMS_MAX, SHM_DIMS_MIN + 1048576);
+define(SHM_DIMS_DLT, 65536);
+ 
 define(COMM_N, 12);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
@@ -58,9 +61,9 @@ define(BRISK_SINGLE_SESS, "");
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "spawn-0.9.2";
+$G_brisk_version = "spawn-0.9.3";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: chiuso il <b>bug</b> dei <b>tavoli bianchi</b>, versione beta.',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: dimensionamento dinamico dell\'area dati e ottimizzazione della stessa, versione beta.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -575,13 +578,14 @@ class User {
     $thiz->trans_step = $from->trans_step;
     $thiz->comm       = array();
 
+    /*
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
     for ($i = $i_start ; $i < $from->step ; $i++) {
       log_wr("TRY PUSH:".$i);
       $ii = $i % COMM_N;
       $thiz->comm[$ii]   = $from->comm[$ii];
     }
-    
+    */
     $thiz->asta_card  = $from->asta_card;
     $thiz->asta_pnt   = $from->asta_pnt;
     $thiz->handpt     = $from->handpt;
@@ -625,8 +629,8 @@ class User {
     return (FALSE);
   }
 
-  function step_inc() {
-    $this->step++;
+  function step_inc($delta = 1) {
+    $this->step += $delta;
     
     if (validate_sess($this->sess)) {
       $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
@@ -683,6 +687,7 @@ class Room {
   var $comm; // commands for many people
   var $step; // current step of the comm array
   var $garbage_timeout;
+  var $shm_sz;
 
   function Room () {
     $this->user = array();
@@ -998,6 +1003,9 @@ class Room {
 	// for users that wakeup the room will be reconstructed by index_rd.php
 	if ($tab_idx < $user_tab_n) {
 	  log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
+
+	  while (array_pop($user_cur->comm) != NULL);
+
 	  $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
 	  $user_cur->comm[$user_cur->step % COMM_N] = "";
 	  $user_cur->step_inc();
@@ -1322,34 +1330,47 @@ class Room {
   function &load_data() 
   {
     GLOBAL $G_false, $sess;
-    
-    if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
-      echo "FTOK FAILED";
-      exit;
-    }
-    
-    if ($shm = shm_attach($tok, SHM_DIMS)) {
-      $room = @shm_get_var($shm, $tok);
-      
-      log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
-      if (isset($room)) 
-	log_only("bri count ".count($room));
-      
-      if ($room == FALSE) {
-	log_only("INIT MAIN DATA");
-	
-	$room =& Room::init_data();
-	if (shm_put_var($shm, $tok, $room) == FALSE) {
-	  log_only("PUT_VAR FALLITA ".strlen(serialize($room)));
-	  log_only(serialize($room));
-	}
+    $doexit = FALSE;
+    do {
+      if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
+	log_main("ftok failed");
+	$doexit = TRUE;
+	break;
       }
-      
-      shm_detach($shm);
-      
+    
+      if (($shm_sz = sharedmem_sz($tok)) == -1) {
+	log_main("shmop_open failed");
+      }
+	
+      if ($shm_sz == -1)
+	$shm_sz = SHM_DIMS_MIN;
+
+      if ($shm = shm_attach($tok, $shm_sz)) {
+	$room = @shm_get_var($shm, $tok);
+	
+	log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
+	if (isset($room)) 
+	  log_only("bri count ".count($room));
+	
+	if ($room == FALSE) {
+	  log_only("INIT MAIN DATA");
+	  
+	  $room =& Room::init_data();
+	  if (@shm_put_var($shm, $tok, $room) == FALSE) {
+	    log_only("PUT_VAR FALLITA ".strlen(serialize($room)));
+	    log_only(serialize($room));
+	  }
+	}
+	$room->shm_sz = $shm_sz;
+	
+	shm_detach($shm);
+      }
       $ret = &$room;
       return ($ret);
-    }
+    } while (0);
+    
+    if ($doexit)
+      exit();
     
     return ($G_false);
   }
@@ -1361,29 +1382,29 @@ class Room {
     
     $ret =   FALSE;
     $shm =   FALSE;
-    $isacq = FALSE;
     
     // var_dump($room);
     
     if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) 
       return (FALSE);
     
-    do {
-      $isacq = TRUE;
-      
-      if (($shm = shm_attach($tok, SHM_DIMS)) == FALSE)
+    while ($room->shm_sz < SHM_DIMS_MAX) {
+      if (($shm = shm_attach($tok, $room->shm_sz)) == FALSE)
 	break;
       
       // log_only("PUT_VAR DI ".strlen(serialize($room)));
-      if (shm_put_var($shm, $tok, $room) == FALSE) {
-	log_only("PUT_VAR FALLITA ".strlen(serialize($room)));
-	log_only(serialize($room));
+      if (shm_put_var($shm, $tok, $room) != FALSE) {
+	shm_detach($shm);
+	return (TRUE);
+      }
+      if (shm_remove($shm) === FALSE) {
+	log_only("REMOVE FALLITA");
 	break;
       }
-      // log_main("QUI CI ARRIVA [".$room->user[0]->name."]");
-      $ret = TRUE;
-    } while (0);
-    
+      shm_detach($shm);
+      $room->shm_sz += SHM_DIMS_DLT;
+    } 
+
     if ($shm)
       shm_detach($shm);
     
@@ -2298,5 +2319,19 @@ function secstoword($secs)
   
   return ($ret);
 }
+
+function sharedmem_sz($tok)
+{
+  if (($shm_id = @shmop_open($tok, 'a', 0, 0)) == FALSE) {
+    log_main("shmop_open failed");
+    return (-1);
+  }
+  $shm_sz = shmop_size($shm_id);
+  shmop_close($shm_id);
+  
+  log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
+  return ($shm_sz);
+}    
+
 
 ?>
