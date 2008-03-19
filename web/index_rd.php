@@ -187,6 +187,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       log_rd("roomma ".$user->step);
       $ret .= show_room(&$room, $user->step, &$user);
 
+      // TODO uncomment and test
+      // while (array_pop($user->comm) != NULL);
+      // $new_step = -1;
+      // $user->step_inc(COMM_N + 1);
+      // Room::save_data($room);
       /* NOTE the sets went common */
       $new_stat =  $user->stat;
       $new_subst = $user->subst;
@@ -223,7 +228,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	    return (page_sync($user->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $user->table, $user->table_token));
 	  }
 	  log_rd2("lost history, refresh from scratch");
-	  $new_step = -1;
+          $new_step = -1;
 	  break;
 	} 
 	for ($i = $cur_step ; $i < $user->step ; $i++) {
