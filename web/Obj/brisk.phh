@@ -2,7 +2,7 @@
 /*
  *  brisk - brisk.phh
  *
- *  Copyright (C) 2006-2007 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 matteo.nastasi@milug.org
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ define(DBG_LOCK, 0x0040);
 define(DBG_WRIT, 0x0080);
 define(DBG_LOAD, 0x0100);
 define(DBG_AUTH, 0x0200);
+define(DBG_CRIT, 0x0400);
 
 define(BRISK_DEBUG, 0);
 
@@ -61,7 +62,7 @@ define(BRISK_SINGLE_SESS, "");
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "spawn-0.10.1";
+$G_brisk_version = "spawn-0.10.2";
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: dimensionamento dinamico dell\'area dati e ottimizzazione della stessa, versione beta.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
@@ -777,14 +778,14 @@ class Room {
 	      }
 	    } // else if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
 	    else if ($no_recovery == FALSE) {
-	      log_main("ERROR: table ".$table_idx." unrecoverable join");
+	      log_crit("ERROR: table ".$table_idx." unrecoverable join");
 
 	      for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
 		$user_cur = &$this->user[$table_cur->player[$i]];
 		$user_cur->subst = "shutdowner";
 		$user_cur->step_inc();
 		
-		$ret = sprintf('stat = "%s"; subst = "%s";',  $cur_user->stat, $cur_user->subst);
+		$ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
 		$ret .= "gst.st = ".($user_cur->step+1)."; ";
 		$ret .= show_notify("<br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>", 2000, "Chiudi.", 400, 110);
 		$user_cur->comm[$user_cur->step % COMM_N] = $ret;
@@ -1004,7 +1005,8 @@ class Room {
 	if ($tab_idx < $user_tab_n) {
 	  log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
-	  while (array_pop($user_cur->comm) != NULL);
+	  if ($trans_delta == 0)
+	    while (array_pop($user_cur->comm) != NULL);
 
 	  $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
 	  $user_cur->comm[$user_cur->step % COMM_N] = "";
@@ -1467,6 +1469,26 @@ function log_only2($log) {
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
     fwrite($fp, sprintf("ONL2: [%s] [%s]\n", $ssess, $log));
+    fclose($fp);
+  }
+}
+
+function log_crit($log) {
+  GLOBAL $sess;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_CRIT) == 0)
+    return;
+
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_CRIT) == 0)
+    return;
+
+  if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("CRIT: [%s] [%s]\n", $ssess, $log));
     fclose($fp);
   }
 }
