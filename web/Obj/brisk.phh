@@ -62,7 +62,7 @@ define(BRISK_SINGLE_SESS, "");
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "spawn-0.10.2";
+$G_brisk_version = "spawn-0.10.3";
 
 $root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: dimensionamento dinamico dell\'area dati e ottimizzazione della stessa, versione beta.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
@@ -1005,8 +1005,9 @@ class Room {
 	if ($tab_idx < $user_tab_n) {
 	  log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
-	  if ($trans_delta == 0)
-	    while (array_pop($user_cur->comm) != NULL);
+//        ARRAY_POP DISABLED
+// 	  if ($trans_delta == 0)
+// 	    while (array_pop($user_cur->comm) != NULL);
 
 	  $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
 	  $user_cur->comm[$user_cur->step % COMM_N] = "";

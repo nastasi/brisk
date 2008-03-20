@@ -174,13 +174,15 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       ignore_user_abort(FALSE);
     }
     else {
-       log_rd2("TRANS NON ATTIVATO, clean del comm array");
-       while (($el = array_pop($user->comm)) != NULL) { 
-         log_rd2("clean element [".$el."]");
-       }
-       //        $user->step_inc(COMM_N + 1);
-       Room::save_data($room);
-       //        $new_step = $user->step;
+       log_rd2("TRANS NON ATTIVATO");
+//        ARRAY_POP DISABLED
+//        log_rd2("TRANS NON ATTIVATO, clean del comm array");
+//        while (($el = array_pop($user->comm)) != NULL) { 
+//          log_rd2("clean element [".$el."]");
+//        }
+//        //        $user->step_inc(COMM_N + 1);
+//        Room::save_data($room);
+//        //        $new_step = $user->step;
 	 
        Room::unlock_data($sem);
        ignore_user_abort(FALSE);
