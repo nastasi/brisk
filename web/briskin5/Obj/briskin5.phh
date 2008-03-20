@@ -2,9 +2,9 @@
 define(BRISKIN5_PLAYERS_N, 3);
 define(BRISKIN5_MAX_PLAYERS, BRISKIN5_PLAYERS_N);
 // define(BRISKIN5_SHM_MIN, (50000 * BRISKIN5_MAX_PLAYERS));
-define(BRISKIN5_SHM_MIN, 10000);
+define(BRISKIN5_SHM_MIN, 32768);
 define(BRISKIN5_SHM_MAX, (BRISKIN5_SHM_MIN + 1048576));
-define(BRISKIN5_SHM_DLT, 65536);
+define(BRISKIN5_SHM_DLT, 32768);
 
 class Briskin5 {
   var $user;
@@ -191,7 +191,6 @@ class Briskin5 {
       if (($shm = shm_attach($bri->tok, $bri->shm_sz)) == FALSE)
 	break;
       
-      // log_only("PUT_VAR DI ".strlen(serialize($room)));
       if (@shm_put_var($shm, $bri->tok, $bri) != FALSE) {
 	shm_detach($shm);
 	return (TRUE);
@@ -204,6 +203,8 @@ class Briskin5 {
       $bri->shm_sz += BRISKIN5_SHM_DLT;
     } 
 
+    log_crit("save data failed!");
+
     if ($shm)
       shm_detach($shm);
     
@@ -211,42 +212,6 @@ class Briskin5 {
   }
 
 
-
-  function save_data_orig(&$bri) 
-  {
-    GLOBAL $sess;
-    
-    $ret =   FALSE;
-    $shm =   FALSE;
-    $isacq = FALSE;
-    
-    log_main("SAVE BRISKIN5 DATA");
-    // var_dump($bri);
-    
-    if (!isset($bri->tok))
-      return (FALSE);
-    
-    do {
-      $isacq = TRUE;
-      
-      if (($shm = shm_attach($bri->tok, BRISKIN5_SHM_DIMS)) == FALSE)
-	break;
-      
-      // log_only("PUT_VAR DI ".strlen(serialize($bri)));
-      if (shm_put_var($shm, $bri->tok, $bri) == FALSE) {
-	log_only("PUT_VAR FALLITA ".strlen(serialize($bri)));
-	log_only(serialize($bri));
-	break;
-      }
-      // log_main("QUI CI ARRIVA [".$bri->user[0]->name."]");
-      $ret = TRUE;
-    } while (0);
-    
-    if ($shm)
-      shm_detach($shm);
-    
-    return ($ret);
-  }
 
   function destroy_data($table_idx) 
   {
