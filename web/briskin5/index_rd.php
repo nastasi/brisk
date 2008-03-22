@@ -318,8 +318,8 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   $old_subst = $subst;
   $old_step =  $step;
   // log_rd("POST MAIN ".$step);;
-  usleep(400000);
-  if (($i % 5) == 0) {
+  usleep(200000);
+  if (($i % 10) == 0) {
     // log_rd2("TIME: ".time());
     echo '_';
     flush();
