@@ -153,19 +153,28 @@ function main()
     // $tables .= '</td></tr></table>';
   }
 
-  $altout_propag = array( array ( 'url' => 'http://www.alternativeoutput.it',
-				  'content' => '<img class="nobo" src="img/altout80x15.png">' ),
-			  array ( 'url' => 'http://virtualsky.alternativeoutput.it',
-				  'content' => '<img class="nobo" src="img/virtualsky80x15a.gif">' )
+  $altout_propag = array( array ( 'id' => 'btn_altout',
+                                  'url' => 'http://www.alternativeoutput.it',
+				  'content' => 'img/altout80x15.png',
+                                  'content_big' => 'img/altout80x15.png'),
+			  array ( 'id' => 'btn_virtualsky',
+                                  'url' => 'http://virtualsky.alternativeoutput.it',
+				  'content' => 'img/virtualsky80x15a.gif',
+                                  'content_big' => 'img/virtualsky_big.png')
 			  );
   
   // seed with microseconds since last "whole" second
   srand ((double) microtime() * 1000000);
   // $randval = rand(0,count($altout_propag)-1);
   $randval = 1;
-  $altout_carousel = sprintf('<a target="_blank" href="%s">%s</a>',
+  $altout_carousel = sprintf('<a target="_blank" href="%s"><img id="%s" class="nobo" src="%s" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a>',
 			     $altout_propag[$randval]['url'],
+			     $altout_propag[$randval]['id'],
 			     $altout_propag[$randval]['content']);
+			 
+  $altout_carousel_big = sprintf('<img class="nobohide" id="%s_big" src="%s">',
+                                 $altout_propag[$randval]['id'],
+                                 $altout_propag[$randval]['content_big']);
 			 
 
   $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
@@ -259,14 +268,16 @@ $brisk_vertical_menu = '
 </div>
 <br><br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
-<a target="_blank" href="http://www.dynamica.it"><img class="nobo" src="img/dynamica.png"></a><br><br>
+<a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
 supported by:<br><br>
-<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" src="img/brichi.png"></a><br><br>
+<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
 <div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
 </div><br><br></div>
 %s
 %s
-</div>';
+<img class="nobohide" id="btn_dynamica_big" src="img/dynamica_big.png">
+<img class="nobohide" id="btn_brichi_big" src="img/brichi_big.png">
+'.$altout_carousel_big.'</div>';
     
   /* Templates. */
   if ($ACTION == 'login') {
@@ -283,9 +294,8 @@ supported by:<br><br>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
-</head>
-<body>
-<SCRIPT type="text/javascript">
+
+<SCRIPT type="text/javascript"><!--
    var g_withflash = false;
    var g_is_spawn = 0; 
    window.onload = function() {
@@ -297,7 +307,10 @@ supported by:<br><br>
        $("proflashext").innerHTML = "";
      $("nameid").focus();
    }
+   //-->
 </SCRIPT>
+</head>
+<body>
 <?php
     printf($brisk_header_form);
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
@@ -346,9 +359,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
-</head>
-<body>
-<SCRIPT type="text/javascript">
+<SCRIPT type="text/javascript"><!--
    var sess;
    var stat = "";
    var subst = "";
@@ -387,8 +398,10 @@ else {
 }
 ?>
    }
-
+   //-->
 </SCRIPT>
+</head>
+<body>
 <?php
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");

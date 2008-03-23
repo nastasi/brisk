@@ -109,6 +109,22 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 
     // var card_pos = RANGE 0 <= x < cards_ea_n
 
+function show_bigpict(obj, act)
+{
+   var big;
+
+   // alert("offsetTop: "+obj.offsetTop+"  offsetLeft: "+obj.offsetLeft+"obj.id: "+obj.id);
+   big = $(obj.id+"_big");
+   if (act == "over") {
+       big.style.left = obj.offsetLeft + 100+"px";
+       big.style.top  = obj.offsetTop  +  10+"px";
+       big.style.visibility = "visible";
+       }
+   else {
+       big.style.visibility = "hidden";
+       }
+}
+
 function rnd_int(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
