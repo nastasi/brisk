@@ -30,7 +30,7 @@ define(SHM_DIMS_MIN, (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
 define(SHM_DIMS_MAX, SHM_DIMS_MIN + 1048576);
 define(SHM_DIMS_DLT, 65536);
  
-define(COMM_N, 12);
+define(COMM_N, 18);
 define(COMM_GEN_N, 50);
 define(SESS_LEN, 13);
 define(STREAM_TIMEOUT, 20);
