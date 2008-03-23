@@ -55,6 +55,13 @@ img.nobo {
     margin: auto;
 }
 
+img.nobohide {
+    position:     absolute;
+    border-width: 0px;
+    visibility: hidden;
+    z-index: 12;
+}
+
 .notify { 
     border-style: solid;
     border-width: 1px;
