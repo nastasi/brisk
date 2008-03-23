@@ -643,6 +643,16 @@ class User {
     
     return (FALSE);
   }
+
+  function reset() {
+    $tmp_sess = $this->sess;
+    $this->sess = "";
+    step_unproxy($tmp_sess);
+    $this->name = "";
+    while (array_pop($this->comm) != NULL);
+    $this->step = 0;
+    $this->the_end = FALSE;
+  }
 } // end class User
 
 
@@ -818,12 +828,16 @@ class Room {
 	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
 	    log_auth($user_cur->sess, "Autologout session.");
 	    
+	    $user_cur->reset();
+	    /* factorized with ->reset()
 	    $tmp_sess = $user_cur->sess;
 	    $user_cur->sess = "";
 	    step_unproxy($tmp_sess);
 	    $user_cur->name = "";
+	    while (array_pop($user_cur->comm) != NULL);
 	    $user_cur->step = 0;
 	    $user_cur->the_end = FALSE;
+	    */
 	    
 	    log_rd2("AUTO LOGOUT.");
 	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
