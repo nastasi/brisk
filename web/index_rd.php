@@ -248,13 +248,18 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if ($user->the_end == TRUE) {
 	log_rd2("LOGOUT BYE BYE!!");
 	log_auth($user->sess, "Explicit logout.");
+
+	$user->reset();
+	/* factorized with ->reset()
 	$tmp_sess = $user->sess;
 	$user->sess = "";
 	step_unproxy($tmp_sess);
-	
 	$user->name = "";
+	while (array_pop($user->comm) != NULL);	
+	$user->step = 0;
 	$user->the_end = FALSE;
-	
+	*/
+
 	if ($user->subst == 'sitdown') {
 	  log_load("ROOM WAKEUP");
 	  $room->room_wakeup(&$user);

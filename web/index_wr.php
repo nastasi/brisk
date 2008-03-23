@@ -57,12 +57,18 @@ log_wr('POSTSPLIT: '.$argz[0]);
 
 if ($argz[0] == 'shutdown') {
   log_auth($user->sess, "Shutdown session.");
+
+  $user->reset();
+  /* factorized with ->reset()
   $tmp_sess = $user->sess;
   $user->sess = "";
   step_unproxy($tmp_sess);
   $user->name = "";
+  while (array_pop($user->comm) != NULL);
+  $user->step = 0;
   $user->the_end = FALSE;
-  
+  */
+
   log_rd2("AUTO LOGOUT.");
   if ($user->subst == 'sitdown' || $user->stat == 'table')
     $room->room_wakeup(&$user);
