@@ -22,6 +22,12 @@
  */
 
 require_once("Obj/brisk.phh");
+require_once("Obj/proxyscan.phh");
+
+// Use of proxies isn't allowed.
+if (is_proxy()) 
+     exit;
+
 require_once("briskin5/Obj/briskin5.phh");
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   echo "Debugging time!";

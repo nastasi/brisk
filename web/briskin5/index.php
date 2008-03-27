@@ -20,6 +20,15 @@
  * $Id$
  *
  */
+
+require_once("../Obj/brisk.phh");
+require_once("../Obj/proxyscan.phh");
+
+// Use of proxies isn't allowed.
+if (is_proxy()) {
+  exit;
+}
+
 ?>
 <html>
 <head>
@@ -49,7 +58,6 @@ var area_ptr;
 
 var gst  = new globst();
 gst.st = <?php 
-require_once("../Obj/brisk.phh");
 
 log_load("bin5/index.php");
 

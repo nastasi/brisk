@@ -1257,8 +1257,13 @@ class Room {
 	else {
 	  $user_cur = &$this->user[$table->player[$i]];
 	}
-        if ($only_you && $user_cur != $user)
-          continue;
+
+        if ($only_you) {
+          if ($user_cur != $user)
+            continue;
+          else
+            $user_mesg = "== chat ban ==";
+        }
 	
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
 	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',

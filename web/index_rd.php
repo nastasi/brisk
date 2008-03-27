@@ -22,8 +22,14 @@
  */
 
 require_once("Obj/brisk.phh");
+require_once("Obj/proxyscan.phh");
 require_once("briskin5/Obj/briskin5.phh");
 
+// Use of proxies isn't allowed.
+if (is_proxy()) {
+  sleep(5);
+  exit;
+}
 log_load("index_rd.php");
 
 $first_loop = TRUE;
