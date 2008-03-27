@@ -276,13 +276,15 @@ $brisk_vertical_menu = '
 sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
 supported by:<br><br>
-<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
+<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br>
+<a target="_blank" href="http://www.forumolimpia.it"><img class="nobo" id="btn_foroli" src="img/forumolimpia.gif" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
 <div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
 </div><br><br></div>
 %s
 %s
 <img class="nobohide" id="btn_dynamica_big" src="img/dynamica_big.png">
 <img class="nobohide" id="btn_brichi_big" src="img/brichi_big.png">
+<img class="nobohide" id="btn_foroli_big" src="img/forumolimpia_big.png">
 '.$altout_carousel_big.'</div>';
     
   /* Templates. */
