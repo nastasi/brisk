@@ -177,7 +177,7 @@ function is_proxy()
   $proxy = new proxy_detector();
   
   //start detect
-  if(!$proxy->detect()) {
+  if($proxy->detect()) {
     //returned true, lets die...
     echo "<br><br><div style=\"text-align:center;\"><h1>Proxy detected</h1><br><br>";
     echo "Please disable your proxy server in your browser preferences or internet settings, and try again.<br><br></div>";
