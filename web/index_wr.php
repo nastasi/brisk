@@ -122,6 +122,19 @@ else if ($user->stat == 'room') {
     if ($argz[0] == 'sitdown') {
       log_wr("SITDOWN command");
 
+      if ($G_shutdown) {
+	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+
+	$timecur = time();
+	$dt = date("H:i ", $timecur);
+	$user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt.NICKSERV);
+
+	$user->step_inc();
+	Room::save_data($room);
+	Room::unlock_data($sem);
+	exit;
+      }
+
       if ($user->the_end == TRUE) {
 	log_wr("INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
 	Room::unlock_data($sem);

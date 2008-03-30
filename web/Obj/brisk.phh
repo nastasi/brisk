@@ -45,7 +45,7 @@ define(EXPIRE_TIME_SMAMMA, 360);
 // BAN_TIME da allineare anche in commons.js
 define(BAN_TIME, 900); 
 define(GARBAGE_TIMEOUT, 10);
-define(NICKSERV, "<i>SERVER</i>");
+define(NICKSERV, "<i>BriskServ</i>");
 
 define(DBG_ONL2, 0x0001);
 define(DBG_ONLY, 0x0002);
@@ -2055,8 +2055,11 @@ function root_wellcome($user)
   GLOBAL $root_wellarr;
   $ret = "";
 
+  $timecur = time();
+  $dt = date("H:i ", $timecur);
+    
   for ($i = 0 ; $i < count($root_wellarr) ; $i++)
-    $ret .= sprintf('chatt_sub("ChanServ: ","%s");', str_replace('"', '\"', $root_wellarr[$i]));
+    $ret .= sprintf('chatt_sub("%s","%s");', $dt.NICKSERV, str_replace('"', '\"', $root_wellarr[$i]));
 
   return ($ret);
 }

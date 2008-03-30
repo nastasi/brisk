@@ -6,15 +6,6 @@
  TODO
  ====
 
-
-
-
-   IL js PER IL PRELOAD
-
-
-
-
-
    
    URGENT - tables spawn
             DONE - spawn of a table
@@ -23,40 +14,38 @@
 	    DONE - return to index.php
             DONE - game's token
 	    DONE - recover of corrupted table data
-
             DONE - closure of a table
             DONE - flush of the table
-
             DONE - security checks for right scope access
-
             DONE - garbage collector management
 	    DONE -    recursive garbage - howto ?
-
 	    DONE - stat & subst in browser
-
-	    TESTING - laccwr setting and exit if all players are unactive for some time
-	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	    WIP  - the list of test case
-	    WIP  - shm dimension
-
+	    DONE - laccwr setting and exit if all players are unactive for some time
+	    DONE - the list of test case
+	    DONE - shm dimension
 	    DONE - remove unused parts
-	    move images
+	    DONE - move images
+            DONE - optimizations
+            DONE - cambiare titolo al tavolo
+            DONE - shutdowning lock tables
 
-
-            FAR - optimizations
 	    FAR - inheritances
-
 	    FAR - testament
-            
-
+   
+               
+   
    NORM   - pubblic announcements
+   NORM   - 10 sec to exit from table
+   NORM   - moving label for tables click
+
+----------------- join -----------------
+   NORM   - map
+
    NORM   - restart preload img
-   NORM   - chat vecchie in reload
    NORM   - tools dir with a main and some pages where check briscola tools.
-   NORM   - bottoni => immagini
    NORM   - watchdog
 
-   MIN    - cambiare titolo al tavolo
+   NORM   - chat vecchie in reload (forse)
 
  MIDDLE TODO
  ===========
