@@ -1,0 +1,3 @@
+<?php
+$proxy_white_list = array();
+?>

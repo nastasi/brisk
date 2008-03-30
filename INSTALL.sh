@@ -3,12 +3,15 @@
 # Defaults
 #
 n_players=3
-brisk_debug="TRUE"
-ftok_path="/var/lib/brisk"
+brisk_debug="0xffff"
 web_path="$HOME/brisk"
+legal_path="$HOME/brisk-priv"
+ftok_path="$HOME/brisk-priv/ftok"
+proxy_path="$HOME/brisk-priv/proxy"
 web_only="FALSE"
+brisk_conf="brisk.conf.pho"
 
-if [ -f $HOME/.brisk_install ]; then
+if [ -f $HOME/.spawn_install ]; then
    . $HOME/.spawn_install
 fi
 if [ "x$cookie_path" = "x" ]; then
@@ -29,6 +32,7 @@ function usage () {
     echo "  -l dir where save logs          - def. \"$legal_path\""
     echo "  -y dir where place proxy files  - def. \"$proxy_path\""
     echo "  -c cookie path                  - def. \"$cookie_path\""
+    echo "  -C config filename              - def. \"$brisk_conf\""
     
     echo
 }
@@ -47,6 +51,23 @@ function get_param () {
     return 0
 }
 
+function searchetc() {
+    local dstart dname pp
+    dstart="$1"
+    dname="$2"
+
+    pp="$dstart"
+    while [ "$pp" != "/" ]; do
+        if [ -d "$pp/$dname" ]; then
+            echo "$pp/$dname"
+            return 0
+        fi
+        pp="`dirname "$pp"`"
+    done
+    
+    return 1
+}
+
 #
 #  MAIN
 #
@@ -62,6 +83,7 @@ while [ $# -gt 0 ]; do
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
 	-y*) proxy_path="`get_param "-y" "$1" "$2"`"; sh=$?;;
 	-c*) cookie_path="`get_param "-c" "$1" "$2"`"; sh=$?;;
+	-C*) brisk_conf="`get_param "-C" "$1" "$2"`"; sh=$?;;
 	-l*) legal_path="`get_param "-l" "$1" "$2"`"; sh=$?;;
 	-W) web_only="TRUE";;
 	-h) usage $0; exit 0;;
@@ -106,6 +128,18 @@ if [ ! -z "$outconf" ]; then
   ) > "$outconf"
 fi
 #
+#  Pre-check
+#
+
+# check for etc path existence
+dsta="`dirname "$web_path"`"
+etc_path="`searchetc "$dsta" Etc`"
+if [ $? -ne 0 ]; then
+    echo "Etc directory not found"
+    exit 1
+fi
+
+#
 #  Installation
 #
 if [ $n_players -ne 3 -a $n_players -ne 5 ]; then
@@ -137,13 +171,13 @@ for i in `find web -type d | grep -v /CVS | sed 's/^....//g'`; do
     install -d ${web_path}__/$i 
 done
 
-for i in `find web -name '*.php' -o -name '*.phh' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'`; do
+for i in `find web -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'`; do
     install -m 644 web/$i ${web_path}__/$i
 done
 
 cd web
 find . -name '.htaccess' -exec install -m 644 {} ${web_path}__/{} \;
-cd -
+cd - >/dev/null 2>&1
 
 if [ $n_players -eq 5 ]; then
    send_time=250
@@ -156,7 +190,7 @@ sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $n_players/g" `find ${web_path}__ -t
 
 sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;`
 
-# .ph[ph] substitutions
+# .ph[pho] substitutions
 sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
 
 sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $n_players)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;`
@@ -169,6 +203,8 @@ sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${
 
 sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}__/Obj/brisk.phh
 
+sed -i "s@define *( *BRISK_CONF,[^)]*)@define(BRISK_CONF, \"$brisk_conf\")@g" ${web_path}__/Obj/brisk.phh
+
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}__/xhr.js
 sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}__/commons.js
 
@@ -179,7 +215,19 @@ fi
 if [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__
-    cd -
+    cd - >/dev/null 2>&1
+fi
+
+# config file installation or diff
+if [ -f "$etc_path/$brisk_conf" ]; then
+    echo "Config file $etc_path/$brisk_conf exists."
+    echo "=== Dump the diff. ==="
+    diff -u "$etc_path/$brisk_conf" "${web_path}__""/Obj/brisk.conf-templ.pho"
+    echo "===   End dump.    ==="
+else
+    echo "Config file $etc_path/$brisk_conf not exists."
+    echo "Install a template."
+    cp  "${web_path}__""/Obj/brisk.conf-templ.pho" "$etc_path/$brisk_conf"
 fi
 
 mv ${web_path}__ ${web_path}

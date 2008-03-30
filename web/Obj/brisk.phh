@@ -19,6 +19,8 @@
  *
  */
 
+
+define(BRISK_CONF, "brisk.conf.pho");
 define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
 define(PROXY_PATH, "/var/lib/brisk_proxy");
@@ -62,6 +64,11 @@ define(BRISK_DEBUG, 0);
 define(BRISK_SINGLE_DEBUG,0);
 define(BRISK_SINGLE_SESS, "");
 // define(DEBUGGING, "local");
+
+$DBASE = "$DOCUMENT_ROOT".dirname("$PHP_SELF");
+
+require_once("$DBASE/".BRISK_CONF);
+
 
 $G_false = FALSE;
 
