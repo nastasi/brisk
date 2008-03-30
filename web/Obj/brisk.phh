@@ -71,9 +71,9 @@ require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "spawn-0.11.0";
+$G_brisk_version = "spawn-0.12.0";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: white-list per proxy verificati - versione beta2.',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunta messaggistica a tutti i tavoli - versione beta2.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -1153,18 +1153,79 @@ class Room {
 
   function chatt_send(&$user, $mesg)
   {
+    GLOBAL $G_alarm_passwd;
     $only_you = FALSE;
     
-    if ($user->stat == 'table') {
-      $table = &$this->table[$user->table];
-    }
+//     if ($user->stat == 'table') {
+//       $table = &$this->table[$user->table];
+//     }
     
     $user_mesg = substr($mesg,6);
-    
     $timecur = time();
     
     $dt = date("H:i ", $timecur);
-    if (strncmp($user_mesg, "/nick ", 6) == 0) {
+    if (strncmp($user_mesg, "/alarm ", 7) == 0) {
+      $alarm_check = "/alarm ".$G_alarm_passwd." ";
+      if (strncmp($user_mesg, $alarm_check, strlen($alarm_check)) != 0) 
+	return;
+      
+      $user_mesg = "<br><b>".$dt.NICKSERV."<br><br>".xcape(substr($user_mesg, strlen($alarm_check)))."</b><br><br>";
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+	$user_cur = &$this->user[$i];
+	// 	if ($user_cur->sess == '' || $user_cur->stat != 'room')
+	if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user_cur == $user)
+	  continue;
+	
+	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+// 	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
+// 							     $dt.NICKSERV, xcape($user_mesg));
+
+
+	$user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($user_mesg, 0, "chiudi", 400, 120);
+	$user_cur->step_inc();
+      }
+
+
+      // Before all align times with table timeout
+      for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+	$table_cur =& $this->table[$table_idx];
+	// if the table is complete and exists its shared mem we get the info about users lacc
+	
+	if ($table_cur->player_n == PLAYERS_N) {
+	  log_main("PLAYERS == N TABLE ".$table_idx);
+	  
+	  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
+	    log_main("bin5 lock data success");
+	    
+	    $no_recovery = FALSE;
+	    if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+	      if ($table_cur->table_token != $bri->table_token) {
+		log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
+		$bri = FALSE;
+	      }
+	    }
+	    
+	    if ($bri != FALSE) {
+	      $bri_table = &$bri->table[0];
+	      for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+		// stat must be "table" by definition
+		$bri_user =& $bri->user[$i];
+
+		log_main("writa: ".$user_mesg);
+		$bri_user->comm[$bri_user->step % COMM_N] = "gst.st = ".($bri_user->step+1)."; ";
+// 		$bri_user->comm[$bri_user->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
+// 								     $dt.NICKSERV, xcape($user_mesg));
+		$bri_user->comm[$bri_user->step % COMM_N] .= show_notify($user_mesg, 0, "chiudi", 400, 120);
+		$bri_user->step_inc();
+	      }
+	      Briskin5::save_data(&$bri);
+	    }
+	    Briskin5::unlock_data($sem);
+	  } // bri::lock_data
+	} //  if ($table_cur->player_n == PLAYERS_N) {
+      } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+    }
+    else if (strncmp($user_mesg, "/nick ", 6) == 0) {
       log_main("chatt_send BEGIN");
 
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
@@ -1207,8 +1268,7 @@ class Room {
 	    if ($user->stat == 'room' && $user->subst == 'standup') {
 	      $this->standup_update(&$user);
 	    }
-	    else if ($user->stat == 'room' && $user->subst == 'sitdown' ||
-		     $user->stat == 'table') {
+	    else if ($user->stat == 'room' && $user->subst == 'sitdown') {
 	      log_main("chatt_send pre table update");
 
 	      $this->table_update(&$user);
@@ -1216,21 +1276,21 @@ class Room {
 	      log_main("chatt_send post table update");
 	    }
 	  }
-	  else if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
-	    $table = &$this->table[$user->table];
+// 	  else if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
+// 	    $table = &$this->table[$user->table];
 	    
-	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	    $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
-	        xcape($this->user[$table->player[($user_cur->table_pos)%PLAYERS_N]]->name),
-	        xcape($this->user[$table->player[($user_cur->table_pos+1)%PLAYERS_N]]->name),
-	        xcape($this->user[$table->player[($user_cur->table_pos+2)%PLAYERS_N]]->name),
-	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3)%PLAYERS_N]]->name)),
-	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4)%PLAYERS_N]]->name)));
-	    if ($user_cur == $user)
-	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>";', 
-								   xcape($user->name,ENT_COMPAT,"UTF-8"));
-	    $user_cur->step_inc();
-	  }
+// 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+// 	    $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
+// 	        xcape($this->user[$table->player[($user_cur->table_pos)%PLAYERS_N]]->name),
+// 	        xcape($this->user[$table->player[($user_cur->table_pos+1)%PLAYERS_N]]->name),
+// 	        xcape($this->user[$table->player[($user_cur->table_pos+2)%PLAYERS_N]]->name),
+// 	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3)%PLAYERS_N]]->name)),
+// 	        (PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4)%PLAYERS_N]]->name)));
+// 	    if ($user_cur == $user)
+// 	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>";', 
+// 								   xcape($user->name,ENT_COMPAT,"UTF-8"));
+// 	    $user_cur->step_inc();
+// 	  }
 	}
       }
     }
@@ -1258,9 +1318,6 @@ class Room {
 	  $user_cur = &$this->user[$i];
 	  if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	    continue;
-	}
-	else {
-	  $user_cur = &$this->user[$table->player[$i]];
 	}
 
         if ($only_you) {
