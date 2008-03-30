@@ -224,7 +224,7 @@ google_color_url = "000000";
     </div>'.($with_topbanner ? '</td>
 
 <td><div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigtopbanner(this, \'out\', 0, 0);">
-<a href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
+<a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
 Torneo di briscola<br>
 chiamata - Milano<br>
 17/05/2008</a>

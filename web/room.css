@@ -281,3 +281,30 @@ div.esco {
     line-height: 20px;
     text-decoration: none;
 }
+
+.topbanner { 
+    position: relative;
+    align: center;
+    text-align:center;
+    background-color: #f8f8f8;
+    padding: 4px;
+    border: 1px solid #000000;
+}
+
+.topbanner a:link {
+    color: black;
+    line-height: 16px;
+    text-decoration: none;
+}
+
+.topbanner a:visited {
+    color: black;
+    line-height: 16px;
+    text-decoration: none;
+}
+
+.topbanner a:hover {
+    color: RGB(255,174,0);
+    line-height: 16px;
+    text-decoration: none;
+}

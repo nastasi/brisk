@@ -109,15 +109,15 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 
     // var card_pos = RANGE 0 <= x < cards_ea_n
 
-function show_bigpict(obj, act)
+function show_bigpict(obj, act, x, y)
 {
    var big;
 
    // alert("offsetTop: "+obj.offsetTop+"  offsetLeft: "+obj.offsetLeft+"obj.id: "+obj.id);
    big = $(obj.id+"_big");
    if (act == "over") {
-       big.style.left = obj.offsetLeft + 100+"px";
-       big.style.top  = obj.offsetTop  +  10+"px";
+       big.style.left = obj.offsetLeft + x+"px";
+       big.style.top  = obj.offsetTop  + y+"px";
        big.style.visibility = "visible";
        }
    else {
