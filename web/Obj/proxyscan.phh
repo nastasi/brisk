@@ -69,11 +69,11 @@ class proxy_detector {
 	$resolved = gethostbyname($rblhost);
 	// echo "RBL ".$rblhost."<br>";
 	if ($resolved != $rblhost) {
-	  return true;
+	  return TRUE;
 	}
       }
     }
-    return false;
+    return FALSE;
   }
   
   /**
@@ -126,21 +126,26 @@ class proxy_detector {
 
   /**
    * BOOL $proxy = detect( VOID )
-   *	Start detection and return true if a proxy server is detected...
+   *	Start detection and return TRUE if a proxy server is detected...
    */
   function detect(){
+    GLOBAL $G_proxy_white_list;
     $log = "";
 
+    foreach($G_proxy_white_list as $authproxy) {
+      if ($_SERVER['REMOTE_ADDR'] == $authproxy)
+	return (TRUE);
+    }
 
     if ($this->exists_in_rbl($_SERVER['REMOTE_ADDR']) == TRUE)
       return (TRUE);
 
-    //scan all headers
-    foreach($this->scan_headers as $i){
-      //proxy detected? lets log...
-      if($_SERVER[$i])
-	$log.= "trigger $i: ".$_SERVER[$i]."\n";
-    }
+//     //scan all headers
+//     foreach($this->scan_headers as $i){
+//       //proxy detected? lets log...
+//       if($_SERVER[$i])
+// 	$log.= "trigger $i: ".$_SERVER[$i]."\n";
+//     }
 
     //let's do something...
     if($log){
@@ -163,11 +168,11 @@ class proxy_detector {
       }
 
       //done
-      return true;
+      return TRUE;
     }
 
     //nope, no proxy was logged...
-    return false;
+    return FALSE;
   }
 }
 
@@ -178,9 +183,9 @@ function is_proxy()
   
   //start detect
   if($proxy->detect()) {
-    //returned true, lets die...
-    echo "<br><br><div style=\"text-align:center;\"><h1>Proxy detected</h1><br><br>";
-    echo "Please disable your proxy server in your browser preferences or internet settings, and try again.<br><br></div>";
+    //returned TRUE, lets die...
+    echo "<br><br><div style=\"text-align:center;\"><h1>Accesso attaverso proxy non consentito.</h1><br><br>";
+    echo "Se state utilizzando un proxy privato e volete che sia autorizzato mandate il suo indirizzo IP (".$_SERVER['REMOTE_ADDR'].") e il suo proprietario all'indirizzo di posta elettronica <a href=\"mailto:brisk@alternativeoutput.it\">brisk@alternativeoutput.it</a><br><br></div>";
     
     //parse logged info
     echo nl2br($proxy->getLog());
