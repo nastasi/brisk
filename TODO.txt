@@ -28,13 +28,14 @@
             DONE - optimizations
             DONE - cambiare titolo al tavolo
             DONE - shutdowning lock tables
+            DONE - topbanner
 
 	    FAR - inheritances
 	    FAR - testament
    
                
    
-   NORM   - pubblic announcements
+   NORM   - public announcements
    NORM   - 10 sec to exit from table
    NORM   - moving label for tables click
 
