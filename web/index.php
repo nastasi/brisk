@@ -173,7 +173,7 @@ function main()
   srand ((double) microtime() * 1000000);
   // $randval = rand(0,count($altout_propag)-1);
   $randval = 1;
-  $altout_carousel = sprintf('<a target="_blank" href="%s"><img id="%s" class="nobo" src="%s" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a>',
+  $altout_carousel = sprintf('<a target="_blank" href="%s"><img id="%s" class="nobo" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a>',
 			     $altout_propag[$randval]['url'],
 			     $altout_propag[$randval]['id'],
 			     $altout_propag[$randval]['content']);
@@ -186,6 +186,8 @@ function main()
   $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
   if ($brisk_donate == FALSE)
     $brisk_donate = "";
+
+  $with_topbanner = TRUE;
 
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
@@ -216,15 +218,21 @@ google_color_url = "000000";
 
 
 </div></td>
-<td align="center">
-<!-- <table><tr><td>  -->
-<div>
+<td align="center">'.($with_topbanner ? '<table><tr><td>' : '').'<div>
     <img class="nobo" src="img/brisk_logo64.png">
     briscola chiamata in salsa ajax<br>
-    </div>
-<!-- </td><td><div style="align: center; text-align:center; background-color: #f8f8f8; padding: 2px; border: 1px solid #ffae00;"><a href="http://www.linuxday.it"><img class="nobo" src="img/ld66.png"></a> 27/10/2007<br>OGGI! 
-    </td></tr></table>-->
+    </div>'.($with_topbanner ? '</td>
+
+<td><div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigtopbanner(this, \'out\', 0, 0);">
+<a href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
+Torneo di briscola<br>
+chiamata - Milano<br>
+17/05/2008</a>
+</div>
+<img class="nobohide" id="topbanner_big" src="img/bcm_tor080517.gif">
 </td>
+
+</tr></table>' : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
 
 
@@ -274,10 +282,10 @@ $brisk_vertical_menu = '
 </div>
 <br><br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
-<a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
+<a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
 supported by:<br><br>
-<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br>
-<a target="_blank" href="http://www.forumolimpia.it"><img class="nobo" id="btn_foroli" src="img/forumolimpia.gif" onMouseOver="show_bigpict(this, \'over\');" onMouseOut="show_bigpict(this, \'out\');"></a><br><br>
+<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>
+<a target="_blank" href="http://www.forumolimpia.it"><img class="nobo" id="btn_foroli" src="img/forumolimpia.gif" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
 <div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
 </div><br><br></div>
 %s
