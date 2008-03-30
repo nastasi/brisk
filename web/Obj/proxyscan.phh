@@ -134,7 +134,7 @@ class proxy_detector {
 
     foreach($G_proxy_white_list as $authproxy) {
       if ($_SERVER['REMOTE_ADDR'] == $authproxy)
-	return (TRUE);
+	return (FALSE);
     }
 
     if ($this->exists_in_rbl($_SERVER['REMOTE_ADDR']) == TRUE)
