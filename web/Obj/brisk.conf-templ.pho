@@ -1,3 +1,4 @@
 <?php
-$proxy_white_list = array();
+$G_shutdown = FALSE;
+$G_proxy_white_list = array();
 ?>
