@@ -29,14 +29,21 @@
             DONE - cambiare titolo al tavolo
             DONE - shutdowning lock tables
             DONE - topbanner
+            DONE - public announcements
+            DONE - 10 sec to exit from table
 
 	    FAR - inheritances
-	    FAR - testament
    
-               
-   
-   NORM   - public announcements
-   NORM   - 10 sec to exit from table
+   TRAIN  -  DONE - add again in reload   
+             DONE - wag_set refact
+             DONE - filtra char speciali per title
+             DONE - chatt_send refact 
+             DONE - elenco dei giocatori
+             DONE - documentazione online
+             DONE - timeout management     
+             LATER - border color a muzzo
+       
+   NORM   - testament
    NORM   - moving label for tables click
 
 ----------------- join -----------------
