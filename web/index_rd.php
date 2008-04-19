@@ -2,7 +2,10 @@
 /*
  *  brisk - index_rd.php
  *
- *  Copyright (C) 2006-2007 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -200,7 +203,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
     if ($user->stat == 'room') {
       log_rd("roomma ".$user->step);
-      $ret .= show_room(&$room, $user->step, &$user);
+      $ret .= $room->show_room($user->step, &$user);
 
       // TODO uncomment and test
       /* NOTE the sets went common */
