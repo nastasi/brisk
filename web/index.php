@@ -182,7 +182,7 @@ $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
 <table width="100%%" border="0" cols="3"><tr>
-<td align="left"><div style="padding-left: 8px;">'.($G_is_local ? '',
+<td align="left"><div style="padding-left: 8px;">'.($G_is_local ? '' :
 '<script type="text/javascript"><!--
 google_ad_client = "pub-5246925322544303";
 google_ad_width = 234;
@@ -217,7 +217,7 @@ chiamata - Milano<br>
 
 </tr></table>' : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
-'.($G_is_local ? '', 
+'.($G_is_local ? '' :
 '<script type="text/javascript"><!--
 google_ad_client = "pub-5246925322544303";
 google_ad_width = 234;
