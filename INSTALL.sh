@@ -130,7 +130,6 @@ fi
 #
 #  Pre-check
 #
-
 # check for etc path existence
 dsta="`dirname "$web_path"`"
 etc_path="`searchetc "$dsta" Etc`"
@@ -142,28 +141,37 @@ fi
 #
 #  Installation
 #
+ftokk_path="${ftok_path}k"
+
 if [ $n_players -ne 3 -a $n_players -ne 5 ]; then
     echo "n_players ($n_players) out of range (3|5)"
     exit 1
 fi
 if [ "$web_only" = "FALSE" ]; then
-    if [ ! -d $ftok_path ]; then
+    if [ ! -d "$ftok_path" -a ! -d "$ftokk_path" ]; then
 	echo "ftok_path (\"$ftok_path\") not exists"
 	exit 2
     fi
-    touch $ftok_path/spy.txt >/dev/null 2>&1
+    if [ -d "$ftok_path" -a -d "$ftokk_path" ]; then
+        echo "ftok_path (\"$ftok_path\") and ftokk_path (\"$ftokk_path\") exist, cannot continue"
+	exit 4
+    fi
+    if [ -d "$ftok_path" ]; then
+        mv "$ftok_path" "$ftokk_path"
+    fi
+    touch $ftokk_path/spy.txt >/dev/null 2>&1
     if [ $? -ne 0 ]; then
-	echo "ftok_path (\"$ftok_path\") write not allow."
+	echo "ftokk_path (\"$ftokk_path\") write not allowed."
 	exit 3
     fi
-    rm $ftok_path/spy.txt
+    rm $ftokk_path/spy.txt
     
     # create the fs subtree to enable ftok-ing
-    touch ${ftok_path}/main
-    chmod 666 ${ftok_path}/main
+    touch ${ftokk_path}/main
+    chmod 666 ${ftokk_path}/main
     for i in `seq 0 99`; do 
-        touch ${ftok_path}/table$i
-        chmod 666 ${ftok_path}/table$i
+        touch ${ftokk_path}/table$i
+        chmod 666 ${ftokk_path}/table$i
     done
 fi
 install -d ${web_path}__
@@ -234,5 +242,7 @@ mv ${web_path}__ ${web_path}
 if [ -d ${web_path}.old ]; then
     rm -rf ${web_path}.old
 fi
-
+if [ "$web_only" = "FALSE" ]; then
+    mv "$ftokk_path" "$ftok_path"
+fi
 exit 0
