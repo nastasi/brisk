@@ -1,7 +1,10 @@
 /*
  *  brisk - room.css
  *
- *  Copyright (C) 2006-2007 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,13 +30,14 @@ body.* {
 
 div.container {
     /* border:1px solid gray; */
+    position: relative;
     width:100%;
     margin:0px;
     padding: 0px;
 }
 
 div.header {
-    /*	border: 1px solid yellow; */
+    /* border: 1px solid yellow; */
     align: center;
     text-align: center;
     font-size: 12px;
@@ -77,11 +81,22 @@ div.bottom {
 }
 
 div.room_tit {
-    /* background-color: orange; */
+    position: relative;
+    top: 6px;
     align: left;
     text-align: left;
     margin: 0px;
-    padding: 6px;
+    /* background-color: orange;  */
+    /* clip: auto; */
+    /* overflow: hidden; */
+}
+
+span.room_titin {
+    position: relative;
+    left: 6px;
+    top: 6px;
+    z-index: 100;
+    background-color: white; 
 }
 
 table.floaty {
@@ -138,6 +153,7 @@ table.room_tab {
 
 table.room_tab td {
     /* background-color: yellow; */
+    width: 25%;
     height: 110px;
     vertical-align: top;
     border: 1px solid gray;
@@ -167,12 +183,12 @@ div.room_standup {
     top:   26px;
     width: 100%;
     height: 80px;
-    overflow: auto;
     padding: 0px;
     margin: 0px;
 }
 
 table.room_standup {
+    position: relative; 
     /* margin-left: 4px; */
     width: 100%;
     border: 1px solid gray;
@@ -182,8 +198,10 @@ table.room_standup {
 
 table.room_standup td {
     /* background-color: yellow; */
+    position: relative;
     border: 0px none gray; 
     vertical-align: top;
+    align: left;
  }
 
 div.room_ex_standup {
@@ -192,7 +210,7 @@ div.room_ex_standup {
     align: left;
     text-align: left;
     padding: 0px;
-
+    overflow: hidden;
 }
 
 table.table_standup {
@@ -219,6 +237,7 @@ div.esco {
     text-align: right; 	
     top:  2px;
     right: 4px;
+    z-index: 10;
 }
 
 .chatt {
@@ -242,11 +261,12 @@ div.esco {
 }
 
 .proxhr { 
-    /* background-color: green; */
+    position: relative;
+    top:  8px;
+    width: 100%;
     align: center;
     text-align: center;
-    width: 100%;
-    top:  28px;
+    /* background-color: green;  */
 }
 
 .webstart {
@@ -308,3 +328,73 @@ div.esco {
     line-height: 16px;
     text-decoration: none;
 }
+
+.train {
+    position: absolute;
+    border: 0px solid blue;
+    visibility: hidden;
+    left: 0px;
+    top: 0px;
+    width: 0px;
+    height: 50px;
+    z-index: 10;
+    /*background-color: #ff00ff;
+     clip: auto;
+    overflow: hidden; */
+}
+
+.wagon {
+    position: absolute;
+    background-color: white;
+    border: 1px solid green;
+    cursor: pointer;
+    left: 0px;
+    top: 2px;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px;
+    z-index: 10;
+    /* visibility: hidden; */
+}
+
+.wagon_disable {
+    position: absolute;
+    background-color: #aaaaaa;
+    border: 1px solid green;
+    cursor: default;
+    left: 0px;
+    top: 2px;
+    font-size: 10px;
+    font-weight: bold;
+    font-color: #999999;
+    padding: 4px;
+    /*z-index: -1;*/
+    /* visibility: hidden; */
+}
+
+.wagon_disable2 {
+    position: absolute;
+    cursor: default;
+    background-color: #555555;
+    border: 1px solid green;
+    left: 0px;
+    top: 2px;
+    font-size: 10px;
+    font-color: #333333;
+    padding: 4px;
+    /*z-index: -1;*/
+    /* visibility: hidden; */
+}
+
+.notebox {
+    background-color: #ffffff;
+    border: 1px solid red;
+    padding: 4px;
+    position: absolute;
+    visibility: hidden;
+/*    z-index: 15px; */
+           }
+
+.room_standup_orig { 
+    position: absolute;
+ }
