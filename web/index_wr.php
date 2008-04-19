@@ -2,7 +2,10 @@
 /*
  *  brisk - index_wr.php
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,12 +125,26 @@ else if ($user->stat == 'room') {
     if ($argz[0] == 'sitdown') {
       log_wr("SITDOWN command");
 
-      if ($G_shutdown) {
+      if ($user->the_end == TRUE) {
+	log_wr("INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
+	Room::unlock_data($sem);
+	exit;
+      }
+
+      // Take parameters
+      $table_idx = $argz[1];
+      $table = &$room->table[$table_idx];
+    
+      $curtime = time();
+
+      if ($G_shutdown || $table->wakeup_time > $curtime) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
-	$timecur = time();
-	$dt = date("H:i ", $timecur);
-	$user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt.NICKSERV);
+	$dt = date("H:i ", $curtime);
+        if ($G_shutdown)
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt.NICKSERV);
+        else
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>");', $dt.NICKSERV, $table->wakeup_time - $curtime);
 
 	$user->step_inc();
 	Room::save_data($room);
@@ -135,11 +152,6 @@ else if ($user->stat == 'room') {
 	exit;
       }
 
-      if ($user->the_end == TRUE) {
-	log_wr("INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
-	Room::unlock_data($sem);
-	exit;
-      }
       /* TODO: refact to a function */
       if ($user->bantime > $user->laccwr) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
@@ -150,10 +162,6 @@ else if ($user->stat == 'room') {
 	Room::unlock_data($sem);
 	exit;
       }
-    
-      // Take parameters
-      $table_idx = $argz[1];
-      $table = &$room->table[$table_idx];
     
       if ($table->player_n == PLAYERS_N) {
 	log_wr("WARN:FSM: Sitdown unreachable, table full.");
@@ -178,98 +186,65 @@ else if ($user->stat == 'room') {
 	//  START THE SPAWN HERE!!!!
 	//
 
-	if (TRUE) { // WITH SPAWN
-	  $curtime = time();
-	  // Create new spawned table
-	  $bri_sem = Briskin5::lock_data($table_idx);
-	  $table_token = uniqid("");
-	  $room->table[$table_idx]->table_token = $table_token;
-	  $room->table[$table_idx]->table_start = $curtime;
-	  
-	  if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
-	    log_wr("bri create: FALSE");
-	  else
-	    log_wr("bri create: ".serialize($bri));
+        $curtime = time();
+        // Create new spawned table
+        $bri_sem = Briskin5::lock_data($table_idx);
+        $table_token = uniqid("");
+        $room->table[$table_idx]->table_token = $table_token;
+        $room->table[$table_idx]->table_start = $curtime;
+        
+        if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
+          log_wr("bri create: FALSE");
+        else
+          log_wr("bri create: ".serialize($bri));
 	
-	  // init table
-	  $bri_table =& $bri->table[0];
-	  $bri_table->init(&$bri->user);
-	  $bri_table->game_init(&$bri->user);
-	  //
-	  // Init spawned users.
-	  //
-	  for ($i = 0 ; $i < $table->player_n ; $i++) {
-	    $bri_user_cur = &$bri->user[$i];
-	    $user_cur = &$room->user[$table->player[$i]];
-	    
-	    $bri_user_cur->stat_set('table');
-	    $bri_user_cur->subst = 'asta';
-	    $bri_user_cur->laccwr = $curtime;
-
-	    $bri_user_cur->trans_step = $user_cur->step + 1;
-	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
-	    $bri_user_cur->step_inc();
-	    $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = show_table(&$bri,&$bri_user_cur,$bri_user_cur->step+1,TRUE, FALSE);
-
-	    $bri_user_cur->step_inc();
-
-	    log_wr("TRY PRESAVE: ".$bri_user_cur->step." TRANS STEP: ".$bri_user_cur->trans_step);
-
-	    log_wr("Pre if!");
-	    
-//          ARRAY_POP DISABLED
-// 	    // CHECK
- 	    while (array_pop($user_cur->comm) != NULL);
-
-	    $ret = "";
-	    $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token);
-	    
-	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-	    $user_cur->trans_step = $user_cur->step + 1;
-	    log_wr("TRANS ATTIVATO");
-	    
-	    
-	    $user_cur->stat_set('table');
-	    $user_cur->subst = 'asta';
-	    $user_cur->laccwr = $curtime;
-	    $user_cur->step_inc();
-	  }
-	  log_wr("presave bri");
-	  Briskin5::save_data($bri);
-	  Briskin5::unlock_data($bri_sem);
-	  log_wr("postsave bri");
-	}
-	else { // BEFORE SPAWN
-	  // init table
-	  $table->init(&$room->user);
-	  $table->game_init(&$room->user);
-	  $curtime = time();
-	  
-	  // init users
-	  for ($i = 0 ; $i < $table->player_n ; $i++) {
-	    $user_cur = &$room->user[$table->player[$i]];
-	    log_wr("Pre if!");
-	    
-	    $ret = "";
-	    $ret .= sprintf('gst.st_loc++; gst.st=%d; the_end=true; window.onunload = null ; document.location.assign("table.php");|', $user_cur->step+1);
-	    
-	    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-	    $user_cur->trans_step = $user_cur->step + 1;
-	    log_wr("TRANS ATTIVATO");
-	    
-	    
-	    $user_cur->stat_set('table');
-	    $user_cur->subst = 'asta';
-	    $user_cur->laccwr = $curtime;
-	    $user_cur->step_inc();
-	    
-	    $user_cur->comm[$user_cur->step % COMM_N] = show_table(&$room,&$user_cur,$user_cur->step+1,TRUE, FALSE);
-	    $user_cur->step_inc();
-	  }
-	} // end else {  BEFORE SPAWN
-	
-	log_wr("MOP after");
-
+        // init table
+        $bri_table =& $bri->table[0];
+        $bri_table->init(&$bri->user);
+        $bri_table->game_init(&$bri->user);
+        //
+        // Init spawned users.
+        //
+        for ($i = 0 ; $i < $table->player_n ; $i++) {
+          $bri_user_cur = &$bri->user[$i];
+          $user_cur = &$room->user[$table->player[$i]];
+          
+          $bri_user_cur->stat_set('table');
+          $bri_user_cur->subst = 'asta';
+          $bri_user_cur->laccwr = $curtime;
+          
+          $bri_user_cur->trans_step = $user_cur->step + 1;
+          $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
+          $bri_user_cur->step_inc();
+          $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = show_table(&$bri,&$bri_user_cur,$bri_user_cur->step+1,TRUE, FALSE);
+          
+          $bri_user_cur->step_inc();
+          
+          log_wr("TRY PRESAVE: ".$bri_user_cur->step." TRANS STEP: ".$bri_user_cur->trans_step);
+          
+          log_wr("Pre if!");
+          
+          //          ARRAY_POP DISABLED
+          // 	    // CHECK
+          while (array_pop($user_cur->comm) != NULL);
+          
+          $ret = "";
+          $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token);
+          
+          $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+          $user_cur->trans_step = $user_cur->step + 1;
+          log_wr("TRANS ATTIVATO");
+          
+          
+          $user_cur->stat_set('table');
+          $user_cur->subst = 'asta';
+          $user_cur->laccwr = $curtime;
+          $user_cur->step_inc();
+        }
+        log_wr("presave bri");
+        Briskin5::save_data($bri);
+        Briskin5::unlock_data($bri_sem);
+        log_wr("postsave bri");
       }
       // change room
       $room->room_sitdown(&$user, $table_idx);
