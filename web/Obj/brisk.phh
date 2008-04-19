@@ -72,7 +72,6 @@ define(BRISK_SINGLE_SESS, "");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 
-
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
@@ -1213,11 +1212,12 @@ class Room {
   {
     log_main("room_sitdown ".($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
 
+    $train_app = "";
+
     if ($table_idx > -1 && $table_idx < TABLES_N) { 
       $table = &$this->table[$table_idx];
 
       // wagon shutdown 
-      $train_app = "";
       if ($table->wag_own != NULL && $table->player_n == PLAYERS_N) {        
         for ($i = 0 ; $i < TABLES_N ; $i++) {
           $user_cur =& $this->user[$table->player[$i]];
