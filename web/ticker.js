@@ -159,7 +159,7 @@ train.prototype = {
 
         if (this.first == null) {
             clearTimeout(this.timout);
-            // this.box.style.visibility = "hidden";            
+            this.timout = null;
         }
     },
 
@@ -244,20 +244,26 @@ train.prototype = {
     start: function()
     {
         this.resetx();
-        this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
+        if (this.timout == null) {
+            this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
+        }
     },
 
     animate: function()
     {
        this.box.style.left = (parseInt(this.box.style.left) - this.deltas)+"px";
-       if (parseInt(this.box.style.left) >= this.xend) {
-            this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
-        }
-        else {
-            // qui destroy
-            this.box.style.left = this.anc.offsetWidth+"px";
-            this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
-        }
+
+//        if (parseInt(this.box.style.left) >= this.xend) {
+//             this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
+//         }
+//         else {
+//             this.box.style.left = this.anc.offsetWidth+"px";
+//             this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
+//         }
+       if (parseInt(this.box.style.left) < this.xend) {
+           this.box.style.left = this.anc.offsetWidth+"px";
+       }
+       this.timout = setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
     },
 
     widthbox_get: function()
