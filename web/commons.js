@@ -1,7 +1,10 @@
 /*
  *  brisk - commons.js
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,6 +109,32 @@ function getStyle(x,IEstyleProp, MozStyleProp)
     };
 
 })()
+
+function addEvent(obj,type,fn)
+{
+    if (obj.addEventListener) {
+        obj.addEventListener( type, fn, false);
+    }
+    else if (obj.attachEvent) {
+        obj["e"+type+fn] = fn;
+        obj[type+fn] = function() { obj["e"+type+fn]( window.event ); }
+        obj.attachEvent( "on"+type, obj[type+fn] );
+    }
+    else
+        throw new Error("Event registration not supported");
+}
+
+function removeEvent(obj,type,fn)
+{
+    if (obj.removeEventListener) {
+        obj.removeEventListener( type, fn, false );
+    }
+    else if (obj.detachEvent) {
+        obj.detachEvent( "on"+type, obj[type+fn] );
+        obj[type+fn] = null;
+        obj["e"+type+fn] = null;
+    }
+}
 
     // var card_pos = RANGE 0 <= x < cards_ea_n
 
