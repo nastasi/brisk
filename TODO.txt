@@ -44,6 +44,8 @@
              LATER - border color a muzzo
        
    NORM   - testament
+   NORM   - public announcements
+   NORM   - 10 sec to exit from table
    NORM   - moving label for tables click
 
 ----------------- join -----------------
