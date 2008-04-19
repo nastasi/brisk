@@ -42,7 +42,7 @@ log_load("index.php");
 function main()
 {
   GLOBAL $G_is_local, $sess, $name, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
-  
+
   $body = "";
   $tables = "";
   $standup = "";
