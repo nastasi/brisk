@@ -2,7 +2,10 @@
 /*
  *  brisk - index.php
  *
- *  Copyright (C) 2006-2007 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +28,8 @@ require_once("Obj/brisk.phh");
 require_once("Obj/proxyscan.phh");
 
 // Use of proxies isn't allowed.
-if (is_proxy()) 
-     exit;
+if (!$G_is_local && is_proxy()) 
+   exit;
 
 require_once("briskin5/Obj/briskin5.phh");
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
@@ -136,27 +139,13 @@ function main()
     $tables .= '</table></div>';
 
 
-    $standup .= '<table class="room_standup" align="center"><tr><td>';
+    $standup .= '<table class="room_standup" align="center"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
     $standup .= '<div class="room_ex_standup">';
-    $standup .= '<div class="room_tit"><b>Giocatori in piedi</b></div>';
+    $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b></span></div>';
     
     $standup .= sprintf('<div id="standup" class="room_standup"></div>');
     $standup .= '<div id="esco" class="esco"></div>';
     $standup .= '</div></td></tr></table>';
-    
-    // $tables .= '</td></tr></table>';
-
-    /*
-    $tables .= '</td></tr><tr><td>';
-    $tables .= '<table class="room_tab" align="center">';
-    $tables .= '<tr><td>';
-    $tables .= '<div class="room_ex_standup">';
-    $tables .= '<b>Giocatori in piedi</b>';
-    
-    $tables .= sprintf('<div id="standup" class="room_standup"></div>');
-    $tables .= '<div id="esco" class="esco"></div>';
-    */
-    // $tables .= '</td></tr></table>';
   }
 
   $altout_propag = array( array ( 'id' => 'btn_altout',
@@ -193,11 +182,8 @@ $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
 <table width="100%%" border="0" cols="3"><tr>
-<td align="left"><div style="padding-left: 8px;">
-
-
-
-<script type="text/javascript"><!--
+<td align="left"><div style="padding-left: 8px;">'.($G_is_local ? '',
+'<script type="text/javascript"><!--
 google_ad_client = "pub-5246925322544303";
 google_ad_width = 234;
 google_ad_height = 60;
@@ -213,17 +199,14 @@ google_color_url = "000000";
 </script>
 <script type="text/javascript"
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>
-
-
-
-</div></td>
+</script>'
+).'</div></td>
 <td align="center">'.($with_topbanner ? '<table><tr><td>' : '').'<div>
     <img class="nobo" src="img/brisk_logo64.png">
     briscola chiamata in salsa ajax<br>
     </div>'.($with_topbanner ? '</td>
 
-<td><div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigtopbanner(this, \'out\', 0, 0);">
+<td><div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigpict(this, \'out\', 0, 0);">
 <a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
 Torneo di briscola<br>
 chiamata - Milano<br>
@@ -234,10 +217,8 @@ chiamata - Milano<br>
 
 </tr></table>' : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
-
-
-
-<script type="text/javascript"><!--
+'.($G_is_local ? '', 
+'<script type="text/javascript"><!--
 google_ad_client = "pub-5246925322544303";
 google_ad_width = 234;
 google_ad_height = 60;
@@ -253,11 +234,8 @@ google_color_url = "000000";
 </script>
 <script type="text/javascript"
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>
-
-
-
-</div></td>
+</script>'
+).'</div></td>
 </td></table>
 </div>';
 
@@ -341,8 +319,11 @@ supported by:<br><br>
    <br><br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <form method="post" action="">
+<table align="center"><tr><td>
 <input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
+</td><td>
 <input id="sub"    value="entra" type="submit" class="button">
+</td></tr></table>
 </form>
 </div></td></tr></table>
 <br><br><br><br>
@@ -370,6 +351,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="commons.js"></script> 
+<script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
@@ -377,6 +359,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <link rel="stylesheet" type="text/css" href="room.css">
 <SCRIPT type="text/javascript"><!--
    var sess;
+   var tra = null;
    var stat = "";
    var subst = "";
    var gst  = new globst();
@@ -398,7 +381,7 @@ else {
      // alert("INDEX START");
      xhr_rd = createXMLHttpRequest();
      sess = "<?php echo "$sess"; ?>";
-
+     tra = new train($('room_tit'));
      window.onunload = onunload_cb;
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
