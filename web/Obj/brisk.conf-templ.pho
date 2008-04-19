@@ -2,4 +2,5 @@
 $G_shutdown = FALSE;
 $G_proxy_white_list = array();
 $G_alarm_passwd = "yourpasswd";
+$G_is_local = FALSE;
 ?>
