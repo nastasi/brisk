@@ -33,18 +33,23 @@ require_once("briskin5/Obj/briskin5.phh");
 //   sleep(5);
 //   exit;
 // }
-log_load("index_rd.php");
+log_load("index_wr.php");
 
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
   echo "Debugging time!";
   exit;
 }
 
-log_load("index_wr.php");
-
 /*
  *  MAIN
  */
+
+/* if the IP is banned, exit without do nothing */
+if (array_search($_SERVER['REMOTE_ADDR'], $G_black_list) !== FALSE) {
+  sleep(5);
+  exit;
+}
+
 $is_spawn = FALSE;
 
 log_wr('COMM: '.$mesg);
