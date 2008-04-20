@@ -1,5 +1,5 @@
 <FilesMatch "\.(js|css)$">
-header append Cache-Control "public, last-modified, must-revalidate"
+header append Cache-Control "public, no-store, last-modified, must-revalidate"
 </FilesMatch>
 <FilesMatch "\.php$">
 header append Pragma "no-cache"
