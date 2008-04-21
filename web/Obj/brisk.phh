@@ -1311,7 +1311,8 @@ class Room {
         $msg = substr($msg, 5);
         
         $table->wag_set($user, $msg);
-        $to_room = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
+        $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
+        $to_room = $to_user;
         
       } while (0);
     } // /tav chat command
