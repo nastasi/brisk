@@ -53,15 +53,17 @@ train.prototype = {
     deltas: 5,
     xend: 0,
     timout: null,
+    clickable: true,
 
     show: function()
     {
+        this.clickable = true;
         this.box.style.visibility = "visible";
     },
 
     hide: function()
     {
-        this.box.style.visibility = "hidden";
+        this.clickable = false;
         for (cur = this.first ; cur != null ; cur = cur.next) {
             if (cur.notebox != null) {
                 cur.cb_mouseout();
@@ -361,7 +363,9 @@ wagon.prototype = {
 
     cb_click: function()
     { 
-        act_sitdown(this.table); 
+        if (this.anc.clickable == true) {
+            act_sitdown(this.table);
+        }
     },
 
     cb_mouseover: function()
