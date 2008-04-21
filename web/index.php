@@ -201,7 +201,7 @@ google_color_url = "000000";
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>'
 ).'</div></td>
-<td align="center">'.($with_topbanner ? '<table><tr><td>' : '').'<div>
+<td align="center">'.($with_topbanner ? '<table><tr><td>' : '').'<div style="text-align: center;">
     <img class="nobo" src="img/brisk_logo64.png">
     briscola chiamata in salsa ajax<br>
     </div>'.($with_topbanner ? '</td>
