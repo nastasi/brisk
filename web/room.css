@@ -185,6 +185,9 @@ div.room_standup {
     height: 80px;
     padding: 0px;
     margin: 0px;
+    /* background-color: orange; */
+    overflow: auto;
+    clip: auto;
 }
 
 table.room_standup {
@@ -214,7 +217,7 @@ div.room_ex_standup {
 }
 
 table.table_standup {
-    /*	background-color: red;  */
+    /* background-color: red; */
 
     border-spacing: 0px;
     width: 100%; 
@@ -262,7 +265,7 @@ div.esco {
 
 .proxhr { 
     position: relative;
-    top:  8px;
+    top:  10px;
     width: 100%;
     align: center;
     text-align: center;
