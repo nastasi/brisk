@@ -735,6 +735,12 @@ class User {
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
     $this->the_end = FALSE;
+
+    $this->chattime = array_fill(0, CHAT_N, 0);
+    $this->chat_cur = 0;
+    $this->chat_lst = "";
+    $this->chat_ban = 0;
+    $this->chat_dlt = 0;
   }
 } // end class User
 
