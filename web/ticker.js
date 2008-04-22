@@ -49,8 +49,8 @@ train.prototype = {
     box: null,
     notebox: null,
     width: 0,
-    deltat: 100,
-    deltas: 5,
+    deltat: 250,
+    deltas: 12,
     xend: 0,
     timout: null,
     clickable: true,
@@ -197,7 +197,7 @@ train.prototype = {
                 wag.box.innerHTML = "";
                 wag.shut_step = 2;
             }
-	    curw = wag.widthbox_get() - 4;
+	    curw = wag.widthbox_get() - 10;
             wag.w = curw + 2; // 2 for border pixels
             if (curw <= 0) {
                 obj.box.removeChild(wag.box);
@@ -211,7 +211,7 @@ train.prototype = {
             }
         }
         this.redraw();
-        setTimeout(function(){ arguments[0][0].shut_wagon(arguments[0]);  }, 100, [ obj, wag ]);
+        setTimeout(function(){ arguments[0][0].shut_wagon(arguments[0]);  }, 250, [ obj, wag ]);
     },
 
     redraw: function()

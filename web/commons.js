@@ -841,6 +841,13 @@ var CHATT_MAXLINES = 40;
 /* PRO CHATT */
 function chatt_sub(name,str)
 {
+    var must_scroll = false;
+
+    // alert ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight);
+
+  if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
+      must_scroll = true;
+
   // alert("ARRIVA NAME: "+ name + "  STR:"+str);
   if (chatt_lines_n == CHATT_MAXLINES) {
     $("txt").innerHTML = "";
@@ -856,8 +863,13 @@ function chatt_sub(name,str)
     $("txt").innerHTML += chatt_lines[chatt_lines_n];
     chatt_lines_n++;
   }
-  $("txt").innerHTML;
-  $("txt").scrollTop = 10000000;
+  // $("txt").innerHTML;
+
+
+  if (must_scroll) {
+      $("txt").scrollTop = 10000000;
+  }
+  // alert("scTOP "+$("txt").scrollTop+"  scHEIGHT: "+$("txt").scrollHeight+" HEIGHT: "+getStyle($("txt"),"height", "height") );
 }
 
 /*
