@@ -1,3 +1,118 @@
+0.13.2 ("spawn" branch) - 21/04/2008
+	Black list added.
+	Cache-Control 'no-store flag' added.
+	Scroll for standup area and top position of proxhr class adjusted.
+	Behavior of ticker changed.
+
+0.13.1 ("spawn" branch) - 20/04/2008
+	Copyrights updated.
+	addEvent and removeEvent functions added.
+	Ticker added.
+	G_is_local var to prevent remote site access when
+	you are in unconnected devel environment (on the train :).
+	Set to 25% the width of each td for the tables table.
+	chatt_send function refactored.
+	Functions show_room, table_content, standup_content moved into Room class.
+
+0.13.0 ("spawn" branch) - 19/04/2008
+	Add ftokk_path var to allow temporary move of the ftok dir.
+
+0.12.0 ("spawn" branch) - 30/03/2008
+	Sitdown disable when shutdowning.
+	Topbanner added.
+	"alert" command added.
+
+0.11.0 ("spawn" branch) - 30/03/2008
+	Pro-site configuration file added.
+	White-list for proxy access added.
+
+0.10.8 ("spawn" branch) - 27/03/2008
+	Forumolimpia supporter images added.
+
+0.10.7 ("spawn" branch) - 27/03/2008
+	Proxyscan to check (and deny) proxy connections.
+	Chat ban: first implementation.
+
+0.10.6 ("spawn" branch) - 23/03/2008
+	"nobohide" class for img added.
+	Big img for supporters and sponsors added.
+
+0.10.5 ("spawn" branch) - 23/03/2008
+	Factorized user reset (and comm array clean added).
+
+0.10.4 ("spawn" branch) - 23/03/2008
+	Flush of command when the table start.
+	comm array to 18 elements.
+
+0.10.3 ("spawn" branch) - 20/03/2008
+	Disabled comm flush optimization.
+	Critical log type added.
+
+0.9.3 ("spawn" branch) - 19/03/2008
+	Quasi atomical installation procedure.
+	cards_hidetake(win) dumb function removed.
+	New shared mem management added.
+
+0.9.2 ("spawn" branch) - 16/03/2008
+	BRISK_SINGLE_SESS and BRISK_SINGLE_DEBUG added.
+	
+0.9.1 ("spawn" branch) - 16/03/2008
+	Char "@" before all ftok functions.
+	Briskin5::load_data checked.
+
+0.0.9 ("spawn" branch) - 13/03/2008
+	Show_room function with new step arg.
+	Table recovery and external garbage_manager call recovery.
+
+0.0.8 ("spawn" branch) - 07/03/2008
+        Correct touch index for ftok from 1-100 to 0-99
+        Unlock_data to garbage_manager added.
+	UnescapeHTML func added.
+
+0.0.7 ("spawn" branch) - 16/02/2008
+	Log path from /tmp to LEGAL_PATH.
+
+0.0.6 ("spawn" branch) - 16/02/2008
+	BRISKIN5_PLAYERS_N sedify.
+	Install ftok file for tables.
+	Preload.js now must manage trees and not flat img dir.
+	Reduced SHM dim and send a parameter to js to have status consistency.
+
+0.0.5 ("spawn" branch) - 12/02/2008
+	Log refactoring.
+	Deep refactoring of garbage_manager func.
+
+0.0.4 ("spawn" branch) - 07/02/2008
+	Garbage_manager updated.
+
+0.0.3 ("spawn" branch) - 03/02/2008
+	Clean of table's data.
+	
+0.0.2 ("spawn" branch) - 26/01/2008
+	Cookiepath added in commons.js.
+	Table_idx via cookie, removed from index_rd.php call.
+	Location to briskin5.
+	Recovery from table supported.
+	First support to return to index.php.
+	Normalized log.
+	room_join_wakeup func added.
+	room_wakeup renamed with table_wakeup.
+	ftok in briskin5 constructor.
+	Dstroy_data and chatt_send funcs added.
+
+0.0.1 ("spawn" branch) - 19/01/2008
+	Obj and briskin5 dirs added.
+	Renamed class Brisco to Room.
+	Split standard constructors to be able to have multiple constructors.
+	Spawning action when the table is completed added.
+
+0.8.3 - 30/12/2007
+	Temporary advise added.
+	Webstart layout enhancement.
+
+0.8.2 - 09/10/2007
+	Start menu added..
+
 0.8.1 - 30/9/2007
 	Auction points bug was fixed.
 	IE rendering bug was fixed.
