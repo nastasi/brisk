@@ -1272,7 +1272,7 @@ class Room {
     $only_you = FALSE;
     
     // common settings
-    $msg = substr($mesg,6);
+    $msg = substr($mesg, 6, 128);
     $timecur = time();
     $dt = date("H:i ", $timecur);
 
