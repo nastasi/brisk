@@ -385,7 +385,7 @@ div.esco {
     font-size: 10px;
     font-color: #333333;
     padding: 4px;
-    /*z-index: -1;*/
+    /* z-index: -1;        */
     /* visibility: hidden; */
 }
 
@@ -395,9 +395,24 @@ div.esco {
     padding: 4px;
     position: absolute;
     visibility: hidden;
-/*    z-index: 15px; */
-           }
+    /* z-index: 15px; */
+}
 
 .room_standup_orig { 
     position: absolute;
- }
+}
+
+td.tickbut { 
+    visibility: hidden; 
+    width: 0px;
+    text-align: left;
+    vertical-align: top;
+    /* background-color: red; */
+    padding: 0px;
+}
+
+img.tickbut { 
+    border: 0px solid black;
+    cursor: pointer;
+    margin-top:4px;
+}
