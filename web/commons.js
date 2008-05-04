@@ -302,6 +302,12 @@ function act_help()
     send_mesg("help");
 }
 
+function act_tav()
+{
+    act_chatt('/tav '+$('txt_in').value); 
+    $('txt_in').value = '';
+}
+
 function act_about()
 {
     send_mesg("about");
