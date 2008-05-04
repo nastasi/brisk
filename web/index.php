@@ -317,7 +317,7 @@ supported by:<br><br>
 <br>
 <div style="text-align: center;">
    <br><br><br>
-Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
+Digita il tuo nickname per accedere ai tavoli della briscola.<br>
 <form method="post" action="">
 <table align="center"><tr><td>
 <input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
@@ -325,6 +325,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <input id="sub"    value="entra" type="submit" class="button">
 </td></tr></table>
 </form>
+(se usi firefox e qualcosa non funziona<br>prova a ricaricare la pagina con <b>Ctrl + F5</b>)<br>
 </div></td></tr></table>
 <br><br><br><br>
 
