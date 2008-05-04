@@ -57,12 +57,18 @@ train.prototype = {
 
     show: function()
     {
+	$('tickbut').style.visibility = "hidden";
+	$('tickbut').style.width = "0px";
+
         this.clickable = true;
         this.box.style.visibility = "visible";
     },
 
     hide: function()
     {
+	$('tickbut').style.visibility = "visible";
+	$('tickbut').style.width = "20px";
+
         this.clickable = false;
         for (cur = this.first ; cur != null ; cur = cur.next) {
             if (cur.notebox != null) {
