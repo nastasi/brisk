@@ -734,13 +734,12 @@ class User {
     $this->name = "";
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
-    $this->the_end = FALSE;
-
     $this->chattime = array_fill(0, CHAT_N, 0);
     $this->chat_cur = 0;
     $this->chat_lst = "";
     $this->chat_ban = 0;
     $this->chat_dlt = 0;
+    $this->the_end = FALSE;
   }
 } // end class User
 
@@ -1398,7 +1397,9 @@ class Room {
       }
       else {
         $to_user = sprintf('chatt_sub("%s","%s");', $dt.xcape($user->name), xcape($msg));
-        $to_room = $to_user;
+	// temporary silentiation for troll (will became array check)
+	if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
+           $to_room = $to_user;
       }
 
       log_legal($timecur, $user->sess, $user->name, 
