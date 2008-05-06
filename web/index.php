@@ -423,7 +423,7 @@ else {
 <b>Chat</b><br>
 <div id="txt" class="chatt">
 </div>
-    <table align=center style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();"></td><td style="width:1%; text-align: center;">
+    <table align=center style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="scrivi un invito al tavolo e clicca"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
