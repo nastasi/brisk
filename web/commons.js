@@ -313,6 +313,16 @@ function act_about()
     send_mesg("about");
 }
 
+function act_roadmap()
+{
+    send_mesg("roadmap");
+}
+
+function act_whysupport()
+{
+    send_mesg("whysupport");
+}
+
 function act_exitlock()
 {
     send_mesg("exitlock");
@@ -451,7 +461,9 @@ slowimg.prototype = {
 	if (this.step_n * this.deltat == this.time) {
 	    this.step_n--;
 	}
-	this.step_free = parseInt(this.step_n * this.free);
+        if (this.free < 1) {
+            this.step_free = parseInt(this.step_n * this.free);
+        }
     },
     
     start: function(st)
@@ -477,7 +489,7 @@ slowimg.prototype = {
 	    this.step_cur++;
 	    setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
 	    if (this.step_cur == this.step_free && this.st != null) {
-		if (this.st != null && this.st.st_loc < this.st.st_loc_new) {
+		if (this.st.st_loc < this.st.st_loc_new) {
 		    // alert("QUI1  " + this.step_cur + "  ZZ  "+  this.step_free);
 		    this.st.st_loc++;
 		    this.st = null;
@@ -490,13 +502,15 @@ slowimg.prototype = {
 	    // $("logz").innerHTML += "xxxxxxxxxxxxxxxCLEAR<br>";
 	    var date = new Date();
 	    // $("logz").innerHTML += "Timestop: " + date + "<br>";
+
+	    if (this.action != null) {
+		eval(this.action);
+	    }
+
 	    if (this.st != null && this.st.st_loc < this.st.st_loc_new) {
 		// alert("QUI2");
 		this.st.st_loc++;
 		this.st = null;
-	    }
-	    if (this.action != null) {
-		eval(this.action);
 	    }
 	    if (this.srcend != null) {
 		this.img.src = this.srcend;
@@ -814,6 +828,8 @@ var fin = 0;
 function table_init() {
     var sux = new Array("", "_ea", "_ne", "_nw", "_we");
 
+    // console.log("table_init");
+
     remark_off();
     $("asta").style.visibility = "hidden";
     $("caller").style.visibility = "hidden";
@@ -824,6 +840,7 @@ function table_init() {
 	    $("card"+sux[e]+i).style.visibility = "hidden";
     }
     for (i=0 ; i < PLAYERS_N ; i++) {
+        // console.log("shut: "+"takes"+sux[i]);
 	$("takes"+sux[i]).style.visibility = "hidden";
 	}
 
