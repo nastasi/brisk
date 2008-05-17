@@ -117,6 +117,22 @@ else if ($user->stat == 'room') {
     $user->step_inc();
     
   }
+  else if ($argz[0] == 'roadmap') {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap), 0, "torna ai tavoli", 400, 200);
+
+    log_wr($user->comm[$user->step % COMM_N]);
+    $user->step_inc();
+    
+  }
+  else if ($argz[0] == 'whysupport') {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_whysupport), 0, "torna ai tavoli", 400, 200);
+
+    log_wr($user->comm[$user->step % COMM_N]);
+    $user->step_inc();
+    
+  }
   else if ($argz[0] == 'chatt') {
     $room->chatt_send(&$user,$mesg);
   }
