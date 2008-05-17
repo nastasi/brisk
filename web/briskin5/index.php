@@ -79,7 +79,7 @@ var g_exitlock = 0;
 window.onload = function() {
   g_withflash = DetectFlashVer(6,0,0);
   remark_off();
-  table_init();
+  // table_init();
   xhr_rd = createXMLHttpRequest();
   sess = "<?php echo "$sess"; ?>";
   
