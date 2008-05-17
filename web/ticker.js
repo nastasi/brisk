@@ -50,7 +50,7 @@ train.prototype = {
     notebox: null,
     width: 0,
     deltat: 250,
-    deltas: 12,
+    deltas: 10,
     xend: 0,
     timout: null,
     clickable: true,
@@ -104,6 +104,7 @@ train.prototype = {
         if (dostart) {
             this.start();
         }
+
     },
 
     rem: function(table)
@@ -178,7 +179,7 @@ train.prototype = {
 
     start_move: function()
     {
-        this.deltas = 5;
+        this.deltas = 10;
     },
 
     shut_wagon: function(args)
@@ -206,6 +207,8 @@ train.prototype = {
 	    curw = wag.widthbox_get() - 10;
             wag.w = curw + 2; // 2 for border pixels
             if (curw <= 0) {
+                wag.cb_mouseout();
+
                 obj.box.removeChild(wag.box);
                 obj.rem_obj(wag);
 
@@ -245,6 +248,9 @@ train.prototype = {
 
     resetx: function()
     {
+        this.deltas = 10;
+        this.clickable = true;
+
         this.box.style.left = this.anc.offsetWidth+"px";
     },
 
