@@ -523,10 +523,6 @@ function card_play_so(card_idx, x, y)
 {
     alert("card_play_so: unreachable function.");
 }
-function card_play_ne(card_idx, x, y)
-{
-    // alert("card_play_nw: card_pos="+ card_pos+"  card_idx="+card_idx+"  x="+x+"  y="+y);
-}
 
 /* CARD_PLAY_EA */
 function card_postplay_ea(card_pos)
