@@ -411,11 +411,10 @@ else if ($user->stat == 'table') {
 	  $turn_nex = ($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N;
 
 	  log_wr(sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
-	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);",
-			       $winner, $winner);
-	  $player_cur = "remark_off();" . $card_take . "|"; 
+	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);|", $winner);
+	  $player_cur = "remark_off();" . $card_take; 
 	  if ($turn_cur != $turn_nex)
-	    $player_nex = $card_play . $card_take . "|";
+	    $player_nex = $card_play . $card_take;
 	  else
 	    $player_nex = "";
 	  if ($table->turn < (BRISKIN5_PLAYERS_N * 8))  /* game NOT finished */
@@ -442,9 +441,6 @@ else if ($user->stat == 'table') {
 
 	  $retar[$i] = $ret;
 	}
-
-
-
 
 	if ($table->turn == (BRISKIN5_PLAYERS_N * 8)) { /* game finished */
 	  log_wr(sprintf("GIOCO FINITO !!!"));
