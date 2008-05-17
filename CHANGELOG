@@ -1,3 +1,9 @@
+0.13.4 ("spawn" branch) -  17/05/2008
+	Serialization now includes postaction bug fixed.
+        "Roadmap" and "whysupport" main menu items added.
+        Ticker keep users list opened when wagon implode bug fixed.
+        Keeped cards still on table when table restart bug fixed.
+         
 0.13.3 ("spawn" branch) -  4/05/2008
 	Tav button added.
 	Raccomandations for firefox users.
