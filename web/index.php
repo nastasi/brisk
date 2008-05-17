@@ -256,7 +256,10 @@ $brisk_vertical_menu = '
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" title="come fare pubblicit&agrave; a brisk!">propaganda</a><br>
 <a href="#" title="credits" onclick="act_about();">about</a><br>
 <a href="mailto:brisk@alternativeoutput.it" title="contatti">contatti</a><br>
-
+<!--
+<a href="#" title="roadmap" onclick="act_roadmap();">roadmap</a><br>
+<a href="#" title="perché supportare brisk" onclick="act_whysupport();">supportare brisk: perché?</a><br>
+-->
 </div>
 <br><br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
