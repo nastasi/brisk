@@ -62,9 +62,25 @@ if (($room = &Room::load_data()) == FALSE) {
   exit;
 }
 if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
-  echo "Get User Error";
-  log_wr("Get User Error");
   Room::unlock_data($sem);
+  $argz = explode('|', $mesg);
+
+  if ($argz[0] == 'help') {
+    echo show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
+  }
+  else if ($argz[0] == 'about') {
+    echo show_notify(str_replace("\n", " ", $G_room_about), 0, "torna ai tavoli", 400, 200);
+  }
+  else if ($argz[0] == 'roadmap') {
+    echo show_notify(str_replace("\n", " ", $G_room_roadmap), 0, "torna ai tavoli", 400, 200);
+  }
+  else if ($argz[0] == 'whysupport') {
+    echo show_notify(str_replace("\n", " ", $G_room_whysupport), 0, "torna ai tavoli", 400, 200);
+  }
+  else { 
+    log_wr("Get User Error");
+    echo "Get User Error";
+  }
   exit;
 }
 $argz = explode('|', $mesg);
@@ -75,15 +91,6 @@ if ($argz[0] == 'shutdown') {
   log_auth($user->sess, "Shutdown session.");
 
   $user->reset();
-  /* factorized with ->reset()
-  $tmp_sess = $user->sess;
-  $user->sess = "";
-  step_unproxy($tmp_sess);
-  $user->name = "";
-  while (array_pop($user->comm) != NULL);
-  $user->step = 0;
-  $user->the_end = FALSE;
-  */
 
   log_rd2("AUTO LOGOUT.");
   if ($user->subst == 'sitdown' || $user->stat == 'table')
@@ -208,12 +215,19 @@ else if ($user->stat == 'room') {
 	//
 
         $curtime = time();
+
         // Create new spawned table
         $bri_sem = Briskin5::lock_data($table_idx);
         $table_token = uniqid("");
         $room->table[$table_idx]->table_token = $table_token;
         $room->table[$table_idx]->table_start = $curtime;
         
+        $plist = "$table_token|$user->table|$table->player_n";
+        for ($i = 0 ; $i < $table->player_n ; $i++) {
+          $plist .= '|'.$room->user[$table->player[$i]]->sess;
+        }
+        log_legal($curtime, $user->sess, $user->name, "STAT:CREATE_GAME", $plist);
+
         if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
           log_wr("bri create: FALSE");
         else
@@ -276,7 +290,7 @@ else if ($user->stat == 'room') {
     }
     else if ($argz[0] == 'logout') {
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-      $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
+      $user->comm[$user->step % COMM_N] .= 'postact_logout();';
       $user->the_end = TRUE;
       $user->step_inc();
     }
@@ -293,7 +307,7 @@ else if ($user->stat == 'room') {
     else if ($argz[0] == 'logout') {
       $room->room_wakeup(&$user);      
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-      $user->comm[$user->step % COMM_N] .= sprintf('postact_logout();');
+      $user->comm[$user->step % COMM_N] .= 'postact_logout();';
       $user->the_end = TRUE;
       $user->step_inc();
     }
