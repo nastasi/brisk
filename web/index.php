@@ -41,7 +41,8 @@ log_load("index.php");
 
 function main()
 {
-  GLOBAL $G_is_local, $sess, $name, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
+  GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
+  GLOBAL $sess, $name, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
 
   $body = "";
   $tables = "";
@@ -92,6 +93,9 @@ function main()
       if (($user = &$room->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
 	$ACTION = "room";
 	
+        log_legal($curtime, $user->sess, $user->name, "STAT:LOGIN", '');
+
+
 	// setcookie ("sess", "", time() + 180);      
 	$room->standup_update(&$user);
 	
@@ -123,7 +127,7 @@ function main()
 
   if ($ACTION == "room") {
     $tables .= '<div class="room_tab">';
-    $tables .= '<table class="room_tab" align="center">';
+    $tables .= '<table class="room_tab">';
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       if ($i % 4 == 0)
 	$tables .= '<tr>';
@@ -139,7 +143,7 @@ function main()
     $tables .= '</table></div>';
 
 
-    $standup .= '<table class="room_standup" align="center"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
+    $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
     $standup .= '<div class="room_ex_standup">';
     $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b></span></div>';
     
@@ -176,7 +180,8 @@ function main()
   if ($brisk_donate == FALSE)
     $brisk_donate = "";
 
-  $with_topbanner = TRUE;
+
+
 
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
@@ -201,21 +206,10 @@ google_color_url = "000000";
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>'
 ).'</div></td>
-<td align="center">'.($with_topbanner ? '<table><tr><td>' : '').'<div style="text-align: center;">
+<td align="center">'.($G_with_topbanner ? '<table><tr><td>' : '').'<div style="text-align: center;">
     <img class="nobo" src="img/brisk_logo64.png">
     briscola chiamata in salsa ajax<br>
-    </div>'.($with_topbanner ? '</td>
-
-<td><div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigpict(this, \'out\', 0, 0);">
-<a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
-Torneo di briscola<br>
-chiamata - Milano<br>
-17/05/2008</a>
-</div>
-<img class="nobohide" id="topbanner_big" src="img/bcm_tor080517.gif">
-</td>
-
-</tr></table>' : '').'</td>
+    </div>'.($G_with_topbanner ? sprintf('</td><td>%s</td></tr></table>', $G_topbanner) : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
 '.($G_is_local ? '' :
 '<script type="text/javascript"><!--
@@ -243,23 +237,77 @@ $brisk_vertical_menu = '
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
 <!-- <a target="_blank" href="/briskhome.php"></a> -->
-<img class="nobo" src="img/brisk_start.png" onmouseover="$(\'webstart\').style.visibility = \'visible\';">
-<div class="webstart" id="webstart" onmouseover="this.style.visibility = \'visible\';" onmouseout="this.style.visibility = \'hidden\';">
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" title="homepage del progetto">homepage</a><br>
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#cose" title="di cosa si tratta">cos\'&egrave;</a><br>
-<a target="_blank" href="http://it.wikipedia.org/wiki/Briscola#Gioco_a_5" title="come si gioca">regole</a><br>
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#shots" title="screenshots dell\'applicazione">screenshoots</a><br>
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#comp" title="compatibilit&agrave; con i browser">compatibilit&agrave;</a><br>
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#sources" title="sorgenti dell\'applicazione">sorgenti</a><br>
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#mailing" title="come iscriversi alla mailing list">mailing&nbsp;list</a><br>
 
-<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" title="come fare pubblicit&agrave; a brisk!">propaganda</a><br>
-<a href="#" title="credits" onclick="act_about();">about</a><br>
-<a href="mailto:brisk@alternativeoutput.it" title="contatti">contatti</a><br>
+
+
+<img class="nobo" src="img/brisk_start.png" onmouseover="menu_show(\'menu_webstart\');">
+
+<div class="webstart" id="menu_webstart" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" 
+   onmouseover="menu_hide(0,1);"
+   title="homepage del progetto">homepage</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#cose" 
+   onmouseover="menu_hide(0,1);"
+   title="di cosa si tratta">cos\'&egrave;</a><br>
+
+<a target="_blank" href="http://it.wikipedia.org/wiki/Briscola#Gioco_a_5" 
+   onmouseover="menu_hide(0,1);"
+   title="come si gioca">regole</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#shots" 
+   onmouseover="menu_hide(0,1);"
+   title="screenshots dell\'applicazione">screenshoots</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#comp" 
+   onmouseover="menu_hide(0,1);"
+   title="compatibilit&agrave; con i browser">compatibilit&agrave;</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#sources" 
+   onmouseover="menu_hide(0,1);"
+   title="sorgenti dell\'applicazione">sorgenti</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#mailing" 
+   onmouseover="menu_hide(0,1);"
+   title="come iscriversi alla mailing list">mailing&nbsp;list</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" 
+   onmouseover="menu_hide(0,1);"
+   title="come fare pubblicit&agrave; a brisk!">propaganda</a><br>
+<a href="#" 
+   onmouseover="menu_hide(0,1);"
+   title="credits" onclick="act_about();">about</a><br>
+
+<a href="mailto:brisk@alternativeoutput.it" 
+   onmouseover="menu_hide(0,1);"
+   title="contatti">contatti</a><br>
+
+<hr>
+
 <!--
-<a href="#" title="roadmap" onclick="act_roadmap();">roadmap</a><br>
-<a href="#" title="perché supportare brisk" onclick="act_whysupport();">supportare brisk: perché?</a><br>
+<a href="#" 
+   onmouseover="menu_hide(0,1);"
+   title="perché supportare brisk?" onclick="act_whysupport();">supportare?</a><br>
 -->
+<a href="#" 
+   onmouseover="menu_hide(0,1);"
+   title="prossime funzionalità implementate" onclick="act_roadmap();">roadmap</a><br>
+
+<a href="#" title="foto dei raduni di briskisti" 
+   onmouseover="menu_show(\'menu_raduni\');">raduni</a><br>
+
+<div id="menu_raduni" class="webstart">
+<a href="http://www.anomalia.it/mop/photoo" 
+   onmouseover="menu_hide(0,2);"
+   title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
+
+<!--
+<a href="http://www.anomalia.it/mop/photoo" 
+   onmouseover="menu_hide(0,2);"
+   title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
+-->
+</div>
 </div>
 <br><br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
@@ -284,6 +332,7 @@ supported by:<br><br>
 <title>Brisk</title>
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="dnd.js"></script>
+<script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
@@ -295,7 +344,13 @@ supported by:<br><br>
 <SCRIPT type="text/javascript"><!--
    var g_withflash = false;
    var g_is_spawn = 0; 
+   var gst  = new globst();
+
+   var sess = "not_connected";
+  
    window.onload = function() {
+     menu_init();
+
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
        $("proflash").innerHTML = 'Audio con Flash.<br><a href="http://www.macromedia.com/"><img class="nobo" style="padding: 4px; width:73; height: 19;" src="img/download_now_flash.gif"></a>';
@@ -322,7 +377,7 @@ supported by:<br><br>
    <br><br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br>
 <form method="post" action="">
-<table align="center"><tr><td>
+<table style="margin: auto;"><tr><td>
 <input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
 </td><td>
 <input id="sub"    value="entra" type="submit" class="button">
@@ -353,6 +408,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br>
 <title>Brisk</title>
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="dnd.js"></script>
+<script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="ticker.js"></script>
@@ -383,6 +439,7 @@ if ($BRISK_SHOWHTML == "debugtable") {
 else {
 ?>
      // alert("INDEX START");
+     menu_init();
      xhr_rd = createXMLHttpRequest();
      sess = "<?php echo "$sess"; ?>";
      tra = new train($('room_tit'));
@@ -422,15 +479,17 @@ else {
 </td></tr></table>
 
 <!--  =========== bottom ===========  -->
-    <div id="bottom" class="bottom" style="/*  background-color: green; */">
+    <div id="bottom" class="bottom">
 <b>Chat</b><br>
 <div id="txt" class="chatt">
 </div>
-    <table align=center style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="scrivi un invito al tavolo e clicca"></td><td style="width:1%; text-align: center;">
+<div style="text-align: center; ">
+    <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="scrivi un invito al tavolo e clicca"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
+</div>
 </div>
 <div id="heartbit"></div>
 <div id="sandbox"></div>
