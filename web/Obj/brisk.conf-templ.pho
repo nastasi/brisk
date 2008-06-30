@@ -1,7 +1,21 @@
 <?php
 $G_shutdown = FALSE;
+$G_room_roadmap = '<div style=\"text-align: left;\"><ul>
+<li>testing della versione beta di brisk2</li>
+<li>rilascio di brisk2</li>
+<li>inizio di brisk3 - supporto a database</li>
+<li>possibilit&agrave; di autenticarsi</li>
+</ul></div>';
 $G_proxy_white_list = array();
 $G_alarm_passwd = "yourpasswd";
 $G_is_local = FALSE;
 $G_black_list = array();
+
+$G_with_topbanner = TRUE;
+$G_topbanner = '<div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigpict(this, \'out\', 0, 0);">
+<a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
+Torneo di briscola<br> chiamata - Milano<br> 17/05/2008</a>
+</div>
+<img class="nobohide" id="topbanner_big" src="img/bcm_tor080517.gif">';
+
 ?>
