@@ -150,7 +150,7 @@ else if ($user->stat == 'table') {
       log_wr(sprintf("GIOCO FINITO !!!"));
     
       $table->mult *= 2; 
-      $table->old_reason = sprintf("Ha lasciato %s perche` aveva al massimo 2 punti.", $user->name);
+      $table->old_reason = sprintf("Ha lasciato %s perch&eacute; aveva al massimo 2 punti.", xcape($user->name));
 
       $table->game_next();
       $table->game_init(&$bri->user);
@@ -444,6 +444,10 @@ else if ($user->stat == 'table') {
 
 	if ($table->turn == (BRISKIN5_PLAYERS_N * 8)) { /* game finished */
 	  log_wr(sprintf("GIOCO FINITO !!!"));
+
+          $plist = "$table->table_token|$user->table|$table->player_n";
+          $curtime = time();
+          log_legal($curtime, $user->sess, $user->name, "STAT:FINISH_GAME", $plist);
 
 	  /* ************************************************ */
 	  /*    PRIMA LA PARTE PER LO SHOW DI CHI HA VINTO    */
