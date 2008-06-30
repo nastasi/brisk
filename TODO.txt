@@ -8,6 +8,8 @@
 
    
    URGENT - tables spawn
+            DONE - link with photos
+            DONE - top banner in Etc file
             DONE - spawn of a table
 	    DONE - data to cookies (removed table_idx from xhr calls also)
 	    DONE - set subst to shutdowner/shutdowned
