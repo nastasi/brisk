@@ -75,9 +75,9 @@ require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "spawn-0.13.4";
+$G_brisk_version = "spawn-0.14.0";
 
-$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: bug del ticker e della carta coperta che rimane sul tavolo chiusi - Beta6.',
+$root_wellarr = Array ( 'Benvenuto in brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: input bug risolto, aggiunte le foto e le statistiche d\`uso - Beta7.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -85,7 +85,7 @@ $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloc
 $G_room_help= '
 <div style=\\"text-align: left; padding: 8px;\\">
 <b>Descrizione</b><br>
-Questa &egrave; un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
+Questa è un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
 <b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
@@ -104,7 +104,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dl>
 <dt><b>Comandi della chat</b>
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
-<dd><b>/tav <i>&lt;frase di invitogt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
+<dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
 </dl>
 </div>
 ';
@@ -115,7 +115,7 @@ $G_room_about= '<br>
   briscola chiamata in salsa ajax
 </div>
 <br><b>version '.$G_brisk_version.'</b><br><br>
-Copyright 2006-2007 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>';
+Copyright 2006-2008 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>';
 
 
 function xcape($s)
@@ -689,6 +689,8 @@ class User {
     
     /*
     if (validate_sess($this->sess)) {
+      if (file_exists(PROXY_PATH) == FALSE)
+        mkdir(PROXY_PATH);
       $fp = fopen(PROXY_PATH."/".$this->sess.".stat", 'w');
       fwrite($fp, sprintf("%s\n",$this->stat));
       fclose($fp);
@@ -702,6 +704,8 @@ class User {
     do {
       if (validate_sess($this->sess) == FALSE)
 	break;
+      if (file_exists(PROXY_PATH) == FALSE)
+        mkdir(PROXY_PATH);
       if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
 	break;
       fwrite($fp, pack("l",$this->step), 4);
@@ -717,6 +721,8 @@ class User {
     $this->step += $delta;
     
     if (validate_sess($this->sess)) {
+      if (file_exists(PROXY_PATH) == FALSE)
+        mkdir(PROXY_PATH);
       $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
       fwrite($fp, pack("l",$this->step), 4);
       fclose($fp);
@@ -728,10 +734,13 @@ class User {
   }
 
   function reset() {
+    $curtime = time();
+    log_legal($curtime, $this->sess, $this->name, "STAT:LOGOUT", '');
+
     $tmp_sess = $this->sess;
     $this->sess = "";
     step_unproxy($tmp_sess);
-    $this->name = "";
+    $this->name = "";  // OK here
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
     $this->chattime = array_fill(0, CHAT_N, 0);
@@ -746,20 +755,18 @@ class User {
 
 function step_get($sess) {
   $fp = FALSE;
-  $ct = 0;
   do {
     if (validate_sess($sess) == FALSE)
       break;
-  $ct = 1;
+
+    if (file_exists(PROXY_PATH) == FALSE)
+      mkdir(PROXY_PATH);
     if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
       break;
-  $ct = 2;
     if (($s = fread($fp, 4)) == FALSE)
       break;
-  $ct = 3;
     if (strlen($s) != 4)
       break;
-  $ct = 4;
     $arr = unpack('l', $s);
     fclose($fp);
 
@@ -770,12 +777,15 @@ function step_get($sess) {
   if ($fp != FALSE)
     fclose($fp);
 
-  log_rd2("STEP_GET: return false ".$ct);
+  log_rd2("STEP_GET: return false ");
+
   return (FALSE);
 }
 
 function step_unproxy($sess) {
   log_rd2("UNPROXY: ".PROXY_PATH."/".$sess.".step");
+  if (file_exists(PROXY_PATH) == FALSE)
+    mkdir(PROXY_PATH);
   @unlink(PROXY_PATH."/".$sess.".step");
 }
 
@@ -848,6 +858,11 @@ class Room {
 		 */
 		log_main("garbage_manager: INSIDE THE END.");
 
+                $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
+                for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                  $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+                }
+
 		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
 		  // stat must be "table" by definition
 		  $user_cur =& $this->user[$table_cur->player[$i]];
@@ -859,7 +874,9 @@ class Room {
 		  $user_cur->laccwr     = $bri_user->lacc;
 		  $user_cur->bantime    = $bri_user->bantime;
 		}
-	      
+
+                log_legal($curtime, $user_cur->sess, $user_cur->name, "STAT:DESTROY_GAME", $plist);
+
 		$this->room_join_wakeup(&$user_cur, FALSE, 0); 
 		$table_cur->table_token = "";
                 $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
@@ -890,6 +907,12 @@ class Room {
 		$user_cur->step_inc();
 	      }
 
+              $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
+              for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+              }
+              log_legal($curtime, $user_cur->sess, $user_cur->name, "STAT:DESTROY_GAME(RECOVERY)", $plist);
+              
 	      $this->room_join_wakeup(&$user_cur, TRUE, -2); 
 	      $table_cur->table_token = "";
 	    }
@@ -917,15 +940,6 @@ class Room {
 	    log_auth($user_cur->sess, "Autologout session.");
 	    
 	    $user_cur->reset();
-	    /* factorized with ->reset()
-	    $tmp_sess = $user_cur->sess;
-	    $user_cur->sess = "";
-	    step_unproxy($tmp_sess);
-	    $user_cur->name = "";
-	    while (array_pop($user_cur->comm) != NULL);
-	    $user_cur->step = 0;
-	    $user_cur->the_end = FALSE;
-	    */
 	    
 	    log_rd2("AUTO LOGOUT.");
 	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
@@ -1272,8 +1286,8 @@ class Room {
     
     // common settings
     $msg = substr($mesg, 6, 128);
-    $timecur = time();
-    $dt = date("H:i ", $timecur);
+    $curtime = time();
+    $dt = date("H:i ", $curtime);
 
     //
     //  Compute actions
@@ -1304,7 +1318,7 @@ class Room {
           break;
         }
 
-        $dtime = $timecur - $table->wag_tout;
+        $dtime = $curtime - $table->wag_tout;
         if ($dtime  < EXPIRE_TIME_WAG) {
           $msg = sprintf("<br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>",
                          EXPIRE_TIME_WAG - $dtime, (EXPIRE_TIME_WAG - $dtime == 1 ? "o" : "i"));
@@ -1335,9 +1349,8 @@ class Room {
         $to_user = sprintf('chatt_sub("%s","Alarm <b>%s</b> inviato a tutti.");', 
                                $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
 
-        // $msg = "<br><b>".$dt.NICKSERV."<br><br>".xcape(substr($msg, strlen($alarm_check)))."</b><br><br>"; 
-        $msg = sprintf("<br><b>%s%s<br><br>%s</b><br><br>",
-                       $dt, NICKSERV, xcape(substr($msg, strlen($alarm_check))));
+        $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
+                       $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
         $to_all = show_notify($msg, 0, "chiudi", 400, 120);
       } while (0);
     } // /alarm chat command
@@ -1347,7 +1360,7 @@ class Room {
 
       do {
         if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
-          $to_user = sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera o una cifra.");', $dt.NICKSERV, xcape($name_new));
+          $to_user = sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.");', $dt.NICKSERV);
           break;
         }
 
@@ -1365,7 +1378,7 @@ class Room {
           break;
         }
       
-	$user->name = $name_new;
+	$user->name = $name_new; // OK - nick changed
         
         log_main("chatt_send start set");
 
@@ -1374,7 +1387,7 @@ class Room {
     } // nick chat command
 
     else { // normal chat line
-      if ($timecur < ($user->chat_ban + $user->chat_dlt)) {
+      if ($curtime < ($user->chat_ban + $user->chat_dlt)) {
         $only_you = TRUE;
         $user->chat_dlt = $user->chat_dlt * 2; 
         if ($user->chat_dlt > 120)
@@ -1382,8 +1395,8 @@ class Room {
       }
       else if ($user->chat_lst == $msg)
         $only_you = TRUE;
-      else if ($timecur - $user->chattime[($user->chat_cur + 1) % CHAT_N] < CHAT_ILL_TIME) {
-        $user->chat_ban = $timecur;
+      else if ($curtime - $user->chattime[($user->chat_cur + 1) % CHAT_N] < CHAT_ILL_TIME) {
+        $user->chat_ban = $curtime;
         $user->chat_dlt = 5;
         $only_you = TRUE;
       }
@@ -1402,11 +1415,11 @@ class Room {
            $to_room = $to_user;
       }
 
-      log_legal($timecur, $user->sess, $user->name, 
+      log_legal($curtime, $user->sess, $user->name, 
 		($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
       
       $user->chat_lst = "$msg";
-      $user->chattime[$user->chat_cur % CHAT_N] = $timecur;
+      $user->chattime[$user->chat_cur % CHAT_N] = $curtime;
       $user->chat_cur++;
     }
 
@@ -1570,7 +1583,7 @@ class Room {
       else {
 	$this->user[$idx]->sess = $sess;
       }
-      $this->user[$idx]->name = $name_new;
+      $this->user[$idx]->name = $name_new; // OK - add new user
       $this->user[$idx]->stat_set("room");
       $this->user[$idx]->step_set(0);
       while (array_pop($this->user[$idx]->comm) != NULL);
@@ -2040,13 +2053,13 @@ function log_auth($sess, $log) {
 }
 
 
-function log_legal($timecur, $sess, $name, $where, $mesg) 
+function log_legal($curtime, $sess, $name, $where, $mesg) 
 {
   GLOBAL $_SERVER;
 
   if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {
     /* Unix time | session | nickname | IP | where was | mesg */
-    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $timecur, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|\n", $curtime, $sess, $name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
     fclose($fp);
   }
 }
@@ -2248,13 +2261,18 @@ function show_table_info(&$room, &$table, $table_pos)
     $unam = xcape($room->user[$table->player[$curplayer]]->name);
     $noty .= " tocca a <b>$unam</b> giocare.";
   }
-
+  
   if ($table->mult > 1) {
     $noty .= sprintf(" La partita vale <b>%s</b>.", multoval($table->mult));
   }
   $noty .= "<hr><br>";
-
   $ret .= show_notify($noty, 3000, "torna alla partita", 500, 400);
+  /* NOTE: show_notify($noty, 3000, "torna alla partita", 500, 
+   *                   130 + ($table->points_n > 0 ? 50 : 0) + 
+   *                   (120 * ($table->points_n / MAX_POINTS)));
+   *       will be used when we refact notify js function following 
+   *       photoo class logic 
+   */ 
   
   return ($ret);
 }
@@ -2264,8 +2282,8 @@ function root_wellcome($user)
   GLOBAL $root_wellarr;
   $ret = "";
 
-  $timecur = time();
-  $dt = date("H:i ", $timecur);
+  $curtime = time();
+  $dt = date("H:i ", $curtime);
     
   for ($i = 0 ; $i < count($root_wellarr) ; $i++)
     $ret .= sprintf('chatt_sub("%s","%s");', $dt.NICKSERV, str_replace('"', '\"', $root_wellarr[$i]));
