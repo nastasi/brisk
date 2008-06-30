@@ -255,12 +255,12 @@ class Briskin5 {
     log_wr("LOCK_DATA ".FTOK_PATH."/table".$table_idx);
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
-    // FIXME monitor this step
+    // WARNING monitor this step
     if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
       echo "FTOK FAILED";
       exit;
     }
-    // FIXME monitor this step
+    // WARNING monitor this step
     if (($res = @sem_get($tok)) == FALSE) {
       echo "SEM_GET FAILED";
       exit;
@@ -293,15 +293,15 @@ class Briskin5 {
     
     $user_mesg = substr($mesg,6);
     
-    $timecur = time();
+    $curtime = time();
     
-    $dt = date("H:i ", $timecur);
+    $dt = date("H:i ", $curtime);
     if (strncmp($user_mesg, "/nick ", 6) == 0) {
       log_main($user->sess." chatt_send BEGIN");
 
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera o una cifra.");', $dt.NICKSERV, xcape($name_new));
+	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.");', $dt.NICKSERV);
 	  $user->step_inc();
 
 	  return;
@@ -382,7 +382,7 @@ class Briskin5 {
 							     $dt.xcape($user->name), xcape($user_mesg));
 	$user_cur->step_inc();
       }
-      log_legal($timecur, $user->sess, $user->name, 
+      log_legal($curtime, $user->sess, $user->name, 
 		($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
     }
   }
