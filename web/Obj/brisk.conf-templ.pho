@@ -11,7 +11,7 @@ $G_alarm_passwd = "yourpasswd";
 $G_is_local = FALSE;
 $G_black_list = array();
 
-$G_with_topbanner = TRUE;
+$G_with_topbanner = FALSE;
 $G_topbanner = '<div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigpict(this, \'out\', 0, 0);">
 <a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
 Torneo di briscola<br> chiamata - Milano<br> 17/05/2008</a>
