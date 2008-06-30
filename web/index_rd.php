@@ -259,15 +259,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	log_auth($user->sess, "Explicit logout.");
 
 	$user->reset();
-	/* factorized with ->reset()
-	$tmp_sess = $user->sess;
-	$user->sess = "";
-	step_unproxy($tmp_sess);
-	$user->name = "";
-	while (array_pop($user->comm) != NULL);	
-	$user->step = 0;
-	$user->the_end = FALSE;
-	*/
 
 	if ($user->subst == 'sitdown') {
 	  log_load("ROOM WAKEUP");
@@ -307,6 +298,8 @@ $is_page_streaming =  ((stristr($HTTP_USER_AGENT, "linux") &&
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+// header('Content-type: application/xml; charset="utf-8"',true);
+header('Content-type: text/plain; charset="utf-8"',true);
 
 if (!isset($myfrom))
      $myfrom = "";
