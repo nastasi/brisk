@@ -4,6 +4,10 @@ header append Cache-Control "public, no-store, last-modified, must-revalidate"
 <FilesMatch "\.php$">
 header append Pragma "no-cache"
 header append Expires "-1"
+php_value mbstring.http_input           "auto"
+php_value mbstring.internal_encoding    "UTF-8" 
+php_flag  mbstring.encoding_translation  On
+php_value mbstring.func_overload        "7"
 </FilesMatch>
 ExpiresActive On
 ExpiresByType image/jpg "access plus 4 days"
