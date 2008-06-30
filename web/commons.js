@@ -222,12 +222,17 @@ function createXMLHttpRequest() {
 function send_mesg(mesg)
 {
     var xhr_wr = createXMLHttpRequest();
-
+    var is_conn = (sess == "not_connected" ? false : true);
     
-    xhr_wr.open('GET', 'index_wr.php?sess='+sess+'&mesg='+mesg, true);
+    xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, (is_conn ? true : false));
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(null);
 
+    if (!is_conn) {
+        if (xhr_wr.responseText != null) {
+            eval(xhr_wr.responseText);
+        }
+    }
 }
 
 /* Stat: CHAT and TABLE */
