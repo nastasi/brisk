@@ -279,11 +279,9 @@ div.esco {
     z-index: 20;
     visibility: hidden;
     border: 1px solid gray;
-    align: left;
     text-align: left;
     width: 100px; 
     padding: 8px;
-    
 }
 
 .webstart a:link {
