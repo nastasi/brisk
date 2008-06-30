@@ -1,3 +1,20 @@
+0.14.0 ("spawn" branch) -  xx/06/2008
+        White space between logo and tables under IE 6 & 7 bug fixed.
+        Creation of tmpfs subdirs if not exists fixed.
+        Input encoding detection management fixed.
+        Help content error fixed.
+        All *printf funcs verified (args and formats) and fixed when needed.
+        All "align" attributes removed from "table" tags.
+        Content-type from 'application/xml; charset="utf-8"'
+            to 'text/plain; charset="utf-8"' as index_rd.php output.
+
+        Topbanner management moved to .conf file.
+        Unsessioned requests mode added to index_wr.php.
+        User statistics.
+        Refactored menu to supprt full tree.
+        Meeting links added to menu.
+        Roadmap and support entry added to menu.
+
 0.13.4 ("spawn" branch) -  17/05/2008
 	Serialization now includes postaction bug fixed.
         "Roadmap" and "whysupport" main menu items added.
