@@ -26,6 +26,7 @@
 body {
     background-image: url(null);
     background-color: #fafafa;
+    text-align: center;
 /* inherit from brisk.css
     background-repeat: no-repeat;
     background-position: top center;
@@ -43,7 +44,13 @@ body {
     overflow: auto;
     border: 1px solid grey;
     vertical-align: text-bottom;
+    text-align: left;
     /*	font-size: 10pt;*/
+}
+
+table.chattshort_table {
+    width: 98%; 
+    margin: auto;
 }
 
 .txtt {
@@ -153,6 +160,7 @@ img.seed3 {
 
 .subarea {
     top: 0px;	
+    text-align: center;
 }
 
 .points {

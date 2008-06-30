@@ -224,25 +224,25 @@ Hai vinto l'asta.<br> Scegli il seme:
 
 <div class="subarea">
 <div id="txt" class="chattshort"></div>
-    <table align=center style="width: 98%; margin: auto;"><tr><td style="width:1%; text-align: right;">
+    <table class="chattshort_table"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 
-<div id="flasou"></div>
+<div id="flasou" style="text-align: left;"></div>
 <hr>
-<div id="heartbit"></div>
+<div id="heartbit" style="text-align: left;"></div>
 <hr>
-<div id="imgct"></div>
+<div id="imgct" style="text-align: left;"></div>
 <hr>
-<div id="sandbox"></div>
-<div id="sandbox2"></div>
-<div id="sandbox3"></div>
+<div id="sandbox" style="text-align: left;"></div>
+<div id="sandbox2" style="text-align: left;"></div>
+<div id="sandbox3" style="text-align: left;"></div>
 <pre>
-<div id="xhrlog"></div>
+<div id="xhrlog" style="text-align: left;"></div>
 </pre>
-<div id="xhrdeltalog"></div>
+<div id="xhrdeltalog" style="text-align: left;"></div>
 </div>
 </body>
 </html>
