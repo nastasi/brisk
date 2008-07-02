@@ -299,12 +299,12 @@ $brisk_vertical_menu = '
 
 <div id="menu_raduni" class="webstart">
 <a href="http://www.anomalia.it/mop/photoo" 
-   onmouseover="menu_hide(0,2);"
+   target="_blank" onmouseover="menu_hide(0,2);"
    title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
 
 <!--
 <a href="http://www.anomalia.it/mop/photoo" 
-   onmouseover="menu_hide(0,2);"
+   target="_blank" onmouseover="menu_hide(0,2);"
    title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
 -->
 </div>
@@ -326,6 +326,7 @@ supported by:<br><br>
     
   /* Templates. */
   if ($ACTION == 'login') {
+    header('Content-type: text/html; charset="utf-8"',true);
 ?>
 <html>
 <head>
@@ -402,6 +403,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br>
 <?php
   }
   else if ($ACTION == 'room') {
+    header('Content-type: text/html; charset="utf-8"',true);
   ?>
 <html>
 <head>

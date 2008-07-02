@@ -32,6 +32,7 @@ if (is_proxy()) {
   exit;
 }
 
+header('Content-type: text/html; charset="utf-8"',true);
 ?>
 <html>
 <head>
