@@ -302,11 +302,9 @@ $brisk_vertical_menu = '
    target="_blank" onmouseover="menu_hide(0,2);"
    title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
 
-<!--
-<a href="http://www.anomalia.it/mop/photoo" 
+<a href="http://www.anomalia.it/mop/photoo?album=brisk_pc0806" 
    target="_blank" onmouseover="menu_hide(0,2);"
    title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
--->
 </div>
 </div>
 <br><br><br>
