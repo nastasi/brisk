@@ -238,10 +238,8 @@ $brisk_vertical_menu = '
 <div class="topmenu">
 <!-- <a target="_blank" href="/briskhome.php"></a> -->
 
-
-
+<div class="webstart_hilite">
 <img class="nobo" src="img/brisk_start.png" onmouseover="menu_show(\'menu_webstart\');">
-
 <div class="webstart" id="menu_webstart" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" 
@@ -307,6 +305,7 @@ $brisk_vertical_menu = '
    title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
 </div>
 </div>
+</div>
 <br><br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
@@ -344,6 +343,7 @@ supported by:<br><br>
    var g_withflash = false;
    var g_is_spawn = 0; 
    var gst  = new globst();
+   var topbanner_sfx, topbanner_dx;
 
    var sess = "not_connected";
   
@@ -424,6 +424,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br>
    var subst = "";
    var gst  = new globst();
    var g_is_spawn = 0; 
+   var topbanner_sfx, topbanner_dx;
 
    var g_withflash = false;
    var g_imgct= 0;
