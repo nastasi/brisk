@@ -1,0 +1,45 @@
+* { 
+    font-family: verdana;
+}
+
+body
+{ 
+  text-align: center;
+  background-image: none;
+  background-color: white;
+  }
+
+div.bug_cont
+{ 
+  margin: auto;
+  width: 800px;
+  text-align: left;
+  font-size: 14px;
+  padding: 8px;
+  }
+
+div.bug_form_out
+{ 
+  display: none;
+  text-align: center;
+  }
+
+div.bug_form 
+{
+  text-align: left;
+  margin: auto;
+  width: 90%;
+  padding: 8px;
+  background-color: #e0e0e0;
+  border: 1px solid #a0a0a0;
+ }
+
+div.bug_form_inn
+{ 
+  text-align: center;
+  }
+ 
+table.bug_form
+{
+  margin: auto;
+ }
