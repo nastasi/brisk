@@ -140,10 +140,14 @@ function removeEvent(obj,type,fn)
 
 function show_bigpict(obj, act, x, y)
 {
-   var big;
+   var big, sfx;
 
-   // alert("offsetTop: "+obj.offsetTop+"  offsetLeft: "+obj.offsetLeft+"obj.id: "+obj.id);
-   big = $(obj.id+"_big");
+   if (arguments.length > 4)
+       sfx = arguments[4];
+   else
+       sfx = '';
+
+   big = $(obj.id+"_big"+sfx);
    if (act == "over") {
        big.style.left = obj.offsetLeft + x+"px";
        big.style.top  = obj.offsetTop  + y+"px";
