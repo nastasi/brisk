@@ -46,12 +46,12 @@ div.header {
 
 div.topmenu {
     /* border: 1px solid red;  */
-    width:90px;
+    width:94px;
     margin:0;
     text-align: center;
     align: center;
     font-size: 10px;
-    padding:4px;	
+    padding:2px;	
 }
 
 div.proflash {
@@ -270,6 +270,13 @@ div.esco {
     align: center;
     text-align: center;
     /* background-color: green;  */
+}
+
+.webstart_hilite { 
+    background: #ffd780; 
+    border: 1px solid #ffae00;
+    padding: 6px; 
+    text-align: center;
 }
 
 .webstart {
