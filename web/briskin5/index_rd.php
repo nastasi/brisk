@@ -299,8 +299,9 @@ $is_page_streaming =  ((stristr($HTTP_USER_AGENT, "linux") &&
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-// header('Content-type: application/xml; charset="utf-8"',true);
-header('Content-type: text/plain; charset="utf-8"',true);
+header('Content-type: application/xml; charset="utf-8"',true);
+// header('Content-type: text/plain; charset="utf-8"',true);
+// header('Content-type: text/html; charset="utf-8"',true);
 
 if (!isset($myfrom))
      $myfrom = "";
