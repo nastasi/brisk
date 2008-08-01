@@ -1,0 +1,26 @@
+* { 
+margin: 0px;
+padding: 0px;
+ }
+
+h4 
+{ 
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+ul
+{
+  list-style-image: url('img/brisk_item6.png');
+  }
+
+li
+{ 
+  vertical-align: middle;
+  margin-left: 40px;
+ }
+
+dd
+{ 
+  margin-left: 40px;
+ }
