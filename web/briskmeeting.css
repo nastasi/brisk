@@ -3,6 +3,14 @@ margin: 0px;
 padding: 0px;
  }
 
+body { 
+  font-family: verdana, sans-serif; font-size: 14px; 
+ }
+
+table { 
+  font-family: verdana, sans-serif; font-size: 14px; 
+ }
+
 h4 
 { 
   margin-top: 8px;
@@ -24,3 +32,38 @@ dd
 { 
   margin-left: 40px;
  }
+
+table.ricapito
+{ 
+  margin: 8px auto 8px auto;
+  width: 80%; 
+  border-collapse: collapse;
+  border-spacing: 0px;
+
+  filter: alpha(opacity=90);
+  moz-opacity: 0.90;
+  opacity: 0.90;
+  
+ }
+
+table.ricapito td
+{ 
+  border: 1px solid black; 
+/*  background-color: #d6d6d6;*/
+  background-color: #f0f0f0;
+  color: black;
+  text-align: center;
+  padding: 4px;
+}
+
+table.ricapito th
+{ 
+  border: 1px solid black; 
+  padding: 4px;
+  }
+
+table.ricapito th.thnobo
+{ 
+  border: 0px solid black; 
+  }
+
