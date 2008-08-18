@@ -1,3 +1,6 @@
+<?php
+header('Content-type: text/html; charset="utf-8"',true);
+?>
 <html>
 <head>
 <title>Brisk Meeting</title>
@@ -22,7 +25,7 @@ giocando a briscola chiamata.<br>
 <h4>Date dei meeting</h4>
 <ul>
 <li>30 agosto - <a target="_blank" href="http://maps.google.com/maps?f=q&hl=it&geocode=&q=12,+via+roma,+paratico,+brescia,+italy&sll=37.0625,-95.677068&sspn=35.547176,84.023438&ie=UTF8&ll=45.665376,9.953957&spn=0.015326,0.041027&z=15">Sarnico (Bergamo)</a> sul lago d'Iseo</li>
-<li>7 settembre - <a target="_blank" href="http://maps.google.com/maps?f=q&hl=it&geocode=&q=24,+strada+del+certosino,+ravadese,+parma,+italy&sll=44.858274,10.373986&sspn=0.069603,0.164108&ie=UTF8&ll=44.867419,10.393639&spn=0.069591,0.164108&z=13" style="color:#0000FF;text-align:left">Ravadese (Parma)</a></li>
+<li>7 settembre - <a target="_blank" href="http://maps.google.it/maps?f=q&hl=it&geocode=&q=ravadese,+parma,+italy&ie=UTF8&ll=44.859763,10.37384&spn=0.127277,0.198441&z=12" style="color:#0000FF;text-align:left">Ravadese (Parma)</a></li>
 </ul>
 <br>
 <h4>Informazioni utili</h4>
@@ -31,8 +34,8 @@ giocando a briscola chiamata.<br>
 <tr><th class="thnobo"></th><th>Sarnico (Bergamo)</th><th>Ravedese (Parma)</th></tr>
 <tr><th>Quando:</th><td>30 Agosto</td>
 <td>7 Settembre</td></tr>
-<tr><th>Dove:</th><td><b>Hotel della stazione</b><br><a target="_blank" href="http://maps.google.com/maps?f=q&hl=it&geocode=&q=12,+via+roma,+paratico,+brescia,+italy&sll=37.0625,-95.677068&sspn=35.547176,84.023438&ie=UTF8&ll=45.665376,9.953957&spn=0.015326,0.041027&z=15">Via Roma, 12</a><br>Sarnico (Bergamo)</td>
-<td><b>Ca'Pianoni</b><br><a target="_blank" href="http://maps.google.com/maps?f=q&hl=it&geocode=&q=24,+strada+del+certosino,+ravadese,+parma,+italy&sll=44.858274,10.373986&sspn=0.069603,0.164108&ie=UTF8&ll=44.867419,10.393639&spn=0.069591,0.164108&z=13" style="color:#0000FF;text-align:left">Strada del Certosino,24</a><br>Ravedese (Parma)</td></tr>
+<tr><th>Dove:</th><td><b><a target="_blank" href="http://www.hotelstazioneparatico.it/">Hotel stazione</a></b><br><a target="_blank" href="http://maps.google.com/maps?f=q&hl=it&geocode=&q=12,+via+roma,+paratico,+brescia,+italy&sll=37.0625,-95.677068&sspn=35.547176,84.023438&ie=UTF8&ll=45.665376,9.953957&spn=0.015326,0.041027&z=15">Via Roma, 12</a><br>Sarnico (Bergamo)</td>
+<td><b>Per i riferimenti<br>esatti<br>contattate Manuel</b><br><a target="_blank" href="http://maps.google.it/maps?f=q&hl=it&geocode=&q=ravadese,+parma,+italy&ie=UTF8&ll=44.859763,10.37384&spn=0.127277,0.198441&z=12" style="color:#0000FF;text-align:left">Ravedese (Parma)</a></td></tr>
 <tr><th>Costo<br>del pranzo:</th><td>23 €(<a href="#" onmouseover="$('bg_menu').style.display = '';" onmouseout="$('bg_menu').style.display = 'none';">menu</a>)
 <div id="bg_menu" style="text-align: left; position: absolute; display: none; background: white; border: 1px solid black; padding: 4px;">
 pranzo:<br>
@@ -64,7 +67,7 @@ pranzo:<br>
 <li>acqua e vino
 </ul>
 </div></td></tr>
-<tr><th>Chiusura<br>prenotazioni:</th><td>28/9</td><td>1/10</td></tr>
+<tr><th>Chiusura<br>prenotazioni:</th><td>28 Agosto</td><td>1 Settembre</td></tr>
 <tr><th>Possibilità<br>di cenare:</th><td>Sì</td><td>No, salvo <br>richieste di massa<br>(min 10 persone)</td></tr>
 <tr><th>Possibilità<br> di pernottare:</th><td>Sì</td><td>No</td></tr>
 <tr><th title="per informazioni e prenotazioni contattateci!">Contatti e prenotazioni:</th><td><a href="mailto:grandebego@hotmail.it, susy.b@live.it?subject=briskmeeting_bg">Bego</a></td><td><a href="mailto:MANUEL-K2@hotmail.it?subject=briskmeeting_pr">Manuel-K2</a></td></tr>
