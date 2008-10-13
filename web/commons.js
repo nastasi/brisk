@@ -1029,3 +1029,22 @@ function playsound(tag, sound) {
 ' WIDTH=1 HEIGHT=1 TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"></OBJECT>';
    }
 }
+
+function topbanner_init()
+{
+//    setInterval(topbanner_cb, 666);
+;
+}
+
+function topbanner_cb()
+{
+    var a, b;
+
+    a = $('topbanner').style.backgroundColor;
+    b = $('topbanner').style.borderLeftColor;
+
+    $('topbanner').style.backgroundColor = b;
+    $('topbanner').style.borderColor = a+" "+a+" "+a+" "+a;
+
+    // console.log("A: "+a+"  B: "+b);
+}

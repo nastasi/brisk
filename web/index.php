@@ -349,6 +349,7 @@ supported by:<br><br>
   
    window.onload = function() {
      menu_init();
+     topbanner_init();
 
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
@@ -441,6 +442,7 @@ else {
 ?>
      // alert("INDEX START");
      menu_init();
+     topbanner_init();
      xhr_rd = createXMLHttpRequest();
      sess = "<?php echo "$sess"; ?>";
      tra = new train($('room_tit'));
