@@ -1,7 +1,10 @@
 /*
  *  brisk - commons.js
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +25,7 @@
 
 var PLAYERS_N = 3;
 var EXIT_BAN_TIME = 900;
+var cookiepath = "/brisk/";
 
 function $(id) { return document.getElementById(id); }
 
@@ -106,7 +110,53 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 
 })()
 
+function addEvent(obj,type,fn)
+{
+    if (obj.addEventListener) {
+        obj.addEventListener( type, fn, false);
+    }
+    else if (obj.attachEvent) {
+        obj["e"+type+fn] = fn;
+        obj[type+fn] = function() { obj["e"+type+fn]( window.event ); }
+        obj.attachEvent( "on"+type, obj[type+fn] );
+    }
+    else
+        throw new Error("Event registration not supported");
+}
+
+function removeEvent(obj,type,fn)
+{
+    if (obj.removeEventListener) {
+        obj.removeEventListener( type, fn, false );
+    }
+    else if (obj.detachEvent) {
+        obj.detachEvent( "on"+type, obj[type+fn] );
+        obj[type+fn] = null;
+        obj["e"+type+fn] = null;
+    }
+}
+
     // var card_pos = RANGE 0 <= x < cards_ea_n
+
+function show_bigpict(obj, act, x, y)
+{
+   var big, sfx;
+
+   if (arguments.length > 4)
+       sfx = arguments[4];
+   else
+       sfx = '';
+
+   big = $(obj.id+"_big"+sfx);
+   if (act == "over") {
+       big.style.left = obj.offsetLeft + x+"px";
+       big.style.top  = obj.offsetTop  + y+"px";
+       big.style.visibility = "visible";
+       }
+   else {
+       big.style.visibility = "hidden";
+       }
+}
 
 function rnd_int(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -134,10 +184,12 @@ function reset_images()
 
 function update_images()
 {
+    //    if (g_imgct % 10 == 0) alert("g_imgct: "+g_imgct+" xx "+g_preload_img_arr[g_imgct]);
     $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
-    if (g_imgct < g_preload_img_arr.length)
-	setTimeout(preload_images, 100, g_preload_img_arr, g_imgct);
-    g_imgct++;
+    if (g_imgct+1 < g_preload_img_arr.length) {
+        g_imgct++;
+        setTimeout(preload_images, 100, g_preload_img_arr, g_imgct-1);
+    }
     // $("imgct").innerHTML += "U";
 }
 
@@ -174,11 +226,17 @@ function createXMLHttpRequest() {
 function send_mesg(mesg)
 {
     var xhr_wr = createXMLHttpRequest();
-    // xhr_wr.open('GET', 'index_wr.php?sess='+sess+'&mesg='+encodeURIComponent(mesg), true);
-    xhr_wr.open('GET', 'index_wr.php?sess='+sess+'&mesg='+mesg, true);
+    var is_conn = (sess == "not_connected" ? false : true);
+    
+    xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, (is_conn ? true : false));
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(null);
 
+    if (!is_conn) {
+        if (xhr_wr.responseText != null) {
+            eval(xhr_wr.responseText);
+        }
+    }
 }
 
 /* Stat: CHAT and TABLE */
@@ -253,9 +311,25 @@ function act_help()
     send_mesg("help");
 }
 
+function act_tav()
+{
+    act_chatt('/tav '+$('txt_in').value); 
+    $('txt_in').value = '';
+}
+
 function act_about()
 {
     send_mesg("about");
+}
+
+function act_roadmap()
+{
+    send_mesg("roadmap");
+}
+
+function act_whysupport()
+{
+    send_mesg("whysupport");
 }
 
 function act_exitlock()
@@ -267,7 +341,7 @@ function safelogout()
 {
     var res;
     
-    if (g_exitlock < 3) 
+    if (g_exitlock < 2) 
 	res = window.confirm("Sei sicuro di volere abbandonare la partita?\nATTENZIONE: se esci adesso senza il consenso degli altri giocatori non potrai sederti ai tavoli per "+(Math.floor(EXIT_BAN_TIME/60))+" minuti.");    
     else 
 	res = window.confirm("Sei sicuro di volere abbandonare la partita?");
@@ -396,7 +470,9 @@ slowimg.prototype = {
 	if (this.step_n * this.deltat == this.time) {
 	    this.step_n--;
 	}
-	this.step_free = parseInt(this.step_n * this.free);
+        if (this.free < 1) {
+            this.step_free = parseInt(this.step_n * this.free);
+        }
     },
     
     start: function(st)
@@ -422,7 +498,7 @@ slowimg.prototype = {
 	    this.step_cur++;
 	    setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
 	    if (this.step_cur == this.step_free && this.st != null) {
-		if (this.st != null && this.st.st_loc < this.st.st_loc_new) {
+		if (this.st.st_loc < this.st.st_loc_new) {
 		    // alert("QUI1  " + this.step_cur + "  ZZ  "+  this.step_free);
 		    this.st.st_loc++;
 		    this.st = null;
@@ -435,13 +511,15 @@ slowimg.prototype = {
 	    // $("logz").innerHTML += "xxxxxxxxxxxxxxxCLEAR<br>";
 	    var date = new Date();
 	    // $("logz").innerHTML += "Timestop: " + date + "<br>";
+
+	    if (this.action != null) {
+		eval(this.action);
+	    }
+
 	    if (this.st != null && this.st.st_loc < this.st.st_loc_new) {
 		// alert("QUI2");
 		this.st.st_loc++;
 		this.st = null;
-	    }
-	    if (this.action != null) {
-		eval(this.action);
 	    }
 	    if (this.srcend != null) {
 		this.img.src = this.srcend;
@@ -697,15 +775,15 @@ function set_names(so,ea,ne,nw,we)
 {
 //    alert("EA: "+ea);
     $("name").innerHTML = so; 
-    $("name").title = so; 
+    $("name").title = unescapeHTML(so); 
     $("name_ea").innerHTML = ea;
-    $("name_ea").title = ea;
+    $("name_ea").title = unescapeHTML(ea);
     $("name_ne").innerHTML = ne;
-    $("name_ne").title = ne;
+    $("name_ne").title = unescapeHTML(ne);
     $("name_nw").innerHTML = nw;
-    $("name_nw").title = nw;
+    $("name_nw").title = unescapeHTML(nw);
     $("name_we").innerHTML = we;
-    $("name_we").title = we;
+    $("name_we").title = unescapeHTML(we);
 
     return;
 }
@@ -759,6 +837,8 @@ var fin = 0;
 function table_init() {
     var sux = new Array("", "_ea", "_ne", "_nw", "_we");
 
+    // console.log("table_init");
+
     remark_off();
     $("asta").style.visibility = "hidden";
     $("caller").style.visibility = "hidden";
@@ -769,6 +849,7 @@ function table_init() {
 	    $("card"+sux[e]+i).style.visibility = "hidden";
     }
     for (i=0 ; i < PLAYERS_N ; i++) {
+        // console.log("shut: "+"takes"+sux[i]);
 	$("takes"+sux[i]).style.visibility = "hidden";
 	}
 
@@ -792,6 +873,13 @@ var CHATT_MAXLINES = 40;
 /* PRO CHATT */
 function chatt_sub(name,str)
 {
+    var must_scroll = false;
+
+    // alert ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight);
+
+  if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
+      must_scroll = true;
+
   // alert("ARRIVA NAME: "+ name + "  STR:"+str);
   if (chatt_lines_n == CHATT_MAXLINES) {
     $("txt").innerHTML = "";
@@ -807,8 +895,13 @@ function chatt_sub(name,str)
     $("txt").innerHTML += chatt_lines[chatt_lines_n];
     chatt_lines_n++;
   }
-  $("txt").innerHTML;
-  $("txt").scrollTop = 10000000;
+  // $("txt").innerHTML;
+
+
+  if (must_scroll) {
+      $("txt").scrollTop = 10000000;
+  }
+  // alert("scTOP "+$("txt").scrollTop+"  scHEIGHT: "+$("txt").scrollHeight+" HEIGHT: "+getStyle($("txt"),"height", "height") );
 }
 
 /*
@@ -895,14 +988,63 @@ function room_checkspace(emme,tables,inpe)
     $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
 }
 
+function  unescapeHTML(cont) {
+    var div = document.createElement('div');
+    var memo = "";
+    var i;
+
+    div.innerHTML = cont;
+    if (div.childNodes[0]) {
+        if (div.childNodes.length > 1) {
+            if (div.childNodes.toArray)
+                alert("si puo");
+            else {
+                var length = div.childNodes.length, results = new Array(length);
+            while (length--)
+                results[length] = div.childNodes[length];
+                
+            for (i=0 ; i<results.length ; i++)
+	        memo = memo + results[i].nodeValue;
+            }
+
+            return (memo);
+        }
+        else {
+            return (div.childNodes[0].nodeValue);
+        }
+    }
+    else {
+        return ('');
+    }
+}
+
 function playsound(tag, sound) {
    // g_withflash is a global var
    if (g_withflash) {
       $(tag).innerHTML = '<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '+
 'codebase="http://active.macromedia.com/flash2/cabs/swflash.cab#version=4,0,0,0" id="mysound" WIDTH=1 HEIGHT=1>' +
-'<PARAM NAME="movie" VALUE="playsound.swf"><PARAM NAME="PLAY" VALUE="true"><PARAM NAME="LOOP" VALUE="false">' +
+'<PARAM NAME="movie" VALUE="../playsound.swf"><PARAM NAME="PLAY" VALUE="true"><PARAM NAME="LOOP" VALUE="false">' +
 '<PARAM NAME=FlashVars VALUE="streamUrl='+sound+'">' +
-'<EMBED swliveconnect="true" name="mysound" src="playsound.swf" FlashVars="streamUrl='+sound+'" PLAY="true" LOOP="false" '+
+'<EMBED swliveconnect="true" name="mysound" src="../playsound.swf" FlashVars="streamUrl='+sound+'" PLAY="true" LOOP="false" '+
 ' WIDTH=1 HEIGHT=1 TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"></OBJECT>';
    }
+}
+
+function topbanner_init()
+{
+//    setInterval(topbanner_cb, 666);
+;
+}
+
+function topbanner_cb()
+{
+    var a, b;
+
+    a = $('topbanner').style.backgroundColor;
+    b = $('topbanner').style.borderLeftColor;
+
+    $('topbanner').style.backgroundColor = b;
+    $('topbanner').style.borderColor = a+" "+a+" "+a+" "+a;
+
+    // console.log("A: "+a+"  B: "+b);
 }

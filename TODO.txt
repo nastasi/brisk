@@ -5,17 +5,59 @@
 
  TODO
  ====
+
    
    URGENT - tables spawn
+            DONE - link with photos
+            DONE - top banner in Etc file
+            DONE - spawn of a table
+	    DONE - data to cookies (removed table_idx from xhr calls also)
+	    DONE - set subst to shutdowner/shutdowned
+	    DONE - return to index.php
+            DONE - game's token
+	    DONE - recover of corrupted table data
+            DONE - closure of a table
+            DONE - flush of the table
+            DONE - security checks for right scope access
+            DONE - garbage collector management
+	    DONE -    recursive garbage - howto ?
+	    DONE - stat & subst in browser
+	    DONE - laccwr setting and exit if all players are unactive for some time
+	    DONE - the list of test case
+	    DONE - shm dimension
+	    DONE - remove unused parts
+	    DONE - move images
+            DONE - optimizations
+            DONE - cambiare titolo al tavolo
+            DONE - shutdowning lock tables
+            DONE - topbanner
+            DONE - public announcements
+            DONE - 10 sec to exit from table
 
-   NORM   - pubblic announcements
+	    FAR - inheritances
+   
+   TRAIN  -  DONE - add again in reload   
+             DONE - wag_set refact
+             DONE - filtra char speciali per title
+             DONE - chatt_send refact 
+             DONE - elenco dei giocatori
+             DONE - documentazione online
+             DONE - timeout management     
+             LATER - border color a muzzo
+       
+   NORM   - testament
+   NORM   - public announcements
+   NORM   - 10 sec to exit from table
+   NORM   - moving label for tables click
+
+----------------- join -----------------
+   NORM   - map
+
    NORM   - restart preload img
-   NORM   - chat vecchie in reload
    NORM   - tools dir with a main and some pages where check briscola tools.
-   NORM   - bottoni => immagini
    NORM   - watchdog
 
-   MIN    - cambiare titolo al tavolo
+   NORM   - chat vecchie in reload (forse)
 
  MIDDLE TODO
  ===========

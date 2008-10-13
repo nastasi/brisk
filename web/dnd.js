@@ -1,7 +1,10 @@
 /*
  *  brisk - dnd.js
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -520,10 +523,6 @@ function card_play_so(card_idx, x, y)
 {
     alert("card_play_so: unreachable function.");
 }
-function card_play_ne(card_idx, x, y)
-{
-    // alert("card_play_nw: card_pos="+ card_pos+"  card_idx="+card_idx+"  x="+x+"  y="+y);
-}
 
 /* CARD_PLAY_EA */
 function card_postplay_ea(card_pos)
@@ -858,42 +857,3 @@ function cards_take(win)
 	movimg.start(gst);
     }
 }
-
-function cards_hidetake(win)
-{
- 
-
-
-   
-}
-/*
-  window.onload = function() {
-  $("log").innerHTML += "            xxxxxxxxxxxxxxxxxxxxxONLOAD<br>"; 53; 
-
-
-  // $("imm2").style.left = 600;
-  // $("imm2").style.top  = 400;
-  var zigu = new slowimg($("imm"),300,100,15,"fin");
-  zigu.settime(1000);
-  zigu.start();
-  //	   setTimeout(function() { alert("FIN:" + fin); }, 5000);
-  }
-*/
-
-
-
-/*
-  window.onload = function() {
-  //
-  var greet = document.createElement("span");
-  greet.style.backgroundColor = "yellow";
-  greet.innerHTML = "Hello World!";
-  $("sandbox").appendChild(greet);
-  //
-  cards_dispose_so();
-
-  for (i=0 ; i < 8 ; i++) {
-  Drag.init($("card" + i), card_mouseup_cb);
-  }
-  }
-*/

@@ -1,7 +1,10 @@
 /*
  *  brisk - xhr.js
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +71,8 @@ function xhr_rd_start(sess,stat,subst,step)
     xhr_rd_newctx = "";
 
     /* NOTE document.uniqueID exists only under IE  */
-    // alert("di qui3");
+    // if (g_is_spawn == 1)
+    // alert("di qui3: "+(g_is_spawn == 1 ? "&table_idx="+g_table_idx : ""));
     xhr_rd.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom, true);
     //    try { 
     xhr_rd.onreadystatechange = function() { xhr_rd_cb(xhr_rd); }

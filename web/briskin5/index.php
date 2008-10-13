@@ -2,7 +2,10 @@
 /*
  *  brisk - table.php
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +23,30 @@
  * $Id$
  *
  */
+
+require_once("../Obj/brisk.phh");
+require_once("../Obj/proxyscan.phh");
+
+// Use of proxies isn't allowed.
+if (is_proxy()) {
+  exit;
+}
+
+header('Content-type: text/html; charset="utf-8"',true);
 ?>
 <html>
 <head>
-<title>Brisk - Tavolo</title>
-<link rel="shortcut icon" href="img/brisk_ico.png">
-<script type="text/javascript" src="dnd.js"></script>
-<script type="text/javascript" src="dom-drag.js"></script>
-<script type="text/javascript" src="commons.js"></script> 
-<script type="text/javascript" src="xhr.js"></script>
-<script type="text/javascript" src="preload_img.js"></script>
-<script type="text/javascript" src="table.js"></script>
-<script type="text/javascript" src="AC_OETags.js"></script>
-<link rel="stylesheet" type="text/css" href="brisk.css">
-<link rel="stylesheet" type="text/css" href="table.css">
+<title>Brisk - Tavolo <?php echo "$table_idx";?></title>
+<link rel="shortcut icon" href="../img/brisk_ico.png">
+<script type="text/javascript" src="../dnd.js"></script>
+<script type="text/javascript" src="../dom-drag.js"></script>
+<script type="text/javascript" src="../commons.js"></script> 
+<script type="text/javascript" src="../xhr.js"></script>
+<script type="text/javascript" src="../preload_img.js"></script>
+<script type="text/javascript" src="briskin5.js"></script>
+<script type="text/javascript" src="../AC_OETags.js"></script>
+<link rel="stylesheet" type="text/css" href="../brisk.css">
+<link rel="stylesheet" type="text/css" href="briskin5.css">
 </head>
 <body>
 <SCRIPT type="text/javascript">
@@ -49,15 +62,16 @@ var area_ptr;
 
 var gst  = new globst();
 gst.st = <?php 
-require_once("brisk.phh");
 
-log_load($sess, "LOAD: table.php");
+log_load("bin5/index.php");
 
 if (isset($laststate) == false) {
   $laststate = -1;
 }
 echo $laststate;
 ?>;
+var g_is_spawn=1;
+var g_table_idx=<?php echo "$table_idx";?>;
 
 var g_imgct= 0;
 var g_imgtot = g_preload_img_arr.length;
@@ -66,7 +80,7 @@ var g_exitlock = 0;
 window.onload = function() {
   g_withflash = DetectFlashVer(6,0,0);
   remark_off();
-  table_init();
+  // table_init();
   xhr_rd = createXMLHttpRequest();
   sess = "<?php echo "$sess"; ?>";
   
@@ -211,25 +225,25 @@ Hai vinto l'asta.<br> Scegli il seme:
 
 <div class="subarea">
 <div id="txt" class="chattshort"></div>
-    <table align=center style="width: 98%; margin: auto;"><tr><td style="width:1%; text-align: right;">
+    <table class="chattshort_table"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 
-<div id="flasou"></div>
+<div id="flasou" style="text-align: left;"></div>
 <hr>
-<div id="heartbit"></div>
+<div id="heartbit" style="text-align: left;"></div>
 <hr>
-<div id="imgct"></div>
+<div id="imgct" style="text-align: left;"></div>
 <hr>
-<div id="sandbox"></div>
-<div id="sandbox2"></div>
-<div id="sandbox3"></div>
+<div id="sandbox" style="text-align: left;"></div>
+<div id="sandbox2" style="text-align: left;"></div>
+<div id="sandbox3" style="text-align: left;"></div>
 <pre>
-<div id="xhrlog"></div>
+<div id="xhrlog" style="text-align: left;"></div>
 </pre>
-<div id="xhrdeltalog"></div>
+<div id="xhrdeltalog" style="text-align: left;"></div>
 </div>
 </body>
 </html>

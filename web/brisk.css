@@ -1,7 +1,10 @@
 /*
  *  brisk - brisk.css
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +24,8 @@
  */
 
 body {
-    background-image: url('img/bg_capodanno.jpg'); 
+    background-image: url('img/bg_spawn2.jpg'); 
+    background-color: #fafafa;
     background-repeat: no-repeat;
     background-position: top center; 
     margin:0px;
@@ -52,6 +56,13 @@ img.nobo {
     border-width: 0px;
     display: block; 
     margin: auto;
+}
+
+img.nobohide {
+    position:     absolute;
+    border-width: 0px;
+    visibility: hidden;
+    z-index: 12;
 }
 
 .notify { 

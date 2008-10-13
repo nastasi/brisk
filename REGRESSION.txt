@@ -1,0 +1,44 @@
+Test base di funzionamento
+==========================
+v - partita avviata 
+v - partita conclusa
+v - partita avviata con un quarto in piedi 
+v - partita conclusa con un quarto in piedi
+
+Test del timeout della _rd
+==========================
+v - partita avviata con un giocatore freeze
+v - partita avviata con un giocatore freeze e un quarto in piedi
+v - partita avviata con tutti i giocatori freeze e un quarto in piedi
+
+Test dei resync di pagina per rientro
+=====================================
+v - partita avviata, browser killato e rientro in index.php
+v - al tavolo, browser killato e rientro in briskin5/index.php
+
+Test verifica degli stati sui browser (var mostrate in basso)
+=============================================================
+v - dal login
+v - ritorno in room dopo un kill
+v - ritorno al tavolo dopo un kill
+
+Test di chiusura della finestra del browser
+===========================================
+v - al tavolo, chiusura finestra
+v - partita avviata, chiusura finestra      
+
+Varie
+=====
+v - gestione dei ban temporanei
+
+Bugfix
+======
+v - partita conclusa, garbage_manager lanciato da giocatore in room 
+    index_rd_nop.php = "<?php sleep(1); exit; ?>" 
+    in brisk.phh si accorcia il timeout per _rd da 20 a 3 sec
+    si prepara l'uscita da un tavolo
+    parall. 
+    . cp index_rd.php index_rd_ok.php ; cp index_rd_nop.php index_rd.php ; sleep 10 ; kill -STOP <pid dei firefox> ; sleep 5 ; cp index_rd_ok.php index_rd.php
+    . si aspettano 5 sec e poi si esce dal tavolo
+      si accede da un altro browser a brisk (forzando così il garbage manager)
+      kill -CONT <pid dei firefox>

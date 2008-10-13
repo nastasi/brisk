@@ -24,16 +24,17 @@
  *
  */
 
-require_once("Obj/brisk.phh");
-// require_once("Obj/proxyscan.phh");
-require_once("briskin5/Obj/briskin5.phh");
+require_once("../Obj/brisk.phh");
+// require_once("../Obj/proxyscan.phh");
+require_once("Obj/briskin5.phh");
 
 // Use of proxies isn't allowed.
 // if (is_proxy()) {
 //   sleep(5);
 //   exit;
-//}
-log_load("index_rd.php");
+// }
+
+log_load("LOAD: bin5/index_rd.php ".$QUERY_STRING);
 
 $first_loop = TRUE;
 $the_end = FALSE;
@@ -45,7 +46,7 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 
 function shutta()
 {
-  log_rd2("SHUTTA!".connection_status());
+  log_rd2("bin5 SHUTTA!".connection_status());
 }
 
 
@@ -56,66 +57,69 @@ function unrecerror()
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  log_rd2("UNREC_ERROR:".var_export(debug_backtrace()));
-  return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
+  log_rd2("UNREC_ERROR");
+  return (sprintf('the_end=true; window.onunload = null; document.location.assign("../index.php");'));
 }
 
-function page_sync($sess, $page, $table_idx, $table_token)
+function page_sync($sess, $page)
 {
   GLOBAL $is_page_streaming;
 
-  log_rd2("page_sync:".var_export(debug_backtrace()));
-
   $is_page_streaming = TRUE;
-
   log_rd2("PAGE_SYNC");
-  return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
+  return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
 }
 
 
 
 
-function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step)
+function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx, $table_token)
 {
   GLOBAL $is_page_streaming, $first_loop;
   
   $ret = FALSE;
-  $room = FALSE;
+  $bri = FALSE;
 
   // log_rd2("M");
   /* Sync check (read only without modifications */
   ignore_user_abort(TRUE);
-  if (($sem = Room::lock_data()) != FALSE) { 
+  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
     // Aggiorna l'expire time lato server
     if  ($first_loop == TRUE) {
       log_only("F");
-      $room = &Room::load_data();
-      if (($user = &$room->get_user($sess, $idx)) == FALSE) {
-	Room::unlock_data($sem);
+
+      // VERIFICARE TUTTE LE LOAD_DATA E PRENDERE CONTROMISURE NEL CASO FALLISCANO //
+
+      if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) {
+	Briskin5::unlock_data($sem);
         ignore_user_abort(FALSE);
 	return (unrecerror());
       }
-      log_auth($sess, "update lacc");
+      if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
+	Briskin5::unlock_data($sem);
+        ignore_user_abort(FALSE);
+	return (unrecerror());
+      }
+      log_auth($sess, "bin5::update lacc");
       $user->lacc = time();
 
-      log_main("pre garbage_manager TRE");
-      $room->garbage_manager(FALSE);
+      $bri->garbage_manager(FALSE);
       
-      Room::save_data($room);
+      Briskin5::save_data($bri);
       $first_loop = FALSE;
     }
 
     log_lock("U");
-    Room::unlock_data($sem);
+    Briskin5::unlock_data($sem);
     ignore_user_abort(FALSE);
   }
   else {
     return (FALSE);
   }
-    
+  
   if (($proxy_step = step_get($sess)) != FALSE) {
     // log_rd2("Postget".$proxy_step."zizi");
-
+    
     if ($cur_step == $proxy_step) {
       log_lock("P");
       return (FALSE);
@@ -125,52 +129,51 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
   }
   else {
-      log_only2("R");
+    log_only2("R");
   }
-
-  if ($room == FALSE) {
+  
+  if ($bri == FALSE) {
     do {
       ignore_user_abort(TRUE);
-      if (($sem = Room::lock_data()) == FALSE) 
+      if (($sem = Briskin5::lock_data($table_idx)) == FALSE) 
 	break;
       
       log_lock("P");
-      if (($room = &Room::load_data()) == FALSE) 
+      if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) 
 	break;
     } while (0);
     
     if ($sem != FALSE)
-      Room::unlock_data($sem);
+      Briskin5::unlock_data($sem);
     
     ignore_user_abort(FALSE);
-    if ($room == FALSE) 
-      return (FALSE);
+    if ($bri == FALSE) 
+      return (unrecerror());
   }
   
-  if (($user = &$room->get_user($sess, $idx)) == FALSE) {
+  if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
     return (unrecerror());
   }
 
   /* Nothing changed, return. */
   if ($cur_step == $user->step) 
-    return (FALSE);
+    return;
 
   log_rd2("do other ++".$cur_stat."++".$user->stat."++".$cur_step."++".$user->step);
 
   if ($cur_step == -1) {
     // FUNZIONE from_scratch DA QUI 
     ignore_user_abort(TRUE);
-    $sem = Room::lock_data();
-    $room = &Room::load_data();
-    if (($user = &$room->get_user($sess, $idx)) == FALSE) {
-      Room::unlock_data($sem);
+    $sem = Briskin5::lock_data($table_idx);
+    $bri = &Briskin5::load_data($table_idx, $table_token);
+    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
+      Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
       return (unrecerror());
     }
-    if ($user->the_end) { 
-      log_rd2("main_check: the end".var_export(debug_backtrace()));
+    if ($user->the_end) 
       $is_page_streaming = TRUE;
-    }
+
 
     if ($user->trans_step != -1) {
       log_rd2("TRANS USATO ".$user->trans_step);
@@ -178,56 +181,52 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       $user->trans_step = -1;
 
 
-      Room::save_data($room);
-      Room::unlock_data($sem);
+      Briskin5::save_data($bri);
+      Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
     }
     else {
-       log_rd2("TRANS NON ATTIVATO");
-//        ARRAY_POP DISABLED
-//        log_rd2("TRANS NON ATTIVATO, clean del comm array");
-//        while (($el = array_pop($user->comm)) != NULL) { 
-//          log_rd2("clean element [".$el."]");
-//        }
-//        //        $user->step_inc(COMM_N + 1);
-//        Room::save_data($room);
-//        //        $new_step = $user->step;
-	 
-       Room::unlock_data($sem);
-       ignore_user_abort(FALSE);
+      log_rd2("TRANS NON ATTIVATO");
+
+//       ARRAY_POP DISABLED
+//       while (array_pop($user->comm) != NULL);
+//       // $user->step_inc(COMM_N + 1);
+//       Briskin5::save_data($bri);
+
+      Briskin5::unlock_data($sem);
+      ignore_user_abort(FALSE);
     }
   }
       
   if ($cur_step == -1) {
-    log_rd2("PRE-NEWSTAT: ".$user->stat);
+    log_rd2("PRE-NEWSTAT.");
 
-    if ($user->stat == 'room') {
-      log_rd("roomma ".$user->step);
-      $ret .= $room->show_room($user->step, &$user);
-
-      // TODO uncomment and test
-      /* NOTE the sets went common */
-      $new_stat =  $user->stat;
-      $new_subst = $user->subst;
-      $new_step =  $user->step;
-    }
     /***************
      *             *
      *    TABLE    *
      *             *
      ***************/
-    else if ($user->stat == 'table') {
-      log_load("RESYNC");
-      return (page_sync($user->sess, "briskin5/index.php", $user->table, $user->table_token));
+    if ($user->stat == "table") {      
+      $ret = show_table(&$bri,&$user,$user->step,FALSE,FALSE);
+
+      log_rd2("SENDED TO THE STREAM: ".$ret);
     }
     log_rd2("NEWSTAT: ".$user->stat);
+
+    $new_stat =  $user->stat;
+    $new_subst = $user->subst;
+    $new_step =  $user->step;
   }
   else {
     ignore_user_abort(TRUE);
-    $sem = Room::lock_data();
-    $room = &Room::load_data();
-    if (($user = &$room->get_user($sess, $idx)) == FALSE) {
-      Room::unlock_data($sem);
+    $sem = Briskin5::lock_data($table_idx);
+    if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) {
+      Briskin5::unlock_data($sem);
+      ignore_user_abort(FALSE);
+      return (unrecerror());
+    }
+    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
+      Briskin5::unlock_data($sem);
       ignore_user_abort(FALSE);
       return (unrecerror());
     }
@@ -236,18 +235,18 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	if ($cur_step + COMM_N < $user->step) {
 	  if (($cur_stat != $user->stat)) {
 	    $to_stat = $user->stat;
-	    Room::unlock_data($sem);
+	    Briskin5::unlock_data($sem);
 	    ignore_user_abort(FALSE);
-	    log_load("RESYNC");
-	    return (page_sync($user->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $user->table, $user->table_token));
+	    return (page_sync($user->sess, $to_stat == "table" ? "index.php" : "../index.php"));
 	  }
 	  log_rd2("lost history, refresh from scratch");
-          $new_step = -1;
+	  $new_step = -1;
 	  break;
 	} 
 	for ($i = $cur_step ; $i < $user->step ; $i++) {
-	  log_rd2("ADDED TO THE STREAM: ".$user->comm[$i % COMM_N]);
-	  $ret .= $user->comm[$i % COMM_N];
+	  $ii = $i % COMM_N;
+	  log_wr("TRY RET ".$i."  COMM_N ".COMM_N."  II ".$ii);
+	  $ret .= $user->comm[$ii];
 	}
 	$new_stat =  $user->stat;
 	$new_subst = $user->subst;
@@ -257,23 +256,25 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if ($user->the_end == TRUE) {
 	log_rd2("LOGOUT BYE BYE!!");
 	log_auth($user->sess, "Explicit logout.");
-
-	$user->reset();
-
-	if ($user->subst == 'sitdown') {
-	  log_load("ROOM WAKEUP");
-	  $room->room_wakeup(&$user);
-	}
+	$tmp_sess = $user->sess;
+	$user->sess = "";
+	step_unproxy($tmp_sess);
+	
+	$user->name = "";
+	$user->the_end = FALSE;
+	
+	if ($user->subst == 'sitdown')
+	  $bri->room_wakeup(&$user);
 	else if ($user->subst == 'standup')
-	  $room->room_outstandup(&$user);
+	  $bri->room_outstandup(&$user);
 	else
 	  log_rd2("LOGOUT FROM WHAT ???");
 	  
-	Room::save_data($room);
+	Briskin5::save_data($bri);
       }
     }
 	  
-    Room::unlock_data($sem);
+    Briskin5::unlock_data($sem);
     ignore_user_abort(FALSE);
   }
 
@@ -306,7 +307,7 @@ if (!isset($myfrom))
      $myfrom = "";
 if (!isset($subst))
      $subst = "";
-log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming);
+log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming."USER_AGENT:".$HTTP_USER_AGENT);
 
 
 $endtime = time() + STREAM_TIMEOUT;
@@ -316,12 +317,12 @@ $old_step =  $ext_step = $step;
 
 for ($i = 0 ; time() < $endtime ; $i++) {
   // log_rd("PRE MAIN ".$step);;
-  if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step)) != FALSE) {
+  if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step, $table_idx, $table_token)) != FALSE) {
     echo '@BEGIN@';
     // log_rd2(sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
     echo "$ret";
     echo ' @END@'; 
-    log_send("IS_PAGE: ".($is_page_streaming == TRUE ? "TRUE" : "FALSE")."EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
+    log_send("EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
     flush();
     if ($is_page_streaming)
       break;

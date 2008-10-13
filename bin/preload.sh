@@ -21,7 +21,7 @@
 
 
 OUTFILE=web/preload_img.js
-IMGPATH=../brisk-img/img
+IMGPATH=../brisk-img
 
 # (
 # echo '<?php'
@@ -30,29 +30,33 @@ IMGPATH=../brisk-img/img
 # echo '?>'
 # ) > $OUTFILE
 
+function imglist () {
+    ls -S `find $1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`
+}
+
 rm -f $OUTFILE
 
 (
 echo "var g_preload_img_arr = new Array( "
 first=1
 spa="            "
-for i in `ls -S $IMGPATH/*.{jpg,png,gif} | grep -v '/src_'`; do
+ltri="`echo "$IMGPATH" | wc -c`"
+for i in `imglist $IMGPATH`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
-      if [ $ct -eq 4 ]; then
+      if [ $((ct % 2)) -eq 0 ]; then
          echo
          echo -n "$spa"
-         ct=0
       fi
    else
       echo -n "$spa"
    fi
-   outna="img/`basename $i`"
+   outna="`echo "$i" | cut -c $((ltri + 1))-`"
    echo -n "\"$outna\""
    ct=$((ct + 1))
    first=0
 done
-
+echo "CT: $ct" >&2
 echo ");"
 ) >> $OUTFILE
 
@@ -62,18 +66,17 @@ first=1
 sum=0
 spa="            "
 tot=0
-for i in `ls -S $IMGPATH`; do
+for i in `imglist $IMGPATH`; do
    sz="`stat -c '%s' $IMGPATH/$i`"
    tot=$((tot + sz))
 done
 
-for i in `ls -S $IMGPATH`; do
+for i in `imglist $IMGPATH`; do
    if [ $first -ne 1 ]; then
       echo -n ", "
-      if [ $ct -eq 8 ]; then
+      if [ $((ct % 8)) -eq 0 ]; then
          echo
          echo -n "$spa"
-         ct=0
       fi
    else
       echo -n "$spa"
@@ -85,6 +88,8 @@ for i in `ls -S $IMGPATH`; do
    ct=$((ct + 1))
    first=0
 done
+
+echo "CT2: $ct" >&2
 
 echo ");"
 ) >> $OUTFILE

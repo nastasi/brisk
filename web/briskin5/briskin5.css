@@ -1,7 +1,10 @@
 /*
- *  brisk - table.css
+ *  brisk - briskin5.css
  *
- *  Copyright (C) 2006 matteo.nastasi@milug.org
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +23,34 @@
  *
  */
 
+body {
+    background-image: url(null);
+    background-color: #fafafa;
+    text-align: center;
+/* inherit from brisk.css
+    background-repeat: no-repeat;
+    background-position: top center;
+    margin:0px;
+
+    font-size: 12px;
+    padding: 0px;
+
+    align: center;
+*/
+}
+
 .chattshort {
     height: 70px;
     overflow: auto;
     border: 1px solid grey;
     vertical-align: text-bottom;
+    text-align: left;
     /*	font-size: 10pt;*/
+}
+
+table.chattshort_table {
+    width: 98%; 
+    margin: auto;
 }
 
 .txtt {
@@ -135,6 +160,7 @@ img.seed3 {
 
 .subarea {
     top: 0px;	
+    text-align: center;
 }
 
 .points {
