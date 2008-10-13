@@ -86,6 +86,9 @@ pranzo:<br>
 </ul>
 <br>
 Il termine serale &egrave; lasciato naturalmente alle esigenze di ognuno.<br>
+<br>
+<b>Un particolare ringraziamento a Erica e Mary  per l'aiuto dato
+nell'organizzazione del meeting di Parma.</b><br>
 
 <br>
 Saluti a tutti, Bego e Manuel.<br>
