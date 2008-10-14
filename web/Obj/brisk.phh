@@ -75,9 +75,9 @@ require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "spawn-0.14.2";
+$G_brisk_version = "2.0.0";
 
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Più risalto a Start - Beta8.',
+$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Nuova versione stabile.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 

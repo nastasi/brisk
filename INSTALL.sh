@@ -11,8 +11,8 @@ proxy_path="$HOME/brisk-priv/proxy"
 web_only="FALSE"
 brisk_conf="brisk.conf.pho"
 
-if [ -f $HOME/.spawn_install ]; then
-   . $HOME/.spawn_install
+if [ -f $HOME/.brisk_install ]; then
+   . $HOME/.brisk_install
 fi
 if [ "x$cookie_path" = "x" ]; then
    cookie_path=$web_path
