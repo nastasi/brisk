@@ -75,7 +75,7 @@ Bevande:<br>
 
 </table>
 
-<h4>Come si articoleranno le giornate</h4>
+<h4>Come si articoler&agrave; la giornata</h4>
 <ul>
 <li>ritrovo in tarda mattinata (9:30-10:00)</li>
 
