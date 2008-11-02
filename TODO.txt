@@ -1,10 +1,34 @@
 /* 
 
- TESTING
- ======= 
-
  TODO
  ====
+   - login 
+       se pass:
+           richiede per l' utente un token (tutta la parte backend va un minimo studiata)
+           lo legge, ci hasha la password
+           invia la pass al server hashata
+       se non pass:
+           check del login e return corretto
+       oggetto in shm single table con ( "ip", "login", timestamp ) e suo management
+       STUDIARE UN ANTI-DOS
+
+   - login modify
+   - db (fake)
+   - display auth
+   - db (minimal)
+     - db admin page
+     - user db admin
+   - work background
+   - reserved tables
+
+
+ minor
+   - auth after login
+  
+   DONE - room javascript refactoring
+
+ BRISK2 (spawn)
+ ======
 
    
    URGENT - tables spawn
