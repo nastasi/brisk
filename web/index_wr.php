@@ -25,6 +25,7 @@
  */
 
 require_once("Obj/brisk.phh");
+require_once("Obj/auth.phh");
 // require_once("Obj/proxyscan.phh");
 require_once("briskin5/Obj/briskin5.phh");
 
@@ -65,7 +66,39 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   Room::unlock_data($sem);
   $argz = explode('|', $mesg);
 
-  if ($argz[0] == 'help') {
+  if ($argz[0] == 'getchallenge') {
+    if (($a_sem = Challenges::lock_data()) != FALSE) { 
+      log_main("chal lock data success");
+      
+      if (($chal = &Challenges::load_data()) != FALSE) {
+        $chal_save = FALSE;
+        $curtime = time();
+
+        $chal_save |= $chal->garbage_manager();
+        $token =  uniqid("");
+        // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
+        // exit;
+
+        if ($chal->add($argz[1], $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
+          echo '0|'.$token;
+          $chal_save = TRUE;
+        }
+        else {
+          echo '1|';
+        }
+        if ($chal_save) {
+          Challenges::save_data(&$chal);
+        }
+      }
+      
+
+      Challenges::unlock_data($a_sem);
+    }
+  }
+  else if ($argz[0] == 'auth') {
+    printf("challenge|ok");
+  }
+  else if ($argz[0] == 'help') {
     echo show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
   }
   else if ($argz[0] == 'about') {
@@ -79,7 +112,7 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   }
   else { 
     log_wr("Get User Error");
-    echo "Get User Error";
+    echo "Get User Error:" + $argz[0];
   }
   exit;
 }

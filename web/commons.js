@@ -239,6 +239,26 @@ function send_mesg(mesg)
     }
 }
 
+function server_request(mesg)
+{
+    var xhr_wr = createXMLHttpRequest();
+    
+    var is_conn = (sess == "not_connected" ? false : true);
+    
+    console.log("server_request:preresp: "+xhr_wr.responseText);
+
+    xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, false);
+    xhr_wr.onreadystatechange = function() { return; };
+    xhr_wr.send(null);
+    
+    if (xhr_wr.responseText != null) {
+        console.log("server_request:resp: "+xhr_wr.responseText);
+        return (xhr_wr.responseText);
+    } 
+    else
+        return (null);
+}
+
 /* Stat: CHAT and TABLE */
 
 function chatt_checksend(obj,e)

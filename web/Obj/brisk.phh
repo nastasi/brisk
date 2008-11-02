@@ -27,7 +27,7 @@ define(BRISK_CONF, "brisk.conf.pho");
 define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
 define(PROXY_PATH, "/var/lib/brisk_proxy");
-define(TABLES_N, 32);
+define(TABLES_N, 12);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
@@ -987,9 +987,9 @@ class Room {
     $ret .= sprintf('$("myname").innerHTML = "<b>%s</b>";', xcape($user->name));
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       $ret .= $this->table_content($user, $i);
-      $act_content = table_act_content(($user->subst == 'standup'), 
+      $ret .= table_act_content(($user->subst == 'standup'), 
 				     $this->table[$i]->player_n, $i, $user->table);
-      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $i, $act_content);
+      // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $i, $act_content);
       if ($this->table[$i]->wag_own != NULL) 
         $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->table[$i]->wag_own->name, $this->table[$i]->wag_com);
       else 
@@ -1067,8 +1067,8 @@ class Room {
 	$ret .= $this->table_content($user_cur, $table_idx);
 	$ret .= $this->standup_content($user_cur);
 	
-	$act_content = table_act_content(FALSE, 0, $table_idx, $user->table);
-	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	$ret .= table_act_content(FALSE, 0, $table_idx, $user->table);
+	// $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
 	
 	if ($user_cur == $user) {
@@ -1076,13 +1076,15 @@ class Room {
 	  $ret .=  'subst = "standup"; tra.show(); ';
 	  // clean the action buttons in other tables
 	  for ($e = 0 ; $e < TABLES_N ; $e++) {
-	    if ($this->table[$e]->player_n < PLAYERS_N)
-	      $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user->table));
+	    if ($this->table[$e]->player_n < PLAYERS_N) {
+	      // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user->table));
+	      $ret .= table_act_content(TRUE, 0, $e, $user->table);
+            }
 	  }
 	}
 	else {
-	  $act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
-	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	  $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
+	  // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	}
       }
       log_wr("ROOM_WAKEUP: ".$ret);
@@ -1156,8 +1158,8 @@ class Room {
 	$ret .= $this->table_content($user_cur, $table_idx);
 	$ret .= $this->standup_content($user_cur);
 	
-	$act_content = table_act_content(FALSE, 0, $table_idx, $user_cur->table);
-	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	$ret .= table_act_content(FALSE, 0, $table_idx, $user_cur->table);
+	// $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
 	for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
 	  if ($user_cur == $user_tab[$tab_idx]) 
@@ -1183,8 +1185,8 @@ class Room {
 	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
 	log_main("JOIN_WAKEUP more");
-	$act_content = table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
-	$ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	$ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
+	// $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	log_main("JOIN_WAKEUP end more");
       }
       log_wr("ROOM_JOIN_WAKEUP: ".$ret);
@@ -1264,14 +1266,14 @@ class Room {
 	$ret .=  'subst = "sitdown"; tra.hide(); ';
 	// clean the action buttons in other tables
 	for ($e = 0 ; $e < TABLES_N ; $e++) {
-	  $act_content = table_act_content(FALSE, 0, $e, $user_cur->table);
-	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, $act_content);
+	  $ret .= table_act_content(FALSE, 0, $e, $user_cur->table);
+	  // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, $act_content);
 	}
       }
       else if ($table_idx > -1) {
 	if ($table->player_n == PLAYERS_N) {
-	  $act_content = table_act_content(($user_cur->subst == 'standup'), PLAYERS_N, $table_idx, $user_cur->table);
-	  $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
+	  $ret .= table_act_content(($user_cur->subst == 'standup'), PLAYERS_N, $table_idx, $user_cur->table);
+	  // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	}
       }
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
@@ -1683,7 +1685,6 @@ class Room {
   {
     GLOBAL $sess;
     
-    $ret =   FALSE;
     $shm =   FALSE;
     
     // var_dump($room);
@@ -1711,7 +1712,7 @@ class Room {
     if ($shm)
       shm_detach($shm);
     
-    return ($ret);
+    return (FALSE);
   }
 
   function lock_data()
@@ -1746,7 +1747,7 @@ class Room {
     return (sem_release($res));
   }
 
-  function standup_content($user)
+  function standup_content_old($user)
   {
     $ret = "";
     $content = "";
@@ -1791,8 +1792,53 @@ class Room {
     
     return ($ret);
   }
+
+
+
+  function standup_content($user)
+  {
+    $ret = "";
+    $content = "";
+    
+    if ($user->stat != 'room')
+      return;
+    
+    for ($e = 0 , $ct = 0 ; $ct < 4 && $e < MAX_PLAYERS ; $e++) {
+      if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
+        continue;
+      $ct++;
+    }
+    
+    // $content .= sprintf('<table cols=\\"%d\\" class=\\"table_standup\\">', $ct);
+    
+    $content = ' j_stand_cont( [ ';
+
+    for ($e = 0 , $ct = 0 ; $e < MAX_PLAYERS ; $e++) {
+      if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
+        continue;
+      
+      $flags = 0;
+      
+      if ($this->user[$e]->subst == "standup") {
+        if ($this->user[$e] == $user) 
+          { 
+            $flags |= 1;
+          }
+        
+        $content .= sprintf('%s[ %d, \'%s\' ]',($ct > 0 ? ', ' : ''), $flags, xcape($this->user[$e]->name));
+        $ct++;
+      }
+    }
+    $content .= ' ]);';
+    
+    // $content2 = '<input class=\\"button\\" name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\">';
+    // $ret .= sprintf('$("standup").innerHTML = "%s";  $("esco").innerHTML = "%s";', 
+    // $content, $content2);
+    
+    return ($content);
+  }
   
-  function table_content($user, $table_idx)
+  function table_content_old($user, $table_idx)
   {
     $content = "";
     $ret = "";
@@ -1829,6 +1875,42 @@ class Room {
     return ($ret);
   }
 
+
+  function table_content($user, $table_idx)
+  {
+    $content = "";
+    $ret = "";
+    // TODO
+    //
+    //   Si possono usare i dati nella classe table
+    //
+    
+    $sess = $user->sess;
+    $table = &$this->table[$table_idx];
+    
+    if ($user->stat != 'room')
+      return;
+    
+    $content = "[ ";
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+      $user_cur = &$this->user[$table->player[$i]];
+
+      $flags = 0;
+
+      if ($user_cur == $user) 
+        $flags = 1;
+      
+      log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
+      
+      $content .= sprintf('%s[ %d, \'%s\' ]',($i == 0 ? '' : ', '), $flags, xcape($user_cur->name));
+    }
+
+    $content .= ' ]';
+
+    $ret .= sprintf('j_tab_cont(%d, %s);', $table_idx, $content);
+    
+    return ($ret);
+  }
 
 } // end class Room
 
@@ -2088,7 +2170,7 @@ function unlock_banlist($res)
   return (sem_release($res));
 }
 
-function table_act_content($isstanding, $sitted, $table, $cur_table)
+function table_act_content_old($isstanding, $sitted, $table, $cur_table)
 {
   $ret = "";
 
@@ -2106,6 +2188,27 @@ function table_act_content($isstanding, $sitted, $table, $cur_table)
   return ($ret);
 }
 
+function table_act_content($isstanding, $sitted, $table, $cur_table)
+{
+  $ret = "";
+
+  if ($isstanding) {
+    if ($sitted < PLAYERS_N) {
+      $act = 'sit';
+    }
+  }
+  else {
+    if ($table == $cur_table)
+      $act = 'wake';
+    else
+      $act = 'none';
+  }
+
+  if ($act != '')
+    $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
+
+  return ($ret);
+}
 
 function show_notify($text, $tout, $butt, $w, $h)
 {

@@ -336,6 +336,7 @@ supported by:<br><br>
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
+<script type="text/javascript" src="room.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 
@@ -376,15 +377,18 @@ supported by:<br><br>
 <div style="text-align: center;">
    <br><br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br>
-<form method="post" action="">
-<table style="margin: auto;"><tr><td>
+<form method="post" action="" onsubmit="return j_login_manager(this);">
+<table style="margin: auto;"><tr><td>user:</td><td>
 <input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
-</td><td>
-<input id="sub"    value="entra" type="submit" class="button">
+</td><td rowspan="2">
+<input id="sub" value="entra" type="submit" class="button">
+</td></tr>
+<tr><td>pwd:</td><td>
+<input id="passid" name="pass" type="password" size="24" maxlength="12" value="">
 </td></tr></table>
 </form>
 (se usi firefox e qualcosa non funziona<br>prova a ricaricare la pagina con <b>Ctrl + F5</b>)<br>
-</div></td></tr></table>
+</div>
 <br><br><br><br>
 
 <div id="imgct"></div>
@@ -414,6 +418,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
