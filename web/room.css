@@ -207,6 +207,18 @@ table.room_standup td {
     align: left;
  }
 
+table.login { 
+    margin: auto;
+    border: 1px solid gray;
+    margin-top: 8px;
+ }
+
+table.login td { 
+    padding: 4px;
+    vertical-align: middle;
+ }
+
+
 div.room_ex_standup {
     position: relative;
     height: 106px;
