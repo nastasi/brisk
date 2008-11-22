@@ -24,7 +24,7 @@
  */
 
 body {
-    background-image: url('img/brisk2bg.jpg'); 
+    background-image: url('img/wip_bg.jpg'); 
     background-color: #fafafa;
     background-repeat: no-repeat;
     background-position: top center; 
@@ -65,20 +65,22 @@ img.nobohide {
     z-index: 12;
 }
 
-.notify { 
+.notify {
+/*    top: 10%; */
+    top: 0;
+
+    left: 50%; 
+    position: absolute;
     border-style: solid;
     border-width: 1px;
-    position: absolute;
-    margin-top: auto;
-    margin-bottom: auto;
+/*  margin-top: auto;
+    margin-bottom: auto;*/
     overflow: auto;
-    top: 0;
     bottom: 0;
-    left: 50%;
     right: 0;
     align: center;
-    text-align: center;
-    background-color: white;
+    text-align: center; 
+    background-color: white; 
     z-index: 10;
     visibility: hidden;
     filter: alpha(opacity=90);
@@ -87,15 +89,70 @@ img.nobohide {
 }
 
 div.notify_clo { 
-/*     position: absolute; */
+    position: absolute;
     align: center;
     width: 100%;
     left: 0px;
-/*    bottom:  4px;*/
+    bottom:  4px;
+}
+
+input.input_text { 
+    background-color: transparent;
+    border: 1px solid gray;  
+    margin: 1px;
+ }
+
+input.input_text:hover { 
+    border: 1px solid #ffae00;  
+ }
+
+input.input_text_hi { 
+    background-color: transparent;
+    border: 2px solid #ffae00;
+    margin: 0px;
+ }
+
+input.input_sub {
+    border: 1px solid gray;  
+    margin: 0px;
+    padding: 1px;
+    color: black;
+    background-color: RGB(246,246,246);
+    vertical-align: middle;
+    text-decoration:none;
+    font-size: 100%;
+    cursor: pointer;
+    height: 22px ! important;
+    max-height: 22px ! important;
+    min-height: 22px ! important;
+    display: inline;
+}
+input.input_sub:hover { 
+    border: 1px solid #ffae00;  
+    margin: 0px;
+    padding: 1px;
+ }
+
+input.input_sub_hi {
+    border: 2px solid #ffae00;
+    padding: 0px;
+    margin: 0px;
+    color: black;
+    background-color: RGB(246,246,246);
+    vertical-align: middle;
+    text-decoration:none;
+    font-size: 100%;
+    cursor: pointer;
+    height: 22px ! important;
+    max-height: 22px ! important;
+    min-height: 22px ! important;
+    display: inline;
 }
 
 input.button {
     border: 1px solid gray;  
+    margin: 1px;
+    padding: 0px;
     color: black;
     background-color: RGB(246,246,246);
     vertical-align: middle;
@@ -105,7 +162,6 @@ input.button {
     height: 20px ! important;
     max-height: 20px ! important;
     min-height: 20px ! important;
-    margin: 1px;
     display: inline;
 }
 
