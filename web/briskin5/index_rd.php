@@ -58,7 +58,7 @@ function unrecerror()
 
   $is_page_streaming = TRUE;
   log_rd2("UNREC_ERROR");
-  return (sprintf('the_end=true; window.onunload = null; document.location.assign("../index.php");'));
+  return (sprintf('the_end=true; window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
 }
 
 function page_sync($sess, $page)
@@ -67,7 +67,7 @@ function page_sync($sess, $page)
 
   $is_page_streaming = TRUE;
   log_rd2("PAGE_SYNC");
-  return (sprintf('the_end=true; window.onunload = null; document.location.assign("%s");', $page));
+  return (sprintf('the_end=true; window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
 }
 
 
