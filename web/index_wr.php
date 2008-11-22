@@ -70,24 +70,26 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
     if (($a_sem = Challenges::lock_data()) != FALSE) { 
       log_main("chal lock data success");
       
-      if (($chal = &Challenges::load_data()) != FALSE) {
-        $chal_save = FALSE;
+      if (($chals = &Challenges::load_data()) != FALSE) {
         $curtime = time();
 
-        $chal_save |= $chal->garbage_manager();
         $token =  uniqid("");
         // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
         // exit;
 
-        if ($chal->add($argz[1], $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
-          echo '0|'.$token;
-          $chal_save = TRUE;
+        if (($login_new = validate_name($argz[1])) != FALSE) {
+          if ($chals->add($login_new, $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
+            echo '0|'.$token;
+          }
+          else {
+            echo '1|';
+          }
         }
         else {
           echo '1|';
         }
-        if ($chal_save) {
-          Challenges::save_data(&$chal);
+        if ($chals->ismod()) {
+          Challenges::save_data(&$chals);
         }
       }
       
@@ -198,15 +200,20 @@ else if ($user->stat == 'room') {
     
       $curtime = time();
 
-      if ($G_shutdown || $table->wakeup_time > $curtime) {
+      if ($G_shutdown || $table->wakeup_time > $curtime || 
+          ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) ) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
 	$dt = date("H:i ", $curtime);
-        if ($G_shutdown)
+        if ($G_shutdown) {
           $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt.NICKSERV);
-        else
+        }
+        else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il tavolo a cui volevi sederti richiede autentifica.</b>");', $dt.NICKSERV);
+        }
+        else {
           $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>");', $dt.NICKSERV, $table->wakeup_time - $curtime);
-
+        }
 	$user->step_inc();
 	Room::save_data($room);
 	Room::unlock_data($sem);
@@ -297,7 +304,7 @@ else if ($user->stat == 'room') {
           while (array_pop($user_cur->comm) != NULL);
           
           $ret = "";
-          $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token);
+          $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token);
           
           $user_cur->comm[$user_cur->step % COMM_N] = $ret;
           $user_cur->trans_step = $user_cur->step + 1;
