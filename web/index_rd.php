@@ -57,7 +57,7 @@ function unrecerror()
 
   $is_page_streaming = TRUE;
   log_rd2("UNREC_ERROR:".var_export(debug_backtrace()));
-  return (sprintf('the_end=true; window.onunload = null; document.location.assign("index.php");'));
+  return (sprintf('the_end=true; window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");'));
 }
 
 function page_sync($sess, $page, $table_idx, $table_token)
@@ -69,7 +69,7 @@ function page_sync($sess, $page, $table_idx, $table_token)
   $is_page_streaming = TRUE;
 
   log_rd2("PAGE_SYNC");
-  return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
+  return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); the_end=true; window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
 }
 
 

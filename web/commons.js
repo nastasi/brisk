@@ -228,6 +228,7 @@ function send_mesg(mesg)
     var xhr_wr = createXMLHttpRequest();
     var is_conn = (sess == "not_connected" ? false : true);
     
+    // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
     xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, (is_conn ? true : false));
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(null);
@@ -245,14 +246,14 @@ function server_request(mesg)
     
     var is_conn = (sess == "not_connected" ? false : true);
     
-    console.log("server_request:preresp: "+xhr_wr.responseText);
+    // console.log("server_request:preresp: "+xhr_wr.responseText);
 
     xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, false);
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(null);
     
     if (xhr_wr.responseText != null) {
-        console.log("server_request:resp: "+xhr_wr.responseText);
+        // console.log("server_request:resp: "+xhr_wr.responseText);
         return (xhr_wr.responseText);
     } 
     else
@@ -386,11 +387,13 @@ function safelascio()
 function act_logout(exitlock)
 {
     send_mesg("logout|"+exitlock);
+    // alert("IZZO");
 }
 
 function act_reload()
 {
     window.onunload = null;
+    window.onbeforeunload = null;
     document.location.reload();
 }
 
@@ -399,8 +402,8 @@ function act_shutdown()
     var c = 0;
 
     send_mesg("shutdown");
-    while (xhr_wr.readyState != 4)
-	c++;
+    // while (xhr_wr.readyState != 4)
+    //	c++;
 }
 
 function postact_logout()
@@ -694,6 +697,7 @@ function notify(st, text, tout, butt, w, h)
     box.style.width  = w+"px";
     box.style.marginLeft  = -parseInt(w/2)+"px";
     box.style.height = h+"px";
+    box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
     box.appendChild(clodiv);
     box.style.visibility = "visible";
 
@@ -955,25 +959,44 @@ function eraseCookie(name) {
 var onunload_times = 0;
 
 
-function onunload_cb () {
+function onbeforeunload_cb () {
+    return("");
+}
+
+function onunload_cb_old () {
     var u = 0;
+    
+    //    if (nonunload == true)
+    //     return true;
+    
     if (onunload_times == 0) {
 	var res = window.confirm("    Vuoi veramente abbandonare la briscola ?\n(clicca annulla o cancel se vuoi ricaricare la briscola)");
 	if (res == true) {
 	    the_end = true; 
 	    act_shutdown();
-	    while (1) 
-		u++;
+	    // while (1) 
+	    //	u++;
 	}
 	else {
 	    try {
-		location = self.location;
+		document.location.href = self.location; //  = self.location;
+                // alert ("passiamo di qui"+self.location);
+                return (false);
 	    } catch (e) {
 		alert("Ripristino della briscola fallito, per non perdere la sessione ricaricare la pagina manualmente.");
 	    }
 	}
 	onunload_times++;
     }
+    
+    return(false);
+}
+
+function onunload_cb () {
+    
+    the_end = true; 
+
+    act_shutdown();
     
     return(false);
 }
@@ -1005,7 +1028,8 @@ function room_checkspace(emme,tables,inpe)
     stand += "</tr>";
     $("standup").innerHTML = stand;
 
-    $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"window.onunload = null; act_logout();\" type=\"button\">";
+    // VERIFY: what is this button ?
+    $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"act_logout();\" type=\"button\">";
 }
 
 function  unescapeHTML(cont) {
