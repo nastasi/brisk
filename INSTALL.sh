@@ -11,8 +11,8 @@ proxy_path="$HOME/brisk-priv/proxy"
 web_only="FALSE"
 brisk_conf="brisk.conf.pho"
 
-if [ -f $HOME/.brisk_install ]; then
-   . $HOME/.brisk_install
+if [ -f $HOME/.trusty_install ]; then
+   . $HOME/.trusty_install
 fi
 if [ "x$cookie_path" = "x" ]; then
    cookie_path=$web_path
@@ -110,6 +110,7 @@ echo "    ftok_path:  \"$ftok_path\""
 echo "    legal_path: \"$legal_path\""
 echo "    proxy_path: \"$proxy_path\""
 echo "    cookie_path:\"$cookie_path\""
+echo "    brisk_conf:\"$brisk_conf\""
 echo "    web_only:   \"$web_only\""
 
 if [ ! -z "$outconf" ]; then
@@ -124,6 +125,7 @@ if [ ! -z "$outconf" ]; then
     echo "proxy_path=\"$proxy_path\""
     echo "legal_path=\"$legal_path\""
     echo "cookie_path=\"$cookie_path\""
+    echo "brisk_conf=\"$brisk_conf\""
     echo "web_only=\"$web_only\""
   ) > "$outconf"
 fi
@@ -169,6 +171,8 @@ if [ "$web_only" = "FALSE" ]; then
     # create the fs subtree to enable ftok-ing
     touch ${ftokk_path}/main
     chmod 666 ${ftokk_path}/main
+    touch ${ftokk_path}/challenges
+    chmod 666 ${ftokk_path}/challenges
     for i in `seq 0 99`; do 
         touch ${ftokk_path}/table$i
         chmod 666 ${ftokk_path}/table$i
