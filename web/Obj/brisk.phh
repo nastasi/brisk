@@ -174,7 +174,8 @@ class Table {
   var $mazzo;
   var $gstart;
   var $turn;
-  
+  var $auth_only;
+
   var $wag_own;
   var $wag_com;
   var $wag_tout;
@@ -223,6 +224,9 @@ class Table {
     $thiz->asta_card =  -1;
     $thiz->asta_pnt  =  -1;
     $thiz->mult      =   1;
+    
+    $thiz->auth_only =   FALSE;
+
     $thiz->points    =   array( );
     $thiz->points_n  =   0;
     $thiz->total     =   array( 0, 0, 0, 0, 0);
@@ -264,6 +268,8 @@ class Table {
     $thiz->mazzo = $from->mazzo; // REVIEW
     $thiz->gstart = $from->gstart;
     $thiz->turn = $from->turn;
+
+    $thiz->auth_only =  $from->auth_only;
 
     $thiz->wag_own   =  $from->wag_own;
     $thiz->wag_com   =  $from->wag_com;
@@ -309,6 +315,8 @@ class Table {
     $thiz->mazzo = $from->mazzo;
     $thiz->gstart = $from->gstart;
     $thiz->turn = $from->turn;
+
+    $thiz->auth_only =  $from->auth_only;
 
     $thiz->wag_own = $from->wag_own;
     $thiz->wag_com = $from->wag_com;
@@ -528,6 +536,10 @@ class Table {
   }
 } // end class Table
   
+
+// User flags
+define(USER_FLAG_AUTH, 0x02);
+
 class User {
   var $name;       // name of the user
   var $sess;       // session of the user
@@ -547,6 +559,7 @@ class User {
   var $table;      // id of the current table (if in table state)
   var $table_pos;  // idx on the table
   var $table_token;// token that identify a game on a table
+  var $flags;      // Bitfield with: AUTHENTICATE: 0x02 
   var $the_end;    // Flag to change the end of the session
 
   var $chat_lst;      // Last chat line
@@ -578,6 +591,8 @@ class User {
     $thiz->asta_pnt  = -1;
     $thiz->handpt = -1;
     $thiz->exitislock = TRUE;
+
+    $thiz->flags = 0x00;
     
     $thiz->chattime = array_fill(0, CHAT_N, 0);
     $thiz->chat_cur = 0;
@@ -620,6 +635,8 @@ class User {
     $thiz->asta_pnt   = $from->asta_pnt;
     $thiz->handpt     = $from->handpt;
     $thiz->exitislock = $from->exitislock;
+
+    $thiz->flags = $from->flags;
 
     $thiz->chattime = array();
     for ($i = 0 ; $i < CHAT_N ; $i++)
@@ -670,11 +687,14 @@ class User {
     $thiz->exitislock = $from->exitislock;
     $thiz->the_end    = $from->the_end;
 
+    $thiz->flags      = $from->flags;
+
     $thiz->chattime   = array_fill(0, CHAT_N, 0);
     $thiz->chat_cur   = 0;
     $thiz->chat_lst   = "";
     $thiz->chat_ban   = 0;
     $thiz->chat_dlt   = 0;
+
 
     $thiz->table      = $table;
     $thiz->table_pos  = $table_pos;
@@ -806,8 +826,12 @@ class Room {
       $this->user[$i] =& User::create("", "");
     }
 
-    for ($i = 0 ; $i < TABLES_N ; $i++) 
+    for ($i = 0 ; $i < TABLES_N ; $i++) {
       $this->table[$i] =& Table::create();
+      $row = ( (((int)($i / 4)) % 2) == 0 );
+      $col = ($i % 2 == 0);
+      $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
+    }
     $this->garbage_timeout = 0;
   }
 
@@ -987,8 +1011,8 @@ class Room {
     $ret .= sprintf('$("myname").innerHTML = "<b>%s</b>";', xcape($user->name));
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       $ret .= $this->table_content($user, $i);
-      $ret .= table_act_content(($user->subst == 'standup'), 
-				     $this->table[$i]->player_n, $i, $user->table);
+      $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
+                                ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
       // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $i, $act_content);
       if ($this->table[$i]->wag_own != NULL) 
         $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->table[$i]->wag_own->name, $this->table[$i]->wag_com);
@@ -1057,7 +1081,7 @@ class Room {
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
       if ($from_table && ($user_cur->table == $table_idx || $user_cur == $user)) {
-	$ret .= 'gst.st_loc++; the_end=true; window.onunload = null; document.location.assign("index.php");|';
+	$ret .= 'gst.st_loc++; the_end=true; window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
 	// $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
 	log_main("DOCUMENT.index.php: from table");
       }
@@ -1067,7 +1091,7 @@ class Room {
 	$ret .= $this->table_content($user_cur, $table_idx);
 	$ret .= $this->standup_content($user_cur);
 	
-	$ret .= table_act_content(FALSE, 0, $table_idx, $user->table);
+	$ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
 	// $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
 	
@@ -1078,12 +1102,14 @@ class Room {
 	  for ($e = 0 ; $e < TABLES_N ; $e++) {
 	    if ($this->table[$e]->player_n < PLAYERS_N) {
 	      // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, table_act_content(TRUE, 0, $e, $user->table));
-	      $ret .= table_act_content(TRUE, 0, $e, $user->table);
+	      $ret .= table_act_content(TRUE, 0, $e, $user->table, 
+                                ($this->table[$e]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
             }
 	  }
 	}
 	else {
-	  $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
+	  $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table,
+                                    ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
 	  // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	}
       }
@@ -1158,7 +1184,9 @@ class Room {
 	$ret .= $this->table_content($user_cur, $table_idx);
 	$ret .= $this->standup_content($user_cur);
 	
-	$ret .= table_act_content(FALSE, 0, $table_idx, $user_cur->table);
+	$ret .= table_act_content(FALSE, 0, $table_idx, $user_cur->table,
+                                ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
+
 	// $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	
 	for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
@@ -1185,7 +1213,9 @@ class Room {
 	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
 	log_main("JOIN_WAKEUP more");
-	$ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table);
+	$ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table,
+                                  ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
+
 	// $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	log_main("JOIN_WAKEUP end more");
       }
@@ -1266,13 +1296,15 @@ class Room {
 	$ret .=  'subst = "sitdown"; tra.hide(); ';
 	// clean the action buttons in other tables
 	for ($e = 0 ; $e < TABLES_N ; $e++) {
-	  $ret .= table_act_content(FALSE, 0, $e, $user_cur->table);
+	  $ret .= table_act_content(FALSE, 0, $e, $user_cur->table, FALSE);
 	  // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $e, $act_content);
 	}
       }
       else if ($table_idx > -1) {
 	if ($table->player_n == PLAYERS_N) {
-	  $ret .= table_act_content(($user_cur->subst == 'standup'), PLAYERS_N, $table_idx, $user_cur->table);
+	  $ret .= table_act_content(($user_cur->subst == 'standup'), PLAYERS_N, $table_idx, $user_cur->table,
+                                ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
+
 	  // $ret .= sprintf('$("table_act%d").innerHTML = "%s";', $table_idx, $act_content);
 	}
       }
@@ -1381,6 +1413,7 @@ class Room {
         }
       
 	$user->name = $name_new; // OK - nick changed
+        $user->flags &= ~USER_FLAG_AUTH; // Remove auth if name changed
         
         log_main("chatt_send start set");
 
@@ -1530,19 +1563,31 @@ class Room {
     return ($G_false);
   }
 
+  
+
   /*
-   * function &add_user(&$room, &$sess, &$idx, $name, $ip)
+   * function &add_user(&$room, &$sess, &$idx, $name, $pass, $ip)
    *
    * RETURN VALUE:
-   *   if ($idx != -1 && ret == FALSE)  =>  duplicated nick
-   *   if ($idx == -2 && ret == FALSE)  =>  invalid name
-   *   if ($idx == -1 && ret == FALSE)  =>  no space left
-   *   if (ret == TRUE)                 =>  SUCCESS
+   *   if ($idx >  -1    && ret == FALSE)  =>  duplicated nick
+   *   if ($idx == -2    && ret == FALSE)  =>  invalid name
+   *   if ($idx == -3    && ret == FALSE)  =>  wrong password
+   *   if ($idx == -1    && ret == FALSE)  =>  no space left
+   *   if ($idx ==  0    && ret == user)   =>  SUCCESS
+   *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db 
    */
-  function &add_user(&$sess, &$idx, $name, $ip)
+
+
+
+  function &add_user(&$sess, &$idx, $name, $pass, $ip)
   {
     GLOBAL $G_false;
 
+    $idx = 0;
+
+    $authenticate = FALSE;
+    $login_exists = FALSE;
+    $ghost = -1;
     $idx = -1;
     $idfree = -1;
     
@@ -1551,10 +1596,26 @@ class Room {
       return ($G_false);
     }
 
-    log_auth("XXX", sprintf("ARRIVA: [%s]", $sess));
+    log_auth("XXX", sprintf("ARRIVA: [%s] pass:[%s]", $sess, ($pass == FALSE ? "FALSE" : $pass)));
     if (validate_sess($sess) == FALSE) 
       $sess = "";
 
+    /* if pass != FALSE verify the login with pass */
+    log_auth("XXX", "auth1");
+    $userdb = new LoginDB();
+    if ($pass != FALSE) {
+      log_auth("XXX", "auth2");
+      $authenticate = $userdb->login_verify($name_new, $pass);
+      log_auth("XXX", "authenticate: ".($authenticate == TRUE ? "TRUE" : "FALSE"));
+      
+      if ($authenticate == FALSE) {
+        $idx = -3;
+        return ($G_false);
+      }
+    }
+    else {
+      $login_exists =  $userdb->login_exists($name_new);
+    }
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       /* free user ? */
       if (strcmp($sess, $this->user[$i]->sess) == 0) {
@@ -1563,16 +1624,23 @@ class Room {
       }
       if ($idfree == -1 && strcmp("", $this->user[$i]->sess) == 0) {
 	$idfree = $i;
+        continue; // NOTE: CHECK IT !!
       }
-      if (strcmp($this->user[$i]->name, $name_new) == 0) {
-	$idx = $i;
-	break;
+      if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
+	if ($authenticate == FALSE) {
+          $idx = $i;
+          break;
+        }
+        else {
+          $ghost = $i;
+        }
       }
     }
     if ($idx == -1)
       $idx = $idfree;
 
     log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
+
 
     if ($idx != -1 && $i == MAX_PLAYERS) {
       /* SUCCESS */
@@ -1594,9 +1662,47 @@ class Room {
       $this->user[$idx]->laccwr = $curtime;
       $this->user[$idx]->bantime = 0;
       $this->user[$idx]->ip = $ip;
+
+      $this->user[$idx]->flags = ($authenticate ? USER_FLAG_AUTH : 0x00);
+
+      if ($ghost > -1) {
+        log_main("ghost: rename!");
+        $ghost_user =& $this->user[$ghost];
+
+
+        for ($sfx = 1 ; $sfx <= MAX_PLAYERS ; $sfx++) {
+          $ghostname = 'ghost'.$sfx;
+          for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            if (strcmp("", $this->user[$i]->sess) == 0) 
+              continue;
+
+            if (strcmp($this->user[$i]->name, $ghostname) == 0) {
+              $ghostname = '';
+              break;
+            }
+          }
+          if ($ghostname != '')
+            break;
+        }
+
+        $ghost_user->name = $ghostname;
+        
+        if ($ghost_user->stat == 'room' && $ghost_user->subst == 'standup') {
+          $this->standup_update(&$ghost_user);
+        }
+        else {
+          log_main("chatt_send pre table update");
+          $this->table_update(&$ghost_user);
+          log_main("chatt_send post table update");
+        }
+      }
+
+
       log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
-      
-      return ($this->user[$idx]);
+      $real_idx = $idx;
+      if ($login_exists)
+        $idx = -($idx + 1);
+      return ($this->user[$real_idx]);
     }
 
     return ($G_false);
@@ -1747,53 +1853,6 @@ class Room {
     return (sem_release($res));
   }
 
-  function standup_content_old($user)
-  {
-    $ret = "";
-    $content = "";
-    
-    if ($user->stat != 'room')
-      return;
-    
-    for ($e = 0 , $ct = 0 ; $ct < 4 && $e < MAX_PLAYERS ; $e++) {
-      if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
-        continue;
-      $ct++;
-    }
-    
-    $content .= sprintf('<table cols=\\"%d\\" class=\\"table_standup\\">', $ct);
-    
-    for ($e = 0 , $ct = 0 ; $e < MAX_PLAYERS ; $e++) {
-      if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
-        continue;
-      
-      
-      if ($this->user[$e]->subst == "standup") {
-        if (($ct % 4) == 0) {
-          $content .= '<tr>';
-        }
-        if ($this->user[$e] == $user) 
-          { $hilion = "<b>"; $hilioff = "</b>"; }
-        else
-          { $hilion = ""; $hilioff = ""; }
-        
-        $content .= sprintf('<td class=\\"room_standup\\">%s%s%s</td>',$hilion, xcape($this->user[$e]->name), $hilioff);
-        if (($ct % 4) == 3) {
-          $content .= '</tr>';
-        }
-        $ct++;
-      }
-    }
-    $content .= '</table>';
-    
-    $content2 = '<input class=\\"button\\" name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\">';
-    $ret .= sprintf('$("standup").innerHTML = "%s";  $("esco").innerHTML = "%s";', 
-                    $content, $content2);
-    
-    return ($ret);
-  }
-
-
 
   function standup_content($user)
   {
@@ -1817,7 +1876,7 @@ class Room {
       if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
         continue;
       
-      $flags = 0;
+      $flags = $this->user[$e]->flags;
       
       if ($this->user[$e]->subst == "standup") {
         if ($this->user[$e] == $user) 
@@ -1830,10 +1889,6 @@ class Room {
       }
     }
     $content .= ' ]);';
-    
-    // $content2 = '<input class=\\"button\\" name=\\"logout\\" value=\\"Esco.\\" onclick=\\"window.onunload = null; act_logout();\\" type=\\"button\\">';
-    // $ret .= sprintf('$("standup").innerHTML = "%s";  $("esco").innerHTML = "%s";', 
-    // $content, $content2);
     
     return ($content);
   }
@@ -1895,10 +1950,10 @@ class Room {
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user_cur = &$this->user[$table->player[$i]];
 
-      $flags = 0;
+      $flags = $user_cur->flags;
 
       if ($user_cur == $user) 
-        $flags = 1;
+        $flags |= 1;
       
       log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
       
@@ -2188,13 +2243,16 @@ function table_act_content_old($isstanding, $sitted, $table, $cur_table)
   return ($ret);
 }
 
-function table_act_content($isstanding, $sitted, $table, $cur_table)
+function table_act_content($isstanding, $sitted, $table, $cur_table, $allowed)
 {
   $ret = "";
 
   if ($isstanding) {
     if ($sitted < PLAYERS_N) {
-      $act = 'sit';
+      if ($allowed)
+        $act = 'sit';
+      else
+        $act = 'reserved';
     }
   }
   else {
