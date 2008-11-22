@@ -25,6 +25,7 @@
  */
 
 require_once("Obj/brisk.phh");
+require_once("Obj/auth.phh");
 require_once("Obj/proxyscan.phh");
 
 // Use of proxies isn't allowed.
@@ -42,7 +43,7 @@ log_load("index.php");
 function main()
 {
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
-  GLOBAL $sess, $name, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
+  GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
 
   $body = "";
   $tables = "";
@@ -88,11 +89,22 @@ function main()
     if ($ACTION == "login" && isset($name)) {
       
       log_main("pre garbage_manager DUE");
+
+      if (isset($pass_private) == FALSE) {
+        $pass_private = FALSE;
+      }
+
       $room->garbage_manager(TRUE);
       /* try login */
-      if (($user = &$room->add_user(&$sess, &$idx, $name, $_SERVER['REMOTE_ADDR'])) != FALSE) {
+      if (($user = &$room->add_user(&$sess, &$idx, $name, $pass_private, $_SERVER['REMOTE_ADDR'])) != FALSE) {
 	$ACTION = "room";
-	
+	if ($idx < 0) {
+          $idx = -$idx - 1;
+          $login_exists = TRUE;
+        }
+        else
+          $login_exists = FALSE;
+
         log_legal($curtime, $user->sess, $user->name, "STAT:LOGIN", '');
 
 
@@ -106,7 +118,9 @@ function main()
       }
       else {
 	/* Login Rendering */
-	if ($idx == -2)
+	if ($idx == -3)
+	  $body .= '<div class="urgmsg"><b>Utente e/o password errati.</b></div>';
+	else if ($idx == -2)
 	  $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
 	else if ($idx == -1) 
 	  $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
@@ -337,6 +351,7 @@ supported by:<br><br>
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
+<script type="text/javascript" src="md5.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 
@@ -349,8 +364,9 @@ supported by:<br><br>
    var sess = "not_connected";
   
    window.onload = function() {
-     menu_init();
-     topbanner_init();
+     // alert(window.onbeforeunload);
+
+     login_init();
 
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
@@ -376,17 +392,17 @@ supported by:<br><br>
 <br>
 <div style="text-align: center;">
    <br><br><br>
-Digita il tuo nickname per accedere ai tavoli della briscola.<br>
+Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <form method="post" action="" onsubmit="return j_login_manager(this);">
-<table style="margin: auto;"><tr><td>user:</td><td>
-<input id="nameid" name="name" type="text" size="24" maxlength="12" value="">
-</td><td rowspan="2">
-<input id="sub" value="entra" type="submit" class="button">
-</td></tr>
-<tr><td>pwd:</td><td>
-<input id="passid" name="pass" type="password" size="24" maxlength="12" value="">
-</td></tr></table>
-</form>
+<input id="passid_private" name="pass_private" type="hidden" value="">
+<table class="login">
+<tr><td>user:</td>
+<td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+<tr><td>pwd:</td>
+<td><input id="passid" class="input_text" name="pass" type="password" size="24" maxlength="64" value=""></td></tr>
+<tr><td colspan="2"><input id="sub" value="entra" type="submit" class="button"></td></tr>
+</table>
+</form><br>
 (se usi firefox e qualcosa non funziona<br>prova a ricaricare la pagina con <b>Ctrl + F5</b>)<br>
 </div>
 <br><br><br><br>
@@ -431,7 +447,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br>
    var gst  = new globst();
    var g_is_spawn = 0; 
    var topbanner_sfx, topbanner_dx;
-
+   // var nonunload = false;
    var g_withflash = false;
    var g_imgct= 0;
    var g_imgtot = g_preload_img_arr.length;
@@ -452,16 +468,23 @@ else {
      sess = "<?php echo "$sess"; ?>";
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
+     window.onbeforeunload = onbeforeunload_cb;
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
        $("proflash").innerHTML = 'Audio con Flash.<br><a href="http://www.macromedia.com/"><img class="nobo" style="padding: 4px; width:73; height: 19;" src="img/download_now_flash.gif"></a>';
      }
      else
        $("proflashext").innerHTML = "";
+
      setTimeout(xhr_rd_poll, 0, sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();
+<?php
+if ($login_exists) {
+  echo show_notify("<br><br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.<br><br><br>", 0, "torna ai tavoli", 400, 150);
+}
+?>
 <?php
 }
 ?>
@@ -495,7 +518,7 @@ else {
     <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="scrivi un invito al tavolo e clicca"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
-    <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    <input id="txt_in" maxlength="128" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 </div>
 </div>
