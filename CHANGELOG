@@ -1,3 +1,16 @@
+        "brisk_conf" config paramiter added.
+        "challenges" ftok tree entry added.
+        Background changed.
+        Notify enhanced.
+        Optional password added (with challenge and pseudo db server-side).
+        Authentication only table added.
+        User flags (authentication and other) added.
+        Client side room rendering refactored.
+        Unmediate exit managed (with "onbeforeunload" and "onunload")
+        Reserved tables
+        
+        
+
 0.14.0 ("spawn" branch) -  xx/06/2008
         White space between logo and tables under IE 6 & 7 bug fixed.
         Creation of tmpfs subdirs if not exists fixed.

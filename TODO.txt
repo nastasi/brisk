@@ -1,31 +1,62 @@
 /* 
 
+ BUG
+ ===
+ DONE   righe troncate
+    problema col treno se mouse sopra mentre stringe (verif)
+
+
  TODO
  ====
    - login 
-       se pass:
-           richiede per l' utente un token (tutta la parte backend va un minimo studiata)
-           lo legge, ci hasha la password
-           invia la pass al server hashata
-       se non pass:
-           check del login e return corretto
-       oggetto in shm single table con ( "ip", "login", timestamp ) e suo management
-       STUDIARE UN ANTI-DOS
+ DONE  se pass:
+ DONE     richiede per l' utente un token (tutta la parte backend va un minimo studiata)
+ DONE     lo legge, ci hasha la password
+ DONE     invia la pass al server hashata
+ DONE  se non pass:
+ DONE     check del login e return corretto
+ DONE       oggetto in shm single table con ( "ip", "login", timestamp ) e suo management
+ DONE       rename ghost if logged
+ DONE       onunload_cb e onbeforeunload_cb !!! 
+ DONE     da change attrs a change class (input field)
+ DONE      colore del bg per arrivare ad essere omogeneo
+ DONE      cambiare path e file di config
+ DONE     login with or without pass
+ DONE      registered nick notice (METTERE IL MSG NELLA PAG DI LOGIN)
+ DONE     segnalare tavoli solo per auth
+      rename restriction at auth table
+      restrict challenge per IP
+      refact js tables to handle flags
 
    - login modify
-   - db (fake)
-   - display auth
+ DONE  - db (fake)
+ DONE  - display auth
+     - manage preferences 
    - db (minimal)
      - db admin page
      - user db admin
-   - work background
-   - reserved tables
+     - use db 
+     - admin db
+ DONE  - work background
+ DONE  - reserved tables
 
 
- minor
-   - auth after login
+   - strong ban: "expire time|IP|session|(nick if authenticated)"
+     login: se auth      -  verifica solo gli expire per quel nick
+            se non auth  -  verifica gli expire per IP e sessione
+
+      change nick (strcasecmp)
+      restricted charset
+
+      STUDIARE UN ANTI-DOS
+
   
    DONE - room javascript refactoring
+
+ minor
+ -----
+   - auth after login
+
 
  BRISK2 (spawn)
  ======
