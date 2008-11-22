@@ -84,6 +84,7 @@ window.onload = function() {
   xhr_rd = createXMLHttpRequest();
   sess = "<?php echo "$sess"; ?>";
   
+  window.onbeforeunload = onbeforeunload_cb;  
   window.onunload = onunload_cb;  
 
   setTimeout(xhr_rd_poll, 0, sess); 
@@ -228,7 +229,7 @@ Hai vinto l'asta.<br> Scegli il seme:
     <table class="chattshort_table"><tr><td style="width:1%; text-align: right;">
     <div id="myname"></div>
     </td><td>
-    <input id="txt_in" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
+    <input id="txt_in" maxlength="128" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 
 <div id="flasou" style="text-align: left;"></div>
