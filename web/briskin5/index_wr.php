@@ -150,7 +150,7 @@ else if ($user->stat == 'table') {
       log_wr(sprintf("GIOCO FINITO !!!"));
     
       $table->mult *= 2; 
-      $table->old_reason = sprintf("Ha lasciato %s perch&eacute; aveva al massimo 2 punti.", xcape($user->name));
+      $table->old_reason = sprintf("Ha lasciato %s perché aveva al massimo 2 punti.", xcape($user->name));
 
       $table->game_next();
       $table->game_init(&$bri->user);
@@ -286,9 +286,11 @@ else if ($user->stat == 'table') {
 		  $table->asta_pla[$i] = FALSE;
 	    }
 	    else {
-	      //"gst.st = ".($user->step+1)."; dispose_asta(".($table->asta_card + 1).",".-($table->asta_pnt).", true); remark_off();";
-	      $user->comm[$user->step % COMM_N] = sprintf( "gst.st = %d; dispose_asta(%d, %d, false); remark_off();", $user->step+1, $table->asta_card + 1,-($table->asta_pnt));
+              /*
+	      $user->comm[$user->step % COMM_N] = sprintf( "gst.st = %d; dispose_asta(%d, %d, false); remark_off();", 
+                                                           $user->step+1, $table->asta_card + 1,-($table->asta_pnt));
 	      $user->step_inc();
+              */
 	      for ($i = 1 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
 		$chooser = ($table->gstart + $i) % BRISKIN5_PLAYERS_N;
 		if ($table->asta_pla[$chooser]) {
@@ -300,10 +302,11 @@ else if ($user->stat == 'table') {
 
 	    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
 	      $user_cur = &$bri->user[$table->player[$i]];
-	      $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
+	      $ret = sprintf('gst.st = %d; %s dispose_asta(%d, %d, false);', $user_cur->step+1, $showst,
+                             $table->asta_card + 1,-($table->asta_pnt));
 
 	      if ($i == $chooser) {
-		$ret .= "choose_seed(". $table->asta_card."); \$(\"asta\").style.visibility = \"hidden\"; remark_on();";
+		$ret .= "choose_seed(". $table->asta_card."); remark_on();";
 	      }
 	      else {
 		$ret .= "remark_off();";
