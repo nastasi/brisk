@@ -301,7 +301,7 @@ class Briskin5 {
 
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.");', $dt.NICKSERV);
+	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.");', $dt, NICKSERV);
 	  $user->step_inc();
 
 	  return;
@@ -318,15 +318,27 @@ class Briskin5 {
 	  continue;
 	if ($user_cur->name == $name_new) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","Nickname <b>%s</b> gi&agrave; in uso.");', $dt.NICKSERV, xcape($name_new));
+	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"Nickname <b>%s</b> gi&agrave; in uso.%d");', $dt, NICKSERV, xcape($name_new), $this->table[$user->table]->auth_only == TRUE);
 	  $user->step_inc();
 	  break;
 	}
       }
       if ($i == BRISKIN5_MAX_PLAYERS) {
+        if ($user->flags & USER_FLAG_AUTH && strcasecmp($user->name,$name_new) != 0) {
+          if ($this->table[$user->table]->auth_only == TRUE) {
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>");', $dt, NICKSERV);
+	    $user->step_inc();
+            return;
+          }
+          else {
+            $user->flags &= ~USER_FLAG_AUTH; // Remove auth if name changed
+          }
+        }
+    
 	$user->name = $name_new;
 
-      log_main($user->sess." chatt_send start set");
+        log_main($user->sess." chatt_send start set");
 	
 
 	for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) {
@@ -352,15 +364,28 @@ class Briskin5 {
 	    $table = &$this->table[$user->table];
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	    $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('set_names(" %s", " %s", " %s", " %s", " %s"); ',
-	        xcape($this->user[$table->player[($user_cur->table_pos) % BRISKIN5_PLAYERS_N]]->name),
-	        xcape($this->user[$table->player[($user_cur->table_pos+1) % BRISKIN5_PLAYERS_N]]->name),
-	        xcape($this->user[$table->player[($user_cur->table_pos+2) % BRISKIN5_PLAYERS_N]]->name),
-	        (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3) % BRISKIN5_PLAYERS_N]]->name)),
-	        (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4) % BRISKIN5_PLAYERS_N]]->name)));
-	    if ($user_cur == $user)
-	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s</b>";', 
-								   xcape($user->name,ENT_COMPAT,"UTF-8"));
+	    $user_cur->comm[$user_cur->step % COMM_N] .= \
+              sprintf('set_names([%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"]); ',
+                      $this->user[$table->player[($user_cur->table_pos) % BRISKIN5_PLAYERS_N]]->flags,
+                      xcape($this->user[$table->player[($user_cur->table_pos) % BRISKIN5_PLAYERS_N]]->name),
+
+                      $this->user[$table->player[($user_cur->table_pos+1) % BRISKIN5_PLAYERS_N]]->flags,
+                      xcape($this->user[$table->player[($user_cur->table_pos+1) % BRISKIN5_PLAYERS_N]]->name),
+
+                      $this->user[$table->player[($user_cur->table_pos+2) % BRISKIN5_PLAYERS_N]]->flags,
+                      xcape($this->user[$table->player[($user_cur->table_pos+2) % BRISKIN5_PLAYERS_N]]->name),
+
+                      (BRISKIN5_PLAYERS_N == 3 ? 0:  $this->user[$table->player[($user_cur->table_pos+3) % BRISKIN5_PLAYERS_N]]->flags),
+                      (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+3) % BRISKIN5_PLAYERS_N]]->name)),
+
+                      (BRISKIN5_PLAYERS_N == 3 ? 0:  $this->user[$table->player[($user_cur->table_pos+4) % BRISKIN5_PLAYERS_N]]->flags),
+                      (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4) % BRISKIN5_PLAYERS_N]]->name)));
+	    if ($user_cur == $user) {
+              $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
+              $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
+	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', 
+								   $itin, xcape($user->name,ENT_COMPAT,"UTF-8"), $itou);
+            }
 	    $user_cur->step_inc();
 	  }
 	}
@@ -378,8 +403,8 @@ class Briskin5 {
 	}
 	
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s","%s");',
-							     $dt.xcape($user->name), xcape($user_mesg));
+	$user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s", [%d, "%s"],"%s");',
+							     $dt, $user->flags, xcape($user->name), xcape($user_mesg));
 	$user_cur->step_inc();
       }
       log_legal($curtime, $user->sess, $user->name, 
