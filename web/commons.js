@@ -787,6 +787,8 @@ function choose_seed(card)
 {
     var i;
 
+    $("asta").style.visibility = "hidden"; 
+    $("astalascio").style.visibility = "hidden"; 
     $("chooseed").style.visibility = "visible";
     for (i = 0 ; i < 4 ; i++) {
 	$("seed"+i).src = "img/"+i+""+card+".png";
@@ -795,19 +797,28 @@ function choose_seed(card)
     }
 }
 
+function italizer(ga)
+{
+    var pre, pos;
+    if (ga[0] & 2) 
+        return "<i>"+ga[1]+"</i>";
+    else
+        return ga[1];
+}
+
 function set_names(so,ea,ne,nw,we)
 {
 //    alert("EA: "+ea);
-    $("name").innerHTML = so; 
-    $("name").title = unescapeHTML(so); 
-    $("name_ea").innerHTML = ea;
-    $("name_ea").title = unescapeHTML(ea);
-    $("name_ne").innerHTML = ne;
-    $("name_ne").title = unescapeHTML(ne);
-    $("name_nw").innerHTML = nw;
-    $("name_nw").title = unescapeHTML(nw);
-    $("name_we").innerHTML = we;
-    $("name_we").title = unescapeHTML(we);
+    $("name").innerHTML = italizer(so);
+    $("name").title = unescapeHTML(so[1]); 
+    $("name_ea").innerHTML = italizer(ea);
+    $("name_ea").title = unescapeHTML(ea[1]);
+    $("name_ne").innerHTML = italizer(ne);
+    $("name_ne").title = unescapeHTML(ne[1]);
+    $("name_nw").innerHTML = italizer(nw);
+    $("name_nw").title = unescapeHTML(nw[1]);
+    $("name_we").innerHTML = italizer(we);
+    $("name_we").title = unescapeHTML(we[1]);
 
     return;
 }
@@ -895,10 +906,18 @@ var chatt_lines_n = 0;
 var CHATT_MAXLINES = 40;
 
 /* PRO CHATT */
-function chatt_sub(name,str)
+function chatt_sub(dt,data,str)
 {
     var must_scroll = false;
+    var name;
+    var flags;
+    var isauth;
 
+    flags = data[0];
+    if (flags & 0x02)
+        name = "<i>"+data[1]+"</i>";
+    else
+        name = data[1];
     // alert ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight);
 
   if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
@@ -911,11 +930,11 @@ function chatt_sub(name,str)
       chatt_lines[i] = chatt_lines[i+1];
       $("txt").innerHTML += chatt_lines[i];
     }
-    chatt_lines[i] = "<b>"+name+"</b> "+str+ "<br>";
+    chatt_lines[i] = dt+"<b>"+name+"</b> "+str+ "<br>";
     $("txt").innerHTML += chatt_lines[i];
   }
   else {
-    chatt_lines[chatt_lines_n] = "<b>"+name+"</b> "+str+ "<br>";
+    chatt_lines[chatt_lines_n] = dt+"<b>"+name+"</b> "+str+ "<br>";
     $("txt").innerHTML += chatt_lines[chatt_lines_n];
     chatt_lines_n++;
   }
@@ -1076,7 +1095,7 @@ function playsound(tag, sound) {
 
 function topbanner_init()
 {
-//    setInterval(topbanner_cb, 666);
+    setInterval(topbanner_cb, 666);
 ;
 }
 
