@@ -78,11 +78,15 @@ function j_tab_act_cont(idx, act)
     if (act == 'sit') {
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="Mi siedo." onclick="act_sitdown('+idx+');">';
     }
+    else if (act == 'sitreser') {
+        // <img class="nobo" title="tavolo riservato agli utenti registrati" style="display: inline; margin-right: 80px;" src="img/okauth.png">
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okauth.png\');" class="button" name="xhenter'+idx+'"  value="Mi siedo." onclick="act_sitdown('+idx+');">';
+    }
     else if (act == 'wake') {
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xwakeup"  value="Mi alzo." onclick="act_wakeup();">';
     }
     else if (act == 'reserved') {
-        $("table_act"+idx).innerHTML = '<img class="nobo" title="tavolo riservato agli utenti registrati" style="margin-right: 0px;" src="img/onlyauth.png">';
+        $("table_act"+idx).innerHTML = '<img class="nobo" title="tavolo riservato agli utenti registrati" style="margin-right: 20px;" src="img/onlyauth.png">';
     }
     else {
         $("table_act"+idx).innerHTML = '';
@@ -142,6 +146,5 @@ function login_formtext_hilite()
 function login_init()
 {
     menu_init();
-    topbanner_init();
     login_formtext_hilite();
 }
