@@ -1,3 +1,12 @@
+        BUG - "lascio" forgotten icon and bad text fixed.
+        
+        auth user replaced with new login
+        nick command restricted inside auth tables.
+        alarm message to single user.
+        act_content totally refactored.
+        new field $idx in table class.
+        variable enabled topbanner.
+        rendering for auth names refactored.
         "brisk_conf" config paramiter added.
         "challenges" ftok tree entry added.
         Background changed.
@@ -8,8 +17,10 @@
         Client side room rendering refactored.
         Unmediate exit managed (with "onbeforeunload" and "onunload")
         Reserved tables
+
+BRANCHED trusty
         
-        
+MERGE IN HEAD        
 
 0.14.0 ("spawn" branch) -  xx/06/2008
         White space between logo and tables under IE 6 & 7 bug fixed.
