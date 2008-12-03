@@ -1,32 +1,54 @@
 /* 
 
+ BRISK3 (trusty)
+ ======
+
  BUG
  ===
  DONE   righe troncate
-    problema col treno se mouse sopra mentre stringe (verif)
+    - problema col treno se mouse sopra mentre stringe (verif)
+    DONE - questione "a monte" che:
+       DONE - lascia fuori il bottone
+       DONE - scrive &agrave e compagnia
+    DONE - refresh act_table when unauthorized
+    DONE - problema ghost autenticato (ne prendi il posto ovunque sia)
 
+ MINOR
+    DONE - refactoring of the owner name (auth attr for owner name)
+      DONE - room
+        DONE - at chat input line 
+        DONE - in the chat output line
+        DONE - deauth management
+      DONE - table
+        DONE - at chat input line
+        DONE - in the chat output line
+        DONE - for user area of other users
+        DONE - deauth management
+    DONE - alart to one user
 
  TODO
  ====
-   - login 
- DONE  se pass:
- DONE     richiede per l' utente un token (tutta la parte backend va un minimo studiata)
- DONE     lo legge, ci hasha la password
- DONE     invia la pass al server hashata
- DONE  se non pass:
- DONE     check del login e return corretto
- DONE       oggetto in shm single table con ( "ip", "login", timestamp ) e suo management
- DONE       rename ghost if logged
- DONE       onunload_cb e onbeforeunload_cb !!! 
- DONE     da change attrs a change class (input field)
- DONE      colore del bg per arrivare ad essere omogeneo
- DONE      cambiare path e file di config
- DONE     login with or without pass
- DONE      registered nick notice (METTERE IL MSG NELLA PAG DI LOGIN)
- DONE     segnalare tavoli solo per auth
-      rename restriction at auth table
+ DONE - login 
+ DONE -   se pass:
+ DONE -     richiede per l' utente un token (tutta la parte backend va un minimo studiata)
+ DONE -     lo legge, ci hasha la password
+ DONE -     invia la pass al server hashata
+ DONE -   se non pass:
+ DONE -     check del login e return corretto
+ DONE -     oggetto in shm single table con ( "ip", "login", timestamp ) e suo management
+ DONE -     rename ghost if logged
+ DONE -     onunload_cb e onbeforeunload_cb !!! 
+ DONE -   da change attrs a change class (input field)
+ DONE -     colore del bg per arrivare ad essere omogeneo
+ DONE -     cambiare path e file di config
+ DONE -   login with or without pass
+ DONE -   registered nick notice (METTERE IL MSG NELLA PAG DI LOGIN)
+ DONE -     segnalare tavoli solo per auth
+ DONE -     rename restriction at auth table
+ DONE -     change nick (strcasecmp)
+ DONE -   refact js tables to handle flags
       restrict challenge per IP
-      refact js tables to handle flags
+      restricted charset for login
 
    - login modify
  DONE  - db (fake)
@@ -45,8 +67,6 @@
      login: se auth      -  verifica solo gli expire per quel nick
             se non auth  -  verifica gli expire per IP e sessione
 
-      change nick (strcasecmp)
-      restricted charset
 
       STUDIARE UN ANTI-DOS
 
