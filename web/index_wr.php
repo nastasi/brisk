@@ -206,13 +206,13 @@ else if ($user->stat == 'room') {
 
 	$dt = date("H:i ", $curtime);
         if ($G_shutdown) {
-          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt.NICKSERV);
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt, NICKSERV);
         }
         else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
-          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il tavolo a cui volevi sederti richiede autentifica.</b>");', $dt.NICKSERV);
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il tavolo a cui volevi sederti richiede autentifica.</b>");', $dt, NICKSERV);
         }
         else {
-          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s","<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>");', $dt.NICKSERV, $table->wakeup_time - $curtime);
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>");', $dt, NICKSERV, $table->wakeup_time - $curtime);
         }
 	$user->step_inc();
 	Room::save_data($room);
