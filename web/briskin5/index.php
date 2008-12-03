@@ -214,12 +214,25 @@ Hai vinto l'asta.<br> Scegli il seme:
 <img id="callerimg" src="img/noimg.png" class="callerimg">
 </div>
 <div class="table_commands">
+<table>
+<tr>
+<td style="text-align: center;"><input type="button" class="button" name="xinfo"  value="Info." onclick="act_tableinfo();"></td>
+<td style="text-align: center;"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reload();"></td>
+</tr><tr>
+<td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
+<td style="text-align: center;"><input type="button" class="button" name="xout"  value="Out." onclick="safelogout();"></td>
+</tr>
+</table>
+</div>
+<!--
+<div class="table_commands">
 <input type="button" class="button" name="xinfo"  value="Info." onclick="act_tableinfo();">
 <input type="button" class="button" name="xreload"  value="Reload." onclick="act_reload();">
 <div style="vertical-align: top;">
 <img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"><input type="button" class="button" name="xout"  value="Out." onclick="safelogout();">
 </div>
 </div>
+-->
 
 </div>
 
