@@ -367,6 +367,11 @@ supported by:<br><br>
      // alert(window.onbeforeunload);
 
      login_init();
+<?php
+     if ($G_with_topbanner) {
+       printf("     topbanner_init();\n");
+    }
+?>
 
      g_withflash = DetectFlashVer(6,0,0);
      if (g_withflash == false) {
@@ -461,9 +466,13 @@ if ($BRISK_SHOWHTML == "debugtable") {
 }
 else {
 ?>
-     // alert("INDEX START");
+    // alert("INDEX START");
      menu_init();
-     topbanner_init();
+<?php
+     if ($G_with_topbanner) {
+       printf("     topbanner_init();\n");
+    }
+?>
      xhr_rd = createXMLHttpRequest();
      sess = "<?php echo "$sess"; ?>";
      tra = new train($('room_tit'));
