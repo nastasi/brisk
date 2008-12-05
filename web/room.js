@@ -103,7 +103,7 @@ function j_login_manager(form)
     else {
         // console.log("richiesta token");
         /* richiede token */
-        token = server_request('getchallenge|'+form.elements['nameid'].value);
+        token = server_request('getchallenge|'+encodeURIComponent(form.elements['nameid'].value));
         tokens = token.split('|');
         
         // console.log('XX token: '+token);
