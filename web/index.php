@@ -342,6 +342,7 @@ supported by:<br><br>
 <html>
 <head>
 <title>Brisk</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="menu.js"></script>
@@ -398,7 +399,7 @@ supported by:<br><br>
 <div style="text-align: center;">
    <br><br><br>
 Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
-<form method="post" action="" onsubmit="return j_login_manager(this);">
+<form accept-charset="utf-8" method="post" action="" onsubmit="return j_login_manager(this);">
 <input id="passid_private" name="pass_private" type="hidden" value="">
 <table class="login">
 <tr><td>user:</td>
@@ -474,6 +475,7 @@ else {
     }
 ?>
      xhr_rd = createXMLHttpRequest();
+     // xhr_rd.setRequestHeader("Content-type", "text/html; charset=utf-8");
      sess = "<?php echo "$sess"; ?>";
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
