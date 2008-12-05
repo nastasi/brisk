@@ -64,11 +64,13 @@ class Challenges {
   {
     $chal = null;
 
+    log_auth("xxx", sprintf("Challenges::add [%s]\n", $login));
     // FIXME Checks here
     if ($login == '') {
       return ($G_false);
     }
 
+      log_auth("xxx", "LOOPI item: ".$i." tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
 
     if (($chal = new Challenge($login, $token, $ip, $tstamp)) == null) {
       return ($G_false);
@@ -118,7 +120,7 @@ class Challenges {
     $ismod = FALSE;
     
     for ($i = 0 ; $i < $this->item_n ; $i++) {
-      log_auth("LOOPI item: ".$i." tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
+      log_auth("xxx", "LOOPI item: ".$i." tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
       if ($this->item[$i]->tstamp < $curtime) {
         for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
           $this->item[$e] = $this->item[$e + 1];
@@ -126,14 +128,14 @@ class Challenges {
         
         $i--;
         $this->item_n--;
-        log_auth("LOOPI unset: ".$this->item_n);
+        log_auth("xxx", "LOOPI unset: ".$this->item_n);
         unset($this->item[$this->item_n]);
         $ismod = TRUE;
         $this->mod = TRUE;
       }
     }
     
-    log_auth("LOOPI AFTER: ".count($this->item)." _n:" .$this->item_n );
+    log_auth("xxx", "LOOPI AFTER: ".count($this->item)." _n:" .$this->item_n );
     
     $this->garbage_timeout = $curtime + CHAL_GARBAGE_TIMEOUT;
     
