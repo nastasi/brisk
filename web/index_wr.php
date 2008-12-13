@@ -221,10 +221,18 @@ else if ($user->stat == 'room') {
       }
 
       /* TODO: refact to a function */
-      if ($user->bantime > $user->laccwr) {
+      // if ($user->bantime > $user->laccwr) {
+      require_once("Obj/hardban.phh");
+
+      if (($bantime = Hardbans::check(($user->flags & USER_FLAG_AUTH ? $user->name : FALSE),
+                          $user->ip, $user->sess)) != -1) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	$user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "resta in piedi.", 400, 100);
-	
+        if ($user->flags & USER_FLAG_AUTH) {
+          $user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "resta in piedi.", 400, 100);
+        }
+        else {
+          $user->comm[$user->step % COMM_N] .= show_notify("<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.", 2000, "resta in piedi.", 400, 180);
+	}
 	$user->step_inc();
 	Room::save_data($room);
 	Room::unlock_data($sem);
