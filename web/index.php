@@ -159,7 +159,7 @@ function main()
 
     $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
     $standup .= '<div class="room_ex_standup">';
-    $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b></span></div>';
+    $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
     
     $standup .= sprintf('<div id="standup" class="room_standup"></div>');
     $standup .= '<div id="esco" class="esco"></div>';
