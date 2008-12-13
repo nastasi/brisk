@@ -28,6 +28,11 @@
 
  TODO
  ====
+   - strong ban: "expire time|IP|session|(nick if authenticated)"
+     DONE - login: se auth      -  verifica solo gli expire per quel nick
+     DONE -        se non auth  -  verifica gli expire per IP e sessione
+     - riscrivere i messaggi
+
  DONE - login 
  DONE -   se pass:
  DONE -     richiede per l' utente un token (tutta la parte backend va un minimo studiata)
@@ -62,10 +67,6 @@
  DONE  - work background
  DONE  - reserved tables
 
-
-   - strong ban: "expire time|IP|session|(nick if authenticated)"
-     login: se auth      -  verifica solo gli expire per quel nick
-            se non auth  -  verifica gli expire per IP e sessione
 
 
       STUDIARE UN ANTI-DOS
