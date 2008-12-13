@@ -173,6 +173,8 @@ if [ "$web_only" = "FALSE" ]; then
     chmod 666 ${ftokk_path}/main
     touch ${ftokk_path}/challenges
     chmod 666 ${ftokk_path}/challenges
+    touch ${ftokk_path}/hardbans
+    chmod 666 ${ftokk_path}/hardbans
     for i in `seq 0 99`; do 
         touch ${ftokk_path}/table$i
         chmod 666 ${ftokk_path}/table$i
