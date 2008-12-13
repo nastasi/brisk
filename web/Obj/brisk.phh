@@ -27,7 +27,7 @@ define(BRISK_CONF, "brisk.conf.pho");
 define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
 define(PROXY_PATH, "/var/lib/brisk_proxy");
-define(TABLES_N, 12);
+define(TABLES_N, 32);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
@@ -48,7 +48,7 @@ define(EXPIRE_TIME_SMAMMA, 360);
 define(EXPIRE_TIME_WAG, 10);
 define(WAKEUP_TIME, 12); 
 // BAN_TIME da allineare anche in commons.js
-define(BAN_TIME, 900); 
+define(BAN_TIME, 3600); 
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>BriskServ</i>");
 
@@ -75,9 +75,9 @@ require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.1.1 - trusty";
+$G_brisk_version = "2.1.2 - trusty";
 
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Autenticazione e tavoli riservati.',
+$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Autenticazione, tavoli riservati e ban efficaci.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -567,6 +567,9 @@ class Table {
           $act = 'sit';
         }
       }
+      else {
+        $act = 'none';
+      }
     }
     else {
       if ($table == $cur_table)
@@ -876,9 +879,14 @@ class Room {
 
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       $this->table[$i] =& Table::create($i);
-      $row = ( (((int)($i / 4)) % 2) == 0 );
-      $col = ($i % 2 == 0);
-      $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
+      if ($i < 12) {
+        $row = ( (((int)($i / 4)) % 2) == 0 );
+        $col = ($i % 2 == 0);
+        $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
+      }
+      else {
+        $this->table[$i]->auth_only = FALSE;
+      }
     }
     $this->garbage_timeout = 0;
   }
