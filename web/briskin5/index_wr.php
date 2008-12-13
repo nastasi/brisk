@@ -120,8 +120,12 @@ else if ($user->stat == 'table') {
 	$logout_cont = FALSE;
       }
     }
-    else 
-      $user->bantime = $user->laccwr + BAN_TIME;
+    else {
+      require_once("../Obj/hardban.phh");
+      Hardbans::add(($user->flags & USER_FLAG_AUTH ? $user->name : FALSE),
+                    $user->ip, $user->sess, $user->laccwr + BAN_TIME);
+    }
+    //      $user->bantime = $user->laccwr + BAN_TIME;
     
     if ($logout_cont == TRUE) {
       $bri->table_wakeup(&$user);

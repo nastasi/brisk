@@ -1,0 +1,326 @@
+<?php
+/*
+ *  brisk - auth.phh
+ *
+ *  Copyright (C) 2006-2008 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+define(HBAN_SHM_DIMS_MIN, 16384);
+define(HBAN_SHM_DIMS_MAX, 65536);
+define(HBAN_SHM_DIMS_DLT, 16384);
+define(HBAN_VALID_TIME,      15);
+define(HBAN_GARBAGE_TIMEOUT,  5);
+
+class Hardban {
+  var $login;
+  var $ip;
+  var $session;
+  var $timeout;
+
+  function Hardban($login, $ip, $session, $timeout)
+  {
+    $this->login  = $login;
+    $this->ip     = $ip;
+    $this->session  = $session;
+    $this->timeout = $timeout;
+  }
+}
+
+class Hardbans {
+  var $item;
+  var $item_n;
+  var $mod;
+  var $shm_sz;
+
+  var $garbage_timeout;
+
+
+  function Hardbans()
+  {
+    $this->item = array();
+    $this->item_n = 0;
+    $this->garbage_timeout = 0;
+    $this->mod = FALSE;
+  }
+
+  function add_item($login, $ip, $session, $timeout)
+  {
+    $chal = null;
+
+    log_auth("xxx", sprintf("Hardbans::add [%s]\n", $login));
+
+    if (($chal = new Hardban($login, $ip, $session, $timeout)) == null) {
+      return ($G_false);
+    }
+
+    $this->item[$this->item_n] = $chal;
+    $this->item_n++;
+
+    $this->mod = TRUE;
+
+    return ($chal);
+  }
+
+
+  /* remove all istances related to $login */
+
+  function rem($login)
+  {
+    $ismod  = FALSE;
+    $curtime = time();
+
+    for ($i = 0 ; $i < $this->item_n ; $i++) {
+      if ($this->item[$i]->timeout < $curtime || strcasecmp($this->item[$i]->login, $login) == 0) {
+        $ismod = TRUE;
+        for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
+          $this->item[$e] = $this->item[$e + 1];
+        }
+        
+        $i--;
+        $this->item_n--;
+        unset($this->item[$this->item_n]);
+        $this->mod = TRUE;
+      }
+    }
+
+    return ($ismod);
+  }
+
+  function garbage_manager($force)
+  {
+    $curtime = time();
+
+    // FIXME remove set to 0
+    $this->garbage_timeout = 0;
+    if ($this->garbage_timeout > $curtime && $force == FALSE)
+      return (FALSE);
+
+    $ismod = FALSE;
+    
+    for ($i = 0 ; $i < $this->item_n ; $i++) {
+      log_auth("xxx", "LOOPI item: ".$i." timeout: ".$this->item[$i]->timeout."  curtime: ".$curtime);
+      if ($this->item[$i]->timeout < $curtime) {
+        for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
+          $this->item[$e] = $this->item[$e + 1];
+        }
+        
+        $i--;
+        $this->item_n--;
+        log_auth("xxx", "LOOPI unset: ".$this->item_n);
+        unset($this->item[$this->item_n]);
+        $ismod = TRUE;
+        $this->mod = TRUE;
+      }
+    }
+    
+    log_auth("xxx", "LOOPI AFTER: ".count($this->item)." _n:" .$this->item_n );
+    
+    $this->garbage_timeout = $curtime + HBAN_GARBAGE_TIMEOUT;
+    
+    return ($ismod);
+  }
+  
+  function ismod()
+  {
+    return ($this->mod);
+  }
+
+  // Static functions
+  function &init_data()
+  {
+    $chal =& new Hardbans();
+    
+    $chal->mod = TRUE;
+
+    return $chal;
+  }
+
+  function &load_data() 
+  {
+    GLOBAL $G_false, $sess;
+    $doexit = FALSE;
+    do {
+      if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
+	log_main("ftok failed");
+	$doexit = TRUE;
+	break;
+      }
+    
+      if (($shm_sz = sharedmem_sz($tok)) == -1) {
+	log_main("shmop_open failed");
+      }
+	
+      if ($shm_sz == -1)
+	$shm_sz = HBAN_SHM_DIMS_MIN;
+
+      if ($shm = shm_attach($tok, $shm_sz)) {
+	$hban = @shm_get_var($shm, $tok);
+	
+	log_only("hardban ==  ".($hban == FALSE ?   "FALSE" : "TRUE")."  hardban ===  ".($hban === FALSE ? "FALSE" : "TRUE")."  hardban isset ".(isset($hban) ?   "TRUE" : "FALSE"));
+	
+	if ($hban == FALSE) {
+	  log_only("INIT HARDBAN DATA");
+	  
+	  $hban =& Hardbans::init_data();
+	  if (@shm_put_var($shm, $tok, $hban) == FALSE) {
+	    log_only("PUT_VAR FALLITA ".strlen(serialize($hban)));
+	    log_only(serialize($hban));
+	  }
+	}
+	$hban->shm_sz = $shm_sz;
+	
+	shm_detach($shm);
+      }
+
+      $hban->garbage_manager(TRUE);
+
+      $ret = &$hban;
+      return ($ret);
+    } while (0);
+    
+    if ($doexit)
+      exit();
+    
+    return ($G_false);
+  }
+  
+
+  function save_data(&$hban) 
+  {
+    $shm =   FALSE;
+    $oldmod = $hban->mod;
+
+    if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) 
+      return (FALSE);
+    
+    while ($hban->shm_sz < HBAN_SHM_DIMS_MAX) {
+      if (($shm = shm_attach($tok, $hban->shm_sz)) == FALSE)
+	break;
+      
+      if (isset($hban)) 
+        log_only("hardban count ".count($hban->item)."  _n: ".$hban->item_n);
+
+      $hban->mod = FALSE;
+      if (shm_put_var($shm, $tok, $hban) != FALSE) {
+	shm_detach($shm);
+	return (TRUE);
+      }
+      $hban->mod = $oldmod;
+
+      if (shm_remove($shm) === FALSE) {
+	log_only("REMOVE FALLITA");
+	break;
+      }
+      shm_detach($shm);
+      $hban->shm_sz += HBAN_SHM_DIMS_DLT;
+    } 
+
+    if ($shm)
+      shm_detach($shm);
+    
+    return (FALSE);
+  }
+
+  function lock_data()
+  {
+    if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+    // echo "FTOK ".$tok."<br>";
+    if (($res = sem_get($tok)) == FALSE) {
+      echo "SEM_GET FAILED";
+      exit;
+    }
+    if (sem_acquire($res)) {   
+      log_lock("LOCK hardbans");
+      return ($res);
+    }
+    else
+      return (FALSE);
+  }
+  
+  function unlock_data($res)
+  {
+    GLOBAL $sess; 
+    
+    log_lock("UNLOCK hardbans");
+
+    return (sem_release($res));
+  }
+
+
+  function check($login, $ip, $session)
+  {
+    $bantime = -1;
+    /* if it exists check for a valid challenge */
+    if (($a_sem = Hardbans::lock_data()) != FALSE) { 
+      
+      if (($hban = &Hardbans::load_data()) != FALSE) {
+        for ($e = 0 ; $e < $hban->item_n ; $e++) {
+          if ($login != FALSE) {
+            if (strcasecmp($login, $hban->item[$e]->login) == 0 || $hban->item[$e]->session == $session) {
+              $bantime = $hban->item[$e]->timeout;
+              break;
+            }
+          }
+          else {
+            /* check on ip and sess */
+            if ($hban->item[$e]->ip == $ip || $hban->item[$e]->session == $session) {
+              $bantime = $hban->item[$e]->timeout;
+              break;
+            }
+          }
+        } // for (...
+        if ($hban->ismod()) {
+          Hardbans::save_data(&$hban);
+        }
+      } // if (load_data
+      Hardbans::unlock_data($a_sem);
+    } // if (lock_data
+    
+    return ($bantime);
+  } // func
+
+
+
+  function add($login, $ip, $session, $timeout)
+  {
+    $found = FALSE;
+    /* if it exists check for a valid challenge */
+    if (($a_sem = Hardbans::lock_data()) != FALSE) { 
+      
+      if (($hban = &Hardbans::load_data()) != FALSE) {
+
+        $hban->add_item($login, $ip, $session, $timeout);
+
+        if ($hban->ismod()) {
+          Hardbans::save_data(&$hban);
+        }
+      } // if (load_data
+      Hardbans::unlock_data($a_sem);
+    } // if (lock_data
+    
+    return ($found);
+  } // func
+
+} // End CLASS Hardbans
+
+?>
