@@ -2018,7 +2018,7 @@ class Room {
             $flags |= 1;
           }
         
-        $content .= sprintf('%s[ %d, \'%s\' ]',($ct > 0 ? ', ' : ''), $flags, xcape($this->user[$e]->name));
+        $content .= sprintf('%s[ %d, "%s" ]',($ct > 0 ? ', ' : ''), $flags, xcape($this->user[$e]->name));
         $ct++;
       }
     }
@@ -2091,7 +2091,7 @@ class Room {
       
       log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
       
-      $content .= sprintf('%s[ %d, \'%s\' ]',($i == 0 ? '' : ', '), $flags, xcape($user_cur->name));
+      $content .= sprintf('%s[ %d, "%s" ]',($i == 0 ? '' : ', '), $flags, xcape($user_cur->name));
     }
 
     $content .= ' ]';
