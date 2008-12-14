@@ -409,6 +409,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <tr><td colspan="2"><input id="sub" value="entra" type="submit" class="button"></td></tr>
 </table>
 </form><br>
+<b>Se non hai ancora una password, lascia il campo in bianco ed entra.</b><br><br>
 (se usi firefox e qualcosa non funziona<br>prova a ricaricare la pagina con <b>Ctrl + F5</b>)<br>
 </div>
 <br><br><br><br>
