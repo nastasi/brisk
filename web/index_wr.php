@@ -78,7 +78,7 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
         // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
         // exit;
 
-        if (($login_new = validate_name($cli_name)) != FALSE) {
+        if (($login_new = validate_name(urldecode($cli_name))) != FALSE) {
           if ($chals->add($login_new, $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
             echo '0|'.$token;
           }
