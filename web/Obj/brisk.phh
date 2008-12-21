@@ -75,9 +75,9 @@ require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 $G_false = FALSE;
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.1.2 - trusty";
+$G_brisk_version = "2.1.3 - trusty";
 
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Autenticazione, tavoli riservati e ban efficaci.',
+$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Garanzia dal sito e stato degli utenti (guarda l\'help).',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
@@ -105,9 +105,13 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dt><b>Comandi della chat</b>
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
+<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\" oppure \\"sigaretta\\"
+<dd><b>/garante</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 </dl>
 </div>
 ';
+
+//  
 
 $G_room_about= '<br>
 <div id=\\"header\\" class=\\"header\\">
@@ -126,6 +130,13 @@ function xcape($s)
   return (str_replace($from, $to, htmlentities($s,ENT_COMPAT,"UTF-8")));
 }
 
+function xcapelt($s)
+{
+  $from = array (   '\\',     '|' );
+  $to   = array ( '\\\\',   '\\|' );
+
+  return (str_replace($from, $to, $s));
+}
 
 class Card {
   var $value; /* 0 - 39 card value */
@@ -590,6 +601,17 @@ class Table {
 
 // User flags
 define(USER_FLAG_AUTH, 0x02);
+
+//   user status
+define(USER_FLAG_S_NORM,  0x000); // done
+define(USER_FLAG_S_PAU,   0x100); // done
+define(USER_FLAG_S_OUT,   0x200); // done
+define(USER_FLAG_S_DOG,   0x300); // done
+define(USER_FLAG_S_EAT,   0x400); // done
+define(USER_FLAG_S_WRK,   0x500); // done
+define(USER_FLAG_S_SMK,   0x600); // done
+
+define(USER_FLAG_S_ALL,   0xf00); // done
 
 class User {
   var $name;       // name of the user
@@ -1455,7 +1477,14 @@ class Room {
         $to_all = show_notify($msg, 0, "chiudi", 400, 120);
       } while (0);
     } // /alarm chat command
-      
+    else if (strncmp($msg, "/garante", 8) == 0) {
+      if ($user->flags & USER_FLAG_AUTH) {
+        $to_user = sprintf('authbox(300,200);');
+      }
+      else {
+        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>");', $dt, NICKSERV);
+      }
+    }
     else if (strncmp($msg, "/nick ", 6) == 0) {
       log_main("chatt_send BEGIN");
 
@@ -1506,6 +1535,46 @@ class Room {
         log_main("chatt_send start set");
 
         $update_room = TRUE;
+      } while (0);
+    } // nick chat command
+
+    else if (strncmp($msg, "/st ", 4) == 0) {
+      log_main("chatt_send BEGIN");
+
+      do {
+        $st_str = substr($msg, 4);
+        
+        if (strcasecmp($st_str, "normale") == 0) {
+          $st = USER_FLAG_S_NORM;
+        }
+        else if (strcasecmp($st_str, "pausa") == 0) {
+          $st = USER_FLAG_S_PAU;
+        }
+        else if (strcasecmp($st_str, "fuori") == 0) {
+          $st = USER_FLAG_S_OUT;
+        }
+        else if (strcasecmp($st_str, "cane") == 0) {
+          $st = USER_FLAG_S_DOG;
+        }
+        else if (strcasecmp($st_str, "cibo") == 0) {
+          $st = USER_FLAG_S_EAT;
+        }
+        else if (strcasecmp($st_str, "lavoro") == 0) {
+          $st = USER_FLAG_S_WRK;
+        }
+        else if (strcasecmp($st_str, "sigaretta") == 0) {
+          $st = USER_FLAG_S_SMK;
+        }
+        else {
+          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"Questo stato non esiste.");', $dt, NICKSERV);
+          break;
+        }
+
+        log_main("chatt_send start set");
+        if (($user->flags & USER_FLAG_S_ALL) != $st) {
+          $update_room = TRUE;
+          $user->flags = ($user->flags & ~USER_FLAG_S_ALL) | $st;
+        }
       } while (0);
     } // nick chat command
 
@@ -2951,5 +3020,37 @@ function sharedmem_sz($tok)
   return ($shm_sz);
 }    
 
+class Warrant {
+  function lock_data()
+  {
+    GLOBAL $sess; 
+    
+    if (($tok = @ftok(FTOK_PATH."/warrant", "B")) == -1) {
+      echo "FTOK FAILED";
+      exit;
+    }
+    // echo "FTOK ".$tok."<br>";
+    if (($res = sem_get($tok)) == FALSE) {
+      echo "SEM_GET FAILED";
+      exit;
+    }
+    if (sem_acquire($res)) {   
+      log_lock("LOCK room");
+      return ($res);
+    }
+    else
+      return (FALSE);
+  }
+  
+  function unlock_data($res)
+  {
+    GLOBAL $sess; 
+    
+    log_lock("UNLOCK room");
+    
+    return (sem_release($res));
+  }
 
+  
+}
 ?>

@@ -3,10 +3,55 @@
    
 */
 
+function state_add(flags)
+{
+    var content = "";
+    var st, name = "";
+    var tit = "";
+
+    if ((flags & 0xf00) != 0) {
+        st = flags & 0xf00;
+        switch (st) {
+        case 0x100:
+            name = "st_pau.png";
+            tit = "in pausa";
+            break;
+        case 0x200:
+            name = "st_out.png";
+            tit = "fuori";
+            break;
+        case 0x300:
+            name = "st_dog.png";
+            tit = "cane a spasso";
+            break;
+        case 0x400:
+            name = "st_eat.png";
+            tit = "a mangiare";
+            break;
+        case 0x500:
+            name = "st_wrk.png";
+            tit = "a lavoro";
+            break;
+        case 0x600:
+            name = "st_smoke.png";
+            tit = "si sta fumando una sigaretta (e facendosi venire il cancro)";
+            break;
+        default:
+            break;
+        }
+        if (name != "") {
+            content += '<img title="'+tit+'" class="unbo" src="img/'+name+'">';
+        }
+    }
+
+    return content;
+}
+
 function j_stand_cont(data)
 {
     var i;
     var content;
+    var st, name = "";
 
     content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
     for (i = 0 ; i < data.length ; i++) {
@@ -27,6 +72,7 @@ function j_stand_cont(data)
         if (data[i][0] & 0x01)
             content += '</b>';
 
+        content += state_add(data[i][0]);
         content += '</td>';
 
         if ((i % 4) == 3)
@@ -67,6 +113,7 @@ function j_tab_cont(table_idx, data)
 
         if (data[i][0] & 0x01)
             content += '</b>';
+        content += state_add(data[i][0]);
 
         content += '<br>';
     }
@@ -103,7 +150,7 @@ function j_login_manager(form)
     else {
         // console.log("richiesta token");
         /* richiede token */
-        token = server_request('getchallenge|'+encodeURIComponent(form.elements['nameid'].value));
+        token = server_request('mesg', 'getchallenge', 'cli_name', encodeURIComponent(form.elements['nameid'].value));
         tokens = token.split('|');
         
         // console.log('XX token: '+token);
@@ -147,4 +194,65 @@ function login_init()
 {
     menu_init();
     login_formtext_hilite();
+}
+
+function warrant_formtext_hilite()
+{
+    formtext_hilite($("nameid"));
+    formtext_hilite($("emailid"));
+    formsub_hilite($("subid"));
+    formsub_hilite($("cloid"));
+}
+
+
+function j_check_email(email)
+{
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+        return (true);
+    return (false);
+}
+
+function j_authbox(form)
+{
+    var no; 
+
+    if (form.elements['realsub'].value == "chiudi") {
+        $('authbox').style.visibility = "hidden";
+        return (false);
+    }
+
+    if (form.elements['name'].value == '' || j_check_email(form.elements['email'].value) == false)
+        no = new notify(gst, "<br>I campi user e/o e-mail non sono validi;</br> correggeteli per favore.", 1, "chiudi", 280, 100); 
+    else {
+        // submit the request
+        token = server_request('mesg', 'warranty', 
+                               'cli_name', encodeURIComponent(form.elements['name'].value),
+                               'cli_email', encodeURIComponent(form.elements['email'].value) );
+        if (token == "1") {
+            $('authbox').style.visibility = "hidden";
+            form.elements['name'].value = "";
+            form.elements['email'].value = "";
+            return (false);
+        }
+    }
+
+    return (false);
+}
+
+function authbox(w, h)
+{
+    var box;
+
+    box = $('authbox');
+
+    box.style.zIndex = 200;
+    box.style.width  = w+"px";
+    box.style.marginLeft  = -parseInt(w/2)+"px";
+    box.style.height = h+"px";
+    box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
+
+    warrant_formtext_hilite();
+
+    box.style.visibility = "visible";
+    $("nameid").focus();
 }
