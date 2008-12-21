@@ -67,6 +67,7 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   $argz = explode('|', $mesg);
 
   if ($argz[0] == 'getchallenge') {
+    GLOBAL $cli_name;
     if (($a_sem = Challenges::lock_data()) != FALSE) { 
       log_main("chal lock data success");
       
@@ -77,7 +78,7 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
         // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
         // exit;
 
-        if (($login_new = validate_name($argz[1])) != FALSE) {
+        if (($login_new = validate_name($cli_name)) != FALSE) {
           if ($chals->add($login_new, $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
             echo '0|'.$token;
           }
@@ -134,6 +135,43 @@ if ($argz[0] == 'shutdown') {
     $room->room_outstandup(&$user);
   else
     log_rd2("SHUTDOWN FROM WHAT ???");
+}
+else if ($argz[0] == 'warranty') {
+  GLOBAL $cli_name, $cli_email;
+
+  $curtime = time();
+  $mesg_to_user = "";
+
+  log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
+  if ($user->flags & USER_FLAG_AUTH) {
+    if (($wa_lock = Warrant::lock_data()) != FALSE) {
+      if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
+        /* Unix time | session | nickname | IP | where was | mesg */
+        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, $user->name, xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
+        fclose($fp);
+      }
+      Warrant::unlock_data($wa_lock);
+      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+      $user->comm[$user->step % COMM_N] .=  show_notify("<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione.", 0, "chiudi", 400, 150);
+      $user->step_inc();
+      echo "1";
+    }
+    else {
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>");', $dt, NICKSERV);
+    }
+    
+  }
+  else {
+    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>");', $dt, NICKSERV);
+  }
+
+  if ($mesg_to_user != "") {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    
+    $dt = date("H:i ", $curtime);
+    $user->comm[$user->step % COMM_N] .= $mesg_to_user;
+    $user->step_inc();
+  }
 }
 /******************
  *                *
