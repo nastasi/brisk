@@ -14,27 +14,27 @@ function state_add(flags)
         switch (st) {
         case 0x100:
             name = "st_pau.png";
-            tit = "in pausa";
+            tit = "sono in pausa";
             break;
         case 0x200:
             name = "st_out.png";
-            tit = "fuori";
+            tit = "sono fuori";
             break;
         case 0x300:
             name = "st_dog.png";
-            tit = "cane a spasso";
+            tit = "sono a spasso col cane";
             break;
         case 0x400:
             name = "st_eat.png";
-            tit = "a mangiare";
+            tit = "sto mangiando";
             break;
         case 0x500:
             name = "st_wrk.png";
-            tit = "a lavoro";
+            tit = "sono a lavoro";
             break;
         case 0x600:
-            name = "st_smoke.png";
-            tit = "si sta fumando una sigaretta (e facendosi venire il cancro)";
+            name = "st_smk.png";
+            tit = "sto fumando una sigaretta (e facendomi venire il cancro)";
             break;
         default:
             break;
