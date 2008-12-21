@@ -610,6 +610,7 @@ define(USER_FLAG_S_DOG,   0x300); // done
 define(USER_FLAG_S_EAT,   0x400); // done
 define(USER_FLAG_S_WRK,   0x500); // done
 define(USER_FLAG_S_SMK,   0x600); // done
+define(USER_FLAG_S_EYE,   0x700); // done
 
 define(USER_FLAG_S_ALL,   0xf00); // done
 
@@ -1564,6 +1565,9 @@ class Room {
         }
         else if (strcasecmp($st_str, "sigaretta") == 0) {
           $st = USER_FLAG_S_SMK;
+        }
+        else if (strcasecmp($st_str, "presente") == 0) {
+          $st = USER_FLAG_S_EYE;
         }
         else {
           $to_user = sprintf('chatt_sub("%s", [2,"%s"],"Questo stato non esiste.");', $dt, NICKSERV);

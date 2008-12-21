@@ -36,6 +36,10 @@ function state_add(flags)
             name = "st_smk.png";
             tit = "sto fumando una sigaretta (e facendomi venire il cancro)";
             break;
+        case 0x700:
+            name = "st_eye.png";
+            tit = "sono presente!";
+            break;
         default:
             break;
         }
