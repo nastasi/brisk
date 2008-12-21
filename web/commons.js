@@ -240,15 +240,23 @@ function send_mesg(mesg)
     }
 }
 
-function server_request(mesg)
+function server_request()
 {
     var xhr_wr = createXMLHttpRequest();
-    
+    var i, collect = "";
+
+    if (arguments.length > 0) {
+        for (i = 0 ; i < arguments.length ; i+= 2) {
+            collect += (i == 0 ? "" : "&") + arguments[i] + "=" + encodeURIComponent(arguments[i+1]);
+        }
+    }
+    // alert("Args: "+arguments.length);
+
     var is_conn = (sess == "not_connected" ? false : true);
     
     // console.log("server_request:preresp: "+xhr_wr.responseText);
 
-    xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, false);
+    xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+collect, false);
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(null);
     
@@ -690,14 +698,23 @@ function notify(st, text, tout, butt, w, h)
     clodiv.className = "notify_clo";
     clodiv.appendChild(clo);
 
-    box = document.createElement("div");
+    cont = document.createElement("div");
+
+    cont.style.borderBottomStyle = "solid";
+    cont.style.borderBottomWidth = "1px";
+    cont.style.borderBottomColor = "gray";
+    cont.style.height = (h - 30)+"px";
+    cont.style.overflow = "auto";
+    cont.innerHTML = text;
+
+    box =  document.createElement("div");
     box.className = "notify";
-    box.innerHTML = text;
     box.style.zIndex = 200;
     box.style.width  = w+"px";
     box.style.marginLeft  = -parseInt(w/2)+"px";
     box.style.height = h+"px";
     box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
+    box.appendChild(cont);
     box.appendChild(clodiv);
     box.style.visibility = "visible";
 
@@ -1111,3 +1128,5 @@ function topbanner_cb()
 
     // console.log("A: "+a+"  B: "+b);
 }
+
+
