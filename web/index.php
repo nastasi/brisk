@@ -494,7 +494,7 @@ else {
      $("txt_in").focus();
 <?php
 if ($login_exists) {
-  echo show_notify("<br><br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.<br><br><br>", 0, "torna ai tavoli", 400, 150);
+  echo show_notify("<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", 0, "torna ai tavoli", 400, 150);
 }
 ?>
 <?php
@@ -534,6 +534,40 @@ if ($login_exists) {
     </td></tr></table>
 </div>
 </div>
+
+<!--
+    box =  document.createElement("div");
+    box.className = "notify";
+    box.style.zIndex = 200;
+    box.style.width  = w+"px";
+    box.style.marginLeft  = -parseInt(w/2)+"px";
+    box.style.height = h+"px";
+    box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
+    box.appendChild(cont);
+    box.appendChild(clodiv);
+    box.style.visibility = "visible";
+-->
+
+    <div id="authbox" class="notify" style="text-align: center;">
+       <br>
+       <b>Garantisci per un tuo conoscente:</b>
+       <br><br>
+
+
+
+       <form accept-charset="utf-8" method="post" action="" onsubmit="return j_authbox(this);">
+       <input type="hidden" name="realsub" value="666">
+<table class="login">
+<tr><td>nickname:</td>
+<td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+<tr><td>e-mail:</td>
+<td><input id="emailid" class="input_text" name="email" type="text" size="24" maxlength="1024" value=""></td></tr>
+<tr><td colspan="2" style="text-align: center;">
+       <input id="subid" name="sub" value="invia" type="submit" onclick="this.form.elements['realsub'].value = this.value;" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input id="cloid" name="clo" value="chiudi" type="submit" class="button" onclick="this.form.elements['realsub'].value = this.value;"></td></tr>
+</table>
+    </form>
+    </div>
 <div id="heartbit"></div>
 <div id="sandbox"></div>
 <div id="imgct"></div>
