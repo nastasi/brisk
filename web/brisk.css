@@ -51,6 +51,10 @@ img {
     border-color: grey;
 }
 
+img.unbo {
+    border-width: 0px;
+}
+
 img.nobo {
     position:     relative;
     border-width: 0px;
@@ -75,7 +79,7 @@ img.nobohide {
     border-width: 1px;
 /*  margin-top: auto;
     margin-bottom: auto;*/
-    overflow: auto;
+/*    overflow: auto; */
     bottom: 0;
     right: 0;
     align: center;
