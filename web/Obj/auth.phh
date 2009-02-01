@@ -246,13 +246,11 @@ class Challenges {
   function lock_data()
   {
     if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
-      echo "FTOK FAILED";
-      exit;
+      return (FALSE);
     }
     // echo "FTOK ".$tok."<br>";
     if (($res = sem_get($tok)) == FALSE) {
-      echo "SEM_GET FAILED";
-      exit;
+      return (FALSE);
     }
     if (sem_acquire($res)) {   
       log_lock("LOCK challenges");

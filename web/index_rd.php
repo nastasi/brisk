@@ -110,7 +110,14 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     ignore_user_abort(FALSE);
   }
   else {
+    // wait 20 secs, then restart the xhr 
+    ignore_user_abort(FALSE);
+
+    return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+    /*
+    ignore_user_abort(FALSE);
     return (FALSE);
+    */
   }
     
   if (($proxy_step = step_get($sess)) != FALSE) {

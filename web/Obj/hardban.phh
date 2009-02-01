@@ -241,13 +241,11 @@ class Hardbans {
   function lock_data()
   {
     if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
-      echo "FTOK FAILED";
-      exit;
+      return (FALSE);
     }
     // echo "FTOK ".$tok."<br>";
     if (($res = sem_get($tok)) == FALSE) {
-      echo "SEM_GET FAILED";
-      exit;
+      return (FALSE);
     }
     if (sem_acquire($res)) {   
       log_lock("LOCK hardbans");
