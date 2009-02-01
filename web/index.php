@@ -105,7 +105,21 @@ function main()
         else
           $login_exists = FALSE;
 
-        log_legal($curtime, $user->sess, $user->name, "STAT:LOGIN", '');
+        log_legal($curtime, $user, "STAT:LOGIN", '');
+
+        // recovery lost game
+	if ($user->stat == "table") {
+	  if (Room::save_data(&$room) == FALSE) {
+	    echo "ERRORE SALVATAGGIO\n";
+	    exit;
+	  }
+	  log_main("unlock Room");
+	  Room::unlock_data($sem);
+	  setcookie("table_token", $user->table_token, $curtime + 31536000);
+	  setcookie("table_idx", $user->table, $curtime + 31536000);
+	  header ("Location: briskin5/index.php");
+	  exit;
+	}
 
 
 	// setcookie ("sess", "", time() + 180);      
@@ -118,6 +132,7 @@ function main()
       }
       else {
 	/* Login Rendering */
+        /* MLANG: "Utente e/o password errati.", "Il nickname deve contenere almeno una lettera o una cifra.", "Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.", "Il tuo nickname &egrave; gi&agrave; in uso." */
 	if ($idx == -3)
 	  $body .= '<div class="urgmsg"><b>Utente e/o password errati.</b></div>';
 	else if ($idx == -2)
@@ -159,10 +174,12 @@ function main()
 
     $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
     $standup .= '<div class="room_ex_standup">';
-    $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
+    /* MLANG: "Giocatori in piedi", "Come ottenere user e password" */
+    // $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
+    $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b></span></div>';
     
     $standup .= sprintf('<div id="standup" class="room_standup"></div>');
-    $standup .= '<div id="esco" class="esco"></div>';
+    $standup .= '<div id="esco" class="esco"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reloadroom();"><input class="button" name="logout" value="Esco." onclick="esco_cb();" type="button"></div>';
     $standup .= '</div></td></tr></table>';
   }
 
@@ -195,7 +212,7 @@ function main()
     $brisk_donate = "";
 
 
-
+  /* MLANG: "briscola chiamata in salsa ajax", */
 
 $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
@@ -247,6 +264,7 @@ google_color_url = "000000";
 </td></table>
 </div>';
 
+/* MLANG: ALL THE VERTICAL MENU */
 $brisk_vertical_menu = '
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
@@ -320,12 +338,13 @@ $brisk_vertical_menu = '
 </div>
 </div>
 </div>
-<br><br><br>
+<br><br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
 supported by:<br><br>
 <a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>
-<a target="_blank" href="http://www.forumolimpia.it"><img class="nobo" id="btn_foroli" src="img/forumolimpia.gif" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
+<a target="_blank" href="http://www.forumolimpia.it"><img class="nobo" id="btn_foroli" src="img/forumolimpia.gif" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>
+<a target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a><br>
 <div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
 </div><br><br></div>
 %s
@@ -394,7 +413,10 @@ supported by:<br><br>
 ?> 
 
 <!--  =========== tables ===========  -->
-<?php echo "$body"; ?>
+<?php 
+
+/* MLANG: "Digita il tuo nickname per accedere ai tavoli della briscola.", "entra", "Se non hai ancora una password, lascia il campo in bianco ed entra." ,"(se usi firefox e qualcosa non funziona prova a ricaricare la pagina con Ctrl + F5)" */
+echo "$body"; ?>
 <br>
 <div style="text-align: center;">
    <br><br><br>
@@ -494,6 +516,7 @@ else {
      $("txt_in").focus();
 <?php
 if ($login_exists) {
+  /* MLANG: "<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", "torna ai tavoli" */
   echo show_notify("<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", 0, "torna ai tavoli", 400, 150);
 }
 ?>
@@ -527,6 +550,7 @@ if ($login_exists) {
 <div id="txt" class="chatt">
 </div>
 <div style="text-align: center; ">
+    <!-- MLANG: scrivi un invito al tavolo e clicca -->
     <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="scrivi un invito al tavolo e clicca"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
