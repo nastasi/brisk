@@ -102,6 +102,7 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
     printf("challenge|ok");
   }
   else if ($argz[0] == 'help') {
+    /* MLANG: "torna ai tavoli" */ 
     echo show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
   }
   else if ($argz[0] == 'about') {
@@ -133,8 +134,9 @@ if ($argz[0] == 'shutdown') {
     $room->room_wakeup(&$user);
   else if ($user->subst == 'standup')
     $room->room_outstandup(&$user);
-  else
+  else {
     log_rd2("SHUTDOWN FROM WHAT ???");
+  }
 }
 else if ($argz[0] == 'warranty') {
   GLOBAL $cli_name, $cli_email;
@@ -152,16 +154,19 @@ else if ($argz[0] == 'warranty') {
       }
       Warrant::unlock_data($wa_lock);
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+      /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
       $user->comm[$user->step % COMM_N] .=  show_notify("<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione.", 0, "chiudi", 400, 150);
       $user->step_inc();
       echo "1";
     }
     else {
+      /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
       $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>");', $dt, NICKSERV);
     }
     
   }
   else {
+    /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
     $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>");', $dt, NICKSERV);
   }
 
@@ -243,6 +248,7 @@ else if ($user->stat == 'room') {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
 	$dt = date("H:i ", $curtime);
+        /* MLANG: "<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>", "<b>Il tavolo a cui volevi sederti richiede autentifica.</b>", "<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>" */
         if ($G_shutdown) {
           $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt, NICKSERV);
         }
@@ -265,6 +271,7 @@ else if ($user->stat == 'room') {
       if (($bantime = Hardbans::check(($user->flags & USER_FLAG_AUTH ? $user->name : FALSE),
                           $user->ip, $user->sess)) != -1) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+        /* MLANG: "<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", "resta in piedi.", "<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere." */
         if ($user->flags & USER_FLAG_AUTH) {
           $user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "resta in piedi.", 400, 100);
         }
@@ -312,7 +319,7 @@ else if ($user->stat == 'room') {
         for ($i = 0 ; $i < $table->player_n ; $i++) {
           $plist .= '|'.$room->user[$table->player[$i]]->sess;
         }
-        log_legal($curtime, $user->sess, $user->name, "STAT:CREATE_GAME", $plist);
+        log_legal($curtime, $user, "STAT:CREATE_GAME", $plist);
 
         if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
           log_wr("bri create: FALSE");

@@ -24,6 +24,8 @@
  *
  */
 
+/* MLANG: le img dell'asta */
+
 require_once("../Obj/brisk.phh");
 require_once("../Obj/proxyscan.phh");
 
