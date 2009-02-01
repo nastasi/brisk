@@ -86,7 +86,7 @@ function j_stand_cont(data)
 
     $("standup").innerHTML = content;
 
-    $("esco").innerHTML =  '<input class="button" name="logout" value="Esco." onclick="esco_cb();" type="button">';
+    // $("esco").innerHTML =  '<input class="button" name="logout" value="Esco." onclick="esco_cb();" type="button">';
 }
 
 function esco_cb() {
