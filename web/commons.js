@@ -164,22 +164,26 @@ function rnd_int(min, max) {
 
 function error_images()
 {
-    alert("GHESEMU!");
+    // alert("GHESEMU!");
+    setTimeout(preload_images, 2000, g_preload_img_arr, g_imgct-1);
 }
 
 function abort_images()
 {
-    alert("ABORTAIMAGES");
+    // alert("ABORTAIMAGES");
+    setTimeout(preload_images, 2000, g_preload_img_arr, g_imgct-1);
 }
 
 function unload_images()
 {
-    alert("ABORTAIMAGES");
+    // alert("ABORTAIMAGES");
+    setTimeout(preload_images, 2000, g_preload_img_arr, g_imgct-1);
 }
 
 function reset_images()
 {
-    alert("ABORTAIMAGES");
+    // alert("ABORTAIMAGES");
+    setTimeout(preload_images, 2000, g_preload_img_arr, g_imgct-1);
 }
 
 function update_images()
@@ -403,6 +407,13 @@ function act_reload()
     window.onunload = null;
     window.onbeforeunload = null;
     document.location.reload();
+}
+
+function act_reloadroom()
+{
+    window.onunload = null;
+    window.onbeforeunload = null;
+    document.location.assign("index.php");
 }
 
 function act_shutdown()
