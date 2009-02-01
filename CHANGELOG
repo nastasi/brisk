@@ -1,22 +1,38 @@
-        BUG - "lascio" forgotten icon and bad text fixed.
-        
-        auth user replaced with new login
-        nick command restricted inside auth tables.
-        alarm message to single user.
-        act_content totally refactored.
-        new field $idx in table class.
-        variable enabled topbanner.
-        rendering for auth names refactored.
-        "brisk_conf" config paramiter added.
-        "challenges" ftok tree entry added.
-        Background changed.
-        Notify enhanced.
-        Optional password added (with challenge and pseudo db server-side).
-        Authentication only table added.
-        User flags (authentication and other) added.
-        Client side room rendering refactored.
-        Unmediate exit managed (with "onbeforeunload" and "onunload")
-        Reserved tables
+2.1.4
+        ENH heartbit refactored (js)
+        ENH watchdog added (js+php)
+        ENH log_legal refactored, if auth added (php)
+        ENH reload button added (js+php)
+        BUG recovery lost game for auth user in room (php)
+
+2.1.3
+	ENH notify object refactored
+	ENH /autentica command added to avoid mail spuffing
+	ENH /st commands to set user status (icons)
+
+2.1.2
+        ENH strong ban added (hardbans).
+	ENH web of trust docs added.
+
+2.1.1
+        BUG "lascio" forgotten icon and bad text fixed.
+        ENH "brisk_conf" config paramiter added.
+        ENH "challenges" ftok tree entry added.
+        MOD background changed.
+	ENH notify enhanced.
+        ENH unmediate exit managed (with "onbeforeunload" and "onunload").
+        ENH user flags (authentication and other) added.
+        ENH rendering for auth names refactored.
+        ENH optional password added (with challenge and pseudo db server-side).
+        ENH auth user replaced with new login.
+        ENH client side room rendering refactored.
+        ENH variable enabled topbanner.
+	ENH new field $idx in table class.
+        ENH authentication only table added.
+        ENH nick command restricted inside auth tables.
+        ENH act_content totally refactored.
+        ENH alarm message to single user.
+        ENH reserved tables.
 
 BRANCHED trusty
         
