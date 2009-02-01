@@ -257,13 +257,11 @@ class Briskin5 {
     //  exit;
     // WARNING monitor this step
     if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
-      echo "FTOK FAILED";
-      exit;
+      return (FALSE);
     }
     // WARNING monitor this step
     if (($res = @sem_get($tok)) == FALSE) {
-      echo "SEM_GET FAILED";
-      exit;
+      return (FALSE);
     }
     if (sem_acquire($res)) {   
       log_lock("LOCK table ".$table_idx."[res: ".$res."]");
@@ -406,8 +404,7 @@ class Briskin5 {
 							     $dt, $user->flags, xcape($user->name), xcape($user_mesg));
 	$user_cur->step_inc();
       }
-      log_legal($curtime, $user->sess, $user->name, 
-		($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
+      log_legal($curtime, $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
     }
   }
 
