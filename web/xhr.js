@@ -24,46 +24,82 @@
  */
 
 var xhr_rd_cookiepath = "/brisk/";
-var xhr_rd = false;
+var xhr_rd = null;
 var xhr_rd_stopped = true;
 var xhr_rd_oldctx = "";
 var xhr_rd_newctx = "";
-
+var xhr_rd_delay = 0;
+var xhr_rd_delayed = null;
 var xhr_rd_cur_n = -1;
 var xhr_rd_old_n = -1;
 var xhr_rd_checkedlen = 0;
+var xhr_rd_watchdog = null;
 var the_end = false;
 var ct = 0;
 var watchdog = 0;
 
 function hbit(symb)
 {
-    if ($("heartbit").innerHTML.length >= 40)
-	$("heartbit").innerHTML = symb;
-    else
-	$("heartbit").innerHTML += symb;
+    if ($("heartbit").innerHTML.length >= 120) {
+        $("heartbit").innerHTML = $("heartbit").innerHTML.substring(10);
+        $("heartbit").innerHTML += symb;
+    }
+    else {
+        $("heartbit").innerHTML += symb;
+    }
+    // $("heartbit").innerHTML = $("heartbit").innerHTML.substring(20,20); // DA METTERE APPOSTO!!!!
+        
 }
 
 function xhr_rd_cb(xhr_rd) 
 {
     var ret;
 
+    // console.log(xhr_rd.readyState);
+
     if (xhr_rd.readyState == 4) {
+        if (xhr_rd_watchdog != null) {
+            hbit('C');
+            clearTimeout(xhr_rd_watchdog);
+            xhr_rd_watchdog = null;
+        }
+
+        // console.log("SS: "+safestatus(xhr_rd));
+
 	try {
 	    if ((ret = safestatus(xhr_rd)) == 200) {
+                xhr_rd_delay = 0;
+                // console.log("del a null "+xhr_rd_delayed);
 	    } else if (ret != -1) {
-		alert('There was a problem with the request.' + ret);
+                xhr_rd_delay = 5000;
+                hbit('X');
+		// alert('There was a problem with the request.' + ret);
 	    }
 	} catch(b) {};
 
+        xhr_rd_delayed = null;
 	xhr_rd_stopped = true;
     }
 };
 
+function xhr_rd_abort(xhr)
+{
+    hbit('A');
+    if (xhr != null)
+        xhr.abort();
+    // alert("de che");
+}
+
 function xhr_rd_start(sess,stat,subst,step) 
 {
-    if (the_end)
+    if (the_end) {
+        if (xhr_rd_watchdog != null) {
+            hbit('C');
+            clearTimeout(xhr_rd_watchdog);
+            xhr_rd_watchdog = null;
+        }
 	return;
+    }
     createCookie("sess", sess, 24*365, xhr_rd_cookiepath);
 
     // NOTE: *ctx = "" to prevent konqueror stream commands duplication.
@@ -77,6 +113,10 @@ function xhr_rd_start(sess,stat,subst,step)
     //    try { 
     xhr_rd.onreadystatechange = function() { xhr_rd_cb(xhr_rd); }
     xhr_rd.send(null);
+    // 
+    // TODO: qui avvio del timer per riavviare xhr
+    // 
+    xhr_rd_watchdog = setTimeout(xhr_rd_abort, 60000, xhr_rd);
     xhr_rd_cur_n++;
     xhr_rd_stopped = false;
     // } catch (e) {}
@@ -127,17 +167,27 @@ function xhr_rd_poll(sess)
 	    xhrrestart = 1;
 	    try { 
 	        if (xhr_rd == null)
-			throw "restart";
+                    throw "restart";
 		if (xhr_rd.responseText != null)
-			xhr_rd_newctx = xhr_rd.responseText;
+                    xhr_rd_newctx = xhr_rd.responseText;
 	    }
 	    catch (e) {
 		if (xhr_rd_stopped == true) {
 		    xhr_rd_stopped = false;
 		    // XX $("xhrstart").innerHTML += "XHRSTART: da catch<br>";
-		    xhr_rd_start(sess, stat, subst, gst.st);
+                    if (xhr_rd_delay > 0) {
+                        if (xhr_rd_delayed == null) {
+                            // console.log("XXX DI QUI "+xhr_rd_delay);
+                            xhr_rd_delayed = setTimeout(xhr_rd_start, xhr_rd_delay, sess, stat, subst, gst.st);
+                            // console.log("XXX DI QUI post"+xhr_rd_delayed);
+                        }
+                    }
+                    else {
+                        // console.log("yyy DI QUI "+xhr_rd_delay);
+                        xhr_rd_start(sess, stat, subst, gst.st);
+                    }
 		}
-		
+                
 		
 		// $("sandbox").innerHTML += "return 1<br>";
 		if (the_end != true) {
@@ -147,17 +197,23 @@ function xhr_rd_poll(sess)
 		    // hbit(".");
 		    
 		}
-		return;
-	    }
-	    
-
-	    // no new char from the last loop, break
-	    if (xhr_rd_old_n == xhr_rd_cur_n && 
-		xhr_rd_newctx.length == xhr_rd_checkedlen) {
-		watchdog++;
-		break;
-	    }
-	    else {
+                else {
+                    if (xhr_rd_watchdog != null) {
+                        clearTimeout(xhr_rd_watchdog);
+                        xhr_rd_watchdog = null;
+                    }
+                }    
+                return;
+            }
+                
+            
+            // no new char from the last loop, break
+            if (xhr_rd_old_n == xhr_rd_cur_n && 
+                xhr_rd_newctx.length == xhr_rd_checkedlen) {
+                watchdog++;
+                break;
+            }
+            else {
 		watchdog = 0;
 		// $("sandbox").innerHTML += "BIG IF<br>";
 		var comm_match;
@@ -227,16 +283,29 @@ function xhr_rd_poll(sess)
 	// $("sandbox").innerHTML += "LITTLE IF<br>";
 	// alert("di qui");
 	// XX $("xhrstart").innerHTML += "XHRSTART: da end poll<br>";
-	xhr_rd_start(sess, stat, subst, gst.st);
-	// $("sandbox").innerHTML += "return 2<br>";
+
+        if (xhr_rd_delay > 0) {
+            if (xhr_rd_delayed == null) {
+                // console.log("XXX DI QUO "+xhr_rd_delay);
+                xhr_rd_delayed = setTimeout(xhr_rd_start, xhr_rd_delay, sess, stat, subst, gst.st);
+                // console.log("XXX DI QUO post"+xhr_rd_delayed);
+            }
+        }
+        else {
+            // console.log("yyy DI QUO "+xhr_rd_delay);
+            xhr_rd_start(sess, stat, subst, gst.st);
+        }
+        
     }
-	
-    // $("sandbox").innerHTML += "return 3<br>";
+    
     if (the_end != true) {
 	setTimeout(xhr_rd_poll, tout, sess);
-	
-	// hbit(".");
-	
+    }
+    else {
+        if (xhr_rd_watchdog != null) {
+            clearTimeout(xhr_rd_watchdog);
+            xhr_rd_watchdog = null;
+        }
     }
     return;
 };
