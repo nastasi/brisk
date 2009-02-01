@@ -454,7 +454,7 @@ else if ($user->stat == 'table') {
 
           $plist = "$table->table_token|$user->table|$table->player_n";
           $curtime = time();
-          log_legal($curtime, $user->sess, $user->name, "STAT:FINISH_GAME", $plist);
+          log_legal($curtime, $user, "STAT:FINISH_GAME", $plist);
 
 	  /* ************************************************ */
 	  /*    PRIMA LA PARTE PER LO SHOW DI CHI HA VINTO    */
