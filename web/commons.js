@@ -315,29 +315,7 @@ function act_wakeup()
     send_mesg("wakeup");
 }
 
-/* Stat: TABLE  Subst: ASTA */
-function act_asta(card,pnt)
-{
-    send_mesg("asta|"+card+"|"+pnt);
-}
 
-function act_choose(card)
-{
-    // alert("sitdown");
-    send_mesg("choose|"+card);
-}
-
-/* Stat: TABLE  Subst: GAME */
-function act_play(card,x,y)
-{
-    // alert("sitdown");
-    send_mesg("play|"+card+"|"+x+"|"+y);
-}
-
-function act_tableinfo()
-{
-    send_mesg("tableinfo");
-}
 
 function act_help()
 {
@@ -365,23 +343,6 @@ function act_whysupport()
     send_mesg("whysupport");
 }
 
-function act_exitlock()
-{
-    send_mesg("exitlock");
-}
-
-function safelogout()
-{
-    var res;
-    
-    if (g_exitlock < 2) 
-	res = window.confirm("Sei sicuro di volere abbandonare la partita?\nATTENZIONE: se esci adesso senza il consenso degli altri giocatori non potrai sederti ai tavoli per "+(Math.floor(EXIT_BAN_TIME/60))+" minuti.");    
-    else 
-	res = window.confirm("Sei sicuro di volere abbandonare la partita?");
-    if (res)
-	act_logout(g_exitlock);
-}
-
 function act_lascio()
 {
     send_mesg("lascio");
@@ -399,14 +360,6 @@ function safelascio()
 function act_logout(exitlock)
 {
     send_mesg("logout|"+exitlock);
-    // alert("IZZO");
-}
-
-function act_reload()
-{
-    window.onunload = null;
-    window.onbeforeunload = null;
-    document.location.reload();
 }
 
 function act_reloadroom()
@@ -570,121 +523,6 @@ slowimg.prototype = {
     }
 }
 
-var asta_xarr = new Array(0,66,132);
-
-/* TODO: impostare gli onclick */
-function dispose_asta(idx, pnt, nopoint)
-{
-    var i, btn, pass;
-    var btn;
-
-    for (i = 0 ; i < 10 ; i++) {
-	btn = $("asta"+i);
-	if (i < idx) {
-	    btn.src = "img/astapasso"+(pnt >= 0 ? "" : "_ro")+".png";
-            btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
-	    pass = -1;
-	}
-	else {
-	    btn.src = "img/asta"+i+(pnt >= 0 ? "" : "_ro")+".png";
-            btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
-	    pass = i;
-	}
-	if (i < 19)
-	    btn.style.left = asta_xarr[i % 3];
-	else
-	    btn.style.left = asta_xarr[(i+1) % 3];
-	
-	btn.style.top  = parseInt(i / 3) * 50 + (i == 9 ? 0 : 1);
-
-	if (pnt >= 0) {
-	    eval("btn.onclick = function () { act_asta("+pass+",61); }");
-	    btn.style.cursor = "pointer";
-	}
-	else {
-	    btn.onclick = null;
-	    btn.style.cursor = "default";
-	}
-    }
-    
-    
-    btn = $("astaptdiv");
-    btn.style.left = asta_xarr[i % 3];
-    btn.style.top = parseInt(i / 3) * 50 - 2;
-    // btn.style.visibility  = "visible";
-    
-    btn = $("astapt");
-    var rpnt = (pnt < 0 ? -pnt : pnt);
-    btn.value = (rpnt < 61 ? 61 : (rpnt > 120 ? 120 : rpnt));
-    
-    btn = $("astaptsub");
-    btn.style.left = asta_xarr[i % 3];
-    btn.style.top = 25 + parseInt(i / 3) * 50 - 1;
-    btn.src = "img/astaptsub"+(pnt >= 0 ? "" : "_ro")+".png";
-    btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
-    if (pnt >= 0) {
-	btn.onclick = function () { act_asta(9,$("astapt").value); };
-	btn.style.cursor = "pointer";
-    }
-    else {
-	btn.onclick = null;
-	btn.style.cursor = "default";
-    }
-    
-    i+=1;
-    if (nopoint) {
-	btn = $("astapasso");
-	btn.style.left = asta_xarr[i % 3];
-	btn.style.top = parseInt(i / 3) * 50;
-	btn.src = "img/astapashalf"+(pnt >= 0 ? "" : "_ro")+".png";
-        btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
-	if (pnt >= 0) {
-	    btn.onclick = function () { act_asta(-1,0); };
-	}
-	else {		
-	    btn.onclick = null;
-	}
-
-	btn = $("astalascio");
-	btn.style.left = asta_xarr[i % 3];
-	btn.style.top = parseInt(i / 3) * 50 + 24;
-	btn.src = "img/astalascio.png";
-	btn.style.visibility = "visible";
-	btn.onclick = function () { safelascio(); };
-	}
-    else {
-	btn = $("astapasso");
-	btn.style.left = asta_xarr[i % 3];
-	btn.style.top = parseInt(i / 3) * 50;;
-	btn.src = "img/astapasso"+(pnt >= 0 ? "" : "_ro")+".png";
-        btn.style.cursor = (pnt >= 0 ? "pointer" : "default");
-	if (pnt >= 0) {
-	    btn.onclick = function () { act_asta(-1,0); };
-	}
-	else {
-	    btn.onclick = null;
-	}
-
-	btn = $("astalascio");
-	btn.style.visibility = "hidden";
-	btn.onclick = null;
-    }
-    // btn.style.visibility  = "visible";
-    $("asta").style.visibility = "visible";
-}
-
-function asta_pnt_set(pnt)
-{
-    btn = $("astapt");
-    var rpnt = (pnt < 0 ? -pnt : pnt);
-    btn.value = (rpnt < 61 ? 61 : (rpnt > 120 ? 120 : rpnt));
-}
-
-function hide_asta()
-{
-    $("asta").style.visibility = "hidden"; 
-}
-
 
 function notify(st, text, tout, butt, w, h)
 {
@@ -811,20 +649,6 @@ function remark_off()
 }
 
 
-function choose_seed(card)
-{
-    var i;
-
-    $("asta").style.visibility = "hidden"; 
-    $("astalascio").style.visibility = "hidden"; 
-    $("chooseed").style.visibility = "visible";
-    for (i = 0 ; i < 4 ; i++) {
-	$("seed"+i).src = "img/"+i+""+card+".png";
-	seed=$("seed"+i);
-	eval("seed.onclick = function () { act_choose("+i+""+card+"); };");
-    }
-}
-
 function italizer(ga)
 {
     var pre, pos;
@@ -834,54 +658,6 @@ function italizer(ga)
         return ga[1];
 }
 
-function set_names(so,ea,ne,nw,we)
-{
-//    alert("EA: "+ea);
-    $("name").innerHTML = italizer(so);
-    $("name").title = unescapeHTML(so[1]); 
-    $("name_ea").innerHTML = italizer(ea);
-    $("name_ea").title = unescapeHTML(ea[1]);
-    $("name_ne").innerHTML = italizer(ne);
-    $("name_ne").title = unescapeHTML(ne[1]);
-    $("name_nw").innerHTML = italizer(nw);
-    $("name_nw").title = unescapeHTML(nw[1]);
-    $("name_we").innerHTML = italizer(we);
-    $("name_we").title = unescapeHTML(we[1]);
-
-    return;
-}
-
-var astat_suffix = new Array("","_ea","_ne","_nw","_we");
-
-function show_astat(zer,uno,due,tre,qua)
-{
-    var astat = new Array(zer,uno,due,tre,qua);
-
-    for (i = 0 ; i < PLAYERS_N ; i++) {
-	idx = (PLAYERS_N + i - table_pos) % PLAYERS_N;
-
-	if (astat[i] == -2) {
-	    $("public"+astat_suffix[idx]).style.visibility = "hidden";
-	}
-	else if (astat[i] == -1) {
-	    $("public"+astat_suffix[idx]).style.visibility = "visible";
-	    $("pubacard"+astat_suffix[idx]).src = "img/astapasso.png";
-	    $("pubapnt"+astat_suffix[idx]).innerHTML = "";
-	    $("pubapnt"+astat_suffix[idx]).style.visibility = "hidden";
-	}
-	else if (astat[i] <= 10) {
-	    $("public"+astat_suffix[idx]).style.visibility = "visible";
-	    $("pubacard"+astat_suffix[idx]).src = "img/asta"+astat[i]+".png";
-	    $("pubapnt"+astat_suffix[idx]).style.visibility = "hidden";
-	}
-	else if (astat[i] <= 120) {
-	    $("public"+astat_suffix[idx]).style.visibility = "visible";
-	    $("pubacard"+astat_suffix[idx]).src = "img/asta9.png";
-	    $("pubapnt"+astat_suffix[idx]).style.visibility = "inherit"; // XXX VISIBLE
-	    $("pubapnt"+astat_suffix[idx]).innerHTML = astat[i];
-	}
-    }
-}
 
 function exitlock_show(num, islock)
 {
@@ -896,36 +672,6 @@ function exitlock_show(num, islock)
 var fin = 0;
 
 //    exitlock_show(0, true);
-
-function table_init() {
-    var sux = new Array("", "_ea", "_ne", "_nw", "_we");
-
-    // console.log("table_init");
-
-    remark_off();
-    $("asta").style.visibility = "hidden";
-    $("caller").style.visibility = "hidden";
-    show_astat(-2,-2,-2,-2,-2);
-    for (i=0 ; i < 8 ; i++) {
-	Drag.init($("card" + i), card_mouseup_cb);
-	for (e = 0 ; e < PLAYERS_N ; e++)
-	    $("card"+sux[e]+i).style.visibility = "hidden";
-    }
-    for (i=0 ; i < PLAYERS_N ; i++) {
-        // console.log("shut: "+"takes"+sux[i]);
-	$("takes"+sux[i]).style.visibility = "hidden";
-	}
-
-    for (i = 0 ; i < 8 ; i++) {
-	cards_pos[i] = i;
-	cards_ea_pos[i] = i;
-	cards_ne_pos[i] = i;
-	cards_nw_pos[i] = i;
-	cards_we_pos[i] = i;
-    }
-
-}
-  
 
 
 var chatt_lines = new Array();
@@ -1141,3 +887,10 @@ function topbanner_cb()
 }
 
 
+function langtolng(lang)
+{
+    if (lang == "en")
+        return ("_en");
+    else
+        return ("");
+}
