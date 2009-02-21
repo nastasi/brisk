@@ -1,3 +1,12 @@
+2.1.5
+        ENH myconsole.js facility added (js)
+        ENH rendering of standup users area (func j_stand_cont()) refactored with a more
+            comfortable "inertial behavior" and decoupling incoming "model" with 
+            local "view", what a mess! (js)
+        ENH moved briskin5 functions from Obj/brisk.phh to briskin5/Obj/briskin5.phh (php)
+        ENH moved briskin5 functions from commons.js to briskin5/briskin5.js (js)
+        ENH start of multi-language support (lang-related images) (php, gfx)
+
 2.1.4
         ENH heartbit refactored (js)
         ENH watchdog added (js+php)
