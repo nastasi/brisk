@@ -410,7 +410,8 @@ supported by:<br><br>
    //-->
 </SCRIPT>
 </head>
-<body onunload="deconsole();">
+<!-- if myconsole <body onunload="deconsole();"> -->
+<body>
 <?php
     printf($brisk_header_form);
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
@@ -539,7 +540,8 @@ if ($login_exists) {
    //-->
 </SCRIPT>
 </head>
-<body onunload="deconsole();">
+<!-- if myconsole <body onunload="deconsole();"> -->
+<body>
 <?php
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
