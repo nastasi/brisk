@@ -2,7 +2,7 @@
 /*
  *  brisk - index.php
  *
- *  Copyright (C) 2006-2008 Matteo Nastasi
+ *  Copyright (C) 2006-2009 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -28,6 +28,9 @@ require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
 require_once("Obj/proxyscan.phh");
 
+$mlang_room = array( 'userpasserr' => array('it' => 'Utente e/o password errati.',
+                                            'en' => 'Wrong user and/or password.') );
+
 // Use of proxies isn't allowed.
 if (!$G_is_local && is_proxy()) 
    exit;
@@ -44,7 +47,7 @@ function main()
 {
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
-
+  GLOBAL $G_lang, $G_lng, $mlang_room;
   $body = "";
   $tables = "";
   $standup = "";
@@ -133,8 +136,8 @@ function main()
       else {
 	/* Login Rendering */
         /* MLANG: "Utente e/o password errati.", "Il nickname deve contenere almeno una lettera o una cifra.", "Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.", "Il tuo nickname &egrave; gi&agrave; in uso." */
-	if ($idx == -3)
-	  $body .= '<div class="urgmsg"><b>Utente e/o password errati.</b></div>';
+	if ($idx == -3) 
+	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpasserr'][$G_lang].'</b></div>';
 	else if ($idx == -2)
 	  $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
 	else if ($idx == -1) 
@@ -372,20 +375,23 @@ supported by:<br><br>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="md5.js"></script>
+<script type="text/javascript" src="probrowser.js"></script>
+<!-- <script type="text/javascript" src="myconsole.js"></script>  -->
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 
 <SCRIPT type="text/javascript"><!--
+   var g_lang = "<? echo $G_lang; ?>";
    var g_withflash = false;
    var g_is_spawn = 0; 
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
-
+   var g_brow = null;
    var sess = "not_connected";
   
    window.onload = function() {
      // alert(window.onbeforeunload);
-
+     g_brow = get_browser_agent();
      login_init();
 <?php
      if ($G_with_topbanner) {
@@ -404,7 +410,7 @@ supported by:<br><br>
    //-->
 </SCRIPT>
 </head>
-<body>
+<body onunload="deconsole();">
 <?php
     printf($brisk_header_form);
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
@@ -466,10 +472,13 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
+<script type="text/javascript" src="probrowser.js"></script>
+<!-- <script type="text/javascript" src="myconsole.js"></script>  -->
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 <SCRIPT type="text/javascript"><!--
    var sess;
+   var g_lang = "<? echo $G_lang; ?>";
    var tra = null;
    var stat = "";
    var subst = "";
@@ -481,7 +490,10 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var g_imgct= 0;
    var g_imgtot = g_preload_img_arr.length;
    var myfrom = "index_php";
+   var g_brow = null;
+
    window.onload = function() {
+     g_brow = get_browser_agent();
 <?php
 if ($BRISK_SHOWHTML == "debugtable") {
 ?>
@@ -527,7 +539,7 @@ if ($login_exists) {
    //-->
 </SCRIPT>
 </head>
-<body>
+<body onunload="deconsole();">
 <?php
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
