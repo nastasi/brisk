@@ -51,41 +51,303 @@ function state_add(flags)
     return content;
 }
 
+var standup_data_old = null;
+
+// TODO !!
+// appendChild , removeChild
+
+function table_add(curtag, td)
+{
+    var tbody  = null, tr;
+
+    do {
+        // console.log("wt: "+curtag.tagName);
+
+        if (curtag.tagName.toLowerCase() == "div" || 
+            curtag.tagName.toLowerCase() == "table") {
+            curtag = curtag.firstChild;
+        }
+        else if (curtag.tagName.toLowerCase() == "tbody") {
+            tbody = curtag;
+            break;
+        }
+        else
+            curtag = null;
+    } while (curtag != null);
+    
+    curtag = tbody.firstChild;
+    ct = 0;
+    do {
+        if (curtag.tagName.toLowerCase() == "tr") {
+            if (curtag.firstChild != null) {
+                curtag = curtag.firstChild;
+                ct++;
+            }
+            else {
+                curtag.appendChild(td);
+                return(true);
+            }
+        }
+        else if (curtag.tagName.toLowerCase() == "td") {
+            if (curtag.nextSibling != null) {
+                curtag = curtag.nextSibling;
+                ct++;
+            }
+            else {
+                if (ct < 4) {
+                    curtag.parentNode.appendChild(td);
+                    return (true);
+                }
+                else {
+                    ct = 0;
+                    curtag = curtag.parentNode.nextSibling;
+                }
+            }
+        }
+        else {
+            curtag = curtag.parentNode;
+        }
+
+    } while (curtag != null);
+
+    tr = document.createElement("tr");
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+
+    return (true);
+}
+
+function spcs(c1, c2, n)
+{
+    var ret = "";
+    var i;
+
+    for (i = 0 ; i < n ; i++) {
+        if ((i % 2) == 0)
+            ret += c1;
+        else
+            ret += c2;
+    }
+
+    return (ret);
+}
+
+
+function table_walk(curtag)
+{
+    do {
+        // console.log("wt: "+curtag.tagName);
+        if (curtag.tagName.toLowerCase() == "div" || 
+            curtag.tagName.toLowerCase() == "table" ||
+            curtag.tagName.toLowerCase() == "tbody") {
+            curtag = curtag.firstChild;
+        }
+        else if (curtag.tagName.toLowerCase() == "tr") {
+            if (curtag.firstChild != null)
+                curtag = curtag.firstChild;
+            else if (curtag.tagName != '')
+                curtag = curtag.nextSibling;
+            else
+                curtag = null;
+        }
+        else if (curtag.tagName.toLowerCase() == "td") {
+            if (curtag.nextSibling != null)
+                curtag = curtag.nextSibling;
+            else {
+                if (curtag.parentNode.nextSibling != null && curtag.parentNode.nextSibling.tagName != '')
+                    curtag = curtag.parentNode.nextSibling;
+                else
+                    curtag = null;
+            }
+        }
+        else
+            curtag = null;
+
+    } while (curtag != null && curtag.tagName.toLowerCase() != "td");
+
+    if (1 == 0) {
+        if (curtag == null)
+            alert("outtag == null"); 
+        else
+            alert("outtag: "+curtag.tagName);
+    }
+    return (curtag);
+}
+
+function j_stand_tdcont(el)
+{
+    var content = "";
+
+    if (el[0] & 0x01)
+        content += '<b>';
+    
+    if (el[0] & 0x02)
+        content += '<i>';
+    
+    content += el[1];
+    
+    if (el[0] & 0x02)
+        content += '</i>';
+    
+    if (el[0] & 0x01)
+        content += '</b>';
+            
+    content += state_add(el[0]);
+    
+    return (content);
+}
+
 function j_stand_cont(data)
 {
     var i;
     var content;
-    var st, name = "";
+    var st = 0, name = "";
+    var curtag, nextag;
 
-    content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
-    for (i = 0 ; i < data.length ; i++) {
-        if ((i % 4) == 0)
-            content += '<tr>';
-        content += '<td class="room_standup">';
-        if (data[i][0] & 0x01)
-            content += '<b>';
-
-        if (data[i][0] & 0x02)
-            content += '<i>';
-
-        content += data[i][1];
+    if (standup_data_old == null || data.length < 4) {
+    // if (standup_data_old == null) {
         
-        if (data[i][0] & 0x02)
-            content += '</i>';
+        content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
+        for (i = 0 ; i < data.length ; i++) {
+            if ((i % 4) == 0)
+                content += '<tr>';
+            content += '<td id="'+i+'" class="room_standup">';
+            content += j_stand_tdcont(data[i]);
+            content += '</td>';
+            
+            if ((i % 4) == 3)
+                content += '</tr>';
+        }
+        content += '</table>';
+        
+        $("standup").innerHTML = content;
 
-        if (data[i][0] & 0x01)
-            content += '</b>';
+        // console.log("inizio");
+        // for (i = 0 , curtag = table_walk($("standup")) ; curtag != null ;  curtag = table_walk(curtag), i++ ) {
+        //     console.log("inloop["+i+"]: "+curtag.tagName+"  ID: "+curtag.id);
+        // }
+        // console.log("fine "+i);
 
-        content += state_add(data[i][0]);
-        content += '</td>';
+        // walktable($("standup"), nextag);
+        // console.log($("standup").firstChild);
+        // console.log($("standup").firstChild.firstChild.firstChild.firstChild);
 
-        if ((i % 4) == 3)
-            content += '</tr>';
+        // log_walk($("standup"));
+
+        standup_data_old = data;
     }
-    content += '</tr>';
+    else {
+        var idx_del, arr_add, idx_mod, arr_mod;
+        var idx_del_n = 0, idx_add_n = 0, idx_mod_n = 0;
+        var i, e;
+        var i_del, i_mod, i_add;
+        var td;
 
-    $("standup").innerHTML = content;
+        idx_del = new Array();
+        arr_add = new Array();
+        map_add = new Array();
+        idx_mod = new Array();
+        arr_mod = new Array();
+        map_cur = new Array();
+        
+        // find removed entries
+        for (i = 0 ; i < standup_data_old.length ; i++) {
+            for (e = 0 ; e < data.length ; e++) {
+                if (standup_data_old[i][1] == data[e][1]) {
+                    break;
+                }
+            }
+            if (e == data.length) {
+                idx_del[idx_del_n++] = i;
+                map_cur[i] = -1;
+            }
+            else {
+                /* modified entries */
+                if (standup_data_old[i][0] != data[e][0]) {
+                    arr_mod[idx_mod_n] = data[e];
+                    idx_mod[idx_mod_n++] = i;
+                }
+                map_cur[i] = e;
+            }
+        }
 
+        // find new entries
+        for (e = 0 ; e < data.length ; e++) {
+            for (i = 0 ; i < standup_data_old.length ; i++) {
+                if (data[e][1] == standup_data_old[i][1] ) {
+                    break;
+                }
+            }
+            if (i == standup_data_old.length) {
+                // console.log("ADD: "+data[e][1]);
+                arr_add[idx_add_n]   = data[e];
+                map_add[idx_add_n++] = e;
+            }
+        }
+        
+        // TODO: qui travaso add in del
+
+        i_del = 0;
+        // alert("del: ["+j_stand_tdcont(standup_data_old[idx_del[i_del]])+"]");
+        for (i = 0 , i_del = 0, i_mod = 0, i_add = 0, curtag = table_walk($("standup")) ; curtag != null ;  curtag = table_walk(curtag), i++ ) {
+            // console.log("cur.id: "+curtag.id);
+
+            // alert("i: "+i+"  tagname: "+curtag.tagName+"  innerHTML: ["+curtag.innerHTML+"]");
+            // console.log("inloop["+i+"]: "+curtag.tagName+"  ID: "+curtag.id);
+            if (curtag.innerHTML == "") {
+                // console.log("innerHTML == none");
+                if (i_add < idx_add_n) {
+                    // console.log("  to be new");
+                    // console.log("  add:   CONT:"+j_stand_tdcont(arr_add[i_add]));
+                    curtag.innerHTML = j_stand_tdcont(arr_add[i_add]);
+                    curtag.id = map_add[i_add];
+                    i_add++
+                }
+            }
+
+            // else if (i_del < idx_del_n && curtag.innerHTML == j_stand_tdcont(standup_data_old[idx_del[i_del]])) {
+            else if (i_del < idx_del_n && curtag.id == idx_del[i_del]) {
+                // console.log("to be cancel["+i+"]:  ID: "+curtag.id);
+                if (i_add < idx_add_n) {
+                    // console.log("  to be new");
+                    // console.log("  add:   CONT:"+j_stand_tdcont(arr_add[i_add]));
+                    curtag.innerHTML = j_stand_tdcont(arr_add[i_add]);
+                    curtag.id = map_add[i_add];
+                    i_add++
+                }
+                else {
+                    // console.log("  to be del");
+                    curtag.innerHTML = "";
+                    curtag.id = -1;
+                }
+                i_del++;
+            }
+            // else if (i_mod < idx_mod_n && curtag.innerHTML == j_stand_tdcont(standup_data_old[idx_mod[i_mod]])) {
+            else if (i_mod < idx_mod_n && curtag.id == idx_mod[i_mod]) {
+                // console.log("  to be mod");
+                // console.log("mod: "+idx_mod[i_mod]+ "  CONT:"+j_stand_tdcont(arr_mod[i_mod]));
+                curtag.innerHTML = j_stand_tdcont(arr_mod[i_mod]);
+                curtag.id = map_cur[curtag.id];
+                i_mod++;
+            }
+            else
+                curtag.id = map_cur[curtag.id];
+        }
+        // console.log("fineloop");
+
+        for (i ; i_add < idx_add_n ; i_add++, i++) {
+            // console.log("ADD: "+i+" arr_add: "+ arr_add[i_add][1]);
+            td = document.createElement("td");
+            td.className = "room_standup";
+            td.id = map_add[i_add];
+            td.innerHTML = j_stand_tdcont(arr_add[i_add]);
+
+            table_add($("standup"), td);
+        }
+
+        standup_data_old = data;
+        return;
+    }
     // $("esco").innerHTML =  '<input class="button" name="logout" value="Esco." onclick="esco_cb();" type="button">';
 }
 
