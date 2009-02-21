@@ -53,6 +53,7 @@ header('Content-type: text/html; charset="utf-8"',true);
 <body>
 <SCRIPT type="text/javascript">
    var sess;
+   var g_lang = "<?php echo "$G_lang"; ?>";
    var stat = "table";
    var subst = "none";
    var table_pos = "";
