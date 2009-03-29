@@ -70,7 +70,7 @@ class Challenges {
       return ($G_false);
     }
 
-      log_auth("xxx", "LOOPI item: ".$i." tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
+    // log_auth("xxx", "LOOPI tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
 
     if (($chal = new Challenge($login, $token, $ip, $tstamp)) == null) {
       return ($G_false);
