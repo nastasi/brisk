@@ -44,7 +44,7 @@ function state_add(flags)
             break;
         }
         if (name != "") {
-            content += '<img title="'+tit+'" class="unbo" src="img/'+name+'">';
+            content += '&nbsp;<img title="'+tit+'" class="unbo" src="img/'+name+'">';
         }
     }
 
@@ -435,20 +435,6 @@ function j_login_manager(form)
     return (false);
 }
 
-function formtext_hilite(obj)
-{
-    obj.className = 'input_text';
-    addEvent(obj, "focus", function () { this.className = 'input_text_hi'; });
-    addEvent(obj, "blur",  function () { this.className = 'input_text'; });
-}
-
-function formsub_hilite(obj)
-{
-    obj.className = 'input_sub';
-    addEvent(obj, "focus", function () { this.className = 'input_sub_hi'; });
-    addEvent(obj, "blur",  function () { this.className = 'input_sub'; });
-}
-
 function login_formtext_hilite()
 {
     formtext_hilite($("nameid"));
@@ -462,12 +448,32 @@ function login_init()
     login_formtext_hilite();
 }
 
-function warrant_formtext_hilite()
+function warrant_formtext_hilite(form)
 {
+    /*
     formtext_hilite($("nameid"));
     formtext_hilite($("emailid"));
     formsub_hilite($("subid"));
     formsub_hilite($("cloid"));
+    */
+    formtext_hilite(form.elements['name']);
+    formtext_hilite(form.elements['email']);
+    formsub_hilite(form.elements['sub']);
+    formsub_hilite(form.elements['clo']);
+}
+
+function mesgtoadm_formtext_hilite(form)
+{
+    /*
+    formtext_hilite($("subjid"));
+    formtext_hilite($("mesgid"));
+    formsub_hilite($("subid"));
+    formsub_hilite($("cloid"));
+    */
+    formtext_hilite(form.elements['subj']);
+    formtext_hilite(form.elements['mesg']);
+    formsub_hilite(form.elements['sub']);
+    formsub_hilite(form.elements['clo']);
 }
 
 
@@ -482,14 +488,17 @@ function j_authbox(form)
 {
     var no; 
 
-    if (form.elements['realsub'].value == "chiudi") {
-        $('authbox').style.visibility = "hidden";
-        return (false);
-    }
+    do {
+        if (form.elements['realsub'].value == "chiudi") {
+            $('authbox').style.visibility = "hidden";
+            break;
+        }
 
-    if (form.elements['name'].value == '' || j_check_email(form.elements['email'].value) == false)
-        no = new notify(gst, "<br>I campi user e/o e-mail non sono validi;</br> correggeteli per favore.", 1, "chiudi", 280, 100); 
-    else {
+        if (form.elements['name'].value == '' || j_check_email(form.elements['email'].value) == false) {
+            no = new notify(gst, "<br>I campi user e/o e-mail non sono validi;</br> correggeteli per favore.", 1, "chiudi", 280, 100); 
+            break;
+        }
+
         // submit the request
         token = server_request('mesg', 'warranty', 
                                'cli_name', encodeURIComponent(form.elements['name'].value),
@@ -498,9 +507,9 @@ function j_authbox(form)
             $('authbox').style.visibility = "hidden";
             form.elements['name'].value = "";
             form.elements['email'].value = "";
-            return (false);
+            break;
         }
-    }
+    } while (0);
 
     return (false);
 }
@@ -517,8 +526,72 @@ function authbox(w, h)
     box.style.height = h+"px";
     box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
 
-    warrant_formtext_hilite();
+    warrant_formtext_hilite($('auth_form'));
 
     box.style.visibility = "visible";
     $("nameid").focus();
+}
+
+function j_mesgtoadmbox(form)
+{
+    var no; 
+
+    do {
+        if (form.elements['realsub'].value == "chiudi") {
+            $('mesgtoadmbox').style.visibility = "hidden";
+            break;
+        }
+
+        if (form.elements['mesg'].value == '' || form.elements['subj'].value == '') {
+            no = new notify(gst, "<br>Il soggetto e il messaggo non possono essere vuoti;</br> correggeteli per favore.", 1, "chiudi", 280, 100); 
+            break;
+        }
+                
+        // submit the request
+        token = server_request('mesg', 'mesgtoadm', 
+                               'cli_subj', encodeURIComponent(form.elements['subj'].value),
+                               'cli_mesg', encodeURIComponent(form.elements['mesg'].value) );
+        if (token == "1") {
+            $('mesgtoadmbox').style.visibility = "hidden";
+            form.elements['subj'].value = "";
+            form.elements['mesg'].value = "";
+            break;
+        }
+    } while (0);
+
+    return (false);
+}
+
+function mesgtoadmbox(w, h)
+{
+    var box;
+
+    box = $('mesgtoadmbox');
+
+    box.style.zIndex = 200;
+    box.style.width  = w+"px";
+    box.style.marginLeft  = -parseInt(w/2)+"px";
+    box.style.height = h+"px";
+    box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
+
+    mesgtoadm_formtext_hilite($('mesgtoadm_form'));
+
+    box.style.visibility = "visible";
+    $('mesgtoadm_form').elements['subj'].focus();
+}
+
+function list_set(what, setco, info)
+{
+    if (what == 'auth') {
+        $('list_auth').style.color = 'red';
+        $('list_all').style.color = 'black';
+    }
+    else {
+        $('list_auth').style.color = 'black';
+        $('list_all').style.color = 'red';
+    }
+    $('list_info').innerHTML = info;
+    if (setco) {
+        createCookie("CO_list", what, 24*365, cookiepath);
+    }
 }
