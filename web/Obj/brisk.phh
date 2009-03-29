@@ -2,7 +2,7 @@
 /*
  *  brisk - brisk.phh
  *
- *  Copyright (C) 2006-2008 Matteo Nastasi
+ *  Copyright (C) 2006-2009 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -65,7 +65,7 @@ define(DBG_AUTH, 0x0200);
 define(DBG_CRIT, 0x0400);
 
 // NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols 
-define(BRISK_DEBUG, 0xffffffff);
+define(BRISK_DEBUG, 0xffffffbf);
 
 define(BRISK_SINGLE_DEBUG,0);
 define(BRISK_SINGLE_SESS, "");
@@ -80,10 +80,10 @@ $G_lng = "";
 // $G_lng = "_en";
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.1.5 - trusty";
+$G_brisk_version = "2.1.6 - trusty";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: il rendering degli utenti in piedi &egrave; stato riscritto.',
+$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: menu comandi e filtro sui non autenticati.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 
 $G_room_help= '
@@ -111,6 +111,8 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
 <dd><b>/garante</b> - se si &egrave; autenticati permette di garantire per un utente fidato
+<dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
+<dd><b>/listen &lt;all|auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
 </dl>
 </div>
 ';
@@ -136,88 +138,26 @@ function xcape($s)
 
 function xcapelt($s)
 {
-  $from = array (   '\\',     '|' );
-  $to   = array ( '\\\\',   '\\|' );
+  $from = array (   '\\',     '|',  "\t",  "\n");
+  $to   = array ( '\\\\',   '\\|', "\\t", "\\n");
 
   return (str_replace($from, $to, $s));
 }
 
-class Card {
-  var $value; /* 0 - 39 card value */
-  var $stat;  /* 'bunch', 'hand', 'table', 'take' */
-  var $owner; /* (table position 0-4) */
-  // var $pos;   /* Pos in hand. */
-  var $x;     /* When played the X position on the table of the owner. */
-  var $y;     /* When played the Y position on the table of the owner. */
-
-  function Card($value, $stat, $owner)
-  {
-    $this->value = $value;
-    $this->stat  = $stat; // Card stat
-    $this->owner = $owner;
-  }
-
-  function assign($stat,$owner)
-  {
-    $this->stat  = $stat; // Card stat
-    $this->owner = $owner;
-  }
-
-  function setpos($pos)
-  {
-    $this->pos   = $pos;
-  }
-
-  function play($x,$y)
-  {
-    $this->stat = 'table'; // Card stat
-    $this->x = $x;
-    $this->y = $y;
-  }
-
-  function take($newown)
-  {
-    $this->stat = 'take'; // Card stat
-    $this->owner = $newown;
-  }
-} // end class Card
 
 class Table {
   var $idx;
   var $player;
   var $player_n;
-  var $card;
-  var $mazzo;
-  var $gstart;
-  var $turn;
-  var $auth_only;
+
+  var $auth_only;     // se tavolo riservato o libero
 
   var $wag_own;
   var $wag_com;
   var $wag_tout;
 
-  var $asta_pla;
-  var $asta_pla_n;
-  var $asta_card;
-  var $asta_pnt;
-  
-  var $mult;
-  var $points;    // points array
-  var $points_n;  // number of row of points
-  var $total;
-
-  var $asta_win;
-  var $briscola;
-  var $friend;
-  
-  var $old_reason;
-  var $old_asta_pnt;
-  var $old_pnt;
-  var $old_win;
-  var $old_friend;
-
   var $table_token;
-  var $table_start;
+  var $table_start;   // information field
 
   var $wakeup_time;
 
@@ -235,32 +175,11 @@ class Table {
     $thiz->idx       =   $idx;
     $thiz->player    =   array();
     $thiz->player_n  =   0;
-    $thiz->card      =   FALSE;
-    $thiz->asta_pla  =   array(); // TRUE: in auction, FALSE: out of the auction
-    $thiz->asta_pla_n=  -1;
-    $thiz->asta_card =  -1;
-    $thiz->asta_pnt  =  -1;
-    $thiz->mult      =   1;
-    
     $thiz->auth_only =   FALSE;
-
-    $thiz->points    =   array( );
-    $thiz->points_n  =   0;
-    $thiz->total     =   array( 0, 0, 0, 0, 0);
-    $thiz->asta_win  =  -1;
-    $thiz->briscola  =  -1;
-    $thiz->friend    =  -1;
-    $thiz->turn      =   0;
 
     $thiz->wag_own   =  NULL;
     $thiz->wag_com   =  "";
     $thiz->wag_tout   =  0;
-
-    $thiz->old_reason   = "";
-    $thiz->old_asta_pnt = -1;
-    $thiz->old_pnt      = -1;
-    $thiz->old_win      = -1;
-    $thiz->old_friend   = -1;
 
     $thiz->table_token  = "";
     $thiz->table_start  = 0;
@@ -270,53 +189,38 @@ class Table {
     return ($thiz);
   }
 
+  function copy(&$from)
+  {
+    GLOBAL $G_false;
+    
+    $this->idx = $from->idx;
+    $this->player = array();
+    for ($i = 0 ; $i < $from->player_n ; $i++)
+      $this->player[$i] = $from->player[$i];
+    $this->player_n = $from->player_n;
+
+    log_main("PLAYER_N - parent::copy.".$this->player_n);
+    
+    $this->auth_only =  $from->auth_only;
+
+    $this->wag_own   =  $from->wag_own;
+    $this->wag_com   =  $from->wag_com;
+    $this->wag_tout  =  $from->wag_tout;
+
+    $this->table_token  = $from->table_token;
+    $this->table_start  = $from->table_start;
+
+    $this->wakeup_time = $from->wakeup_time;
+  }
+
   function &clone(&$from)
   {
     GLOBAL $G_false;
     
     if (($thiz =& new Table()) == FALSE)
       return ($G_false);
-    
-    $thiz->idx = $from->idx;
-    $thiz->player = array();
-    for ($i = 0 ; $i < $from->player_n ; $i++)
-      $thiz->player[$i] = $from->player[$i];
-    $thiz->player_n = $from->player_n;
-    $thiz->card = $from->card;
-    $thiz->mazzo = $from->mazzo; // REVIEW
-    $thiz->gstart = $from->gstart;
-    $thiz->turn = $from->turn;
 
-    $thiz->auth_only =  $from->auth_only;
-
-    $thiz->wag_own   =  $from->wag_own;
-    $thiz->wag_com   =  $from->wag_com;
-    $thiz->wag_tout  =  $from->wag_taut;
-
-    $thiz->asta_pla = $from->asta_pla;
-    $thiz->asta_pla_n = $from->asta_pla_n;
-    $thiz->asta_card = $from->asta_card;
-    $thiz->asta_pnt = $from->asta_pnt;
-    
-    $thiz->mult = $from->mult;
-    $thiz->points = $from->points;
-    $thiz->points_n = $from->points_n;
-    $thiz->total = $from->total;
-    
-    $thiz->asta_win = $from->asta_win;
-    $thiz->briscola = $from->briscola;
-    $thiz->friend = $from->friend;
-    
-    $thiz->old_reason = $from->old_reason;
-    $thiz->old_asta_pnt = $from->old_asta_pnt;
-    $thiz->old_pnt = $from->old_pnt;
-    $thiz->old_win = $from->old_win;
-    $thiz->old_friend = $from->old_friend;
-
-    $thiz->table_token  = $from->table_token;
-    $thiz->table_start  = $from->table_start;
-
-    $thiz->wakeup_time = $from->wakeup_time;
+    $this->copy($from);
 
     return ($thiz);
   }
@@ -329,42 +233,16 @@ class Table {
       return ($G_false);
     
     $thiz->idx = $from->idx;
+    $thiz->player = array();
+    for ($i = 0 ; $i < $from->player_n ; $i++)
+      $thiz->player[$i] = $i;
     $thiz->player_n = $from->player_n;
-    $thiz->card = &$thiz->bunch_create();
-    $thiz->mazzo = $from->mazzo;
-    $thiz->gstart = $from->gstart;
-    $thiz->turn = $from->turn;
 
     $thiz->auth_only =  $from->auth_only;
 
     $thiz->wag_own = $from->wag_own;
     $thiz->wag_com = $from->wag_com;
-    $thiz->wag_tout  =  $from->wag_taut;
-
-    $thiz->asta_pla = $from->asta_pla;
-    $thiz->asta_pla_n = $from->asta_pla_n;
-    $thiz->asta_card = $from->asta_card;
-    $thiz->asta_pnt = $from->asta_pnt;
-    
-    $thiz->mult = $from->mult;
-    $thiz->points = $from->points;
-    $thiz->points_n = $from->points_n;
-    $thiz->total = $from->total;
-    
-    $thiz->asta_win = $from->asta_win;
-    $thiz->briscola = $from->briscola;
-    $thiz->friend = $from->friend;
-    
-    $thiz->old_reason = $from->old_reason;
-    $thiz->old_asta_pnt = $from->old_asta_pnt;
-    $thiz->old_pnt = $from->old_pnt;
-    $thiz->old_win = $from->old_win;
-    $thiz->old_friend = $from->old_friend;
-
-    // players are rearranged in an dedicated array
-    $thiz->player = array();
-    for ($i = 0 ; $i < $from->player_n ; $i++)
-      $thiz->player[$i] = $i;
+    $thiz->wag_tout  =  $from->wag_tout;
 
     $thiz->table_token  = $from->table_token;
     $thiz->table_start  = $from->table_start;
@@ -372,18 +250,6 @@ class Table {
     $thiz->wakeup_time = $from->wakeup_time;
 
     return ($thiz);
-  }
-  
-  function &bunch_create()
-  {
-    $ret = array();
-
-    for ($i = 0 ; $i < 40 ; $i++) {
-      $ret[$i] =& new Card($i, 'bunch', 'no_owner');
-    }
-
-    $oret = &$ret;
-    return ($oret);
   }
 
   function wag_set(&$user, $mesg)
@@ -403,79 +269,6 @@ class Table {
     $this->wag_own = NULL;
     $this->wag_com  = "";
     $this->wag_tout = $timeout;
-  }
-
-  function bunch_make()
-  {
-    $ct = array(0,0,0,0,0);
-    
-    mt_srand(make_seed());
-    
-    for ($i = 39 ; $i >= 0 ; $i--) 
-      $rest[$i] = $i;
-
-    for ($i = 39 ; $i >= 0 ; $i--) {
-      $rn = rand(0, $i);
-      
-      if ($rn == 0)
-	log_main("RND ZERO");
-      
-      $id = $rest[$rn];
-
-      $owner = $i % 5;
-      $this->card[$id]->assign('hand', $owner);
-
-      $rest[$rn] = $rest[$i];
-      // $pubbpos[$rn2] = $pubbpos[$i];
-    }
-  }
-
-  function init(&$userarr)
-  {
-    $this->mazzo    = rand(0,PLAYERS_N-1);
-    $this->points_n = 0;
-    $this->mult     = 1;
-    $this->old_win  =-1;
-    $this->old_reason = "";
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-      $this->total[$i] = 0;
-      $user_cur = &$userarr[$this->player[$i]];
-      $user_cur->exitislock = TRUE;
-    }
-
-    log_main("table::init: ci siamo");
-  }
-
-  function game_init(&$userarr)
-  {
-    log_rd2("GSTART 4");
-
-    $this->gstart = ($this->mazzo+1) % PLAYERS_N;
-    $this->bunch_make();
-    
-    
-    $this->asta_pla_n = PLAYERS_N;
-    $this->asta_card = -1;
-    $this->asta_pnt  = 60;
-    $this->asta_win  = -1;
-    $this->briscola  = -1;
-    $this->friend    = -1;
-    $this->turn      =  0;
-    
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-      $this->asta_pla[$i] = TRUE;
-      $user_cur = &$userarr[$this->player[$i]];
-      $user_cur->subst = 'asta';
-      $user_cur->asta_card = -2;
-      $user_cur->asta_pnt  = -1;
-      $user_cur->handpt = $this->hand_points($i);
-      // SEE function calculate_points(&$table)
-    }
-  }
-
-  function game_next()
-  {
-    $this->mazzo  = ($this->mazzo + 1) % PLAYERS_N;
   }
 
   function getPlayer($idx)
@@ -515,45 +308,6 @@ class Table {
       log_main("INCONSISTENCY ON TABLE.");
     }
   }
-
-  function hand_points($idx)
-  {
-    GLOBAL $G_all_points; 
-    
-    $tot = 0;
-    
-    for ($i = 0 ; $i < 40 ; $i++) {
-      if ($this->card[$i]->owner != $idx)
-	continue;
-
-      $ctt = $this->card[$i]->value % 10;
-      $tot += $G_all_points[$ctt];
-    }
-
-    return ($tot);
-  }
-
-  function exitlock_show(&$userarr, $table_pos)
-  {
-    $ct = $this->exitlock_calc(&$userarr, $table_pos);
-
-    $ret = sprintf('exitlock_show(%d, %s);', $ct, 
-		   ($userarr[$this->player[$table_pos]]->exitislock ? 'true' : 'false'));
-    return ($ret);
-  }
-
-  function exitlock_calc(&$userarr, $table_pos)
-  {
-    $ct = 0;
-
-    for ($i = 0 , $ct = 0 ; $i < PLAYERS_N ; $i++) {	
-      if ($userarr[$this->player[$i]]->exitislock == FALSE)
-	$ct++;
-    }
-
-    return ($ct);
-  }
-
 
 
 
@@ -598,13 +352,12 @@ class Table {
     
     return ($ret);
   }
-
-
 } // end class Table
-  
+
 
 // User flags
-define(USER_FLAG_AUTH, 0x02);
+define(USER_FLAG_AUTH,     0x02);
+define(USER_FLAG_LISTAUTH, 0x04);
 
 //   user status
 define(USER_FLAG_S_NORM,  0x000); // done
@@ -630,10 +383,14 @@ class User {
   var $step;       // step of the current status
   var $trans_step; // step to enable transition between pages (disable == -1)
   var $comm;       // commands array
-  var $asta_card;  // 
-  var $asta_pnt;   //
-  var $handpt;     // Total card points at the beginning of the current hand.
-  var $exitislock; // Player can exit from the table ?
+  // var $asta_card;  // 
+  // var $asta_pnt;   //
+  // var $handpt;     // Total card points at the beginning of the current hand.
+  // var $exitislock; // Player can exit from the table ?
+
+  // FIXME: the table_orig field must be removed after table field verify of index management (in spawned table
+  //        it is allways ZERO
+  var $table_orig; // id of the current table (if in table state)
   var $table;      // id of the current table (if in table state)
   var $table_pos;  // idx on the table
   var $table_token;// token that identify a game on a table
@@ -678,12 +435,59 @@ class User {
     $thiz->chat_ban = 0;
     $thiz->chat_dlt = 0;
 
-    $thiz->table = $table;
+    $thiz->table_orig = $table;
+    $thiz->table      = $table;
     $thiz->table_pos = -1;
     $thiz->table_token = "";
 
     return ($thiz);
   }
+
+  function copy(&$from)
+  {
+    GLOBAL $G_false;
+    
+    $this->name       = $from->name;
+    $this->sess       = $from->sess;
+    $this->ip         = $from->ip;
+    $this->lacc       = $from->lacc;
+    $this->laccwr     = $from->laccwr;
+    $this->bantime    = $from->bantime;
+    $this->stat       = $from->stat;
+    $this->subst      = $from->subst;
+    $this->step       = $from->step;
+    $this->trans_step = $from->trans_step;
+    $this->comm       = array();
+
+    $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
+    for ($i = $i_start ; $i < $from->step ; $i++) {
+      $ii = $i % COMM_N;
+      $this->comm[$ii] = $from->comm[$ii];
+    }
+    $this->asta_card  = $from->asta_card;
+    $this->asta_pnt   = $from->asta_pnt;
+    $this->handpt     = $from->handpt;
+    $this->exitislock = $from->exitislock;
+
+    $this->flags = $from->flags;
+
+    $this->chattime = array();
+    for ($i = 0 ; $i < CHAT_N ; $i++)
+      $this->chattime[$i] = $from->chattime[$i];
+    $this->chat_cur = $from->chat_cur;
+    $this->chat_lst = $from->chat_lst;
+    $this->chat_ban = $from->chat_ban;
+    $this->chat_dlt = $from->chat_dlt;
+
+    $this->table_orig = $from->table_orig;
+    $this->table      = $from->table;
+    $this->table_pos  = $from->table_pos;
+    $this->table_token = $from->table_token;
+    $this->the_end    = $from->the_end;
+
+    return (TRUE);
+  }
+
 
   function &clone(&$from)
   {
@@ -692,42 +496,7 @@ class User {
     if (($thiz =& new User()) == FALSE)
       return ($G_false);
     
-    $thiz->name       = $from->name;
-    $thiz->sess       = $from->sess;
-    $thiz->ip         = $from->ip;
-    $thiz->lacc       = $from->lacc;
-    $thiz->laccwr     = $from->laccwr;
-    $thiz->bantime    = $from->bantime;
-    $thiz->stat       = $from->stat;
-    $thiz->subst      = $from->subst;
-    $thiz->step       = $from->step;
-    $thiz->trans_step = $from->trans_step;
-    $thiz->comm       = array();
-
-    $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
-    for ($i = $i_start ; $i < $from->step ; $i++) {
-      $ii = $i % COMM_N;
-      $thiz->comm[$ii] = $from->comm[$ii];
-    }
-    $thiz->asta_card  = $from->asta_card;
-    $thiz->asta_pnt   = $from->asta_pnt;
-    $thiz->handpt     = $from->handpt;
-    $thiz->exitislock = $from->exitislock;
-
-    $thiz->flags = $from->flags;
-
-    $thiz->chattime = array();
-    for ($i = 0 ; $i < CHAT_N ; $i++)
-      $thiz->chattime[$i] = $from->chattime[$i];
-    $thiz->chat_cur = $from->chat_cur;
-    $thiz->chat_lst = $from->chat_lst;
-    $thiz->chat_ban = $from->chat_ban;
-    $thiz->chat_dlt = $from->chat_dlt;
-
-    $thiz->table      = $from->table;
-    $thiz->table_pos  = $from->table_pos;
-    $thiz->table_token = $from->table_token;
-    $thiz->the_end    = $from->the_end;
+    $thiz->copy($from);
 
     return ($thiz);
   }
@@ -774,7 +543,8 @@ class User {
     $thiz->chat_dlt   = 0;
 
 
-    $thiz->table      = $table;
+    $thiz->table_orig = $table;
+    $thiz->table      = 0;
     $thiz->table_pos  = $table_pos;
     $thiz->table_token = $from->table_token;
 
@@ -851,6 +621,11 @@ class User {
 } // end class User
 
 
+
+
+
+
+
 function step_get($sess) {
   $fp = FALSE;
   do {
@@ -906,6 +681,7 @@ class Room {
 
     for ($i = 0 ; $i < TABLES_N ; $i++) {
       $this->table[$i] =& Table::create($i);
+      /* OLD METHOD
       if ($i < 12) {
         $row = ( (((int)($i / 4)) % 2) == 0 );
         $col = ($i % 2 == 0);
@@ -914,6 +690,11 @@ class Room {
       else {
         $this->table[$i]->auth_only = FALSE;
       }
+      */
+      if ($i < 16) 
+        $this->table[$i]->auth_only = TRUE;
+      else
+        $this->table[$i]->auth_only = FALSE;
     }
     $this->garbage_timeout = 0;
   }
@@ -965,7 +746,7 @@ class Room {
 		 */
 		log_main("garbage_manager: INSIDE THE END.");
 
-                $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
+                $plist = "$table_cur->table_token|$table_cur->idx|$table_cur->player_n";
                 for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
                   $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
                 }
@@ -1081,8 +862,15 @@ class Room {
   {
     log_main("show_room: username: ".$user->name);
     
-    
     $ret = sprintf('gst.st = %d; ',  $user_step);
+
+    if ($user->flags & USER_FLAG_LISTAUTH) {
+      $ret .= 'list_set(\'auth\', false, \'(solo aut.)\' ); ';
+    }
+    else {
+      $ret .= 'list_set(\'all\', false, \'\' ); ';
+    }
+
     if ($user->subst == 'standup')
       $ret .= "tra.show(); ";
     else
@@ -1417,6 +1205,7 @@ class Room {
     $to_all      = FALSE;
     $to_room     = FALSE;
     $to_tabl     = FALSE;
+    $is_normchat = FALSE;
     $update_room = FALSE;
 
     if (strcmp($msg,  "/tav") == 0 || 
@@ -1487,6 +1276,18 @@ class Room {
         $to_all = show_notify($msg, 0, "chiudi", 400, 120);
       } while (0);
     } // /alarm chat command
+    else if (strncmp($msg, "/listen ", 8) == 0) {
+      $arg = substr($msg, 8);
+
+      if (strcasecmp($arg, "auth") == 0) {
+        $user->flags |= USER_FLAG_LISTAUTH;
+        $to_user = 'list_set(\'auth\', true, \'(solo aut.)\'); ';
+      }
+      else {
+        $user->flags &= ~USER_FLAG_LISTAUTH;
+        $to_user = 'list_set(\'all\', true, \'\'); ';
+      }
+    }
     else if (strncmp($msg, "/garante", 8) == 0) {
       if ($user->flags & USER_FLAG_AUTH) {
         $to_user = sprintf('authbox(300,200);');
@@ -1494,6 +1295,15 @@ class Room {
       else {
         /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
         $to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>");', $dt, NICKSERV);
+      }
+    }
+    else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
+      if ($user->flags & USER_FLAG_AUTH) {
+        $to_user = sprintf('mesgtoadmbox(500,300);');
+      }
+      else {
+        /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
+        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per inviare un messaggio devi essere autenticato.</b>");', $dt, NICKSERV);
       }
     }
     else if (strncmp($msg, "/nick ", 6) == 0) {
@@ -1595,6 +1405,7 @@ class Room {
     } // nick chat command
 
     else { // normal chat line
+      $is_normchat = TRUE;
       if ($curtime < ($user->chat_ban + $user->chat_dlt)) {
         $only_you = TRUE;
         $user->chat_dlt = $user->chat_dlt * 2; 
@@ -1655,6 +1466,14 @@ class Room {
         if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user_cur == $user)
           continue;
         
+        if ($is_normchat == TRUE) {
+          if ($user_cur->flags & USER_FLAG_LISTAUTH) {
+            if (($user->flags & USER_FLAG_AUTH) == 0) {
+              continue;
+            }
+          }
+        }
+  
         $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
         $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
         $user_cur->step_inc();
@@ -1758,7 +1577,7 @@ class Room {
 
   function &add_user(&$sess, &$idx, $name, $pass, $ip)
   {
-    GLOBAL $G_false;
+    GLOBAL $G_false, $CO_list;
 
     $idx = 0;
 
@@ -1873,7 +1692,15 @@ class Room {
       $this->user[$idx]->ip = $ip;
 
       $this->user[$idx]->flags = ($authenticate ? USER_FLAG_AUTH : 0x00);
+      
+      if ($authenticate) {
+        $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
 
+        if (isset($CO_list) && strcmp($CO_list, "all") == 0) {
+          $this->user[$idx]->flags &= ~USER_FLAG_LISTAUTH;
+        }
+      }
+      
       if ($ghost > -1) {
         log_main("ghost: rename!");
         $ghost_user =& $this->user[$ghost];
