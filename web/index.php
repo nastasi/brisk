@@ -48,6 +48,7 @@ function main()
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   GLOBAL $G_lang, $G_lng, $mlang_room;
+  $is_login = FALSE;
   $body = "";
   $tables = "";
   $standup = "";
@@ -103,10 +104,8 @@ function main()
 	$ACTION = "room";
 	if ($idx < 0) {
           $idx = -$idx - 1;
-          $login_exists = TRUE;
+          $is_login = TRUE;
         }
-        else
-          $login_exists = FALSE;
 
         log_legal($curtime, $user, "STAT:LOGIN", '');
 
@@ -160,8 +159,13 @@ function main()
   if ($ACTION == "room") {
     $tables .= '<div class="room_tab">';
     $tables .= '<table class="room_tab">';
-    for ($i = 0 ; $i < TABLES_N ; $i++) {
-      if ($i % 4 == 0)
+    for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
+      if ($user->flags & USER_FLAG_AUTH)
+        $i = $ii;
+      else
+        $i = TABLES_N - $ii - 1;
+
+      if ($ii % 4 == 0)
 	$tables .= '<tr>';
       $tables .= '<td>';
       $tables .= '<div class="room_div"><div class="room_tit"><b>Tavolo '.$i.'</b></div>';
@@ -169,7 +173,7 @@ function main()
       $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
       $tables .= '</div>';
       $tables .= '</td>'."\n";
-      if ($i % 4 == 3)
+      if ($ii % 4 == 3)
 	$tables .= '</tr>';
     }
     $tables .= '</table></div>';
@@ -274,7 +278,7 @@ $brisk_vertical_menu = '
 <!-- <a target="_blank" href="/briskhome.php"></a> -->
 
 <div class="webstart_hilite">
-<img class="nobo" src="img/brisk_start.png" onmouseover="menu_show(\'menu_webstart\');">
+<img class="nobo" src="img/brisk_start.png" onmouseover="menu_hide(0,0); menu_show(\'menu_webstart\');">
 <div class="webstart" id="menu_webstart" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" 
@@ -328,9 +332,9 @@ $brisk_vertical_menu = '
    title="prossime funzionalità implementate" onclick="act_roadmap();">roadmap</a><br>
 
 <a href="#" title="foto dei raduni di briskisti" 
-   onmouseover="menu_show(\'menu_raduni\');">raduni</a><br>
+   onmouseover="menu_show(\'menu_meeting\');">raduni</a><br>
 
-<div id="menu_raduni" class="webstart">
+<div id="menu_meeting" class="webstart">
 <a href="http://www.anomalia.it/mop/photoo" 
    target="_blank" onmouseover="menu_hide(0,2);"
    title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
@@ -339,9 +343,73 @@ $brisk_vertical_menu = '
    target="_blank" onmouseover="menu_hide(0,2);"
    title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
 </div>
+</div>'. ($ACTION == "room" ? '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div><img class="nobo" src="img/brisk_commands.png" onmouseover="menu_hide(0,0); menu_show(\'menu_commands\');">
+
+<div class="webstart" id="menu_commands" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
+
+<a href="#" title="imposta lo stato del tuo utente" 
+   onmouseover="menu_hide(0,1); menu_show(\'menu_state\');">stato</a><br>
+<div id="menu_state" class="webstart">
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st normale\'); menu_over(-1,this);">normale</a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st pausa\'); menu_over(-1,this);">pausa&nbsp;<img class="unbo" src="img/st_pau.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st fuori\'); menu_over(-1,this);">fuori&nbsp;<img class="unbo" src="img/st_out.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st cane\'); menu_over(-1,this);">cane&nbsp;<img class="unbo" src="img/st_dog.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st cibo\'); menu_over(-1,this);">cibo&nbsp;<img class="unbo" src="img/st_eat.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st lavoro\'); menu_over(-1,this);">lavoro&nbsp;<img class="unbo" src="img/st_wrk.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st sigaretta\'); menu_over(-1,this);">sigaretta&nbsp;<img class="unbo" src="img/st_smk.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st presente\'); menu_over(-1,this);">presente&nbsp;<img class="unbo" src="img/st_eye.png"></a><br>
+
 </div>
+
+<a href="#" title="avvia un ticker pubblicitario per il tuo tavolo" 
+   onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/tav \'+$(\'txt_in\').value); menu_over(-1,this);">ticker &nbsp;<img class="unbo" src="img/train.png"></a><br>
+
+<a href="#" title="garantisci per un tuo conoscente" 
+   onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/garante\'); menu_over(-1,this);">garantisci</a><br>
+
+<a href="#" title="manda un messaggio o una segnalazione all\'amministratore del sito" 
+   onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/mesgtoadm\'); menu_over(-1,this);">segnala a mop</a><br>
+
+
+<a href="#" title="imposta le regole di ascolto" 
+   onmouseover="menu_hide(0,1); menu_show(\'menu_listen\');">ascolta</a><br>
+<div id="menu_listen" class="webstart">
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="leggo i messaggi di tutti gli utenti collegati" onclick="act_chatt(\'/listen all\'); menu_over(-1,this);"><span id="list_all">tutti</span></a><br>
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="leggo soltanto i messaggi degli utenti con password" onclick="act_chatt(\'/listen auth\'); menu_over(-1,this);"><span id="list_auth">solo autenticati</span></a><br>
+
 </div>
-<br><br>
+
+</div>' : '').'
+
+</div>
+<br>
 sponsored by:<br><br>'.$altout_carousel.'<br>
 <a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
 supported by:<br><br>
@@ -528,7 +596,7 @@ else {
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();
 <?php
-if ($login_exists) {
+if ($is_login) {
   /* MLANG: "<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", "torna ai tavoli" */
   echo show_notify("<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", 0, "torna ai tavoli", 400, 150);
 }
@@ -560,7 +628,7 @@ if ($login_exists) {
 
 <!--  =========== bottom ===========  -->
     <div id="bottom" class="bottom">
-<b>Chat</b><br>
+<b>Chat</b> <span id="list_info" style="color: red;"></span><br>
 <div id="txt" class="chatt">
 </div>
 <div style="text-align: center; ">
@@ -573,33 +641,39 @@ if ($login_exists) {
 </div>
 </div>
 
-<!--
-    box =  document.createElement("div");
-    box.className = "notify";
-    box.style.zIndex = 200;
-    box.style.width  = w+"px";
-    box.style.marginLeft  = -parseInt(w/2)+"px";
-    box.style.height = h+"px";
-    box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
-    box.appendChild(cont);
-    box.appendChild(clodiv);
-    box.style.visibility = "visible";
--->
-
     <div id="authbox" class="notify" style="text-align: center;">
        <br>
        <b>Garantisci per un tuo conoscente:</b>
        <br><br>
 
-
-
-       <form accept-charset="utf-8" method="post" action="" onsubmit="return j_authbox(this);">
+       <form id="auth_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_authbox(this);">
        <input type="hidden" name="realsub" value="666">
 <table class="login">
 <tr><td>nickname:</td>
 <td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
 <tr><td>e-mail:</td>
 <td><input id="emailid" class="input_text" name="email" type="text" size="24" maxlength="1024" value=""></td></tr>
+<tr><td colspan="2" style="text-align: center;">
+       <input id="subid" name="sub" value="invia" type="submit" onclick="this.form.elements['realsub'].value = this.value;" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input id="cloid" name="clo" value="chiudi" type="submit" class="button" onclick="this.form.elements['realsub'].value = this.value;"></td></tr>
+</table>
+    </form>
+    </div>
+    <div id="mesgtoadmbox" class="notify_opaque" style="text-align: center;">
+       <br>
+       <b>Invia un messaggio o una segnalazione all'amministratore:</b>
+       <br><br>
+       <form id="mesgtoadm_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_mesgtoadmbox(this);">
+
+
+       <input type="hidden" name="realsub" value="666">
+<table class="login">
+<!--MLANG: soggetto -->
+<tr><td><b>soggetto:</b></td>
+<td><input id="subjid" class="input_text" name="subj" type="text" size="32" maxlength="255" value=""></td></tr></table>
+<table class="login">
+<tr><td><img title="messaggio" class="nobo" src="img/mesgtoadm_mesg.png"></td>
+<td><textarea id="mesgid" class="input_text" name="mesg" cols="40" rows="8" wrap="soft"></textarea></td></tr>
 <tr><td colspan="2" style="text-align: center;">
        <input id="subid" name="sub" value="invia" type="submit" onclick="this.form.elements['realsub'].value = this.value;" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <input id="cloid" name="clo" value="chiudi" type="submit" class="button" onclick="this.form.elements['realsub'].value = this.value;"></td></tr>
