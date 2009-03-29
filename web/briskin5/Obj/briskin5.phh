@@ -8,21 +8,409 @@ define(BRISKIN5_SHM_DLT, 32768);
 
 $table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
 
+class Card {
+  var $value; /* 0 - 39 card value */
+  var $stat;  /* 'bunch', 'hand', 'table', 'take' */
+  var $owner; /* (table position 0-4) */
+  // var $pos;   /* Pos in hand. */
+  var $x;     /* When played the X position on the table of the owner. */
+  var $y;     /* When played the Y position on the table of the owner. */
+
+  function Card($value, $stat, $owner)
+  {
+    $this->value = $value;
+    $this->stat  = $stat; // Card stat
+    $this->owner = $owner;
+  }
+
+  function assign($stat,$owner)
+  {
+    $this->stat  = $stat; // Card stat
+    $this->owner = $owner;
+  }
+
+  function setpos($pos)
+  {
+    $this->pos   = $pos;
+  }
+
+  function play($x,$y)
+  {
+    $this->stat = 'table'; // Card stat
+    $this->x = $x;
+    $this->y = $y;
+  }
+
+  function take($newown)
+  {
+    $this->stat = 'take'; // Card stat
+    $this->owner = $newown;
+  }
+} // end class Card
+
+class Table_briskin5 extends Table {
+  var $card;       // il mazzo di carte
+  var $mazzo;      // chi e' di mazzo
+  var $gstart;
+  var $turn;
+
+  var $asta_pla;
+  var $asta_pla_n;
+  var $asta_card;
+  var $asta_pnt;
+  
+  var $mult;
+  var $points;    // points array
+  var $points_n;  // number of row of points
+  var $total;
+
+  var $asta_win;
+  var $briscola;
+  var $friend;
+  
+  var $old_reason;
+  var $old_asta_pnt;
+  var $old_pnt;
+  var $old_win;
+  var $old_friend;
+
+  function Table_briskin5() 
+  {
+  }
+
+
+  /* CREATE() NOT USED
+  function &create($idx) 
+  {
+    GLOBAL $G_false;
+
+    if (($thiz =& new Table_briskin5()) == FALSE)
+      return ($G_false);
+
+    $thiz->create($idx);
+
+    $thiz->card      =   FALSE;
+    $thiz->asta_pla  =   array(); // TRUE: in auction, FALSE: out of the auction
+    $thiz->asta_pla_n=  -1;
+    $thiz->asta_card =  -1;
+    $thiz->asta_pnt  =  -1;
+    $thiz->mult      =   1;
+    
+    $thiz->points    =   array( );
+    $thiz->points_n  =   0;
+    $thiz->total     =   array( 0, 0, 0, 0, 0);
+    $thiz->asta_win  =  -1;
+    $thiz->briscola  =  -1;
+    $thiz->friend    =  -1;
+    $thiz->turn      =   0;
+
+    $thiz->old_reason   = "";
+    $thiz->old_asta_pnt = -1;
+    $thiz->old_pnt      = -1;
+    $thiz->old_win      = -1;
+    $thiz->old_friend   = -1;
+
+    return ($thiz);
+  }
+  */
+
+  /* CLONE() NOT USED
+  function &clone(&$from)
+  {
+    GLOBAL $G_false;
+    
+    if (($thiz =& new Table_briskin5()) == FALSE)
+      return ($G_false);
+    
+    parent::copy($from);
+
+    $thiz->card = $from->card;
+    $thiz->mazzo = $from->mazzo; // REVIEW
+    $thiz->gstart = $from->gstart;
+    $thiz->turn = $from->turn;
+
+    $thiz->asta_pla = $from->asta_pla;
+    $thiz->asta_pla_n = $from->asta_pla_n;
+    $thiz->asta_card = $from->asta_card;
+    $thiz->asta_pnt = $from->asta_pnt;
+    
+    $thiz->mult = $from->mult;
+    $thiz->points = $from->points;
+    $thiz->points_n = $from->points_n;
+    $thiz->total = $from->total;
+    
+    $thiz->asta_win = $from->asta_win;
+    $thiz->briscola = $from->briscola;
+    $thiz->friend = $from->friend;
+    
+    $thiz->old_reason = $from->old_reason;
+    $thiz->old_asta_pnt = $from->old_asta_pnt;
+    $thiz->old_pnt = $from->old_pnt;
+    $thiz->old_win = $from->old_win;
+    $thiz->old_friend = $from->old_friend;
+
+    return ($thiz);
+  }
+  */
+
+  function parentcopy(&$from)
+  {
+    parent::copy($from);
+  }
+
+  function &spawn(&$from)
+  {
+    GLOBAL $G_false;
+    
+    if (($thiz =& new Table_briskin5()) == FALSE)
+      return ($G_false);
+    
+    $thiz->parentcopy($from);
+
+    log_main("PLAYER_N - spawn.".$thiz->player_n);
+
+    $thiz->card = &$thiz->bunch_create();
+    $thiz->mazzo    = rand(0,PLAYERS_N-1);
+    $thiz->points_n = 0;
+    $thiz->mult     = 1;
+    $thiz->old_win    = -1;
+    $thiz->old_reason = "";
+
+    // players are rearranged in an dedicated array
+    $thiz->player = array();
+    for ($i = 0 ; $i < $from->player_n ; $i++)
+      $thiz->player[$i] = $i;
+
+    log_main("TABLE_OLD_WIN - spawn:".$thiz->old_win);
+
+    return ($thiz);
+  }
+
+
+  function &bunch_create()
+  {
+    $ret = array();
+
+    for ($i = 0 ; $i < 40 ; $i++) {
+      $ret[$i] =& new Card($i, 'bunch', 'no_owner');
+    }
+
+    $oret = &$ret;
+    return ($oret);
+  }
+
+  function bunch_make()
+  {
+    $ct = array(0,0,0,0,0);
+    
+    mt_srand(make_seed());
+    
+    for ($i = 39 ; $i >= 0 ; $i--) 
+      $rest[$i] = $i;
+
+    for ($i = 39 ; $i >= 0 ; $i--) {
+      $rn = rand(0, $i);
+      
+      if ($rn == 0)
+	log_main("RND ZERO");
+      
+      $id = $rest[$rn];
+
+      $owner = $i % PLAYERS_N;
+      $this->card[$id]->assign('hand', $owner);
+
+      $rest[$rn] = $rest[$i];
+      // $pubbpos[$rn2] = $pubbpos[$i];
+    }
+  }
+
+  function init(&$userarr)
+  {
+    /* MOVED INTO SPAWN
+    $this->mazzo    =  rand(0,PLAYERS_N-1);
+    $this->points_n =  0;
+    $this->mult     =  1;
+    $this->old_win  = -1;
+    $this->old_reason = "";
+    */
+    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+      $this->total[$i] = 0;
+      $user_cur = &$userarr[$this->player[$i]];
+      $user_cur->exitislock = TRUE;
+    }
+
+    log_main("table::init: ci siamo");
+  }
+
+  function game_init(&$userarr)
+  {
+    log_rd2("GSTART 4");
+
+    $this->gstart = ($this->mazzo+1) % PLAYERS_N;
+    $this->bunch_make();
+    
+    
+    $this->asta_pla_n = PLAYERS_N;
+    $this->asta_card = -1;
+    $this->asta_pnt  = 60;
+    $this->asta_win  = -1;
+    $this->briscola  = -1;
+    $this->friend    = -1;
+    $this->turn      =  0;
+    
+    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+      $this->asta_pla[$i] = TRUE;
+      $user_cur = &$userarr[$this->player[$i]];
+      $user_cur->subst = 'asta';
+      $user_cur->asta_card = -2;
+      $user_cur->asta_pnt  = -1;
+      $user_cur->handpt = $this->hand_points($i);
+      // SEE function calculate_points(&$table)
+    }
+  }
+
+  function game_next()
+  {
+    $this->mazzo  = ($this->mazzo + 1) % PLAYERS_N;
+  }
+
+
+  function hand_points($idx)
+  {
+    GLOBAL $G_all_points; 
+    
+    $tot = 0;
+    
+    for ($i = 0 ; $i < 40 ; $i++) {
+      if ($this->card[$i]->owner != $idx)
+	continue;
+
+      $ctt = $this->card[$i]->value % 10;
+      $tot += $G_all_points[$ctt];
+    }
+
+    return ($tot);
+  }
+
+
+  function exitlock_show(&$userarr, $table_pos)
+  {
+    $ct = $this->exitlock_calc(&$userarr, $table_pos);
+
+    $ret = sprintf('exitlock_show(%d, %s);', $ct, 
+		   ($userarr[$this->player[$table_pos]]->exitislock ? 'true' : 'false'));
+    return ($ret);
+  }
+
+  function exitlock_calc(&$userarr, $table_pos)
+  {
+    $ct = 0;
+
+    for ($i = 0 , $ct = 0 ; $i < PLAYERS_N ; $i++) {	
+      if ($userarr[$this->player[$i]]->exitislock == FALSE)
+	$ct++;
+    }
+
+    return ($ct);
+  }
+} // end class Table_briskin5
+
+
+
+
+
+
+class User_briskin5 extends User {
+  var $asta_card;  // 
+  var $asta_pnt;   //
+  var $handpt;     // Total card points at the beginning of the current hand.
+  var $exitislock; // Player can exit from the table ?
+
+  function User() {
+  }
+
+  /* CREATE NOT USED
+  function &create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+    GLOBAL $G_false;
+
+    if (($thiz =& new User()) == FALSE)
+      return ($G_false);
+
+    $thiz->asta_card = -2;
+    $thiz->asta_pnt  = -1;
+    $thiz->handpt = -1;
+    $thiz->exitislock = TRUE;
+
+    return ($thiz);
+  }
+  */
+
+  function parentcopy(&$from)
+  {
+    parent::copy($from);
+  }
+
+  function copy(&$from)
+  {
+    $this->parentcopy($from);
+
+    $this->asta_card  = $from->asta_card;
+    $this->asta_pnt   = $from->asta_pnt;
+    $this->handpt     = $from->handpt;
+    $this->exitislock = $from->exitislock;
+  }
+
+  /* CLONE NOT USED
+  function &clone(&$from)
+  {
+    GLOBAL $G_false;
+    
+    if (($thiz =& new User()) == FALSE)
+      return ($G_false);
+
+    $thiz->copy($from);
+
+    return ($thiz);
+  } 
+  */
+  
+  function &spawn(&$from, $table, $table_pos)
+  {
+    GLOBAL $G_false;
+    
+    if (($thiz =& new User_briskin5()) == FALSE)
+      return ($G_false);
+    
+    $thiz->parentcopy($from);
+
+    $thiz->asta_card = -2;
+    $thiz->asta_pnt  = -1;
+    $thiz->handpt = -1;
+    $thiz->exitislock = TRUE;
+
+    $thiz->table_orig = $table;
+    $thiz->table      = 0;
+    $thiz->table_pos  = $table_pos;
+
+    return ($thiz);
+  }
+} // end class User_briskin5
+
+
 
 class Briskin5 {
   var $user;
   var $table;
-  var $table_idx;
-  var $table_token;
-
   var $comm; // commands for many people
   var $step; // current step of the comm array
   var $garbage_timeout;
+  var $shm_sz;
+
+  var $table_idx;
+  var $table_token;
 
   var $the_end;
-  
   var $tok;
-  var $shm_sz;
 
   function Briskin5 (&$room, $table_idx, $table_token) {
     $this->user = array();
@@ -42,9 +430,12 @@ class Briskin5 {
 
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user[$table->player[$i]]->table_token = $table_token;
-      $this->user[$i] =& User::spawn(&$user[$table->player[$i]], 0, $i);
+      $this->user[$i] =& User_briskin5::spawn(&$user[$table->player[$i]], $table_idx, $i);
     }
-    $this->table[0] =& Table::spawn(&$table);
+    $this->table[0] =& Table_briskin5::spawn(&$table);
+
+    log_main("TABLE_OLD_WIN - Briskin5:".$this->table[0]->old_win);
+
     $this->table_idx = $table_idx;
     $this->table_token = $table_token;
     $this->garbage_timeout = 0;
@@ -255,7 +646,7 @@ class Briskin5 {
   {
     GLOBAL $sess; 
     
-    log_wr("LOCK_DATA ".FTOK_PATH."/table".$table_idx);
+    log_lock("LOCK_DATA ".FTOK_PATH."/table".$table_idx);
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
     // WARNING monitor this step
@@ -348,20 +739,8 @@ class Briskin5 {
 	  $user_cur = &$this->user[$i];
 	  if ($user_cur->sess == '')
 	    continue;
-	  if ($user_cur->stat == 'room') {
-	    if ($user->stat == 'room' && $user->subst == 'standup') {
-	      $this->standup_update(&$user);
-	    }
-	    else if ($user->stat == 'room' && $user->subst == 'sitdown' ||
-		     $user->stat == 'table') {
-	      log_main($user->sess." chatt_send pre table update");
-
-	      $this->table_update(&$user);
-
-	      log_main($user->sess." chatt_send post table update");
-	    }
-	  }
-	  else if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
+          
+          if ($user_cur->stat == 'table' && $user_cur->table == $user->table) {
 	    $table = &$this->table[$user->table];
 	    
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
@@ -407,7 +786,7 @@ class Briskin5 {
 							     $dt, $user->flags, xcape($user->name), xcape($user_mesg));
 	$user_cur->step_inc();
       }
-      log_legal($curtime, $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table),$user_mesg);
+      log_legal($curtime, $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table_orig),$user_mesg);
     }
   }
 
@@ -510,7 +889,7 @@ function calculate_points(&$table)
   
   if ($table->asta_pnt == 61 && $pro == 60) { // PATTA !
     $table->points[$table->points_n % MAX_POINTS] = array();
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) 
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) 
       $table->points[$table->points_n % MAX_POINTS][$i] = 0;
     $table->points_n++;
     $table->old_pnt = $pro;
@@ -525,7 +904,7 @@ function calculate_points(&$table)
     $sig = -1;
 
   $table->points[$table->points_n % MAX_POINTS] = array();
-  for ($i = 0 ; $i < 5 ; $i++) {
+  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
     if ($i == $table->asta_win) 
       $pt = ($i == $table->friend ? 4 : 2);
     else if ($i == $table->friend) 
@@ -581,20 +960,20 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 
     $ret .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', $itin, xcape($user->name), $itou);
     $ret .= sprintf('set_names([%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"]); ',
-		    $room->user[$table->player[($table_pos)%PLAYERS_N]]->flags,
-		    xcape($room->user[$table->player[($table_pos)%PLAYERS_N]]->name),
+		    $room->user[$table->player[($table_pos) % BRISKIN5_PLAYERS_N]]->flags,
+		    xcape($room->user[$table->player[($table_pos) % BRISKIN5_PLAYERS_N]]->name),
 
-		    $room->user[$table->player[($table_pos+1)%PLAYERS_N]]->flags,
-		    xcape($room->user[$table->player[($table_pos+1)%PLAYERS_N]]->name),
+		    $room->user[$table->player[($table_pos+1) % BRISKIN5_PLAYERS_N]]->flags,
+		    xcape($room->user[$table->player[($table_pos+1) % BRISKIN5_PLAYERS_N]]->name),
 
-		    $room->user[$table->player[($table_pos+2)%PLAYERS_N]]->flags,
-		    xcape($room->user[$table->player[($table_pos+2)%PLAYERS_N]]->name),
+		    $room->user[$table->player[($table_pos+2) % BRISKIN5_PLAYERS_N]]->flags,
+		    xcape($room->user[$table->player[($table_pos+2) % BRISKIN5_PLAYERS_N]]->name),
 
-		    (PLAYERS_N == 3 ? 0 : $room->user[$table->player[($table_pos+3)%PLAYERS_N]]->flags),
-		    (PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+3)%PLAYERS_N]]->name)),
+		    (BRISKIN5_PLAYERS_N == 3 ? 0 : $room->user[$table->player[($table_pos+3) % BRISKIN5_PLAYERS_N]]->flags),
+		    (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+3) % BRISKIN5_PLAYERS_N]]->name)),
 
-		    (PLAYERS_N == 3 ? 0 : $room->user[$table->player[($table_pos+4)%PLAYERS_N]]->flags),
-		    (PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+4)%PLAYERS_N]]->name)));
+		    (BRISKIN5_PLAYERS_N == 3 ? 0 : $room->user[$table->player[($table_pos+4) % BRISKIN5_PLAYERS_N]]->flags),
+		    (BRISKIN5_PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+4) % BRISKIN5_PLAYERS_N]]->name)));
   }
   /* NOTIFY FOR THE CARD MAKER */
   if ($is_transition) { //  && $user->subst ==  "asta" superfluo
@@ -613,10 +992,10 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     $ret .= "|";
     
     for ($i = 0 ; $i < 8 ; $i++) {
-      for ($e = 0 ; $e < PLAYERS_N ; $e++) {
+      for ($e = 0 ; $e < BRISKIN5_PLAYERS_N ; $e++) {
 	$ct = 0;
 	for ($o = 0 ; $o < 40 && $ct < $i+1 ; $o++) {
-	  if ($table->card[$o]->owner == (($e + $table->gstart) % PLAYERS_N)) {
+	  if ($table->card[$o]->owner == (($e + $table->gstart) % BRISKIN5_PLAYERS_N)) {
 	    $ct++;
 	    if ($ct == $i+1)
 	      break;
@@ -624,10 +1003,10 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 	}
 	log_rd("O ".$o." VAL ".$table->card[$o]->value." Owner: ".$table->card[$o]->owner);
 	
-	$ret .= sprintf( ' card_send(%d,%d,%d,%8.2f,%d);|', ($table->gstart + $e) % PLAYERS_N, 
-			 $i, ((($e + PLAYERS_N - $table_pos + $table->gstart) % PLAYERS_N) == 0 ?
+	$ret .= sprintf( ' card_send(%d,%d,%d,%8.2f,%d);|', ($table->gstart + $e) % BRISKIN5_PLAYERS_N, 
+			 $i, ((($e + BRISKIN5_PLAYERS_N - $table_pos + $table->gstart) % BRISKIN5_PLAYERS_N) == 0 ?
 			      $table->card[$o]->value : -1), 
-			 ($i == 7 && $e == (PLAYERS_N - 1) ? 1 : 0.5),$i+1);
+			 ($i == 7 && $e == (BRISKIN5_PLAYERS_N - 1) ? 1 : 0.5),$i+1);
       }
     }    
   }
@@ -653,7 +1032,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
       }
     }
     $logg = "\n";
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       $logg .= sprintf("INHAND: %d   IN TABLE %d   TAKED %d\n", $inhand[$i], $ontabl[$i], $taked[$i]);
     }
     log_main("Stat table: ".$logg);
@@ -667,7 +1046,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     $ret .= sprintf('card_setours(%s);', $oursarg);
 
     /* Dispose all cards */
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       /* Qui sotto al posto di + 1 c'era + ->gstart ... credo in modo errato */
       $ret .= sprintf('cards_dispose(%d,%d,%d);', $i,
 		      $inhand[$i], $taked[$i]);
@@ -685,12 +1064,12 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 
     /* show users auction status */
     $showst = "";
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       $user_cur = &$room->user[$table->player[$i]];
       $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "), 
 			 ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
     }
-    if (PLAYERS_N == 3)
+    if (BRISKIN5_PLAYERS_N == 3)
     	$showst .= ",-2,-2";
     $ret .= sprintf('show_astat(%s);', $showst);
 
@@ -701,7 +1080,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     }
     else {
       /* show auction */
-      if ($table_pos == ($table->gstart % PLAYERS_N) &&
+      if ($table_pos == ($table->gstart % BRISKIN5_PLAYERS_N) &&
 	  $table->asta_win == -1) 
 	$ret .= sprintf('dispose_asta(%d,%d, %s);', 
 			$table->asta_card + 1, $table->asta_pnt+1, ($user->handpt <= 2 ? "true" : "false"));
@@ -712,7 +1091,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
 
     /* Remark */
     if ($table->asta_win == -1) { // auction case
-      if ($table_pos == ($table->gstart % PLAYERS_N)) 
+      if ($table_pos == ($table->gstart % BRISKIN5_PLAYERS_N)) 
 	$ret .= "remark_on();";
       else
 	$ret .= "remark_off();";
@@ -726,7 +1105,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
   }
   else if ($user->subst == 'game') {
     /* HIGHLIGHT */
-    if (($table->gstart + $table->turn) % PLAYERS_N == $table_pos) 
+    if (($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N == $table_pos) 
       $ret .= "is_my_time = true; remark_on();";
     else
       $ret .= "remark_off();";
@@ -767,7 +1146,7 @@ function calculate_winner(&$table)
     $cur_seed = $cur_val - ($cur_val % 10);
   }
 
-  for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
     if (($ontab[$i] - ($ontab[$i] % 10)) == $cur_seed) {
       if ($ontab[$i] < $cur_val) {
 	$cur_val = $ontab[$i];
@@ -776,7 +1155,7 @@ function calculate_winner(&$table)
     }
   }
 
-  for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
     $table->card[$ontid[$i]]->owner = $cur_win;
     $table->card[$ontid[$i]]->stat =  "take"; // Card stat
   }
@@ -792,7 +1171,7 @@ function show_table_info(&$room, &$table, $table_pos)
   $noty = sprintf('<table class=\"points\"><tr><th></th>');
   
   // Names.
-  for ($i = 0 ; $i < PLAYERS_N ; $i++) 
+  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) 
     $noty .= sprintf('<th class=\"td_points\">%s</th>', xcape($room->user[$table->player[$i]]->name));
   $noty .= sprintf("</tr>");
 
@@ -801,14 +1180,14 @@ function show_table_info(&$room, &$table, $table_pos)
 
   for ($i = $pnt_min ; $i < $table->points_n ; $i++) {
     $noty .= sprintf('<tr><th class=\"td_points\">%d</th>', $i+1);
-    for ($e = 0 ; $e < PLAYERS_N ; $e++) 
+    for ($e = 0 ; $e < BRISKIN5_PLAYERS_N ; $e++) 
       $noty .= sprintf('<td class=\"td_points\">%d</td>', $table->points[$i % MAX_POINTS][$e]);
     $noty .= "</tr>";
   }
 
   // Total points.
   $noty .= '<tr><th class=\"td_points\">Tot.</th>';
-  for ($e = 0 ; $e < PLAYERS_N ; $e++) 
+  for ($e = 0 ; $e < BRISKIN5_PLAYERS_N ; $e++) 
     $noty .= sprintf('<td class=\"td_points\">%d</td>', $table->total[$e]);
   $noty .= "</tr></table>";
 
@@ -817,7 +1196,9 @@ function show_table_info(&$room, &$table, $table_pos)
   }
 
   if ($table->old_win != -1) {
+    log_main("TABLE_OLD_WIN:".$table->old_win);
     $win = $table->player[$table->old_win];
+    log_main("TABLE_OLD_FRIEND:".$table->old_friend);
     $fri = $table->player[$table->old_friend];
 
     $wol = game_result($table->old_asta_pnt, $table->old_pnt);
@@ -861,12 +1242,12 @@ function show_table_info(&$room, &$table, $table_pos)
 
   if ($user->subst == 'asta') {
     if ($table->asta_win == -1)  // auction case
-      $curplayer = $table->gstart % PLAYERS_N;
+      $curplayer = $table->gstart % BRISKIN5_PLAYERS_N;
     else 
       $curplayer = $table->asta_win;
   }
   else if ($user->subst == 'game') {
-    $curplayer = ($table->gstart + $table->turn) % PLAYERS_N;
+    $curplayer = ($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N;
   }
 
   /* MLANG: " tocca a <b>te</b> giocare.", " tocca a <b>$unam</b> giocare.", " La partita vale <b>%s</b>.", "torna alla partita" */
