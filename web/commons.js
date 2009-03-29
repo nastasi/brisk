@@ -572,6 +572,10 @@ function notify(st, text, tout, butt, w, h)
     this.ancestor.appendChild(box);
     
     this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
+
+    formsub_hilite(clo);
+    clo.focus();
+
 }
 
 notify.prototype = {
@@ -894,3 +898,18 @@ function langtolng(lang)
     else
         return ("");
 }
+
+function formtext_hilite(obj)
+{
+    obj.className = 'input_text';
+    addEvent(obj, "focus", function () { this.className = 'input_text_hi'; });
+    addEvent(obj, "blur",  function () { this.className = 'input_text'; });
+}
+
+function formsub_hilite(obj)
+{
+    obj.className = 'input_sub';
+    addEvent(obj, "focus", function () { this.className = 'input_sub_hi'; });
+    addEvent(obj, "blur",  function () { this.className = 'input_sub'; });
+}
+
