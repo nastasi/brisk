@@ -27,7 +27,6 @@
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
 // require_once("Obj/proxyscan.phh");
-require_once("briskin5/Obj/briskin5.phh");
 
 // Use of proxies isn't allowed.
 // if (is_proxy()) {
@@ -178,6 +177,49 @@ else if ($argz[0] == 'warranty') {
     $user->step_inc();
   }
 }
+else if ($argz[0] == 'mesgtoadm') {
+  GLOBAL $cli_subj, $cli_mesg;
+
+  $curtime = time();
+  $mesg_to_user = "";
+
+  log_wr("INFO:SKIP:argz == mesgtoadm name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
+  if ($user->flags & USER_FLAG_AUTH) {
+    if (($wa_lock = Warrant::lock_data()) != FALSE) {
+      if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
+        /* Unix time | session | nickname | IP | where was | mesg */
+        fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name, 
+                            xcapelt(urldecode($cli_subj)), xcapelt(urldecode($cli_mesg))));
+        fclose($fp);
+      }
+      Warrant::unlock_data($wa_lock);
+      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+      /* MLANG: "" */
+      $user->comm[$user->step % COMM_N] .=  show_notify("<br><br>Il messaggio &egrave; stato inoltrato all\'amministratore.", 0, "chiudi", 400, 110);
+      $user->step_inc();
+      echo "1";
+    }
+    else {
+      /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta per mail l\'amministratore.</b>");', $dt, NICKSERV);
+    }
+    
+  }
+  else {
+    /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
+    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per mandare messaggi all\'amministratore devi essere autenticato.</b>");', $dt, NICKSERV);
+  }
+
+  if ($mesg_to_user != "") {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    
+    $dt = date("H:i ", $curtime);
+    $user->comm[$user->step % COMM_N] .= $mesg_to_user;
+    $user->step_inc();
+  }
+}
+
+
 /******************
  *                *
  *   STAT: room   *
@@ -298,6 +340,7 @@ else if ($user->stat == 'room') {
       log_wr("MOP before");
 
       if ($table->player_n == PLAYERS_N) {
+        require_once("briskin5/Obj/briskin5.phh");
 	log_wr("MOP inall");
 
 	// Start game for this table.
