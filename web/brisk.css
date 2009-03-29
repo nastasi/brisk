@@ -92,6 +92,27 @@ img.nobohide {
     opacity: 0.90;  
 }
 
+.notify_opaque {
+/*    top: 10%; */
+    top: 0;
+
+    left: 50%; 
+    position: absolute;
+    border-style: solid;
+    border-width: 1px;
+/*  margin-top: auto;
+    margin-bottom: auto;*/
+/*    overflow: auto; */
+    bottom: 0;
+    right: 0;
+    align: center;
+    text-align: center; 
+    background-color: white; 
+    z-index: 10;
+    visibility: hidden;
+}
+
+
 div.notify_clo { 
     position: absolute;
     align: center;
@@ -100,18 +121,18 @@ div.notify_clo {
     bottom:  4px;
 }
 
-input.input_text { 
+.input_text { 
     background-color: #f8f8f8;
     border: 1px solid gray;  
     margin: 1px;
  }
 
-input.input_text:hover { 
+.input_text:hover { 
     background-color: white;
     border: 1px solid #ffae00;  
  }
 
-input.input_text_hi { 
+.input_text_hi { 
     background-color: white;
     border: 2px solid #ffae00;
     margin: 0px;
