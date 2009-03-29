@@ -8,15 +8,28 @@
 
  BUG
  ---
-  - recupero partita per re-login con password
-  WIP - problema "|" nei nomi (manca enhance degli script lato server)
+ 
+  - paste da demauroparavia
+  DONE - recupero partita per re-login con password
+  DONE - problema "|" nei nomi (manca enhance degli script lato server)
   - problema col treno se mouse sopra mentre stringe (verif)
-
+  
  MINOR
  -----
 
  NORMAL
  ------
+
+  - win test
+  WIP - /listen 
+    DONE - skin della textarea
+    DONE - set cookie 
+    DONE - init client (read from cookie) - ALWAYS BY SERVER
+    DONE - init server
+    DONE - after cookie check auth-only when no-auth case
+    DONE - aggiungi info accanto a "Chat"
+  DONE - /mesgtoadm
+  DONE - img dei comandi
 
   DONE - form per garantire utenti (accoda in un file nel formato corretto)
   DONE -   process request
