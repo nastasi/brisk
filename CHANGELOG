@@ -1,3 +1,9 @@
+2.1.6
+	ENH commands menu added
+	ENH /listen and /mesgtoadm commands added
+	ENH improved inheritance between classes
+        ENH auth only tables disposition changed
+
 2.1.5
         ENH myconsole.js facility added (js)
         ENH rendering of standup users area (func j_stand_cont()) refactored with a more
