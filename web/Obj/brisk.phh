@@ -112,7 +112,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
 <dd><b>/garante</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
-<dd><b>/listen &lt;all|auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
+<dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
 </dl>
 </div>
 ';
