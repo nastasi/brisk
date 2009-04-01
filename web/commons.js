@@ -890,6 +890,25 @@ function topbanner_cb()
     // console.log("A: "+a+"  B: "+b);
 }
 
+function sidebanner_init()
+{
+    setInterval(sidebanner_cb, 666);
+;
+}
+
+function sidebanner_cb()
+{
+    var a, b;
+
+    a = $('sidebanner').style.backgroundColor;
+    b = $('sidebanner').style.borderLeftColor;
+
+    $('sidebanner').style.backgroundColor = b;
+    $('sidebanner').style.borderColor = a+" "+a+" "+a+" "+a;
+
+    // console.log("A: "+a+"  B: "+b);
+}
+
 
 function langtolng(lang)
 {

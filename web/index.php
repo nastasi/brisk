@@ -46,6 +46,7 @@ log_load("index.php");
 function main()
 {
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
+  GLOBAL $G_with_sidebanner, $G_sidebanner; 
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   GLOBAL $G_lang, $G_lng, $mlang_room;
   $is_login = FALSE;
@@ -465,6 +466,9 @@ supported by:<br><br>
      if ($G_with_topbanner) {
        printf("     topbanner_init();\n");
     }
+     if ($G_with_sidebanner) {
+       printf("     sidebanner_init();\n");
+    }
 ?>
 
      g_withflash = DetectFlashVer(6,0,0);
@@ -484,6 +488,9 @@ supported by:<br><br>
     printf($brisk_header_form);
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
     printf($brisk_vertical_menu, '', '');
+    if ($G_with_sidebanner) {
+      printf("<br><br>%s", $G_sidebanner);
+    }
     printf("</td><td>");
 ?> 
 
@@ -577,6 +584,10 @@ else {
      if ($G_with_topbanner) {
        printf("     topbanner_init();\n");
     }
+     if ($G_with_sidebanner) {
+       printf("     sidebanner_init();\n");
+    }
+
 ?>
      xhr_rd = createXMLHttpRequest();
      // xhr_rd.setRequestHeader("Content-type", "text/html; charset=utf-8");
@@ -613,8 +624,14 @@ if ($is_login) {
 <?php
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
-   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br><br><br>',
+   /*   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br><br><br>',
+	   $brisk_donate);*/
+   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br>',
 	   $brisk_donate);
+
+   if ($G_with_sidebanner) {
+     printf("<br><br>%s", $G_sidebanner);
+   }
    printf("</td><td>");
 ?> 
 <!--  =========== tables ===========  -->

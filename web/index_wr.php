@@ -52,7 +52,7 @@ if (array_search($_SERVER['REMOTE_ADDR'], $G_black_list) !== FALSE) {
 
 $is_spawn = FALSE;
 
-log_wr('COMM: '.$mesg);
+log_wr('COMM: '.xcapemesg($mesg));
 
 $sem = Room::lock_data();
 if (($room = &Room::load_data()) == FALSE) {
@@ -63,7 +63,7 @@ if (($room = &Room::load_data()) == FALSE) {
 }
 if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   Room::unlock_data($sem);
-  $argz = explode('|', $mesg);
+  $argz = explode('|', xcapemesg($mesg));
 
   if ($argz[0] == 'getchallenge') {
     GLOBAL $cli_name;
@@ -119,7 +119,7 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   }
   exit;
 }
-$argz = explode('|', $mesg);
+$argz = explode('|', xcapemesg($mesg));
 
 log_wr('POSTSPLIT: '.$argz[0]);
 
@@ -261,7 +261,7 @@ else if ($user->stat == 'room') {
     
   }
   else if ($argz[0] == 'chatt') {
-    $room->chatt_send(&$user,$mesg);
+    $room->chatt_send(&$user, xcapemesg($mesg));
   }
   /**********************
    *                    *

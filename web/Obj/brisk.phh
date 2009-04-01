@@ -27,7 +27,7 @@ define(BRISK_CONF, "brisk.conf.pho");
 define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
 define(PROXY_PATH, "/var/lib/brisk_proxy");
-define(TABLES_N, 32);
+define(TABLES_N, 36);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
@@ -80,10 +80,10 @@ $G_lng = "";
 // $G_lng = "_en";
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.1.6 - trusty";
+$G_brisk_version = "2.1.7 - trusty";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: menu comandi e filtro sui non autenticati.',
+$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: menu comandi, filtro opzionale sui non autenticati e "return bug" corretto.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 
 $G_room_help= '
@@ -140,6 +140,14 @@ function xcapelt($s)
 {
   $from = array (   '\\',     '|',  "\t",  "\n");
   $to   = array ( '\\\\',   '\\|', "\\t", "\\n");
+
+  return (str_replace($from, $to, $s));
+}
+
+function xcapemesg($s)
+{
+  $from = array (  "\n");
+  $to   = array ( "\\n");
 
   return (str_replace($from, $to, $s));
 }
@@ -691,7 +699,7 @@ class Room {
         $this->table[$i]->auth_only = FALSE;
       }
       */
-      if ($i < 16) 
+      if ($i < 12) 
         $this->table[$i]->auth_only = TRUE;
       else
         $this->table[$i]->auth_only = FALSE;
