@@ -191,29 +191,62 @@ function main()
     $standup .= '</div></td></tr></table>';
   }
 
-  $altout_propag = array( array ( 'id' => 'btn_altout',
+  $altout_sponsor_arr = array( array ( 'id' => 'btn_altout',
                                   'url' => 'http://www.alternativeoutput.it',
 				  'content' => 'img/altout80x15.png',
-                                  'content_big' => 'img/altout80x15.png'),
+                                  'content_big' => 'img/logotxt_banner.png'),
 			  array ( 'id' => 'btn_virtualsky',
                                   'url' => 'http://virtualsky.alternativeoutput.it',
 				  'content' => 'img/virtualsky80x15a.gif',
-                                  'content_big' => 'img/virtualsky_big.png')
+                                  'content_big' => 'img/virtualsky_big.png'),
+			  array ( 'id' => 'btn_dynamica',
+                                  'url' => 'http://www.dynamica.it',
+				  'content' => 'img/dynamica.png',
+                                  'content_big' => 'img/dynamica_big.png')
 			  );
-  
+
+  $altout_support_arr = array( array ( 'id' => 'btn_brichi',
+                                       'url' => 'http://www.briscolachiamata.it',
+                                       'content' => 'img/brichi.png',
+                                       'content_big' => 'img/brichi_big.png'),
+                               array ( 'id' => 'btn_foroli',
+                                       'url' => 'http://www.forumolimpia.it',
+                                       'content' => 'img/forumolimpia.gif',
+                                       'content_big' => 'img/forumolimpia_big.png' ) );
+
+
+
+  $altout_support = "";
+  for ($i = 0 ; $i < 3 ; $i++) {
+    $ii = ($i < 2 ? $i : 0);
+
+    $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
+                               $i * 20, $altout_support_arr[$ii]['url'],
+                               $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
+    
+    $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
+                                   $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
+  }
+
+
   // seed with microseconds since last "whole" second
-  srand ((double) microtime() * 1000000);
-  // $randval = rand(0,count($altout_propag)-1);
-  $randval = 1;
-  $altout_carousel = sprintf('<a target="_blank" href="%s"><img id="%s" class="nobo" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a>',
-			     $altout_propag[$randval]['url'],
-			     $altout_propag[$randval]['id'],
-			     $altout_propag[$randval]['content']);
-			 
-  $altout_carousel_big = sprintf('<img class="nobohide" id="%s_big" src="%s">',
-                                 $altout_propag[$randval]['id'],
-                                 $altout_propag[$randval]['content_big']);
-			 
+  // srand ((double) microtime() * 1000000);
+  // $randval = rand(0,count($altout_sponsor_arr)-1);
+  $altout_sponsor = "";
+  for ($i = 0 ; $i < 4 ; $i++) {
+    $ii = ($i < 3 ? $i : 0);
+
+    $altout_sponsor .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
+                               $i * 20, $altout_sponsor_arr[$ii]['url'],
+                               $altout_sponsor_arr[$ii]['id'], $altout_sponsor_arr[$ii]['content']);
+    
+    $altout_sponsor_big .= sprintf('<img class="nobohide" id="%s_big" src="%s">',
+                                   $altout_sponsor_arr[$ii]['id'], $altout_sponsor_arr[$ii]['content_big']);
+  }
+
+
+
+
 
   $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
   if ($brisk_donate == FALSE)
@@ -411,20 +444,30 @@ $brisk_vertical_menu = '
 
 </div>
 <br>
-sponsored by:<br><br>'.$altout_carousel.'<br>
-<a target="_blank" href="http://www.dynamica.it"><img class="nobo" id="btn_dynamica" src="img/dynamica.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br><br>
+sponsored by:<br><br>
+<div id="spon_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */ ">
+<div style="/*background-color: green; */ text-align: left; position: relative; padding: 0px; margin: 0px; top: 0px; height: 80px;">'.$altout_sponsor.'<br>
+</div></div>
+<div style="position: absolute;">
+'.$altout_sponsor_big.'
+</div>
+<br>
 supported by:<br><br>
-<a target="_blank" href="http://www.briscolachiamata.it"><img class="nobo" id="btn_brichi" src="img/brichi.png" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>
-<a target="_blank" href="http://www.forumolimpia.it"><img class="nobo" id="btn_foroli" src="img/forumolimpia.gif" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>
-<a target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a><br>
+<div id="supp_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */">
+<div style="/* background-color: green; */ text-align: left; position: relative; padding: 0px; margin: 0px; top: 0px; height: 80px;">'.$altout_support.'<br> 
+
+</div>
+</div>
+<div style="position: absolute;">
+'.$altout_support_big.'
+</div>
+<a style="/* position: absolute; top: 40px; left: 6px;" */ target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
+<br>
 <div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
 </div><br><br></div>
 %s
 %s
-<img class="nobohide" id="btn_dynamica_big" src="img/dynamica_big.png">
-<img class="nobohide" id="btn_brichi_big" src="img/brichi_big.png">
-<img class="nobohide" id="btn_foroli_big" src="img/forumolimpia_big.png">
-'.$altout_carousel_big.'</div>';
+<br></div>';
     
   /* Templates. */
   if ($ACTION == 'login') {
@@ -457,10 +500,14 @@ supported by:<br><br>
    var topbanner_sfx, topbanner_dx;
    var g_brow = null;
    var sess = "not_connected";
-  
+   var spo_slide, sup_slide;
+
    window.onload = function() {
      // alert(window.onbeforeunload);
      g_brow = get_browser_agent();
+     spo_slide  = new sideslide($('spon_caro'), 80, 20);
+     sup_slide  = new sideslide($('supp_caro'), 60, 20);
+
      login_init();
 <?php
      if ($G_with_topbanner) {
@@ -570,6 +617,9 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 
    window.onload = function() {
      g_brow = get_browser_agent();
+     spo_slide  = new sideslide($('spon_caro'), 80, 20);
+     sup_slide  = new sideslide($('supp_caro'), 60, 20);
+
 <?php
 if ($BRISK_SHOWHTML == "debugtable") {
 ?>

@@ -595,3 +595,66 @@ function list_set(what, setco, info)
         createCookie("CO_list", what, 24*365, cookiepath);
     }
 }
+
+function sideslide(domobj, height, step)
+{
+    this.st = 'wait';
+    this.twait = 5000;
+
+    this.domobj = domobj;
+    this.height = height;
+    this.step = step;
+
+    this.start();
+}
+
+sideslide.prototype = {
+    id: null,
+    st: 'wait',
+    twait: 0,
+    scroll: 0,
+    countdown: 0,
+
+    domobj: null,
+    height: 0,
+    step: 0,
+
+    start: function() {
+        var instant = this;
+        
+        this.st = 'wait';
+        this.id = setTimeout(function () { instant.sideslide_cb(); }, this.twait);
+    },
+
+    sideslide_cb: function() {
+        var instant = this;
+
+        if (this.st == 'wait') {
+            this.st = 'scroll';
+            this.countdown = 10;
+            this.id = setInterval(function () { instant.sideslide_cb(); }, 100);
+        }
+        else if (this.st == 'scroll') {
+            this.scroll += (this.step / 10);
+            if (this.scroll >= this.height - this.step) {
+                this.scroll = 0;
+            }
+            this.domobj.scrollTop = this.scroll;
+            this.countdown--;
+            if (this.countdown == 0) {
+                this.stop();
+                this.st = 'wait';
+                this.id = setTimeout(function () { instant.sideslide_cb(); }, this.twait);
+            }
+        }
+    },
+
+
+    stop: function() {
+        if (this.id != null) {
+            clearInterval(this.id);
+            this.id = null;
+        }
+    }
+
+}
