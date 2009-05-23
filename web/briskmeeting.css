@@ -67,3 +67,23 @@ table.ricapito th.thnobo
   border: 0px solid black; 
   }
 
+a:link {
+    color: RGB(225, 144,0);
+    line-height: 20px;
+  /*  text-decoration: none; */
+}
+
+a:visited {
+    color: RGB(225, 144,0);
+    line-height: 20px;
+  /*  text-decoration: none; */
+}
+
+a:hover {
+    color: RGB(225, 144,0);
+    line-height: 20px;
+  /*    font-weight: bold;   */
+  /*  text-decoration: none; */
+}
+
+
