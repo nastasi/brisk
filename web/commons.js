@@ -322,6 +322,16 @@ function act_help()
     send_mesg("help");
 }
 
+function act_passwdhowto()
+{
+    send_mesg("passwdhowto");
+}
+
+function act_mesgtoadm()
+{
+    send_mesg("mesgtoadm");
+}
+
 function act_tav()
 {
     act_chatt('/tav '+$('txt_in').value); 
