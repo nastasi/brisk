@@ -107,6 +107,9 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   else if ($argz[0] == 'about') {
     echo show_notify(str_replace("\n", " ", $G_room_about), 0, "torna ai tavoli", 400, 200);
   }
+  else if ($argz[0] == 'passwdhowto') {
+    echo show_notify(str_replace("\n", " ", $G_room_passwdhowto), 0, "torna ai tavoli", 400, 200);
+  }
   else if ($argz[0] == 'roadmap') {
     echo show_notify(str_replace("\n", " ", $G_room_roadmap), 0, "torna ai tavoli", 400, 200);
   }
@@ -231,6 +234,14 @@ else if ($user->stat == 'room') {
   if ($argz[0] == 'help') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
+
+    log_wr($user->comm[$user->step % COMM_N]);
+    $user->step_inc();
+    
+  }
+  else if ($argz[0] == 'passwdhowto') {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_passwdhowto), 0, "torna ai tavoli", 600, 500);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
