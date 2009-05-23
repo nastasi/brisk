@@ -9,6 +9,9 @@
      g_menu_tree[0] = new Array();
      g_menu_tree[0][0] = $('menu_webstart');
      g_menu_tree[0][1] = $('menu_commands');
+     if ($('menu_pool') != null)
+         g_menu_tree[0][2] = $('menu_pool');
+
      g_menu_tree[1] = new Array();
      g_menu_tree[1][0] = $('menu_meeting');
      g_menu_tree[1][1] = $('menu_state');
