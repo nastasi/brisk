@@ -43,6 +43,57 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 
 log_load("index.php");
 
+
+function pool_dom() {
+  GLOBAL $G_with_pool;
+
+  $G_with_pool = TRUE;
+  // $G_with_pool = FALSE;
+
+  if ($G_with_pool) {
+    return sprintf('<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+
+          <img class="nobo" src="img/brisk_signal.png" onmouseover="menu_hide(0,0); menu_show(\'menu_pool\');">
+<div class="webstart" style="width: auto;" id="menu_pool" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
+<b>Vota come calcolare i punteggi!</b><br><br>
+<form onsubmit="return j_mesgtoadmbox(this);" action="" method="post" accept-charset="utf-8" id="mesgtoadm_form">
+<input type="hidden" value="666" name="realsub"/>
+
+<INPUT TYPE="radio" NAME="category" VALUE="liv" CHECKED> Living
+<hr>
+<BR><INPUT TYPE="radio" NAME="category" VALUE="din"> Dining
+<hr>
+<BR><INPUT TYPE="radio" NAME="category" VALUE="bed"> Bedroom
+<hr>
+<br>
+<input type="submit" class="input_sub" onclick="this.form.elements[\'realsub\'].value = this.value;" value="invia" name="sub" id="subid"/>     
+</form>
+
+
+</div');
+
+//            <form onsubmit="return j_mesgtoadmbox(this);" action="" method="post" accept-charset="utf-8" id="mesgtoadm_form">
+
+
+//        <input type="hidden" value="666" name="realsub"/>
+// <table class="login">
+// <!--MLANG: soggetto -->
+// <tbody><tr><td><b>soggetto:</b></td>
+// <td><input type="text" value="" maxlength="255" size="32" name="subj" class="input_text" id="subjid"/></td></tr></tbody></table>
+// <table class="login">
+// <tbody><tr><td><img src="img/mesgtoadm_mesg.png" class="nobo" title="messaggio"/></td>
+// <td><textarea wrap="soft" rows="8" cols="40" name="mesg" class="input_text" id="mesgid"/></td></tr>
+// <tr><td style="text-align: center;" colspan="2">
+//        <input type="submit" class="input_sub" onclick="this.form.elements[\'realsub\'].value = this.value;" value="invia" name="sub" id="subid"/>     
+// <input type="submit" onclick="this.form.elements[\'realsub\'].value = this.value;" class="input_sub" value="chiudi" name="clo" id="cloid"/></td></tr>
+// </tbody></table>
+//     </form>
+// </div>');
+  }
+  else
+    return '';
+}
+
 function main()
 {
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -424,9 +475,6 @@ $brisk_vertical_menu = '
 <a href="#" title="garantisci per un tuo conoscente" 
    onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/garante\'); menu_over(-1,this);">garantisci</a><br>
 
-<a href="#" title="manda un messaggio o una segnalazione all\'amministratore del sito" 
-   onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/mesgtoadm\'); menu_over(-1,this);">segnala a mop</a><br>
-
 
 <a href="#" title="imposta le regole di ascolto" 
    onmouseover="menu_hide(0,1); menu_show(\'menu_listen\');">ascolta</a><br>
@@ -440,7 +488,18 @@ $brisk_vertical_menu = '
 
 </div>
 
-</div>' : '').'
+</div>
+
+<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+<img style="cursor: pointer;" class="nobo" src="img/brisk_help.png" title="informazioni utili su Brisk." onmouseover="menu_hide(0,0);" onclick="act_help();">
+<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+'.($user->flags & USER_FLAG_AUTH ? '
+<img style="cursor: pointer;" class="nobo" src="img/brisk_signal.png" title="manda un messaggio o una segnalazione all\'amministratore del sito" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.pool_dom()
+ : '
+<img style="cursor: pointer;" class="nobo" src="img/brisk_password.png" title="Come ottenere una password su Brisk." onmouseover="menu_hide(0,0);" onclick="act_passwdhowto();">
+').'
+
+' : '').'
 
 </div>
 <br>
@@ -614,6 +673,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
    var g_imgtot = g_preload_img_arr.length;
    var myfrom = "index_php";
    var g_brow = null;
+   var spo_slide, sup_slide;
 
    window.onload = function() {
      g_brow = get_browser_agent();
@@ -675,9 +735,12 @@ if ($is_login) {
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
    /*   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br><br><br>',
-	   $brisk_donate);*/
-   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br>',
 	   $brisk_donate);
+   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br>',
+	   $brisk_donate);*/
+   printf($brisk_vertical_menu, '<!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br>',
+	   $brisk_donate);
+
 
    if ($G_with_sidebanner) {
      printf("<br><br>%s", $G_sidebanner);
