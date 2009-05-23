@@ -41,8 +41,8 @@ header('Content-type: text/html; charset="utf-8"',true);
 <div style=" z-index: 0; margin: auto; text-align: left; padding: 70px 10px 10px 80px; border: 0px solid black; position: relative; left: auto;">
 <h4>Presentazioni</h4>
 Cari briskisti vicini e lontani ,ciao a tutti.<br><br>
-Siamo Pinky, Susy e Bego,veterani di brisk,e stiamo organizzando uno degli ormai frequenti meeting del sito.<br><br>
-Naturalmente confidiamo nella Vostra massiccia partecipazione,anche perché siamo convinti che il gruppo di brisk sia diventato qualcosa di molto più affascinante di un semplice insieme di persone che si trovano per giocare a carte.<br><br>
+Siamo Pinky, Susy e Bego,veterani di Brisk,e stiamo organizzando uno degli ormai frequenti meeting del sito.<br><br>
+Naturalmente confidiamo nella Vostra massiccia partecipazione,anche perché siamo convinti che il gruppo di Brisk sia diventato qualcosa di molto più affascinante di un semplice insieme di persone che si trovano per giocare a carte.<br><br>
 Qui sotto troverete tutte le indicazioni per poter partecipare all'evento.<br><br>
 Per qualsiasi dubbio Vi dovesse sorgere,contattateci senza frapporre indugi.<br><br>
 Grazie e a presto <b>Pinky</b>, <b>Susy</b>, <b>Bego</b>.<br><br>
