@@ -108,7 +108,7 @@ in via di definizione<br>
 All'atto della conferma dell'adesione, Vi verranno forniti indirizzo preciso e
 tutti i dati relativi al luogo di ritrovo.<br><br>
 Riconfermiamo i cari saluti a tutti<br><br>
-<b>Pinky</b>, <b>Susy</b>, <b>Bego</b>.
+<b>Pinky</b>, <b>Susy</b> e <b>Bego</b>.
 
 </div>
 <br>
