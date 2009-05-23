@@ -47,8 +47,8 @@ log_load("index.php");
 function pool_dom() {
   GLOBAL $G_with_pool;
 
-  $G_with_pool = TRUE;
-  // $G_with_pool = FALSE;
+  // $G_with_pool = TRUE;
+  $G_with_pool = FALSE;
 
   if ($G_with_pool) {
     return sprintf('<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
