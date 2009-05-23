@@ -100,13 +100,13 @@ in via di definizione<br>
 
 <li>Termine secondo le esigenze dei singoli
 
-<li>Ovviamente ,dall'inizio alla fine, briscola a volontà. 
+<li>Ovviamente, dall'inizio alla fine, briscola a volontà. 
 </ul>
 <br>
 <b>Chi dispone di mazzi di carte, non li lasci a casa a stagionare....</b>
 <br><br>
 All'atto della conferma dell'adesione, Vi verranno forniti indirizzo preciso e
-tutti idati relativi al luogo di ritrovo.<br><br>
+tutti i dati relativi al luogo di ritrovo.<br><br>
 Riconfermiamo i cari saluti a tutti<br><br>
 <b>Pinky</b>, <b>Susy</b>, <b>Bego</b>.
 
