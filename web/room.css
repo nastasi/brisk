@@ -23,6 +23,27 @@
  *
  */
 
+a.flat:link {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    text-decoration: none;
+}
+
+a.flat:visited {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    text-decoration: none;
+}
+
+a.flat:hover {
+    color: RGB(255, 174,0);
+    line-height: 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+
+
 body.* {
     margin:0px;
     padding: 0px;
