@@ -9,7 +9,7 @@
  BUG
  ---
  
-  - paste da demauroparavia
+  DONE - paste da demauroparavia
   DONE - recupero partita per re-login con password
   DONE - problema "|" nei nomi (manca enhance degli script lato server)
   - problema col treno se mouse sopra mentre stringe (verif)
@@ -47,7 +47,7 @@
   DONE -   for status
   -   for password
 
-  - reload home
+  DONE - reload home
   - notify for long pages
 
   - buddy list
