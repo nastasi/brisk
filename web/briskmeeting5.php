@@ -27,7 +27,7 @@ header('Content-type: text/html; charset="utf-8"',true);
 ?>
 <html>
 <head>
-<title>BriskMeeting - 14 Giugno - Nicolosi (Catania)</title>
+<title>BriskMeeting - 14 Giugno 2009 - Nicolosi (Catania)</title>
 <link rel="stylesheet" type="text/css" href="briskmeeting.css">
 <!-- <link rel="stylesheet" type="text/css" href="room.css">
 <link rel="stylesheet" type="text/css" href="bug.css"> -->
