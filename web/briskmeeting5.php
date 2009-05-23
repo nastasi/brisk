@@ -114,7 +114,8 @@ Bevande:<br>
 Il termine serale &egrave; lasciato naturalmente alle esigenze di ognuno.<br>
 <br>
 Alla conferma della presenza verrà dato l'indirizzo preciso del ristorante compreso il link per il sito e il numero di telefono.
-
+<br><br>
+<b>Importante:</b> chi può porti un mazzo di carte!<br>
 <br>
 Saluti a tutti da Bomber e Francesco. Vi aspettiamo numerosi.<br>
 <br>
