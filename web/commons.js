@@ -903,7 +903,11 @@ function topbanner_cb()
 function sidebanner_init()
 {
     setInterval(sidebanner_cb, 666);
-;
+}
+
+function sidebanner2_init()
+{
+    setInterval(sidebanner2_cb, 666);
 }
 
 function sidebanner_cb()
@@ -915,6 +919,19 @@ function sidebanner_cb()
 
     $('sidebanner').style.backgroundColor = b;
     $('sidebanner').style.borderColor = a+" "+a+" "+a+" "+a;
+
+    // console.log("A: "+a+"  B: "+b);
+}
+
+function sidebanner2_cb()
+{
+    var a, b;
+
+    a = $('sidebanner2').style.backgroundColor;
+    b = $('sidebanner2').style.borderLeftColor;
+
+    $('sidebanner2').style.backgroundColor = b;
+    $('sidebanner2').style.borderColor = a+" "+a+" "+a+" "+a;
 
     // console.log("A: "+a+"  B: "+b);
 }

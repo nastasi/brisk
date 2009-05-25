@@ -44,17 +44,17 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 log_load("index.php");
 
 
-function pool_dom() {
-  GLOBAL $G_with_pool;
+function poll_dom() {
+  GLOBAL $G_with_poll;
 
-  // $G_with_pool = TRUE;
-  $G_with_pool = FALSE;
+  // $G_with_poll = TRUE;
+  $G_with_poll = FALSE;
 
-  if ($G_with_pool) {
+  if ($G_with_poll) {
     return sprintf('<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 
-          <img class="nobo" src="img/brisk_signal.png" onmouseover="menu_hide(0,0); menu_show(\'menu_pool\');">
-<div class="webstart" style="width: auto;" id="menu_pool" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
+          <img class="nobo" src="img/brisk_signal.png" onmouseover="menu_hide(0,0); menu_show(\'menu_poll\');">
+<div class="webstart" style="width: auto;" id="menu_poll" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 <b>Vota come calcolare i punteggi!</b><br><br>
 <form onsubmit="return j_mesgtoadmbox(this);" action="" method="post" accept-charset="utf-8" id="mesgtoadm_form">
 <input type="hidden" value="666" name="realsub"/>
@@ -98,6 +98,7 @@ function main()
 {
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
   GLOBAL $G_with_sidebanner, $G_sidebanner; 
+  GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   GLOBAL $G_lang, $G_lng, $mlang_room;
   $is_login = FALSE;
@@ -494,7 +495,7 @@ $brisk_vertical_menu = '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_help.png" title="informazioni utili su Brisk." onmouseover="menu_hide(0,0);" onclick="act_help();">
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 '.($user->flags & USER_FLAG_AUTH ? '
-<img style="cursor: pointer;" class="nobo" src="img/brisk_signal.png" title="manda un messaggio o una segnalazione all\'amministratore del sito" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.pool_dom()
+<img style="cursor: pointer;" class="nobo" src="img/brisk_signal.png" title="manda un messaggio o una segnalazione all\'amministratore del sito" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
  : '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_password.png" title="Come ottenere una password su Brisk." onmouseover="menu_hide(0,0);" onclick="act_passwdhowto();">
 ').'
@@ -502,16 +503,18 @@ $brisk_vertical_menu = '
 ' : '').'
 
 </div>
-<br>
-sponsored by:<br><br>
+<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+sponsored by:<br>
+<div style="padding: 0px; margin: 0px; witdh: 50px; height: 4px; font-size: 1px;"></div>
 <div id="spon_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */ ">
 <div style="/*background-color: green; */ text-align: left; position: relative; padding: 0px; margin: 0px; top: 0px; height: 80px;">'.$altout_sponsor.'<br>
 </div></div>
 <div style="position: absolute;">
 '.$altout_sponsor_big.'
 </div>
-<br>
-supported by:<br><br>
+<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+supported by:<br>
+<div style="padding: 0px; margin: 0px; witdh: 50px; height: 4px; font-size: 1px;"></div>
 <div id="supp_caro" style="overflow: hidden; height: 18px; /* border: 1px solid red; */">
 <div style="/* background-color: green; */ text-align: left; position: relative; padding: 0px; margin: 0px; top: 0px; height: 80px;">'.$altout_support.'<br> 
 
@@ -574,6 +577,9 @@ supported by:<br><br>
     }
      if ($G_with_sidebanner) {
        printf("     sidebanner_init();\n");
+    }
+     if ($G_with_sidebanner2) {
+       printf("     sidebanner2_init();\n");
     }
 ?>
 
@@ -697,6 +703,9 @@ else {
      if ($G_with_sidebanner) {
        printf("     sidebanner_init();\n");
     }
+     if ($G_with_sidebanner2) {
+       printf("     sidebanner2_init();\n");
+    }
 
 ?>
      xhr_rd = createXMLHttpRequest();
@@ -742,9 +751,22 @@ if ($is_login) {
 	   $brisk_donate);
 
 
-   if ($G_with_sidebanner) {
-     printf("<br><br>%s", $G_sidebanner);
+   if ($G_with_sidebanner xor $G_with_sidebanner2) {
+     printf("<br><br>");
    }
+
+   if ($G_with_sidebanner) {
+     printf("%s", $G_sidebanner);
+     if ($G_with_sidebanner2) {
+       printf("<br>");
+     }
+   }
+
+
+   if ($G_with_sidebanner2) {
+     printf("%s", $G_sidebanner2);
+   }
+
    printf("</td><td>");
 ?> 
 <!--  =========== tables ===========  -->
