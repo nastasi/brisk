@@ -48,19 +48,20 @@ function poll_dom() {
   GLOBAL $G_with_poll, $G_poll_title, $G_poll_entries;
 
   if ($G_with_poll) {
-    $ret = sprintf('<div style="padding: 0px;margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+    $ret = sprintf('<div style="padding: 0px;margin: 0px; height: 8px; font-size: 1px;"></div>
 
-          <img class="nobo" src="img/brisk_poll.png" onmouseover="menu_hide(0,0); menu_show(\'menu_poll\');">
-<div class="webstart" style="width: auto;" id="menu_poll" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
+<img class="nobo" src="img/brisk_poll.png" onmouseover="menu_hide(0,0); menu_show(\'menu_poll\');">
+
+<div style="width: 300px;" class="webstart" id="menu_poll" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 <b>%s</b><br><br>
-<form syle="padding: 0px; margin: 0px;" id="poll_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_pollbox(this);">
+<form id="poll_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_pollbox(this);">
 <input type="hidden" name="realsub" value="666">', $G_poll_title);
     for ($i = 0 ; $i < count($G_poll_entries) ; $i++) {
       $ret .= sprintf('<INPUT TYPE="radio" NAME="category" VALUE="%s">%s<hr><br>', $G_poll_entries[$i]['id'],
                       $G_poll_entries[$i]['cont']);
     }
     $ret .= sprintf('<div style="text-align: center;"><input type="submit" class="input_sub" onclick="this.form.elements[\'realsub\'].value = this.value;" value="invia" name="sub" id="subid"/></div>
-</form></div');
+</form></div>');
     return ($ret);
   }
   else
