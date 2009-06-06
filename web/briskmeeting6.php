@@ -69,15 +69,90 @@ Facciamo notare che, il luogo dove ci si incontra,si chiama <i>"Osteria del pesc
 <a href="#" onmouseover="$('mi_menu_meat').style.display = '';" onmouseout="$('mi_menu_meat').style.display = 'none';">menu di carne</a>)
 <div id="mi_menu_fish" style="text-align: left; position: absolute; display: none; background: white; border: 1px solid black; padding: 4px;">
 <br>
-Menu di pesce<br>
-in via di definizione<br>
+<b>Menu di mare</b><br>
+<br>
+Cocktail di benvenuto:<br>
+<ul>
+<li>Bollicine Franciacorta
+<li>Long Drink Analcolico
+</ul>
+<br>
+Antipasti:<br>
+<ul>
+<li>Antipasto di mare
+</ul>
+<br>
+Bis di primi:<br>
+<ul>
+<li>Risotto al nero di seppia
+<li>Penne al mozzo (con tonno)
+</ul>
+<br>
+Secondo:
+<ul>
+<li>Fritto Misto
+</ul>
+<br>
+Contorno:<br>
+<ul>
+<li>Patatine
+</ul>
+<br>
+Fine pasto:<br>
+<ul>
+<li>Sorbetto
+<li>Caffè
+</ul>
+<br>
+Bevande:<br>
+<ul>
+<li>Mezzo litro d'acqua
+<li>Un quarto di vino
+</ul>
 <br>
 </div>
 
 <div id="mi_menu_meat" style="text-align: left; position: absolute; display: none; background: white; border: 1px solid black; padding: 4px;">
 <br>
-Menu di carne<br>
-in via di definizione<br>
+<b>Menu di terra</b><br>
+<br>
+Cocktail di benvenuto:<br>
+<ul>
+<li>Bollicine Franciacorta
+<li>Long Drink Analcolico
+</ul>
+<br>
+Antipasti:<br>
+<ul>
+<li>Antipasto di terra
+</ul>
+<br>
+Primo:<br>
+<ul>
+<li>Ravioli ricotta e spinaci al burro fuso
+</ul>
+<br>
+Secondo:
+<ul>
+<li>Scaloppine con funghi e polenta
+</ul>
+<br>
+Contorno:<br>
+<ul>
+<li>Patatine
+</ul>
+<br>
+Fine pasto:<br>
+<ul>
+<li>Sorbetto
+<li>Caffè
+</ul>
+<br>
+Bevande:<br>
+<ul>
+<li>Mezzo litro d'acqua
+<li>Un quarto di vino
+</ul>
 <br>
 </div>
 
