@@ -580,6 +580,40 @@ function mesgtoadmbox(w, h)
     $('mesgtoadm_form').elements['subj'].focus();
 }
 
+function j_pollbox(form)
+{
+    var no, i, choose; 
+
+    do {
+        // submit the request
+        
+        for (i = 0 ; i < form.elements.length ; i++) {
+            if (form.elements[i].checked == true)
+                break;
+        }
+        if (i == form.elements.length) {
+            no = new notify(gst, "<br>Non hai espresso nessuna preferenza;</br> correggi per favore.", 1, "chiudi", 280, 100); 
+            return false;
+        }
+        else
+            choose = form.elements[i].value;
+
+        token = server_request('mesg', 'poll', 
+                               'cli_choose', encodeURIComponent(choose) );
+
+        if (token == "1") {
+            // TODO: mesg to user
+            // $('mesgtoadmbox').style.visibility = "hidden";
+            break;
+        }
+    } while (0);
+
+    return (false);
+}
+
+
+
+
 function list_set(what, setco, info)
 {
     if (what == 'auth') {
