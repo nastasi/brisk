@@ -274,11 +274,13 @@ class Challenges {
 class LoginDBItem {
   var $login;
   var $pass;
+  var $email;
 
-  function LoginDBItem($login, $pass)
+  function LoginDBItem($login, $pass, $email)
   {
     $this->login = $login;
     $this->pass  = $pass;
+    $this->email = $email;
   }
 }
 
@@ -296,10 +298,10 @@ class LoginDB {
       require("$DOCUMENT_ROOT/Etc/brisk_auth.conf.pho");
     }
     else {
-      $this->item = array( new LoginDBItem("uno", md5("one")),
-                           new LoginDBItem("due", md5("two")),
-                           new LoginDBItem("a_b", md5("abb")),
-                           new LoginDBItem("tre", md5("three")) );
+      $this->item = array( new LoginDBItem("uno", md5("one"), "pippo@pluto.com"),
+                           new LoginDBItem("due", md5("two"), "pippo@pluto.com"),
+                           new LoginDBItem("a_b", md5("abb"), "pippo@pluto.com"),
+                           new LoginDBItem("tre", md5("three"), "pippo@pluto.com") );
     }
     $this->item_n = count($this->item);
     log_main("LoginDB create:end");
@@ -307,7 +309,7 @@ class LoginDB {
 
   function login_exists($login)
   {
-    log_main("login_verify");
+    log_main("login_exists: ".$login);
     
     /* check the existence of the nick in the LoginDB */
     for ($i = 0 ; $i < $this->item_n ; $i++) {
@@ -319,14 +321,29 @@ class LoginDB {
     return (FALSE);
   }
 
+  function getmail($login)
+  {
+    log_main("getmail");
+    
+    /* check the existence of the nick in the LoginDB */
+    for ($i = 0 ; $i < $this->item_n ; $i++) {
+      if (strcasecmp($this->item[$i]->login, $login) == 0) {
+        log_main("login[".$i."]: ".$this->item[$i]->login);
+        return ($this->item[$i]->email);
+      }
+    }
+    return (FALSE);
+  }
+
   function login_verify($login, $pass)
   {
     $ret = FALSE;
 
-    log_main("login_verify");
+    log_main("login_verify: ".$login);
         
     /* check the existence of the nick in the LoginDB */
     for ($i = 0 ; $i < $this->item_n ; $i++) {
+      log_main("login_verify: LOOP");
       if (strcasecmp($this->item[$i]->login, $login) == 0) {
         log_main("login[".$i."]: ".$this->item[$i]->login);
 
