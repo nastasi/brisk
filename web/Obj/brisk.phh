@@ -80,10 +80,10 @@ $G_lng = "";
 // $G_lng = "_en";
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.1.8 - trusty";
+$G_brisk_version = "2.1.9 - trusty";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Sponsor alternati, menù rivisto, AUTO-GARANZIE, sondaggi quasi ultimati.',
+$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: sondaggi, direct messages quando segnalate.',
                         'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
 
 $G_room_help= '
