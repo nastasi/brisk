@@ -45,50 +45,23 @@ log_load("index.php");
 
 
 function poll_dom() {
-  GLOBAL $G_with_poll;
-
-  // $G_with_poll = TRUE;
-  $G_with_poll = FALSE;
+  GLOBAL $G_with_poll, $G_poll_title, $G_poll_entries;
 
   if ($G_with_poll) {
-    return sprintf('<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+    $ret = sprintf('<div style="padding: 0px;margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 
-          <img class="nobo" src="img/brisk_signal.png" onmouseover="menu_hide(0,0); menu_show(\'menu_poll\');">
+          <img class="nobo" src="img/brisk_poll.png" onmouseover="menu_hide(0,0); menu_show(\'menu_poll\');">
 <div class="webstart" style="width: auto;" id="menu_poll" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
-<b>Vota come calcolare i punteggi!</b><br><br>
-<form onsubmit="return j_mesgtoadmbox(this);" action="" method="post" accept-charset="utf-8" id="mesgtoadm_form">
-<input type="hidden" value="666" name="realsub"/>
-
-<INPUT TYPE="radio" NAME="category" VALUE="liv" CHECKED> Living
-<hr>
-<BR><INPUT TYPE="radio" NAME="category" VALUE="din"> Dining
-<hr>
-<BR><INPUT TYPE="radio" NAME="category" VALUE="bed"> Bedroom
-<hr>
-<br>
-<input type="submit" class="input_sub" onclick="this.form.elements[\'realsub\'].value = this.value;" value="invia" name="sub" id="subid"/>     
-</form>
-
-
-</div');
-
-//            <form onsubmit="return j_mesgtoadmbox(this);" action="" method="post" accept-charset="utf-8" id="mesgtoadm_form">
-
-
-//        <input type="hidden" value="666" name="realsub"/>
-// <table class="login">
-// <!--MLANG: soggetto -->
-// <tbody><tr><td><b>soggetto:</b></td>
-// <td><input type="text" value="" maxlength="255" size="32" name="subj" class="input_text" id="subjid"/></td></tr></tbody></table>
-// <table class="login">
-// <tbody><tr><td><img src="img/mesgtoadm_mesg.png" class="nobo" title="messaggio"/></td>
-// <td><textarea wrap="soft" rows="8" cols="40" name="mesg" class="input_text" id="mesgid"/></td></tr>
-// <tr><td style="text-align: center;" colspan="2">
-//        <input type="submit" class="input_sub" onclick="this.form.elements[\'realsub\'].value = this.value;" value="invia" name="sub" id="subid"/>     
-// <input type="submit" onclick="this.form.elements[\'realsub\'].value = this.value;" class="input_sub" value="chiudi" name="clo" id="cloid"/></td></tr>
-// </tbody></table>
-//     </form>
-// </div>');
+<b>%s</b><br><br>
+<form syle="padding: 0px; margin: 0px;" id="poll_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_pollbox(this);">
+<input type="hidden" name="realsub" value="666">', $G_poll_title);
+    for ($i = 0 ; $i < count($G_poll_entries) ; $i++) {
+      $ret .= sprintf('<INPUT TYPE="radio" NAME="category" VALUE="%s">%s<hr><br>', $G_poll_entries[$i]['id'],
+                      $G_poll_entries[$i]['cont']);
+    }
+    $ret .= sprintf('<div style="text-align: center;"><input type="submit" class="input_sub" onclick="this.form.elements[\'realsub\'].value = this.value;" value="invia" name="sub" id="subid"/></div>
+</form></div');
+    return ($ret);
   }
   else
     return '';
@@ -99,6 +72,7 @@ function main()
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
   GLOBAL $G_with_sidebanner, $G_sidebanner; 
   GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
+  GLOBAL $G_with_poll;
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   GLOBAL $G_lang, $G_lng, $mlang_room;
   $is_login = FALSE;
@@ -269,6 +243,7 @@ function main()
 
 
   $altout_support = "";
+  $altout_support_big = "";
   for ($i = 0 ; $i < 3 ; $i++) {
     $ii = ($i < 2 ? $i : 0);
 
@@ -285,6 +260,7 @@ function main()
   // srand ((double) microtime() * 1000000);
   // $randval = rand(0,count($altout_sponsor_arr)-1);
   $altout_sponsor = "";
+  $altout_sponsor_big = "";
   for ($i = 0 ; $i < 4 ; $i++) {
     $ii = ($i < 3 ? $i : 0);
 
@@ -366,6 +342,9 @@ $brisk_vertical_menu = '
 <div class="webstart_hilite">
 <img class="nobo" src="img/brisk_start.png" onmouseover="menu_hide(0,0); menu_show(\'menu_webstart\');">
 <div class="webstart" id="menu_webstart" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
+
+<a href="#" onmouseover="menu_hide(0,1);" title="informazioni utili su Brisk." onclick="act_help();"
+   >aiuto</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" 
    onmouseover="menu_hide(0,1);"
@@ -489,10 +468,8 @@ $brisk_vertical_menu = '
 
 </div>
 
-</div>
-
-<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
-<img style="cursor: pointer;" class="nobo" src="img/brisk_help.png" title="informazioni utili su Brisk." onmouseover="menu_hide(0,0);" onclick="act_help();">
+</div>'.($G_with_poll ? '' : '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
+<img style="cursor: pointer;" class="nobo" src="img/brisk_help.png" title="informazioni utili su Brisk." onmouseover="menu_hide(0,0);" onclick="act_help();">').'
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 '.($user->flags & USER_FLAG_AUTH ? '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_signal.png" title="manda un messaggio o una segnalazione all\'amministratore del sito" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
@@ -600,10 +577,23 @@ supported by:<br>
     printf($brisk_header_form);
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
     printf($brisk_vertical_menu, '', '');
-    if ($G_with_sidebanner) {
-      printf("<br><br>%s", $G_sidebanner);
-    }
-    printf("</td><td>");
+
+   if ($G_with_sidebanner xor $G_with_sidebanner2) {
+     printf("<br><br>");
+   }
+
+   if ($G_with_sidebanner) {
+     printf("%s", $G_sidebanner);
+     if ($G_with_sidebanner2) {
+       printf("<br>");
+     }
+   }
+
+
+   if ($G_with_sidebanner2) {
+     printf("%s", $G_sidebanner2);
+   }
+   printf("</td><td>");
 ?> 
 
 <!--  =========== tables ===========  -->
@@ -816,8 +806,6 @@ if ($is_login) {
        <b>Invia un messaggio o una segnalazione all'amministratore:</b>
        <br><br>
        <form id="mesgtoadm_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_mesgtoadmbox(this);">
-
-
        <input type="hidden" name="realsub" value="666">
 <table class="login">
 <!--MLANG: soggetto -->
