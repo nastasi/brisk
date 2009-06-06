@@ -189,6 +189,13 @@ else if ($argz[0] == 'mesgtoadm') {
   log_wr("INFO:SKIP:argz == mesgtoadm name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
   if ($user->flags & USER_FLAG_AUTH) {
     if (($wa_lock = Warrant::lock_data()) != FALSE) {
+      $userdb = new LoginDB();
+      
+      if (($ema = $userdb->getmail($user->name)) != FALSE) {
+        // mail("brisk@alternativeoutput.it", 
+        mail("nastasi", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
+      }
+
       if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
         /* Unix time | session | nickname | IP | where was | mesg */
         fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name, 
@@ -222,6 +229,116 @@ else if ($argz[0] == 'mesgtoadm') {
   }
 }
 
+
+
+else if ($argz[0] == 'poll') {
+  GLOBAL $G_with_poll, $G_poll_name, $cli_choose, $cli_poll_name;
+
+  $poll_lock = FALSE;
+  $curtime = time();
+  $mesg_to_user = "";
+  
+  $fp = FALSE;
+  $echont = "0";
+
+  /*
+          DONE - autorizzato ?
+          DONE - ci sono poll attivi ?
+          - verifica che il poll_name del client sia uguale a quello sul server
+          DONE - lock
+          DONE - apro file r+ con fallback in w+
+          DONE - vedo se ha già votato
+          DONE - se si: messaggio di voto già dato
+          se no: accetto il voto e lo segno; messaggio
+          chiudo file
+  */
+
+  $dobreak = FALSE;
+  do {
+    log_wr("INFO:SKIP:argz == poll name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
+    if (($user->flags & USER_FLAG_AUTH) != USER_FLAG_AUTH) {
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per partecipare al sondaggio devi essere autenticato.</b>");', $dt, NICKSERV);
+      log_wr("break1");
+      break;
+    }
+
+    if ($G_with_poll == FALSE && $G_poll_name != FALSE && $G_poll_name != "") {
+      $mesg_to_user = show_notify("<br><br>Al momento non è attivo alcun sondaggio.", 0, "chiudi", 400, 110);
+      log_wr("break2");
+      break;
+    }
+    
+    if ($cli_choose == "" || !isset($cli_choose)) {
+      $mesg_to_user = show_notify("<br><br>Non hai espresso nessuna preferenza.", 0, "chiudi", 400, 110);
+      log_wr("break2.5");
+      break;
+    }
+    
+    if (($poll_lock = Poll::lock_data()) == FALSE) {
+      /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta per mail l\'amministratore.</b>");', $dt, NICKSERV);
+      log_wr("break3");
+      break;
+    }
+    
+    if (($fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'r+')) == FALSE) 
+      $fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'w+');
+    
+    if ($fp == FALSE) {
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta per mail l\'amministratore.</b>");', $dt, NICKSERV);
+      log_wr("break4");
+      break;
+    }
+    
+    log_wr("poll: cp");
+    fseek($fp, 0);
+    
+    log_wr("poll: cp2");
+    while (!feof($fp)) {
+      log_wr("poll: cp3");
+      $bf = fgets($fp, 4096);
+      log_wr("poll: cp3.1");
+      $arli = csplitter($bf, '|');
+      if (count($arli) == 0)
+        break;
+    log_wr("poll: cp3.2");
+      if (strcasecmp($arli[1], $user->name) == 0) {
+        $mesg_to_user = show_notify("<br>Per questo sondaggio hai già votato.<br><br>Non si può esprimere la propria preferenza più di una volta.", 0, "chiudi", 400, 110);
+        $dobreak = TRUE;
+        break;
+      }
+    }
+    log_wr("poll: cp4");
+
+    if ($dobreak) {
+      log_wr("break5");
+      break;
+    }
+      
+    /* Unix time | nickname | choose */
+    fwrite($fp, sprintf("%ld|%s|%s\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_choose))));
+    fflush($fp);
+    $mesg_to_user =  show_notify("<br><br>Il tuo voto è stato registrato.", 0, "chiudi", 400, 110);
+    $echont = "1";
+    log_wr("poll: cp5");
+  } while (0);
+
+  if ($fp != FALSE)
+    fclose($fp);
+
+  if ($poll_lock != FALSE)
+    Poll::unlock_data($poll_lock);
+  
+  if ($mesg_to_user != "") {
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+    
+    $dt = date("H:i ", $curtime);
+    $user->comm[$user->step % COMM_N] .= $mesg_to_user;
+    $user->step_inc();
+  }
+
+  echo "$echont";
+}
 
 /******************
  *                *
