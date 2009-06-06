@@ -177,6 +177,8 @@ if [ "$web_only" = "FALSE" ]; then
     chmod 666 ${ftokk_path}/hardbans
     touch ${ftokk_path}/warrant
     chmod 666 ${ftokk_path}/warrant
+    touch ${ftokk_path}/poll
+    chmod 666 ${ftokk_path}/poll
     for i in `seq 0 99`; do 
         touch ${ftokk_path}/table$i
         chmod 666 ${ftokk_path}/table$i
