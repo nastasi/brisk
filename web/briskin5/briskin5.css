@@ -24,7 +24,7 @@
  */
 
 body {
-    background-image: url(null);
+    background-image: none;
     background-color: #fafafa;
     text-align: center;
 /* inherit from brisk.css
@@ -167,8 +167,10 @@ img.seed3 {
     /*    position:     relative;  */
     
     margin-top: 8px; 
+    padding: 8px;
     margin-left:auto; 
     margin-right:auto;
+    margin-bottom: 4px;
     border-style: solid;
     border-width: 0px;
     border-color: black;
