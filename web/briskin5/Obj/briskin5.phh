@@ -30,7 +30,63 @@ define(BRISKIN5_SHM_MIN, 32768);
 define(BRISKIN5_SHM_MAX, (BRISKIN5_SHM_MIN + 1048576));
 define(BRISKIN5_SHM_DLT, 32768);
 
-$table_wellarr = Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.');
+$mlang_bin5_bin5 = array( 
+                         'info_part' => array( 'it' => '<hr>Nell\'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>',
+                                               'en' => '<hr>In the last hand the declarer was <b>%s</b>, the partner was <b>%s</b>,<br>'),
+                         'info_capp' => array( 'it' => 'hanno fatto <b>cappotto</b> EBBRAVI!.<hr>',
+                                               'en' => 'and he made <b>capot</b> WELL DONE!.<hr>'),
+                         'info_pnt'  => array( 'it' => 'dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: %s.<hr>',
+                                               'en' => 'they had to do <b>%s</b> points and they had made <b>%d</b>: %s.<hr>'),
+                         'info_alea' => array( 'it' => 'almeno ',
+                                               'en' => 'at least '),
+                         'info_more' => array( 'it' => 'pi&ugrave; di 60',
+                                               'en' => 'over 60'),
+                         'info_win'  => array( 'it' => 'hanno <b>vinto</b>',
+                                               'en' => 'they have <b>win</b>'),
+                         'info_peer' => array( 'it' => 'hanno <b>pareggiato</b>',
+                                               'en' => 'they have <b>drew</b>'),
+                         'info_lost' => array( 'it' => 'hanno <b>perso</b>',
+                                               'en' => 'they have <b>lost</b>'),
+                         'info_yturn'=> array( 'it' => ' tocca a <b>te</b> giocare.',
+                                               'en' => ' it\'s <b>your</b> turn.'),
+                         'info_turn' => array( 'it' => 'tocca a <b>$unam</b> giocare.',
+                                               'en' => 'it\'s the <b>%s</b>\'s turn.'),
+                         'info_mult' => array( 'it' => ' La partita vale <b>%s</b>.',
+                                               'en' => ' The game worth <b>%s</b>.' ),
+                         'info_yshuf'=> array( 'it' => 'Fai <b>tu</b> il mazzo, ',
+                                               'en' => 'It\'s <b>your</b> shuffled the cards, '),
+                         'info_shuf' => array( 'it' => 'Il mazzo a <b>%s</b>, ',
+                                               'en' => '<b>%s</b> shuffled the cards, '),
+                         'btn_bkgame'=> array( 'it' => 'torna alla partita',
+                                               'en' => 'back to the game'),
+                         'call_wptn' => array( 'it' => '<br>con %d punti',
+                                               'en' => '<br>with %d points'),
+                         'call_ycall'=> array( 'it' => 'Chiami%s:',
+                                               'en' => 'Call%s:'),
+                         'call_call' => array( 'it' => 'Chiama %s%s:',
+                                               'en' => 'The declarer is %s%s:')
+
+                         
+                         );
+
+                         // MLANG
+                         $table_wellarr = Array( 'it' => Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.'),
+                                                 'en' => Array ( 'EN Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.') );
+
+function multoval($mult)
+{
+  GLOBAL $G_lang;
+
+  if ($mult == 2)
+    return ($G_lang == 'en' ? 'double' : 'doppio');
+  if ($mult == 3)
+    return ($G_lang == 'en' ? 'triple' : 'triplo');
+  else if ($mult == 4)
+    return ($G_lang == 'en' ? 'quadruple' : 'quadruplo');
+  else
+    return (sprintf(($G_lang == 'en' ? "%d-ple" : "%d-plo"), $mult));
+}
+
 
 class Card {
   var $value; /* 0 - 39 card value */
@@ -215,7 +271,8 @@ class Table_briskin5 extends Table {
   {
     $ret = array();
 
-    for ($i = 0 ; $i < 40 ; $i++) {
+    for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+      // for ($i = 0 ; $i < 40 ; $i++) {
       $ret[$i] =& new Card($i, 'bunch', 'no_owner');
     }
 
@@ -225,14 +282,15 @@ class Table_briskin5 extends Table {
 
   function bunch_make()
   {
+    log_main("bunch_make start");
     $ct = array(0,0,0,0,0);
     
     mt_srand(make_seed());
     
-    for ($i = 39 ; $i >= 0 ; $i--) 
+    for ($i = (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) - 1 ; $i >= 0 ; $i--) 
       $rest[$i] = $i;
 
-    for ($i = 39 ; $i >= 0 ; $i--) {
+    for ($i = (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) - 1 ; $i >= 0 ; $i--) {
       $rn = rand(0, $i);
       
       if ($rn == 0)
@@ -240,12 +298,13 @@ class Table_briskin5 extends Table {
       
       $id = $rest[$rn];
 
-      $owner = $i % PLAYERS_N;
+      $owner = $i % BRISKIN5_PLAYERS_N;
       $this->card[$id]->assign('hand', $owner);
 
       $rest[$rn] = $rest[$i];
       // $pubbpos[$rn2] = $pubbpos[$i];
     }
+    log_main("bunch_make end");
   }
 
   function init(&$userarr)
@@ -257,7 +316,7 @@ class Table_briskin5 extends Table {
     $this->old_win  = -1;
     $this->old_reason = "";
     */
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       $this->total[$i] = 0;
       $user_cur = &$userarr[$this->player[$i]];
       $user_cur->exitislock = TRUE;
@@ -270,11 +329,11 @@ class Table_briskin5 extends Table {
   {
     log_rd2("GSTART 4");
 
-    $this->gstart = ($this->mazzo+1) % PLAYERS_N;
+    $this->gstart = ($this->mazzo+1) % BRISKIN5_PLAYERS_N;
     $this->bunch_make();
     
     
-    $this->asta_pla_n = PLAYERS_N;
+    $this->asta_pla_n = BRISKIN5_PLAYERS_N;
     $this->asta_card = -1;
     $this->asta_pnt  = 60;
     $this->asta_win  = -1;
@@ -282,7 +341,7 @@ class Table_briskin5 extends Table {
     $this->friend    = -1;
     $this->turn      =  0;
     
-    for ($i = 0 ; $i < PLAYERS_N ; $i++) {
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       $this->asta_pla[$i] = TRUE;
       $user_cur = &$userarr[$this->player[$i]];
       $user_cur->subst = 'asta';
@@ -291,11 +350,12 @@ class Table_briskin5 extends Table {
       $user_cur->handpt = $this->hand_points($i);
       // SEE function calculate_points(&$table)
     }
+    log_rd2("GEND 4");
   }
 
   function game_next()
   {
-    $this->mazzo  = ($this->mazzo + 1) % PLAYERS_N;
+    $this->mazzo  = ($this->mazzo + 1) % BRISKIN5_PLAYERS_N;
   }
 
 
@@ -305,7 +365,8 @@ class Table_briskin5 extends Table {
     
     $tot = 0;
     
-    for ($i = 0 ; $i < 40 ; $i++) {
+    for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+      // for ($i = 0 ; $i < 40 ; $i++) {
       if ($this->card[$i]->owner != $idx)
 	continue;
 
@@ -703,6 +764,8 @@ class Briskin5 {
 
   function chatt_send(&$user, $mesg)
   {
+    GLOBAL $mlang_brisk, $G_lang;
+
     if ($user->stat == 'table') {
       $table = &$this->table[$user->table];
     }
@@ -717,7 +780,7 @@ class Briskin5 {
 
       if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.");', $dt, NICKSERV);
+	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
 	  $user->step_inc();
 
 	  return;
@@ -734,7 +797,9 @@ class Briskin5 {
 	  continue;
 	if ($user_cur->name == $name_new) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-	  $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"Nickname <b>%s</b> gi&agrave; in uso.%d");', $dt, NICKSERV, xcape($name_new), $this->table[$user->table]->auth_only == TRUE);
+
+          $premsg = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $premsg);
 	  $user->step_inc();
 	  break;
 	}
@@ -743,7 +808,7 @@ class Briskin5 {
         if ($user->flags & USER_FLAG_AUTH && strcasecmp($user->name,$name_new) != 0) {
           if ($this->table[$user->table]->auth_only == TRUE) {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>");', $dt, NICKSERV);
+            $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>%s</b>");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
 	    $user->step_inc();
             return;
           }
@@ -901,7 +966,8 @@ function calculate_points(&$table)
   $table->old_friend = $table->friend;
   $table->old_asta_pnt = $table->asta_pnt;
 
-  for ($i = 0 ; $i < 40 ; $i++) {
+  for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+    // for ($i = 0 ; $i < 40 ; $i++) {
     $ctt = $table->card[$i]->value % 10;
     $own = $table->card[$i]->owner;
     if ($own == $table->asta_win || $own == $table->friend) 
@@ -1018,7 +1084,8 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     for ($i = 0 ; $i < 8 ; $i++) {
       for ($e = 0 ; $e < BRISKIN5_PLAYERS_N ; $e++) {
 	$ct = 0;
-	for ($o = 0 ; $o < 40 && $ct < $i+1 ; $o++) {
+        for ($o = 0 ; $o < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) && $ct < $i+1 ; $o++) {
+          // for ($o = 0 ; $o < 40 && $ct < $i+1 ; $o++) {
 	  if ($table->card[$o]->owner == (($e + $table->gstart) % BRISKIN5_PLAYERS_N)) {
 	    $ct++;
 	    if ($ct == $i+1)
@@ -1040,7 +1107,8 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     $ontabl  = array(-1,-1,-1,-1,-1);
     $cards  = array();
 
-    for ($i = 0 ; $i < 40 ; $i++) {
+    for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+      // for ($i = 0 ; $i < 40 ; $i++) {
       if ($table->card[$i]->stat == 'hand') {
 	if ($table->card[$i]->owner == $table_pos) {
 	  $cards[$inhand[$table->card[$i]->owner]] = $table->card[$i]->value;
@@ -1073,7 +1141,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       /* Qui sotto al posto di + 1 c'era + ->gstart ... credo in modo errato */
       $ret .= sprintf('cards_dispose(%d,%d,%d);', $i,
-		      $inhand[$i], $taked[$i]);
+		      ($inhand[$i] <= 8 ? $inhand[$i] : 8)  , $taked[$i]);
 
       if ($ontabl[$i] != -1) {
 	$ret .= sprintf('card_place(%d,%d,%d,%d,%d);',$i, $inhand[$i], 
@@ -1150,7 +1218,8 @@ function calculate_winner(&$table)
   $cur_val  = 100;
   $cur_seed = $table->briscola - ($table->briscola % 10);
 
-  for ($i = 0 ; $i < 40 ; $i++) {
+  for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+    // for ($i = 0 ; $i < 40 ; $i++) {
     if ($table->card[$i]->stat != "table")
       continue;
 
@@ -1188,6 +1257,8 @@ function calculate_winner(&$table)
 
 function show_table_info(&$room, &$table, $table_pos)
 {
+  GLOBAL $G_lang, $mlang_bin5_bin5;
+
   $ret = "";
   $user = &$room->user[$table->player[$table_pos]];
 
@@ -1229,17 +1300,18 @@ function show_table_info(&$room, &$table, $table_pos)
 
     if ($win != $fri) {
       /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
-      $noty .= sprintf("<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", 
+      
+      $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang], 
 		       xcape($room->user[$win]->name),
 		       xcape($room->user[$fri]->name));
       if ($table->old_pnt == 120) {
-	$noty .= sprintf("hanno fatto <b>cappotto</b> EBBRAVI!.<hr>");
+	$noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang]);
       }
       else {
-	$noty .= sprintf("dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>",
-			 ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt :
-			  'pi&ugrave; di 60'), $table->old_pnt,
-			 ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso")));
+	$noty .= sprintf($mlang_bin5_bin5['info_pnt'][$G_lang],
+			 ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
+			  $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
+			 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
       }
     }
     else {
@@ -1258,10 +1330,10 @@ function show_table_info(&$room, &$table, $table_pos)
   }
   /* MLANG: "Fai <b>tu</b> il mazzo,", "Il mazzo a <b>$unam</b>," */
   if ($table->mazzo == $table_pos) 
-    $noty .= "Fai <b>tu</b> il mazzo,";
+    $noty .= $mlang_bin5_bin5['info_yshuf'][$G_lang];
   else {
     $unam = xcape($room->user[$table->player[$table->mazzo]]->name);
-    $noty .= "Il mazzo a <b>$unam</b>,";
+    $noty .= sprintf($mlang_bin5_bin5['info_shuf'][$G_lang], $unam);
   }
 
   if ($user->subst == 'asta') {
@@ -1276,18 +1348,18 @@ function show_table_info(&$room, &$table, $table_pos)
 
   /* MLANG: " tocca a <b>te</b> giocare.", " tocca a <b>$unam</b> giocare.", " La partita vale <b>%s</b>.", "torna alla partita" */
   if ($curplayer == $table_pos) {
-    $noty .= " tocca a <b>te</b> giocare.";
+    $noty .= $mlang_bin5_bin5['info_yturn'][$G_lang];
   }
   else {
     $unam = xcape($room->user[$table->player[$curplayer]]->name);
-    $noty .= " tocca a <b>$unam</b> giocare.";
+    $noty .= sprintf($mlang_bin5_bin5['info_turn'][$G_lang], $unam);
   }
   
   if ($table->mult > 1) {
-    $noty .= sprintf(" La partita vale <b>%s</b>.", multoval($table->mult));
+    $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($table->mult));
   }
   $noty .= "<hr><br>";
-  $ret .= show_notify($noty, 3000, "torna alla partita", 500, 400);
+  $ret .= show_notify($noty, 3000, $mlang_bin5_bin5['btn_bkgame'][$G_lang], 500, 400);
   /* NOTE: show_notify($noty, 3000, "torna alla partita", 500, 
    *                   130 + ($table->points_n > 0 ? 50 : 0) + 
    *                   (120 * ($table->points_n / MAX_POINTS)));
@@ -1300,11 +1372,11 @@ function show_table_info(&$room, &$table, $table_pos)
 
 function table_wellcome($user)
 {
-  GLOBAL $table_wellarr;
+  GLOBAL $table_wellarr, $G_lang;
   $ret = "";
 
-  for ($i = 0 ; $i < count($table_wellarr) ; $i++)
-    $ret .= sprintf('chatt_sub("%s", [2, "ChanServ: "],"%s");', "", str_replace('"', '\"', $table_wellarr[$i]));
+  for ($i = 0 ; $i < count($table_wellarr[$G_lang]) ; $i++)
+    $ret .= sprintf('chatt_sub("%s", [2, "ChanServ: "],"%s");', "", str_replace('"', '\"', $table_wellarr[$G_lang][$i]));
 
   return ($ret);
 }
@@ -1316,14 +1388,18 @@ function briscola_show($room, $table, $user)
   $ret = "";
 
   if ($table->asta_card == 9) 
-    $ptnadd = sprintf("<br>con %d punti", $table->asta_pnt);
+    $ptnadd = sprintf($mlang_bin5_bin5['call_wptn'][$G_lang], $table->asta_pnt);
   
   /* text of caller cell */
-  if ($user->table_pos == $table->asta_win) 
-    $ret .= sprintf('$("callerinfo").innerHTML = "Chiami%s:";', $ptnadd);
-  else 
-    $ret .= sprintf('$("callerinfo").innerHTML = "Chiama %s%s:";', 
+  if ($user->table_pos == $table->asta_win) {
+    $prestr = sprintf('$("callerinfo").innerHTML = "%s";', $mlang_bin5_bin5['call_ycall'][$G_lang]);
+    $ret .= sprintf($prestr, $ptnadd);
+  }
+  else {
+    $prestr = sprintf('$("callerinfo").innerHTML = "%s";', $mlang_bin5_bin5['call_call'][$G_lang]);
+    $ret .= sprintf($prestr, 
 		    xcape($room->user[$table->player[$table->asta_win]]->name), $ptnadd);
+  }
 
   $ret .= sprintf('$("caller").style.backgroundImage = \'url("img/brisk_caller_sand%d.png")\';',
 		  $table->asta_win);
