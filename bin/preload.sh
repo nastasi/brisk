@@ -2,7 +2,7 @@
 #
 #  brisk - preload.sh
 #
-#  Copyright (C) 2006 matteo.nastasi@milug.org
+#  Copyright (C) 2006-2009 matteo.nastasi@milug.org
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #
 #
 
+IMGPATHBASE="../brisk-img/"
 
-OUTFILE=web/preload_img.js
-IMGPATH=../brisk-img
+set -x
 
 # (
 # echo '<?php'
@@ -30,68 +30,132 @@ IMGPATH=../brisk-img
 # echo '?>'
 # ) > $OUTFILE
 
-function imglist () {
-    ls -S `find $1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort`
+function imglist_fla () {
+    local pname lang
+    pname="$1"
+    lang="$2"
+    rex="$3"
+    wrex="$4"
+    ret=""
+    for i in $(find "$pname" -maxdepth 1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort); do
+        if [ "$rex" != "" ]; then
+            echo "$i" | grep -q "$rex"
+            rt=$?
+            if [ "$wrex" = "y" -a $rt -ne 0  ]; then
+                continue
+            fi
+            if [ "$wrex" = "n" -a $rt -eq 0  ]; then
+                continue
+            fi
+        fi
+        echo "$i" | grep -q '.*\-[a-z][a-z]\....$'
+        if [ $? -eq 0 ]; then
+            # se file con suffisso di lingua
+            suff="$(echo "$i" | sed 's/\(.*\)\-\([a-z][a-z]\)\.\(...\)$/\2/g')"
+
+            if [ "$lang" = "$suff" ]; then
+                echo "$i"
+            fi
+        else
+            eni="$(echo "$i" | sed 's/\(.*\)\.\(...\)$/\1-en.\2/g')"
+            if [ -f $eni ]; then
+                # esiste la versione _en
+                if [ "$lang" = "it" ]; then
+                    # se lingua italiana le img mlang nn hanno estensione quindi va presa
+                    echo "$i"
+                fi
+            else
+                # NON esiste la versione _en quindi e' una immagine NON mlang e va comunque presa
+                echo "$i"
+            fi
+        fi
+    done 
 }
 
-rm -f $OUTFILE
+function imglist () {
+    local abspa
+    abspa="${IMGPATHBASE}${1}img"
+    if [ "$1" = "" ]; then
+        ls -S $( imglist_fla "$abspa" "$2" )
+    elif [ "$1" = "briskin5/" ]; then
+        rex='/[0-9][0-9][^/]*$'
+        ls -S $( imglist_fla "$abspa" "$2" "$rex" "y" )
+        ls -S $( imglist_fla "$abspa" "$2" "$rex" "n" )
+    fi
+}
 
-(
-echo "var g_preload_img_arr = new Array( "
-first=1
-spa="            "
-ltri="`echo "$IMGPATH" | wc -c`"
-for i in `imglist $IMGPATH`; do
-   if [ $first -ne 1 ]; then
-      echo -n ", "
-      if [ $((ct % 2)) -eq 0 ]; then
-         echo
-         echo -n "$spa"
-      fi
-   else
-      echo -n "$spa"
-   fi
-   outna="`echo "$i" | cut -c $((ltri + 1))-`"
-   echo -n "\"$outna\""
-   ct=$((ct + 1))
-   first=0
+for lang in it en; do
+    if [ "$lang" = "it" ]; then
+        fsuf=""
+    else
+        fsuf="-${lang}"
+    fi
+
+    for dpath in "" briskin5/ ; do
+        OUTFILE="web/${dpath}"preload_img${fsuf}.js
+        echo "creating $OUTFILE ..."
+        rm -f $OUTFILE
+        IMGPATH="${IMGPATHBASE}${dpath}img"
+        (
+            echo "var g_preload_img_arr = new Array( "
+            first=1
+            spa="            "
+            ltri="`echo "$IMGPATH" | wc -c`"
+            for i in $(imglist "$dpath" "$lang"); do
+                if [ $first -ne 1 ]; then
+                    echo -n ", "
+                    if [ $((ct % 2)) -eq 0 ]; then
+                        echo
+                        echo -n "$spa"
+                    fi
+                else
+                    echo -n "$spa"
+                fi
+                outna="img/`echo "$i" | cut -c $((ltri + 1))-`"
+                echo -n "\"$outna\""
+                ct=$((ct + 1))
+                first=0
+            done
+            echo "CT: $ct" >&2
+            echo ");"
+        ) >> $OUTFILE
+        
+        (
+            echo "var g_preload_imgsz_arr = new Array( "
+            first=1
+            sum=0
+            spa="            "
+            tot=0
+            ltri="`echo "$IMGPATH" | wc -c`"
+            for i in $(imglist "$dpath" "$lang"); do
+                outna="`echo "$i" | cut -c $((ltri + 1))-`"
+                sz="`stat -c '%s' $IMGPATH/$outna`"
+                tot=$((tot + sz))
+            done
+            
+            for i in $(imglist "$dpath" "$lang"); do
+                outna="`echo "$i" | cut -c $((ltri + 1))-`"
+                if [ $first -ne 1 ]; then
+                    echo -n ", "
+                    if [ $((ct % 8)) -eq 0 ]; then
+                        echo
+                        echo -n "$spa"
+                    fi
+                else
+                    echo -n "$spa"
+                fi
+                sz="`stat -c '%s' $IMGPATH/$outna`"
+                sum=$((sum + sz))
+                cur="`echo "100.0 * $sum / $tot" | bc -l | sed 's/\(\.[0-9]\)[0-9]*/\1/g'`"
+                echo -n "\"$cur\""
+                ct=$((ct + 1))
+                first=0
+            done
+            
+            echo "CT2: $ct" >&2
+            
+            echo ");"
+        ) >> $OUTFILE
+    done
 done
-echo "CT: $ct" >&2
-echo ");"
-) >> $OUTFILE
-
-(
-echo "var g_preload_imgsz_arr = new Array( "
-first=1
-sum=0
-spa="            "
-tot=0
-for i in `imglist $IMGPATH`; do
-   sz="`stat -c '%s' $IMGPATH/$i`"
-   tot=$((tot + sz))
-done
-
-for i in `imglist $IMGPATH`; do
-   if [ $first -ne 1 ]; then
-      echo -n ", "
-      if [ $((ct % 8)) -eq 0 ]; then
-         echo
-         echo -n "$spa"
-      fi
-   else
-      echo -n "$spa"
-   fi
-   sz="`stat -c '%s' $IMGPATH/$i`"
-   sum=$((sum + sz))
-   cur="`echo "100.0 * $sum / $tot" | bc -l | sed 's/\(\.[0-9]\)[0-9]*/\1/g'`"
-   echo -n "\"$cur\""
-   ct=$((ct + 1))
-   first=0
-done
-
-echo "CT2: $ct" >&2
-
-echo ");"
-) >> $OUTFILE
-
 exit 0
