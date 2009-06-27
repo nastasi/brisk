@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - table.php
+ *  brisk - briskin5/index.php
  *
  *  Copyright (C) 2006-2009 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
@@ -28,6 +28,12 @@
 
 require_once("../Obj/brisk.phh");
 require_once("../Obj/proxyscan.phh");
+require_once("Obj/briskin5.phh");
+
+$mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Scegli il seme:',
+                                              'en' => 'You win the auction.<br> Choose the seed:' )
+                           );
+
 
 // Use of proxies isn't allowed.
 if (is_proxy()) {
@@ -40,11 +46,11 @@ header('Content-type: text/html; charset="utf-8"',true);
 <head>
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
-<script type="text/javascript" src="../dnd.js"></script>
-<script type="text/javascript" src="../dom-drag.js"></script>
 <script type="text/javascript" src="../commons.js"></script> 
 <script type="text/javascript" src="../xhr.js"></script>
-<script type="text/javascript" src="../preload_img.js"></script>
+<script type="text/javascript" src="dnd.js"></script>
+<script type="text/javascript" src="dom-drag.js"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="briskin5.js"></script>
 <script type="text/javascript" src="../AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="../brisk.css">
@@ -74,7 +80,7 @@ if (isset($laststate) == false) {
 echo $laststate;
 ?>;
 var g_is_spawn=1;
-var g_table_idx=<?php echo "$table_idx";?>;
+// var g_table_idx=<?php echo "$table_idx";?>;
 
 var g_imgct= 0;
 var g_imgtot = g_preload_img_arr.length;
@@ -91,7 +97,7 @@ window.onload = function() {
   window.onunload = onunload_cb;  
 
   setTimeout(xhr_rd_poll, 0, sess); 
-  //  setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+  setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
 }
 </SCRIPT>
 <div id="bg" class="area">
@@ -206,7 +212,7 @@ window.onload = function() {
    </div>
 </div>
 <div id="chooseed" class="chooseed">
-Hai vinto l'asta.<br> Scegli il seme:
+                           <?php echo $mlang_bin5_index['aucwin'][$G_lang]; ?>
 <img id="seed0" src="img/00.png" class="seed0">
 <img id="seed1" src="img/10.png" class="seed1">
 <img id="seed2" src="img/20.png" class="seed2">
@@ -252,7 +258,7 @@ Hai vinto l'asta.<br> Scegli il seme:
 <hr>
 <div id="heartbit" style="text-align: left;"></div>
 <hr>
-<div id="imgct" style="text-align: left;"></div>
+<div id="imgct" style="text-align: left;">HERE</div>
 <hr>
 <div id="sandbox" style="text-align: left;"></div>
 <div id="sandbox2" style="text-align: left;"></div>
