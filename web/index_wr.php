@@ -33,6 +33,52 @@ require_once("Obj/auth.phh");
 //   sleep(5);
 //   exit;
 // }
+
+$mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
+                                                'en' => 'Back to tables.' ),
+                      'warrrepl'  => array( 'it' => '<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni verr&agrave;<br><br>notificata al garantito l\'avvenuta registrazione.',
+                                            'en' => '<br>The subscription was forwarded to the administrator.<br><br>In a few days we will notify<br><br>your friend the occurred registration.'),
+                      'btn_close' => array( 'it' => 'chiudi',
+                                            'en' => 'close' ),
+                      'commerr' => array( 'it' => '<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>',
+                                          'en' => '<b>An error was occurred during the saving, try again or contact the administrator.</b>'),
+                      'warrmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>',
+                                           'en' => 'To authenticate somebody you have to be authenticated in your turn'),
+                      'mesgrepl' => array( 'it' => '<br><br>Il messaggio &egrave; stato inoltrato all\'amministratore.',
+                                           'en' => '<br><br>The message was forwarded to the administrator'),
+                      'mesgmust' => array( 'it' => '<b>Per mandare messaggi all\'amministratore devi essere autenticato.</b>',
+                                           'en' => 'To send a message to the administrator you have to be authenticated'),
+                      'shutmsg'  => array( 'it' => '<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>',
+                                           'en' => '<b>The server is going to be rebooted, new games are not allowed.</b>'),
+                      'mustauth' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica.</b>',
+                                           'en' => '<b>the table where you want to sit require authentication</b>'),
+                      'tabwait_a'=> array( 'it' => '<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra ',
+                                           'en' => '<b>The table is only just opened, you will sit down in '), // FIXME
+                      'tabwait_b'=> array( 'it' => ' secondi.</b>',
+                                           'en' => ' seconds.</b>'),
+                      'pollmust' => array( 'it' => '<b>Per partecipare al sondaggio devi essere autenticato.</b>',
+                                           'en' => '<b>To vote for the poll you have to be authenticated</b>'),
+                      'pollnone' => array( 'it' => '<br><br>Al momento non è attivo alcun sondaggio.',
+                                           'en' => '<br><br>At this moment no polls are active.'),
+                      'pollchoo' => array( 'it' => '<br><br>Non hai espresso nessuna preferenza.',
+                                           'en' => '<br><br>You don\'t choose any preference, do it'), 
+                      'pollagai' => array( 'it' => '<br>Per questo sondaggio hai già votato.<br><br>Non si può esprimere la propria preferenza più di una volta.',
+                                           'en' => '<br>You just express your preference about this poll.<br><br>You cannot do it again.'),
+                      'pollrec'  => array ('it' => '<br><br>Il tuo voto è stato registrato.',
+                                           'en' => '<br><br>Your vote had be stored.'),
+                      'badwake_a'=> array( 'it' => '<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ',
+                                           'en' => '<br>You stand up without the permission of the other players.<br><br>You will wait '),
+                      'badwake_b'=> array( 'it' => ' prima di poterti sedere nuovamente.',
+                                           'en' => ' before you can sit down again.'),
+                      'btn_stays'=> array( 'it' => 'resta in piedi.',
+                                           'en' => 'stay standing.'),
+                      'badsit_a' => array( 'it' => '<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ',
+                                           'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '), 
+                      'badsit_b' => array( 'it' => ' prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.',
+                                           'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access')
+
+                      );
+
 log_load("index_wr.php");
 
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
@@ -102,19 +148,19 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   }
   else if ($argz[0] == 'help') {
     /* MLANG: "torna ai tavoli" */ 
-    echo show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
+    echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
   }
   else if ($argz[0] == 'about') {
-    echo show_notify(str_replace("\n", " ", $G_room_about), 0, "torna ai tavoli", 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'passwdhowto') {
-    echo show_notify(str_replace("\n", " ", $G_room_passwdhowto), 0, "torna ai tavoli", 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'roadmap') {
-    echo show_notify(str_replace("\n", " ", $G_room_roadmap), 0, "torna ai tavoli", 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'whysupport') {
-    echo show_notify(str_replace("\n", " ", $G_room_whysupport), 0, "torna ai tavoli", 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lng], 400, 200);
   }
   else { 
     log_wr("Get User Error");
@@ -157,19 +203,19 @@ else if ($argz[0] == 'warranty') {
       Warrant::unlock_data($wa_lock);
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
       /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
-      $user->comm[$user->step % COMM_N] .=  show_notify("<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione.", 0, "chiudi", 400, 150);
+      $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['warrrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
       $user->step_inc();
       echo "1";
     }
     else {
       /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>");', $dt, NICKSERV);
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
     }
     
   }
   else {
     /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>");', $dt, NICKSERV);
+    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['warrmust'][$G_lang]);
   }
 
   if ($mesg_to_user != "") {
@@ -192,8 +238,8 @@ else if ($argz[0] == 'mesgtoadm') {
       $userdb = new LoginDB();
       
       if (($ema = $userdb->getmail($user->name)) != FALSE) {
-        // mail("brisk@alternativeoutput.it", 
-        mail("nastasi", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
+        //  mail("nastasi", 
+        mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
       }
 
       if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
@@ -205,19 +251,19 @@ else if ($argz[0] == 'mesgtoadm') {
       Warrant::unlock_data($wa_lock);
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
       /* MLANG: "" */
-      $user->comm[$user->step % COMM_N] .=  show_notify("<br><br>Il messaggio &egrave; stato inoltrato all\'amministratore.", 0, "chiudi", 400, 110);
+      $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['mesgrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
       $user->step_inc();
       echo "1";
     }
     else {
       /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta per mail l\'amministratore.</b>");', $dt, NICKSERV);
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
     }
     
   }
   else {
     /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per mandare messaggi all\'amministratore devi essere autenticato.</b>");', $dt, NICKSERV);
+    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mesgmust'][$G_lang]);
   }
 
   if ($mesg_to_user != "") {
@@ -257,26 +303,27 @@ else if ($argz[0] == 'poll') {
   do {
     log_wr("INFO:SKIP:argz == poll name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
     if (($user->flags & USER_FLAG_AUTH) != USER_FLAG_AUTH) {
-      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per partecipare al sondaggio devi essere autenticato.</b>");', $dt, NICKSERV);
+      // MLANG: <b>Per partecipare al sondaggio devi essere autenticato.</b>
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['pollmust'][$G_lang]);
       log_wr("break1");
       break;
     }
 
     if ($G_with_poll == FALSE && $G_poll_name != FALSE && $G_poll_name != "") {
-      $mesg_to_user = show_notify("<br><br>Al momento non è attivo alcun sondaggio.", 0, "chiudi", 400, 110);
+      $mesg_to_user = show_notify($mlang_indwr['pollnone'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
       log_wr("break2");
       break;
     }
     
     if ($cli_choose == "" || !isset($cli_choose)) {
-      $mesg_to_user = show_notify("<br><br>Non hai espresso nessuna preferenza.", 0, "chiudi", 400, 110);
+      $mesg_to_user = show_notify($mlang_indwr['pollchoo'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
       log_wr("break2.5");
       break;
     }
     
     if (($poll_lock = Poll::lock_data()) == FALSE) {
       /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta per mail l\'amministratore.</b>");', $dt, NICKSERV);
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
       log_wr("break3");
       break;
     }
@@ -285,7 +332,7 @@ else if ($argz[0] == 'poll') {
       $fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'w+');
     
     if ($fp == FALSE) {
-      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>E\' occorso un errore durante il salvataggio, riprova o contatta per mail l\'amministratore.</b>");', $dt, NICKSERV);
+      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
       log_wr("break4");
       break;
     }
@@ -303,7 +350,7 @@ else if ($argz[0] == 'poll') {
         break;
     log_wr("poll: cp3.2");
       if (strcasecmp($arli[1], $user->name) == 0) {
-        $mesg_to_user = show_notify("<br>Per questo sondaggio hai già votato.<br><br>Non si può esprimere la propria preferenza più di una volta.", 0, "chiudi", 400, 110);
+        $mesg_to_user = show_notify($mlang_indwr['pollagai'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
         $dobreak = TRUE;
         break;
       }
@@ -318,7 +365,7 @@ else if ($argz[0] == 'poll') {
     /* Unix time | nickname | choose */
     fwrite($fp, sprintf("%ld|%s|%s\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_choose))));
     fflush($fp);
-    $mesg_to_user =  show_notify("<br><br>Il tuo voto è stato registrato.", 0, "chiudi", 400, 110);
+    $mesg_to_user =  show_notify($mlang_indwr['pollrec'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
     $echont = "1";
     log_wr("poll: cp5");
   } while (0);
@@ -350,7 +397,7 @@ else if ($user->stat == 'room') {
 
   if ($argz[0] == 'help') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help), 0, "torna ai tavoli", 600, 500);
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
@@ -358,7 +405,7 @@ else if ($user->stat == 'room') {
   }
   else if ($argz[0] == 'passwdhowto') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_passwdhowto), 0, "torna ai tavoli", 600, 500);
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
@@ -366,7 +413,7 @@ else if ($user->stat == 'room') {
   }
   else if ($argz[0] == 'about') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about), 0, "torna ai tavoli", 400, 200);
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
@@ -374,7 +421,7 @@ else if ($user->stat == 'room') {
   }
   else if ($argz[0] == 'roadmap') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap), 0, "torna ai tavoli", 400, 200);
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
@@ -382,7 +429,7 @@ else if ($user->stat == 'room') {
   }
   else if ($argz[0] == 'whysupport') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_whysupport), 0, "torna ai tavoli", 400, 200);
+    $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
@@ -420,13 +467,13 @@ else if ($user->stat == 'room') {
 	$dt = date("H:i ", $curtime);
         /* MLANG: "<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>", "<b>Il tavolo a cui volevi sederti richiede autentifica.</b>", "<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>" */
         if ($G_shutdown) {
-          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>");', $dt, NICKSERV);
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
         }
         else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
-          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il tavolo a cui volevi sederti richiede autentifica.</b>");', $dt, NICKSERV);
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
         }
         else {
-          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>");', $dt, NICKSERV, $table->wakeup_time - $curtime);
+          $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s%d%s");', $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang], $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
         }
 	$user->step_inc();
 	Room::save_data($room);
@@ -443,10 +490,10 @@ else if ($user->stat == 'room') {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
         /* MLANG: "<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", "resta in piedi.", "<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere." */
         if ($user->flags & USER_FLAG_AUTH) {
-          $user->comm[$user->step % COMM_N] .= show_notify("<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", 2000, "resta in piedi.", 400, 100);
+          $user->comm[$user->step % COMM_N] .= show_notify($mlang_indwr['badwake_a'][$G_lang].secstoword($user->bantime - $user->laccwr).$mlang_indwr['badwake_b'][$G_lang], 2000, $mlang_indwr['btn_stays'][$G_lang], 400, 100);
         }
         else {
-          $user->comm[$user->step % COMM_N] .= show_notify("<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.", 2000, "resta in piedi.", 400, 180);
+          $user->comm[$user->step % COMM_N] .= show_notify($mlang_indwr['badsit_a'][$G_lang].secstoword($bantime - $user->laccwr).$mlang_indwr['badsit_a'][$G_lang], 2000, $mlang_indwr['btn_stays'][$G_lang], 400, 180);
 	}
 	$user->step_inc();
 	Room::save_data($room);
@@ -504,10 +551,9 @@ else if ($user->stat == 'room') {
         //
         // Init spawned users.
         //
-        require_once('briskin5/Obj/briskin5.phh');
-        //
         //  MULTIGAME: here init of selected game instead of hardcabled briskin5 init (look subst status)
         // 
+        log_wr("game_init after");
         for ($i = 0 ; $i < $table->player_n ; $i++) {
           $bri_user_cur = &$bri->user[$i];
           $user_cur = &$room->user[$table->player[$i]];
