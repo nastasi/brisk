@@ -132,19 +132,21 @@ else if ($user->stat == 'table') {
     }
   }
   else if ($argz[0] == 'exitlock') {
-    $user->exitislock = ($user->exitislock == TRUE ? FALSE : TRUE);
-    for ($ct = 0, $i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
-      $user_cur[$i] = &$bri->user[$table->player[$i]];
-      if ($user_cur[$i]->exitislock == FALSE)
-	$ct++;
-    }
-    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
-      $ret = sprintf('gst.st = %d;', $user_cur[$i]->step+1);
-      $ret .= sprintf('exitlock_show(%d, %s);', $ct, 
-		     ($user_cur[$i]->exitislock ? 'true' : 'false'));
-      $user_cur[$i]->comm[$user_cur[$i]->step % COMM_N] = $ret;
-      log_wr($user_cur[$i]->comm[$user_cur[$i]->step % COMM_N]);
-      $user_cur[$i]->step_inc();
+    if ($user->exitislock == TRUE) {
+      $user->exitislock = ($user->exitislock == TRUE ? FALSE : TRUE);
+      for ($ct = 0, $i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
+        $user_cur[$i] = &$bri->user[$table->player[$i]];
+        if ($user_cur[$i]->exitislock == FALSE)
+          $ct++;
+      }
+      for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+        $ret = sprintf('gst.st = %d;', $user_cur[$i]->step+1);
+        $ret .= sprintf('exitlock_show(%d, %s);', $ct, 
+                        ($user_cur[$i]->exitislock ? 'true' : 'false'));
+        $user_cur[$i]->comm[$user_cur[$i]->step % COMM_N] = $ret;
+        log_wr($user_cur[$i]->comm[$user_cur[$i]->step % COMM_N]);
+        $user_cur[$i]->step_inc();
+      }
     }
   }
   else if ($user->subst == 'asta') {
@@ -331,7 +333,7 @@ else if ($user->stat == 'table') {
       if ($table->asta_win > -1 && 
 	  $user->table_pos == $table->asta_win) {
 	$a_brisco = $argz[1];
-	if ($a_brisco >= 0 && $a_brisco < 40) {
+	if ($a_brisco >= 0 && $a_brisco < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24)) {
 	  $table->briscola = $a_brisco;
 	  $table->friend   = $table->card[$a_brisco]->owner;
 	  log_wr("GSTART 2");
@@ -387,7 +389,7 @@ else if ($user->stat == 'table') {
       log_wr("CIC".$loggo);
 			  
       /* se era il suo turno e la carta era sua ed era in mano */
-      if ($a_play >=0 && $a_play < 40 &&
+      if ($a_play >=0 && $a_play < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) &&
 	  ($user->table_pos == (($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N)) &&
 	  $table->card[$a_play]->stat == 'hand' &&
 	  $table->card[$a_play]->owner == $user->table_pos) {
