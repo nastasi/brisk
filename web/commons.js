@@ -27,6 +27,23 @@ var PLAYERS_N = 3;
 var EXIT_BAN_TIME = 900;
 var cookiepath = "/brisk/";
 
+var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ', 
+                                      'en' : 'Loaded images ' },
+                      'imgload_b' : { 'it' : '%.', 
+                                      'en' : '%.' },
+                      'gamleav'   : { 'it' : 'Sei sicuro di volere lasciare questa mano?' ,
+                                      'en' : 'Are you sure to leave this game?' },
+                      'brileav'   : { 'it' : '    Vuoi veramente abbandonare la briscola ?\n(clicca annulla o cancel se vuoi ricaricare la briscola)',
+                                      'en' : '    Are you really sure to leave briscola ?\n(click cancel yo reload it)' },
+                      'brireco'   : { 'it' : 'Ripristino della briscola fallito, per non perdere la sessione ricaricare la pagina manualmente.',
+                                      'en' : 'Recovery of briscola failed, to keep the current session reload the page manually.' },
+                      'btn_sit'   : { 'it' : 'Mi siedo.',
+                                      'en' : 'Sit down.' },
+                      'btn_exit'  : { 'it' : 'Esco.',
+                                      'en' : 'Exit.' }
+                      
+                      };
+
 function $(id) { return document.getElementById(id); }
 
 function getStyle(x,IEstyleProp, MozStyleProp) 
@@ -188,8 +205,8 @@ function reset_images()
 
 function update_images()
 {
-    //    if (g_imgct % 10 == 0) alert("g_imgct: "+g_imgct+" xx "+g_preload_img_arr[g_imgct]);
-    $("imgct").innerHTML = "Immagini caricate "+g_preload_imgsz_arr[g_imgct]+"%.";
+    // MLANG "Immagine caricate" + g_preload_imgsz_arr[g_imgct] + "%."
+    $("imgct").innerHTML = mlang_commons['imgload_a'][g_lang]+g_preload_imgsz_arr[g_imgct]+"%.";
     if (g_imgct+1 < g_preload_img_arr.length) {
         g_imgct++;
         setTimeout(preload_images, 100, g_preload_img_arr, g_imgct-1);
@@ -361,8 +378,8 @@ function act_lascio()
 function safelascio()
 {
     var res;
-
-    res = window.confirm("Sei sicuro di volere lasciare questa mano?");
+    // MLANG "Sei sicuro di volere lasciare questa mano?"
+    res = window.confirm(mlang_commons['gamleav'][g_lang]);
     if (res)
 	act_lascio();
 }
@@ -777,7 +794,8 @@ function onunload_cb_old () {
     //     return true;
     
     if (onunload_times == 0) {
-	var res = window.confirm("    Vuoi veramente abbandonare la briscola ?\n(clicca annulla o cancel se vuoi ricaricare la briscola)");
+        // MLANG "    Vuoi veramente abbandonare la briscola ?\n(clicca annulla o cancel se vuoi ricaricare la briscola)"
+	var res = window.confirm(mlang_commons['brileav'][g_lang]);
 	if (res == true) {
 	    the_end = true; 
 	    act_shutdown();
@@ -790,7 +808,8 @@ function onunload_cb_old () {
                 // alert ("passiamo di qui"+self.location);
                 return (false);
 	    } catch (e) {
-		alert("Ripristino della briscola fallito, per non perdere la sessione ricaricare la pagina manualmente.");
+                // MLANG "Ripristino della briscola fallito, per non perdere la sessione ricaricare la pagina manualmente."
+		alert(mlang_commons['brireco'][g_lang]);
 	    }
 	}
 	onunload_times++;
@@ -822,7 +841,8 @@ function room_checkspace(emme,tables,inpe)
 
     for (i = 0 ; i < tables ; i++) {
 	$("table"+i).innerHTML = alta;
-	$("table_act"+i).innerHTML = "<input type=\"button\" class=\"button\" name=\"xhenter"+i+"\"  value=\"Mi siedo.\" onclick=\"act_sitdown(1);\">";
+        // MLANG Mi siedo.
+	$("table_act"+i).innerHTML = "<input type=\"button\" class=\"button\" name=\"xhenter"+i+"\"  value=\""+mlang_commons['btn_sit'][g_lang]+"\" onclick=\"act_sitdown(1);\">";
 	}
 
     stand = "<table class=\"table_standup\"><tbody><tr>";
@@ -836,7 +856,8 @@ function room_checkspace(emme,tables,inpe)
     $("standup").innerHTML = stand;
 
     // VERIFY: what is this button ?
-    $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\"Esco.\" onclick=\"act_logout();\" type=\"button\">";
+    // MLANG Esco.
+    $("esco").innerHTML = "<input class=\"button\" name=\"logout\" type=\"button\" value=\""+mlang_commons['btn_exit'][g_lang]+"\" onclick=\"act_logout();\" type=\"button\">";
 }
 
 function  unescapeHTML(cont) {
@@ -940,7 +961,7 @@ function sidebanner2_cb()
 function langtolng(lang)
 {
     if (lang == "en")
-        return ("_en");
+        return ("-en");
     else
         return ("");
 }

@@ -28,8 +28,112 @@ require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
 require_once("Obj/proxyscan.phh");
 
-$mlang_room = array( 'userpasserr' => array('it' => 'Utente e/o password errati.',
-                                            'en' => 'Wrong user and/or password.') );
+
+$mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati.',
+                                             'en' => 'Wrong user and/or password.'),
+                     'userpassmust' => array('it' => 'Il nickname deve contenere almeno una lettera o una cifra.',
+                                             'en' => 'The nickname have to contain at least one letter or one number.'),
+                     'userpassend'  => array('it' => 'Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.',
+                                             'en' => 'We are sorry, there aren\'t free place. Try again later.'),
+                     'userpassuse'  => array('it' => 'Il tuo nickname &egrave; gi&agrave; in uso.',
+                                             'en' => 'Your nickname is already in use.'),
+                     'standing'     => array('it' => 'Giocatori in piedi',
+                                             'en' => 'Standing players'),
+                     'headline'     => array('it' => 'briscola chiamata in salsa ajax',
+                                             'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
+                     'wellcome'     => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola',
+                                             'en' => 'Enter your nickname to access to the tables of briscola'),
+                     'btn_enter'    => array('it' => 'entra',
+                                             'en' => 'enter'),
+                     'passwarn'     => array('it' => 'Se non hai ancora una password, lascia il campo in bianco ed entra.',
+                                             'en' => 'If you don\'t have a password, leave blank the field and enter.'),
+                     'browwarn'     => array('it' => '(se qualcosa non funziona<br>prova a ricaricare la pagina con <b>Ctrl + F5</b>)',
+                                             'en' => '(if something don\'t work<br>try to reload the current page with <b>Ctrl + F5</b>)'),
+                     'regwarn'      => array('it' => '<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d\'ufficio come ghost<i>N</i>.',
+                                             'en' => '<br>The nickname you are using it\'s already registered, <br><br>if its proprietary authenticates<br><br>you will named ghost<i>N</i>.'),
+                     'btn_rettabs'  => array('it' => 'torna ai tavoli',
+                                             'en' => 'back to tables'),
+                     'btn_exit'     => array('it' => 'Esco.',
+                                             'en' => 'Exit.'),
+                     'tit_tabl'     => array('it' => 'Tavolo ',
+                                             'en' => 'Table '),
+                     'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
+                                             'en' => 'write an invitation at the table and click'),
+                     'itm_warr'     => array('it' => 'garantisci',
+                                             'en' => 'guarantee'),
+                     'warr_desc'    => array('it' => 'garantisci per un tuo conoscente',
+                                             'en' => 'guarantee for a friend'),
+                     'tit_warr'     => array('it' => 'Garantisci per un tuo conoscente.',
+                                             'en' => 'Guarantee for a friend.'),
+                     'itm_list'     => array('it' => 'ascolta',
+                                             'en' => 'listen'),
+                     'list_desc'    => array('it' => 'imposta le regole di ascolto',
+                                             'en' => 'set the listen rules'),
+                     'tit_listall'  => array('it' => 'tutti',
+                                             'en' => 'everybody'),
+                     'listall_desc' => array('it' => 'leggi tutti i messaggi di tutti gli utenti collegati',
+                                             'en' => 'listen all messages from each user connected'),
+                     'tit_listaut'  => array('it' => 'solo autenticati',
+                                             'en' => 'only authorized'),
+                     'listaut_desc' => array('it' => 'leggi soltanto i messaggi degli utenti con password',
+                                             'en' => 'listen messages only from authenticated users'),
+                     'tit_help'     => array('it' => 'informazioni utili su Brisk',
+                                             'en' => 'usefull information about Brisk'),
+                     'itm_help'     => array('it' => 'aiuto',
+                                             'en' => 'help'),
+                     'tit_hpage'    => array('it' => 'homepage del progetto',
+                                             'en' => 'project homepage (ita)'),
+                     'tit_what'     => array('it' => 'di cosa si tratta',
+                                             'en' => 'what is the project'),
+                     'itm_what'     => array('it' => 'cos\'&egrave;',
+                                             'en' => 'what is it'),
+                     'url_rules'    => array('it' => 'http://it.wikipedia.org/wiki/Briscola#Gioco_a_5',
+                                             'en' => 'http://it.wikipedia.org/wiki/Briscola#Gioco_a_5&EN=true'),
+                     'itm_rules'    => array('it' => 'regole',
+                                             'en' => 'rules'),
+                     'tit_rules'    => array('it' => 'come si gioca',
+                                             'en' => 'how to play'),
+                     'tit_shot'     => array('it' => 'screenshots dell\'applicazione',
+                                             'en' => 'screenshots of the web-application'),
+                     'tit_comp'     => array('it' => 'compatibilit&agrave; con i browser',
+                                             'en' => 'browsers compatibility'),
+                     'itm_comp'     => array('it' => 'compatibilit&agrave;',
+                                             'en' => 'compatibility'),
+                     'tit_src'      => array('it' => 'sorgenti dell\'applicazione web',
+                                             'en' => 'sources of the web-application'),
+                     'itm_src'      => array('it' => 'sorgenti',
+                                             'en' => 'sources'),
+                     'tit_ml'       => array('it' => 'come iscriversi alla mailing list',
+                                             'en' => 'how to subscribe the mailing list'),
+                     'itm_ml'       => array('it' => 'mailing&nbsp;list',
+                                             'en' => 'mailing&nbsp;list'),
+                     'tit_pro'      => array('it' => 'come fare pubblicit&agrave; a Brisk!',
+                                             'en' => 'how to spread Brisk!'),
+                     'itm_pro'      => array('it' => 'propaganda',
+                                             'en' => 'propaganda'),
+                     'tit_mail'     => array('it' => 'contatti',
+                                             'en' => 'contacts'),
+                     'itm_mail'     => array('it' => 'contatti',
+                                             'en' => 'contacts'),
+                     'tit_rmap'     => array('it' => 'prossime funzionalità implementate',
+                                             'en' => 'roadmap of next functionalities'),
+                     'itm_rmap'     => array('it' => 'roadmap',
+                                             'en' => 'roadmap'),
+                     'tit_meet'     => array('it' => 'foto dei raduni di briskisti',
+                                             'en' => 'photos of brisk meetings'),
+                     'itm_meet'     => array('it' => 'raduni',
+                                             'en' => 'meeting'),
+                     'tit_mesg'     => array('it' => 'manda un messaggio o una segnalazione all\'amministratore del sito',
+                                             'en' => 'send a message or a signalling to the administrator' ),
+                     'mesgtoadm_tit'=> array('it' => 'Invia un messaggio o una segnalazione all\'amministratore:',
+                                             'en' => 'Send a message to the administrator:'),
+                     'mesgtoadm_sub'=> array('it' => 'soggetto:',
+                                             'en' => 'subject:'),
+                     'btn_send'     => array('it' => 'Invia.',
+                                             'en' => 'Send.'),
+                     'btn_close'    => array('it' => 'Chiudi.',
+                                             'en' => 'Close.')
+                     );
 
 // Use of proxies isn't allowed.
 if (!$G_is_local && is_proxy()) 
@@ -163,14 +267,30 @@ function main()
       else {
 	/* Login Rendering */
         /* MLANG: "Utente e/o password errati.", "Il nickname deve contenere almeno una lettera o una cifra.", "Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.", "Il tuo nickname &egrave; gi&agrave; in uso." */
+        /*
 	if ($idx == -3) 
 	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpasserr'][$G_lang].'</b></div>';
 	else if ($idx == -2)
-	  $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
+	  // $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
+	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassmust'][$G_lang].'</b></div>';
 	else if ($idx == -1) 
-	  $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
+	  // $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
+	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassend'][$G_lang].'</b></div>';
 	else
-	  $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
+	  // $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
+          $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassuse'][$G_lang].'</b></div>';
+        */
+
+	if ($idx == -3) 
+          $sfx = 'err';
+	else if ($idx == -2)
+          $sfx = 'must';
+	else if ($idx == -1) 
+	  $sfx = 'end';
+	else
+	  $sfx = 'use';
+
+        $body .= '<div class="urgmsg"><b>'.$mlang_room['userpass'.$sfx][$G_lang].'</b></div>';
       }
     }
     Room::unlock_data($sem);
@@ -196,7 +316,7 @@ function main()
       if ($ii % 4 == 0)
 	$tables .= '<tr>';
       $tables .= '<td>';
-      $tables .= '<div class="room_div"><div class="room_tit"><b>Tavolo '.$i.'</b></div>';
+      $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
       $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
       $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
       $tables .= '</div>';
@@ -209,12 +329,13 @@ function main()
 
     $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
     $standup .= '<div class="room_ex_standup">';
-    /* MLANG: "Giocatori in piedi", "Come ottenere user e password" */
+    /* MLANG: "Giocatori in piedi" */
     // $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
-    $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b></span></div>';
+    $standup .= '<div id="room_tit"><span class="room_titin"><b>'.$mlang_room['standing'][$G_lang].'</b></span></div>';
     
     $standup .= sprintf('<div id="standup" class="room_standup"></div>');
-    $standup .= '<div id="esco" class="esco"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reloadroom();"><input class="button" name="logout" value="Esco." onclick="esco_cb();" type="button"></div>';
+    // MLANG Esco.
+    $standup .= '<div id="esco" class="esco"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reloadroom();"><input class="button" name="logout" value="'.$mlang_room['btn_exit'][$G_lang].'" onclick="esco_cb();" type="button"></div>';
     $standup .= '</div></td></tr></table>';
   }
 
@@ -309,7 +430,7 @@ google_color_url = "000000";
 ).'</div></td>
 <td align="center">'.($G_with_topbanner ? '<table><tr><td>' : '').'<div style="text-align: center;">
     <img class="nobo" src="img/brisk_logo64.png">
-    briscola chiamata in salsa ajax<br>
+    '.$mlang_room['headline'][$G_lang].'<br>
     </div>'.($G_with_topbanner ? sprintf('</td><td>%s</td></tr></table>', $G_topbanner) : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
 '.($G_is_local ? '' :
@@ -344,47 +465,47 @@ $brisk_vertical_menu = '
 <img class="nobo" src="img/brisk_start.png" onmouseover="menu_hide(0,0); menu_show(\'menu_webstart\');">
 <div class="webstart" id="menu_webstart" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
-<a href="#" onmouseover="menu_hide(0,1);" title="informazioni utili su Brisk." onclick="act_help();"
-   >aiuto</a><br>
+<a href="#" onmouseover="menu_hide(0,1);" title="'.$mlang_room['tit_help'][$G_lang].'" onclick="act_help();"
+   >'.$mlang_room['itm_help'][$G_lang].'</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php" 
    onmouseover="menu_hide(0,1);"
-   title="homepage del progetto">homepage</a><br>
+   title="'.$mlang_room['tit_hpage'][$G_lang].'">homepage</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#cose" 
    onmouseover="menu_hide(0,1);"
-   title="di cosa si tratta">cos\'&egrave;</a><br>
+   title="'.$mlang_room['tit_what'][$G_lang].'">'.$mlang_room['itm_what'][$G_lang].'</a><br>
 
-<a target="_blank" href="http://it.wikipedia.org/wiki/Briscola#Gioco_a_5" 
+<a target="_blank" href="'.$mlang_room['url_rules'][$G_lang].'" 
    onmouseover="menu_hide(0,1);"
-   title="come si gioca">regole</a><br>
+   title="'.$mlang_room['tit_rules'][$G_lang].'">'.$mlang_room['itm_rules'][$G_lang].'</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#shots" 
    onmouseover="menu_hide(0,1);"
-   title="screenshots dell\'applicazione">screenshoots</a><br>
+   title="'.$mlang_room['tit_shot'][$G_lang].'">screenshoots</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#comp" 
    onmouseover="menu_hide(0,1);"
-   title="compatibilit&agrave; con i browser">compatibilit&agrave;</a><br>
+   title="'.$mlang_room['tit_comp'][$G_lang].'">'.$mlang_room['itm_comp'][$G_lang].'</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#sources" 
    onmouseover="menu_hide(0,1);"
-   title="sorgenti dell\'applicazione">sorgenti</a><br>
+   title="'.$mlang_room['tit_src'][$G_lang].'">'.$mlang_room['itm_src'][$G_lang].'</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#mailing" 
    onmouseover="menu_hide(0,1);"
-   title="come iscriversi alla mailing list">mailing&nbsp;list</a><br>
+   title="'.$mlang_room['tit_ml'][$G_lang].'">'.$mlang_room['itm_ml'][$G_lang].'</a><br>
 
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" 
    onmouseover="menu_hide(0,1);"
-   title="come fare pubblicit&agrave; a brisk!">propaganda</a><br>
+   title="'.$mlang_room['tit_pro'][$G_lang].'">'.$mlang_room['itm_pro'][$G_lang].'</a><br>
 <a href="#" 
    onmouseover="menu_hide(0,1);"
    title="credits" onclick="act_about();">about</a><br>
 
 <a href="mailto:brisk@alternativeoutput.it" 
    onmouseover="menu_hide(0,1);"
-   title="contatti">contatti</a><br>
+   title="'.$mlang_room['tit_mail'][$G_lang].'">'.$mlang_room['itm_mail'][$G_lang].'</a><br>
 
 <hr>
 
@@ -395,10 +516,10 @@ $brisk_vertical_menu = '
 -->
 <a href="#" 
    onmouseover="menu_hide(0,1);"
-   title="prossime funzionalità implementate" onclick="act_roadmap();">roadmap</a><br>
+   title="'.$mlang_room['tit_rmap'][$G_lang].'" onclick="act_roadmap();">'.$mlang_room['itm_rmap'][$G_lang].'</a><br>
 
-<a href="#" title="foto dei raduni di briskisti" 
-   onmouseover="menu_show(\'menu_meeting\');">raduni</a><br>
+<a href="#" title="'.$mlang_room['tit_meet'][$G_lang].'" 
+   onmouseover="menu_show(\'menu_meeting\');">'.$mlang_room['itm_meet'][$G_lang].'</a><br>
 
 <div id="menu_meeting" class="webstart">
 <a href="http://www.anomalia.it/mop/photoo" 
@@ -409,7 +530,7 @@ $brisk_vertical_menu = '
    target="_blank" onmouseover="menu_hide(0,2);"
    title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
 </div>
-</div>'. ($ACTION == "room" ? '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div><img class="nobo" src="img/brisk_commands.png" onmouseover="menu_hide(0,0); menu_show(\'menu_commands\');">
+</div>'. ($ACTION == "room" ? '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div><img class="nobo" src="img/brisk_commands'.langtolng($G_lang).'.png" onmouseover="menu_hide(0,0); menu_show(\'menu_commands\');">
 
 <div class="webstart" id="menu_commands" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
@@ -453,27 +574,50 @@ $brisk_vertical_menu = '
 <a href="#" title="avvia un ticker pubblicitario per il tuo tavolo" 
    onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/tav \'+$(\'txt_in\').value); menu_over(-1,this);">ticker &nbsp;<img class="unbo" src="img/train.png"></a><br>
 
-<a href="#" title="garantisci per un tuo conoscente" 
-   onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/garante\'); menu_over(-1,this);">garantisci</a><br>
+<a href="#" title="'
+          // MLANG garantisci per un tuo conoscente
+          .$mlang_room['warr_desc'][$G_lang].
+'" 
+   onmouseover="menu_hide(0,1);" onclick="act_chatt(\'/authreq\'); menu_over(-1,this);">'
+          // MLANG garantisci
+          .$mlang_room['itm_warr'][$G_lang].
+          '</a><br>
 
 
-<a href="#" title="imposta le regole di ascolto" 
-   onmouseover="menu_hide(0,1); menu_show(\'menu_listen\');">ascolta</a><br>
+<a href="#" title="'
+          // MLANG imposta le regole di ascolto
+          .$mlang_room['list_desc'][$G_lang].
+'"   onmouseover="menu_hide(0,1); menu_show(\'menu_listen\');">'
+          // MLANG ascolta
+          .$mlang_room['itm_list'][$G_lang].
+'</a><br>
 <div id="menu_listen" class="webstart">
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="leggo i messaggi di tutti gli utenti collegati" onclick="act_chatt(\'/listen all\'); menu_over(-1,this);"><span id="list_all">tutti</span></a><br>
+   title="'
+          // MLANG leggo i messaggi di tutti gli utenti collegati
+          .$mlang_room['listall_desc'][$G_lang].
+'" onclick="act_chatt(\'/listen all\'); menu_over(-1,this);"><span id="list_all">'
+          // MLANG tutti
+          .$mlang_room['tit_listall'][$G_lang].
+'</span></a><br>
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="leggo soltanto i messaggi degli utenti con password" onclick="act_chatt(\'/listen auth\'); menu_over(-1,this);"><span id="list_auth">solo autenticati</span></a><br>
+   title="'
+          // MLANG leggo soltanto i messaggi degli utenti con password
+          .$mlang_room['listaut_desc'][$G_lang].
+          '" onclick="act_chatt(\'/listen auth\'); menu_over(-1,this);"><span id="list_auth">'
+          // MLANG solo autenticati
+          .$mlang_room['tit_listaut'][$G_lang].
+'</span></a><br>
 
 </div>
 
 </div>'.($G_with_poll ? '' : '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
-<img style="cursor: pointer;" class="nobo" src="img/brisk_help.png" title="informazioni utili su Brisk." onmouseover="menu_hide(0,0);" onclick="act_help();">').'
+<img style="cursor: pointer;" class="nobo" src="img/brisk_help'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_help'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_help();">').'
 <div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 '.($user->flags & USER_FLAG_AUTH ? '
-<img style="cursor: pointer;" class="nobo" src="img/brisk_signal.png" title="manda un messaggio o una segnalazione all\'amministratore del sito" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
+<img style="cursor: pointer;" class="nobo" src="img/brisk_signal'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_mesg'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_chatt(\'/mesgtoadm\');">'.poll_dom()
  : '
 <img style="cursor: pointer;" class="nobo" src="img/brisk_password.png" title="Come ottenere una password su Brisk." onmouseover="menu_hide(0,0);" onclick="act_passwdhowto();">
 ').'
@@ -518,12 +662,12 @@ supported by:<br>
 <title>Brisk</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
-<script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript" src="dom-drag.js"></script>
+<!-- <script type="text/javascript" src="dnd.js"></script>
+<script type="text/javascript" src="dom-drag.js"></script> -->
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
-<script type="text/javascript" src="preload_img.js"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="md5.js"></script>
@@ -534,6 +678,7 @@ supported by:<br>
 
 <SCRIPT type="text/javascript"><!--
    var g_lang = "<? echo $G_lang; ?>";
+   var g_lng = "<? echo $G_lng; ?>";
    var g_withflash = false;
    var g_is_spawn = 0; 
    var gst  = new globst();
@@ -605,7 +750,8 @@ echo "$body"; ?>
 <br>
 <div style="text-align: center;">
    <br><br><br>
-Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
+<?php echo $mlang_room['wellcome'][$G_lang];?>
+<br><br>
 <form accept-charset="utf-8" method="post" action="" onsubmit="return j_login_manager(this);">
 <input id="passid_private" name="pass_private" type="hidden" value="">
 <table class="login">
@@ -613,11 +759,11 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
 <tr><td>pwd:</td>
 <td><input id="passid" class="input_text" name="pass" type="password" size="24" maxlength="64" value=""></td></tr>
-<tr><td colspan="2"><input id="sub" value="entra" type="submit" class="button"></td></tr>
+<tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_enter'][$G_lang];?>" type="submit" class="button"></td></tr>
 </table>
 </form><br>
-<b>Se non hai ancora una password, lascia il campo in bianco ed entra.</b><br><br>
-(se usi firefox e qualcosa non funziona<br>prova a ricaricare la pagina con <b>Ctrl + F5</b>)<br>
+<b><?php echo $mlang_room['passwarn'][$G_lang];?></b><br><br>
+<?php echo $mlang_room['browwarn'][$G_lang];?><br>
 </div>
 <br><br><br><br>
 
@@ -642,14 +788,14 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <head>
 <title>Brisk</title>
 <link rel="shortcut icon" href="img/brisk_ico.png">
-<script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript" src="dom-drag.js"></script>
+<!-- <script type="text/javascript" src="dnd.js"></script>
+<script type="text/javascript" src="dom-drag.js"></script> -->
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="room.js"></script>
-<script type="text/javascript" src="preload_img.js"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script>  -->
@@ -658,6 +804,7 @@ Digita il tuo nickname per accedere ai tavoli della briscola.<br><br>
 <SCRIPT type="text/javascript"><!--
    var sess;
    var g_lang = "<? echo $G_lang; ?>";
+   var g_lng = "<? echo $G_lng; ?>";
    var tra = null;
    var stat = "";
    var subst = "";
@@ -719,7 +866,7 @@ else {
 <?php
 if ($is_login) {
   /* MLANG: "<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", "torna ai tavoli" */
-  echo show_notify("<br>Il nickname che stai usando &egrave; gi&agrave; registrato,<br><br>se il suo proprietario si autentificher&agrave;<br><br>verrai rinominato d'ufficio come ghost<i>N</i>.", 0, "torna ai tavoli", 400, 150);
+  echo show_notify($mlang_room['regwarn'][$G_lang], 0, $mlang_room['btn_rettabs'][$G_lang], 400, 150);
 }
 ?>
 <?php
@@ -776,7 +923,7 @@ if ($is_login) {
 </div>
 <div style="text-align: center; ">
     <!-- MLANG: scrivi un invito al tavolo e clicca -->
-    <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="scrivi un invito al tavolo e clicca"></td><td style="width:1%; text-align: center;">
+    <table style="width: 98%; margin: auto;"><tr><td id="tickbut" class="tickbut"><img class="tickbut" src="img/train.png" onclick="act_tav();" title="<?php echo $mlang_room['tit_ticker'][$G_lang];?>"></td><td style="width:1%; text-align: center;">
     <div id="myname"></div>
     </td><td>
     <input id="txt_in" maxlength="128" type="text" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
@@ -786,7 +933,10 @@ if ($is_login) {
 
     <div id="authbox" class="notify" style="text-align: center;">
        <br>
-       <b>Garantisci per un tuo conoscente:</b>
+       <b>
+    <!-- MLANG: Garantisci per un tuo conoscente: -->
+    <?php echo $mlang_room['tit_warr'][$G_lang]; ?>
+</b>
        <br><br>
 
        <form id="auth_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_authbox(this);">
@@ -797,27 +947,34 @@ if ($is_login) {
 <tr><td>e-mail:</td>
 <td><input id="emailid" class="input_text" name="email" type="text" size="24" maxlength="1024" value=""></td></tr>
 <tr><td colspan="2" style="text-align: center;">
-       <input id="subid" name="sub" value="invia" type="submit" onclick="this.form.elements['realsub'].value = this.value;" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<input id="cloid" name="clo" value="chiudi" type="submit" class="button" onclick="this.form.elements['realsub'].value = this.value;"></td></tr>
+    <!-- MLANG: Garantisci per un tuo conoscente: -->
+       <input id="subid" name="sub" value=
+"<?php echo $mlang_room['btn_send'][$G_lang]; ?>"
+ type="submit" onclick="this.form.elements['realsub'].value = 'invia';" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <!-- MLANG: Garantisci per un tuo conoscente: -->
+<input id="cloid" name="clo" value=
+"<?php echo $mlang_room['btn_close'][$G_lang]; ?>" 
+type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chiudi';"></td></tr>
 </table>
     </form>
     </div>
     <div id="mesgtoadmbox" class="notify_opaque" style="text-align: center;">
        <br>
-       <b>Invia un messaggio o una segnalazione all'amministratore:</b>
+<!--MLANG: Invia un messaggio o una segnalazione all'amministratore: -->
+       <b><?php echo $mlang_room['mesgtoadm_tit'][$G_lang];?></b>
        <br><br>
        <form id="mesgtoadm_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_mesgtoadmbox(this);">
        <input type="hidden" name="realsub" value="666">
 <table class="login">
 <!--MLANG: soggetto -->
-<tr><td><b>soggetto:</b></td>
+<tr><td><b><?php echo $mlang_room['mesgtoadm_sub'][$G_lang];?></b></td>
 <td><input id="subjid" class="input_text" name="subj" type="text" size="32" maxlength="255" value=""></td></tr></table>
 <table class="login">
-<tr><td><img title="messaggio" class="nobo" src="img/mesgtoadm_mesg.png"></td>
+<tr><td><img title="messaggio" class="nobo" src="img/mesgtoadm_mesg<?php echo $G_lng;?>.png"></td>
 <td><textarea id="mesgid" class="input_text" name="mesg" cols="40" rows="8" wrap="soft"></textarea></td></tr>
 <tr><td colspan="2" style="text-align: center;">
-       <input id="subid" name="sub" value="invia" type="submit" onclick="this.form.elements['realsub'].value = this.value;" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<input id="cloid" name="clo" value="chiudi" type="submit" class="button" onclick="this.form.elements['realsub'].value = this.value;"></td></tr>
+       <input id="subid" name="sub" value="<?php echo $mlang_room['btn_send'][$G_lang];?>" type="submit" onclick="this.form.elements['realsub'].value = 'invia';" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input id="cloid" name="clo" value="<?php echo $mlang_room['btn_close'][$G_lang];?>" type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chiudi';"></td></tr>
 </table>
     </form>
     </div>
