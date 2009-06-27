@@ -1,3 +1,27 @@
+/*
+ *  brisk - room.js
+ *
+ *  Copyright (C) 2006-2009 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+
 /* 
    data = [ [ flags, name ],  ... ]
    
@@ -11,34 +35,35 @@ function state_add(flags)
 
     if ((flags & 0xf00) != 0) {
         st = flags & 0xf00;
+        // MLANG 4,12,16,20,24,28
         switch (st) {
         case 0x100:
             name = "st_pau.png";
-            tit = "sono in pausa";
+            tit = (g_lang == 'en' ? "I'm doing a break" : "sono in pausa");
             break;
         case 0x200:
             name = "st_out.png";
-            tit = "sono fuori";
+            tit = (g_lang == 'en' ? "I'm away" : "sono fuori");
             break;
         case 0x300:
             name = "st_dog.png";
-            tit = "sono a spasso col cane";
+            tit = (g_lang == 'en' ? "Dog time" : "sono a spasso col cane");
             break;
         case 0x400:
             name = "st_eat.png";
-            tit = "sto mangiando";
+            tit = (g_lang == 'en' ? "I'm eating" : "sto mangiando");
             break;
         case 0x500:
             name = "st_wrk.png";
-            tit = "sono a lavoro";
+            tit = (g_lang == 'en' ? "I'm working" : "sono a lavoro");
             break;
         case 0x600:
             name = "st_smk.png";
-            tit = "sto fumando una sigaretta (e facendomi venire il cancro)";
+            tit = (g_lang == 'en' ? "I'm smoking a sigarett (and keeping a cancer)" : "sto fumando una sigaretta (e facendomi venire il cancro)");
             break;
         case 0x700:
             name = "st_eye.png";
-            tit = "sono presente!";
+            tit = (g_lang == 'en' ? "I'm here!" : "sono presente!");
             break;
         default:
             break;
@@ -389,17 +414,21 @@ function j_tab_cont(table_idx, data)
 function j_tab_act_cont(idx, act)
 {
     if (act == 'sit') {
-        $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="Mi siedo." onclick="act_sitdown('+idx+');">';
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
     }
     else if (act == 'sitreser') {
         // <img class="nobo" title="tavolo riservato agli utenti registrati" style="display: inline; margin-right: 80px;" src="img/okauth.png">
-        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okauth.png\');" class="button" name="xhenter'+idx+'"  value="Mi siedo." onclick="act_sitdown('+idx+');">';
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okauth.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
     }
     else if (act == 'wake') {
-        $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xwakeup"  value="Mi alzo." onclick="act_wakeup();">';
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xwakeup"  value="'+(g_lang == 'en' ? "Wake up." : "Mi alzo.")+'" onclick="act_wakeup();">';
     }
     else if (act == 'reserved') {
-        $("table_act"+idx).innerHTML = '<img class="nobo" title="tavolo riservato agli utenti registrati" style="margin-right: 20px;" src="img/onlyauth.png">';
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<img class="nobo" title="'+(g_lang == 'en' ? "reserved table for authenticated users only" : "tavolo riservato agli utenti registrati")+'" style="margin-right: 20px;" src="img/onlyauth.png">';
     }
     else {
         $("table_act"+idx).innerHTML = '';
@@ -495,7 +524,11 @@ function j_authbox(form)
         }
 
         if (form.elements['name'].value == '' || j_check_email(form.elements['email'].value) == false) {
-            no = new notify(gst, "<br>I campi user e/o e-mail non sono validi;</br> correggeteli per favore.", 1, "chiudi", 280, 100); 
+            // MLANG 2-4
+            no = new notify(gst, 
+                            (g_lang == 'en' ? "<br><b>nickname</b> and/or <b>e-mail</b> fields are invalid;<br>please, fix them." :
+                             "<br>I campi <b>nickname</b> e/o <b>e-mail</b> non sono validi;<br> correggeteli per favore."),
+                            1, (g_lang == 'en' ? "close" : "chiudi"), 280, 100); 
             break;
         }
 
@@ -543,7 +576,10 @@ function j_mesgtoadmbox(form)
         }
 
         if (form.elements['mesg'].value == '' || form.elements['subj'].value == '') {
-            no = new notify(gst, "<br>Il soggetto e il messaggo non possono essere vuoti;</br> correggeteli per favore.", 1, "chiudi", 280, 100); 
+            // MLANG 1-3
+            no = new notify(gst, (g_lang == 'en' ? "<br><b>subject</b> and the <b>message</b> cannot be void;<br>please, fix them." :
+                                  "<br>Il <b>soggetto</b> e il <b>messaggo</b> non possono essere vuoti;<br>correggeteli per favore."), 1, 
+                                  (g_lang == 'en' ? "close" : "chiudi"), 280, 100); 
             break;
         }
                 
@@ -592,7 +628,10 @@ function j_pollbox(form)
                 break;
         }
         if (i == form.elements.length) {
-            no = new notify(gst, "<br>Non hai espresso nessuna preferenza;</br> correggi per favore.", 1, "chiudi", 280, 100); 
+            // MLANG 1-3
+            no = new notify(gst, (g_lang == 'en' ? "<br>You must choose ah item;<br> please, fix it." :
+                                  "<br>Non hai espresso nessuna preferenza;<br> correggi per favore."), 1, 
+                            (g_lang == 'en' ? "close" : "chiudi"), 280, 100); 
             return false;
         }
         else

@@ -73,20 +73,63 @@ define(BRISK_SINGLE_SESS, "");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 
+$mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
+                                               'en' => 'back standing' ),
+                      'btn_close' => array( 'it' => 'chiudi',
+                                            'en' => 'close'),
+
+                      'tit_all' => array( 'it' => 'tutti',
+                                          'en' => 'all' ),
+
+                      'tabtout_a'=> array( 'it' => '<br>Sei stato inattivo per ', 
+                                           'en' => '<br>You are being idle for ' ),
+                      'tabtout_b'=> array( 'it' => ' minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.',
+                                           'en' => ' minutes. <br><br>Then you return with the <b>standing players</b>.'),
+                      'tickmust' => array( 'it' => '<br>Per attivare il messaggio di segnalazione del tavolo occorre essere seduti.<br><br>',
+                                           'en' => '<br>To activate the signalling message of the table it\'s necessary to be sitting<br><br>'),
+                      'tickjust' => array( 'it' => '<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> ',
+                                           'en' => 'EN<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> '),
+                      'tickwait' => array( 'it' => '<br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>',
+                                           'en' => 'EN<br>The signalling message of the table<br>will be deactivated for %d second%s.<br><br>'),
+                      'alarpass' => array( 'it' => '<br>La password digitata non &egrave; corretta.<br><br>',
+                                           'en' => '<br>The entered password is not correct.<br><br>'),
+                      'alarret'  => array( 'it' => '"Alarm \\"<b>%s</b>\\" inviato a <b>%s</b>."',
+                                           'en' => '"Alarm \\"<b>%s</b>\\" sent to <b>%s</b>."'),
+                      'authmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>',
+                                           'en' => '<b>To authenticate someone you have to be authenticated.</b>'), // on your turn
+                      'mesgmust' => array( 'it' => '<b>Per inviare un messaggio devi essere autenticato.</b>',
+                                           'en' => '<b>To send a message you have to be authenticated.</b>'),
+                      'nickmust' => array( 'it' => 'Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.',
+                                           'en' => 'The nickname have to contain at least one letter or one number.'),
+                      'nickdupl' => array( 'it' => 'Nickname <b>%s</b> gi&agrave; in uso.',
+                                           'en' => 'The nickname <b>%s</b> is already in use.'),
+                      'authchan' => array( 'it' => '<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>',
+                                           'en' => '<b>You can\'t change your nickname into a table for only authenticated.</b>'),
+                      'nickjust' => array( 'it' => 'Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>',
+                                           'en' => 'The nickname <b>\'%s\'</b> is already registered, <b>if its proprietary will authenticate you will named again officially ghost<i>N</i>.</b>'), // FIXME: him ???
+                      'statunkn' => array( 'it' => 'Questo stato non esiste.',
+                                           'en' => 'This state don\'t exists.'),
+                      'tabincon' => array( 'it' => '<br>I dati del tavolo n&deg; %d sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>',
+                                           'en' => 'EN <br>I dati del tavolo n&deg; %d sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>'),
+                      'tit_onauth'=>array( 'it' => '(solo aut.)',
+                                           'en' => '(only aut.)'),
+                      
+
+);
+
 $G_false = FALSE;
-$G_lang = "it";
-$G_lng = "";
-// $G_lang = "en";
-// $G_lng = "_en";
+$G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
 $G_brisk_version = "2.1.9 - trusty";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = Array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: sondaggi, direct messages quando segnalate.',
-                        'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' );
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: bug della carta coperta risolto, assenso all\'apertura del tavolo non revocabile, multi-lingua quasi ultimato.',
+                                       'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' ),
+                       'en' => array ( 'EN Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: EN Sponsor alternati, menù rivisto, AUTO-GARANZIE, sondaggi quasi ultimati.',
+                                       'EN Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' ) );
 
-$G_room_help= '
+$G_room_help = array( 'it' => '
 <div style=\\"text-align: left; padding: 8px;\\">
 <b>Descrizione</b><br>
 Questa è un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
@@ -110,15 +153,46 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
-<dd><b>/garante</b> - se si &egrave; autenticati permette di garantire per un utente fidato
+<dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
 <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
 </dl>
 </div>
-';
+',
+
+'en' => '
+<div style=\\"text-align: left; padding: 8px;\\">
+<b>EN Descrizione</b><br>
+EN Questa è un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
+<a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
+<b>EN Configurazione del browser.</b><br>
+Occorre abilitare i cookies.<br>
+<br>
+<b>Uso del sito</b><br>
+Potete sedervi a un tavolo o rimanere in piedi.<br>
+Se al vostro tavolo si raggiungono i 5 giocatori inizia automaticamente la partita.<br>
+<br>
+<b>Partita</b><br>
+All\'inizio vengono distribuite le carte e parte l\'asta; per partecipare all\'asta, quando sar&agrave; il vostro turno, potrete scegliere se andare avanti o passare cliccando sulle icone corrispondenti. Se si arriva ai punti, scrivete nella textbox il vostro rilancio e cliccate PUNTI.<br><br>
+Chi vince l\'asta dovr&agrave; decidere il seme della carta scelta e inizier&agrave; la mano.<br>
+Per giocare le carte dovrete trascinarle nel quadrato al centro del vostro schermo.<br><br>
+Il vostro turno &egrave; sempre segnalato da una cornice verde lampeggiante intorno al quadrato al centro del vostro schermo.<br><br>
+Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \\"reload\\" in basso a destra.<br>
+Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri giocatori di sbloccarla cliccando sul lucchetto. Se non si segue questa prassi, una volta usciti, non vi potrete sedere a nessun tavolo per '.floor(BAN_TIME/60).' minuti.
+<dl>
+<dt><b>Comandi della chat</b>
+<dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
+<dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
+<dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
+<dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
+<dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
+</dl>
+</div>
+');
 
 //  
-$G_room_passwdhowto= '<br><h2>Come registrarsi su Brisk</h2>
+$G_room_passwdhowto = array( 'it' => '<br><h2>Come registrarsi su Brisk</h2>
 <div style=\\"text-align: left; padding: 8px;\\">
 Attualmente ci sono due metodi per ottenere una password sul sito:<br><br>
 <dir>
@@ -145,20 +219,62 @@ Se sei in possesso di una carta che permette l\'identificazione via internet che
 
 </dir>
 </div>
-';
+',
+                             'en' => '<br><h2>EN Come registrarsi su Brisk</h2>
+<div style=\\"text-align: left; padding: 8px;\\">
+EN Attualmente ci sono due metodi per ottenere una password sul sito:<br><br>
+<dir>
+<li><b>Facendosi garantire da un utente di Brisk che gi&agrave; possidede una password</b><br><br>
+<li><b>Auto-garantendosi utilizzando uno dei seguenti sistemi di identificazione digitale:</b><br><br>
+<dir>
+<li>Carta Regionale dei Servizi della Lombardia (la tessera sanitaria)
+<li>Carta Regionale dei Servizi del Friuli Venezia Giulia (la tessera sanitaria)
+</dir>
+<br>
+<b>Per auto-garantisi occorre possedere:</b><br><br>
+<dir>
+<li>il codice PIN della propria carta
+<li>il lettore di smart-card per collegare la carta al PC (acquistabile di solito presso le edicole)
+</dir>
+<br>
+<b>Per effettuare la registrazione collegarsi al sito:</b><br><br>
+<dl>
+<dd><a class=\\"flat\\"  target=\\"_blank\\" href=\\"https://brisk.mine.nu\\">https://brisk.mine.nu</a>
+</dl>
+<br><br>
+Se sei in possesso di una carta che permette l\'identificazione via internet che non è nell\'elenco qui sopra
+<a class=\\"flat\\" href=\\"mailto:authadmbrisk@alternativeoutput.it\\">fai una segnalazione</a>.
+
+</dir>
+</div>
+' );
 /*
 <dd>Seguendo la procedura di auto-garanzia all\'url: <a href="https://brisk.mine.nu">https://brisk.mine.nu</a>
 ';
 */
 
-$G_room_about= '<br>
+$G_room_about = array( 'it' => '<br>
 <div id=\\"header\\" class=\\"header\\">
   <img class=\\"nobo\\" src=\\"img/brisk_logo64.png\\">
   briscola chiamata in salsa ajax
 </div>
 <br><b>version '.$G_brisk_version.'</b><br><br>
-Copyright 2006-2008 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>';
+Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>',
+                      'en' => '<br>
+<div id=\\"header\\" class=\\"header\\">
+  <img class=\\"nobo\\" src=\\"img/brisk_logo64.png\\">
+  declaration briscola in ajax sauce <b>(Beta)</b>
+</div>
+<br><b>version '.$G_brisk_version.'</b><br><br>
+Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+
+function langtolng($lang)
+{
+  GLOBAL $G_lang;
+
+  return ($G_lang == 'en' ? '-en' : '');
+}
 
 function csplitter($in, $sep)
 {
@@ -183,7 +299,7 @@ function csplitter($in, $sep)
     }
   }
 
-    return ($out);
+  return ($out);
 }
 
 
@@ -768,6 +884,8 @@ class Room {
 
   function garbage_manager($force)
   {
+    GLOBAL $G_lang, $mlang_brisk;
+
     $ismod = FALSE;
 
     log_rd2("garbage_manager START");
@@ -860,7 +978,9 @@ class Room {
 		
 		$ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
 		$ret .= "gst.st = ".($user_cur->step+1)."; ";
-		$ret .= show_notify("<br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>", 2000, "Chiudi.", 400, 110);
+                // MLANG <br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>
+                $prestr = sprintf($mlang_brisk['tabincon'][$G_lang], $user_cur->table);
+		$ret .= show_notify($prestr, 2000, $mlang_brisk['btn_close'][$G_lang], 400, 110);
 		$user_cur->comm[$user_cur->step % COMM_N] = $ret;
 		$user_cur->step_inc();
 	      }
@@ -914,7 +1034,7 @@ class Room {
 	    $this->room_wakeup(&$user_cur);
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
             /* MLANG: <br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", "torna ai tavoli" */
-	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify("<br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", 0, "torna ai tavoli", 400, 100);
+	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
 	    $user_cur->step_inc();
 	  }
 	}
@@ -930,12 +1050,13 @@ class Room {
 
   function show_room($user_step, &$user)
   {
+    GLOBAL $G_lang, $mlang_brisk;
     log_main("show_room: username: ".$user->name);
     
     $ret = sprintf('gst.st = %d; ',  $user_step);
 
     if ($user->flags & USER_FLAG_LISTAUTH) {
-      $ret .= 'list_set(\'auth\', false, \'(solo aut.)\' ); ';
+      $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
     }
     else {
       $ret .= 'list_set(\'all\', false, \'\' ); ';
@@ -1259,7 +1380,7 @@ class Room {
 
   function chatt_send(&$user, $mesg)
   {
-    GLOBAL $G_alarm_passwd;
+    GLOBAL $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
     
     // common settings
@@ -1283,7 +1404,7 @@ class Room {
       do {
         if ($user->stat != 'room' || $user->subst != 'sitdown') {
           /* MLANG: "<br>Per attivare il messaggio di segnalazione del tavolo occorre essere seduti.<br><br>", "<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>", "<br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>" */
-          $msg = "<br>Per attivare il messaggio di segnalazione del tavolo occorre essere seduti.<br><br>";
+          $msg = $mlang_brisk['tickmust'][$G_lang];
           $to_user = show_notify($msg, 0, "chiudi", 400, 100);
 
           break;
@@ -1292,7 +1413,8 @@ class Room {
         $table = &$this->table[$user->table];
         
         if ($table->wag_own != NULL) {
-          $msg = "<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>";
+          // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> 
+          $msg = $mlang_brisk['tickjust'][$G_lang];
           $to_user = show_notify($msg, 0, "chiudi", 400, 100);
 
           break;
@@ -1300,9 +1422,10 @@ class Room {
 
         $dtime = $curtime - $table->wag_tout;
         if ($dtime  < EXPIRE_TIME_WAG) {
-          $msg = sprintf("<br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>",
-                         EXPIRE_TIME_WAG - $dtime, (EXPIRE_TIME_WAG - $dtime == 1 ? "o" : "i"));
-          $to_user = show_notify($msg, 0, "chiudi", 400, 100);
+          // MLANG - <br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>
+          $msg = sprintf($mlang_brisk['tickwait'][$G_lang],
+                         EXPIRE_TIME_WAG - $dtime, (EXPIRE_TIME_WAG - $dtime == 1 ? ($G_lang == 'en' ? "" : "o") : ($G_lang == 'en' ? "s" : "i")));
+          $to_user = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang] , 400, 100);
 
           break;
         }
@@ -1329,21 +1452,22 @@ class Room {
       do {
         if (strncmp($msg, $alarm_check, strlen($alarm_check)) != 0) {
           /* MLANG: "<br>La password digitata non &egrave; corretta.<br><br>" */
-          $msg = "<br>La password digitata non &egrave; corretta.<br><br>";
-          $to_user = show_notify($msg, 0, "chiudi", 400, 100);
+          $msg = $mlang_brisk['alarpass'][$G_lang];
+          $to_user = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 100);
 
           break;
         }
 
         /* MLANG: "Alarm <b>%s</b> inviato a <b>%s</b>." */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"Alarm <b>%s</b> inviato a <b>%s</b>.");', 
-                           $dt, NICKSERV, xcape(substr($msg, strlen($alarm_check))), 
-                           ($target == "" ? "tutti" : xcape($target)) );
+        $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))), 
+                           ($target == "" ? $mlang_brisk['tit_all'][$G_lang] : xcape($target)) );
+        $to_user = sprintf('chatt_sub("%s", [2, "%s"],%s);', 
+                           $dt, NICKSERV, $prestr);
 
         $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
                        $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
         /* MLANG: "chiudi" */
-        $to_all = show_notify($msg, 0, "chiudi", 400, 120);
+        $to_all = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 120);
       } while (0);
     } // /alarm chat command
     else if (strncmp($msg, "/listen ", 8) == 0) {
@@ -1351,20 +1475,20 @@ class Room {
 
       if (strcasecmp($arg, "auth") == 0) {
         $user->flags |= USER_FLAG_LISTAUTH;
-        $to_user = 'list_set(\'auth\', true, \'(solo aut.)\'); ';
+        $to_user = 'list_set(\'auth\', true, \''.$mlang_brisk['tit_onauth'][$G_lang].'\'); ';
       }
       else {
         $user->flags &= ~USER_FLAG_LISTAUTH;
         $to_user = 'list_set(\'all\', true, \'\'); ';
       }
     }
-    else if (strncmp($msg, "/garante", 8) == 0) {
+    else if (strcmp($msg, "/authreq") == 0) {
       if ($user->flags & USER_FLAG_AUTH) {
         $to_user = sprintf('authbox(300,200);');
       }
       else {
         /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>");', $dt, NICKSERV);
+        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
       }
     }
     else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
@@ -1373,7 +1497,7 @@ class Room {
       }
       else {
         /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Per inviare un messaggio devi essere autenticato.</b>");', $dt, NICKSERV);
+        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['mesgmust'][$G_lang]);
       }
     }
     else if (strncmp($msg, "/nick ", 6) == 0) {
@@ -1381,7 +1505,7 @@ class Room {
 
       do {
         if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
-          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.");', $dt, NICKSERV);
+          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
           break;
         }
 
@@ -1395,7 +1519,8 @@ class Room {
             break;
           }
         if ($i <  MAX_PLAYERS) {
-          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"Nickname <b>%s</b> gi&agrave; in uso.");', $dt, NICKSERV, xcape($name_new));
+          $prestr = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
+          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
           break;
         }
         
@@ -1409,7 +1534,7 @@ class Room {
               }
             }
             else {
-              $to_user = sprintf('chatt_sub("%s", [2, "%s"],"<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>");', $dt, NICKSERV);
+              $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
               break;
             }
           }
@@ -1420,7 +1545,8 @@ class Room {
           $userdb = new LoginDB();
           /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
           if ($userdb->login_exists($name_new)) {
-            $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>");', $dt, NICKSERV, xcape($name_new));
+            $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
+            $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
           }
         }
 
@@ -1462,7 +1588,7 @@ class Room {
         }
         else {
           /* MLANG: "Questo stato non esiste." */
-          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"Questo stato non esiste.");', $dt, NICKSERV);
+          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
           break;
         }
 
@@ -1500,8 +1626,8 @@ class Room {
       else {
         $to_user = sprintf('chatt_sub("%s", [%d, "%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
 	// temporary silentiation for troll (will became array check)
-	if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
-          $to_room = $to_user;
+	// if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
+        $to_room = $to_user;
       }
 
       log_legal($curtime, $user, 
@@ -2011,44 +2137,6 @@ class Room {
     return ($content);
   }
   
-  function table_content_old($user, $table_idx)
-  {
-    $content = "";
-    $ret = "";
-    // TODO
-    //
-    //   Si possono usare i dati nella classe table
-    //
-    
-    $sess = $user->sess;
-    $table = &$this->table[$table_idx];
-    
-    if ($user->stat != 'room')
-      return;
-    
-    for ($i = 0 ; $i < $table->player_n ; $i++) {
-      $user_cur = &$this->user[$table->player[$i]];
-      
-      if ($user_cur == $user) 
-	{ $hilion = "<b>"; $hilioff = "</b>"; }
-      else
-	{ $hilion = ""; $hilioff = ""; }
-      
-      log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
-      
-      $content .= sprintf("%s%s%s<br>",$hilion, xcape($user_cur->name), $hilioff);
-    }
-    /*
-  for ( ; $i < PLAYERS_N ; $i++)
-    $content .= "<br>";
-    */
-    
-    $ret .= sprintf('$("table%d").innerHTML = "%s";', $table_idx, $content);
-    
-    return ($ret);
-  }
-
-
   function table_content($user, $table_idx)
   {
     $content = "";
@@ -2346,24 +2434,6 @@ function unlock_banlist($res)
   return (sem_release($res));
 }
 
-function table_act_content_old($isstanding, $sitted, $table, $cur_table)
-{
-  $ret = "";
-
-  if ($isstanding) {
-    if ($sitted < PLAYERS_N) {
-      $ret = sprintf('<input type=\\"button\\" class=\\"button\\" name=\\"xhenter%d\\"  value=\\"Mi siedo.\\" onclick=\\"act_sitdown(%d);\\">', $table, $table);
-    }
-  }
-  else {
-    if ($table == $cur_table)
-      $ret = sprintf('<input type=\\"button\\" class=\\"button\\" name=\\"xwakeup\\"  value=\\"Mi alzo.\\" onclick=\\"act_wakeup();\\">');
-    else
-      $ret = "";
-  }
-  return ($ret);
-}
-
 function table_act_content($isstanding, $sitted, $table, $cur_table, $allowed)
 {
   $ret = "";
@@ -2395,27 +2465,17 @@ function show_notify($text, $tout, $butt, $w, $h)
   return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
 }
 
-function multoval($mult)
-{
-  if ($mult == 2)
-    return ("doppio");
-  else if ($mult == 4)
-    return ("quadruplo");
-  else
-    return (sprintf("%d-plo", $mult));
-}
-
 
 function root_wellcome($user)
 {
-  GLOBAL $root_wellarr;
+  GLOBAL $root_wellarr, $G_lang;
   $ret = "";
 
   $curtime = time();
   $dt = date("H:i ", $curtime);
     
-  for ($i = 0 ; $i < count($root_wellarr) ; $i++)
-    $ret .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$i]));
+  for ($i = 0 ; $i < count($root_wellarr[$G_lang]) ; $i++)
+    $ret .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
 
   return ($ret);
 }
@@ -2450,14 +2510,24 @@ function playsound($filename)
 
 function secstoword($secs)
 {
+  GLOBAL $G_lang;
+
   $mins = floor($secs / 60);
   $secs = $secs % 60;
-  if ($mins > 0) 
-    $ret = sprintf("%d minut%s%s", $mins, ($mins > 1 ? "i" : "o"), ($secs > 0 ? " e " : ""));
-  
-  if ($secs > 0)
-    $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "i" : "o"));
-  
+  if ($G_lang == 'en') {
+    if ($mins > 0) 
+      $ret = sprintf("%d minute%s%s", $mins, ($mins > 1 ? "s" : ""), ($secs > 0 ? " and " : ""));
+    
+    if ($secs > 0)
+      $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "s" : ""));
+  }
+  else {
+    if ($mins > 0) 
+      $ret = sprintf("%d minut%s%s", $mins, ($mins > 1 ? "i" : "o"), ($secs > 0 ? " e " : ""));
+    
+    if ($secs > 0)
+      $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "i" : "o"));
+  }
   return ($ret);
 }
 
