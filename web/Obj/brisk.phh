@@ -28,6 +28,7 @@ define(FTOK_PATH, "/var/lib/brisk");
 define(LEGAL_PATH, "/tmp/legal_brisk");
 define(PROXY_PATH, "/var/lib/brisk_proxy");
 define(TABLES_N, 36);
+define(TABLES_AUTH_N, 4);
 define(PLAYERS_N, 3);
 define(MAX_POINTS, 5);
 define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
@@ -121,7 +122,7 @@ $G_false = FALSE;
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.1.9 - trusty";
+$G_brisk_version = "2.2.0 - trusty";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: bug della carta coperta risolto, assenso all\'apertura del tavolo non revocabile, multi-lingua quasi ultimato.',
@@ -874,7 +875,7 @@ class Room {
         $this->table[$i]->auth_only = FALSE;
       }
       */
-      if ($i < 12) 
+      if ($i < TABLES_AUTH_N) 
         $this->table[$i]->auth_only = TRUE;
       else
         $this->table[$i]->auth_only = FALSE;
