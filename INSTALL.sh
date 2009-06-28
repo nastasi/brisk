@@ -1,8 +1,11 @@
 #!/bin/bash
+set -x
 #
 # Defaults
 #
 n_players=3
+n_tables=16
+brisk_auth_conf="brisk_auth.conf.pho"
 brisk_debug="0xffff"
 web_path="$HOME/brisk"
 legal_path="$HOME/brisk-priv"
@@ -20,12 +23,14 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 [-W] [-n 3|5] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
+    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-a <auth_file_name>] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
     echo "  -n number of players            - def. $n_players"
+    echo "  -t number of tables             - def. $n_tables"
+    echo "  -a authorization file name      - def. \"$brisk_auth_file\""
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
@@ -78,6 +83,8 @@ while [ $# -gt 0 ]; do
 	-f*) conffile="`get_param "-f" "$1" "$2"`"; sh=$?;;
 	-p*) outconf="`get_param "-p" "$1" "$2"`"; sh=$?;;
 	-n*) n_players="`get_param "-n" "$1" "$2"`"; sh=$?;;
+	-t*) n_tables="`get_param "-t" "$1" "$2"`"; sh=$?;;
+        -a*) brisk_auth_file="`get_param "-a" "$1" "$2"`"; sh=$?;;
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
@@ -104,6 +111,8 @@ done
 #
 echo "    outconf:    \"$outconf\""
 echo "    n_players:   $n_players"
+echo "    n_tables:   $n_tables"
+echo "    brisk_auth_file: \"$brisk_auth_file\""
 echo "    brisk_debug:\"$brisk_debug\""
 echo "    web_path:   \"$web_path\""
 echo "    ftok_path:  \"$ftok_path\""
@@ -119,6 +128,8 @@ if [ ! -z "$outconf" ]; then
     echo "#  Produced automatically by brisk::INSTALL.sh"
     echo "#"
     echo "n_players=$n_players"
+    echo "n_tables=$n_tables"
+    echo "brisk_auth_file=\"$brisk_auth_file\""
     echo "brisk_debug=\"$brisk_debug\""
     echo "web_path=\"$web_path\""
     echo "ftok_path=\"$ftok_path\""
@@ -149,6 +160,7 @@ if [ $n_players -ne 3 -a $n_players -ne 5 ]; then
     echo "n_players ($n_players) out of range (3|5)"
     exit 1
 fi
+
 if [ "$web_only" = "FALSE" ]; then
     if [ ! -d "$ftok_path" -a ! -d "$ftokk_path" ]; then
 	echo "ftok_path (\"$ftok_path\") not exists"
@@ -215,6 +227,8 @@ sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, 
 
 sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
 
+sed -i "s@define *( *N_TABLES,[^)]*)@define(N_TABLES, $n_tables)@g" ${web_path}__/Obj/brisk.phh
+
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${web_path}__/Obj/brisk.phh
@@ -222,6 +236,8 @@ sed -i "s@define *( *LEGAL_PATH,[^)]*)@define(LEGAL_PATH, \"$legal_path\")@g" ${
 sed -i "s@define *( *PROXY_PATH,[^)]*)@define(PROXY_PATH, \"$proxy_path\")@g" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *BRISK_CONF,[^)]*)@define(BRISK_CONF, \"$brisk_conf\")@g" ${web_path}__/Obj/brisk.phh
+
+sed -i "s@define *( *BRISK_AUTH_CONF,[^)]*)@define(BRISK_AUTH_CONF, \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
 
 sed -i "s@var \+xhr_rd_cookiepath \+= \+\"[^\"]*\";@var xhr_rd_cookiepath = \"$cookie_path\";@g" ${web_path}__/xhr.js
 sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}__/commons.js
