@@ -1,10 +1,10 @@
 #!/bin/bash
-set -x
+# set -x
 #
 # Defaults
 #
 n_players=3
-n_tables=16
+tables_n=16
 brisk_auth_conf="brisk_auth.conf.pho"
 brisk_debug="0xffff"
 web_path="$HOME/brisk"
@@ -29,7 +29,7 @@ function usage () {
     echo "  -p save preferences in the file"
     echo "  -W web files only"
     echo "  -n number of players            - def. $n_players"
-    echo "  -t number of tables             - def. $n_tables"
+    echo "  -t number of tables             - def. $tables_n"
     echo "  -a authorization file name      - def. \"$brisk_auth_file\""
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
@@ -83,7 +83,7 @@ while [ $# -gt 0 ]; do
 	-f*) conffile="`get_param "-f" "$1" "$2"`"; sh=$?;;
 	-p*) outconf="`get_param "-p" "$1" "$2"`"; sh=$?;;
 	-n*) n_players="`get_param "-n" "$1" "$2"`"; sh=$?;;
-	-t*) n_tables="`get_param "-t" "$1" "$2"`"; sh=$?;;
+	-t*) tables_n="`get_param "-t" "$1" "$2"`"; sh=$?;;
         -a*) brisk_auth_file="`get_param "-a" "$1" "$2"`"; sh=$?;;
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
@@ -111,7 +111,7 @@ done
 #
 echo "    outconf:    \"$outconf\""
 echo "    n_players:   $n_players"
-echo "    n_tables:   $n_tables"
+echo "    tables_n:   $tables_n"
 echo "    brisk_auth_file: \"$brisk_auth_file\""
 echo "    brisk_debug:\"$brisk_debug\""
 echo "    web_path:   \"$web_path\""
@@ -128,7 +128,7 @@ if [ ! -z "$outconf" ]; then
     echo "#  Produced automatically by brisk::INSTALL.sh"
     echo "#"
     echo "n_players=$n_players"
-    echo "n_tables=$n_tables"
+    echo "tables_n=$tables_n"
     echo "brisk_auth_file=\"$brisk_auth_file\""
     echo "brisk_debug=\"$brisk_debug\""
     echo "web_path=\"$web_path\""
@@ -227,7 +227,7 @@ sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, 
 
 sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
 
-sed -i "s@define *( *N_TABLES,[^)]*)@define(N_TABLES, $n_tables)@g" ${web_path}__/Obj/brisk.phh
+sed -i "s@define *( *TABLES_N,[^)]*)@define(TABLES_N, $tables_n)@g" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}__/Obj/brisk.phh
 
