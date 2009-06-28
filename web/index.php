@@ -57,6 +57,27 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'Exit.'),
                      'tit_tabl'     => array('it' => 'Tavolo ',
                                              'en' => 'Table '),
+                     'tit_stat'     => array('it' => 'imposta lo stato del tuo utente',
+                                             'en' => 'set the status of the user'),
+                     'stat_desc'    => array('it' => 'stato',
+                                             'en' => 'mode' ),
+                     'st_norm_desc' => array('it' => 'normale',
+                                             'en' => 'normal'),
+                     'st_paus_desc' => array('it' => 'pausa',
+                                             'en' => 'pause'),
+                     'st_out_desc'  => array('it' => 'fuori',
+                                             'en' => 'out'),
+                     'st_dog_desc'  => array('it' => 'cane',
+                                             'en' => 'dog'),
+                     'st_food_desc' => array('it' => 'cibo',
+                                             'en' => 'food'),
+                     'st_work_desc' => array('it' => 'lavoro',
+                                             'en' => 'work'),
+                     'st_smok_desc' => array('it' => 'sigaretta',
+                                             'en' => 'smoke'),
+                     'st_pres_desc' => array('it' => 'presente',
+                                             'en' => 'present'),
+                     
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
                      'itm_warr'     => array('it' => 'garantisci',
@@ -534,40 +555,70 @@ $brisk_vertical_menu = '
 
 <div class="webstart" id="menu_commands" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
-<a href="#" title="imposta lo stato del tuo utente" 
-   onmouseover="menu_hide(0,1); menu_show(\'menu_state\');">stato</a><br>
+<a href="#" title="'
+          // MLANG
+          .$mlang_room['tit_stat'][$G_lang].
+'" 
+   onmouseover="menu_hide(0,1); menu_show(\'menu_state\');">'
+          // MLANG
+          .$mlang_room['stat_desc'][$G_lang].
+'</a><br>
 <div id="menu_state" class="webstart">
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st normale\'); menu_over(-1,this);">normale</a><br>
+   title="" onclick="act_chatt(\'/st normale\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_norm_desc'][$G_lang].
+'</a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st pausa\'); menu_over(-1,this);">pausa&nbsp;<img class="unbo" src="img/st_pau.png"></a><br>
+   title="" onclick="act_chatt(\'/st pausa\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_paus_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_pau.png"></a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st fuori\'); menu_over(-1,this);">fuori&nbsp;<img class="unbo" src="img/st_out.png"></a><br>
+   title="" onclick="act_chatt(\'/st fuori\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_out_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_out.png"></a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st cane\'); menu_over(-1,this);">cane&nbsp;<img class="unbo" src="img/st_dog.png"></a><br>
+   title="" onclick="act_chatt(\'/st cane\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_dog_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_dog.png"></a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st cibo\'); menu_over(-1,this);">cibo&nbsp;<img class="unbo" src="img/st_eat.png"></a><br>
+   title="" onclick="act_chatt(\'/st cibo\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_food_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_eat.png"></a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st lavoro\'); menu_over(-1,this);">lavoro&nbsp;<img class="unbo" src="img/st_wrk.png"></a><br>
+   title="" onclick="act_chatt(\'/st lavoro\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_work_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_wrk.png"></a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st sigaretta\'); menu_over(-1,this);">sigaretta&nbsp;<img class="unbo" src="img/st_smk.png"></a><br>
+   title="" onclick="act_chatt(\'/st sigaretta\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_smok_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_smk.png"></a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st presente\'); menu_over(-1,this);">presente&nbsp;<img class="unbo" src="img/st_eye.png"></a><br>
+   title="" onclick="act_chatt(\'/st presente\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_pres_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_eye.png"></a><br>
 
 </div>
 
