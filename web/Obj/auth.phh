@@ -309,6 +309,11 @@ class LoginDB {
     log_main("LoginDB create:end");
   }
 
+  function count()
+  {
+    return ($this->item_n);
+  }
+
   function login_exists($login)
   {
     log_main("login_exists: ".$login);
@@ -321,6 +326,32 @@ class LoginDB {
       }
     }
     return (FALSE);
+  }
+
+  function getlogin_byidx($idx)
+  {
+    if ($idx >= $this->item_n)
+      return FALSE;
+    return ($this->item[$idx]->login);
+  }
+
+  function &getitem_bylogin($login, &$id)
+  {
+    GLOBAL $G_false;
+
+    log_main("login_exists: ".$login);
+    
+    /* check the existence of the nick in the LoginDB */
+    for ($i = 0 ; $i < $this->item_n ; $i++) {
+      if (strcasecmp($this->item[$i]->login, $login) == 0) {
+        log_main("login[".$i."]: ".$this->item[$i]->login);
+        $ret = &$this->item[$i];
+        $id = $i;
+        return ($ret);
+      }
+    }
+    $id = -1;
+    return ($G_false);
   }
 
   function getmail($login)
