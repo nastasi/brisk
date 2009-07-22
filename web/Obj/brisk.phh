@@ -282,13 +282,14 @@ function csplitter($in, $sep)
   $st = 0;
   $id = 0;
   $out = array();
-
+  $out[$id] = "";
   for ($i = 0 ; $i < strlen($in) ; $i++) {
     if ($st == 0) {
       if ($in{$i} == '\\')
         $st = 1;
       else if ($in{$i} == $sep) {
         $id++;
+        $out[$id] = "";
       }
       else {
         $out[$id] .= $in{$i};
@@ -2411,6 +2412,19 @@ function log_legal($curtime, &$user, $where, $mesg)
   }
 }
 
+function log_points($curtime, &$user, $where, $mesg) 
+{
+  GLOBAL $_SERVER;
+
+  if (($fp = @fopen(LEGAL_PATH."/points.log", 'a')) != FALSE) {
+    /* Unix time | session | nickname | IP | where was | mesg */
+    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
+                        ($user->flags & USER_FLAG_AUTH ? 'A' : 'N'),
+                        $user->name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+    fclose($fp);
+  }
+}
+
 
 
 
@@ -2464,6 +2478,12 @@ function show_notify($text, $tout, $butt, $w, $h)
 {
   log_main("SHOW_NOTIFY: ".$text);
   return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
+}
+
+function show_notify_opaque($text, $tout, $butt, $w, $h)
+{
+  log_main("SHOW_NOTIFY OPAQUE: ".$text);
+  return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, true);', $text, $tout, $butt, $w, $h);
 }
 
 
