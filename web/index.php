@@ -136,6 +136,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'contacts'),
                      'itm_mail'     => array('it' => 'contatti',
                                              'en' => 'contacts'),
+                     'tit_cla'      => array('it' => 'classifiche degli utenti',
+                                             'en' => 'user\'s classifics'),
+                     'itm_cla'      => array('it' => 'classifiche',
+                                             'en' => 'classifics'),
                      'tit_rmap'     => array('it' => 'prossime funzionalità implementate',
                                              'en' => 'roadmap of next functionalities'),
                      'itm_rmap'     => array('it' => 'roadmap',
@@ -535,6 +539,10 @@ $brisk_vertical_menu = '
    onmouseover="menu_hide(0,1);"
    title="perché supportare brisk?" onclick="act_whysupport();">supportare?</a><br>
 -->
+<a href="#" 
+   onmouseover="menu_hide(0,1);"
+   title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_classific();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>
+
 <a href="#" 
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_rmap'][$G_lang].'" onclick="act_roadmap();">'.$mlang_room['itm_rmap'][$G_lang].'</a><br>

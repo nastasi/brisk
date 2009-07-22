@@ -135,6 +135,42 @@ table.floaty td {
     vertical-align: top;
 }
 
+table.classifics {
+/*    border: 1px solid red; */
+/*    border-collapse: collapse; */
+    border-spacing: 8px;
+    margin: 0px;
+    width: 100%;
+}
+
+table.classifics td
+{
+    border: 1px solid gray; 
+    padding: auto;         
+    margin: auto;
+    vertical-align: top;
+    text-align: center;
+}
+
+table.classific {
+    border: 1px solid gray;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    margin: auto;
+}
+
+table.classific th {
+    border: 1px solid gray;
+    text-align: center;
+    padding: 4px;
+}
+
+table.classific td {
+    border: 1px solid gray;
+    text-align: center;
+    padding: 4px;
+}
+
 table.floaty td.floatyleft {
     width: 100px;
 }
