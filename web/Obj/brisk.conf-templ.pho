@@ -12,11 +12,36 @@ $G_alarm_passwd = "yourpasswd";
 $G_is_local = FALSE;
 $G_black_list = array();
 
+// is the top banner active ?
 $G_with_topbanner = FALSE;
+// is the first side banner active ?
+$G_with_sidebanner = TRUE;
+// is the second side banner active ?
+$G_with_sidebanner2 = TRUE;
+// is poll active ?
+$G_with_poll = FALSE;
+
+
 $G_topbanner = '<div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigpict(this, \'out\', 0, 0);">
 <a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
 Torneo di briscola<br> chiamata - Milano<br> 17/05/2008</a>
 </div>
 <img class="nobohide" id="topbanner_big" src="img/bcm_tor080517.gif">';
+
+$G_sidebanner = '<div class="topbanner" style="background: #ffd780; border: solid 1px #ffae00; width: 60px; margin: auto;" id="sidebanner2">
+<a target="_blank" href="briskmeeting4.php">
+<img style="position: static; border: solid 0px black;" src="img/brisk_meeting_trinacria60b.png"  onMouseOver="show_bigpict($(\'sidebanner2\'), \'over\', 100, -80, \'\');" onMouseOut="show_bigpict($(\'sidebanner2\'), \'out\', 0, 0, \'\');"></div>
+<img class="nobohide" id="sidebanner2_big" src="img/brisk_meeting4big150.png">';
+
+$G_sidebanner2 = '<div class="topbanner" style="background: #ffd780; border: solid 1px #ffae00; width: 60px; margin: auto;" id="sidebanner2">
+<a target="_blank" href="briskmeeting4.php">
+<img style="position: static; border: solid 0px black;" src="img/brisk_meeting_trinacria60b.png"  onMouseOver="show_bigpict($(\'sidebanner2\'), \'over\', 100, -80, \'\');" onMouseOut="show_bigpict($(\'sidebanner2\'), \'out\', 0, 0, \'\');"></div>
+<img class="nobohide" id="sidebanner2_big" src="img/brisk_meeting4big150.png">';
+
+$G_poll_name = "calcolo_punteggio";
+$G_poll_title = "Vota come calcolare i punteggi!";
+$G_poll_entries = array( array( 'id' => 'din', 'cont' => 'Dinner room'),
+                         array( 'id' => 'bat', 'cont' => 'Bath room'),
+                         array( 'id' => 'coo', 'cont' => 'Cooking room') );
 
 ?>
