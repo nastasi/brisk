@@ -951,11 +951,12 @@ function locshm_exists($tok)
     
 }
 
-
+// rendiamo qui l'elenco dei punti come return della func
 function calculate_points(&$table)
 {
   GLOBAL $G_all_points; 
 
+  $ret = array();
   $pro = 0;
 
   if ($table->asta_pnt == 60)
@@ -1010,10 +1011,13 @@ function calculate_points(&$table)
     
     $table->points[$table->points_n % MAX_POINTS][$i] = $pt;
     $table->total[$i] += $pt;
+    $ret[$i] = $pt;
   }
   $table->points_n++;
   $table->old_pnt = $pro;
   $table->mult = 1;
+  
+  return($ret);
 }
 
 /* show table 
@@ -1384,6 +1388,7 @@ function table_wellcome($user)
 
 function briscola_show($room, $table, $user)
 {
+  GLOBAL $G_lang, $mlang_bin5_bin5;
   $ptnadd = "";
   $ret = "";
 
