@@ -454,14 +454,20 @@ else if ($user->stat == 'table') {
 	if ($table->turn == (BRISKIN5_PLAYERS_N * 8)) { /* game finished */
 	  log_wr(sprintf("GIOCO FINITO !!!"));
 
-          $plist = "$table->table_token|$user->table|$table->player_n";
-          $curtime = time();
-          log_legal($curtime, $user, "STAT:FINISH_GAME", $plist);
 
 	  /* ************************************************ */
 	  /*    PRIMA LA PARTE PER LO SHOW DI CHI HA VINTO    */
 	  /* ************************************************ */
-	  calculate_points(&$table);
+	  $pt_cur = calculate_points(&$table);
+
+          $plist = "$table->table_token|$user->table_orig|$table->player_n";
+          $curtime = time();
+          for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+            $user_cur = &$bri->user[$table->player[$i]];
+            $plist .= '|'.xcapelt($user_cur->name).'|'.$pt_cur[$i];
+          }
+          log_legal($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
+          log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
 
 	  $table->game_next();
 	  $table->game_init(&$bri->user);
