@@ -151,13 +151,21 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
     echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
   }
   else if ($argz[0] == 'about') {
-    echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 220);
   }
   else if ($argz[0] == 'passwdhowto') {
     echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'roadmap') {
     echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+  }
+  else if ($argz[0] == 'classific') {
+    GLOBAL $G_false;
+
+    require_once("briskin5/Obj/briskin5.phh");
+    require_once("briskin5/Obj/classific.phh");
+
+    echo show_notify(str_replace("\n", " ", classifics_show($G_false)), 0, $mlang_indwr['btn_backtotab'][$G_lang], 800, 600);
   }
   else if ($argz[0] == 'whysupport') {
     echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lng], 400, 200);
@@ -419,6 +427,23 @@ else if ($user->stat == 'room') {
     $user->step_inc();
     
   }
+
+
+  else if ($argz[0] == 'classific') {
+
+    require_once("briskin5/Obj/briskin5.phh");
+    require_once("briskin5/Obj/classific.phh");
+
+    $user->comm[$user->step % COMM_N] =  "gst.st = ".($user->step+1)."; ";
+    $user->comm[$user->step % COMM_N] .= show_notify_opaque(str_replace("\n", " ", classifics_show($user)), 0, $mlang_indwr['btn_backtotab'][$G_lang], 800, 600);
+
+    log_wr($user->comm[$user->step % COMM_N]);
+    $user->step_inc();
+
+
+  }
+
+
   else if ($argz[0] == 'roadmap') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
