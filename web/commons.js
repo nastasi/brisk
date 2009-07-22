@@ -360,6 +360,11 @@ function act_about()
     send_mesg("about");
 }
 
+function act_classific()
+{
+    send_mesg("classific");
+}
+
 function act_roadmap()
 {
     send_mesg("roadmap");
@@ -551,7 +556,7 @@ slowimg.prototype = {
 }
 
 
-function notify(st, text, tout, butt, w, h)
+function notify_ex(st, text, tout, butt, w, h, is_opa)
 {
     var clo, box;
     var t = this;
@@ -584,7 +589,11 @@ function notify(st, text, tout, butt, w, h)
     cont.innerHTML = text;
 
     box =  document.createElement("div");
-    box.className = "notify";
+    if (is_opa)
+        box.className = "notify_opaque";
+    else
+        box.className = "notify";
+
     box.style.zIndex = 200;
     box.style.width  = w+"px";
     box.style.marginLeft  = -parseInt(w/2)+"px";
@@ -605,7 +614,8 @@ function notify(st, text, tout, butt, w, h)
 
 }
 
-notify.prototype = {
+
+notify_ex.prototype = {
     ancestor: null,
     st: null,
     notitag: null,
@@ -631,6 +641,17 @@ notify.prototype = {
 	this.obj.ancestor.removeChild(this.obj.notitag);
 	this.obj.unblock();
     }
+}
+
+
+notify.prototype = notify_ex.prototype;                // Define sub-class
+notify.prototype.constructor = notify;
+notify.baseConstructor = notify_ex;
+notify.superClass = notify_ex.prototype;
+
+function notify(st, text, tout, butt, w, h)
+{
+    notify_ex.call(this, st, text, tout, butt, w, h, false);
 }
 	
 
