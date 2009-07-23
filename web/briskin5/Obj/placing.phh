@@ -24,7 +24,7 @@
  *
  */
 
-
+define(TOP_NUM, 10);
 
 define(TRI_LIMIT, (90 * 24 * 60 * 60));
 define(TRI_FEW_GAMES, 60);
@@ -130,12 +130,12 @@ function placing_show(&$user, $suff)
     if ($pg->username == "")
       continue;
 
-    if ($i < 5) {
+    if ($i < TOP_NUM) {
       $ret .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s</td><td>(%d/%d)</td></tr>", $i+1, 
                       ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
     }
     if ($user != FALSE) {
-      if ($pg->username == $user->name && $i >= 5) {
+      if ($pg->username == $user->name && $i >= TOP_NUM) {
         $tail = sprintf("<tr><td colspan=4 style='text-align: center'> . . . . . . . . . . </td></tr>");
         $tail .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s</td><td>(%d/%d)</td></tr>", $i+1,
                          ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
