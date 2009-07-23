@@ -137,9 +137,9 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                      'itm_mail'     => array('it' => 'contatti',
                                              'en' => 'contacts'),
                      'tit_cla'      => array('it' => 'classifiche degli utenti',
-                                             'en' => 'user\'s classifics'),
+                                             'en' => 'user\'s placings'),
                      'itm_cla'      => array('it' => 'classifiche',
-                                             'en' => 'classifics'),
+                                             'en' => 'placings'),
                      'tit_rmap'     => array('it' => 'prossime funzionalità implementate',
                                              'en' => 'roadmap of next functionalities'),
                      'itm_rmap'     => array('it' => 'roadmap',
@@ -541,7 +541,7 @@ $brisk_vertical_menu = '
 -->
 <a href="#" 
    onmouseover="menu_hide(0,1);"
-   title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_classific();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>
+   title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_placing();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>
 
 <a href="#" 
    onmouseover="menu_hide(0,1);"

@@ -360,9 +360,9 @@ function act_about()
     send_mesg("about");
 }
 
-function act_classific()
+function act_placing()
 {
-    send_mesg("classific");
+    send_mesg("placing");
 }
 
 function act_roadmap()
