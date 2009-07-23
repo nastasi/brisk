@@ -111,7 +111,7 @@ function main()
   usort($mon, ptsgam_cmp);
   usort($wee, ptsgam_cmp);
   
-  echo "<br><br>TRI<br>";
+  echo "<br><br>TRI<br>\n";
 
   if (($fplo = @fopen(LEGAL_PATH."/class_tri_lo.log", 'w')) == FALSE) {
     echo "Open tri_lo failed<br>";
@@ -125,7 +125,7 @@ function main()
   for ($i = 0 ; $i < count($tri) ; $i++) {
     if ($tri[$i]->gam == 0.0)
       continue;
-    printf("%s: %s (%d) <br>",  $tri[$i]->username,  $tri[$i]->snormpts(), $tri[$i]->gam);
+    printf("%s: %s (%d) <br>\n",  $tri[$i]->username,  $tri[$i]->snormpts(), $tri[$i]->gam);
     if ($tri[$i]->gam < TRI_FEW_GAMES) 
       fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($tri[$i]->username), $tri[$i]->pts, $tri[$i]->gam));
     else
@@ -134,7 +134,7 @@ function main()
   fclose($fphi);
   fclose($fplo);
 
-  echo "<br><br>MON<br>";
+  echo "<br><br>MON<br>\n";
 
   if (($fplo = @fopen(LEGAL_PATH."/class_mon_lo.log", 'w')) == FALSE) {
     echo "Open tri_lo failed<br>";
@@ -148,7 +148,7 @@ function main()
   for ($i = 0 ; $i < count($mon) ; $i++) {
     if ($mon[$i]->gam == 0.0)
       continue;
-    printf("%s: %s (%d) <br>",  $mon[$i]->username,  $mon[$i]->snormpts(), $mon[$i]->gam);
+    printf("%s: %s (%d) <br>\n",  $mon[$i]->username,  $mon[$i]->snormpts(), $mon[$i]->gam);
     if ($mon[$i]->gam < MON_FEW_GAMES) 
       fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($mon[$i]->username), $mon[$i]->pts, $mon[$i]->gam));
     else
@@ -157,7 +157,7 @@ function main()
   fclose($fphi);
   fclose($fplo);
 
-  echo "<br><br>WEE<br>";
+  echo "<br><br>WEE<br>\n";
   if (($fplo = @fopen(LEGAL_PATH."/class_wee_lo.log", 'w')) == FALSE) {
     echo "Open wee_lo failed<br>";
     exit;
@@ -170,7 +170,7 @@ function main()
   for ($i = 0 ; $i < count($wee) ; $i++) {
     if ($wee[$i]->gam == 0.0) 
       continue;
-    printf("%s: %s (%d) <br>",  $wee[$i]->username,  $wee[$i]->snormpts(), $wee[$i]->gam);
+    printf("%s: %s (%d) <br>\n",  $wee[$i]->username,  $wee[$i]->snormpts(), $wee[$i]->gam);
     if ($wee[$i]->gam < WEE_FEW_GAMES) 
       fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($wee[$i]->username), $wee[$i]->pts, $wee[$i]->gam));
     else
@@ -180,7 +180,7 @@ function main()
   fclose($fplo);
 
 
-  echo "FINITO";
+  echo "FINITO\n";
 }
 
 main();
