@@ -63,7 +63,7 @@ class Ptsgam {
 
   function snormpts() 
   {
-    $ret = sprintf ("%.3f", $this->normpts());
+    $ret = sprintf ("%.3f", $this->normpts() * 100.0);
     if (strchr($ret, ".")) {
       $ret =  rtrim(rtrim($ret, "0"), ".");
     }
