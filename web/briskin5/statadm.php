@@ -50,7 +50,7 @@ function main()
   if ($pazz != $G_alarm_passwd)
     exit;
 
-  if (($fp = @fopen(LEGAL_PATH."/legal.log", 'r')) == FALSE) {
+  if (($fp = @fopen(LEGAL_PATH."/points.log", 'r')) == FALSE) {
     echo "Open data file error";
     exit;
   }
