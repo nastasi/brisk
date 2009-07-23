@@ -30,7 +30,7 @@ function usage () {
     echo "  -W web files only"
     echo "  -n number of players            - def. $n_players"
     echo "  -t number of tables             - def. $tables_n"
-    echo "  -a authorization file name      - def. \"$brisk_auth_file\""
+    echo "  -a authorization file name      - def. \"$brisk_auth_conf\""
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
@@ -84,7 +84,7 @@ while [ $# -gt 0 ]; do
 	-p*) outconf="`get_param "-p" "$1" "$2"`"; sh=$?;;
 	-n*) n_players="`get_param "-n" "$1" "$2"`"; sh=$?;;
 	-t*) tables_n="`get_param "-t" "$1" "$2"`"; sh=$?;;
-        -a*) brisk_auth_file="`get_param "-a" "$1" "$2"`"; sh=$?;;
+        -a*) brisk_auth_conf="`get_param "-a" "$1" "$2"`"; sh=$?;;
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
 	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
@@ -112,7 +112,7 @@ done
 echo "    outconf:    \"$outconf\""
 echo "    n_players:   $n_players"
 echo "    tables_n:   $tables_n"
-echo "    brisk_auth_file: \"$brisk_auth_file\""
+echo "    brisk_auth_conf: \"$brisk_auth_conf\""
 echo "    brisk_debug:\"$brisk_debug\""
 echo "    web_path:   \"$web_path\""
 echo "    ftok_path:  \"$ftok_path\""
@@ -129,7 +129,7 @@ if [ ! -z "$outconf" ]; then
     echo "#"
     echo "n_players=$n_players"
     echo "tables_n=$tables_n"
-    echo "brisk_auth_file=\"$brisk_auth_file\""
+    echo "brisk_auth_conf=\"$brisk_auth_conf\""
     echo "brisk_debug=\"$brisk_debug\""
     echo "web_path=\"$web_path\""
     echo "ftok_path=\"$ftok_path\""
