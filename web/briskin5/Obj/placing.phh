@@ -135,7 +135,7 @@ function placing_show(&$user, $suff)
                       ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
     }
     if ($user != FALSE) {
-      if ($pg->username == $user->name && $i >= TOP_NUM) {
+      if (strcasecmp($pg->username, $user->name) == 0 && $i >= TOP_NUM) {
         $tail = sprintf("<tr><td colspan=4 style='text-align: center'> . . . . . . . . . . </td></tr>");
         $tail .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s</td><td>(%d/%d)</td></tr>", $i+1,
                          ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
