@@ -6,6 +6,9 @@
  BRISK3 (trusty)
  ======
 
+  numero di tavoli auth-only nel .brisk-install
+  finire multilingua (briskin5/index_wr.php e altri se ce ne sono)
+
  BUG
  ---
  
