@@ -1,0 +1,154 @@
+<?php
+/*
+ *  brisk - placing.phh
+ *
+ *  Copyright (C) 2009 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * $Id$
+ *
+ */
+
+
+
+define(TRI_LIMIT, (90 * 24 * 60 * 60));
+define(TRI_FEW_GAMES, 60);
+
+define(MON_LIMIT, (30 * 24 * 60 * 60));
+define(MON_FEW_GAMES, 20);
+
+define(WEE_LIMIT, (7 * 24 * 60 * 60));
+define(WEE_FEW_GAMES, 10);
+
+
+class Ptsgam {
+  var $username;
+  var $pts;
+  var $gam;
+  
+  function Ptsgam($username = "", $pts = 0, $gam = 0)
+  {
+    $this->username = $username;
+    $this->pts = $pts;
+    $this->gam = $gam;
+  }
+
+  function &clone()
+  {
+    $ret = new Ptsgam($this->username, $this->pts, $this->gam);
+
+    return ($ret);
+  }
+
+  function add($pts)
+  {
+    $this->pts += $pts;
+    $this->gam++;
+  }
+
+  function snormpts() 
+  {
+    $ret = sprintf ("%.3f", $this->normpts());
+    if (strchr($ret, ".")) {
+      $ret =  rtrim(rtrim($ret, "0"), ".");
+    }
+    return ($ret);
+  }
+
+  function normpts()
+  {
+    if ($this->gam == 0)
+      return (0);
+    else
+      return ($this->pts / $this->gam);
+  }
+}
+
+function ptsgam_cmp($a, $b)
+{
+  $norma = $a->normpts();
+  $normb = $b->normpts();
+    
+  if ($norma == $normb) {
+    if ($a->gam == $b->gam)
+      return (0);
+    else 
+      return ($a->gam < $b->gam ? 1 : -1);
+  }
+  else
+    return (($norma < $normb) ? 1 : -1);
+}
+
+function placings_show(&$user) 
+{
+  $ret = sprintf("<div style='padding: auto;'><table class='placings'>");
+  $ret .= sprintf("<tr><td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>(non meno di %d partite)<br><br>%s</td>", WEE_FEW_GAMES, placing_show($user, "wee_hi") );
+  $ret .= sprintf("<td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>(meno di %d partite)<br><br>%s</td></tr>\n", WEE_FEW_GAMES, placing_show($user, "wee_lo") );
+
+  $ret .= sprintf("<tr><td style='background-color: #fffff0;'><br><b>Mensile</b><br>(non meno di %d partite)<br><br>%s</td>", MON_FEW_GAMES, placing_show($user, "mon_hi") );
+  $ret .= sprintf("<td style='background-color: #fffff0;'><br><b>Mensile</b><br>(meno di %d partite)<br><br>%s</td></tr>\n", MON_FEW_GAMES, placing_show($user, "mon_lo") );
+
+  $ret .= sprintf("<tr><td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>(non meno di %d partite)<br><br>%s</td>", TRI_FEW_GAMES, placing_show($user, "tri_hi")); 
+  $ret .= sprintf("<td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>(meno di %d partite)<br><br>%s</td></tr>", TRI_FEW_GAMES, placing_show($user, "tri_lo")); 
+
+
+  $ret .= sprintf("</table></div>");
+  return ($ret);
+}
+
+function placing_show(&$user, $suff) 
+{
+  $tail = FALSE;
+  
+  if (($fp = @fopen(LEGAL_PATH."/class_".$suff.".log", 'r')) == FALSE) {
+    return (FALSE);
+  }
+  
+  // MLANG
+  $ret = sprintf("<table class='placing'><tr><th>Pos.</th><th>Utente</th><th>Score</th><th>(Punti/Partite)</th>");
+  for ($i = 0 ; !feof($fp) ; $i++) {
+    $bf = fgets($fp, 4096);
+    $ar = csplitter($bf, '|');
+    
+    $pg = new Ptsgam($ar[0], $ar[1], $ar[2]);
+
+    if ($pg->username == "")
+      continue;
+
+    if ($i < 5) {
+      $ret .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s</td><td>(%d/%d)</td></tr>", $i+1, 
+                      ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
+    }
+    if ($user != FALSE) {
+      if ($pg->username == $user->name && $i >= 5) {
+        $tail = sprintf("<tr><td colspan=4 style='text-align: center'> . . . . . . . . . . </td></tr>");
+        $tail .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s</td><td>(%d/%d)</td></tr>", $i+1,
+                         ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
+      }
+    }
+  }
+
+  if ($tail != FALSE) {
+    $ret .= $tail;
+  }
+  $ret .= "</table>"; 
+  
+  fclose($fp);
+  
+  return ($ret);
+}
