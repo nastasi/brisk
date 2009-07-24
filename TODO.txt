@@ -8,6 +8,35 @@
 
   numero di tavoli auth-only nel .brisk-install
   finire multilingua (briskin5/index_wr.php e altri se ce ne sono)
+  coniglio
+  only auth strictly
+
+Dunque, 
+
+- come vengono aggiornate le classifiche: ogni giorno alle 23:58
+
+- cosa cambia tra le tre coppie di classifiche: 
+  ci sono le classifiche dell' ultima settimana, quelle dell' ultimo mese,  e quelle dell' ultimo trimestre,
+  per ognuno di questi lassi di tempo poi c'e' la classifica di chi ha giocato piu' di TOT partite o meno di TOT partite, con TOT che cambia a seconda del lasso di tempo.
+
+- come vengono calcolate le classifiche: per ogni utente vengono presi tutti i punti fatti ai tavoli con lucchetto nel lasso di tempo preso in considerazione (ultima settimana, ultimo mese o ultimo trimestre), sommati e divisi per il numero di partite fatte in quello stesso lasso di tempo per normalizzare i valori; poi siccome la gente quando vede 0.18734 sbarella ho deciso di moltiplicare il tutto per 100.
+
+Un esempio per chiarire:
+
+  l'utente 'pippo' che è nuovo gioca 4 partite nell'ultima settimana con i seguenti punteggi:
+    -2, 1, 2, 1
+  lo score viene { [ (-2) + (1) + (2) + (1) ] / 4 }  * 100 = 50.0
+  
+  a parita' di score tra utenti va più in alto chi ha giocato più partite.
+
+Se dopo quelle 4 partite 'pippo' non ne giochera' più, passata una settimana dall'ultima giocata 
+sparirà dalla classifica settimanale e rimarrà in quelle mensili e trimestrali.
+
+
+  
+
+
+
 
  BUG
  ---
