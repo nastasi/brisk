@@ -27,13 +27,13 @@
 define(TOP_NUM, 10);
 
 define(TRI_LIMIT, (90 * 24 * 60 * 60));
-define(TRI_FEW_GAMES, 60);
+define(TRI_FEW_GAMES, 140);
 
 define(MON_LIMIT, (30 * 24 * 60 * 60));
-define(MON_FEW_GAMES, 20);
+define(MON_FEW_GAMES, 70);
 
 define(WEE_LIMIT, (7 * 24 * 60 * 60));
-define(WEE_FEW_GAMES, 10);
+define(WEE_FEW_GAMES, 35);
 
 
 class Ptsgam {
