@@ -24,15 +24,18 @@
  *
  */
 
-define(TOP_NUM, 10);
 
+define(TOP_NUM, 10);
 define(TRI_LIMIT, (90 * 24 * 60 * 60));
+// define(TRI_FEW_GAMES, 60);
 define(TRI_FEW_GAMES, 140);
 
 define(MON_LIMIT, (30 * 24 * 60 * 60));
+// define(MON_FEW_GAMES, 20);
 define(MON_FEW_GAMES, 70);
 
 define(WEE_LIMIT, (7 * 24 * 60 * 60));
+// define(WEE_FEW_GAMES, 10);
 define(WEE_FEW_GAMES, 35);
 
 
@@ -97,14 +100,14 @@ function ptsgam_cmp($a, $b)
 function placings_show(&$user) 
 {
   $ret = sprintf("<div style='padding: auto;'><table class='placings'>");
-  $ret .= sprintf("<tr><td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>(non meno di %d partite)<br><br>%s</td>", WEE_FEW_GAMES, placing_show($user, "wee_hi") );
-  $ret .= sprintf("<td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>(meno di %d partite)<br><br>%s</td></tr>\n", WEE_FEW_GAMES, placing_show($user, "wee_lo") );
+  $ret .= sprintf("<tr><td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>(non meno di %d partite)<br><br>%s<br></td>", WEE_FEW_GAMES, placing_show($user, "wee_hi") );
+  $ret .= sprintf("<td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>(meno di %d partite)<br><br>%s<br></td></tr>\n", WEE_FEW_GAMES, placing_show($user, "wee_lo") );
 
-  $ret .= sprintf("<tr><td style='background-color: #fffff0;'><br><b>Mensile</b><br>(non meno di %d partite)<br><br>%s</td>", MON_FEW_GAMES, placing_show($user, "mon_hi") );
-  $ret .= sprintf("<td style='background-color: #fffff0;'><br><b>Mensile</b><br>(meno di %d partite)<br><br>%s</td></tr>\n", MON_FEW_GAMES, placing_show($user, "mon_lo") );
+  $ret .= sprintf("<tr><td style='background-color: #fffff0;'><br><b>Mensile</b><br>(non meno di %d partite)<br><br>%s<br></td>", MON_FEW_GAMES, placing_show($user, "mon_hi") );
+  $ret .= sprintf("<td style='background-color: #fffff0;'><br><b>Mensile</b><br>(meno di %d partite)<br><br>%s<br></td></tr>\n", MON_FEW_GAMES, placing_show($user, "mon_lo") );
 
-  $ret .= sprintf("<tr><td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>(non meno di %d partite)<br><br>%s</td>", TRI_FEW_GAMES, placing_show($user, "tri_hi")); 
-  $ret .= sprintf("<td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>(meno di %d partite)<br><br>%s</td></tr>", TRI_FEW_GAMES, placing_show($user, "tri_lo")); 
+  $ret .= sprintf("<tr><td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>(non meno di %d partite)<br><br>%s<br></td>", TRI_FEW_GAMES, placing_show($user, "tri_hi")); 
+  $ret .= sprintf("<td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>(meno di %d partite)<br><br>%s<br></td></tr>", TRI_FEW_GAMES, placing_show($user, "tri_lo")); 
 
 
   $ret .= sprintf("</table></div>");
@@ -121,6 +124,9 @@ function placing_show(&$user, $suff)
   
   // MLANG
   $ret = sprintf("<table class='placing'><tr><th>Pos.</th><th>Utente</th><th>Score</th><th>(Punti/Partite)</th>");
+
+  $old_normpts = 1000000000;
+  $old_gam = -1;
   for ($i = 0 ; !feof($fp) ; $i++) {
     $bf = fgets($fp, 4096);
     $ar = csplitter($bf, '|');
@@ -129,6 +135,9 @@ function placing_show(&$user, $suff)
 
     if ($pg->username == "")
       continue;
+
+    if ($pg->normpts() == $old_normpts && $pg->gam == $old_gam)
+       $i--;
 
     if ($i < TOP_NUM) {
       $ret .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s</td><td>(%d/%d)</td></tr>", $i+1, 
@@ -141,6 +150,8 @@ function placing_show(&$user, $suff)
                          ($pg->username == $user->name ? "<b>" : ""), $pg->username, ($pg->username == $user->name ? "</b>" : ""), $pg->snormpts(), $pg->pts, $pg->gam);
       }
     }
+    $old_normpts = $pg->normpts();
+    $old_gam = $pg->gam;
   }
 
   if ($tail != FALSE) {
