@@ -96,8 +96,12 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'listen all messages from each user connected'),
                      'tit_listaut'  => array('it' => 'solo autenticati',
                                              'en' => 'only authorized'),
+                     'tit_isolaut'  => array('it' => 'isolamento',
+                                             'en' => 'isolation'),
                      'listaut_desc' => array('it' => 'leggi soltanto i messaggi degli utenti con password',
                                              'en' => 'listen messages only from authenticated users'),
+                     'isolaut_desc' => array('it' => 'visualizza Brisk come se fosse solo per utenti con password',
+                                             'en' => 'show Brisk like an authenticated user only site'),
                      'tit_help'     => array('it' => 'informazioni utili su Brisk',
                                              'en' => 'usefull information about Brisk'),
                      'itm_help'     => array('it' => 'aiuto',
@@ -199,6 +203,7 @@ function poll_dom() {
 
 function main()
 {
+  GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
   GLOBAL $G_with_sidebanner, $G_sidebanner; 
   GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
@@ -338,16 +343,21 @@ function main()
       else
         $i = TABLES_N - $ii - 1;
 
-      if ($ii % 4 == 0)
-	$tables .= '<tr>';
-      $tables .= '<td>';
-      $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
-      $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
-      $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
-      $tables .= '</div>';
-      $tables .= '</td>'."\n";
-      if ($ii % 4 == 3)
+      if ($ii % 4 == 0) {
+          $tables .= '<tr id = "tr_noauth'.$ii.'">';
+      }
+      if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $ii < TABLES_AUTH_N) {
+        $tables .= '<td id = "td_noauth'.$ii.'">';
+
+        $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
+        $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
+        $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
+        $tables .= '</div>';
+        $tables .= '</td>'."\n";
+      }
+      if ($ii % 4 == 3) {
 	$tables .= '</tr>';
+      }
     }
     $tables .= '</table></div>';
 
@@ -453,10 +463,12 @@ google_color_url = "000000";
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>'
 ).'</div></td>
-<td align="center">'.($G_with_topbanner ? '<table><tr><td>' : '').'<div style="text-align: center;">
+<td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
     <img class="nobo" src="img/brisk_logo64.png">
     '.$mlang_room['headline'][$G_lang].'<br>
-    </div>'.($G_with_topbanner ? sprintf('</td><td>%s</td></tr></table>', $G_topbanner) : '').'</td>
+    </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>', 
+                                                                ($G_with_topbanner ? $G_topbanner : 
+"<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
 '.($G_is_local ? '' :
 '<script type="text/javascript"><!--
@@ -670,6 +682,16 @@ $brisk_vertical_menu = '
           .$mlang_room['tit_listaut'][$G_lang].
 '</span></a><br>
 
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="'
+          // MLANG leggo soltanto i messaggi degli utenti con password
+          .$mlang_room['isolaut_desc'][$G_lang].
+          '" onclick="act_chatt(\'/listen isolation\'); menu_over(-1,this);"><span id="list_isol">'
+          // MLANG solo autenticati
+          .$mlang_room['tit_isolaut'][$G_lang].
+'</span></a><br>
+
 </div>
 
 </div>'.($G_with_poll ? '' : '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
@@ -738,6 +760,9 @@ supported by:<br>
 <SCRIPT type="text/javascript"><!--
    var g_lang = "<? echo $G_lang; ?>";
    var g_lng = "<? echo $G_lng; ?>";
+   var g_tables_n = <? echo TABLES_N; ?>;
+   var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
+   var g_listen;
    var g_withflash = false;
    var g_is_spawn = 0; 
    var gst  = new globst();
@@ -864,6 +889,9 @@ echo "$body"; ?>
    var sess;
    var g_lang = "<? echo $G_lang; ?>";
    var g_lng = "<? echo $G_lng; ?>";
+   var g_tables_n = <? echo TABLES_N; ?>;
+   var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
+   var g_listen;
    var tra = null;
    var stat = "";
    var subst = "";
@@ -896,7 +924,7 @@ else {
 <?php
      if ($G_with_topbanner) {
        printf("     topbanner_init();\n");
-    }
+     }
      if ($G_with_sidebanner) {
        printf("     sidebanner_init();\n");
     }
