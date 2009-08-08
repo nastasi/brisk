@@ -332,7 +332,10 @@ function act_wakeup()
     send_mesg("wakeup");
 }
 
-
+function act_splash(date)
+{
+    send_mesg("splash|"+date);
+}
 
 function act_help()
 {
@@ -556,7 +559,7 @@ slowimg.prototype = {
 }
 
 
-function notify_ex(st, text, tout, butt, w, h, is_opa)
+function notify_ex(st, text, tout, butt, w, h, is_opa, block_time)
 {
     var clo, box;
     var t = this;
@@ -571,12 +574,21 @@ function notify_ex(st, text, tout, butt, w, h, is_opa)
     clo.type = "submit";
     clo.className = "button";
     clo.style.bottom = "4px";
-    clo.value = butt;
     clo.obj = this;
-    clo.onclick = this.input_hide;
-    
+    if (block_time > 0) {
+        clo.value = "leggere, prego.";
+        this.butt = butt;
+    }
+    else {
+        clo.value = butt;
+        clo.onclick = this.input_hide;
+    }
+
     clodiv = document.createElement("div");
     clodiv.className = "notify_clo";
+    this.clo = clo;
+    this.clodiv = clodiv;
+
     clodiv.appendChild(clo);
 
     cont = document.createElement("div");
@@ -609,8 +621,13 @@ function notify_ex(st, text, tout, butt, w, h, is_opa)
     
     this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
 
-    formsub_hilite(clo);
-    clo.focus();
+    if (block_time != 0) {
+        this.tblkid = setTimeout(function(obj){ obj.clo.value = obj.butt; obj.clo.onclick = obj.input_hide; formsub_hilite(obj.clo); obj.clo.focus(); }, block_time, this);
+    }
+    else {
+        formsub_hilite(clo);
+        clo.focus();
+    }
 
 }
 
@@ -620,7 +637,11 @@ notify_ex.prototype = {
     st: null,
     notitag: null,
     toutid: null,
-    
+    clo: null,
+    clodiv: null, 
+    butt: null,
+    tblkid: null, 
+
     unblock: function()
     {
 	if (this.st.st_loc < this.st.st_loc_new) {
@@ -651,7 +672,7 @@ notify.superClass = notify_ex.prototype;
 
 function notify(st, text, tout, butt, w, h)
 {
-    notify_ex.call(this, st, text, tout, butt, w, h, false);
+    notify_ex.call(this, st, text, tout, butt, w, h, false, 0);
 }
 	
 
