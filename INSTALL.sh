@@ -3,8 +3,9 @@
 #
 # Defaults
 #
-n_players=3
+players_n=3
 tables_n=16
+tables_auth_n=6
 brisk_auth_conf="brisk_auth.conf.pho"
 brisk_debug="0xffff"
 web_path="$HOME/brisk"
@@ -23,13 +24,14 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-a <auth_file_name>] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
+    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-a <auth_file_name>] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
-    echo "  -n number of players            - def. $n_players"
+    echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
+    echo "  -T number of auth-only tables   - def. $tables_auth_n"
     echo "  -a authorization file name      - def. \"$brisk_auth_conf\""
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
@@ -82,8 +84,9 @@ while [ $# -gt 0 ]; do
     case $1 in
 	-f*) conffile="`get_param "-f" "$1" "$2"`"; sh=$?;;
 	-p*) outconf="`get_param "-p" "$1" "$2"`"; sh=$?;;
-	-n*) n_players="`get_param "-n" "$1" "$2"`"; sh=$?;;
+	-n*) players_n="`get_param "-n" "$1" "$2"`"; sh=$?;;
 	-t*) tables_n="`get_param "-t" "$1" "$2"`"; sh=$?;;
+	-T*) tables_auth_n="`get_param "-T" "$1" "$2"`"; sh=$?;;
         -a*) brisk_auth_conf="`get_param "-a" "$1" "$2"`"; sh=$?;;
 	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
 	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
@@ -110,8 +113,9 @@ done
 #  Show parameters
 #
 echo "    outconf:    \"$outconf\""
-echo "    n_players:   $n_players"
+echo "    players_n:   $players_n"
 echo "    tables_n:   $tables_n"
+echo "    tables_auth_n: $tables_auth_n"
 echo "    brisk_auth_conf: \"$brisk_auth_conf\""
 echo "    brisk_debug:\"$brisk_debug\""
 echo "    web_path:   \"$web_path\""
@@ -127,8 +131,9 @@ if [ ! -z "$outconf" ]; then
     echo "#"
     echo "#  Produced automatically by brisk::INSTALL.sh"
     echo "#"
-    echo "n_players=$n_players"
+    echo "players_n=$players_n"
     echo "tables_n=$tables_n"
+    echo "tables_auth_n=$tables_auth_n"
     echo "brisk_auth_conf=\"$brisk_auth_conf\""
     echo "brisk_debug=\"$brisk_debug\""
     echo "web_path=\"$web_path\""
@@ -156,8 +161,8 @@ fi
 #
 ftokk_path="${ftok_path}k"
 
-if [ $n_players -ne 3 -a $n_players -ne 5 ]; then
-    echo "n_players ($n_players) out of range (3|5)"
+if [ $players_n -ne 3 -a $players_n -ne 5 ]; then
+    echo "players_n ($players_n) out of range (3|5)"
     exit 1
 fi
 
@@ -209,25 +214,27 @@ cd web
 find . -name '.htaccess' -exec install -m 644 {} ${web_path}__/{} \;
 cd - >/dev/null 2>&1
 
-if [ $n_players -eq 5 ]; then
+if [ $players_n -eq 5 ]; then
    send_time=250
 else
    send_time=10
 fi
 
 # .js substitutions
-sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $n_players/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;`
+sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $players_n/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;`
 
 sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;`
 
 # .ph[pho] substitutions
-sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $n_players)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
+sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $players_n)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
 
-sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $n_players)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;`
+sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $players_n)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;`
 
 sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
 
 sed -i "s@define *( *TABLES_N,[^)]*)@define(TABLES_N, $tables_n)@g" ${web_path}__/Obj/brisk.phh
+
+sed -i "s@define *( *TABLES_AUTH_N,[^)]*)@define(TABLES_AUTH_N, $tables_auth_n)@g" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *BRISK_DEBUG,[^)]*)@define(BRISK_DEBUG, $brisk_debug)@g" ${web_path}__/Obj/brisk.phh
 
