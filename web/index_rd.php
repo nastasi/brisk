@@ -28,6 +28,12 @@ require_once("Obj/brisk.phh");
 // require_once("Obj/proxyscan.phh");
 require_once("briskin5/Obj/briskin5.phh");
 
+
+$mlang_indrd = array( 
+                     'btn_backtotab'  => array('it' => 'torna ai tavoli',
+                                               'en' => 'back to tables') 
+                     );
+
 // Use of proxies isn't allowed.
 // if (is_proxy()) {
 //   sleep(5);
@@ -77,7 +83,11 @@ function page_sync($sess, $page, $table_idx, $table_token)
 
 function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step)
 {
-  GLOBAL $is_page_streaming, $first_loop;
+  GLOBAL $G_lang, $mlang_indrd, $is_page_streaming, $first_loop;
+  GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
+  GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
+  $CO_splashdate = "CO_splashdate".$G_splash_idx;
+  GLOBAL $$CO_splashdate;
   
   $ret = FALSE;
   $room = FALSE;
@@ -210,6 +220,14 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
     if ($user->stat == 'room') {
       log_rd("roomma ".$user->step);
+      $curtime = time();
+
+      if ($G_with_splash &&
+          ($$CO_splashdate < $curtime - $G_splash_interval ||
+           $$CO_splashdate > $curtime)) {
+        $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), $G_splash_timeout, $mlang_indrd['btn_backtotab'][$G_lang], $G_splash_w, $G_splash_h, true, $G_splash_timeout);
+        $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
+      }
       $ret .= $room->show_room($user->step, &$user);
 
       // TODO uncomment and test
