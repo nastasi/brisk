@@ -53,6 +53,7 @@ define(BAN_TIME, 3600);
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>BriskServ</i>");
 
+
 define(DBG_ONL2, 0x0001);
 define(DBG_ONLY, 0x0002);
 define(DBG_MAIN, 0x0004);
@@ -104,16 +105,21 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                            'en' => 'The nickname have to contain at least one letter or one number.'),
                       'nickdupl' => array( 'it' => 'Nickname <b>%s</b> gi&agrave; in uso.',
                                            'en' => 'The nickname <b>%s</b> is already in use.'),
-                      'authchan' => array( 'it' => '<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>',
-                                           'en' => '<b>You can\'t change your nickname into a table for only authenticated.</b>'),
+                      'authchan' => array( 'it' => '<b>Non puoi cambiare nick a un tavolo per soli autenticati o se sei in modalità isolata.</b>',
+                                           'en' => '<b>You can\'t change your nickname into a table for only authenticated or if you are in isolation mode.</b>'),
                       'nickjust' => array( 'it' => 'Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>',
                                            'en' => 'The nickname <b>\'%s\'</b> is already registered, <b>if its proprietary will authenticate you will named again officially ghost<i>N</i>.</b>'), // FIXME: him ???
                       'statunkn' => array( 'it' => 'Questo stato non esiste.',
                                            'en' => 'This state don\'t exists.'),
                       'tabincon' => array( 'it' => '<br>I dati del tavolo n&deg; %d sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>',
                                            'en' => 'EN <br>I dati del tavolo n&deg; %d sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>'),
+                      'listmust' => array( 'it' => '<b>Per andare in isolamento non bisogna essere seduti a tavoli non riservati.</b>',
+                                           'en' => '<b>To go to isolation you must don\'t stay on not reserved tables</b>'),
+
                       'tit_onauth'=>array( 'it' => '(solo aut.)',
                                            'en' => '(only aut.)'),
+                      'tit_onisol'=>array( 'it' => '(isolam.to)',
+                                           'en' => '(isolation)')
                       
 
 );
@@ -122,12 +128,12 @@ $G_false = FALSE;
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.3.0 - trusty";
+$G_brisk_version = "2.4.0 - trusty";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunte le <b>classifiche</b> (menu Start->classifiche).',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: modalità isolamento, splash window, migliorate le classifiche.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: <b>placings</b> added (menu Start->placings)',
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: isolation mode, splash window, placings enhanced.',
                                        'If you want to subscribe our <a target="_blank" href="http://www.milug.org/cgi-bin/mailman/listinfo/ml-briscola">Mailing List</a>, click it!' ) );
 
 $G_room_help = array( 'it' => '
@@ -398,7 +404,7 @@ class Table {
     $this->wakeup_time = $from->wakeup_time;
   }
 
-  function &clone(&$from)
+  function &myclone(&$from)
   {
     GLOBAL $G_false;
     
@@ -542,7 +548,11 @@ class Table {
 
 // User flags
 define(USER_FLAG_AUTH,     0x02);
+
+define(USER_FLAG_MAP_AUTH, 0x0c);
+
 define(USER_FLAG_LISTAUTH, 0x04);
+define(USER_FLAG_ISOLAUTH, 0x08);
 
 //   user status
 define(USER_FLAG_S_NORM,  0x000); // done
@@ -674,7 +684,7 @@ class User {
   }
 
 
-  function &clone(&$from)
+  function &myclone(&$from)
   {
     GLOBAL $G_false;
     
@@ -1057,7 +1067,10 @@ class Room {
     
     $ret = sprintf('gst.st = %d; ',  $user_step);
 
-    if ($user->flags & USER_FLAG_LISTAUTH) {
+    if ($user->flags & USER_FLAG_ISOLAUTH) {
+      $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';
+    }
+    else if ($user->flags & USER_FLAG_LISTAUTH) {
       $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
     }
     else {
@@ -1077,6 +1090,7 @@ class Room {
     $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
     $ret .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', $itin, xcape($user->name), $itou);
     for ($i = 0 ; $i < TABLES_N ; $i++) {
+
       $ret .= $this->table_content($user, $i);
       // $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
       //                          ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
@@ -1144,7 +1158,7 @@ class Room {
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	continue;
       
-      log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+      // log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
       if ($from_table && ($user_cur->table == $table_idx || $user_cur == $user)) {
@@ -1399,6 +1413,7 @@ class Room {
     $to_room     = FALSE;
     $to_tabl     = FALSE;
     $is_normchat = FALSE;
+    $is_ticker   = FALSE;
     $update_room = FALSE;
 
     if (strcmp($msg,  "/tav") == 0 || 
@@ -1437,7 +1452,7 @@ class Room {
         $table->wag_set($user, $msg);
         $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
         $to_room = $to_user;
-        
+        $is_ticker = TRUE;
       } while (0);
     } // /tav chat command
 
@@ -1475,12 +1490,25 @@ class Room {
     else if (strncmp($msg, "/listen ", 8) == 0) {
       $arg = substr($msg, 8);
 
-      if (strcasecmp($arg, "auth") == 0) {
+      if (strcasecmp($arg, "isolation") == 0) {
+        if ($user->stat == 'room' && $user->subst == 'sitdown' &&
+            $user->table >= TABLES_AUTH_N) {
+          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
+          
+        }
+        else {
+          $user->flags &= ~USER_FLAG_MAP_AUTH;
+          $user->flags |= USER_FLAG_ISOLAUTH;
+          $to_user = 'list_set(\'isolation\', true, \''.$mlang_brisk['tit_onisol'][$G_lang].'\'); ';
+        }
+      }
+      else if (strcasecmp($arg, "auth") == 0) {
+        $user->flags &= ~USER_FLAG_MAP_AUTH;
         $user->flags |= USER_FLAG_LISTAUTH;
         $to_user = 'list_set(\'auth\', true, \''.$mlang_brisk['tit_onauth'][$G_lang].'\'); ';
       }
       else {
-        $user->flags &= ~USER_FLAG_LISTAUTH;
+        $user->flags &= ~USER_FLAG_MAP_AUTH;
         $to_user = 'list_set(\'all\', true, \'\'); ';
       }
     }
@@ -1529,7 +1557,11 @@ class Room {
         /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
         if ($user->flags & USER_FLAG_AUTH) {
           if (strcasecmp($user->name,$name_new) != 0) {
-            if ($user->subst == 'standup' || ($user->subst != 'standup' && $this->table[$user->table]->auth_only == FALSE)) {
+            if (($user->flags & USER_FLAG_MAP_AUTH != USER_FLAG_ISOLAUTH) &&
+                ($user->subst == 'standup' || 
+                 ($user->subst != 'standup' && $this->table[$user->table]->auth_only == FALSE)
+                 )
+                ) {
               $user->flags &= ~USER_FLAG_AUTH; // Remove auth if name changed
               for ($i = 0 ; $i < TABLES_N ; $i++) {
                 $to_user .= $this->table[$i]->act_content($user);
@@ -1665,13 +1697,20 @@ class Room {
           continue;
         
         if ($is_normchat == TRUE) {
-          if ($user_cur->flags & USER_FLAG_LISTAUTH) {
+          // use MAP_AUTH to check if auth or isolation
+          if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
             if (($user->flags & USER_FLAG_AUTH) == 0) {
               continue;
             }
           }
         }
-  
+        else if ($is_ticker) {
+          if (($user_cur->flags & USER_FLAG_MAP_AUTH) == USER_FLAG_ISOLAUTH) {
+            if ($user->table >= TABLES_AUTH_N)
+              continue;
+          }
+        }
+
         $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
         $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
         $user_cur->step_inc();
@@ -1898,8 +1937,18 @@ class Room {
       if ($authenticate) {
         $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
 
-        if (isset($CO_list) && strcmp($CO_list, "all") == 0) {
-          $this->user[$idx]->flags &= ~USER_FLAG_LISTAUTH;
+        if (isset($CO_list)) {
+          if (strcmp($CO_list, "auth") == 0) {
+            $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+            $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
+          }
+          if (strcmp($CO_list, "isolation") == 0) {
+            $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+            $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
+          }
+          else {
+            $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+          }
         }
       }
       
@@ -2480,10 +2529,10 @@ function show_notify($text, $tout, $butt, $w, $h)
   return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
 }
 
-function show_notify_opaque($text, $tout, $butt, $w, $h)
+function show_notify_ex($text, $tout, $butt, $w, $h, $is_opaque, $block_time)
 {
   log_main("SHOW_NOTIFY OPAQUE: ".$text);
-  return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, true);', $text, $tout, $butt, $w, $h);
+  return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, %s, %d);', $text, $tout, $butt, $w, $h, ($is_opaque ? "true" : "false"), $block_time);
 }
 
 
