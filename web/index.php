@@ -102,6 +102,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'listen messages only from authenticated users'),
                      'isolaut_desc' => array('it' => 'visualizza Brisk come se fosse solo per utenti con password',
                                              'en' => 'show Brisk like an authenticated user only site'),
+                     'tit_splash'   => array('it' => 'splash',
+                                             'en' => 'splash'),
+                     'splash_desc'  => array('it' => 'attiva la finestra di splash',
+                                             'en' => 'show the splash window'),
                      'tit_help'     => array('it' => 'informazioni utili su Brisk',
                                              'en' => 'usefull information about Brisk'),
                      'itm_help'     => array('it' => 'aiuto',
@@ -693,6 +697,14 @@ $brisk_vertical_menu = '
 '</span></a><br>
 
 </div>
+<a href="#" title="'
+          // MLANG garantisci per un tuo conoscente
+          .$mlang_room['splash_desc'][$G_lang].
+'" 
+   onmouseover="menu_hide(0,1);" onclick="act_splash(); menu_over(-1,this);">'
+          // MLANG garantisci
+          .$mlang_room['tit_splash'][$G_lang].
+          '</a><br>
 
 </div>'.($G_with_poll ? '' : '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 <img style="cursor: pointer;" class="nobo" src="img/brisk_help'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_help'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_help();">').'
