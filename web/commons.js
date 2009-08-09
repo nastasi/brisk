@@ -332,9 +332,9 @@ function act_wakeup()
     send_mesg("wakeup");
 }
 
-function act_splash(date)
+function act_splash()
 {
-    send_mesg("splash|"+date);
+    send_mesg("splash");
 }
 
 function act_help()
