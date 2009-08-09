@@ -292,7 +292,7 @@ function j_stand_cont(data)
                 }
             }
             if (e == data.length || 
-                (g_listen & l_list_isol && ((data[i][0] & 0x02) == 0))) {
+                (g_listen & l_list_isol && ((data[e][0] & 0x02) == 0))) {
                 idx_del[idx_del_n++] = i;
                 map_cur[i] = -1;
             }
