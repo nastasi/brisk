@@ -21,6 +21,18 @@ $G_with_sidebanner2 = TRUE;
 // is poll active ?
 $G_with_poll = FALSE;
 
+$G_with_splash = TRUE;
+$G_splash_interval = 25200; // 3600 * 7
+$G_splash_idx = 3;
+$G_splash_w = 350;
+$G_splash_h = 500;
+$G_splash_timeout = 5000;
+$G_splash_content = array( 'it' => 'content italico',
+                           'en' => 'content anglofico' );
+
+$G_with_donors = TRUE;
+$G_donors_cur = 12;
+$G_donors_all = 50;
 
 $G_topbanner = '<div class="topbanner" id="topbanner" onMouseOver="show_bigpict(this, \'over\', -100, 80);" onMouseOut="show_bigpict(this, \'out\', 0, 0);">
 <a target="_blank" href="http://www.briscolachiamatamilano.it/maggiotorneo.htm">
