@@ -226,25 +226,37 @@ function j_stand_tdcont(el)
     return (content);
 }
 
-function j_stand_cont(data)
+function j_stand_cont(ddata)
 {
-    var i;
+    var i, ii;
     var content;
     var st = 0, name = "";
     var curtag, nextag;
+
+    var data;
+
+    if (g_listen & l_list_isol) {
+        data = new Array();
+
+        for (i = 0, ii = 0 ; ii < ddata.length ; ii++) {
+            if ((ddata[ii][0] & 0x02) == 0) {
+                continue;
+            }
+            data[i++] = ddata[ii];
+        }
+    }
+    else
+        data = ddata;
 
     if (standup_data_old == null || data.length < 4) {
     // if (standup_data_old == null) {
         
         content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
-        for (i = 0, ii = 0 ; ii < data.length ; ii++) {
-            if (g_listen & l_list_isol && ((data[ii][0] & 0x02) == 0)) {
-                continue;
-            }
+        for (i = 0 ; i < data.length ; i++) {
             if ((i % 4) == 0)
                 content += '<tr>';
             content += '<td id="'+i+'" class="room_standup">';
-            content += j_stand_tdcont(data[ii]);
+            content += j_stand_tdcont(data[i]);
             content += '</td>';
             
             if ((i % 4) == 3)
@@ -252,6 +264,8 @@ function j_stand_cont(data)
 
             i++;
         }
+        if ((i % 4) < 3)
+            content += '</tr>';
         content += '</table>';
         
         $("standup").innerHTML = content;
@@ -291,8 +305,7 @@ function j_stand_cont(data)
                     break;
                 }
             }
-            if (e == data.length || 
-                (g_listen & l_list_isol && ((data[e][0] & 0x02) == 0))) {
+            if (e == data.length) {
                 idx_del[idx_del_n++] = i;
                 map_cur[i] = -1;
             }
@@ -313,8 +326,7 @@ function j_stand_cont(data)
                     break;
                 }
             }
-            if (i == standup_data_old.length &&
-                !(g_listen & l_list_isol && ((data[e][0] & 0x02) == 0))) {
+            if (i == standup_data_old.length) {
                 // console.log("ADD: "+data[e][1]);
                 arr_add[idx_add_n]   = data[e];
                 map_add[idx_add_n++] = e;
