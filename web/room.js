@@ -27,6 +27,10 @@
    
 */
 
+var l_list_all = 0x00;
+var l_list_auth = 0x01;
+var l_list_isol = 0x02;
+
 function state_add(flags)
 {
     var content = "";
@@ -233,15 +237,20 @@ function j_stand_cont(data)
     // if (standup_data_old == null) {
         
         content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
-        for (i = 0 ; i < data.length ; i++) {
+        for (i = 0, ii = 0 ; ii < data.length ; ii++) {
+            if (g_listen & l_list_isol && ((data[ii][0] & 0x02) == 0)) {
+                continue;
+            }
             if ((i % 4) == 0)
                 content += '<tr>';
             content += '<td id="'+i+'" class="room_standup">';
-            content += j_stand_tdcont(data[i]);
+            content += j_stand_tdcont(data[ii]);
             content += '</td>';
             
             if ((i % 4) == 3)
                 content += '</tr>';
+
+            i++;
         }
         content += '</table>';
         
@@ -282,7 +291,8 @@ function j_stand_cont(data)
                     break;
                 }
             }
-            if (e == data.length) {
+            if (e == data.length || 
+                (g_listen & l_list_isol && ((data[i][0] & 0x02) == 0))) {
                 idx_del[idx_del_n++] = i;
                 map_cur[i] = -1;
             }
@@ -303,7 +313,8 @@ function j_stand_cont(data)
                     break;
                 }
             }
-            if (i == standup_data_old.length) {
+            if (i == standup_data_old.length &&
+                !(g_listen & l_list_isol && ((data[e][0] & 0x02) == 0))) {
                 // console.log("ADD: "+data[e][1]);
                 arr_add[idx_add_n]   = data[e];
                 map_add[idx_add_n++] = e;
@@ -653,19 +664,58 @@ function j_pollbox(form)
 
 
 
-function list_set(what, setco, info)
+function list_set(what, is_update, info)
 {
+    // console.log(what);
+    var i;
+    var relo = false;
+    var old_st = readCookie("CO_list");
+    
     if (what == 'auth') {
         $('list_auth').style.color = 'red';
+        $('list_isol').style.color = 'black';
         $('list_all').style.color = 'black';
+        if (old_st == 'isolation')
+            relo = true;
+        g_listen = l_list_auth;
+    }
+    else if (what == 'isolation') {
+        $('list_auth').style.color = 'black';
+        $('list_isol').style.color = 'red';
+        $('list_all').style.color = 'black';
+        if (old_st != 'isolation')
+            relo = true;
+        g_listen = l_list_isol;
     }
     else {
         $('list_auth').style.color = 'black';
+        $('list_isol').style.color = 'black';
         $('list_all').style.color = 'red';
+        if (old_st == 'isolation')
+            relo = true;
+        g_listen = l_list_all;
     }
     $('list_info').innerHTML = info;
-    if (setco) {
+    if (is_update) {
         createCookie("CO_list", what, 24*365, cookiepath);
+    }
+
+
+    if (relo || !is_update) {
+        for (i = g_tables_auth_n ; i < g_tables_n ; i++) {
+            
+            if (i % 4 == 0) {
+                $('tr_noauth'+i).style.display = (what == 'isolation' ? 'none' : '');
+            }
+            
+            $('td_noauth'+i).style.display = (what == 'isolation' ? 'none' : '');
+        }
+        // ricalculation of standup area
+        if (standup_data_old != null) {
+            standup_data = standup_data_old;
+            standup_data_old = null;
+            j_stand_cont(standup_data);
+        }
     }
 }
 
