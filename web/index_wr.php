@@ -148,16 +148,16 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   }
   else if ($argz[0] == 'help') {
     /* MLANG: "torna ai tavoli" */ 
-    echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
+    echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 600, 500);
   }
   else if ($argz[0] == 'about') {
-    echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 220);
+    echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 220);
   }
   else if ($argz[0] == 'passwdhowto') {
-    echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'roadmap') {
-    echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'placing') {
     GLOBAL $G_false;
@@ -165,10 +165,10 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
     require_once("briskin5/Obj/briskin5.phh");
     require_once("briskin5/Obj/placing.phh");
 
-    echo show_notify(str_replace("\n", " ", placings_show($G_false)), 0, $mlang_indwr['btn_backtotab'][$G_lang], 800, 600);
+    echo show_notify(str_replace("\n", " ", placings_show($G_false)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
   }
   else if ($argz[0] == 'whysupport') {
-    echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lng], 400, 200);
+    echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
   }
   else { 
     log_wr("Get User Error");
@@ -419,6 +419,20 @@ else if ($user->stat == 'room') {
     $user->step_inc();
     
   }
+  else if ($argz[0] == 'splash') {
+    GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
+    GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
+    $CO_splashdate = "CO_splashdate".$G_splash_idx;
+    GLOBAL $$CO_splashdate;
+
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+
+
+    $user->comm[$user->step % COMM_N] .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], $G_splash_w, $G_splash_h, true, 0);
+
+    log_wr($user->comm[$user->step % COMM_N]);
+    $user->step_inc();
+  }
   else if ($argz[0] == 'about') {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
@@ -435,7 +449,7 @@ else if ($user->stat == 'room') {
     require_once("briskin5/Obj/placing.phh");
 
     $user->comm[$user->step % COMM_N] =  "gst.st = ".($user->step+1)."; ";
-    $user->comm[$user->step % COMM_N] .= show_notify_opaque(str_replace("\n", " ", placings_show($user)), 0, $mlang_indwr['btn_backtotab'][$G_lang], 800, 600);
+    $user->comm[$user->step % COMM_N] .= show_notify_ex(str_replace("\n", " ", placings_show($user)), 0, $mlang_indwr['btn_backtotab'][$G_lang], 800, 600, TRUE, 0);
 
     log_wr($user->comm[$user->step % COMM_N]);
     $user->step_inc();
