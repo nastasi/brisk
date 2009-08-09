@@ -126,10 +126,10 @@ function main()
     if ($tri[$i]->gam == 0.0)
       continue;
     printf("%s: %s (%d) <br>\n",  $tri[$i]->username,  $tri[$i]->snormpts(), $tri[$i]->gam);
-    if ($tri[$i]->gam < TRI_FEW_GAMES) 
-      fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($tri[$i]->username), $tri[$i]->pts, $tri[$i]->gam));
-    else
+    if ($tri[$i]->gam >= TRI_MAX_GAMES) 
       fwrite($fphi, sprintf("%s|%d|%d|\n", xcapelt($tri[$i]->username), $tri[$i]->pts, $tri[$i]->gam));
+    else if ($tri[$i]->gam > TRI_MIN_GAMES) 
+      fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($tri[$i]->username), $tri[$i]->pts, $tri[$i]->gam));
   }
   fclose($fphi);
   fclose($fplo);
@@ -149,10 +149,10 @@ function main()
     if ($mon[$i]->gam == 0.0)
       continue;
     printf("%s: %s (%d) <br>\n",  $mon[$i]->username,  $mon[$i]->snormpts(), $mon[$i]->gam);
-    if ($mon[$i]->gam < MON_FEW_GAMES) 
-      fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($mon[$i]->username), $mon[$i]->pts, $mon[$i]->gam));
-    else
+    if ($mon[$i]->gam >= MON_MAX_GAMES) 
       fwrite($fphi, sprintf("%s|%d|%d|\n", xcapelt($mon[$i]->username), $mon[$i]->pts, $mon[$i]->gam));
+    else if ($mon[$i]->gam > MON_MIN_GAMES) 
+      fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($mon[$i]->username), $mon[$i]->pts, $mon[$i]->gam));
   }
   fclose($fphi);
   fclose($fplo);
@@ -171,10 +171,10 @@ function main()
     if ($wee[$i]->gam == 0.0) 
       continue;
     printf("%s: %s (%d) <br>\n",  $wee[$i]->username,  $wee[$i]->snormpts(), $wee[$i]->gam);
-    if ($wee[$i]->gam < WEE_FEW_GAMES) 
-      fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($wee[$i]->username), $wee[$i]->pts, $wee[$i]->gam));
-    else
+    if ($wee[$i]->gam >= WEE_MAX_GAMES) 
       fwrite($fphi, sprintf("%s|%d|%d|\n", xcapelt($wee[$i]->username), $wee[$i]->pts, $wee[$i]->gam));
+    else if ($wee[$i]->gam > WEE_MIN_GAMES) 
+      fwrite($fplo, sprintf("%s|%d|%d|\n", xcapelt($wee[$i]->username), $wee[$i]->pts, $wee[$i]->gam));
   }
   fclose($fphi);
   fclose($fplo);
