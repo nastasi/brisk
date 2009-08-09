@@ -261,8 +261,6 @@ function j_stand_cont(ddata)
             
             if ((i % 4) == 3)
                 content += '</tr>';
-
-            i++;
         }
         if ((i % 4) < 3)
             content += '</tr>';
