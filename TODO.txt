@@ -5,8 +5,24 @@
 
  BRISK3 (trusty)
  ======
+  - donameter
+    DONE - G_donors
+    DONE (WOW!) - js object with infos
+    DONE - main logic at login (cookie check in index_rd.php; show_message and createCookie via snippets with block
+           to prevent fast reload)
+    DONE - cookie per non assillare e visualizz.
+    graphical donameter
+    WIP content (in conf.)
 
-  numero di tavoli auth-only nel .brisk-install
+  DONE - numero di tavoli auth-only nel .brisk-install
+  - isolation
+    TEST - ricalcolo delle persone in piedi quando si cambia modalità
+    DONE - se si e' in isolation non si può cambiare nick perdendo l' auth
+    DONE - non leggere le chat di quelli non autenticati (in isolation)
+    DONE - regole per passare alla modalita' (in piedi o ai tavoli autenticati) 
+    DONE - treni non auth da nascondere 
+    DONE - verso gli altri ??: uguale a prima
+
   finire multilingua (briskin5/index_wr.php e altri se ce ne sono)
   coniglio
   only auth strictly
