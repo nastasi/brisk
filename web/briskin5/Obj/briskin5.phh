@@ -195,7 +195,7 @@ class Table_briskin5 extends Table {
   */
 
   /* CLONE() NOT USED
-  function &clone(&$from)
+  function &myclone(&$from)
   {
     GLOBAL $G_false;
     
@@ -446,7 +446,7 @@ class User_briskin5 extends User {
   }
 
   /* CLONE NOT USED
-  function &clone(&$from)
+  function &myclone(&$from)
   {
     GLOBAL $G_false;
     
