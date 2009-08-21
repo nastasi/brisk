@@ -1,3 +1,16 @@
+2.4.1
+	ENH rabbit user state added
+	ENH radio button instead flat pref in room
+	ENH restore room after isolation mode leaved
+        ENH sound when auction finish added (with preference)
+	ENH page title change when auction finish
+	
+2.4.0
+	ENH splash window
+	ENH isolation mode
+	ENH donometer
+	ENH placing with dates range
+
 2.1.6
 	ENH commands menu added
 	ENH /listen and /mesgtoadm commands added
