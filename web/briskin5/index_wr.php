@@ -99,6 +99,16 @@ else if ($user->stat == 'table') {
   else if ($argz[0] == 'chatt') {
     $bri->chatt_send(&$user,$mesg);
   }
+  else if ($argz[0] == 'preferences_update') {
+    GLOBAL $CO_bin5_pref_ring_endauct;
+
+    log_wr("PER DI TABLEINFO");
+
+    if ($CO_bin5_pref_ring_endauct == "true")
+      $user->privflags |= BIN5_USER_FLAG_RING_ENDAUCT;
+    else
+      $user->privflags &= ~BIN5_USER_FLAG_RING_ENDAUCT;
+  }
   else if ($argz[0] == 'logout') {
     $remcalc = $argz[1];
 
@@ -347,6 +357,11 @@ else if ($user->stat == 'table') {
 	    $user_cur->subst = 'game';
 	    $ret = sprintf('gst.st = %d; subst = "game";', $user_cur->step+1);
 	  
+            if ($user_cur->privflags & BIN5_USER_FLAG_RING_ENDAUCT) {
+              // $ret .= "var de_che= 33;";
+              $ret .= playsound("ringbell.mp3");
+            }
+            $ret .= sprintf('document.title = "Brisk - Tavolo %d";', $user->table_orig);
 
 	    /* bg of caller cell */
 	    $ret .= briscola_show($bri, $table, $user_cur);
@@ -467,7 +482,8 @@ else if ($user->stat == 'table') {
             $plist .= '|'.xcapelt($user_cur->name).'|'.$pt_cur[$i];
           }
           log_legal($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
-          log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
+          if ($user->table_orig < TABLES_AUTH_N)
+            log_points($curtime, xcapelt($user), "STAT:BRISKIN5:FINISH_GAME", $plist);
 
 	  $table->game_next();
 	  $table->game_init(&$bri->user);
