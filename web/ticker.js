@@ -78,6 +78,24 @@ train.prototype = {
            
     },
 
+    hide_noauth: function()
+    {
+        for (cur = this.first ; cur != null ; cur = cur.next) {
+            if (cur.table >= g_tables_auth_n) {
+                cur.hide();
+            }
+        }           
+    },
+
+    show_noauth: function()
+    {
+        for (cur = this.first ; cur != null ; cur = cur.next) {
+            if (cur.table >= g_tables_auth_n) {
+                cur.show();
+            }
+        }           
+    },
+
     add: function(table, title)
     {
         var last, wag, curx;
@@ -321,6 +339,10 @@ function wagon(anc, table, title) {
     addEvent(this.box, "mouseout",  function() { this.anc.cb_mouseout(); }  );
     addEvent(this.box, "click",     function() { this.anc.cb_click(); }     );
 
+    
+    if (g_listen & l_list_isol && table >= g_tables_auth_n) {
+        this.box.style.visibility = "hidden";
+    }
     this.anc.box.appendChild(box);
 
     this.w = this.widthbox_get();
@@ -337,6 +359,17 @@ wagon.prototype = {
     x: 0,
     box: null,
     shut_step: 0, 
+
+    show: function()
+    {
+        this.box.style.visibility = "visible";
+    },
+
+    hide: function()
+    {
+        this.box.style.visibility = "hidden";
+    },
+    
 
     width_get: function()
     {
