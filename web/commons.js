@@ -261,6 +261,10 @@ function send_mesg(mesg)
     }
 }
 
+/*
+  request to server
+  server_request([arg0=arg1[, arg2=arg3[, ...]]])
+ */
 function server_request()
 {
     var xhr_wr = createXMLHttpRequest();
@@ -558,6 +562,11 @@ slowimg.prototype = {
     }
 }
 
+function div_show(div)
+{
+    div.style.top = parseInt((document.body.clientHeight - parseInt(getStyle(div,"height", "height"))) / 2) + document.body.scrollTop;
+    div.style.visibility = "visible";
+}
 
 function notify_ex(st, text, tout, butt, w, h, is_opa, block_time)
 {
@@ -640,7 +649,7 @@ notify_ex.prototype = {
     clo: null,
     clodiv: null, 
     butt: null,
-    tblkid: null, 
+    tblkid: null,
 
     unblock: function()
     {
@@ -1022,3 +1031,42 @@ function formsub_hilite(obj)
     addEvent(obj, "blur",  function () { this.className = 'input_sub'; });
 }
 
+// return the value of the radio button that is checked
+// return an empty string if none are checked, or
+// there are no radio buttons
+function get_checked_value(radioObj) {
+	if(!radioObj)
+		return "";
+	var radioLength = radioObj.length;
+	if(radioLength == undefined)
+		if(radioObj.checked)
+			return radioObj.value;
+		else
+			return "";
+	for(var i = 0; i < radioLength; i++) {
+		if(radioObj[i].checked) {
+			return radioObj[i].value;
+		}
+	}
+	return "";
+}
+
+// set the radio button with the given value as being checked
+// do nothing if there are no radio buttons
+// if the given value does not exist, all the radio buttons
+// are reset to unchecked
+function set_checked_value(radioObj, newValue) {
+	if(!radioObj)
+		return;
+	var radioLength = radioObj.length;
+	if(radioLength == undefined) {
+		radioObj.checked = (radioObj.value == newValue.toString());
+		return;
+	}
+	for(var i = 0; i < radioLength; i++) {
+		radioObj[i].checked = false;
+		if(radioObj[i].value == newValue.toString()) {
+			radioObj[i].checked = true;
+		}
+	}
+}
