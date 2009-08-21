@@ -403,13 +403,14 @@ class Table_briskin5 extends Table {
 
 
 
-
+define(BIN5_USER_FLAG_RING_ENDAUCT, 0x01);
 
 class User_briskin5 extends User {
   var $asta_card;  // 
   var $asta_pnt;   //
   var $handpt;     // Total card points at the beginning of the current hand.
   var $exitislock; // Player can exit from the table ?
+  var $privflags;  // Flags for briskin5 only 
 
   function User() {
   }
@@ -425,6 +426,7 @@ class User_briskin5 extends User {
     $thiz->asta_pnt  = -1;
     $thiz->handpt = -1;
     $thiz->exitislock = TRUE;
+    $thiz->privflags = 0;
 
     return ($thiz);
   }
@@ -443,6 +445,7 @@ class User_briskin5 extends User {
     $this->asta_pnt   = $from->asta_pnt;
     $this->handpt     = $from->handpt;
     $this->exitislock = $from->exitislock;
+    $this->privflags  = $from->privflags;
   }
 
   /* CLONE NOT USED
@@ -461,7 +464,7 @@ class User_briskin5 extends User {
   
   function &spawn(&$from, $table, $table_pos)
   {
-    GLOBAL $G_false;
+    GLOBAL $G_false, $CO_bin5_pref_ring_endauct;
     
     if (($thiz =& new User_briskin5()) == FALSE)
       return ($G_false);
@@ -472,6 +475,10 @@ class User_briskin5 extends User {
     $thiz->asta_pnt  = -1;
     $thiz->handpt = -1;
     $thiz->exitislock = TRUE;
+
+    log_wr("Briskin5 constructor");
+
+    $this->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
 
     $thiz->table_orig = $table;
     $thiz->table      = 0;
@@ -980,13 +987,15 @@ function calculate_points(&$table)
   
   if ($table->asta_pnt == 61 && $pro == 60) { // PATTA !
     $table->points[$table->points_n % MAX_POINTS] = array();
-    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) 
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       $table->points[$table->points_n % MAX_POINTS][$i] = 0;
+      $ret[$i] = 0;
+    }
     $table->points_n++;
     $table->old_pnt = $pro;
     $table->mult *= 2;
 
-    return;
+    return($ret);
   }
 
   if ($pro >= $table->asta_pnt) 
@@ -1167,6 +1176,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     }
     if (BRISKIN5_PLAYERS_N == 3)
     	$showst .= ",-2,-2";
+    $ret .= sprintf('document.title = "Brisk - Tavolo %d (asta)";', $user->table_orig);
     $ret .= sprintf('show_astat(%s);', $showst);
 
     if ($table->asta_win != -1 && $table->asta_win == $table_pos) {
