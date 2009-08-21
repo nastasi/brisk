@@ -69,6 +69,10 @@ function state_add(flags)
             name = "st_eye.png";
             tit = (g_lang == 'en' ? "I'm here!" : "sono presente!");
             break;
+        case 0x800:
+            name = "st_rabbit.png";
+            tit = (g_lang == 'en' ? "Rabbit time" : "sono a spasso col coniglio");
+            break;
         default:
             break;
         }
@@ -705,6 +709,11 @@ function list_set(what, is_update, info)
             relo = true;
         g_listen = l_list_all;
     }
+
+    set_checked_value($('ra_listen_auth'), what);
+    set_checked_value($('ra_listen_isol'), what);
+    set_checked_value($('ra_listen_all'),  what);
+
     $('list_info').innerHTML = info;
     if (is_update) {
         createCookie("CO_list", what, 24*365, cookiepath);
@@ -720,11 +729,20 @@ function list_set(what, is_update, info)
             
             $('td_noauth'+i).style.display = (what == 'isolation' ? 'none' : '');
         }
-        // ricalculation of standup area
-        if (standup_data_old != null) {
-            standup_data = standup_data_old;
-            standup_data_old = null;
-            j_stand_cont(standup_data);
+        if (what == 'isolation') {
+            tra.hide_noauth();
+        }
+        else {
+            tra.show_noauth();
+        }
+            
+        if (false) {
+            // ricalculation of standup area
+            if (standup_data_old != null) {
+                standup_data = standup_data_old;
+                standup_data_old = null;
+                j_stand_cont(standup_data);
+            }
         }
     }
 }

@@ -563,6 +563,7 @@ define(USER_FLAG_S_EAT,   0x400); // done
 define(USER_FLAG_S_WRK,   0x500); // done
 define(USER_FLAG_S_SMK,   0x600); // done
 define(USER_FLAG_S_EYE,   0x700); // done
+define(USER_FLAG_S_RABB,  0x800); // done
 
 define(USER_FLAG_S_ALL,   0xf00); // done
 
@@ -1413,7 +1414,7 @@ class Room {
     $to_room     = FALSE;
     $to_tabl     = FALSE;
     $is_normchat = FALSE;
-    $is_ticker   = FALSE;
+    /* for old isolation management $is_ticker   = FALSE; */
     $update_room = FALSE;
 
     if (strcmp($msg,  "/tav") == 0 || 
@@ -1452,7 +1453,7 @@ class Room {
         $table->wag_set($user, $msg);
         $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
         $to_room = $to_user;
-        $is_ticker = TRUE;
+        /* for old isolation management $is_ticker = TRUE; */
       } while (0);
     } // /tav chat command
 
@@ -1491,6 +1492,7 @@ class Room {
       $arg = substr($msg, 8);
 
       if (strcasecmp($arg, "isolation") == 0) {
+        $flags_old = 0;
         if ($user->stat == 'room' && $user->subst == 'sitdown' &&
             $user->table >= TABLES_AUTH_N) {
           $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
@@ -1503,13 +1505,21 @@ class Room {
         }
       }
       else if (strcasecmp($arg, "auth") == 0) {
+        $flags_old = $user->flags;
         $user->flags &= ~USER_FLAG_MAP_AUTH;
         $user->flags |= USER_FLAG_LISTAUTH;
         $to_user = 'list_set(\'auth\', true, \''.$mlang_brisk['tit_onauth'][$G_lang].'\'); ';
       }
       else {
+        $flags_old = $user->flags;
         $user->flags &= ~USER_FLAG_MAP_AUTH;
         $to_user = 'list_set(\'all\', true, \'\'); ';
+        
+      }
+      // if from isolation redraw standup area
+      if (($flags_old ^ $user->flags) & USER_FLAG_ISOLAUTH) {
+        $to_user .= 'standup_data_old = null; '.$this->standup_content($user);
+        
       }
     }
     else if (strcmp($msg, "/authreq") == 0) {
@@ -1620,6 +1630,9 @@ class Room {
         else if (strcasecmp($st_str, "presente") == 0) {
           $st = USER_FLAG_S_EYE;
         }
+        else if (strcasecmp($st_str, "coniglio") == 0) {
+          $st = USER_FLAG_S_RABB;
+        }
         else {
           /* MLANG: "Questo stato non esiste." */
           $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
@@ -1704,13 +1717,14 @@ class Room {
             }
           }
         }
+        /*
         else if ($is_ticker) {
           if (($user_cur->flags & USER_FLAG_MAP_AUTH) == USER_FLAG_ISOLAUTH) {
             if ($user->table >= TABLES_AUTH_N)
               continue;
           }
         }
-
+        */
         $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
         $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
         $user_cur->step_inc();
