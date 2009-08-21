@@ -77,6 +77,8 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'smoke'),
                      'st_pres_desc' => array('it' => 'presente',
                                              'en' => 'present'),
+                     'st_rabb_desc' => array('it' => 'coniglio',
+                                             'en' => 'rabbit'),
                      
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
@@ -96,11 +98,11 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'listen all messages from each user connected'),
                      'tit_listaut'  => array('it' => 'solo autenticati',
                                              'en' => 'only authorized'),
-                     'tit_isolaut'  => array('it' => 'isolamento',
+                     'tit_listisol'  => array('it' => 'isolamento',
                                              'en' => 'isolation'),
                      'listaut_desc' => array('it' => 'leggi soltanto i messaggi degli utenti con password',
                                              'en' => 'listen messages only from authenticated users'),
-                     'isolaut_desc' => array('it' => 'visualizza Brisk come se fosse solo per utenti con password',
+                     'listisol_desc'=> array('it' => 'visualizza Brisk come se fosse solo per utenti con password',
                                              'en' => 'show Brisk like an authenticated user only site'),
                      'tit_splash'   => array('it' => 'splash',
                                              'en' => 'splash'),
@@ -644,6 +646,13 @@ $brisk_vertical_menu = '
           .$mlang_room['st_pres_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_eye.png"></a><br>
 
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st coniglio\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_rabb_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_rabbit.png"></a><br>
+
 </div>
 
 <a href="#" title="avvia un ticker pubblicitario per il tuo tavolo" 
@@ -666,7 +675,27 @@ $brisk_vertical_menu = '
           // MLANG ascolta
           .$mlang_room['itm_list'][$G_lang].
 '</a><br>
-<div id="menu_listen" class="webstart">
+<div id="menu_listen" style="width: 120px;" class="webstart">
+<!--
+
+-->
+<input id="ra_listen_all" type="radio" name="listen" value="all" onclick="act_chatt(\'/listen all\');" title="'
+.$mlang_room['listall_desc'][$G_lang].
+'"><span id="list_all">'
+.$mlang_room['tit_listall'][$G_lang].
+'</span><br>  
+<input id="ra_listen_auth" type="radio" name="listen" value="auth" onclick="act_chatt(\'/listen auth\');" title="'
+.$mlang_room['listaut_desc'][$G_lang].
+'"><span id="list_auth">'
+.$mlang_room['tit_listaut'][$G_lang].
+'</span><br>  
+<input id="ra_listen_isol" type="radio" name="listen" value="isolation" onclick="act_chatt(\'/listen isolation\');" title="'
+.$mlang_room['listisol_desc'][$G_lang].
+'"><span id="list_isol">'
+.$mlang_room['tit_listisol'][$G_lang].
+'</span><br>
+<!--
+<hr>
 <a href="#" 
    onmouseover="menu_hide(0,2);"
    title="'
@@ -695,7 +724,7 @@ $brisk_vertical_menu = '
           // MLANG solo autenticati
           .$mlang_room['tit_isolaut'][$G_lang].
 '</span></a><br>
-
+-->
 </div>
 <a href="#" title="'
           // MLANG garantisci per un tuo conoscente
