@@ -283,3 +283,55 @@ function set_names(so,ea,ne,nw,we)
     return;
 }
 
+function preferences_init()
+{
+    var rd;
+
+    if ((rd = readCookie("CO_bin5_pref_ring_endauct")) != null) {
+        $('pref_ring_endauct').checked = (rd == "true" ? true : false);
+    }
+    else {
+        $('pref_ring_endauct').checked = false;
+    }
+    $('preferences').ring_endauct = $('pref_ring_endauct').checked;
+}
+
+function preferences_update()
+{
+    var ret;
+    createCookie("CO_bin5_pref_ring_endauct", ($('preferences').ring_endauct ? "true" : "false"), 24*3650, cookiepath+"/briskin5"); 
+    ret = server_request('mesg', 'preferences_update');
+}
+
+function act_preferences_update()
+{
+    preferences_update()
+    preferences_showhide();
+}
+
+function pref_ring_endauct_set(obj)
+{
+    $('preferences').ring_endauct = obj.checked;
+}
+
+
+function preferences_show()
+{
+    var no;
+
+    div_show($('preferences'));
+}
+
+function preferences_showhide()
+{
+    if ($('preferences').style.visibility == 'hidden') {
+        preferences_init();
+        
+        $('preferences').style.top = parseInt((document.body.clientHeight - 
+                                               parseInt(getStyle($('preferences'), "height","height"))
+                                               ) / 2) + document.body.scrollTop;
+        $('preferences').style.visibility = 'visible';
+    }
+    else
+        $('preferences').style.visibility = 'hidden';
+}

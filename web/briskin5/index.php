@@ -31,7 +31,13 @@ require_once("../Obj/proxyscan.phh");
 require_once("Obj/briskin5.phh");
 
 $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Scegli il seme:',
-                                              'en' => 'You win the auction.<br> Choose the seed:' )
+                                              'en' => 'You win the auction.<br> Choose the seed:' ),
+                           'tit_pref'=>array( 'it' => 'Preferenze.',
+                                              'en' => 'Preferences.'),
+                           'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
+                                                  'en' => 'play a sound at the end of the auction'),
+                           'btn_update'  => array('it' => 'Aggiorna.',
+                                                  'en' => 'Update.' )
                            );
 
 
@@ -89,7 +95,10 @@ var g_exitlock = 0;
 window.onload = function() {
   g_withflash = DetectFlashVer(6,0,0);
   remark_off();
-  // table_init();
+
+  preferences_init();
+  preferences_update();
+
   xhr_rd = createXMLHttpRequest();
   sess = "<?php echo "$sess"; ?>";
   
@@ -227,9 +236,10 @@ window.onload = function() {
 <tr>
 <td style="text-align: center;"><input type="button" class="button" name="xinfo"  value="Info." onclick="act_tableinfo();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reload();"></td>
-</tr><tr>
-<td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xout"  value="Out." onclick="safelogout();"></td>
+</tr><tr>
+<td style="text-align: center;" colspan="2"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
+<td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
 </tr>
 </table>
 </div>
@@ -268,5 +278,21 @@ window.onload = function() {
 </pre>
 <div id="xhrdeltalog" style="text-align: left;"></div>
 </div>
+
+<div id="preferences" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 200px; top: 126px; visibility: hidden;">
+<div id="preferences_child" style="border-bottom: 1px solid gray; overflow: auto; height: 170px;">
+
+<h2><?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?></h2>
+<div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
+<br><br>
+<input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php echo $mlang_bin5_index['itm_ringauc'][$G_lang] ?>
+</div>
+
+
+</div>
+<div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_bin5_index['btn_update'][$G_lang]; ?>"/></div>
+</div>
+
+
 </body>
 </html>
