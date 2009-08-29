@@ -24,10 +24,10 @@
  */
 
 body {
-    background-image: url('img/brisk2bg.jpg'); 
+    background-image: url('img/happysunbg.jpg'); 
     background-color: #fafafa;
     background-repeat: no-repeat;
-    background-position: top center; 
+    background-position: center center; 
     margin:0px;
 
     font-size: 12px;
