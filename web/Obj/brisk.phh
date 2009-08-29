@@ -290,26 +290,26 @@ function csplitter($in, $sep)
   $out = array();
   $out[$id] = "";
   for ($i = 0 ; $i < strlen($in) ; $i++) {
+    $ini = substr($in, $i, 1);
     if ($st == 0) {
-      if ($in{$i} == '\\')
+      if ($ini == '\\')
         $st = 1;
-      else if ($in{$i} == $sep) {
+      else if ($ini == $sep) {
         $id++;
         $out[$id] = "";
       }
       else {
-        $out[$id] .= $in{$i};
+        $out[$id] .= $ini;
       }
     }
     else if ($st == 1) {
-      $out[$id] .= $in{$i};
+      $out[$id] .= $ini;
       $st = 0;
     }
   }
 
   return ($out);
 }
-
 
 function xcape($s)
 {
