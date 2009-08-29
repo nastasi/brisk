@@ -719,10 +719,10 @@ $brisk_vertical_menu = '
    onmouseover="menu_hide(0,2);"
    title="'
           // MLANG leggo soltanto i messaggi degli utenti con password
-          .$mlang_room['isolaut_desc'][$G_lang].
+          .$mlang_room['listisol_desc'][$G_lang].
           '" onclick="act_chatt(\'/listen isolation\'); menu_over(-1,this);"><span id="list_isol">'
           // MLANG solo autenticati
-          .$mlang_room['tit_isolaut'][$G_lang].
+          .$mlang_room['tit_listisol'][$G_lang].
 '</span></a><br>
 -->
 </div>
