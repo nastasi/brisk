@@ -299,7 +299,7 @@ function preferences_init()
 function preferences_update()
 {
     var ret;
-    createCookie("CO_bin5_pref_ring_endauct", ($('preferences').ring_endauct ? "true" : "false"), 24*3650, cookiepath+"/briskin5"); 
+    createCookie("CO_bin5_pref_ring_endauct", ($('preferences').ring_endauct ? "true" : "false"), 24*3650, cookiepath); 
     ret = server_request('mesg', 'preferences_update');
 }
 
