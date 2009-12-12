@@ -470,7 +470,7 @@ google_color_url = "000000";
 </script>'
 ).'</div></td>
 <td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
-    <img class="nobo" src="img/brisk_logo64summer.png">
+    <img class="nobo" src="img/brisk_logo64.png">
     '.$mlang_room['headline'][$G_lang].'<br>
     </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>', 
                                                                 ($G_with_topbanner ? $G_topbanner : 
