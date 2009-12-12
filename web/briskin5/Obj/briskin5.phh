@@ -33,20 +33,31 @@ define(BRISKIN5_SHM_DLT, 32768);
 $mlang_bin5_bin5 = array( 
                          'info_part' => array( 'it' => '<hr>Nell\'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>',
                                                'en' => '<hr>In the last hand the declarer was <b>%s</b>, the partner was <b>%s</b>,<br>'),
-                         'info_capp' => array( 'it' => 'hanno fatto <b>cappotto</b> EBBRAVI!.<hr>',
-                                               'en' => 'and he made <b>capot</b> WELL DONE!.<hr>'),
-                         'info_pnt'  => array( 'it' => 'dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: %s.<hr>',
-                                               'en' => 'they had to do <b>%s</b> points and they had made <b>%d</b>: %s.<hr>'),
+                         'info_capp' => array( 'it' => 'hanno fatto <b>cappotto</b> EBBRAVI!.<br>',
+                                               'en' => 'and they made <b>capot</b> WELL DONE!.<br>'),
+                         'info_pnt'  => array( 'it' => 'dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno %s.<br>',
+                                               'en' => 'they had to do <b>%s</b> points and they had made <b>%d</b>: they have %s.<br>'),
                          'info_alea' => array( 'it' => 'almeno ',
                                                'en' => 'at least '),
                          'info_more' => array( 'it' => 'pi&ugrave; di 60',
                                                'en' => 'over 60'),
-                         'info_win'  => array( 'it' => 'hanno <b>vinto</b>',
-                                               'en' => 'they have <b>win</b>'),
-                         'info_peer' => array( 'it' => 'hanno <b>pareggiato</b>',
-                                               'en' => 'they have <b>drew</b>'),
-                         'info_lost' => array( 'it' => 'hanno <b>perso</b>',
-                                               'en' => 'they have <b>lost</b>'),
+                         'info_win'  => array( 'it' => '<b>vinto</b>',
+                                               'en' => '<b>win</b>'),
+                         'info_peer' => array( 'it' => '<b>pareggiato</b>',
+                                               'en' => '<b>drew</b>'),
+                         'info_lost' => array( 'it' => '<b>perso</b>',
+                                               'en' => '<b>lost</b>'),
+
+                         'info_alon' => array( 'it' => '<hr>Nell\'ultima partita <b>%s</b> si &egrave; chiamato in mano,<br>',
+                                               'en' => '<hr>In the last hand <b>%s</b> play alone against each other,<br>'),
+                         'info_apnt' => array( 'it' => 'doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha %s.<br>',
+                                               'en' => 'he/she had to do <b>%s</b> points and they had made <b>%d</b>: he/she had %s.<br>'),
+                         'info_acap' => array( 'it' => 'ha fatto <b>cappotto</b> EBBRAVO!.<hr>',
+                                               'en' => 'and he/she made <b>capot</b> WELL DONE!.<hr>'),
+                         
+                         'info_omul' => array( 'it' => ' La partita valeva <b>%s</b>.',
+                                               'en' => ' EN: The game was worth <b>%s</b>.' ),
+
                          'info_yturn'=> array( 'it' => ' tocca a <b>te</b> giocare.',
                                                'en' => ' it\'s <b>your</b> turn.'),
                          'info_turn' => array( 'it' => 'tocca a <b>%s</b> giocare.',
@@ -150,6 +161,7 @@ class Table_briskin5 extends Table {
   
   var $old_reason;
   var $old_asta_pnt;
+  var $old_mult;
   var $old_pnt;
   var $old_win;
   var $old_friend;
@@ -186,6 +198,7 @@ class Table_briskin5 extends Table {
 
     $thiz->old_reason   = "";
     $thiz->old_asta_pnt = -1;
+    $thiz->old_mult     = -1;
     $thiz->old_pnt      = -1;
     $thiz->old_win      = -1;
     $thiz->old_friend   = -1;
@@ -225,6 +238,7 @@ class Table_briskin5 extends Table {
     
     $thiz->old_reason = $from->old_reason;
     $thiz->old_asta_pnt = $from->old_asta_pnt;
+    $thiz->old_mult = $from->mult;
     $thiz->old_pnt = $from->old_pnt;
     $thiz->old_win = $from->old_win;
     $thiz->old_friend = $from->old_friend;
@@ -958,6 +972,22 @@ function locshm_exists($tok)
     
 }
 
+function asta2mult($asta_pnt)
+{ 
+  if ($asta_pnt > 110) 
+    return (5);
+  else if ($asta_pnt > 100) 
+    return (4);
+  else if ($asta_pnt > 90) 
+    return (3);
+  else if ($asta_pnt > 80) 
+    return (2);
+  else if ($asta_pnt > 70) 
+    return (1);
+  else
+    return (0);
+}
+
 // rendiamo qui l'elenco dei punti come return della func
 function calculate_points(&$table)
 {
@@ -973,6 +1003,7 @@ function calculate_points(&$table)
   $table->old_win = $table->asta_win;
   $table->old_friend = $table->friend;
   $table->old_asta_pnt = $table->asta_pnt;
+  $table->old_mult = $table->mult;
 
   for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
     // for ($i = 0 ; $i < 40 ; $i++) {
@@ -993,7 +1024,7 @@ function calculate_points(&$table)
     }
     $table->points_n++;
     $table->old_pnt = $pro;
-    $table->mult *= 2;
+    $table->mult += 1;
 
     return($ret);
   }
@@ -1003,6 +1034,8 @@ function calculate_points(&$table)
   else
     $sig = -1;
 
+  $gamult = asta2mult($table->asta_pnt);
+  
   $table->points[$table->points_n % MAX_POINTS] = array();
   for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
     if ($i == $table->asta_win) 
@@ -1011,10 +1044,12 @@ function calculate_points(&$table)
       $pt = 1;
     else
       $pt = -1;
+    
+    
 
     log_wr(sprintf("PRO: pt[%d][%d] = %d", $table->points_n % MAX_POINTS, $i, $pt));
 
-    $pt = $pt * $sig * $table->mult * ($pro == 120 ? 2 : 1);
+    $pt = $pt * $sig * ($gamult + $table->mult) * ($pro == 120 ? 2 : 1);
 
     log_wr(sprintf("PRO:[%d][%d][%d]", $sig, $table->mult, ($pro == 120 ? 2 : 1)));
     
@@ -1329,18 +1364,24 @@ function show_table_info(&$room, &$table, $table_pos)
       }
     }
     else {
-      $noty .= sprintf("<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", 
+      $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
 		       xcape($room->user[$win]->name));
       if ($table->old_pnt == 120) {
-	$noty .= sprintf("ha fatto <b>cappotto</b> EBBRAVO!.<hr>");
+	$noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang]);
       }
       else {
-	$noty .= sprintf("doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>",
-			 ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt :
-			  'pi&ugrave; di 60'), $table->old_pnt,
-			 ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso")));
+	$noty .= sprintf($mlang_bin5_bin5['info_apnt'][$G_lang],
+
+			 ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
+			  $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
+
+			 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
       }
     }
+    if (($table->old_mult + asta2mult($table->old_asta_pnt)) > 1) {
+      $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], multoval($table->old_mult + asta2mult($table->old_asta_pnt)));
+    }
+    $noty .= "<hr><br>";
   }
   /* MLANG: "Fai <b>tu</b> il mazzo,", "Il mazzo a <b>$unam</b>," */
   if ($table->mazzo == $table_pos) 
@@ -1369,8 +1410,8 @@ function show_table_info(&$room, &$table, $table_pos)
     $noty .= sprintf($mlang_bin5_bin5['info_turn'][$G_lang], $unam);
   }
   
-  if ($table->mult > 1) {
-    $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($table->mult));
+  if (($table->mult + asta2mult($table->asta_pnt)) > 1) {
+    $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($table->mult + asta2mult($table->asta_pnt)));
   }
   $noty .= "<hr><br>";
   $ret .= show_notify($noty, 3000, $mlang_bin5_bin5['btn_bkgame'][$G_lang], 500, 400);
