@@ -165,7 +165,7 @@ else if ($user->stat == 'table') {
     
       log_wr(sprintf("GIOCO FINITO !!!"));
     
-      $table->mult *= 2; 
+      $table->mult += 1; 
       $table->old_reason = sprintf("Ha lasciato %s perché aveva al massimo 2 punti.", xcape($user->name));
 
       $table->game_next();
@@ -278,7 +278,7 @@ else if ($user->stat == 'table') {
 	    log_wr(sprintf("GIOCO FINITO !!!"));
 	  
 	    $table->old_reason = "Hanno passato tutti.";
-	    $table->mult *= 2; 
+	    $table->mult += 1; 
 
 	    $table->game_next();
 	    $table->game_init(&$bri->user);
