@@ -35,6 +35,8 @@ TODO:
    
 */
 
+ini_set("max_execution_time",  "120");
+
 require_once("../Obj/brisk.phh");
 require_once("../Obj/auth.phh");
 require_once("Obj/briskin5.phh");
@@ -47,6 +49,8 @@ function main()
   $mon = array();
   $wee = array();
   
+  echo "inizio<br>";
+  fflush();
   if ($pazz != $G_alarm_passwd)
     exit;
 
@@ -54,7 +58,15 @@ function main()
     echo "Open data file error";
     exit;
   }
-  
+  echo "prima<br>";
+ 
+  if (($fp_start = @fopen(LEGAL_PATH."/points.start", 'r')) != FALSE) {
+    $skip = intval(fgets($fp_start));
+    if ($skip > 0)
+      fseek($fp, $skip, SEEK_SET);
+    fclose($fp_start);
+  }
+
   $userdb = new LoginDB();
 
   for ($i = 0 ; $i < $userdb->count() ; $i++) {
@@ -84,10 +96,32 @@ function main()
       continue;
     // echo $p++."<br>";
     // if to much old points, continue
-    if ($ar[0] < $curtime - TRI_LIMIT)
+    if ($ar[0] < $curtime - TRI_LIMIT) {
+      if (($fp_start = @fopen(LEGAL_PATH."/points.start", 'w')) != FALSE) {
+        $curpos = ftell($fp);
+        fwrite($fp_start, sprintf("%d\n", $curpos));
+        fclose($fp_start);
+      }
+      
       continue;
+    }
     // echo $p++." ".BRISKIN5_PLAYERS_N."<br>";
     
+    $found = FALSE;
+    $mult = 1;
+    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+      for ($e = $i + 1 ; $e < BRISKIN5_PLAYERS_N ; $e++) {
+        if ($ar[10+($i*2)] == $ar[10+($e*2)]) {
+          $mult = abs($ar[10+($i*2)]);
+          $found = TRUE;
+        }
+      }
+      if ($found)
+        break;
+    }
+
+    if ($mult == 0)
+       continue;
     for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       // echo $p." i) ".$i."<br>";
       $username = $ar[9+($i*2)];
@@ -96,12 +130,12 @@ function main()
         continue;
       }
       
-      // echo $item->login." id)".$id."  ".$ar[10+($i*2)]."<br>";
-      $tri[$id]->add($ar[10+($i*2)]);
+      // echo $item->login." id)".$id."  ".$ar[10+($i*2)]." mult: ".$mult."<br>";
+      $tri[$id]->add($ar[10+($i*2)] / $mult);
       if ($ar[0] >= $curtime - MON_LIMIT) 
-        $mon[$id]->add($ar[10+($i*2)]);
+        $mon[$id]->add($ar[10+($i*2)] / $mult);
       if ($ar[0] >= $curtime - WEE_LIMIT) 
-        $wee[$id]->add($ar[10+($i*2)]);
+        $wee[$id]->add($ar[10+($i*2)] / $mult);
     }
     // $p++; echo $p++."<br>";
   }
