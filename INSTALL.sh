@@ -1,10 +1,5 @@
 #!/bin/bash
 # set -x
-
-#
-#  ONLY FOR TEST
-#
-
 #
 # Defaults
 #
