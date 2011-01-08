@@ -2,7 +2,7 @@
 /*
  *  brisk - index.php
  *
- *  Copyright (C) 2006-2009 Matteo Nastasi
+ *  Copyright (C) 2006-2011 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -19,8 +19,6 @@
  * copy of the GNU General Public License along with this program; if
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
- *
- * $Id: index.php,v 1.33.2.28 2009-12-12 08:42:19 nastasi Exp $
  *
  */
 
@@ -525,7 +523,7 @@ google_color_url = "000000";
 <!-- <a target="_blank" href="/briskhome.php"></a> -->
 
 <div class="webstart_hilite">
-<img class="nobo" src="img/brisk_start.png" onmouseover="menu_hide(0,0); menu_show(\'menu_webstart\');">
+<img class="nobo" style="cursor: pointer;" src="img/brisk_start.png" onmouseover="menu_hide(0,0); menu_show(\'menu_webstart\');">
 <div class="webstart" id="menu_webstart" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
 <a href="#" onmouseover="menu_hide(0,1);" title="'.$mlang_room['tit_help'][$G_lang].'" onclick="act_help();"
@@ -626,7 +624,7 @@ google_color_url = "000000";
    title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
 
 </div>
-</div>'. ($ACTION == "room" ? '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div><img class="nobo" src="img/brisk_commands'.langtolng($G_lang).'.png" onmouseover="menu_hide(0,0); menu_show(\'menu_commands\');">
+</div>'. ($ACTION == "room" ? '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div><img class="nobo" style="cursor: pointer;" src="img/brisk_commands'.langtolng($G_lang).'.png" onmouseover="menu_hide(0,0); menu_show(\'menu_commands\');">
 
 <div class="webstart" id="menu_commands" onmouseover="menu_over(1,this);" onmouseout="menu_over(-1,this);">
 
@@ -715,6 +713,13 @@ google_color_url = "000000";
           // MLANG
           .$mlang_room['st_baby_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_baby.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st pulizie\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_mop_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_mop.png"></a><br>
 
 <!--
 <a href="#" 

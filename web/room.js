@@ -1,7 +1,7 @@
 /*
  *  brisk - room.js
  *
- *  Copyright (C) 2006-2009 Matteo Nastasi
+ *  Copyright (C) 2006-2011 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it

@@ -1,7 +1,7 @@
 /*
  *  brisk - briskin5.js
  *
- *  Copyright (C) 2006-2008 Matteo Nastasi
+ *  Copyright (C) 2006-2011 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -19,9 +19,10 @@
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id$
- *
  */
+
+var mlang_briskin5 = { 'is_calling' : { 'it' : ' sta chiamando', 
+                                        'en' : ' is calling' } }
 
 function background_set()
 {
@@ -294,7 +295,7 @@ function set_iscalling(idx)
 
     for (i = 0 ; i < PLAYERS_N ; i++) {
         $("name"+astat_suffix[i]).className = "pubinfo"+astat_suffix[i]+(i == idx ? "_iscalling" : "");
-        $("name"+astat_suffix[i]).title = $("name"+astat_suffix[i]).title_orig + (i == idx ? " sta chiamando" : "");
+        $("name"+astat_suffix[i]).title = $("name"+astat_suffix[i]).title_orig + (i == idx ? mlang_briskin5['is_calling'][g_lang] : "");
     }
 }
 
