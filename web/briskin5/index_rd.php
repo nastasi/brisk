@@ -252,6 +252,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 	$new_subst = $user->subst;
 	$new_step =  $user->step;
       } while (0);
+
+      log_mop($user->step, 'bin::index_rd.php: after ret set');
       
       if ($user->the_end == TRUE) {
 	log_rd2("LOGOUT BYE BYE!!");
@@ -293,9 +295,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
    step
 */
 
-$is_page_streaming =  ((stristr($HTTP_USER_AGENT, "linux") && 
-			(stristr($HTTP_USER_AGENT, "firefox") || stristr($HTTP_USER_AGENT, "iceweasel"))) ? FALSE : TRUE);
-
+$is_page_streaming =  (stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -317,6 +317,7 @@ $old_step =  $ext_step = $step;
 
 for ($i = 0 ; time() < $endtime ; $i++) {
   // log_rd("PRE MAIN ".$step);;
+  $pre_main = gettimeofday(TRUE);
   if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step, $table_idx, $table_token)) != FALSE) {
     echo '@BEGIN@';
     // log_rd2(sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
@@ -324,6 +325,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
     echo ' @END@'; 
     log_send("EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
     flush();
+    log_mop(0, 'bin::index_rd.php: after flush (begin: '.sprintf("%f", $pre_main).')');
     if ($is_page_streaming)
       break;
   }
@@ -332,7 +334,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   $old_step =  $step;
   // log_rd("POST MAIN ".$step);;
   usleep(400000);
-  if (($i % 5) == 0) {
+  if (($i % 10) == 0) {
     // log_rd2("TIME: ".time());
     echo '_';
     flush();

@@ -49,6 +49,8 @@ log_wr('COMM: '.$mesg);
 if ($table_idx < 0 || $table_idx >= TABLE_N)
      exit;
 
+log_mop(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
+
 $sem = Briskin5::lock_data($table_idx);
 
 if (($bri = &Briskin5::load_data($table_idx,$table_token)) == FALSE) {
@@ -67,8 +69,9 @@ if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
 $argz = explode('|', $mesg);
 
 log_wr('POSTSPLIT: '.$argz[0]);
+log_mop($user->step, 'bin::index_wr.php: after get_user()');
 
-if ($argz[0] == 'shutdown') {
+if (false && $argz[0] == 'shutdown') {
   log_auth($user_cur->sess, "Shutdown session. delegate to room gc the autologout");
   
   log_rd2("bin5/index_wr.php: AUTO LOGOUT.");
@@ -483,7 +486,7 @@ else if ($user->stat == 'table') {
           }
           log_legal($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
           if ($user->table_orig < TABLES_AUTH_N)
-            log_points($curtime, xcapelt($user), "STAT:BRISKIN5:FINISH_GAME", $plist);
+            log_points($curtime, xcapelt($user->name), "STAT:BRISKIN5:FINISH_GAME", $plist);
 
 	  $table->game_next();
 	  $table->game_init(&$bri->user);
@@ -515,6 +518,7 @@ else if ($user->stat == 'table') {
 }
 log_wr("before save data");
 Briskin5::save_data($bri);
+log_mop($user->step, 'bin::index_wr.php: after save_data()');
 
 Briskin5::unlock_data($sem);
 exit;

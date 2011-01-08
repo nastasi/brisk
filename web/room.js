@@ -33,9 +33,10 @@ var l_list_isol = 0x02;
 
 function state_add(flags)
 {
-    var content = "";
-    var st, name = "";
-    var tit = "";
+    var content = "", supercont = "";
+    var st, superst, name = "", supername = "", supersfx = "";
+    var tit = "", supertit = "";
+
 
     if ((flags & 0xf00) != 0) {
         st = flags & 0xf00;
@@ -73,12 +74,43 @@ function state_add(flags)
             name = "st_rabbit.png";
             tit = (g_lang == 'en' ? "Rabbit time" : "sono a spasso col coniglio");
             break;
+        case 0x900:
+            name = "st_soccer.png";
+            tit = (g_lang == 'en' ? "Soccer time" : "c'è la partita!!");
+            break;
+        case 0xa00:
+            name = "st_baby.png";
+            tit = (g_lang == 'en' ? "Children time" : "ho il pupo da accudire");
+            break;
+        case 0xb00:
+            name = "st_mop.png";
+            tit = (g_lang == 'en' ? "Mop time" : "sto rassettando");
+            break;
         default:
             break;
         }
+    }
+
+    if ((flags & 0xf0000) != 0) {
+        superst = flags & 0xf0000;
         if (name != "") {
-            content += '&nbsp;<img title="'+tit+'" class="unbo" src="img/'+name+'">';
+            supersfx = "_side";                
         }
+
+        switch (superst) {
+        case 0x20000:
+            supername = "superuser"+supersfx+".png";
+            supertit = (g_lang == 'en' ? "Brisk Supporter" : "Brisk Supporter");
+            break;
+        }
+    }
+
+    if (supername != "") {
+        content += '&nbsp;<img title="'+supertit+'" class="inline" src="img/'+supername+'">';
+    }
+    
+    if (name != "") {
+        content += '&nbsp;<img title="'+tit+'" class="inline" src="img/'+name+'">';
     }
 
     return content;

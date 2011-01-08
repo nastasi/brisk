@@ -605,6 +605,15 @@ class Briskin5 {
 	    
             */
 
+            /* se gli altri utenti non erano d'accordo questo utente viene bannato */
+            $remcalc = $this->table[0]->exitlock_calc(&$this->user, $user_cur->table_pos);
+            if ($remcalc < 3) {
+                require_once("/var/www/webspace/trusty/Obj/hardban.phh");
+                Hardbans::add(($user_cur->flags & USER_FLAG_AUTH ? $user_cur->name : FALSE),
+                              $user_cur->ip, $user_cur->sess, $user_cur->laccwr + BAN_TIME);
+            }
+            //      $user->bantime = $user->laccwr + BAN_TIME;
+
 	    $this->table_wakeup(&$user_cur);
 	  }
 	}
@@ -1251,7 +1260,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     else
       $ret .= "remark_off();";
     
-    /* WHO CALL AND WATH */
+    /* WHO CALL AND WHAT */
     $ret .= briscola_show($room, $table, $user);
     
   }
@@ -1456,6 +1465,7 @@ function briscola_show($room, $table, $user)
     $ret .= sprintf($prestr, 
 		    xcape($room->user[$table->player[$table->asta_win]]->name), $ptnadd);
   }
+  $ret .= sprintf('set_iscalling(%d);', ($table->asta_win - $user->table_pos + BRISKIN5_PLAYERS_N) % BRISKIN5_PLAYERS_N);
 
   $ret .= sprintf('$("caller").style.backgroundImage = \'url("img/brisk_caller_sand%d.png")\';',
 		  $table->asta_win);

@@ -6,7 +6,7 @@
 players_n=3
 tables_n=16
 tables_auth_n=6
-brisk_auth_conf="brisk_auth.conf.pho"
+brisk_auth_conf="brisk_auth2.conf.pho"
 brisk_debug="0xffff"
 web_path="$HOME/brisk"
 legal_path="$HOME/brisk-priv"
@@ -15,8 +15,8 @@ proxy_path="$HOME/brisk-priv/proxy"
 web_only="FALSE"
 brisk_conf="brisk.conf.pho"
 
-if [ -f $HOME/.trusty_install ]; then
-   . $HOME/.trusty_install
+if [ -f $HOME/.brisk_install ]; then
+   . $HOME/.brisk_install
 fi
 if [ "x$cookie_path" = "x" ]; then
    cookie_path=$web_path

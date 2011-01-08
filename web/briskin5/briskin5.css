@@ -112,6 +112,7 @@ img.cover {
     height: 200px;
     top:  250px;
     left: 300px;
+    z-index: 10;
 }
 
 .asta {
@@ -122,30 +123,35 @@ img.cover {
     height: 200px;
     top:  250px;
     left: 300px;
+    z-index: 10;
 }
 
 img.seed0 {
     position:     absolute; 
     left: 0px;
     top: 55px;
+    cursor: pointer;
 }
 
 img.seed1 {
     position:     absolute; 
     left: 43px;
     top: 55px;
+    cursor: pointer;
 }
 
 img.seed2 {
     position:     absolute; 
     left: 93px;
     top: 55px;
+    cursor: pointer;
 }
 
 img.seed3 {
     position:     absolute; 
     left: 143px;
     top: 55px;
+    cursor: pointer;
 }
 
 .area {
@@ -203,7 +209,7 @@ div.table_commands {
     border-style: solid;
     border-width: 0px;
     border-color: green;
-    z-index: 0;
+    z-index: 1;
 }
 
 .remark1 { 
@@ -217,7 +223,7 @@ div.table_commands {
     border-style: solid;
     border-width: 4px;
     border-color: green;
-    z-index: 0;
+    z-index: 1;
 }
 
 .remark2 { 
@@ -231,7 +237,7 @@ div.table_commands {
     border-style: solid;
     border-width: 2px;
     border-color: green;
-    z-index: 0;
+    z-index: 1;
 }
 
 .punti {
@@ -265,6 +271,20 @@ div.table_commands {
     height: 125px;
 }
 
+.pubinfo_iscalling {
+    /*  background-color: red;  */
+    color: grey;
+    visibility: visible;
+    position: absolute;
+    top: 475px;
+    left: 200px;
+    width:  396px !important;
+    width:  400px;
+    height: 121px !important;
+    height: 125px;
+    border: 2px solid #66bbff;
+}
+
 .public {
     /* background-color: red;  */
     visibility: hidden;
@@ -286,8 +306,6 @@ div.table_commands {
     margin-right: auto;
 }  
 
-
-
 .pubinfo_we {
     color: grey;
     visibility: visible;
@@ -296,6 +314,19 @@ div.table_commands {
     left: 175px;
     width:  125px;
     height: 200px;
+}
+
+.pubinfo_we_iscalling {
+    color: grey;
+    visibility: visible;
+    position: absolute;
+    top: 250px;
+    left: 175px;
+    width:  121px !important;
+    width:  125px;
+    height: 196px !important;
+    height: 200px;
+    border: 2px solid #66bbff;
 }
 
 .public_we {
@@ -321,24 +352,26 @@ div.table_commands {
     height: 125px;
 }
 
+.pubinfo_nw_iscalling {
+    /*  background-color: red;  */
+    color: grey;
+    visibility: visible;
+    position: absolute;
+    top: 125px;
+    left: 200px;
+    width:  196px !important;
+    width:  200px;
+    height: 121px !important;
+    height: 125px;
+    border: 2px solid #66bbff;
+}
+
 .public_nw {
     /*  background-color: red;   */
     visibility: hidden;
     position: absolute;
     top: 125px;
     left: 200px;
-    display: table;
-    width:  200px;
-    height: 125px;
-    overflow: hidden;
-}
-
-.public_ne {
-    /*  background-color: red;  */
-    visibility: hidden;
-    position: absolute;
-    top: 125px;
-    left: 400px;
     display: table;
     width:  200px;
     height: 125px;
@@ -356,17 +389,29 @@ div.table_commands {
     height: 125px;
 }
 
+.pubinfo_ne_iscalling {
+    /*  background-color: red;  */
+    color: grey;
+    visibility: visible;
+    position: absolute;
+    top: 125px;
+    left: 400px;
+    width:  196px !important;
+    width:  200px;
+    height: 121px !important;
+    height: 125px;
+    border: 2px solid #66bbff;
+}
 
-
-.public_ea {
-    /*  background-color: red; */
+.public_ne {
+    /*  background-color: red;  */
     visibility: hidden;
     position: absolute;
-    top: 250px;
-    left: 500px;
+    top: 125px;
+    left: 400px;
     display: table;
-    width:  125px;
-    height: 200px;
+    width:  200px;
+    height: 125px;
     overflow: hidden;
 }
 
@@ -379,6 +424,32 @@ div.table_commands {
     left: 500px;
     width:  125px;
     height: 200px;
+}
+
+.pubinfo_ea_iscalling {
+    /*  background-color: red; */
+    color: grey;
+    visibility: visible;
+    position: absolute;
+    top: 250px;
+    left: 500px;
+    width:  121px !important;
+    width:  125px;
+    height: 196px !important;
+    height: 200px;
+    border: 2px solid #66bbff;
+}
+
+.public_ea {
+    /*  background-color: red; */
+    visibility: hidden;
+    position: absolute;
+    top: 250px;
+    left: 500px;
+    display: table;
+    width:  125px;
+    height: 200px;
+    overflow: hidden;
 }
 
 .vert_midfloat {

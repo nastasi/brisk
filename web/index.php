@@ -20,7 +20,7 @@
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id$
+ * $Id: index.php,v 1.33.2.28 2009-12-12 08:42:19 nastasi Exp $
  *
  */
 
@@ -79,6 +79,12 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'present'),
                      'st_rabb_desc' => array('it' => 'coniglio',
                                              'en' => 'rabbit'),
+                     'st_socc_desc' => array('it' => 'calcio',
+                                             'en' => 'soccer'),
+                     'st_baby_desc' => array('it' => 'pupo',
+                                             'en' => 'baby'),
+                     'st_mop_desc'  => array('it' => 'pulizie',
+                                             'en' => 'mop'),
                      
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
@@ -154,10 +160,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'roadmap of next functionalities'),
                      'itm_rmap'     => array('it' => 'roadmap',
                                              'en' => 'roadmap'),
-                     'tit_meet'     => array('it' => 'foto dei raduni di briskisti',
+                     'tit_meet'     => array('it' => 'foto dei raduni di briskisti (serve Facebook)',
                                              'en' => 'photos of brisk meetings'),
-                     'itm_meet'     => array('it' => 'raduni',
-                                             'en' => 'meeting'),
+                     'itm_meet'     => array('it' => 'BriskMeeting',
+                                             'en' => 'BriskMeeting'),
                      'tit_mesg'     => array('it' => 'manda un messaggio o una segnalazione all\'amministratore del sito',
                                              'en' => 'send a message or a signalling to the administrator' ),
                      'mesgtoadm_tit'=> array('it' => 'Invia un messaggio o una segnalazione all\'amministratore:',
@@ -207,6 +213,12 @@ function poll_dom() {
     return '';
 }
 
+function carousel_top()
+{
+    $rn = rand(1, 3);
+    return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" src="img/briskshop%d.gif"></a>', $rn));
+}
+
 function main()
 {
   GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
@@ -223,177 +235,177 @@ function main()
   $ACTION = "login";
   
   if (isset($BRISK_SHOWHTML) == FALSE) {
-    $is_table = FALSE;
-    $sem = Room::lock_data();
-    log_main("lock Room");
-    $room = &Room::load_data();
-    $curtime = time();
-
-    /* Actions */
-
-    if (validate_sess($sess)) {
-      log_main("pre garbage_manager UNO");
-      $room->garbage_manager(TRUE);
-      log_main("post garbage_manager");
-      if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
-	log_main("user stat: ".$user->stat);
-	if ($user->stat == "table") {
-	  if (Room::save_data(&$room) == FALSE) {
-	    echo "ERRORE SALVATAGGIO\n";
-	    exit;
-	  }
-	  log_main("unlock Room");
-	  Room::unlock_data($sem);
-	  setcookie("table_token", $user->table_token, $curtime + 31536000);
-	  setcookie("table_idx", $user->table, $curtime + 31536000);
-	  header ("Location: briskin5/index.php");
-	  exit;
-	}
-	$ACTION = "room";
-      }
-
-      if (Room::save_data(&$room) == FALSE) {
-	echo "ERRORE SALVATAGGIO\n";
-	exit;
-      }
-    }
-    
-    if ($ACTION == "login" && isset($name)) {
+      $is_table = FALSE;
+      $sem = Room::lock_data();
+      log_main("lock Room");
+      $room = &Room::load_data();
+      $curtime = time();
       
-      log_main("pre garbage_manager DUE");
-
-      if (isset($pass_private) == FALSE) {
-        $pass_private = FALSE;
+      /* Actions */
+      
+      if (validate_sess($sess)) {
+          log_main("pre garbage_manager UNO");
+          $room->garbage_manager(TRUE);
+          log_main("post garbage_manager");
+          if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
+              log_main("user stat: ".$user->stat);
+              if ($user->stat == "table") {
+                  if (Room::save_data(&$room) == FALSE) {
+                      echo "ERRORE SALVATAGGIO\n";
+                      exit;
+                  }
+                  log_main("unlock Room");
+                  Room::unlock_data($sem);
+                  setcookie("table_token", $user->table_token, $curtime + 31536000);
+                  setcookie("table_idx", $user->table, $curtime + 31536000);
+                  header ("Location: briskin5/index.php");
+                  exit;
+              }
+              $ACTION = "room";
+          }
+          
+          if (Room::save_data(&$room) == FALSE) {
+              echo "ERRORE SALVATAGGIO\n";
+              exit;
+          }
       }
-
-      $room->garbage_manager(TRUE);
-      /* try login */
-      if (($user = &$room->add_user(&$sess, &$idx, $name, $pass_private, $_SERVER['REMOTE_ADDR'])) != FALSE) {
-	$ACTION = "room";
-	if ($idx < 0) {
-          $idx = -$idx - 1;
-          $is_login = TRUE;
-        }
-
-        log_legal($curtime, $user, "STAT:LOGIN", '');
-
-        // recovery lost game
-	if ($user->stat == "table") {
-	  if (Room::save_data(&$room) == FALSE) {
-	    echo "ERRORE SALVATAGGIO\n";
-	    exit;
-	  }
-	  log_main("unlock Room");
-	  Room::unlock_data($sem);
-	  setcookie("table_token", $user->table_token, $curtime + 31536000);
-	  setcookie("table_idx", $user->table, $curtime + 31536000);
-	  header ("Location: briskin5/index.php");
-	  exit;
-	}
-
-
-	// setcookie ("sess", "", time() + 180);      
-	$room->standup_update(&$user);
-	
+      
+      if ($ACTION == "login" && isset($name)) {
+          
+          log_main("pre garbage_manager DUE");
+          
+          if (isset($pass_private) == FALSE) {
+              $pass_private = FALSE;
+          }
+          
+          $room->garbage_manager(TRUE);
+          /* try login */
+          if (($user = &$room->add_user(&$sess, &$idx, $name, $pass_private, $_SERVER['REMOTE_ADDR'])) != FALSE) {
+              $ACTION = "room";
+              if ($idx < 0) {
+                  $idx = -$idx - 1;
+                  $is_login = TRUE;
+              }
+              
+              log_legal($curtime, $user, "STAT:LOGIN", '');
+              
+              // recovery lost game
+              if ($user->stat == "table") {
+                  if (Room::save_data(&$room) == FALSE) {
+                      echo "ERRORE SALVATAGGIO\n";
+                      exit;
+                  }
+                  log_main("unlock Room");
+                  Room::unlock_data($sem);
+                  setcookie("table_token", $user->table_token, $curtime + 31536000);
+                  setcookie("table_idx", $user->table, $curtime + 31536000);
+                  header ("Location: briskin5/index.php");
+                  exit;
+              }
+              
+              
+              // setcookie ("sess", "", time() + 180);      
+              $room->standup_update(&$user);
+              
 	if (Room::save_data(&$room) == FALSE) {
-	  echo "ERRORE SALVATAGGIO\n";
-	  exit;
+            echo "ERRORE SALVATAGGIO\n";
+            exit;
 	}
+          }
+          else {
+              /* Login Rendering */
+              /* MLANG: "Utente e/o password errati.", "Il nickname deve contenere almeno una lettera o una cifra.", "Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.", "Il tuo nickname &egrave; gi&agrave; in uso." */
+              /*
+               if ($idx == -3) 
+               $body .= '<div class="urgmsg"><b>'.$mlang_room['userpasserr'][$G_lang].'</b></div>';
+               else if ($idx == -2)
+               // $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
+               $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassmust'][$G_lang].'</b></div>';
+               else if ($idx == -1) 
+               // $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
+               $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassend'][$G_lang].'</b></div>';
+               else
+               // $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
+               $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassuse'][$G_lang].'</b></div>';
+              */
+              
+              if ($idx == -3) 
+                  $sfx = 'err';
+              else if ($idx == -2)
+                  $sfx = 'must';
+              else if ($idx == -1) 
+                  $sfx = 'end';
+              else
+                  $sfx = 'use';
+              
+              $body .= '<div class="urgmsg"><b>'.$mlang_room['userpass'.$sfx][$G_lang].'</b></div>';
+          }
       }
-      else {
-	/* Login Rendering */
-        /* MLANG: "Utente e/o password errati.", "Il nickname deve contenere almeno una lettera o una cifra.", "Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.", "Il tuo nickname &egrave; gi&agrave; in uso." */
-        /*
-	if ($idx == -3) 
-	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpasserr'][$G_lang].'</b></div>';
-	else if ($idx == -2)
-	  // $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
-	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassmust'][$G_lang].'</b></div>';
-	else if ($idx == -1) 
-	  // $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
-	  $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassend'][$G_lang].'</b></div>';
-	else
-	  // $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
-          $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassuse'][$G_lang].'</b></div>';
-        */
-
-	if ($idx == -3) 
-          $sfx = 'err';
-	else if ($idx == -2)
-          $sfx = 'must';
-	else if ($idx == -1) 
-	  $sfx = 'end';
-	else
-	  $sfx = 'use';
-
-        $body .= '<div class="urgmsg"><b>'.$mlang_room['userpass'.$sfx][$G_lang].'</b></div>';
-      }
-    }
-    Room::unlock_data($sem);
+      Room::unlock_data($sem);
   }
   /* Rendering. */
 
   if ($BRISK_SHOWHTML == "debugtable") {
-    $ACTION = "room";
+      $ACTION = "room";
   }
   else if ($BRISK_SHOWHTML == "debuglogin") {
-    $ACTION = "login";
+      $ACTION = "login";
   }
-
+  
   if ($ACTION == "room") {
-    $tables .= '<div class="room_tab">';
-    $tables .= '<table class="room_tab">';
-    for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
-      if ($user->flags & USER_FLAG_AUTH)
+      $tables .= '<div class="room_tab">';
+      $tables .= '<table class="room_tab">';
+      for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
+          if ($user->flags & USER_FLAG_AUTH)
         $i = $ii;
-      else
-        $i = TABLES_N - $ii - 1;
-
-      if ($ii % 4 == 0) {
-          $tables .= '<tr id = "tr_noauth'.$ii.'">';
+          else
+              $i = TABLES_N - $ii - 1;
+          
+          if ($ii % 4 == 0) {
+              $tables .= '<tr id = "tr_noauth'.$ii.'">';
+          }
+          if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $ii < TABLES_AUTH_N) {
+              $tables .= '<td id = "td_noauth'.$ii.'">';
+              
+              $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
+              $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
+              $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
+              $tables .= '</div>';
+              $tables .= '</td>'."\n";
+          }
+          if ($ii % 4 == 3) {
+              $tables .= '</tr>';
+          }
       }
-      if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $ii < TABLES_AUTH_N) {
-        $tables .= '<td id = "td_noauth'.$ii.'">';
-
-        $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
-        $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
-        $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
-        $tables .= '</div>';
-        $tables .= '</td>'."\n";
-      }
-      if ($ii % 4 == 3) {
-	$tables .= '</tr>';
-      }
-    }
-    $tables .= '</table></div>';
-
-
-    $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
-    $standup .= '<div class="room_ex_standup">';
-    /* MLANG: "Giocatori in piedi" */
-    // $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
-    $standup .= '<div id="room_tit"><span class="room_titin"><b>'.$mlang_room['standing'][$G_lang].'</b></span></div>';
-    
-    $standup .= sprintf('<div id="standup" class="room_standup"></div>');
-    // MLANG Esco.
-    $standup .= '<div id="esco" class="esco"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reloadroom();"><input class="button" name="logout" value="'.$mlang_room['btn_exit'][$G_lang].'" onclick="esco_cb();" type="button"></div>';
-    $standup .= '</div></td></tr></table>';
+      $tables .= '</table></div>';
+      
+      
+      $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
+      $standup .= '<div class="room_ex_standup">';
+      /* MLANG: "Giocatori in piedi" */
+      // $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
+      $standup .= '<div id="room_tit"><span class="room_titin"><b>'.$mlang_room['standing'][$G_lang].'</b></span></div>';
+      
+      $standup .= sprintf('<div id="standup" class="room_standup"></div>');
+      // MLANG Esco.
+      $standup .= '<div id="esco" class="esco"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reloadroom();"><input class="button" name="logout" value="'.$mlang_room['btn_exit'][$G_lang].'" onclick="esco_cb();" type="button"></div>';
+      $standup .= '</div></td></tr></table>';
   }
-
+  
   $altout_sponsor_arr = array( array ( 'id' => 'btn_altout',
-                                  'url' => 'http://www.alternativeoutput.it',
-				  'content' => 'img/altout80x15.png',
-                                  'content_big' => 'img/logotxt_banner.png'),
-			  array ( 'id' => 'btn_virtualsky',
-                                  'url' => 'http://virtualsky.alternativeoutput.it',
-				  'content' => 'img/virtualsky80x15a.gif',
-                                  'content_big' => 'img/virtualsky_big.png'),
-			  array ( 'id' => 'btn_dynamica',
-                                  'url' => 'http://www.dynamica.it',
-				  'content' => 'img/dynamica.png',
-                                  'content_big' => 'img/dynamica_big.png')
-			  );
-
+                                       'url' => 'http://www.alternativeoutput.it',
+                                       'content' => 'img/altout80x15.png',
+                                       'content_big' => 'img/logotxt_banner.png'),
+                               array ( 'id' => 'btn_virtualsky',
+                                       'url' => 'http://virtualsky.alternativeoutput.it',
+                                       'content' => 'img/virtualsky80x15a.gif',
+                                       'content_big' => 'img/virtualsky_big.png'),
+                               array ( 'id' => 'btn_dynamica',
+                                       'url' => 'http://www.dynamica.it',
+                                       'content' => 'img/dynamica.png',
+                                       'content_big' => 'img/dynamica_big.png')
+                               );
+  
   $altout_support_arr = array( array ( 'id' => 'btn_brichi',
                                        'url' => 'http://www.briscolachiamata.it',
                                        'content' => 'img/brichi.png',
@@ -402,56 +414,55 @@ function main()
                                        'url' => 'http://www.forumolimpia.it',
                                        'content' => 'img/forumolimpia.gif',
                                        'content_big' => 'img/forumolimpia_big.png' ) );
-
-
-
+  
+  
+  
   $altout_support = "";
   $altout_support_big = "";
   for ($i = 0 ; $i < 3 ; $i++) {
-    $ii = ($i < 2 ? $i : 0);
-
-    $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
-                               $i * 20, $altout_support_arr[$ii]['url'],
-                               $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
-    
-    $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
-                                   $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
+      $ii = ($i < 2 ? $i : 0);
+      
+      $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
+                                 $i * 20, $altout_support_arr[$ii]['url'],
+                                 $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content']);
+      
+      $altout_support_big .= sprintf('<img style="position: absolute;" class="nobohide" id="%s_big" src="%s">',
+                                     $altout_support_arr[$ii]['id'], $altout_support_arr[$ii]['content_big']);
   }
-
-
+  
+  
   // seed with microseconds since last "whole" second
   // srand ((double) microtime() * 1000000);
   // $randval = rand(0,count($altout_sponsor_arr)-1);
   $altout_sponsor = "";
   $altout_sponsor_big = "";
   for ($i = 0 ; $i < 4 ; $i++) {
-    $ii = ($i < 3 ? $i : 0);
-
-    $altout_sponsor .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
-                               $i * 20, $altout_sponsor_arr[$ii]['url'],
-                               $altout_sponsor_arr[$ii]['id'], $altout_sponsor_arr[$ii]['content']);
-    
-    $altout_sponsor_big .= sprintf('<img class="nobohide" id="%s_big" src="%s">',
+      $ii = ($i < 3 ? $i : 0);
+      
+      $altout_sponsor .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
+                                 $i * 20, $altout_sponsor_arr[$ii]['url'],
+                                 $altout_sponsor_arr[$ii]['id'], $altout_sponsor_arr[$ii]['content']);
+      
+      $altout_sponsor_big .= sprintf('<img class="nobohide" id="%s_big" src="%s">',
                                    $altout_sponsor_arr[$ii]['id'], $altout_sponsor_arr[$ii]['content_big']);
   }
-
-
-
-
-
+  
+  
+  
+  
+  
   $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
   if ($brisk_donate == FALSE)
-    $brisk_donate = "";
-
-
+      $brisk_donate = "";
+  
+  
   /* MLANG: "briscola chiamata in salsa ajax", */
-
-$brisk_header_form = '<div class="container">
-<!-- =========== header ===========  -->
-<div id="header" class="header">
-<table width="100%%" border="0" cols="3"><tr>
-<td align="left"><div style="padding-left: 8px;">'.($G_is_local ? '' :
-'<script type="text/javascript"><!--
+  
+  mt_srand(make_seed());
+  $rn = rand(0, 1);
+  
+  if ($rn == 0) { 
+      $banner_top_left = '<script type="text/javascript"><!--
 google_ad_client = "pub-5246925322544303";
 google_ad_width = 234;
 google_ad_height = 60;
@@ -467,8 +478,35 @@ google_color_url = "000000";
 </script>
 <script type="text/javascript"
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>'
-).'</div></td>
+</script>';
+      $banner_top_right = carousel_top();
+  }
+  else { 
+      $banner_top_left = carousel_top();
+      $banner_top_right = '<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>';
+  }
+
+  $brisk_header_form = '<div class="container">
+<!-- =========== header ===========  -->
+<div id="header" class="header">
+<table width="100%%" border="0" cols="3"><tr>
+<td align="left"><div style="padding-left: 8px;">'.($G_is_local ? '' : $banner_top_left ).'</div></td>
 <td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
     <img class="nobo" src="img/brisk_logo64.png">
     '.$mlang_room['headline'][$G_lang].'<br>
@@ -476,30 +514,12 @@ google_color_url = "000000";
                                                                 ($G_with_topbanner ? $G_topbanner : 
 "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
-'.($G_is_local ? '' :
-'<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript"
-  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>'
-).'</div></td>
+'.($G_is_local ? '' : $banner_top_right ).'</div></td>
 </td></table>
 </div>';
 
 /* MLANG: ALL THE VERTICAL MENU */
-$brisk_vertical_menu = '
+  $brisk_vertical_menu = '
 <!--  =========== vertical menu ===========  -->
 <div class="topmenu">
 <!-- <a target="_blank" href="/briskhome.php"></a> -->
@@ -568,14 +588,43 @@ $brisk_vertical_menu = '
 <a href="#" title="'.$mlang_room['tit_meet'][$G_lang].'" 
    onmouseover="menu_show(\'menu_meeting\');">'.$mlang_room['itm_meet'][$G_lang].'</a><br>
 
-<div id="menu_meeting" class="webstart">
-<a href="http://www.anomalia.it/mop/photoo" 
+<div style="text-align: right;" id="menu_meeting" class="webstart">
+<a href="http://it-it.facebook.com/event.php?eid=262482143080&index=1"
    target="_blank" onmouseover="menu_hide(0,2);"
-   title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
+   title="1° Torneo-Meeting di Lodi del 21/02/2010" ><img style="display: inline;" class="nobo" src="img/coppa16.png">Lodi 02/10</a><br>
+
+<a href="http://it-it.facebook.com/event.php?eid=165523204539&index=1"
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="1° Torneo-Meeting di Parma del 22/11/2009" <img style="display: inline;" class="nobo" src="img/coppa16.png">Parma 11/09</a><br>
+
+<a href="http://it-it.facebook.com/event.php?eid=105699129890&index=1"
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="BriskMeeting di Parma del 13/09/2009" >Parma 09/09</a><br>
+
+<a href="http://it-it.facebook.com/event.php?eid=97829048656&index=1"
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="BriskMeeting di Clusane d\'Iseo del 5/07/2009" >Clusane 07/09</a><br>
+
+<a href="http://it-it.facebook.com/event.php?eid=103366692570&index=1"
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="BriskMeeting Siciliano del 14/06/2009" >Catania 06/09</a><br>
+
+<a href="http://it-it.facebook.com/event.php?eid=81488770852&index=1" 
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="BriskMeeting di Piacenza del 19/04/2009" >Piacenza 04/09</a><br>
+
+<a href="http://it-it.facebook.com/event.php?eid=51159131399&index=1" 
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="BriskMeeting di Parma del 22/02/2009" >Parma 02/09</a><br>
 
 <a href="http://www.anomalia.it/mop/photoo?album=brisk_pc0806" 
    target="_blank" onmouseover="menu_hide(0,2);"
    title="Raduno di Piacenza del del 15/06/2008" >Piacenza 06/08</a><br>
+
+<a href="http://www.anomalia.it/mop/photoo" 
+   target="_blank" onmouseover="menu_hide(0,2);"
+   title="Torneo di Milano del 17/05/2008" >Milano 05/08</a><br>
+
 </div>
 </div>'. ($ACTION == "room" ? '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div><img class="nobo" src="img/brisk_commands'.langtolng($G_lang).'.png" onmouseover="menu_hide(0,0); menu_show(\'menu_commands\');">
 
@@ -653,6 +702,28 @@ $brisk_vertical_menu = '
           .$mlang_room['st_rabb_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_rabbit.png"></a><br>
 
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st calcio\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_socc_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_soccer.png"></a><br>
+
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st pupo\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_baby_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_baby.png"></a><br>
+
+<!--
+<a href="#" 
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st coniglio\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_rabb_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_rabbit.png"></a><br>
+-->
 </div>
 
 <a href="#" title="avvia un ticker pubblicitario per il tuo tavolo" 

@@ -277,13 +277,36 @@ class LoginDBItem {
   var $login;
   var $pass;
   var $email;
+  var $type;
 
-  function LoginDBItem($login, $pass, $email)
+  function LoginDBItem($login, $pass, $email, $type)
   {
     $this->login = $login;
     $this->pass  = $pass;
     $this->email = $email;
+    $this->type  = $type;
   }
+
+  function loginget()
+  {
+      return $this->login;
+  }
+
+  function passget()
+  {
+      return $this->pass;
+  }
+
+  function emailget()
+  {
+      return $this->email;
+  }
+
+  function typeget()
+  {
+      return $this->type;
+  }
+
 }
 
 class LoginDB {
@@ -300,9 +323,9 @@ class LoginDB {
       require("$DOCUMENT_ROOT/Etc/".BRISK_AUTH_CONF);
     }
     else {
-      $this->item = array( new LoginDBItem("uno", md5("one"), "pippo@pluto.com"),
-                           new LoginDBItem("due", md5("two"), "pippo@pluto.com"),
-                           new LoginDBItem("a_b", md5("abb"), "pippo@pluto.com"),
+      $this->item = array( new LoginDBItem("uno", md5("one"),   "pippo@pluto.com"),
+                           new LoginDBItem("due", md5("two"),   "pippo@pluto.com"),
+                           new LoginDBItem("a_b", md5("abb"),   "pippo@pluto.com"),
                            new LoginDBItem("tre", md5("three"), "pippo@pluto.com") );
     }
     $this->item_n = count($this->item);
@@ -368,9 +391,25 @@ class LoginDB {
     return (FALSE);
   }
 
-  function login_verify($login, $pass)
+  function gettype($login)
   {
-    $ret = FALSE;
+    log_main("getmail");
+    
+    /* check the existence of the nick in the LoginDB */
+    for ($i = 0 ; $i < $this->item_n ; $i++) {
+      if (strcasecmp($this->item[$i]->login, $login) == 0) {
+        log_main("login[".$i."]: ".$this->item[$i]->login);
+        return ($this->item[$i]->type);
+      }
+    }
+    return (FALSE);
+  }
+
+  function &login_verify($login, $pass)
+  {
+    GLOBAL $G_false;
+
+    $ret = &$G_false;
 
     log_main("login_verify: ".$login);
         
@@ -394,7 +433,7 @@ class LoginDB {
                   log_main("login_verify SUCCESS for ".$login);
    
                   $chals->rem($login);
-                  $ret = TRUE;
+                  $ret = &$this->item[$i];
                   break;
                 }
               }

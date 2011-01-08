@@ -207,6 +207,8 @@ function table_init() {
     $("asta").style.visibility = "hidden";
     $("caller").style.visibility = "hidden";
     show_astat(-2,-2,-2,-2,-2);
+    set_iscalling(-1);
+
     for (i=0 ; i < 8 ; i++) {
 	Drag.init($("card" + i), card_mouseup_cb);
 	for (e = 0 ; e < PLAYERS_N ; e++)
@@ -268,7 +270,7 @@ function act_reload()
 
 function set_names(so,ea,ne,nw,we)
 {
-//    alert("EA: "+ea);
+    // alert("SET NAME");
     $("name").innerHTML = italizer(so);
     $("name").title = unescapeHTML(so[1]); 
     $("name_ea").innerHTML = italizer(ea);
@@ -280,7 +282,20 @@ function set_names(so,ea,ne,nw,we)
     $("name_we").innerHTML = italizer(we);
     $("name_we").title = unescapeHTML(we[1]);
 
+    for (i = 0 ; i < PLAYERS_N ; i++) 
+        $("name"+astat_suffix[i]).title_orig = $("name"+astat_suffix[i]).title;
+
     return;
+}
+
+function set_iscalling(idx)
+{
+    var i;
+
+    for (i = 0 ; i < PLAYERS_N ; i++) {
+        $("name"+astat_suffix[i]).className = "pubinfo"+astat_suffix[i]+(i == idx ? "_iscalling" : "");
+        $("name"+astat_suffix[i]).title = $("name"+astat_suffix[i]).title_orig + (i == idx ? " sta chiamando" : "");
+    }
 }
 
 function preferences_init()

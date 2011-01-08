@@ -65,6 +65,7 @@ define(DBG_WRIT, 0x0080);
 define(DBG_LOAD, 0x0100);
 define(DBG_AUTH, 0x0200);
 define(DBG_CRIT, 0x0400);
+define(DBG_LMOP, 0x0800);
 
 // NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols 
 define(BRISK_DEBUG, 0xffffffbf);
@@ -565,8 +566,16 @@ define(USER_FLAG_S_WRK,   0x500); // done
 define(USER_FLAG_S_SMK,   0x600); // done
 define(USER_FLAG_S_EYE,   0x700); // done
 define(USER_FLAG_S_RABB,  0x800); // done
+define(USER_FLAG_S_SOCC,  0x900); // done
+define(USER_FLAG_S_BABY,  0xa00); // done
+define(USER_FLAG_S_MOP,   0xb00); // done
 
 define(USER_FLAG_S_ALL,   0xf00); // done
+
+/* type of user normal, supporter etc ... */
+define(USER_FLAG_TY_ALL,   0xf0000); // done
+define(USER_FLAG_TY_NORM,  0x10000); // done
+define(USER_FLAG_TY_SUPER, 0x20000); // done
 
 class User {
   var $name;       // name of the user
@@ -1257,7 +1266,7 @@ class Room {
       }
 
       log_main("___");
-      log_main("VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+      log_main("VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
       if ($user_cur->stat == "room") {
@@ -1568,12 +1577,12 @@ class Room {
         /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
         if ($user->flags & USER_FLAG_AUTH) {
           if (strcasecmp($user->name,$name_new) != 0) {
-            if (($user->flags & USER_FLAG_MAP_AUTH != USER_FLAG_ISOLAUTH) &&
+             if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
                 ($user->subst == 'standup' || 
                  ($user->subst != 'standup' && $this->table[$user->table]->auth_only == FALSE)
                  )
                 ) {
-              $user->flags &= ~USER_FLAG_AUTH; // Remove auth if name changed
+              $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL); // Remove auth if name changed
               for ($i = 0 ; $i < TABLES_N ; $i++) {
                 $to_user .= $this->table[$i]->act_content($user);
               }
@@ -1633,6 +1642,15 @@ class Room {
         }
         else if (strcasecmp($st_str, "coniglio") == 0) {
           $st = USER_FLAG_S_RABB;
+        }
+        else if (strcasecmp($st_str, "calcio") == 0) {
+          $st = USER_FLAG_S_SOCC;
+        }
+        else if (strcasecmp($st_str, "pupo") == 0) {
+          $st = USER_FLAG_S_BABY;
+        }
+        else if (strcasecmp($st_str, "pulizie") == 0) {
+          $st = USER_FLAG_S_MOP;
         }
         else {
           /* MLANG: "Questo stato non esiste." */
@@ -1836,6 +1854,7 @@ class Room {
     $idx = 0;
 
     $authenticate = FALSE;
+    $user_type    = 0;
     $login_exists = FALSE;
     $ghost = -1;
     $ghost_auth = FALSE;
@@ -1857,11 +1876,14 @@ class Room {
     if ($pass != FALSE) {
       log_auth("XXX", "auth2");
       $authenticate = $userdb->login_verify($name_new, $pass);
-      log_auth("XXX", "authenticate: ".($authenticate == TRUE ? "TRUE" : "FALSE"));
+      log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
       
-      if ($authenticate == FALSE) {
-        $idx = -3;
-        return ($G_false);
+      if ($authenticate != FALSE) {
+          $user_type = $authenticate->typeget();
+      }
+      else {
+          $idx = -3;
+          return ($G_false);
       }
     }
     else {
@@ -1878,14 +1900,14 @@ class Room {
         continue; // NOTE: CHECK IT !!
       }
       if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
-	if ($authenticate == FALSE) {
-          $idx = $i;
-          break;
-        }
-        else {
-          $ghost = $i;
-          $ghost_auth = ($this->user[$i]->flags & USER_FLAG_AUTH);
-        }
+          if ($authenticate != FALSE) {
+              $ghost = $i;
+              $ghost_auth = ($this->user[$i]->flags & USER_FLAG_AUTH);
+          }
+          else {
+              $idx = $i;
+              break;
+          }
       }
     }
     if ($idx == -1)
@@ -1893,7 +1915,7 @@ class Room {
 
     log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
 
-    if ($ghost > -1 && $ghost_auth && $authenticate) {
+    if ($ghost > -1 && $ghost_auth && ($authenticate != FALSE)) {
       /* swap session */
 
       $ghost_user =& $this->user[$ghost];
@@ -1947,9 +1969,12 @@ class Room {
       $this->user[$idx]->bantime = 0;
       $this->user[$idx]->ip = $ip;
 
-      $this->user[$idx]->flags = ($authenticate ? USER_FLAG_AUTH : 0x00);
+      $this->user[$idx]->flags = ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00) | $user_type;
+
+      log_auth("XXX", sprintf("FLAGS: [%x]", $this->user[$idx]->flags));
+
       
-      if ($authenticate) {
+      if ($authenticate != FALSE) {
         $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
 
         if (isset($CO_list)) {
@@ -2248,8 +2273,29 @@ function make_seed()
 }
 
 
+function log_mop($step, $log) {
+  GLOBAL $sess, $PHP_SELF;
+
+  if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LMOP) == 0)
+    return;
+
+  if (isset($sess) == FALSE)
+    $ssess = "XXXX";
+  else
+    $ssess = $sess;
+
+  if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LMOP) == 0)
+    return;
+
+  if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
+    fwrite($fp, sprintf("LMOP: [%f] [%05d] [%s] [%s]\n", gettimeofday(TRUE), $step, $PHP_SELF, $log));
+    fclose($fp);
+  }
+}
+
+
 function log_only2($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONL2) == 0)
     return;
@@ -2263,13 +2309,13 @@ function log_only2($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("ONL2: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("ONL2: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_crit($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_CRIT) == 0)
     return;
@@ -2283,13 +2329,13 @@ function log_crit($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("CRIT: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("CRIT: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_only($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONLY) == 0)
     return;
@@ -2303,13 +2349,13 @@ function log_only($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("ONLY: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("ONLY: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_main($log) {
-  GLOBAL $sess;
+    GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_MAIN) == 0)
     return;
@@ -2323,13 +2369,13 @@ function log_main($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("MAIN: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("MAIN: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_rd($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_READ) == 0)
     return;
@@ -2343,13 +2389,13 @@ function log_rd($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("READ: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("READ: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_rd2($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_REA2) == 0)
     return;
@@ -2363,13 +2409,13 @@ function log_rd2($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("REA2: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("REA2: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_send($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SEND) == 0)
     return;
@@ -2383,13 +2429,13 @@ function log_send($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("SEND: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("SEND: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_lock($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOCK) == 0)
     return;
@@ -2403,13 +2449,13 @@ function log_lock($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("LOCK: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("LOCK: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_wr($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_WRIT) == 0)
     return;
@@ -2423,13 +2469,13 @@ function log_wr($log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("WRIT: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("WRIT: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_load($log) {
-  GLOBAL $sess;
+  GLOBAL $sess, $PHP_SELF;
 
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOAD) == 0)
     return;
@@ -2443,12 +2489,13 @@ function log_load($log) {
     return;
       
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("LOAD: [%s] [%s]\n", $ssess, $log));
+    fwrite($fp, sprintf("LOAD: [%s] [%s] [%s]\n", $ssess, $PHP_SELF, $log));
     fclose($fp);
   }
 }
 
 function log_auth($sess, $log) {
+    GLOBAL $PHP_SELF;
   if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_AUTH) == 0)
     return;
 
@@ -2456,7 +2503,7 @@ function log_auth($sess, $log) {
     return;
 
   if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
-    fwrite($fp, sprintf("AUTH: [%s] [%d] [%s]\n", $sess, time(), $log));
+    fwrite($fp, sprintf("AUTH: [%s] [%d] [%s] [%s]\n", $sess, time(), $PHP_SELF, $log));
     fclose($fp);
   }
 }

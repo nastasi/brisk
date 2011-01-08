@@ -62,6 +62,12 @@ img.nobo {
     margin: auto;
 }
 
+img.inline { 
+    position:     relative;
+    vertical-align: middle;
+    border-width: 0px;
+}
+
 img.nobohide {
     position:     absolute;
     border-width: 0px;
