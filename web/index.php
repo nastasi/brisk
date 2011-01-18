@@ -457,10 +457,11 @@ function main()
   /* MLANG: "briscola chiamata in salsa ajax", */
   
   mt_srand(make_seed());
-  $rn = rand(0, 1);
-  
-  if ($rn == 0) { 
-      $banner_top_left = '<script type="text/javascript"><!--
+  if (!$G_is_local) {
+      $rn = rand(0, 1);
+      
+      if ($rn == 0) { 
+          $banner_top_left = '<script type="text/javascript"><!--
 google_ad_client = "pub-5246925322544303";
 google_ad_width = 234;
 google_ad_height = 60;
@@ -477,34 +478,39 @@ google_color_url = "000000";
 <script type="text/javascript"
   src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>';
-      $banner_top_right = carousel_top();
+          $banner_top_right = carousel_top();
+      }
+      else { 
+          $banner_top_left = carousel_top();
+          $banner_top_right = '<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>';
+      }
   }
-  else { 
-      $banner_top_left = carousel_top();
-      $banner_top_right = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript"
-  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>';
+  else { // !$G_is_local
+      $banner_top_left  = carousel_top();
+      $banner_top_right = carousel_top();
   }
 
   $brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
 <table width="100%%" border="0" cols="3"><tr>
-<td align="left"><div style="padding-left: 8px;">'.($G_is_local ? '' : $banner_top_left ).'</div></td>
+<td align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
 <td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
     <img class="nobo" src="img/brisk_logo64.png">
     '.$mlang_room['headline'][$G_lang].'<br>
@@ -512,7 +518,7 @@ google_color_url = "000000";
                                                                 ($G_with_topbanner ? $G_topbanner : 
 "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
-'.($G_is_local ? '' : $banner_top_right ).'</div></td>
+'.$banner_top_right.'</div></td>
 </td></table>
 </div>';
 
