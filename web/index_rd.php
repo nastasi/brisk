@@ -28,8 +28,10 @@ require_once("briskin5/Obj/briskin5.phh");
 
 
 $mlang_indrd = array( 
-                     'btn_backtotab'  => array('it' => 'torna ai tavoli',
-                                               'en' => 'back to tables') 
+                     'btn_backtotab'  => array('it' => ' torna ai tavoli ',
+                                               'en' => ' back to tables '),
+                     'btn_btotabsup'  => array('it' => ' grazie della donazione, torna ai tavoli ',
+                                               'en' => ' thank you for donation, back to tables ') 
                      );
 
 // Use of proxies isn't allowed.
@@ -223,7 +225,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
       if ($G_with_splash &&
           ($$CO_splashdate < $curtime - $G_splash_interval ||
            $$CO_splashdate > $curtime)) {
-        $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), $G_splash_timeout, $mlang_indrd['btn_backtotab'][$G_lang], $G_splash_w, $G_splash_h, true, $G_splash_timeout);
+          $is_super = $user->flags & USER_FLAG_TY_SUPER;
+          $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 
+                                  ($is_super ? 0 : $G_splash_timeout), 
+                                  $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], 
+                                  $G_splash_w, $G_splash_h, true, 
+                                  ($is_super ? 0 : $G_splash_timeout));
         $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
       }
       $ret .= $room->show_room($user->step, &$user);
