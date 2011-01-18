@@ -323,10 +323,10 @@ class LoginDB {
       require("$DOCUMENT_ROOT/Etc/".BRISK_AUTH_CONF);
     }
     else {
-      $this->item = array( new LoginDBItem("uno", md5("one"),   "pippo@pluto.com"),
-                           new LoginDBItem("due", md5("two"),   "pippo@pluto.com"),
-                           new LoginDBItem("a_b", md5("abb"),   "pippo@pluto.com"),
-                           new LoginDBItem("tre", md5("three"), "pippo@pluto.com") );
+        $this->item = array( new LoginDBItem("uno", md5("one"),   "pippo@pluto.com", USER_FLAG_TY_SUPER),
+                             new LoginDBItem("due", md5("two"),   "pippo@pluto.com", USER_FLAG_TY_NORM),
+                             new LoginDBItem("a_b", md5("abb"),   "pippo@pluto.com", USER_FLAG_TY_NORM),
+                             new LoginDBItem("tre", md5("three"), "pippo@pluto.com", USER_FLAG_TY_NORM) );
     }
     $this->item_n = count($this->item);
     log_main("LoginDB create:end");
