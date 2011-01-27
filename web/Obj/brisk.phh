@@ -2051,7 +2051,9 @@ class Room {
       if ($login_exists)
         $idx = -($idx + 1);
       log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s] count [%d] [%s]", $idx, $sess, $name_new, count($this->user),$this->user[$real_idx]->name));
-      return ($this->user[$real_idx]);
+
+      $ret = $this->user[$real_idx];
+      return ($ret);
     }
 
     return ($G_false);
