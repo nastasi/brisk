@@ -5,7 +5,7 @@
  BRISK4 (brisk)
  ======
  DB: - initial usage
-     - configurabilità file o db
+     DONE - configurabilità file o db
      - travasatore file to pg
      - sistema di inserimento nuovi utenti
 

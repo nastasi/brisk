@@ -1,4 +1,6 @@
 <?php
+// G_dbasetype value can be "pgsql" or "file"
+$G_dbasetype="pgsql";
 $G_lang = "it";
 $G_shutdown = FALSE;
 $G_room_roadmap = '<div style=\"text-align: left;\"><ul>
