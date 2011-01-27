@@ -278,6 +278,22 @@ Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
 
+$escinp_from = array( "\""     );
+$escinp_to = array(   "&quot;" );
+
+function escinput($s)
+{
+    GLOBAL $escinp_from, $escinp_to;
+    
+    return str_replace($escinp_from, $escinp_to, $s);
+}
+
+function eschtml($s)
+{
+    return htmlentities($s);
+}
+
+
 function langtolng($lang)
 {
   GLOBAL $G_lang;
