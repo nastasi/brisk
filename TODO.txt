@@ -2,16 +2,26 @@
   TODO
 ========
 
+ BRISK4 (brisk)
+ ======
+ DB: - initial usage
+     - configurabilità file o db
+     - travasatore file to pg
+     - sistema di inserimento nuovi utenti
+
+     - modifica password
+     - ripristino password
+     - comunicazioni di aggiornamento (stato salvato sul server)
 
  BRISK3 (trusty)
  ======
-  - donameter
+  DONE - donameter
     DONE - G_donors
     DONE (WOW!) - js object with infos
     DONE - main logic at login (cookie check in index_rd.php; show_message and createCookie via snippets with block
            to prevent fast reload)
     DONE - cookie per non assillare e visualizz.
-    graphical donameter
+    DONE - graphical donameter
     WIP content (in conf.)
 
   DONE - numero di tavoli auth-only nel .brisk-install
