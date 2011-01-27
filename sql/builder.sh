@@ -1,14 +1,17 @@
 #! /bin/bash
 
-exit 0
 #
 #  all this part is from mopshop and we will use it to construct the brisk database
 #
 DBHOST=127.0.0.1
-DBUSER=mopshop
-DBBASE=mopshop
-DBPASS=sozopoco
-PFX="msh_"
+DBUSER=brisk
+DBBASE=brisk
+DBPASS=briskpass
+PFX="bsk_"
+
+if [ -f $HOME/.brisk_install ]; then
+   . $HOME/.brisk_install
+fi
 
 sqlexe () {
     local sht
