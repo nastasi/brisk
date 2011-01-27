@@ -1,458 +1,276 @@
 <?php
-/*
- *  brisk - auth.phh
- *
- *  Copyright (C) 2006-2011 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
- *                                  matteo.nastasi@milug.org
- *                          web: http://www.alternativeoutput.it
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details. You should have received a
- * copy of the GNU General Public License along with this program; if
- * not, write to the Free Software Foundation, Inc, 59 Temple Place -
- * Suite 330, Boston, MA 02111-1307, USA.
- *
- */
+  /*
+   *  brisk - auth.phh
+   *
+   *  Copyright (C) 2006-2011 Matteo Nastasi
+   *                          mailto: nastasi@alternativeoutput.it 
+   *                                  matteo.nastasi@milug.org
+   *                          web: http://www.alternativeoutput.it
+   *
+   * This program is free software; you can redistribute it and/or modify
+   * it under the terms of the GNU General Public License as published by
+   * the Free Software Foundation; either version 2 of the License, or
+   * (at your option) any later version.
+   *
+   * This program is distributed in the hope that it will be useful, but
+   * WITHOUT ANY WARRANTY; without even the implied warranty of
+   * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+   * General Public License for more details. You should have received a
+   * copy of the GNU General Public License along with this program; if
+   * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+   * Suite 330, Boston, MA 02111-1307, USA.
+   *
+   */
+
+require_once("Obj/dbase_pgsql.phh");
 
 define(CHAL_SHM_DIMS_MIN, 16384);
 define(CHAL_SHM_DIMS_MAX, 65536);
 define(CHAL_SHM_DIMS_DLT, 16384);
 define(CHAL_VALID_TIME,      15);
 define(CHAL_GARBAGE_TIMEOUT,  5);
-define(BRISK_AUTH_CONF,   "brisk_auth.conf.pho");
 
 
 class Challenge {
-  var $login;
-  var $token;
-  var $ip;
-  var $tstamp;
-
-  function Challenge($login, $token, $ip, $tstamp)
-  {
-    $this->login  = $login;
-    $this->token  = $token;
-    $this->ip     = $ip;
-    $this->tstamp = $tstamp + CHAL_VALID_TIME;
-  }
+    var $login;
+    var $token;
+    var $ip;
+    var $tstamp;
+    
+    function Challenge($login, $token, $ip, $tstamp)
+    {
+        $this->login  = $login;
+        $this->token  = $token;
+        $this->ip     = $ip;
+        $this->tstamp = $tstamp + CHAL_VALID_TIME;
+    }
 }
 
 class Challenges {
-  var $item;
-  var $item_n;
-  var $mod;
-  var $shm_sz;
-
-  var $garbage_timeout;
-
-
-  function Challenges()
-  {
-    $this->item = array();
-    $this->item_n = 0;
-    $this->garbage_timeout = 0;
-    $this->mod = FALSE;
-  }
-
-  function add($login, $token, $ip, $tstamp) 
-  {
-    $chal = null;
-
-    log_auth("xxx", sprintf("Challenges::add [%s]\n", $login));
-    // FIXME Checks here
-    if ($login == '') {
-      return ($G_false);
+    var $item;
+    var $item_n;
+    var $mod;
+    var $shm_sz;
+    
+    var $garbage_timeout;
+    
+    
+    function Challenges()
+    {
+        $this->item = array();
+        $this->item_n = 0;
+        $this->garbage_timeout = 0;
+        $this->mod = FALSE;
     }
-
-    // log_auth("xxx", "LOOPI tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
-
-    if (($chal = new Challenge($login, $token, $ip, $tstamp)) == null) {
-      return ($G_false);
-    }
-
-    $this->item[$this->item_n] = $chal;
-    $this->item_n++;
-
-    $this->mod = TRUE;
-
-    return ($chal);
-  }
-
-
-  /* remove all istances related to $login */
-
-  function rem($login)
-  {
-    $ismod  = FALSE;
-
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      if ($this->item[$i]->login == $login) {
-        $ismod = TRUE;
-        for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
-          $this->item[$e] = $this->item[$e + 1];
+    
+    function add($login, $token, $ip, $tstamp) 
+    {
+        $chal = null;
+        
+        log_auth("xxx", sprintf("Challenges::add [%s]\n", $login));
+        // FIXME Checks here
+        if ($login == '') {
+            return ($G_false);
         }
         
-        $i--;
-        $this->item_n--;
-        unset($this->item[$this->item_n]);
-        $this->mod = TRUE;
-      }
-    }
-
-    return ($ismod);
-  }
-
-  function garbage_manager()
-  {
-    $curtime = time();
-
-    // FIXME remove set to 0
-    $this->garbage_timeout = 0;
-    if ($this->garbage_timeout > $curtime)
-      return (FALSE);
-
-    $ismod = FALSE;
-    
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      log_auth("xxx", "LOOPI item: ".$i." tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
-      if ($this->item[$i]->tstamp < $curtime) {
-        for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
-          $this->item[$e] = $this->item[$e + 1];
+        // log_auth("xxx", "LOOPI tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
+        
+        if (($chal = new Challenge($login, $token, $ip, $tstamp)) == null) {
+            return ($G_false);
         }
         
-        $i--;
-        $this->item_n--;
-        log_auth("xxx", "LOOPI unset: ".$this->item_n);
-        unset($this->item[$this->item_n]);
-        $ismod = TRUE;
+        $this->item[$this->item_n] = $chal;
+        $this->item_n++;
+
         $this->mod = TRUE;
-      }
+
+        return ($chal);
     }
-    
-    log_auth("xxx", "LOOPI AFTER: ".count($this->item)." _n:" .$this->item_n );
-    
-    $this->garbage_timeout = $curtime + CHAL_GARBAGE_TIMEOUT;
-    
-    return ($ismod);
-  }
-  
-  function ismod()
-  {
-    return ($this->mod);
-  }
-
-  // Static functions
-  function &init_data()
-  {
-    $chal =& new Challenges();
-    
-    $chal->mod = TRUE;
-
-    return $chal;
-  }
-
-  function &load_data() 
-  {
-    GLOBAL $G_false, $sess;
-    $doexit = FALSE;
-    do {
-      if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
-	log_main("ftok failed");
-	$doexit = TRUE;
-	break;
-      }
-    
-      if (($shm_sz = sharedmem_sz($tok)) == -1) {
-	log_main("shmop_open failed");
-      }
-	
-      if ($shm_sz == -1)
-	$shm_sz = CHAL_SHM_DIMS_MIN;
-
-      if ($shm = shm_attach($tok, $shm_sz)) {
-	$chals = @shm_get_var($shm, $tok);
-	
-	log_only("challenges ==  ".($chals == FALSE ?   "FALSE" : "TRUE")."  challenges ===  ".($chals === FALSE ? "FALSE" : "TRUE")."  challenges isset ".(isset($chals) ?   "TRUE" : "FALSE"));
-	
-	if ($chals == FALSE) {
-	  log_only("INIT CHALLENGES DATA");
-	  
-	  $chals =& Challenges::init_data();
-	  if (@shm_put_var($shm, $tok, $chals) == FALSE) {
-	    log_only("PUT_VAR FALLITA ".strlen(serialize($chals)));
-	    log_only(serialize($chals));
-	  }
-	}
-	$chals->shm_sz = $shm_sz;
-	
-	shm_detach($shm);
-      }
-
-      $chals->garbage_manager();
-
-      $ret = &$chals;
-      return ($ret);
-    } while (0);
-    
-    if ($doexit)
-      exit();
-    
-    return ($G_false);
-  }
-  
-
-  function save_data(&$chals) 
-  {
-    $shm =   FALSE;
-    $oldmod = $chals->mod;
-
-    if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) 
-      return (FALSE);
-    
-    while ($chals->shm_sz < CHAL_SHM_DIMS_MAX) {
-      if (($shm = shm_attach($tok, $chals->shm_sz)) == FALSE)
-	break;
-      
-      if (isset($chals)) 
-        log_only("challenges count ".count($chals->item)."  _n: ".$chals->item_n);
-
-      $chals->mod = FALSE;
-      if (shm_put_var($shm, $tok, $chals) != FALSE) {
-	shm_detach($shm);
-	return (TRUE);
-      }
-      $chals->mod = $oldmod;
-
-      if (shm_remove($shm) === FALSE) {
-	log_only("REMOVE FALLITA");
-	break;
-      }
-      shm_detach($shm);
-      $chals->shm_sz += CHAL_SHM_DIMS_DLT;
-    } 
-
-    if ($shm)
-      shm_detach($shm);
-    
-    return (FALSE);
-  }
-
-  function lock_data()
-  {
-    if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
-      return (FALSE);
-    }
-    // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok)) == FALSE) {
-      return (FALSE);
-    }
-    if (sem_acquire($res)) {   
-      log_lock("LOCK challenges");
-      return ($res);
-    }
-    else
-      return (FALSE);
-  }
-  
-  function unlock_data($res)
-  {
-    GLOBAL $sess; 
-    
-    log_lock("UNLOCK challenges");
-
-    return (sem_release($res));
-  }
-} // End CLASS Challenges
 
 
-class LoginDBItem {
-  var $login;
-  var $pass;
-  var $email;
-  var $type;
+    /* remove all istances related to $login */
 
-  function LoginDBItem($login, $pass, $email, $type)
-  {
-    $this->login = $login;
-    $this->pass  = $pass;
-    $this->email = $email;
-    $this->type  = $type;
-  }
+    function rem($login)
+    {
+        $ismod  = FALSE;
 
-  function loginget()
-  {
-      return $this->login;
-  }
-
-  function passget()
-  {
-      return $this->pass;
-  }
-
-  function emailget()
-  {
-      return $this->email;
-  }
-
-  function typeget()
-  {
-      return $this->type;
-  }
-
-}
-
-class LoginDB {
-  var $item;
-  var $item_n;
-
-  
-  function LoginDB()
-  {
-    GLOBAL $DOCUMENT_ROOT;
-    log_main("LoginDB create:start");
-
-    if (file_exists("$DOCUMENT_ROOT/Etc/".BRISK_AUTH_CONF)) {
-      require("$DOCUMENT_ROOT/Etc/".BRISK_AUTH_CONF);
-    }
-    else {
-        $this->item = array( new LoginDBItem("uno", md5("one"),   "pippo@pluto.com", USER_FLAG_TY_SUPER),
-                             new LoginDBItem("due", md5("two"),   "pippo@pluto.com", USER_FLAG_TY_NORM),
-                             new LoginDBItem("a_b", md5("abb"),   "pippo@pluto.com", USER_FLAG_TY_NORM),
-                             new LoginDBItem("tre", md5("three"), "pippo@pluto.com", USER_FLAG_TY_NORM) );
-    }
-    $this->item_n = count($this->item);
-    log_main("LoginDB create:end");
-  }
-
-  function count()
-  {
-    return ($this->item_n);
-  }
-
-  function login_exists($login)
-  {
-    log_main("login_exists: ".$login);
-    
-    /* check the existence of the nick in the LoginDB */
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      if (strcasecmp($this->item[$i]->login, $login) == 0) {
-        log_main("login[".$i."]: ".$this->item[$i]->login);
-        return (TRUE);
-      }
-    }
-    return (FALSE);
-  }
-
-  function getlogin_byidx($idx)
-  {
-    if ($idx >= $this->item_n)
-      return FALSE;
-    return ($this->item[$idx]->login);
-  }
-
-  function &getitem_bylogin($login, &$id)
-  {
-    GLOBAL $G_false;
-
-    log_main("login_exists: ".$login);
-    
-    /* check the existence of the nick in the LoginDB */
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      if (strcasecmp($this->item[$i]->login, $login) == 0) {
-        log_main("login[".$i."]: ".$this->item[$i]->login);
-        $ret = &$this->item[$i];
-        $id = $i;
-        return ($ret);
-      }
-    }
-    $id = -1;
-    return ($G_false);
-  }
-
-  function getmail($login)
-  {
-    log_main("getmail");
-    
-    /* check the existence of the nick in the LoginDB */
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      if (strcasecmp($this->item[$i]->login, $login) == 0) {
-        log_main("login[".$i."]: ".$this->item[$i]->login);
-        return ($this->item[$i]->email);
-      }
-    }
-    return (FALSE);
-  }
-
-  function gettype($login)
-  {
-    log_main("getmail");
-    
-    /* check the existence of the nick in the LoginDB */
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      if (strcasecmp($this->item[$i]->login, $login) == 0) {
-        log_main("login[".$i."]: ".$this->item[$i]->login);
-        return ($this->item[$i]->type);
-      }
-    }
-    return (FALSE);
-  }
-
-  function &login_verify($login, $pass)
-  {
-    GLOBAL $G_false;
-
-    $ret = &$G_false;
-
-    log_main("login_verify: ".$login);
-        
-    /* check the existence of the nick in the LoginDB */
-    for ($i = 0 ; $i < $this->item_n ; $i++) {
-      log_main("login_verify: LOOP");
-      if (strcasecmp($this->item[$i]->login, $login) == 0) {
-        log_main("login[".$i."]: ".$this->item[$i]->login);
-
-        /* if it exists check for a valid challenge */
-        if (($a_sem = Challenges::lock_data()) != FALSE) { 
-          
-          if (($chals = &Challenges::load_data()) != FALSE) {
-            for ($e = 0 ; $e < $chals->item_n ; $e++) {
-              
-              log_main("challenge[".$i."]: ".$chals->item[$e]->login);
-              if (strcmp($login, $chals->item[$e]->login) == 0) {
-                log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$this->item[$i]->pass)."]");
-                  
-                if (strcmp($pass , md5($chals->item[$e]->token.$this->item[$i]->pass)) == 0) {
-                  log_main("login_verify SUCCESS for ".$login);
-   
-                  $chals->rem($login);
-                  $ret = &$this->item[$i];
-                  break;
+        for ($i = 0 ; $i < $this->item_n ; $i++) {
+            if ($this->item[$i]->login == $login) {
+                $ismod = TRUE;
+                for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
+                    $this->item[$e] = $this->item[$e + 1];
                 }
-              }
-            } // end for ($e = 0 ...
-          }
-
-          if ($chals->ismod()) {
-            Challenges::save_data(&$chals);
-          }
-          
-          Challenges::unlock_data($a_sem);
+        
+                $i--;
+                $this->item_n--;
+                unset($this->item[$this->item_n]);
+                $this->mod = TRUE;
+            }
         }
-        break;
-      } //  if (strcasecmp($this->item[$i]->login, ...
+
+        return ($ismod);
     }
 
-    return ($ret);
-  }
-} // End class LoginDB
+    function garbage_manager()
+    {
+        $curtime = time();
 
+        // FIXME remove set to 0
+        $this->garbage_timeout = 0;
+        if ($this->garbage_timeout > $curtime)
+            return (FALSE);
+
+        $ismod = FALSE;
+    
+        for ($i = 0 ; $i < $this->item_n ; $i++) {
+            log_auth("xxx", "LOOPI item: ".$i." tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
+            if ($this->item[$i]->tstamp < $curtime) {
+                for ($e = $i ; $e  < ($this->item_n - 1) ; $e++) {
+                    $this->item[$e] = $this->item[$e + 1];
+                }
+        
+                $i--;
+                $this->item_n--;
+                log_auth("xxx", "LOOPI unset: ".$this->item_n);
+                unset($this->item[$this->item_n]);
+                $ismod = TRUE;
+                $this->mod = TRUE;
+            }
+        }
+    
+        log_auth("xxx", "LOOPI AFTER: ".count($this->item)." _n:" .$this->item_n );
+    
+        $this->garbage_timeout = $curtime + CHAL_GARBAGE_TIMEOUT;
+    
+        return ($ismod);
+    }
+  
+    function ismod()
+    {
+        return ($this->mod);
+    }
+
+    // Static functions
+    function &init_data()
+        {
+            $chal =& new Challenges();
+    
+            $chal->mod = TRUE;
+
+            return $chal;
+        }
+
+    function &load_data() 
+        {
+            GLOBAL $G_false, $sess;
+            $doexit = FALSE;
+            do {
+                if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
+                    log_main("ftok failed");
+                    $doexit = TRUE;
+                    break;
+                }
+    
+                if (($shm_sz = sharedmem_sz($tok)) == -1) {
+                    log_main("shmop_open failed");
+                }
+	
+                if ($shm_sz == -1)
+                    $shm_sz = CHAL_SHM_DIMS_MIN;
+
+                if ($shm = shm_attach($tok, $shm_sz)) {
+                    $chals = @shm_get_var($shm, $tok);
+	
+                    log_only("challenges ==  ".($chals == FALSE ?   "FALSE" : "TRUE")."  challenges ===  ".($chals === FALSE ? "FALSE" : "TRUE")."  challenges isset ".(isset($chals) ?   "TRUE" : "FALSE"));
+	
+                    if ($chals == FALSE) {
+                        log_only("INIT CHALLENGES DATA");
+	  
+                        $chals =& Challenges::init_data();
+                        if (@shm_put_var($shm, $tok, $chals) == FALSE) {
+                            log_only("PUT_VAR FALLITA ".strlen(serialize($chals)));
+                            log_only(serialize($chals));
+                        }
+                    }
+                    $chals->shm_sz = $shm_sz;
+	
+                    shm_detach($shm);
+                }
+
+                $chals->garbage_manager();
+
+                $ret = &$chals;
+                return ($ret);
+            } while (0);
+    
+            if ($doexit)
+                exit();
+    
+            return ($G_false);
+        }
+  
+
+    function save_data(&$chals) 
+    {
+        $shm =   FALSE;
+        $oldmod = $chals->mod;
+
+        if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) 
+            return (FALSE);
+    
+        while ($chals->shm_sz < CHAL_SHM_DIMS_MAX) {
+            if (($shm = shm_attach($tok, $chals->shm_sz)) == FALSE)
+                break;
+      
+            if (isset($chals)) 
+                log_only("challenges count ".count($chals->item)."  _n: ".$chals->item_n);
+
+            $chals->mod = FALSE;
+            if (shm_put_var($shm, $tok, $chals) != FALSE) {
+                shm_detach($shm);
+                return (TRUE);
+            }
+            $chals->mod = $oldmod;
+
+            if (shm_remove($shm) === FALSE) {
+                log_only("REMOVE FALLITA");
+                break;
+            }
+            shm_detach($shm);
+            $chals->shm_sz += CHAL_SHM_DIMS_DLT;
+        } 
+
+        if ($shm)
+            shm_detach($shm);
+    
+        return (FALSE);
+    }
+
+    function lock_data()
+    {
+        if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
+            return (FALSE);
+        }
+        // echo "FTOK ".$tok."<br>";
+        if (($res = sem_get($tok)) == FALSE) {
+            return (FALSE);
+        }
+        if (sem_acquire($res)) {   
+            log_lock("LOCK challenges");
+            return ($res);
+        }
+        else
+            return (FALSE);
+    }
+  
+    function unlock_data($res)
+    {
+        GLOBAL $sess; 
+    
+        log_lock("UNLOCK challenges");
+
+        return (sem_release($res));
+    }
+} // End CLASS Challenges
 
 ?>
