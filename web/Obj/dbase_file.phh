@@ -22,7 +22,7 @@
    *
    */
 
-require_once("Obj/dbase_base.phh")
+require_once("Obj/dbase_base.phh");
 
 define(BRISK_AUTH_CONF,   "brisk_auth.conf.pho");
 
