@@ -277,7 +277,6 @@ Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
-
 $escinp_from = array( "\""     );
 $escinp_to = array(   "&quot;" );
 

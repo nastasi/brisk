@@ -25,13 +25,12 @@
 require_once("Obj/dbase_base.phh");
 
 $escsql_from = array( "\\",   "'"   );
-$escsql_to = array(   "\\\\", "\\'" );
-
+$escsql_to   = array( "\\\\", "\\'" );
 
 function escsql($s)
 {
     GLOBAL $escsql_from, $escsql_to;
-    
+
     return str_replace($escsql_from, $escsql_to, $s);
 }
 
@@ -185,7 +184,57 @@ class LoginDB
         
         return ($ret->email);
     }
+
+    function addusers_from_olddb($olddb, &$cont)
+    {
+        GLOBAL $G_dbpfx;
+
+        for ($i = 0 ; $i < $olddb->count() ; $i++) {
+            $user_sql = sprintf("INSERT INTO %susers ( login, pass, email, type) VALUES ('%s', '%s', '%s', %d);",
+                                $G_dbpfx, escsql($olddb->item[$i]->login), escsql($olddb->item[$i]->pass),
+                                escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL); 
+            
+            // if ( ! (($user_pg = pg_exec($dbconn,$order_add_sql)) != FALSE && pg_affected_rows($order_pg) == 1) ) {
+
+            if ( ! (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+                $cont .= sprintf("ERROR IN LINE: %s\n", eschtml($user_sql));
+
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
 } // End class LoginDB
+
+class LoginDBOld 
+{
+    var $item;
+    var $item_n;
+
+    function LoginDBOld($filename)
+    {
+        GLOBAL $DOCUMENT_ROOT;
+        log_main("LoginDBOld create:start");
+
+        if (file_exists("$DOCUMENT_ROOT/Etc/".$filename)) {
+            require("$DOCUMENT_ROOT/Etc/".$filename);
+        }
+        else {
+            return (FALSE);
+        }
+        $this->item_n = count($this->item);
+        log_main("LoginDBOld create:end");
+    }
+
+    function count()
+    {
+        return ($this->item_n);
+    }
+
+
+
+}
+
 
     if (0 == 1) {
         
@@ -255,52 +304,52 @@ class LoginDB
     }
 
     function &login_verify($login, $pass)
-        {
-            GLOBAL $G_false;
-
-            $ret = &$G_false;
-
-            log_main("login_verify: ".$login);
+    {
+        GLOBAL $G_false;
         
-            /* check the existence of the nick in the LoginDB */
-            for ($i = 0 ; $i < $this->item_n ; $i++) {
-                log_main("login_verify: LOOP");
-                if (strcasecmp($this->item[$i]->login, $login) == 0) {
-                    log_main("login[".$i."]: ".$this->item[$i]->login);
-
-                    /* if it exists check for a valid challenge */
-                    if (($a_sem = Challenges::lock_data()) != FALSE) { 
-          
-                        if (($chals = &Challenges::load_data()) != FALSE) {
-                            for ($e = 0 ; $e < $chals->item_n ; $e++) {
-              
-                                log_main("challenge[".$i."]: ".$chals->item[$e]->login);
-                                if (strcmp($login, $chals->item[$e]->login) == 0) {
-                                    log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$this->item[$i]->pass)."]");
-                  
-                                    if (strcmp($pass , md5($chals->item[$e]->token.$this->item[$i]->pass)) == 0) {
-                                        log_main("login_verify SUCCESS for ".$login);
-   
-                                        $chals->rem($login);
-                                        $ret = &$this->item[$i];
-                                        break;
-                                    }
+        $ret = &$G_false;
+        
+        log_main("login_verify: ".$login);
+        
+        /* check the existence of the nick in the LoginDB */
+        for ($i = 0 ; $i < $this->item_n ; $i++) {
+            log_main("login_verify: LOOP");
+            if (strcasecmp($this->item[$i]->login, $login) == 0) {
+                log_main("login[".$i."]: ".$this->item[$i]->login);
+                
+                /* if it exists check for a valid challenge */
+                if (($a_sem = Challenges::lock_data()) != FALSE) { 
+                    
+                    if (($chals = &Challenges::load_data()) != FALSE) {
+                        for ($e = 0 ; $e < $chals->item_n ; $e++) {
+                            
+                            log_main("challenge[".$i."]: ".$chals->item[$e]->login);
+                            if (strcmp($login, $chals->item[$e]->login) == 0) {
+                                log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$this->item[$i]->pass)."]");
+                                
+                                if (strcmp($pass , md5($chals->item[$e]->token.$this->item[$i]->pass)) == 0) {
+                                    log_main("login_verify SUCCESS for ".$login);
+                                    
+                                    $chals->rem($login);
+                                    $ret = &$this->item[$i];
+                                    break;
                                 }
-                            } // end for ($e = 0 ...
-                        }
-
-                        if ($chals->ismod()) {
-                            Challenges::save_data(&$chals);
-                        }
-          
-                        Challenges::unlock_data($a_sem);
+                            }
+                        } // end for ($e = 0 ...
                     }
-                    break;
-                } //  if (strcasecmp($this->item[$i]->login, ...
-            }
-
-            return ($ret);
+                    
+                    if ($chals->ismod()) {
+                        Challenges::save_data(&$chals);
+                    }
+                    
+                    Challenges::unlock_data($a_sem);
+                }
+                break;
+            } //  if (strcasecmp($this->item[$i]->login, ...
         }
+        
+        return ($ret);
+    }
 
  } // if (0 == 1) {
 

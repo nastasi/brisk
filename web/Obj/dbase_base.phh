@@ -74,4 +74,11 @@ class LoginDBItem {
 
 }
 
+class LoginDBItemOld extends LoginDBItem {
+    function LoginDBItemOld($login, $pass, $email, $type)
+    {
+        parent::LoginDBItem(-1, $login, $pass, $email, $type);
+    }
+}
+
 ?>

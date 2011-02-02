@@ -6,8 +6,11 @@
  ======
  DB: - initial usage
      DONE - configurabilità file o db
-     - travasatore file to pg
-     - sistema di inserimento nuovi utenti
+     DONE - travasatore file to pg
+       - travaso punteggi e gestione punteggi
+          - tab punteggi nel db
+          
+       - sistema di inserimento nuovi utenti (riversatore da form di inserimento)
 
      - modifica password
      - ripristino password
