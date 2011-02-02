@@ -588,9 +588,12 @@ define(USER_FLAG_S_MOP,   0xb00); // done
 define(USER_FLAG_S_ALL,   0xf00); // done
 
 /* type of user normal, supporter etc ... */
-define(USER_FLAG_TY_ALL,   0xf0000); // done
-define(USER_FLAG_TY_NORM,  0x10000); // done
-define(USER_FLAG_TY_SUPER, 0x20000); // done
+define(USER_FLAG_TY_ALL,     0xff0000); // done
+define(USER_FLAG_TY_NORM,    0x010000); // done
+define(USER_FLAG_TY_SUPER,   0x020000); // done
+//  ... other usefull status ...
+define(USER_FLAG_TY_SUSPEND, 0x400000); // done
+define(USER_FLAG_TY_DISABLE, 0x800000); // done
 
 class User {
   var $name;       // name of the user
