@@ -1614,9 +1614,10 @@ class Room {
 	$user->name = $name_new; // OK - nick changed
         /* se nome gia' in uso, segnala cosa potrebbe capitare */
         if (($user->flags & USER_FLAG_AUTH) == 0) {
-          $userdb = new LoginDB();
+          $bdb = new BriskDB();
+          $bdb->users_load();
           /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-          if ($userdb->login_exists($name_new)) {
+          if ($bdb->login_exists($name_new)) {
             $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
             $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
           }
@@ -1890,10 +1891,11 @@ class Room {
 
     /* if pass != FALSE verify the login with pass */
     log_auth("XXX", "auth1");
-    $userdb = new LoginDB();
+    $bdb = new BriskDB();
+    $bdb->users_load();
     if ($pass != FALSE) {
       log_auth("XXX", "auth2");
-      $authenticate = $userdb->login_verify($name_new, $pass);
+      $authenticate = $bdb->login_verify($name_new, $pass, $code);
       log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
       
       if ($authenticate != FALSE) {
@@ -1905,7 +1907,7 @@ class Room {
       }
     }
     else {
-      $login_exists =  $userdb->login_exists($name_new);
+      $login_exists =  $bdb->login_exists($name_new);
     }
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       /* free user ? */

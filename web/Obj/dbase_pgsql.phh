@@ -59,27 +59,31 @@ class DBConn
     }
 }
 
-class LoginDB
+class BriskDB
 {
     var $dbconn;
     var $item;
     var $item_n;
     
-    function LoginDB()
+    function BriskDB()
     {
         GLOBAL $DOCUMENT_ROOT, $G_dbpfx, $G_false;
-        log_main("LoginDB create:start");
+        log_main("BriskDB create:start");
         
         $this->dbconn = new DBConn();
         
-        log_main("LoginDB create:end");
+        log_main("BriskDB create:end");
+    }
+
+    function users_load()
+    {
     }
     
     function login_exists($login)
     {
         GLOBAL $G_dbpfx;
 
-        /* check the existence of the nick in the LoginDB */
+        /* check the existence of the nick in the BriskDB */
         log_main("login_exists: ".$login);
         
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s');",  $G_dbpfx, escsql($login));
@@ -116,7 +120,7 @@ class LoginDB
         log_main("login_verify: ".$login);
         
         
-        //O /* check the existence of the nick in the LoginDB */
+        //O /* check the existence of the nick in the BriskDB */
         //O for ($i = 0 ; $i < $this->item_n ; $i++) {
         //O log_main("login_verify: BEGIN");
         

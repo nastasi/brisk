@@ -67,10 +67,11 @@ function main()
     fclose($fp_start);
   }
 
-  $userdb = new LoginDB();
+  $bdb = new BriskDB();
+  $bdb->users_load();
 
-  for ($i = 0 ; $i < $userdb->count() ; $i++) {
-    $login = $userdb->getlogin_byidx($i);
+  for ($i = 0 ; $i < $bdb->count() ; $i++) {
+    $login = $bdb->getlogin_byidx($i);
     $tri[$i] = new Ptsgam($login);
     $mon[$i] = new Ptsgam($login);
     $wee[$i] = new Ptsgam($login);
@@ -125,7 +126,7 @@ function main()
     for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
       // echo $p." i) ".$i."<br>";
       $username = $ar[9+($i*2)];
-      if (($item = $userdb->getitem_bylogin($username, &$id)) == FALSE) {
+      if (($item = $bdb->getitem_bylogin($username, &$id)) == FALSE) {
         echo "WARNING: the user [".$username."] NOT EXISTS!<br>";
         continue;
       }

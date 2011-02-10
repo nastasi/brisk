@@ -246,9 +246,10 @@ else if ($argz[0] == 'mesgtoadm') {
   log_wr("INFO:SKIP:argz == mesgtoadm name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
   if ($user->flags & USER_FLAG_AUTH) {
     if (($wa_lock = Warrant::lock_data()) != FALSE) {
-      $userdb = new LoginDB();
-      
-      if (($ema = $userdb->getmail($user->name)) != FALSE) {
+      $bdb = new BriskDB();
+      $bdb->users_load();
+
+      if (($ema = $bdb->getmail($user->name)) != FALSE) {
         //  mail("nastasi", 
         mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
       }
