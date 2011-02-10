@@ -22,6 +22,8 @@
  *
  */
 
+$G_base = "";
+
 require_once("Obj/brisk.phh");
 
 

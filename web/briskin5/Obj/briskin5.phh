@@ -575,7 +575,8 @@ class Briskin5 {
 
   function garbage_manager($force)
   {
-    
+    GLOBAL $G_base;
+
     /* Garbage collector degli utenti in timeout */
     $ismod = FALSE;
     $curtime = time();
@@ -606,7 +607,7 @@ class Briskin5 {
             /* se gli altri utenti non erano d'accordo questo utente viene bannato */
             $remcalc = $this->table[0]->exitlock_calc(&$this->user, $user_cur->table_pos);
             if ($remcalc < 3) {
-                require_once("/var/www/webspace/trusty/Obj/hardban.phh");
+                require_once("${G_base}Obj/hardban.phh");
                 Hardbans::add(($user_cur->flags & USER_FLAG_AUTH ? $user_cur->name : FALSE),
                               $user_cur->ip, $user_cur->sess, $user_cur->laccwr + BAN_TIME);
             }

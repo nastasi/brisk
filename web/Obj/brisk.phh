@@ -925,7 +925,7 @@ class Room {
 
   function garbage_manager($force)
   {
-    GLOBAL $G_lang, $mlang_brisk;
+    GLOBAL $G_lang, $mlang_brisk, $G_base;
 
     $ismod = FALSE;
 
@@ -936,7 +936,7 @@ class Room {
     if ($force || $this->garbage_timeout < $curtime) {
       
       // FIXME BRISK4: include for each kind of table
-      require_once("briskin5/Obj/briskin5.phh");
+      require_once("${G_base}briskin5/Obj/briskin5.phh");
 
       // Before all align times with table timeout
       for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
@@ -1425,7 +1425,7 @@ class Room {
 
   function chatt_send(&$user, $mesg)
   {
-    GLOBAL $G_alarm_passwd, $mlang_brisk, $G_lang;
+    GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
     
     // common settings
@@ -1770,7 +1770,7 @@ class Room {
     
     if ($to_tabl) {
       // FIXME BRISK4: include for each kind of table
-      require_once("briskin5/Obj/briskin5.phh");
+      require_once("${G_base}briskin5/Obj/briskin5.phh");
       // Before all align times with table timeout
       for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
         $table_cur =& $this->table[$table_idx];
@@ -1867,7 +1867,7 @@ class Room {
 
   function &add_user(&$sess, &$idx, $name, $pass, $ip)
   {
-    GLOBAL $G_false, $CO_list;
+    GLOBAL $G_base, $G_false, $CO_list;
 
     $idx = 0;
 
@@ -1951,7 +1951,7 @@ class Room {
       $table_idx = $ghost_user->table;
       if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
         // FIXME BRISK4: include for each kind of table
-        require_once("briskin5/Obj/briskin5.phh");
+        require_once("${G_base}briskin5/Obj/briskin5.phh");
         if (($brisem = Briskin5::lock_data($table_idx)) != FALSE) { 
           if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
             if ($bri->the_end != TRUE) {

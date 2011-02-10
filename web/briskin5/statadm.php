@@ -33,6 +33,8 @@ TODO:
    
 */
 
+$G_base = "../";
+
 ini_set("max_execution_time",  "240");
 
 require_once("../Obj/brisk.phh");

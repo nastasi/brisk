@@ -22,6 +22,9 @@
  *
  */
 
+
+$G_base = "../";
+
 require_once("../Obj/brisk.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once("Obj/briskin5.phh");

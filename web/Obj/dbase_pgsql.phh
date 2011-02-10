@@ -22,7 +22,7 @@
    *
    */
 
-require_once("Obj/dbase_base.phh");
+require_once("${G_base}Obj/dbase_base.phh");
 
 $escsql_from = array( "\\",   "'"   );
 $escsql_to   = array( "\\\\", "\\'" );

@@ -22,7 +22,7 @@
    *
    */
 
-require_once("Obj/dbase_".$G_dbasetype.".phh");
+require_once("${G_base}Obj/dbase_${G_dbasetype}.phh");
 
 define(CHAL_SHM_DIMS_MIN, 16384);
 define(CHAL_SHM_DIMS_MAX, 65536);
