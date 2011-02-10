@@ -292,6 +292,11 @@ function eschtml($s)
     return htmlentities($s);
 }
 
+function esclfhtml($s)
+{
+    return str_replace("\n", "<br>\n", htmlentities($s));
+}
+
 
 function langtolng($lang)
 {
