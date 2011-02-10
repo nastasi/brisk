@@ -3,9 +3,11 @@
 --
 
 -- macro for user_flag bit-field
--- define(USER_FLAG_TY_ALL,   0x000f0000); // done
--- define(USER_FLAG_TY_NORM,  0x00010000); // done
--- define(USER_FLAG_TY_SUPER, 0x00020000); // done
+-- define(USER_FLAG_TY_ALL,     0x000f0000); // done
+-- define(USER_FLAG_TY_NORM,    0x00010000); // done
+-- define(USER_FLAG_TY_SUPER,   0x00020000); // done
+-- define(USER_FLAG_TY_SUSPEND, 0x00400000); // done
+-- define(USER_FLAG_TY_DISABLE, 0x00800000); // done
 
 INSERT INTO #PFX#users VALUES (1, 'uno', md5('one'),   'uno@pluto.com', CAST (X'00020000' as integer));
 INSERT INTO #PFX#users VALUES (2, 'due', md5('two'),   'due@pluto.com', CAST (X'00010000' as integer));
