@@ -481,13 +481,24 @@ else if ($user->stat == 'table') {
 
           $plist = "$table->table_token|$user->table_orig|$table->player_n";
           $curtime = time();
+          $ucodes = array();
           for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
             $user_cur = &$bri->user[$table->player[$i]];
             $plist .= '|'.xcapelt($user_cur->name).'|'.$pt_cur[$i];
+            $ucodes[$i] = $user_cur->code_get();
+          }
+          for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+            $plist .= '|'.xcapelt($ucodes[$i]);
           }
           log_legal($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
-          if ($user->table_orig < TABLES_AUTH_N)
-            log_points($curtime, xcapelt($user->name), "STAT:BRISKIN5:FINISH_GAME", $plist);
+          if ($user->table_orig < TABLES_AUTH_N) {
+            require_once("../Obj/dbase_".$G_dbasetype.".phh");
+  
+            log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
+            $bdb = new BriskDB();
+            $bdb->bin5_points_save($curtime, $table->table_token, $user->table_orig, $ucodes, $pt_cur);
+            unset($bdb);
+          }
 
 	  $table->game_next();
 	  $table->game_init(&$bri->user);

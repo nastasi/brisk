@@ -208,7 +208,96 @@ class BriskDB
         }
         return TRUE;
     }
-} // End class LoginDB
+
+    function &getdbconn()
+    {
+        $ret = $this->dbconn;
+        return ($ret);
+    }
+
+    //   ttok   text UNIQUE,      
+    //   tidx   
+    function bin5_points_save($date, $ttok, $tidx, $ucodes, $pts)
+    {
+        GLOBAL $G_dbpfx;
+
+        $is_trans = FALSE;
+        $ret = FALSE;
+
+        $n = count($ucodes);
+        /* check the existence of the nick in the BriskDB */
+        log_main("bin5_points_save: ");
+        
+        do {
+            if (pg_query($this->dbconn->db(), "BEGIN") == FALSE) {
+                break;
+            }
+            $is_trans = TRUE;
+
+            /*
+             * matches management
+             */
+            $mtc_sql = sprintf("SELECT * FROM %sbin5_matches WHERE ttok = '%s';", $G_dbpfx, escsql($ttok));
+            if (($mtc_pg  = pg_query($this->dbconn->db(), $mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+                // match not exists, insert it
+                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx) VALUES ('%s', %d) RETURNING *;",
+                                   $G_dbpfx, escsql($ttok), $tidx);
+                if ( ! (($mtc_pg  = pg_query($this->dbconn->db(), $mtc_sql)) != FALSE && 
+                        pg_affected_rows($mtc_pg) == 1) ) {
+                    log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
+                    break;
+                }
+            }
+            $mtc_obj = pg_fetch_object($mtc_pg,0);
+
+            /*
+             * games management
+             */
+            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp) 
+                                               VALUES (%d, to_timestamp(%d)) RETURNING *;",
+                               $G_dbpfx, $mtc_obj->code, $date);
+            if ( ! (($gam_pg  = pg_query($this->dbconn->db(), $gam_sql)) != FALSE && 
+                    pg_affected_rows($gam_pg) == 1) ) {
+                log_crit(sprintf("bin5_points_save: failed at insert game [%s]", $gam_sql));
+                break;                        
+            }
+        
+            $gam_obj = pg_fetch_object($gam_pg,0);
+
+            /*
+             * points management
+             */
+            for ($i = 0 ; $i < $n ; $i++) {
+                /* put points */
+                $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts) 
+                                               VALUES (%d, %d, %d);",
+                                   $G_dbpfx, $gam_obj->code, $ucodes[$i], $pts[$i]);
+                if ( ! (($pts_pg  = pg_query($this->dbconn->db(), $pts_sql)) != FALSE && 
+                        pg_affected_rows($pts_pg) == 1) ) {
+                    log_crit(sprintf("bin5_points_save: failed at insert point [%s]", $pts_sql));
+                    break;                        
+                }
+            }
+
+            if ($i < $n)
+                break;
+            
+            if (pg_query($this->dbconn->db(), "COMMIT") == FALSE) {
+                break;
+            }
+             
+            $is_trans = FALSE;
+
+            $ret =  TRUE;
+        } while (0);
+        
+        if ($is_trans)
+            pg_query($this->dbconn-db(), "ROLLBACK");
+        
+        return $ret;
+    }
+
+} // End class BriskDB
 
 class LoginDBOld 
 {
