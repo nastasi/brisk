@@ -86,7 +86,8 @@ class BriskDB
         /* check the existence of the nick in the BriskDB */
         log_main("login_exists: ".$login);
         
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s');",  $G_dbpfx, escsql($login));
+        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",
+                            $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) != FALSE)
             if (pg_numrows($user_pg) == 1)
                 return TRUE;
@@ -97,7 +98,7 @@ class BriskDB
     function &getrecord_bylogin($login) {
         GLOBAL $G_false, $G_dbpfx;
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s');",  $G_dbpfx, escsql($login));
+        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",  $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) == FALSE)
             return $ret;
         
