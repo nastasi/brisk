@@ -144,8 +144,7 @@ class BriskDB
                             
                             $chals->rem($login);
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
-                            return ($ret);
-                            //O break;
+                            break;
                         }
                     }
                 } // end for ($e = 0 ...
