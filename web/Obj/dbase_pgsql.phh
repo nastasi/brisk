@@ -195,7 +195,7 @@ class BriskDB
 
         for ($i = 0 ; $i < $olddb->count() ; $i++) {
             $user_sql = sprintf("INSERT INTO %susers ( login, pass, email, type) VALUES ('%s', '%s', '%s', %d);",
-                                $G_dbpfx, escsql($olddb->item[$i]->login), escsql($olddb->item[$i]->pass),
+                                $G_dbpfx, escsql(strtolower($olddb->item[$i]->login)), escsql($olddb->item[$i]->pass),
                                 escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL); 
             
             // if ( ! (($user_pg = pg_exec($dbconn,$order_add_sql)) != FALSE && pg_affected_rows($order_pg) == 1) ) {
