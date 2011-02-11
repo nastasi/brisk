@@ -1497,4 +1497,17 @@ function game_result($asta_pnt, $pnt)
   }
 }
 
+function log_points($curtime, &$user, $where, $mesg) 
+{
+  GLOBAL $_SERVER;
+
+  if (($fp = @fopen(LEGAL_PATH."/points.log", 'a')) != FALSE) {
+    /* Unix time | session | nickname | IP | where was | mesg */
+    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
+                        ($user->flags & USER_FLAG_AUTH ? 'A' : 'N'),
+                        $user->name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+    fclose($fp);
+  }
+}
+
 ?>
