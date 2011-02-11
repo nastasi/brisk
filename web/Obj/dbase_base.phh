@@ -47,27 +47,27 @@ class LoginDBItem {
         return ($ret);
     }
 
-    function codeget()
+    function code_get()
     {
         return $this->code;
     }
 
-    function loginget()
+    function login_get()
     {
         return $this->login;
     }
     
-    function passget()
+    function pass_get()
     {
         return $this->pass;
     }
 
-    function emailget()
+    function email_get()
     {
         return $this->email;
     }
 
-    function typeget()
+    function type_get()
     {
         return $this->type;
     }

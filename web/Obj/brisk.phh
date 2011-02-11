@@ -1913,7 +1913,7 @@ class Room {
       log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
       
       if ($authenticate != FALSE) {
-          $user_type = $authenticate->typeget();
+          $user_type = $authenticate->type_get();
       }
       else {
           $idx = -3;
