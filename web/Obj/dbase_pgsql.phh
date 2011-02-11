@@ -139,7 +139,7 @@ class BriskDB
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
                         log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$user_obj->pass)."]");
                         
-                        if (strcmp($pass , md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
+                        if (strcmp($pass, md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
                             log_main("login_verify SUCCESS for ".$login);
                             
                             $chals->rem($login);
@@ -325,127 +325,6 @@ class LoginDBOld
         return ($this->item_n);
     }
 
-
-
-}
-
-
-    if (0 == 1) {
-        
-        
-        
-        
-        
-        
-        function count()
-        {
-        // sprintf("select count(code) from %sbrisk");
-        return ($this->item_n);
-    }
-
-    function getlogin_byidx($idx)
-    {
-        if ($idx >= $this->item_n)
-            return FALSE;
-        return ($this->item[$idx]->login);
-    }
-
-    function &getitem_bylogin($login, &$id)
-        {
-            GLOBAL $G_false;
-
-            log_main("login_exists: ".$login);
-    
-            /* check the existence of the nick in the LoginDB */
-            for ($i = 0 ; $i < $this->item_n ; $i++) {
-                if (strcasecmp($this->item[$i]->login, $login) == 0) {
-                    log_main("login[".$i."]: ".$this->item[$i]->login);
-                    $ret = &$this->item[$i];
-                    $id = $i;
-                    return ($ret);
-                }
-            }
-            $id = -1;
-            return ($G_false);
-        }
-
-    function getmail($login)
-    {
-        log_main("getmail");
-    
-        /* check the existence of the nick in the LoginDB */
-        for ($i = 0 ; $i < $this->item_n ; $i++) {
-            if (strcasecmp($this->item[$i]->login, $login) == 0) {
-                log_main("login[".$i."]: ".$this->item[$i]->login);
-                return ($this->item[$i]->email);
-            }
-        }
-        return (FALSE);
-    }
-
-    function gettype($login)
-    {
-        log_main("getmail");
-    
-        /* check the existence of the nick in the LoginDB */
-        for ($i = 0 ; $i < $this->item_n ; $i++) {
-            if (strcasecmp($this->item[$i]->login, $login) == 0) {
-                log_main("login[".$i."]: ".$this->item[$i]->login);
-                return ($this->item[$i]->type);
-            }
-        }
-        return (FALSE);
-    }
-
-    function &login_verify($login, $pass)
-    {
-        GLOBAL $G_false;
-        
-        $ret = &$G_false;
-        
-        log_main("login_verify: ".$login);
-        
-        /* check the existence of the nick in the LoginDB */
-        for ($i = 0 ; $i < $this->item_n ; $i++) {
-            log_main("login_verify: LOOP");
-            if (strcasecmp($this->item[$i]->login, $login) == 0) {
-                log_main("login[".$i."]: ".$this->item[$i]->login);
-                
-                /* if it exists check for a valid challenge */
-                if (($a_sem = Challenges::lock_data()) != FALSE) { 
-                    
-                    if (($chals = &Challenges::load_data()) != FALSE) {
-                        for ($e = 0 ; $e < $chals->item_n ; $e++) {
-                            
-                            log_main("challenge[".$i."]: ".$chals->item[$e]->login);
-                            if (strcmp($login, $chals->item[$e]->login) == 0) {
-                                log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$this->item[$i]->pass)."]");
-                                
-                                if (strcmp($pass , md5($chals->item[$e]->token.$this->item[$i]->pass)) == 0) {
-                                    log_main("login_verify SUCCESS for ".$login);
-                                    
-                                    $chals->rem($login);
-                                    $ret = &$this->item[$i];
-                                    break;
-                                }
-                            }
-                        } // end for ($e = 0 ...
-                    }
-                    
-                    if ($chals->ismod()) {
-                        Challenges::save_data(&$chals);
-                    }
-                    
-                    Challenges::unlock_data($a_sem);
-                }
-                break;
-            } //  if (strcasecmp($this->item[$i]->login, ...
-        }
-        
-        return ($ret);
-    }
-
- } // if (0 == 1) {
-
+} // End class LoginDBOld
 
 ?>
