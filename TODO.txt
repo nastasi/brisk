@@ -2,19 +2,27 @@
   TODO
 ========
 
- BRISK4 (brisk)
+ BRISK4 (mammuth)
  ======
  DB: - initial usage
      DONE - configurabilità file o db
+     DONE - aggiornare le funz di gestione db in modo che prevedano anche il flag DISABLE
      DONE - travasatore file to pg
-       - travaso punteggi e gestione punteggi
-          - tab punteggi nel db
-          
+       DONE - travaso punteggi
+       DONE - memorizzazione nuovi i punteggi nel db
+       - gestione classifiche in SQL
+   
        - sistema di inserimento nuovi utenti (riversatore da form di inserimento)
 
-     - modifica password
-     - ripristino password
-     - comunicazioni di aggiornamento (stato salvato sul server)
+     STEP 2
+     - aggiornare le funz di gestione db in modo che prevedano anche il flag SUSPEND
+     - modifica password   
+     - ripristino password 
+
+     STEP 3
+     - comunicazioni di aggiornamento (stato salvato sul server) 
+
+ DONE - var $G_base aggiunta per gestire include in include da path differenti
 
  BRISK3 (trusty)
  ======
