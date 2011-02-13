@@ -26,6 +26,14 @@ sqlexe () {
     return 0
 }
 
+one_or_all() {
+    if [ "$1" = "" ]; then
+        cat sql.d/*.sql
+    else
+        cat "$1"
+    fi
+}
+
 #
 # MAIN
 #
@@ -46,12 +54,12 @@ elif [ "$1" = "destroy" ]; then
     echo "su root" 
     su root -c "su postgres -c \"dropdb $DBBASE && dropuser $DBUSER\"" 
 elif [ "$1" = "clean" ]; then
-    ( echo "-- MESG: clean start" ; cat sql.d/*.sql | grep -i '^drop' | tac ; echo "-- MESG: clean end" ;   ) | sqlexe $sht
+    ( echo "-- MESG: clean start" ; one_or_all $2 | grep -i '^drop' | tac ; echo "-- MESG: clean end" ;   ) | sqlexe $sht
 elif [ "$1" = "build" ]; then
-    ( echo "-- MESG: build start" ; cat sql.d/*.sql | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) | sqlexe $sht
+    ( echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) | sqlexe $sht
 elif [ "$1" = "rebuild" ]; then
-    ( echo "-- MESG: clean start" ; cat sql.d/*.sql | grep -i '^drop' | tac ; echo "-- MESG: clean end" ; \
-      echo "-- MESG: build start" ; cat sql.d/*.sql | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) \
+    ( echo "-- MESG: clean start" ; one_or_all $2 | grep -i '^drop' | tac ; echo "-- MESG: clean end" ; \
+      echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) \
         | sqlexe $sht
 elif [ "$1" = "psql" ]; then
    psql -h $DBHOST -U $DBUSER $DBBASE
