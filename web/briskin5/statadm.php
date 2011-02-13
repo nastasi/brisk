@@ -39,21 +39,16 @@ ini_set("max_execution_time",  "240");
 
 require_once("../Obj/brisk.phh");
 require_once("../Obj/auth.phh");
+require_once("../Obj/dbase_${G_dbasetype}.phh");
 require_once("Obj/briskin5.phh");
 require_once("Obj/placing.phh");
 
-function main()
+function main_file($curtime)
 {
-  GLOBAL $pazz, $G_alarm_passwd;
   $tri = array();
   $mon = array();
   $wee = array();
   
-  echo "inizio<br>";
-  flush();
-  if ($pazz != $G_alarm_passwd)
-    exit;
-
   if (($fp = @fopen(LEGAL_PATH."/points.log", 'r')) == FALSE) {
     echo "Open data file error";
     exit;
@@ -78,7 +73,6 @@ function main()
   }
 
   // recalculate all the placings
-  $curtime = time();
   // 1246428948|492e4e9e856b0|N|tre|172.22.1.90|STAT:BRISKIN5:FINISH_GAME|4a4afd4983039|6|3|tre|1|due|2|uno|-1|
   while (!feof($fp)) {
     $p = 0;
@@ -214,8 +208,130 @@ function main()
   fclose($fphi);
   fclose($fplo);
 
+}
 
-  echo "FINITO\n";
+function main_pgsql($curtime)
+{
+    GLOBAL $G_dbpfx;
+
+    $bdb = new BriskDB();
+
+    $limi = array( TRI_LIMIT, MON_LIMIT, WEE_LIMIT );
+    $ming = array( TRI_MIN_GAMES, MON_MIN_GAMES, WEE_MIN_GAMES );
+    $maxg = array( TRI_MAX_GAMES, MON_MAX_GAMES, WEE_MAX_GAMES );
+
+    do {
+        if (pg_query($bdb->dbconn->db(), "BEGIN") == FALSE) {
+            log_crit("statadm: begin failed");
+            break;
+        }
+
+        // Truncate table (postgresql extension, in other SQL you must user unqualified DELETE
+        $tru_sql = sprintf("TRUNCATE %sbin5_places;", $G_dbpfx);
+        if (pg_query($bdb->dbconn->db(), $tru_sql) == FALSE) {
+            log_crit("statadm: truncate failed");
+            break;
+        }
+
+        for ($dtime = 0 ; $dtime < count($limi) ; $dtime++) {
+            $old_score = array( 1000000000, 1000000000);
+            $old_gam   = array( -1, -1);
+            $rank      = array(  0,  0);
+            
+            $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.login as login
+                                FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers as u 
+                                WHERE p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND 
+                                      g.tstamp > to_timestamp(%d)
+                                GROUP BY u.code, u.login
+                                ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) DESC, 
+                                         count(p.pts) DESC",
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $curtime - $limi[$dtime], $ming[$dtime]);
+
+            // log_crit("statadm: INFO: [$pla_sql]");
+
+            if (($pla_pg  = pg_query($bdb->dbconn->db(), $pla_sql)) == FALSE || pg_numrows($pla_pg) == 0) {
+                // no point found, abort
+                log_crit("statadm: main placement select failed [$pla_sql]");
+                break;
+            }
+            
+            for ($i = 0 ; $i < pg_numrows($pla_pg) ; $i++) {
+                $pla_obj = pg_fetch_object($pla_pg,$i);
+                if ($pla_obj->games < $ming[$dtime])
+                    continue;
+
+                if ($pla_obj->games < $maxg[$dtime])
+                    $subty = 0;
+                else
+                    $subty = 1;
+                
+                $ty = ($dtime * 2) + $subty;
+                
+                if ($pla_obj->games != $old_gam[$subty] || $pla_obj->score != $old_score[$subty]) {
+                    $rank[$subty]++;
+                }
+                $new_sql = sprintf("INSERT INTO %sbin5_places (type, rank, ucode, login, pts, games, score)
+                                    VALUES (%d, %d, %d, '%s', %d, %d, %f);",
+                                   $G_dbpfx, $ty, $rank[$subty], $pla_obj->ucode, escsql($pla_obj->login), 
+                                   $pla_obj->points, $pla_obj->games, $pla_obj->score);
+                if ( ! (($new_pg  = pg_query($bdb->dbconn->db(), $new_sql)) != FALSE && 
+                        pg_affected_rows($new_pg) == 1) ) {
+                    log_crit("statadm: new place insert failed: ".print_r($pla_obj, TRUE));
+                    break;                        
+                }
+                
+                $old_gam[$subty]   = $pla_obj->games;
+                $old_score[$subty] = $pla_obj->score;
+            } // for ($i = 0 ; $i < pg_numrows($pla_pg) ; $i++) {
+            if ($i < pg_numrows($pla_pg)) {
+                break;
+            }
+        } // for ($dtime = 0 ; $dtime < count($limi) ; $dtime++) {
+        if ($dtime < count($limi)) {
+            break;
+        }
+
+        $mti_sql = sprintf("UPDATE %sbin5_places_mtime SET mtime = (to_timestamp(%d)) WHERE code = 0;",
+                           $G_dbpfx, $curtime);
+        if ( ! (($mti_pg  = pg_query($bdb->dbconn->db(), $mti_sql)) != FALSE && 
+                pg_affected_rows($mti_pg) == 1) ) {
+            log_crit("statadm: new mtime insert failed.");
+            break;                        
+        }
+        
+        if (pg_query($bdb->dbconn->db(), "COMMIT") == FALSE) {
+            break;
+        }
+        return (TRUE);
+    } while (0);
+
+    pg_query($bdb->dbconn->db(), "ROLLBACK");
+
+    return (FALSE);
+}
+
+function main()
+{
+    GLOBAL $G_dbasetype, $G_alarm_passwd, $pazz;
+    
+    echo "Inizio.<br>";
+    flush();
+    if ($pazz != $G_alarm_passwd) {
+        echo "Wrong password<br>";
+        flush();
+        exit;
+    }
+    
+    $fun_name = "main_${G_dbasetype}";
+    
+    $curtime = time();
+    if ($ret = $fun_name($curtime))
+        echo "Success.<br>\n";
+    else
+        echo "Failed.<br>\n";
+    
+    echo "Fine.\n";
+    flush();
 }
 
 main();

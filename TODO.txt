@@ -10,8 +10,11 @@
      DONE - travasatore file to pg
        DONE - travaso punteggi
        DONE - memorizzazione nuovi i punteggi nel db
-       - gestione classifiche in SQL
-   
+       DONE - gestione classifiche in SQL
+         DONE - produrle
+         DONE - mostrarle
+
+     STEP 1.5
        - sistema di inserimento nuovi utenti (riversatore da form di inserimento)
 
      STEP 2

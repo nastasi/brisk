@@ -78,7 +78,7 @@ class Ptsgam {
     else
       return ($this->pts / $this->gam);
   }
-}
+} // class Ptsgam {
 
 function ptsgam_cmp($a, $b)
 {
@@ -95,6 +95,16 @@ function ptsgam_cmp($a, $b)
     return (($norma < $normb) ? 1 : -1);
 }
 
+/* types of placing based on delta time */
+define(TY_DTIME_TRI, 0);
+define(TY_DTIME_MON, 1);
+define(TY_DTIME_WEE, 2);
+
+/* subtypes of placing based on number of played games */
+define(SUBTY_FREQ_LO, 0);
+define(SUBTY_FREQ_HI, 1);
+
+
 function placings_show(&$user) 
 {
   $mtime = placing_time();
@@ -102,23 +112,23 @@ function placings_show(&$user)
   $ret = sprintf("<div style='padding: auto;'><h2><b>CLASSIFICHE</b></h2>(aggiornate alle ore %s del %s)<table class='placings'>", $tm[0], $tm[1]);
 
   $tmwee = placing_date($mtime - WEE_LIMIT + (3600));
-  $ret .= sprintf("<tr><td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>dal %s al %s<br>(non meno di %d partite)<br><br>%s<br></td>", $tmwee[1], $tm[1], WEE_MAX_GAMES, placing_show($user, "wee_hi") );
-  $ret .= sprintf("<td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>dal %s al %s<br>(meno di %d partite, più di %d)<br><br>%s<br></td></tr>\n", $tmwee[1], $tm[1], WEE_MAX_GAMES, WEE_MIN_GAMES, placing_show($user, "wee_lo") );
+  $ret .= sprintf("<tr><td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>dal %s al %s<br>(non meno di %d partite)<br><br>%s<br></td>", $tmwee[1], $tm[1], WEE_MAX_GAMES, placing_show($user, TY_DTIME_WEE, SUBTY_FREQ_HI) );
+  $ret .= sprintf("<td style='background-color: #f0f0ff;'><br><b>Settimanale</b><br>dal %s al %s<br>(meno di %d partite, più di %d)<br><br>%s<br></td></tr>\n", $tmwee[1], $tm[1], WEE_MAX_GAMES, WEE_MIN_GAMES, placing_show($user, TY_DTIME_WEE, SUBTY_FREQ_LO) );
 
   $tmmon = placing_date($mtime - MON_LIMIT + (3600));
-  $ret .= sprintf("<tr><td style='background-color: #fffff0;'><br><b>Mensile</b><br>dal %s al %s<br>(non meno di %d partite)<br><br>%s<br></td>", $tmmon[1], $tm[1], MON_MAX_GAMES, placing_show($user, "mon_hi") );
-  $ret .= sprintf("<td style='background-color: #fffff0;'><br><b>Mensile</b><br>dal %s al %s<br>(meno di %d partite, più di %d)<br><br>%s<br></td></tr>\n", $tmmon[1], $tm[1], MON_MAX_GAMES, MON_MIN_GAMES, placing_show($user, "mon_lo") );
+  $ret .= sprintf("<tr><td style='background-color: #fffff0;'><br><b>Mensile</b><br>dal %s al %s<br>(non meno di %d partite)<br><br>%s<br></td>", $tmmon[1], $tm[1], MON_MAX_GAMES, placing_show($user, TY_DTIME_MON, SUBTY_FREQ_HI) );
+  $ret .= sprintf("<td style='background-color: #fffff0;'><br><b>Mensile</b><br>dal %s al %s<br>(meno di %d partite, più di %d)<br><br>%s<br></td></tr>\n", $tmmon[1], $tm[1], MON_MAX_GAMES, MON_MIN_GAMES, placing_show($user, TY_DTIME_MON, SUBTY_FREQ_LO) );
 
   $tmtri = placing_date($mtime - TRI_LIMIT + (3600));
-  $ret .= sprintf("<tr><td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>dal %s al %s<br>(non meno di %d partite)<br><br>%s<br></td>", $tmtri[1], $tm[1], TRI_MAX_GAMES, placing_show($user, "tri_hi")); 
-  $ret .= sprintf("<td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>dal %s al %s<br>(meno di %d partite, più di %d)<br><br>%s<br></td></tr>", $tmtri[1], $tm[1], TRI_MAX_GAMES, TRI_MIN_GAMES, placing_show($user, "tri_lo")); 
+  $ret .= sprintf("<tr><td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>dal %s al %s<br>(non meno di %d partite)<br><br>%s<br></td>", $tmtri[1], $tm[1], TRI_MAX_GAMES, placing_show($user, TY_DTIME_TRI, SUBTY_FREQ_HI)); 
+  $ret .= sprintf("<td style='background-color: #fff0f0;'><br><b>Trimestrale</b><br>dal %s al %s<br>(meno di %d partite, più di %d)<br><br>%s<br></td></tr>", $tmtri[1], $tm[1], TRI_MAX_GAMES, TRI_MIN_GAMES, placing_show($user, TY_DTIME_TRI, SUBTY_FREQ_LO)); 
 
 
   $ret .= sprintf("</table></div>");
   return ($ret);
 }
 
-function placing_time()
+function placing_time_file()
 {
   if (($fp = @fopen(LEGAL_PATH."/class_wee_lo.log", 'r')) == FALSE) {
     return (FALSE);
@@ -129,15 +139,65 @@ function placing_time()
   return ( $st['mtime'] );
 }
 
+function placing_time_pgsql()
+{    
+    GLOBAL $G_dbpfx;
+    $bdb = new BriskDB();
+    
+    $mti_sql = sprintf("SELECT CAST(EXTRACT(EPOCH FROM mtime) AS INTEGER) as mtime 
+                        FROM %sbin5_places_mtime WHERE code = 0;", $G_dbpfx);
+
+    if (($mti_pg  = pg_query($bdb->dbconn->db(), $mti_sql)) == FALSE || pg_numrows($mti_pg) == 0) {
+        // no point found, abort
+        log_crit("placing: get placing mtime failed [$mti_sql]");
+        return (FALSE);
+    }
+    
+    $mti_pg = pg_fetch_object($mti_pg, 0);
+
+    return ($mti_pg->mtime);
+}
+
+function placing_time()
+{
+    GLOBAL $G_dbasetype;
+    
+    $fun_name = "placing_time_${G_dbasetype}";
+    
+    return ($fun_name());
+}
+
 function placing_date($mtime)
 {
   return array( date('G:i', $mtime), date('j/n/y', $mtime) );
 }
   
 
-function placing_show(&$user, $suff) 
+function placing_show_file(&$user, $ty, $subty) 
 {
   $tail = FALSE;
+
+  $suff = "";
+  switch($ty) {
+  case TY_DTIME_TRI:
+      $suff = "tri_";
+      break;
+  case TY_DTIME_MON:
+      $suff = "mon_";
+      break;
+  case TY_DTIME_WEE:
+      $suff = "wee_";
+      break;
+  }
+  
+  switch($subty) {
+  case TY_FREQ_LO:
+      $suff .= "lo";
+      break;
+  case TY_FREQ_HI:
+      $suff .= "hi";
+      break;
+  }
   
   if (($fp = @fopen(LEGAL_PATH."/class_".$suff.".log", 'r')) == FALSE) {
     return (FALSE);
@@ -184,3 +244,66 @@ function placing_show(&$user, $suff)
   
   return ($ret);
 }
+//
+//
+    
+function placing_show_pgsql(&$user, $ty, $subty) 
+{
+    GLOBAL $G_dbpfx;
+
+    $bdb = new BriskDB();
+      
+    if ($user != FALSE) {
+        $pla_sql = sprintf("SELECT * from %sbin5_places where type = %d AND (rank <= %d OR ucode = '%s');",
+                           $G_dbpfx, ($ty * 2) + $subty, TOP_NUM, escsql($user->code));
+    }
+    else {
+        $pla_sql = sprintf("SELECT * from %sbin5_places where type = %d AND rank <= %d;",
+                           $G_dbpfx, ($ty * 2) + $subty, TOP_NUM);
+    }
+    
+    if (($pla_pg  = pg_query($bdb->dbconn->db(), $pla_sql)) == FALSE || pg_numrows($pla_pg) == 0) {
+        // no point found, abort
+        log_crit("placing: get placing list failed [$pla_sql]");
+        return ("");
+    }
+
+    // MLANG
+    $ret = sprintf("<table class='placing'><tr><th>Pos.</th><th>Utente</th><th>Score</th><th>(Punti/Partite)</th>");
+
+    for ($i = 0 ; $i < pg_numrows($pla_pg) ; $i++) {
+        $pla_obj = pg_fetch_object($pla_pg,$i);
+        
+        $ein = "";
+        $eou = "";
+        if ($user != FALSE) {
+            if ($user->code == $pla_obj->ucode) {
+                $ein = "<b>";
+                $eou = "</b>";
+            }
+        }
+        
+        /* when the user is far from the top-ten we place a ... separator before it */
+        if ($pla_obj->rank > TOP_NUM) {
+            $ret .= sprintf("<tr><td colspan=4 style='text-align: center'> . . . . . . . . . . </td></tr>");
+        }        
+        $ret .= sprintf("<tr><td>%d</td><td>%s%s%s</td><td>%s%12.3f%s</td><td>%s(%d/%d)%s</td></tr>", $pla_obj->rank, 
+                        $ein, xcape($pla_obj->login), $eou,
+                        $ein, $pla_obj->score, $eou,
+                        $ein, $pla_obj->pts, $pla_obj->games, $eou);
+    }
+    $ret .= "</table>"; 
+  
+    return ($ret);
+}
+
+function placing_show(&$user, $ty, $subty) 
+{
+    GLOBAL $G_dbasetype;
+
+    $fun_name = "placing_show_${G_dbasetype}";
+    
+    return ($fun_name($user, $ty, $subty));
+}
+
+?>
