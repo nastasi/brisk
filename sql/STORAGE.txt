@@ -1,0 +1,16 @@
+== rende la view dei punteggi ==
+select m.ttok, m.tidx, g.code, g.tstamp, p.pts, u.login from bsk_bin5_points as p, bsk_bin5_games as g, bsk_bin5_matches as m, bsk_users as u where p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND g.tstamp > '2010-10-01 00:00:00' ORDER BY g.tstamp;
+
+
+== rende somma punteggi da una certa data ==
+select sum(p.pts), u.login from bsk_bin5_points as p, bsk_bin5_games as g, bsk_bin5_matches as m, bsk_users as u where p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND g.tstamp > '2010-10-01 00:00:00' GROUP BY (u.login) ORDER BY sum(p.pts);
+
+== vicini al conteggio ==
+select (sum(p.pts) * 100 ) /  count(p.pts), u.login from bsk_bin5_points as p, bsk_bin5_games as g, bsk_bin5_matches as m, bsk_users as u where p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND g.tstamp > '2010-12-01 00:00:00' GROUP BY (u.login) ORDER BY (sum(p.pts) * 100 ) /  count(p.pts);
+
+
+== conteggio esatto ==
+select (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)), u.login from bsk_bin5_points as p, bsk_bin5_games as g, bsk_bin5_matches as m, bsk_users as u where p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND g.tstamp > '2010-10-01 00:00:00' GROUP BY (u.login) ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts));
+
+== conteggio ancora più esatto ==
+select (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)), count(p.pts), u.login from bsk_bin5_points as p, bsk_bin5_games as g, bsk_bin5_matches as m, bsk_users as u where p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND g.tstamp > '2010-10-01 00:00:00' GROUP BY (u.login) ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) DESC, count(p.pts) DESC
