@@ -15,10 +15,31 @@ proxy_path="$HOME/brisk-priv/proxy"
 web_only="FALSE"
 brisk_conf="brisk.conf.pho"
 
-if [ "$1" = "--ck" ]; then
+if [ "$1" = "chk" ]; then
     find -name '*.pho' -o -name '*.phh' -o -name '*.php' -exec php5 -l {} \;
     exit 0
 fi
+
+if [ "$1" = "pkg" ]; then
+    if [ "$2" != "" ]; then
+        tag="$2"
+    else
+        tag="$(git describe)"
+    fi
+    nam1="brisk_${tag}.tgz"
+    nam2="brisk-img_${tag}.tgz"
+    echo "Build packages ${nam1} and ${nam2}."
+    read -p "Proceed [y/n]: " a
+    if [ "$a" != "y" -a  "$a" != "Y" ]; then
+        exit 1
+    fi
+    git archive --format=tar --prefix=brisk-${tag}/brisk/ $tag | gzip > ../$nam1
+    cd ../brisk-img
+    git archive --format=tar --prefix=brisk-${tag}/brisk-img/ $tag | gzip > ../$nam2
+    cd -
+    exit 0
+fi
+    
 
 if [ -f $HOME/.brisk_install ]; then
    . $HOME/.brisk_install
@@ -29,7 +50,8 @@ fi
 function usage () {
     echo
     echo "$1 -h"
-    echo "$1 --ck                           - run lintian on all ph* files."
+    echo "$1 chk                          - run lintian on all ph* files."
+    echo "$1 pkg                          - build brisk packages."
     echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-a <auth_file_name>] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
