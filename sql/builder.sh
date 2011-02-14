@@ -3,15 +3,21 @@
 #
 #  all this part is from mopshop and we will use it to construct the brisk database
 #
-DBHOST=127.0.0.1
-DBUSER=brisk
-DBBASE=brisk
-DBPASS=briskpass
-PFX="bsk_"
+
+if [ -f $HOME/.db.conf ]; then
+    source $HOME/.db.conf
+else
+    DBHOST=127.0.0.1
+    DBUSER=brisk
+    DBBASE=brisk
+    DBPASS=briskpass
+    PFX="bsk_"
+fi
 
 if [ -f $HOME/.brisk_install ]; then
-   . $HOME/.brisk_install
+    source $HOME/.brisk_install
 fi
+
 
 sqlexe () {
     local sht
@@ -38,9 +44,6 @@ one_or_all() {
 # MAIN
 #
 sht=0
-if [ -f $HOME/.db.conf ]; then
-    source $HOME/.db.conf
-fi
 
 if [ "$1" = "-s" ]; then
     shift
@@ -59,24 +62,24 @@ elif [ "$1" = "build" ]; then
     ( echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) | sqlexe $sht
 elif [ "$1" = "rebuild" ]; then
     ( echo "-- MESG: clean start" ; one_or_all $2 | grep -i '^drop' | tac ; echo "-- MESG: clean end" ; \
-      echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) \
+        echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) \
         | sqlexe $sht
 elif [ "$1" = "psql" ]; then
-   psql -h $DBHOST -U $DBUSER $DBBASE
+    psql -h $DBHOST -U $DBUSER $DBBASE
 elif [ "$1" = "dump" ]; then
-   if [ $# -eq 1 ]; then
-      pg_dump -a --inserts -h $DBHOST -U $DBUSER $DBBASE
-   else
-      pg_dump -a --inserts -h $DBHOST -U $DBUSER $DBBASE > $2
-   fi
+    if [ $# -eq 1 ]; then
+        pg_dump -a --inserts -h $DBHOST -U $DBUSER $DBBASE
+    else
+        pg_dump -a --inserts -h $DBHOST -U $DBUSER $DBBASE > $2
+    fi
 elif [ "$1" = "dumpall" ]; then
-   if [ $# -eq 1 ]; then
-      pg_dump -h $DBHOST -U $DBUSER $DBBASE
-   else
-      pg_dump -h $DBHOST -U $DBUSER $DBBASE > $2
-   fi
+    if [ $# -eq 1 ]; then
+        pg_dump -h $DBHOST -U $DBUSER $DBBASE
+    else
+        pg_dump -h $DBHOST -U $DBUSER $DBBASE > $2
+    fi
 elif [ "$1" = "add" ]; then
-   cat "$2" | psql -h $DBHOST -U $DBUSER $DBBASE
+    cat "$2" | psql -h $DBHOST -U $DBUSER $DBBASE
 else
     echo " USAGE"
     echo "   ./builder create"
