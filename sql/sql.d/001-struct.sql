@@ -9,8 +9,8 @@ CREATE TABLE #PFX#users (
        pass   text,
        email  text UNIQUE,
        type   integer,
-       tsusp  timestamp DEFAULT to_timestamp(0) -- disable timeout
-       mtime  timestamp DEFAULT to_timestamp(0) -- last access
+       tsusp  timestamp DEFAULT to_timestamp(0), -- disable timeout
+       mtime  timestamp DEFAULT to_timestamp(0)  -- last access
        );
 
 DROP TABLE #PFX#groups;
