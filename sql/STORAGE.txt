@@ -1,3 +1,6 @@
+== how to move match ==
+select m.code, m.ttok, min(g.tstamp) from bsk_bin5_matches as m, bsk_bin5_games as g where g.mcode = m.code GROUP BY m.code, m.ttok;
+
 == rende la view dei punteggi ==
 select m.ttok, m.tidx, g.code, g.tstamp, p.pts, u.login from bsk_bin5_points as p, bsk_bin5_games as g, bsk_bin5_matches as m, bsk_users as u where p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND g.tstamp > '2010-10-01 00:00:00' ORDER BY g.tstamp;
 
