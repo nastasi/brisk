@@ -16,9 +16,18 @@ web_only="FALSE"
 brisk_conf="brisk.conf.pho"
 
 if [ "$1" = "chk" ]; then
-    find -name '*.pho' -o -name '*.phh' -o -name '*.php' -exec php5 -l {} \;
+    set -e
+    oldifs="$IFS"
+    IFS='
+'
+    for i in $(find -name '*.pho' -o -name '*.phh' -o -name '*.php'); do
+        php5 -l $i
+    done
     exit 0
 fi
+
+# before all check errors on the sources
+$0 chk || exit 3
 
 if [ "$1" = "pkg" ]; then
     if [ "$2" != "" ]; then
@@ -40,13 +49,14 @@ if [ "$1" = "pkg" ]; then
     exit 0
 fi
     
-
 if [ -f $HOME/.brisk_install ]; then
    . $HOME/.brisk_install
 fi
+
 if [ "x$cookie_path" = "x" ]; then
    cookie_path=$web_path
 fi
+
 function usage () {
     echo
     echo "$1 -h"
