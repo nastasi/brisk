@@ -246,7 +246,8 @@ else if ($argz[0] == 'mesgtoadm') {
   log_wr("INFO:SKIP:argz == mesgtoadm name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
   if ($user->flags & USER_FLAG_AUTH) {
     if (($wa_lock = Warrant::lock_data()) != FALSE) {
-      $bdb = new BriskDB();
+        // FIXME: now create can return FALSE
+      $bdb = BriskDB::create();
       $bdb->users_load();
 
       if (($ema = $bdb->getmail($user->name)) != FALSE) {

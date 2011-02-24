@@ -38,6 +38,13 @@ class BriskDB {
         log_main("BriskDB create:end");
     }
 
+    static function &create()
+    {
+        $ret = new BriskDB();
+        
+        return ($ret);
+    }
+
     function users_load() 
     {
         GLOBAL $DOCUMENT_ROOT;

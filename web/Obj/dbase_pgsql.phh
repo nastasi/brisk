@@ -41,17 +41,24 @@ class DBConn
     
     function DBConn()
     {
-        GLOBAL $G_dbauth;
+        $this->db = DBConn::$dbcnnx;        
+    }
+
+    static function &create()
+    {
+        GLOBAL $G_dbauth, $G_false;
         
+        $ret = &$G_false;
+
         if (DBConn::$dbcnnx == FALSE) {
             if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth))) {
-                echo "DB connection failed.";
-                exit;
+                return FALSE;
             }
         }
-        $this->db = DBConn::$dbcnnx;
 
-        return;
+        $ret = new DBConn();
+        
+        return $ret;
     }
     function db()
     {
@@ -65,14 +72,29 @@ class BriskDB
     var $item;
     var $item_n;
     
-    function BriskDB()
+    function BriskDB($dbconn)
+    {
+        $this->dbconn = $dbconn;
+    }
+
+    static function &create()
     {
         GLOBAL $DOCUMENT_ROOT, $G_dbpfx, $G_false;
+
+        $dbconn = $G_false;
+        $ret = $G_false;
+
         log_main("BriskDB create:start");
         
-        $this->dbconn = new DBConn();
+        do {
+            if (($dbconn = DBConn::create()) == FALSE)
+                break;
+            
+            $ret = new BriskDB($dbconn);
+        } while (0);
         
         log_main("BriskDB create:end");
+        return ($ret);
     }
 
     function users_load()

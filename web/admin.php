@@ -101,7 +101,9 @@ function main()
                 $cont .= sprintf("Loading failed.<br>\n"); 
                 break;
             }
-            $newdb = new BriskDB();
+
+            // FIXME: now create can return FALSE
+            $newdb = BriskDB::create();
             $newdb->users_load();
             if ($newdb->addusers_from_olddb($olddb, $cont) == FALSE) {
                 $cont .= sprintf("Insert failed.<br>\n"); 
@@ -123,7 +125,8 @@ function main()
                 break;
             }
 
-            $newdb = new BriskDB();
+            // FIXME: now create can return FALSE
+            $newdb = BriskDB::create();
             $newdb->users_load();
             $dbconn = $newdb->getdbconn();
             for ($pts_n = 0 ;  !feof($fp) ; $pts_n++) {

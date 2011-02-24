@@ -1627,7 +1627,8 @@ class Room {
 	$user->name = $name_new; // OK - nick changed
         /* se nome gia' in uso, segnala cosa potrebbe capitare */
         if (($user->flags & USER_FLAG_AUTH) == 0) {
-          $bdb = new BriskDB();
+            // FIXME: now create can return FALSE
+          $bdb = BriskDB::create();
           $bdb->users_load();
           /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
           if ($bdb->login_exists($name_new)) {
@@ -1905,9 +1906,11 @@ class Room {
 
     /* if pass != FALSE verify the login with pass */
     log_auth("XXX", "auth1");
-    $bdb = new BriskDB();
-    $bdb->users_load();
-    if ($pass != FALSE) {
+
+    // FIXME: now create can return FALSE
+    if (($bdb = BriskDB::create()) != FALSE)
+        $bdb->users_load();
+    if ($pass != FALSE && $bdb != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
       log_auth("XXX", "auth2");
       $authenticate = $bdb->login_verify($name_new, $pass, $code);
       log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));

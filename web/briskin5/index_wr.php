@@ -495,7 +495,8 @@ else if ($user->stat == 'table') {
             require_once("../Obj/dbase_".$G_dbasetype.".phh");
   
             log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
-            $bdb = new BriskDB();
+            // FIXME: now create can return FALSE
+            $bdb = BriskDB::create();
             $bdb->bin5_points_save($curtime, $table->table_token, $user->table_orig, $ucodes, $pt_cur);
             unset($bdb);
           }
