@@ -17,8 +17,11 @@
      STEP 1.1
        DONE - points archiver
 
+     STEP 1.2
+       - partial usability if database go down.
+
      STEP 1.5
-       - sistema di inserimento nuovi utenti (riversatore da form di inserimento)
+     - sistema di inserimento nuovi utenti (riversatore da form di inserimento)
 
      STEP 2
      - aggiornare le funz di gestione db in modo che prevedano anche il flag SUSPEND
