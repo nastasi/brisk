@@ -494,11 +494,14 @@ else if ($user->stat == 'table') {
           if ($user->table_orig < TABLES_AUTH_N) {
             require_once("../Obj/dbase_".$G_dbasetype.".phh");
   
+            if (($bdb = BriskDB::create()) != FALSE) {
+                $bdb->bin5_points_save($curtime, $table->table_token, $user->table_orig, $ucodes, $pt_cur);
+                unset($bdb);
+            }
+            else {
+                log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", "DATABASE CONNECTION FAILED");
+            }
             log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
-            // FIXME: now create can return FALSE
-            $bdb = BriskDB::create();
-            $bdb->bin5_points_save($curtime, $table->table_token, $user->table_orig, $ucodes, $pt_cur);
-            unset($bdb);
           }
 
 	  $table->game_next();

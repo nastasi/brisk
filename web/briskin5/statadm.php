@@ -58,8 +58,11 @@ function main_file($curtime)
     fclose($fp_start);
   }
 
-  // FIXME: now create can return FALSE
-  $bdb = BriskDB::create();
+  if (($bdb = BriskDB::create()) == FALSE) {
+    echo "database connection failed";
+    exit;
+  }
+      
   $bdb->users_load();
 
   for ($i = 0 ; $i < $bdb->count() ; $i++) {
@@ -211,8 +214,10 @@ function main_pgsql($curtime)
 {
     GLOBAL $G_dbpfx;
 
-    // FIXME: now create can return FALSE
-    $bdb = BriskDB::create();
+    if (($bdb = BriskDB::create()) == FALSE) {
+        echo "database connection failed";
+        exit;
+    }
 
     $limi = array( TRI_LIMIT, MON_LIMIT, WEE_LIMIT );
     $ming = array( TRI_MIN_GAMES, MON_MIN_GAMES, WEE_MIN_GAMES );

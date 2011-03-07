@@ -42,6 +42,8 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                             'en' => 'close' ),
                       'commerr' => array( 'it' => '<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>',
                                           'en' => '<b>An error was occurred during the saving, try again or contact the administrator.</b>'),
+                      'coerrdb' => array( 'it' => '<b>Il database è temporaneamente irraggiungibile, riprova più tardi o contatta l\'amministratore.</b>',
+                                          'en' => '<b>The database is temporarly unavailable, retry to later or conctact the administrator.</b>'),
                       'warrmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>',
                                            'en' => 'To authenticate somebody you have to be authenticated in your turn'),
                       'mesgrepl' => array( 'it' => '<br><br>Il messaggio &egrave; stato inoltrato all\'amministratore.',
@@ -101,6 +103,9 @@ $is_spawn = FALSE;
 log_mop(0, 'index_wr.php: COMM: '.xcapemesg($mesg));
 log_wr('COMM: '.xcapemesg($mesg));
 
+$curtime = time();
+$dt = date("H:i ", $curtime);
+
 $sem = Room::lock_data();
 if (($room = &Room::load_data()) == FALSE) {
   echo "Load data error";
@@ -118,7 +123,6 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
       log_main("chal lock data success");
       
       if (($chals = &Challenges::load_data()) != FALSE) {
-        $curtime = time();
 
         $token =  uniqid("");
         // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
@@ -200,7 +204,6 @@ if ($argz[0] == 'shutdown') {
 else if ($argz[0] == 'warranty') {
   GLOBAL $cli_name, $cli_email;
 
-  $curtime = time();
   $mesg_to_user = "";
 
   log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
@@ -232,60 +235,62 @@ else if ($argz[0] == 'warranty') {
   if ($mesg_to_user != "") {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     
-    $dt = date("H:i ", $curtime);
     $user->comm[$user->step % COMM_N] .= $mesg_to_user;
     $user->step_inc();
   }
 }
 else if ($argz[0] == 'mesgtoadm') {
-  GLOBAL $cli_subj, $cli_mesg;
-
-  $curtime = time();
-  $mesg_to_user = "";
-
-  log_wr("INFO:SKIP:argz == mesgtoadm name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
-  if ($user->flags & USER_FLAG_AUTH) {
-    if (($wa_lock = Warrant::lock_data()) != FALSE) {
-        // FIXME: now create can return FALSE
-      $bdb = BriskDB::create();
-      $bdb->users_load();
-
-      if (($ema = $bdb->getmail($user->name)) != FALSE) {
-        //  mail("nastasi", 
-        mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
-      }
-
-      if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
-        /* Unix time | session | nickname | IP | where was | mesg */
-        fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name, 
-                            xcapelt(urldecode($cli_subj)), xcapelt(urldecode($cli_mesg))));
-        fclose($fp);
-      }
-      Warrant::unlock_data($wa_lock);
-      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-      /* MLANG: "" */
-      $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['mesgrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
-      $user->step_inc();
-      echo "1";
+    GLOBAL $cli_subj, $cli_mesg;
+    
+    $mesg_to_user = "";
+    
+    log_wr("INFO:SKIP:argz == mesgtoadm name: [".$user->name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
+    if ($user->flags & USER_FLAG_AUTH) {
+        if (($wa_lock = Warrant::lock_data()) != FALSE) {
+            if (($bdb = BriskDB::create()) != FALSE) {
+                $bdb->users_load();
+                
+                if (($ema = $bdb->getmail($user->name)) != FALSE) {
+                    //  mail("nastasi", 
+                    mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
+                }
+                
+                if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
+                    /* Unix time | session | nickname | IP | where was | mesg */
+                    fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name, 
+                                        xcapelt(urldecode($cli_subj)), xcapelt(urldecode($cli_mesg))));
+                    fclose($fp);
+                }
+                Warrant::unlock_data($wa_lock);
+                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            /* MLANG: "" */
+                $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['mesgrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
+                $user->step_inc();
+                echo "1";
+            }
+            else {
+                /* MLANG: "<b>Il database è temporaneamente irraggiungibile, riprova più tardi o contatta l\'amministratore.</b>" */
+                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['coerrdb'][$G_lang]);
+                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            }
+        }
+        else {
+            /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
+            $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+        }
+        
     }
     else {
-      /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-      $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+        /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
+        $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mesgmust'][$G_lang]);
     }
     
-  }
-  else {
-    /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mesgmust'][$G_lang]);
-  }
-
-  if ($mesg_to_user != "") {
-    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-    
-    $dt = date("H:i ", $curtime);
-    $user->comm[$user->step % COMM_N] .= $mesg_to_user;
-    $user->step_inc();
-  }
+    if ($mesg_to_user != "") {
+        $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+        
+        $user->comm[$user->step % COMM_N] .= $mesg_to_user;
+        $user->step_inc();
+    }
 }
 
 
@@ -294,7 +299,6 @@ else if ($argz[0] == 'poll') {
   GLOBAL $G_with_poll, $G_poll_name, $cli_choose, $cli_poll_name;
 
   $poll_lock = FALSE;
-  $curtime = time();
   $mesg_to_user = "";
   
   $fp = FALSE;
@@ -392,7 +396,6 @@ else if ($argz[0] == 'poll') {
   if ($mesg_to_user != "") {
     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
     
-    $dt = date("H:i ", $curtime);
     $user->comm[$user->step % COMM_N] .= $mesg_to_user;
     $user->step_inc();
   }
@@ -502,13 +505,10 @@ else if ($user->stat == 'room') {
       $table_idx = $argz[1];
       $table = &$room->table[$table_idx];
     
-      $curtime = time();
-
       if ($G_shutdown || $table->wakeup_time > $curtime || 
           ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) ) {
 	$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
-	$dt = date("H:i ", $curtime);
         /* MLANG: "<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>", "<b>Il tavolo a cui volevi sederti richiede autentifica.</b>", "<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>" */
         if ($G_shutdown) {
           $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
@@ -568,8 +568,6 @@ else if ($user->stat == 'room') {
 	//
 	//  START THE SPAWN HERE!!!!
 	//
-
-        $curtime = time();
 
         // Create new spawned table
         $bri_sem = Briskin5::lock_data($table_idx);

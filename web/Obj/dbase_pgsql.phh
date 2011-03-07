@@ -52,7 +52,7 @@ class DBConn
 
         if (DBConn::$dbcnnx == FALSE) {
             if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth))) {
-                return FALSE;
+                return ($ret);
             }
         }
 

@@ -120,7 +120,9 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                       'tit_onauth'=>array( 'it' => '(solo aut.)',
                                            'en' => '(only aut.)'),
                       'tit_onisol'=>array( 'it' => '(isolam.to)',
-                                           'en' => '(isolation)')
+                                           'en' => '(isolation)'),
+                      'db_failed' =>array('it'  => '<br>Il collegamento al database è fallito.<br>Temporaneamente tutte le autenticazioni verranno sospese, accederai a Brisk come un utente normale.<br><br>Ci scusiamo per il disagio.',
+                                          'en'  => 'Connection to the database failed<br>All authentications are suspended temporarly, you login as normal user.<br>We are about the limitation')
                       
 
 );
@@ -129,7 +131,7 @@ $G_false = FALSE;
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "2.5.0";
+$G_brisk_version = "3.2.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: informazioni al tavolo sul chiamante, nuovo stato di supporter del sito.',
@@ -572,9 +574,10 @@ class Table {
 define(USER_FLAG_AUTH,     0x02);
 
 define(USER_FLAG_MAP_AUTH, 0x0c);
-
 define(USER_FLAG_LISTAUTH, 0x04);
 define(USER_FLAG_ISOLAUTH, 0x08);
+
+define(USER_FLAG_DBFAILED, 0x10); 
 
 //   user status
 define(USER_FLAG_S_NORM,  0x000); // done
@@ -1127,6 +1130,11 @@ class Room {
     $ret .= sprintf('stat = "%s";',  $user->stat);
     
     $ret .= root_wellcome($user);
+    if ($user->flags & USER_FLAG_DBFAILED) {
+        $ret .= "gst.st = ".($user->step+1)."; ";
+        $ret .= show_notify($mlang_brisk['db_failed'][$G_lang], 0, $mlang_brisk['btn_close'][$G_lang], 400, 140);
+    }
+
     $ret .= sprintf('subst = "%s";', $user->subst);
     $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
     $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
@@ -1627,14 +1635,14 @@ class Room {
 	$user->name = $name_new; // OK - nick changed
         /* se nome gia' in uso, segnala cosa potrebbe capitare */
         if (($user->flags & USER_FLAG_AUTH) == 0) {
-            // FIXME: now create can return FALSE
-          $bdb = BriskDB::create();
-          $bdb->users_load();
-          /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-          if ($bdb->login_exists($name_new)) {
-            $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
-            $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
-          }
+            if (($bdb = BriskDB::create()) != FALSE) {
+                $bdb->users_load();
+                /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
+                if ($bdb->login_exists($name_new)) {
+                    $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
+                    $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
+                }
+            }
         }
 
         log_main("chatt_send start set");
@@ -1864,8 +1872,6 @@ class Room {
     return ($G_false);
   }
 
-  
-
   /*
    * function &add_user(&$room, &$sess, &$idx, $name, $pass, $ip)
    *
@@ -1875,10 +1881,8 @@ class Room {
    *   if ($idx == -3    && ret == FALSE)  =>  wrong password
    *   if ($idx == -1    && ret == FALSE)  =>  no space left
    *   if ($idx ==  0    && ret == user)   =>  SUCCESS
-   *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db 
+   *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db)
    */
-
-
 
   function &add_user(&$sess, &$idx, $name, $pass, $ip)
   {
@@ -1907,24 +1911,28 @@ class Room {
     /* if pass != FALSE verify the login with pass */
     log_auth("XXX", "auth1");
 
-    // FIXME: now create can return FALSE
-    if (($bdb = BriskDB::create()) != FALSE)
+    if (($bdb = BriskDB::create()) != FALSE) {
         $bdb->users_load();
-    if ($pass != FALSE && $bdb != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
-      log_auth("XXX", "auth2");
-      $authenticate = $bdb->login_verify($name_new, $pass, $code);
-      log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
-      
-      if ($authenticate != FALSE) {
-          $user_type = $authenticate->type_get();
-      }
-      else {
-          $idx = -3;
-          return ($G_false);
-      }
+        if ($pass != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
+            log_auth("XXX", "auth2");
+            $authenticate = $bdb->login_verify($name_new, $pass, $code);
+            log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
+            
+            if ($authenticate != FALSE) {
+                $user_type = $authenticate->type_get();
+            }
+            else {
+                $idx = -3;
+                return ($G_false);
+            }
+        }
+        else {
+            $login_exists =  $bdb->login_exists($name_new);
+        }
     }
     else {
-      $login_exists =  $bdb->login_exists($name_new);
+        // if db is down, send a warning and verify only current users
+        // no actions at this moment
     }
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       /* free user ? */
@@ -1932,7 +1940,7 @@ class Room {
 	if ($idx == -1)
 	  $idx = $i;
       }
-      if ($idfree == -1 && strcmp("", $this->user[$i]->sess) == 0) {
+      if ($idfree == -1 && strcmp($this->user[$i]->sess, "") == 0) {
 	$idfree = $i;
         continue; // NOTE: CHECK IT !!
       }
@@ -1952,6 +1960,8 @@ class Room {
 
     log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
 
+    /* there is another user logged with your account and you and him have authenticated => che new user
+       get the session of the old user */
     if ($ghost > -1 && $ghost_auth && ($authenticate != FALSE)) {
       /* swap session */
 
@@ -2006,8 +2016,9 @@ class Room {
       $this->user[$idx]->bantime = 0;
       $this->user[$idx]->ip = $ip;
 
-      $this->user[$idx]->flags = ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00) | $user_type;
-
+      $this->user[$idx]->flags = $user_type;
+      $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
+      $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
       log_auth("XXX", sprintf("FLAGS: [%x]", $this->user[$idx]->flags));
 
       

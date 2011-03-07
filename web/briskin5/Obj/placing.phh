@@ -142,8 +142,11 @@ function placing_time_file()
 function placing_time_pgsql()
 {    
     GLOBAL $G_dbpfx;
-    // FIXME: now create can return FALSE
-    $bdb = BriskDB::create();
+    
+    if (($bdb = BriskDB::create()) == FALSE) {
+        log_crit("placing: database connection failed");
+        return (FALSE);
+    }
     
     $mti_sql = sprintf("SELECT CAST(EXTRACT(EPOCH FROM mtime) AS INTEGER) as mtime 
                         FROM %sbin5_places_mtime WHERE code = 0;", $G_dbpfx);
@@ -252,8 +255,10 @@ function placing_show_pgsql(&$user, $ty, $subty)
 {
     GLOBAL $G_dbpfx;
     
-    // FIXME: now create can return FALSE
-    $bdb = BriskDB::create();
+    if (($bdb = BriskDB::create()) == FALSE) {
+        log_crit("placing: database connection failed");
+        return ("");
+    }
       
     if ($user != FALSE) {
         $pla_sql = sprintf("SELECT * from %sbin5_places where type = %d AND (rank <= %d OR ucode = '%s');",
