@@ -120,7 +120,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
   if (($proxy_step = step_get($sess)) != FALSE) {
     // log_rd2("Postget".$proxy_step."zizi");
     
-    if ($cur_step == $proxy_step) {
+    if ($cur_step == $proxy_step['s']) {
       log_lock("P");
       return (FALSE);
     }

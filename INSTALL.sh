@@ -107,7 +107,7 @@ function searchetc() {
             echo "$pp/$dname"
             return 0
         fi
-        pp="`dirname "$pp"`"
+        pp="$(dirname "$pp")"
     done
     
     return 1
@@ -120,19 +120,19 @@ while [ $# -gt 0 ]; do
     # echo aa $1 xx $2 bb
     conffile=""
     case $1 in
-	-f*) conffile="`get_param "-f" "$1" "$2"`"; sh=$?;;
-	-p*) outconf="`get_param "-p" "$1" "$2"`"; sh=$?;;
-	-n*) players_n="`get_param "-n" "$1" "$2"`"; sh=$?;;
-	-t*) tables_n="`get_param "-t" "$1" "$2"`"; sh=$?;;
-	-T*) tables_auth_n="`get_param "-T" "$1" "$2"`"; sh=$?;;
-        -a*) brisk_auth_conf="`get_param "-a" "$1" "$2"`"; sh=$?;;
-	-d*) brisk_debug="`get_param "-d" "$1" "$2"`"; sh=$?;;
-	-w*) web_path="`get_param "-w" "$1" "$2"`"; sh=$?;;
-	-k*) ftok_path="`get_param "-k" "$1" "$2"`"; sh=$?;;
-	-y*) proxy_path="`get_param "-y" "$1" "$2"`"; sh=$?;;
-	-c*) cookie_path="`get_param "-c" "$1" "$2"`"; sh=$?;;
-	-C*) brisk_conf="`get_param "-C" "$1" "$2"`"; sh=$?;;
-	-l*) legal_path="`get_param "-l" "$1" "$2"`"; sh=$?;;
+	-f*) conffile="$(get_param "-f" "$1" "$2")"; sh=$?;;
+	-p*) outconf="$(get_param "-p" "$1" "$2")"; sh=$?;;
+	-n*) players_n="$(get_param "-n" "$1" "$2")"; sh=$?;;
+	-t*) tables_n="$(get_param "-t" "$1" "$2")"; sh=$?;;
+	-T*) tables_auth_n="$(get_param "-T" "$1" "$2")"; sh=$?;;
+        -a*) brisk_auth_conf="$(get_param "-a" "$1" "$2")"; sh=$?;;
+	-d*) brisk_debug="$(get_param "-d" "$1" "$2")"; sh=$?;;
+	-w*) web_path="$(get_param "-w" "$1" "$2")"; sh=$?;;
+	-k*) ftok_path="$(get_param "-k" "$1" "$2")"; sh=$?;;
+	-y*) proxy_path="$(get_param "-y" "$1" "$2")"; sh=$?;;
+	-c*) cookie_path="$(get_param "-c" "$1" "$2")"; sh=$?;;
+	-C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
+	-l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
 	-W) web_only="TRUE";;
 	-h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
@@ -187,8 +187,8 @@ fi
 #  Pre-check
 #
 # check for etc path existence
-dsta="`dirname "$web_path"`"
-etc_path="`searchetc "$dsta" Etc`"
+dsta="$(dirname "$web_path")"
+etc_path="$(searchetc "$dsta" Etc)"
 if [ $? -ne 0 ]; then
     echo "Etc directory not found"
     exit 1
@@ -234,17 +234,21 @@ if [ "$web_only" = "FALSE" ]; then
     chmod 666 ${ftokk_path}/warrant
     touch ${ftokk_path}/poll
     chmod 666 ${ftokk_path}/poll
-    for i in `seq 0 99`; do 
+    for i in $(seq 0 99); do 
         touch ${ftokk_path}/table$i
         chmod 666 ${ftokk_path}/table$i
     done
+    for i in $(seq 0 299); do
+        touch ${ftokk_path}/user$i
+        chmod 666 ${ftokk_path}/user$i
+    done
 fi
 install -d ${web_path}__
-for i in `find web -type d | grep -v /CVS | sed 's/^....//g'`; do
+for i in $(find web -type d | grep -v /CVS | sed 's/^....//g'); do
     install -d ${web_path}__/$i 
 done
 
-for i in `find web -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'`; do
+for i in $(find web -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'); do
     install -m 644 web/$i ${web_path}__/$i
 done
 
@@ -259,16 +263,16 @@ else
 fi
 
 # .js substitutions
-sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $players_n/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;`
+sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $players_n/g" $(find ${web_path}__ -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;)
 
-sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" `find ${web_path}__ -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;`
+sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" $(find ${web_path}__ -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;)
 
 # .ph[pho] substitutions
-sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $players_n)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;`
+sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;)
 
-sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $players_n)/g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;`
+sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;)
 
-sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" `find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;`
+sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;)
 
 sed -i "s@define *( *TABLES_N,[^)]*)@define(TABLES_N, $tables_n)@g" ${web_path}__/Obj/brisk.phh
 

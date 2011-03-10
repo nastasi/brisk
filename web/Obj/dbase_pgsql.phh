@@ -56,9 +56,9 @@ class DBConn
             }
         }
 
-        $ret = new DBConn();
+        $out = new DBConn();
         
-        return $ret;
+        return $out;
     }
     function db()
     {
@@ -81,20 +81,21 @@ class BriskDB
     {
         GLOBAL $DOCUMENT_ROOT, $G_dbpfx, $G_false;
 
-        $dbconn = $G_false;
-        $ret = $G_false;
+        $ret = FALSE;
 
         log_main("BriskDB create:start");
         
         do {
-            if (($dbconn = DBConn::create()) == FALSE)
+            if (($dbconn = DBConn::create()) == FALSE) 
                 break;
             
             $ret = new BriskDB($dbconn);
         } while (0);
         
-        log_main("BriskDB create:end");
-        return ($ret);
+        if ($ret)
+            return ($ret);
+        else
+            return ($G_false);
     }
 
     function users_load()
@@ -138,7 +139,9 @@ class BriskDB
     {
         GLOBAL $G_dbpfx, $G_false;
         
-        $ret = &$G_false;
+        error_log("dbase_pgsql G_false: [".$G_false."]", 0);
+
+        $ret = FALSE;
         
         log_main("login_verify: ".$login);
         
@@ -147,29 +150,38 @@ class BriskDB
         //O for ($i = 0 ; $i < $this->item_n ; $i++) {
         //O log_main("login_verify: BEGIN");
         
-        if (($user_obj = $this->getrecord_bylogin($login)) == FALSE)
-            return $ret;
+        if (($user_obj = $this->getrecord_bylogin($login)) == FALSE) {
+            return $G_false;
+        }
+
+        error_log("G_false: [".$G_false."] user_obj: ".print_r($user_obj, TRUE), 0);
 
         log_main("login[".$user_obj->code."]: ".$user_obj->login);
         
         /* if it exists check for a valid challenge */
         if (($a_sem = Challenges::lock_data()) != FALSE) { 
+            error_log("loop-2", 0);
             if (($chals = &Challenges::load_data()) != FALSE) {
+                error_log("loop-1", 0);
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
-                    
+                    error_log("loop", 0);
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
+                        error_log("loop2", 0);
                         log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$user_obj->pass)."]");
                         
                         if (strcmp($pass, md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
+                            error_log("loop3", 0);
                             log_main("login_verify SUCCESS for ".$login);
                             
                             $chals->rem($login);
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
+                            error_log("dbitem: ".print_r($ret, TRUE));
                             break;
                         }
                     }
                 } // end for ($e = 0 ...
+                error_log("end loop-1", 0);
             }
             
             if ($chals->ismod()) {
@@ -182,7 +194,12 @@ class BriskDB
         // O } //  if (strcasecmp($this->item[$i]->login, ...
         //O }
     
-        return ($ret);
+        error_log("return: ".($G_false == FALSE ? "FALSE" : "not FALSE"), 0);
+
+        if ($ret) 
+            return ($ret);
+        else 
+            return ($G_false);
     }
 
     function &getitem_bylogin($login, &$id) {

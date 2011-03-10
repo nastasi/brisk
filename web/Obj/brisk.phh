@@ -35,7 +35,11 @@ define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
 define(SHM_DIMS_MIN, (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
 define(SHM_DIMS_MAX, SHM_DIMS_MIN + 1048576);
 define(SHM_DIMS_DLT, 65536);
- 
+
+define(SHM_DIMS_U_MIN, 4096);
+define(SHM_DIMS_U_MAX, 65536);
+define(SHM_DIMS_U_DLT, 4096);
+
 define(COMM_N, 18);
 define(COMM_GEN_N, 50);
 
@@ -604,6 +608,7 @@ define(USER_FLAG_TY_SUSPEND, 0x400000); // done
 define(USER_FLAG_TY_DISABLE, 0x800000); // done
 
 class User {
+  var $idx;        // index in the users array
   var $code;       // authentication code
   var $name;       // name of the user
   var $sess;       // session of the user
@@ -635,15 +640,20 @@ class User {
   var $chat_cur;      // Current chat line number
   var $chat_ban;      // Time for ban chat
   var $chat_dlt;      // Delta t for ban
+  var $shm_sz;
+
   function User() {
   }
 
-  function &create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+  function &create($idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     GLOBAL $G_false;
+
+    // error_log("User::create BEGIN", 0);
 
     if (($thiz =& new User()) == FALSE)
       return ($G_false);
 
+    $thiz->idx   = $idx;
     $thiz->code  = -1;
     $thiz->name  = $name;
     $thiz->sess  = $sess;
@@ -673,7 +683,7 @@ class User {
     $thiz->table      = $table;
     $thiz->table_pos = -1;
     $thiz->table_token = "";
-
+    $thiz->shm_sz = SHM_DIMS_U_MIN;
     return ($thiz);
   }
 
@@ -681,6 +691,7 @@ class User {
   {
     GLOBAL $G_false;
     
+    $this->idx        = $from->idx;
     $this->code       = $from->code;
     $this->name       = $from->name;
     $this->sess       = $from->sess;
@@ -719,7 +730,7 @@ class User {
     $this->table_pos  = $from->table_pos;
     $this->table_token = $from->table_token;
     $this->the_end    = $from->the_end;
-
+    $this->shm_sz     = $from->shm_sz;
     return (TRUE);
   }
 
@@ -743,6 +754,7 @@ class User {
     if (($thiz =& new User()) == FALSE)
       return ($G_false);
     
+    $thiz->idx        = $from->idx;
     $thiz->code       = $from->code;
     $thiz->name       = $from->name;
     $thiz->sess       = $from->sess;
@@ -783,8 +795,13 @@ class User {
     $thiz->table      = 0;
     $thiz->table_pos  = $table_pos;
     $thiz->table_token = $from->table_token;
+    $thiz->shm_sz      = $from->shm_sz;
 
     return ($thiz);
+  }
+
+  function idx_get() {
+      return ($this->idx);
   }
 
   function code_get() {
@@ -816,7 +833,7 @@ class User {
         mkdir(PROXY_PATH);
       if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
 	break;
-      fwrite($fp, pack("l",$this->step), 4);
+      fwrite($fp, pack("LL",$this->step, $this->idx));
       fclose($fp);
 
       return (TRUE);
@@ -832,7 +849,7 @@ class User {
       if (file_exists(PROXY_PATH) == FALSE)
         mkdir(PROXY_PATH);
       $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
-      fwrite($fp, pack("l",$this->step), 4);
+      fwrite($fp, pack("LL", $this->step, $this->idx));
       fclose($fp);
 
       return (TRUE);
@@ -858,12 +875,106 @@ class User {
     $this->chat_dlt = 0;
     $this->the_end = FALSE;
   }
+
+
+
+  // SHSPLIT save and load function for the User class.
+  function &load_data($id) 
+  {
+    GLOBAL $G_false, $sess;
+
+    // error_log("User::load_data BEGIN", 0);
+
+    $doexit = FALSE;
+    do {
+      if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+	log_main("ftok failed");
+	$doexit = TRUE;
+	break;
+      }
+    
+      if (($shm_sz = sharedmem_sz($tok)) == -1) {
+	log_main("shmop_open failed");
+      }
+	
+      if ($shm_sz == -1)
+	$shm_sz = SHM_DIMS_U_MIN;
+
+      if ($shm = shm_attach($tok, $shm_sz)) {
+	$user = @shm_get_var($shm, $tok);
+	
+	log_only("bri ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($user === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($user) ?   "TRUE" : "FALSE"));
+	if (isset($user)) 
+	  log_only("bri count ".count($user));
+	
+	if ($user == FALSE) {
+	  log_only("INIT MAIN DATA");
+	  
+          // SHSPLIT FIXME: init_data for User class ??
+	  $user =& User::create($id, "", "");
+	  if (@shm_put_var($shm, $tok, $user) == FALSE) {
+              log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
+              log_only(serialize($user));
+	  }
+	}
+
+	$user->shm_sz = $shm_sz;
+	
+	shm_detach($shm);
+      }
+      
+      //  
+      // SHSPLIT: load users from the shared memory
+      //
+      $ret = &$user;
+      return ($ret);
+    } while (0);
+    
+    if ($doexit)
+      exit();
+    
+    return ($G_false);
+  }
+  
+
+  function save_data(&$user, $id) 
+  {
+    GLOBAL $sess;
+    
+    $shm =   FALSE;
+    
+    // var_dump($user);
+    // error_log("User::save_data BEGIN", 0);
+
+    if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+      return (FALSE);
+    }
+    while ($user->shm_sz < SHM_DIMS_U_MAX) {
+      if (($shm = shm_attach($tok, $user->shm_sz)) == FALSE)
+	break;
+      
+      // log_only("PUT_VAR DI ".strlen(serialize($user)));
+      if (shm_put_var($shm, $tok, $user) != FALSE) {
+	shm_detach($shm);
+	return (TRUE);
+      }
+      if (shm_remove($shm) === FALSE) {
+	log_only("REMOVE FALLITA");
+	break;
+      }
+      shm_detach($shm);
+      $user->shm_sz += SHM_DIMS_U_DLT;
+    } 
+
+    if ($shm)
+      shm_detach($shm);
+    
+    return (FALSE);
+  }
+
+
+
 } // end class User
-
-
-
-
-
 
 
 function step_get($sess) {
@@ -876,15 +987,15 @@ function step_get($sess) {
       mkdir(PROXY_PATH);
     if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
       break;
-    if (($s = fread($fp, 4)) == FALSE)
+    if (($s = fread($fp, 8)) == FALSE)
       break;
-    if (strlen($s) != 4)
+    if (strlen($s) != 8)
       break;
-    $arr = unpack('l', $s);
+    $arr = unpack('Ls/Li', $s);
     fclose($fp);
 
     // log_rd2("A0: ".$arr[0]."  A1: ".$arr[1]);
-    return ($arr[1]);
+    return ($arr);
   } while (0);
 
   if ($fp != FALSE)
@@ -916,7 +1027,7 @@ class Room {
     $this->table = array();
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $this->user[$i] =& User::create("", "");
+        $this->user[$i] =& User::create($i, "", "");
     }
 
     for ($i = 0 ; $i < TABLES_N ; $i++) {
@@ -937,6 +1048,7 @@ class Room {
         $this->table[$i]->auth_only = FALSE;
     }
     $this->garbage_timeout = 0;
+    $this->shm_sz = SHM_DIMS_MIN;
   }
 
   function garbage_manager($force)
@@ -1453,6 +1565,7 @@ class Room {
     $msg = substr($mesg, 6, 128);
     $curtime = time();
     $dt = date("H:i ", $curtime);
+    $target = "";
 
     //
     //  Compute actions
@@ -1890,6 +2003,8 @@ class Room {
 
     $idx = 0;
 
+    error_log("add_user: G_false: [".$G_false."]", 0);
+
     $authenticate = FALSE;
     $user_type    = 0;
     $login_exists = FALSE;
@@ -1919,6 +2034,7 @@ class Room {
             log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
             
             if ($authenticate != FALSE) {
+                error_log(print_r(&$authenticate, TRUE),0);
                 $user_type = $authenticate->type_get();
             }
             else {
@@ -2118,18 +2234,21 @@ class Room {
   }
 
   // Static functions
-  function &init_data()
+  static function &create()
   {
     $room =& new Room();
     
     return $room;
   }
   
-
+  
   function &load_data() 
   {
     GLOBAL $G_false, $sess;
     $doexit = FALSE;
+
+    // error_log("Room::load_data BEGIN", 0);
+
     do {
       if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
 	log_main("ftok failed");
@@ -2145,25 +2264,37 @@ class Room {
 	$shm_sz = SHM_DIMS_MIN;
 
       if ($shm = shm_attach($tok, $shm_sz)) {
-	$room = @shm_get_var($shm, $tok);
-	
-	log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
-	if (isset($room)) 
-	  log_only("bri count ".count($room));
-	
-	if ($room == FALSE) {
-	  log_only("INIT MAIN DATA");
-	  
-	  $room =& Room::init_data();
-	  if (@shm_put_var($shm, $tok, $room) == FALSE) {
-	    log_only("PUT_VAR FALLITA ".strlen(serialize($room)));
-	    log_only(serialize($room));
-	  }
-	}
-	$room->shm_sz = $shm_sz;
-	
-	shm_detach($shm);
+          $room = @shm_get_var($shm, $tok);
+          
+          log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
+          if (isset($room)) 
+              log_only("bri count ".count($room));
+          
+          if ($room == FALSE) {
+              log_only("INIT MAIN DATA");
+              shm_detach($shm);
+              
+              // error_log("DE CHE", 0);
+
+              $room =& Room::create();
+              
+              if (Room::save_data($room) == FALSE)
+                  return $G_false;
+
+              return $room;
+          }
+          $room->shm_sz = $shm_sz;
+          
+          shm_detach($shm);
+
+          for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+              $room->user[$i] = User::load_data($i);
+          }
       }
+      
+      //  
+      // SHSPLIT: load users from the shared memory
+      //
       $ret = &$room;
       return ($ret);
     } while (0);
@@ -2175,7 +2306,7 @@ class Room {
   }
   
 
-  function save_data(&$room) 
+  function save_data_orig(&$room) 
   {
     GLOBAL $sess;
     
@@ -2207,6 +2338,57 @@ class Room {
       shm_detach($shm);
     
     return (FALSE);
+  }
+
+
+  function save_data(&$room) 
+  {
+      GLOBAL $sess;
+    
+      $ret =   FALSE;
+      $shm =   FALSE;
+    
+      // var_dump($room);
+      // error_log("Room::save_data BEGIN", 0);
+    
+      if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) 
+          return (FALSE);
+    
+      // SHSPLIT: before save the $room you must save users, 
+      //          detach from main struct and (then) reattach
+      $user_park = array();
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          $user_park[$i]  = $room->user[$i];
+          $room->user[$i] = FALSE;
+      }
+
+      while ($room->shm_sz < SHM_DIMS_MAX) {
+          if (($shm = shm_attach($tok, $room->shm_sz)) == FALSE)
+              break;
+      
+          // log_only("PUT_VAR DI ".strlen(serialize($room)));
+          if (shm_put_var($shm, $tok, $room) != FALSE) {
+              $ret = TRUE;
+              break;
+          }
+          if (shm_remove($shm) === FALSE) {
+              log_only("REMOVE FALLITA");
+              break;
+          }
+          shm_detach($shm);
+          $room->shm_sz += SHM_DIMS_DLT;
+      } 
+
+      if ($shm)
+          shm_detach($shm);
+    
+      // SHSPLIT: reattach users to the room class
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          User::save_data($user_park[$i], $i);
+          $room->user[$i] = $user_park[$i];
+      }
+
+      return ($ret);
   }
 
   function lock_data()
