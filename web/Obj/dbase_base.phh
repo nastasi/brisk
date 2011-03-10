@@ -39,9 +39,9 @@ class LoginDBItem {
         $this->type  = $type;
     }
 
-    static function &LoginDBItemFromRecord($rec)
+    static function LoginDBItemFromRecord($rec)
     {
-        $ret =& new LoginDBItem($rec->code, $rec->login, $rec->pass, 
+        $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
                                  $rec->email, $rec->type);
 
         return ($ret);

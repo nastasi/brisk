@@ -170,12 +170,10 @@ class Table_briskin5 extends Table {
 
 
   /* CREATE() NOT USED
-  function &create($idx) 
+  function create($idx) 
   {
-    GLOBAL $G_false;
-
     if (($thiz =& new Table_briskin5()) == FALSE)
-      return ($G_false);
+      return (FALSE);
 
     $thiz->create($idx);
 
@@ -206,12 +204,10 @@ class Table_briskin5 extends Table {
   */
 
   /* CLONE() NOT USED
-  function &myclone(&$from)
+  function myclone(&$from)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new Table_briskin5()) == FALSE)
-      return ($G_false);
+      return (FALSE);
     
     parent::copy($from);
 
@@ -250,18 +246,17 @@ class Table_briskin5 extends Table {
     parent::copy($from);
   }
 
-  function &spawn(&$from)
+  function spawn(&$from)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new Table_briskin5()) == FALSE)
-      return ($G_false);
+      return (FALSE);
     
     $thiz->parentcopy($from);
 
     log_main("PLAYER_N - spawn.".$thiz->player_n);
 
-    $thiz->card = &$thiz->bunch_create();
+    $thiz->card = array();
+    $thiz->bunch_create();
     $thiz->mazzo    = rand(0,PLAYERS_N-1);
     $thiz->points_n = 0;
     $thiz->mult     = 1;
@@ -279,17 +274,26 @@ class Table_briskin5 extends Table {
   }
 
 
-  function &bunch_create()
+  //   function bunch_create_old() function AND 
+  //   {
+  //     $ret = array();
+  // 
+  //     for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+  //       // for ($i = 0 ; $i < 40 ; $i++) {
+  //       $ret[$i] =& new Card($i, 'bunch', 'no_owner');
+  //     }
+  // 
+  //     $oret = &$ret;
+  //     return ($oret);
+  //   }
+
+  function bunch_create()
   {
-    $ret = array();
-
-    for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
-      // for ($i = 0 ; $i < 40 ; $i++) {
-      $ret[$i] =& new Card($i, 'bunch', 'no_owner');
-    }
-
-    $oret = &$ret;
-    return ($oret);
+      $ret = array();
+      
+      for ($i = 0 ; $i < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
+          $this->card[$i] = new Card($i, 'bunch', 'no_owner');
+      }
   }
 
   function bunch_make()
@@ -428,11 +432,9 @@ class User_briskin5 extends User {
   }
 
   /* CREATE NOT USED
-  function &create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
-    GLOBAL $G_false;
-
+  function create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     if (($thiz =& new User()) == FALSE)
-      return ($G_false);
+      return (FALSE);
 
     $thiz->asta_card = -2;
     $thiz->asta_pnt  = -1;
@@ -461,12 +463,10 @@ class User_briskin5 extends User {
   }
 
   /* CLONE NOT USED
-  function &myclone(&$from)
+  function myclone(&$from)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new User()) == FALSE)
-      return ($G_false);
+      return (FALSE);
 
     $thiz->copy($from);
 
@@ -474,12 +474,12 @@ class User_briskin5 extends User {
   } 
   */
   
-  function &spawn(&$from, $table, $table_pos)
+  function spawn(&$from, $table, $table_pos)
   {
-    GLOBAL $G_false, $CO_bin5_pref_ring_endauct;
+    GLOBAL $CO_bin5_pref_ring_endauct;
     
     if (($thiz =& new User_briskin5()) == FALSE)
-      return ($G_false);
+      return (FALSE);
     
     $thiz->parentcopy($from);
 
@@ -548,9 +548,9 @@ class Briskin5 {
   }
 
 
-  function &get_user($sess, &$idx)
+  function get_user($sess, &$idx)
   {
-    GLOBAL $PHP_SELF, $G_false;
+    GLOBAL $PHP_SELF;
 
     if (validate_sess($sess)) {
       for ($i = 0 ; $i < BRISKIN5_MAX_PLAYERS ; $i++) {
@@ -569,7 +569,7 @@ class Briskin5 {
       log_main(sprintf("get_user: Wrong strlen [%s]",$sess));
     }
 
-    return ($G_false);
+    return (FALSE);
   }
 
 
@@ -632,7 +632,7 @@ class Briskin5 {
   //
   //  static functions
   //
-  function &load_data($table_idx, $table_token = "") 
+  function load_data($table_idx, $table_token = "") 
   {
     GLOBAL $G_false, $sess;
     $doexit = FALSE;
@@ -678,7 +678,7 @@ class Briskin5 {
     if ($doexit)
       exit();
     
-    return ($G_false);
+    return (FALSE);
   }
   
 

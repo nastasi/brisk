@@ -49,7 +49,7 @@ class Ptsgam {
     $this->gam = $gam;
   }
 
-  function &myclone()
+  function myclone()
   {
     $ret = new Ptsgam($this->username, $this->pts, $this->gam);
 
@@ -177,7 +177,7 @@ function placing_date($mtime)
 }
   
 
-function placing_show_file(&$user, $ty, $subty) 
+function placing_show_file($user, $ty, $subty) 
 {
   $tail = FALSE;
 

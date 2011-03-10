@@ -44,15 +44,13 @@ class DBConn
         $this->db = DBConn::$dbcnnx;        
     }
 
-    static function &create()
+    static function create()
     {
-        GLOBAL $G_dbauth, $G_false;
+        GLOBAL $G_dbauth;
         
-        $ret = &$G_false;
-
         if (DBConn::$dbcnnx == FALSE) {
             if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth))) {
-                return ($ret);
+                return (FALSE);
             }
         }
 
@@ -77,9 +75,9 @@ class BriskDB
         $this->dbconn = $dbconn;
     }
 
-    static function &create()
+    static function create()
     {
-        GLOBAL $DOCUMENT_ROOT, $G_dbpfx, $G_false;
+        GLOBAL $DOCUMENT_ROOT, $G_dbpfx;
 
         $ret = FALSE;
 
@@ -92,10 +90,7 @@ class BriskDB
             $ret = new BriskDB($dbconn);
         } while (0);
         
-        if ($ret)
-            return ($ret);
-        else
-            return ($G_false);
+        return ($ret);
     }
 
     function users_load()
@@ -118,15 +113,15 @@ class BriskDB
         return FALSE;
     }
 
-    function &getrecord_bylogin($login) {
-        GLOBAL $G_false, $G_dbpfx;
+    function getrecord_bylogin($login) {
+        GLOBAL $G_dbpfx;
 
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",  $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) == FALSE)
-            return $ret;
+            return FALSE;
         
         if (pg_numrows($user_pg) != 1)
-            return $ret;
+            return FALSE;
         
         $user_obj = pg_fetch_object($user_pg, 0);
 
@@ -135,12 +130,10 @@ class BriskDB
 
 
     
-    function &login_verify($login, $pass)
+    function login_verify($login, $pass)
     {
-        GLOBAL $G_dbpfx, $G_false;
+        GLOBAL $G_dbpfx;
         
-        error_log("dbase_pgsql G_false: [".$G_false."]", 0);
-
         $ret = FALSE;
         
         log_main("login_verify: ".$login);
@@ -151,37 +144,35 @@ class BriskDB
         //O log_main("login_verify: BEGIN");
         
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE) {
-            return $G_false;
+            return FALSE;
         }
-
-        error_log("G_false: [".$G_false."] user_obj: ".print_r($user_obj, TRUE), 0);
 
         log_main("login[".$user_obj->code."]: ".$user_obj->login);
         
         /* if it exists check for a valid challenge */
         if (($a_sem = Challenges::lock_data()) != FALSE) { 
-            error_log("loop-2", 0);
+            // error_log("loop-2", 0);
             if (($chals = &Challenges::load_data()) != FALSE) {
-                error_log("loop-1", 0);
+                // error_log("loop-1", 0);
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
-                    error_log("loop", 0);
+                    // error_log("loop", 0);
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
-                        error_log("loop2", 0);
+                        // error_log("loop2", 0);
                         log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$user_obj->pass)."]");
                         
                         if (strcmp($pass, md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
-                            error_log("loop3", 0);
+                            // error_log("loop3", 0);
                             log_main("login_verify SUCCESS for ".$login);
                             
                             $chals->rem($login);
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
-                            error_log("dbitem: ".print_r($ret, TRUE));
+                            // error_log("dbitem: ".print_r($ret, TRUE));
                             break;
                         }
                     }
                 } // end for ($e = 0 ...
-                error_log("end loop-1", 0);
+                // error_log("end loop-1", 0);
             }
             
             if ($chals->ismod()) {
@@ -194,18 +185,11 @@ class BriskDB
         // O } //  if (strcasecmp($this->item[$i]->login, ...
         //O }
     
-        error_log("return: ".($G_false == FALSE ? "FALSE" : "not FALSE"), 0);
-
-        if ($ret) 
-            return ($ret);
-        else 
-            return ($G_false);
+        return ($ret);
     }
 
-    function &getitem_bylogin($login, &$id) {
-        GLOBAL $G_false;
-        
-        $ret = &$G_false;
+    function getitem_bylogin($login, &$id) {
+        $ret = FALSE;
         $id = -1;
         
         log_main("getitem_bylogin: ".$login);
@@ -248,10 +232,9 @@ class BriskDB
         return TRUE;
     }
 
-    function &getdbconn()
+    function getdbconn()
     {
-        $ret = $this->dbconn;
-        return ($ret);
+        return ($this->dbconn);
     }
 
     //   ttok   text UNIQUE,      

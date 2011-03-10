@@ -66,8 +66,8 @@ class Hardbans {
 
     log_auth("xxx", sprintf("Hardbans::add [%s]\n", $login));
 
-    if (($chal = new Hardban($login, $ip, $session, $timeout)) == null) {
-      return ($G_false);
+    if (($chal = new Hardban($login, $ip, $session, $timeout)) == FALSE) {
+      return (FALSE);
     }
 
     $this->item[$this->item_n] = $chal;
@@ -143,7 +143,7 @@ class Hardbans {
   }
 
   // Static functions
-  static function &create()
+  static function create()
   {
     $chal =& new Hardbans();
     
@@ -152,9 +152,9 @@ class Hardbans {
     return $chal;
   }
 
-  function &load_data() 
+  function load_data() 
   {
-    GLOBAL $G_false, $sess;
+    GLOBAL $sess;
     $doexit = FALSE;
     do {
       if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
@@ -191,18 +191,17 @@ class Hardbans {
 
       $hban->garbage_manager(TRUE);
 
-      $ret = &$hban;
-      return ($ret);
+      return ($hban);
     } while (0);
     
     if ($doexit)
       exit();
     
-    return ($G_false);
+    return (FALSE);
   }
   
 
-  function save_data(&$hban) 
+  function save_data($hban) 
   {
     $shm =   FALSE;
     $oldmod = $hban->mod;

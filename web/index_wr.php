@@ -165,12 +165,10 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
     echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
   }
   else if ($argz[0] == 'placing') {
-    GLOBAL $G_false;
-
     require_once("briskin5/Obj/briskin5.phh");
     require_once("briskin5/Obj/placing.phh");
 
-    echo show_notify(str_replace("\n", " ", placings_show($G_false)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
+    echo show_notify(str_replace("\n", " ", placings_show(FALSE)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
   }
   else if ($argz[0] == 'whysupport') {
     echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);

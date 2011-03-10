@@ -225,7 +225,7 @@ function main()
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
   GLOBAL $G_with_sidebanner, $G_sidebanner; 
   GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
-  GLOBAL $G_with_poll, $G_false;
+  GLOBAL $G_with_poll;
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   GLOBAL $G_lang, $G_lng, $mlang_room;
   $is_login = FALSE;
@@ -234,8 +234,6 @@ function main()
   $standup = "";
   $ACTION = "login";
   
-  error_log("main: G_false: [".$G_false."]", 0);
-
   if (isset($BRISK_SHOWHTML) == FALSE) {
       $is_table = FALSE;
       $sem = Room::lock_data();

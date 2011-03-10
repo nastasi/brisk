@@ -70,13 +70,13 @@ class Challenges {
         log_auth("xxx", sprintf("Challenges::add [%s]\n", $login));
         // FIXME Checks here
         if ($login == '') {
-            return ($G_false);
+            return (FALSE);
         }
         
         // log_auth("xxx", "LOOPI tstamp: ".$this->item[$i]->tstamp."  curtime: ".$curtime);
         
-        if (($chal = new Challenge($login, $token, $ip, $tstamp)) == null) {
-            return ($G_false);
+        if (($chal = new Challenge($login, $token, $ip, $tstamp)) == FALSE) {
+            return (FALSE);
         }
         
         $this->item[$this->item_n] = $chal;
@@ -151,7 +151,7 @@ class Challenges {
     }
 
     // Static functions
-    static function &create()
+    static function create()
         {
             $chal =& new Challenges();
     
@@ -160,9 +160,9 @@ class Challenges {
             return $chal;
         }
 
-    function &load_data() 
+    function load_data() 
         {
-            GLOBAL $G_false, $sess;
+            GLOBAL $sess;
             $doexit = FALSE;
             do {
                 if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
@@ -199,18 +199,17 @@ class Challenges {
 
                 $chals->garbage_manager();
 
-                $ret = &$chals;
-                return ($ret);
+                return ($chals);
             } while (0);
     
             if ($doexit)
                 exit();
     
-            return ($G_false);
+            return (FALSE);
         }
   
 
-    function save_data(&$chals) 
+    function save_data($chals) 
     {
         $shm =   FALSE;
         $oldmod = $chals->mod;

@@ -38,7 +38,7 @@ class BriskDB {
         log_main("BriskDB create:end");
     }
 
-    static function &create()
+    static function create()
     {
         $ret = new BriskDB();
         
@@ -87,10 +87,8 @@ class BriskDB {
         return ($this->item[$idx]->login);
     }
 
-    function &getitem_bylogin($login, &$id)
+    function getitem_bylogin($login, &$id)
         {
-            GLOBAL $G_false;
-
             log_main("login_exists: ".$login);
     
             /* check the existence of the nick in the BriskDB */
@@ -103,7 +101,7 @@ class BriskDB {
                 }
             }
             $id = -1;
-            return ($G_false);
+            return (FALSE);
         }
 
     function getmail($login)
@@ -134,11 +132,9 @@ class BriskDB {
         return (FALSE);
     }
 
-    function &login_verify($login, $pass)
+    function login_verify($login, $pass)
     {
-        GLOBAL $G_false;
-        
-        $ret = &$G_false;
+        $ret = FALSE;
         
         log_main("login_verify: ".$login);
         

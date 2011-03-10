@@ -131,7 +131,6 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 
 );
 
-$G_false = FALSE;
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
@@ -384,12 +383,10 @@ class Table {
   {
   }
   
-  function &create($idx) 
+  function create($idx) 
   {
-    GLOBAL $G_false;
-
     if (($thiz =& new Table()) == FALSE)
-      return ($G_false);
+      return (FALSE);
 
     $thiz->idx       =   $idx;
     $thiz->player    =   array();
@@ -408,10 +405,8 @@ class Table {
     return ($thiz);
   }
 
-  function copy(&$from)
+  function copy($from)
   {
-    GLOBAL $G_false;
-    
     $this->idx = $from->idx;
     $this->player = array();
     for ($i = 0 ; $i < $from->player_n ; $i++)
@@ -432,24 +427,20 @@ class Table {
     $this->wakeup_time = $from->wakeup_time;
   }
 
-  function &myclone(&$from)
+  function myclone($from)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new Table()) == FALSE)
-      return ($G_false);
+      return (FALSE);
 
     $this->copy($from);
 
     return ($thiz);
   }
   
-  function &spawn(&$from)
+  function spawn($from)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new Table()) == FALSE)
-      return ($G_false);
+      return (FALSE);
     
     $thiz->idx = $from->idx;
     $thiz->player = array();
@@ -471,11 +462,11 @@ class Table {
     return ($thiz);
   }
 
-  function wag_set(&$user, $mesg)
+  function wag_set($user, $mesg)
   {
     log_main("WAG_SET");
 
-    $this->wag_own  = &$user;
+    $this->wag_own  =  $user;
     $this->wag_com  =  $mesg;
     $this->wag_tout =  0;
   }
@@ -645,13 +636,11 @@ class User {
   function User() {
   }
 
-  function &create($idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
-    GLOBAL $G_false;
-
+  function create($idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     // error_log("User::create BEGIN", 0);
 
     if (($thiz =& new User()) == FALSE)
-      return ($G_false);
+      return (FALSE);
 
     $thiz->idx   = $idx;
     $thiz->code  = -1;
@@ -687,10 +676,8 @@ class User {
     return ($thiz);
   }
 
-  function copy(&$from)
+  function copy($from)
   {
-    GLOBAL $G_false;
-    
     $this->idx        = $from->idx;
     $this->code       = $from->code;
     $this->name       = $from->name;
@@ -735,24 +722,20 @@ class User {
   }
 
 
-  function &myclone(&$from)
+  function myclone($from)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new User()) == FALSE)
-      return ($G_false);
+      return (FALSE);
     
     $thiz->copy($from);
 
     return ($thiz);
   }
   
-  function &spawn(&$from, $table, $table_pos)
+  function spawn($from, $table, $table_pos)
   {
-    GLOBAL $G_false;
-    
     if (($thiz =& new User()) == FALSE)
-      return ($G_false);
+      return (FALSE);
     
     $thiz->idx        = $from->idx;
     $thiz->code       = $from->code;
@@ -879,9 +862,9 @@ class User {
 
 
   // SHSPLIT save and load function for the User class.
-  function &load_data($id) 
+  function load_data($id) 
   {
-    GLOBAL $G_false, $sess;
+    GLOBAL $sess;
 
     // error_log("User::load_data BEGIN", 0);
 
@@ -926,14 +909,13 @@ class User {
       //  
       // SHSPLIT: load users from the shared memory
       //
-      $ret = &$user;
-      return ($ret);
+      return ($user);
     } while (0);
     
     if ($doexit)
       exit();
     
-    return ($G_false);
+    return (FALSE);
   }
   
 
@@ -1961,9 +1943,9 @@ class Room {
     return;
   } // function chatt_send( ...
 
-  function &get_user($sess, &$idx)
+  function get_user($sess, &$idx)
   {
-    GLOBAL $PHP_SELF, $G_false;
+    GLOBAL $PHP_SELF;
 
     if (validate_sess($sess)) {
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
@@ -1982,11 +1964,11 @@ class Room {
       log_main(sprintf("get_user: Wrong strlen [%s]",$sess));
     }
 
-    return ($G_false);
+    return (FALSE);
   }
 
   /*
-   * function &add_user(&$room, &$sess, &$idx, $name, $pass, $ip)
+   * function add_user(&$room, &$sess, &$idx, $name, $pass, $ip)
    *
    * RETURN VALUE:
    *   if ($idx >  -1    && ret == FALSE)  =>  duplicated nick
@@ -1997,13 +1979,11 @@ class Room {
    *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db)
    */
 
-  function &add_user(&$sess, &$idx, $name, $pass, $ip)
+  function add_user(&$sess, &$idx, $name, $pass, $ip)
   {
-    GLOBAL $G_base, $G_false, $CO_list;
+    GLOBAL $G_base, $CO_list;
 
     $idx = 0;
-
-    error_log("add_user: G_false: [".$G_false."]", 0);
 
     $authenticate = FALSE;
     $user_type    = 0;
@@ -2016,7 +1996,7 @@ class Room {
 
     if (($name_new = validate_name($name)) == FALSE) {
       $idx = -2;
-      return ($G_false);
+      return (FALSE);
     }
 
     log_auth("XXX", sprintf("ARRIVA: [%s] pass:[%s]", $sess, ($pass == FALSE ? "FALSE" : $pass)));
@@ -2034,12 +2014,12 @@ class Room {
             log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
             
             if ($authenticate != FALSE) {
-                error_log(print_r(&$authenticate, TRUE),0);
+                // error_log(print_r(&$authenticate, TRUE),0);
                 $user_type = $authenticate->type_get();
             }
             else {
                 $idx = -3;
-                return ($G_false);
+                return (FALSE);
             }
         }
         else {
@@ -2205,10 +2185,10 @@ class Room {
       return ($ret);
     }
 
-    return ($G_false);
+    return (FALSE);
   }
   
-  function standup_update(&$user)
+  function standup_update($user)
   {
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = &$this->user[$i];
@@ -2234,17 +2214,17 @@ class Room {
   }
 
   // Static functions
-  static function &create()
+  static function create()
   {
-    $room =& new Room();
+    $room = new Room();
     
     return $room;
   }
   
   
-  function &load_data() 
+  function load_data() 
   {
-    GLOBAL $G_false, $sess;
+    GLOBAL $sess;
     $doexit = FALSE;
 
     // error_log("Room::load_data BEGIN", 0);
@@ -2276,10 +2256,10 @@ class Room {
               
               // error_log("DE CHE", 0);
 
-              $room =& Room::create();
+              $room = Room::create();
               
               if (Room::save_data($room) == FALSE)
-                  return $G_false;
+                  return FALSE;
 
               return $room;
           }
@@ -2295,14 +2275,13 @@ class Room {
       //  
       // SHSPLIT: load users from the shared memory
       //
-      $ret = &$room;
-      return ($ret);
+      return ($room);
     } while (0);
     
     if ($doexit)
       exit();
     
-    return ($G_false);
+    return (FALSE);
   }
   
 
