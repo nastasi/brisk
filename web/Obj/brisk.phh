@@ -481,12 +481,12 @@ class Table {
     $this->wag_tout = $timeout;
   }
 
-  function getPlayer($idx)
+  function player_get($idx)
   {
     return ($this->player[$idx]);
   }
 
-  function setPlayer($idx, $player)
+  function player_set($idx, $player)
   {
     $this->player[$idx] = $player;
   }
