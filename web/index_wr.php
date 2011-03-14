@@ -192,7 +192,7 @@ if ($argz[0] == 'shutdown') {
 
   log_rd2("AUTO LOGOUT.");
   if ($user->subst == 'sitdown' || $user->stat == 'table')
-    $room->room_wakeup(&$user);
+    $room->room_wakeup($user);
   else if ($user->subst == 'standup')
     $room->room_outstandup(&$user);
   else {
@@ -656,10 +656,10 @@ else if ($user->stat == 'room') {
    **********************/
   else if ($user->subst == 'sitdown') {
     if ($argz[0] == 'wakeup') {
-      $room->room_wakeup(&$user);      
+      $room->room_wakeup($user);      
     }
     else if ($argz[0] == 'logout') {
-      $room->room_wakeup(&$user);      
+      $room->room_wakeup($user);      
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
       $user->comm[$user->step % COMM_N] .= 'postact_logout();';
       $user->the_end = TRUE;

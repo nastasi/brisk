@@ -105,7 +105,7 @@ define(SUBTY_FREQ_LO, 0);
 define(SUBTY_FREQ_HI, 1);
 
 
-function placings_show(&$user) 
+function placings_show($user) 
 {
   $mtime = placing_time();
   $tm = placing_date($mtime);
@@ -251,7 +251,7 @@ function placing_show_file($user, $ty, $subty)
 //
 //
     
-function placing_show_pgsql(&$user, $ty, $subty) 
+function placing_show_pgsql($user, $ty, $subty) 
 {
     GLOBAL $G_dbpfx;
     
@@ -304,7 +304,7 @@ function placing_show_pgsql(&$user, $ty, $subty)
     return ($ret);
 }
 
-function placing_show(&$user, $ty, $subty) 
+function placing_show($user, $ty, $subty) 
 {
     GLOBAL $G_dbasetype;
 

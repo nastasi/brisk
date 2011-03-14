@@ -1172,7 +1172,7 @@ class Room {
 	    
 	    log_rd2("AUTO LOGOUT.");
 	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
-	      $this->room_wakeup(&$user_cur);
+	      $this->room_wakeup($user_cur);
 	    else if ($user_cur->subst == 'standup')
 	      $this->room_outstandup(&$user_cur);
 	    else
@@ -1182,7 +1182,7 @@ class Room {
 
 	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < $curtime) { // lo rimettiamo in piedi
 	  if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
-	    $this->room_wakeup(&$user_cur);
+	    $this->room_wakeup($user_cur);
 	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
             /* MLANG: <br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", "torna ai tavoli" */
 	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
@@ -1250,7 +1250,7 @@ class Room {
   }
   
 
-  function room_wakeup(&$user)
+  function room_wakeup($user)
   {
     $table_idx = $user->table;
     $table = &$this->table[$table_idx];
@@ -1297,7 +1297,7 @@ class Room {
     $table->user_rem(&$this, &$user);
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $user_cur = &$this->user[$i];
+      $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	continue;
       
@@ -1484,14 +1484,14 @@ class Room {
     log_main("table_update: post");
   }
 
-  function room_sitdown(&$user, $table_idx)
+  function room_sitdown($user, $table_idx)
   {
     log_main("room_sitdown ".($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
 
     $train_app = "";
 
     if ($table_idx > -1 && $table_idx < TABLES_N) { 
-      $table = &$this->table[$table_idx];
+      $table = $this->table[$table_idx];
 
       // wagon shutdown 
       if ($table->wag_own != -1 && $table->player_n == PLAYERS_N) {        
@@ -1536,7 +1536,7 @@ class Room {
     }
   }
 
-  function chatt_send(&$user, $mesg)
+  function chatt_send($user, $mesg)
   {
     GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
@@ -1855,7 +1855,7 @@ class Room {
 
     if ($to_room != FALSE) {
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        $user_cur = &$this->user[$i];
+        $user_cur = $this->user[$i];
         if ($target != "" && $user_cur->name != $target)
           continue;
         // 	if ($user_cur->sess == '' || $user_cur->stat != 'room')
@@ -2189,7 +2189,7 @@ class Room {
   function standup_update($user)
   {
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $user_cur = &$this->user[$i];
+      $user_cur = $this->user[$i];
       if ($user_cur->sess == '')
 	continue;
 

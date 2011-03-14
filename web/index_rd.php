@@ -296,7 +296,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
 	if ($user->subst == 'sitdown') {
 	  log_load("ROOM WAKEUP");
-	  $room->room_wakeup(&$user);
+	  $room->room_wakeup($user);
 	}
 	else if ($user->subst == 'standup')
 	  $room->room_outstandup(&$user);
