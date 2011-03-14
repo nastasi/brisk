@@ -393,7 +393,7 @@ class Table {
     $thiz->player_n  =   0;
     $thiz->auth_only =   FALSE;
 
-    $thiz->wag_own   =  NULL;
+    $thiz->wag_own   =  -1;
     $thiz->wag_com   =  "";
     $thiz->wag_tout   =  0;
 
@@ -462,11 +462,11 @@ class Table {
     return ($thiz);
   }
 
-  function wag_set($user, $mesg)
+  function wag_set($user_idx, $mesg)
   {
     log_main("WAG_SET");
 
-    $this->wag_own  =  $user;
+    $this->wag_own  =  $user_idx;
     $this->wag_com  =  $mesg;
     $this->wag_tout =  0;
   }
@@ -476,7 +476,7 @@ class Table {
     log_main("WAG_RESET");
 
     unset($this->wag_own);
-    $this->wag_own = NULL;
+    $this->wag_own  = -1;
     $this->wag_com  = "";
     $this->wag_tout = $timeout;
   }
@@ -1239,8 +1239,8 @@ class Room {
       // $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
       //                          ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
       $ret .=  $this->table[$i]->act_content($user);
-      if ($this->table[$i]->wag_own != NULL) 
-        $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->table[$i]->wag_own->name, $this->table[$i]->wag_com);
+      if ($this->table[$i]->wag_own != -1) 
+        $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
       else 
         $ret .= sprintf('tra.rem(%d); ', $i);
     }
@@ -1286,11 +1286,10 @@ class Room {
       $user->laccwr = $curtime;
     }
     
-    $remove_wagon = false;
-    if($table->wag_own == $user) {
-      $remove_wagon = true;
+    $remove_wagon = FALSE;
+    if($table->wag_own == $user->idx_get()) {
       $table->wag_reset($curtime);
-      
+      $remove_wagon = TRUE;
     }
     
 
@@ -1495,14 +1494,13 @@ class Room {
       $table = &$this->table[$table_idx];
 
       // wagon shutdown 
-      if ($table->wag_own != NULL && $table->player_n == PLAYERS_N) {        
+      if ($table->wag_own != -1 && $table->player_n == PLAYERS_N) {        
         for ($i = 0 ; $i < TABLES_N ; $i++) {
-          $user_cur =& $this->user[$table->player[$i]];
-          if ($user_cur == $table->wag_own) {
-            $train_app = sprintf("tra.rem(%d); ", $table_idx); 
-            $table->wag_reset(time());
-            break;
-          }
+            if ($table->wag_own == $table->player[$i]) {
+                $train_app = sprintf("tra.rem(%d); ", $table_idx); 
+                $table->wag_reset(time());
+                break;
+            }
 	}
       }
     }
@@ -1574,7 +1572,7 @@ class Room {
 
         $table = &$this->table[$user->table];
         
-        if ($table->wag_own != NULL) {
+        if ($table->wag_own != -1) {
           // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> 
           $msg = $mlang_brisk['tickjust'][$G_lang];
           $to_user = show_notify($msg, 0, "chiudi", 400, 100);
@@ -1594,7 +1592,7 @@ class Room {
         
         $msg = substr($msg, 5);
         
-        $table->wag_set($user, $msg);
+        $table->wag_set($user->idx_get(), $msg);
         $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
         $to_room = $to_user;
         /* for old isolation management $is_ticker = TRUE; */
