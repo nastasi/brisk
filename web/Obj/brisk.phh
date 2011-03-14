@@ -694,8 +694,10 @@ class User {
 
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
     for ($i = $i_start ; $i < $from->step ; $i++) {
-      $ii = $i % COMM_N;
-      $this->comm[$ii] = $from->comm[$ii];
+        $ii = $i % COMM_N;
+        if (isset($from->comm[$ii])) {
+            $this->comm[$ii] = $from->comm[$ii];
+        }
     }
     $this->asta_card  = $from->asta_card;
     $this->asta_pnt   = $from->asta_pnt;
