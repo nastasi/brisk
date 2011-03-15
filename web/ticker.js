@@ -51,7 +51,7 @@ train.prototype = {
     deltas: 10,
     xend: 0,
     timout: null,
-    clickable: true,
+    clickable: false,
 
     show: function()
     {
@@ -60,6 +60,9 @@ train.prototype = {
 
         this.clickable = true;
         this.box.style.visibility = "visible";
+        for (cur = this.first ; cur != null ; cur = cur.next) {
+            cur.box.style.borderColor = "green green green green";
+        }
     },
 
     hide: function()
@@ -68,10 +71,13 @@ train.prototype = {
 	$('tickbut').style.width = "20px";
 
         this.clickable = false;
+        this.box.style.visibility = "visible";
+
         for (cur = this.first ; cur != null ; cur = cur.next) {
             if (cur.notebox != null) {
                 cur.cb_mouseout();
             }
+            cur.box.style.borderColor = "gray gray gray gray";
         }
            
     },
@@ -265,7 +271,6 @@ train.prototype = {
     resetx: function()
     {
         this.deltas = 10;
-        this.clickable = true;
 
         this.box.style.left = this.anc.offsetWidth+"px";
     },
@@ -327,6 +332,8 @@ function wagon(anc, table, title) {
     box = document.createElement("div");
     box.className = "wagon";
     box.anc = this;
+    if (anc.clickable == false)
+        box.style.borderColor = "gray gray gray gray";
     this.table = table;
     this.title = title;
     box.innerHTML = "Tavolo&nbsp;"+table;
