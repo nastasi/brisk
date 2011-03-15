@@ -2408,8 +2408,8 @@ class Room {
     if ($user->stat != 'room')
       return;
     
-    for ($e = 0 , $ct = 0 ; $ct < 4 && $e < MAX_PLAYERS ; $e++) {
-      if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
+    for ($i = 0 , $ct = 0 ; $ct < 4 && $i < MAX_PLAYERS ; $i++) {
+      if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
         continue;
       $ct++;
     }
@@ -2418,20 +2418,19 @@ class Room {
     
     $content = ' j_stand_cont( [ ';
 
-    for ($e = 0 , $ct = 0 ; $e < MAX_PLAYERS ; $e++) {
-      if ($this->user[$e]->sess == "" || $this->user[$e]->stat != "room" || $this->user[$e]->name == "")
+    for ($i = 0 , $ct = 0 ; $i < MAX_PLAYERS ; $i++) {
+      if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
         continue;
       
-      $flags = $this->user[$e]->flags;
+      $flags = $this->user[$i]->flags;
       
-      if ($this->user[$e]->subst == "standup") {
-        if ($this->user[$e] == $user) 
-          { 
-            $flags |= 1;
+      if ($this->user[$i]->subst == "standup") {
+          if ($user->idx_get() == $i) { 
+              $flags |= 1;
           }
-        
-        $content .= sprintf('%s[ %d, "%s" ]',($ct > 0 ? ', ' : ''), $flags, xcape($this->user[$e]->name));
-        $ct++;
+          
+          $content .= sprintf('%s[ %d, "%s" ]',($ct > 0 ? ', ' : ''), $flags, xcape($this->user[$i]->name));
+          $ct++;
       }
     }
     $content .= ' ]);';
