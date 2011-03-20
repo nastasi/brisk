@@ -118,35 +118,38 @@ if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
   $argz = explode('|', xcapemesg($mesg));
 
   if ($argz[0] == 'getchallenge') {
-    GLOBAL $cli_name;
-    if (($a_sem = Challenges::lock_data()) != FALSE) { 
-      log_main("chal lock data success");
-      
-      if (($chals = &Challenges::load_data()) != FALSE) {
-
-        $token =  uniqid("");
-        // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
-        // exit;
-
-        if (($login_new = validate_name(urldecode($cli_name))) != FALSE) {
-          if ($chals->add($login_new, $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
-            echo '0|'.$token;
+      GLOBAL $cli_name;
+      if (($a_sem = Challenges::lock_data()) != FALSE) { 
+          log_main("chal lock data success");
+          
+          if (($chals = &Challenges::load_data()) != FALSE) {
+              
+              $token =  uniqid("");
+              // echo '2|'.$argz[1].'|'.$token.'|'.$_SERVER['REMOTE_ADDR'].'|'.$curtime.'|';
+              // exit;
+              
+              if (($login_new = validate_name(urldecode($cli_name))) != FALSE) {
+                  if ($chals->add($login_new, $token, $_SERVER['REMOTE_ADDR'], $curtime) != FALSE) {
+                      log_send("SUCCESS: token:".$token);
+                      echo '0|'.$token;
+                  }
+                  else {
+                      log_send("getchallenge FAILED");
+                      echo '1|';
+                  }
+              }
+              else {
+                  log_send("getchallenge FAILED");
+                  echo '1|';
+              }
+              if ($chals->ismod()) {
+                  Challenges::save_data(&$chals);
+              }
           }
-          else {
-            echo '1|';
-          }
-        }
-        else {
-          echo '1|';
-        }
-        if ($chals->ismod()) {
-          Challenges::save_data(&$chals);
-        }
+          
+          
+          Challenges::unlock_data($a_sem);
       }
-      
-
-      Challenges::unlock_data($a_sem);
-    }
   }
   else if ($argz[0] == 'auth') {
     printf("challenge|ok");
