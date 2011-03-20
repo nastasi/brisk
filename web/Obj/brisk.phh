@@ -1015,7 +1015,7 @@ class Room {
   var $table;
   var $comm; // commands for many people
   var $step; // current step of the comm array
-  var $garbage_timeout;
+  // externalized var $garbage_timeout;
   var $shm_sz;
 
   function Room () {
@@ -1043,7 +1043,8 @@ class Room {
       else
         $this->table[$i]->auth_only = FALSE;
     }
-    $this->garbage_timeout = 0;
+    // externalized $this->garbage_timeout = 0;
+    Room::garbage_time_expire_set(0);
     $this->shm_sz = SHM_DIMS_MIN;
   }
 
@@ -1057,7 +1058,9 @@ class Room {
 
     /* Garbage collector degli utenti in timeout */
     $curtime = time();
-    if ($force || $this->garbage_timeout < $curtime) {
+
+    // externalized if ($force || $this->garbage_timeout < $curtime) {
+    if ($force || Room::garbage_time_is_expired($curtime)) {
       
       // FIXME BRISK4: include for each kind of table
       require_once("${G_base}briskin5/Obj/briskin5.phh");
@@ -1206,7 +1209,8 @@ class Room {
       }
       log_rd2("GARBAGE UPDATED!");
       
-      $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
+      // externalized $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
+      Room::garbage_time_expire_set(time() + GARBAGE_TIMEOUT);
       $ismod = TRUE;
     }
 
@@ -2485,6 +2489,49 @@ class Room {
     
     return ($ret);
   }
+
+  static function garbage_time_is_expired($tm) 
+  {
+      $ret = TRUE;
+      $fp = FALSE;
+      do {
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH);
+          if (($fp = @fopen(PROXY_PATH."/room_garbage_time.expired", 'rb')) == FALSE)
+              break;
+          if (($s = fread($fp, 4)) == FALSE)
+              break;
+          if (strlen($s) != 4)
+              break;
+          $arr = unpack('Le', $s);
+          if ($arr['e'] > $tm)
+              $ret = FALSE;
+      } while (0);
+      
+      if ($fp != FALSE)
+          fclose($fp);
+      
+      log_rd2("END: return ".($ret ? "TRUE" : "FALSE"));
+      
+      return ($ret);
+  }
+
+  static function garbage_time_expire_set($tm) 
+  {
+      do {
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH);
+          if (($fp = @fopen(PROXY_PATH."/room_garbage_time.expired", 'wb')) == FALSE)
+              break;
+          fwrite($fp, pack("L",$tm));
+          fclose($fp);
+          
+          return (TRUE);
+      } while (0);
+      
+      return (FALSE);
+  }
+
 
 } // end class Room
 
