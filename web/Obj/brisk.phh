@@ -808,39 +808,46 @@ class User {
     */
   }
 
-  function step_set($step) {
-    $this->step = $step;
-    
-    do {
-      if (validate_sess($this->sess) == FALSE)
-	break;
-      if (file_exists(PROXY_PATH) == FALSE)
-        mkdir(PROXY_PATH);
-      if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
-	break;
-      fwrite($fp, pack("LL",$this->step, $this->idx));
-      fclose($fp);
+  function step_set($step) 
+  {
+      $this->step = $step & 0x7fffffff;
+      
+      do {
+          if (validate_sess($this->sess) == FALSE)
+              break;
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH);
+          if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
+              break;
+          fwrite($fp, pack("LL",$this->step, $this->idx));
+          fclose($fp);
 
-      return (TRUE);
-    } while (0);
-
-    return (FALSE);
+          log_main("step_set [".$this->sess. "] [".$this->step."]"); 
+          
+          return (TRUE);
+      } while (0);
+      
+      return (FALSE);
   }
-
+  
   function step_inc($delta = 1) {
-    $this->step += $delta;
-    
-    if (validate_sess($this->sess)) {
-      if (file_exists(PROXY_PATH) == FALSE)
-        mkdir(PROXY_PATH);
-      $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
-      fwrite($fp, pack("LL", $this->step, $this->idx));
-      fclose($fp);
+      $this->step += $delta;
+      /* modularization because unpack() not manage unsigned 32bit int correctly */
+      $this->step &= 0x7fffffff;
+      
+      if (validate_sess($this->sess)) {
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH);
+          $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
+          fwrite($fp, pack("LL", $this->step, $this->idx));
+          fclose($fp);
 
-      return (TRUE);
-    }
-    
-    return (FALSE);
+          log_main("step_inc [".$this->sess. "] [".$this->step."]"); 
+          
+          return (TRUE);
+      }
+      
+      return (FALSE);
   }
 
   function reset() {
