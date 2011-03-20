@@ -238,7 +238,7 @@ function main()
       $is_table = FALSE;
       $sem = Room::lock_data();
       log_main("lock Room");
-      $room = &Room::load_data();
+      $room = Room::load_data();
       $curtime = time();
       
       /* Actions */
@@ -280,7 +280,7 @@ function main()
           
           $room->garbage_manager(TRUE);
           /* try login */
-          if (($user = &$room->add_user(&$sess, &$idx, $name, $pass_private, $_SERVER['REMOTE_ADDR'])) != FALSE) {
+          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $_SERVER['REMOTE_ADDR'])) != FALSE) {
               $ACTION = "room";
               if ($idx < 0) {
                   $idx = -$idx - 1;
@@ -307,10 +307,10 @@ function main()
               // setcookie ("sess", "", time() + 180);      
               $room->standup_update(&$user);
               
-	if (Room::save_data(&$room) == FALSE) {
-            echo "ERRORE SALVATAGGIO\n";
-            exit;
-	}
+              if (Room::save_data($room) == FALSE) {
+                  echo "ERRORE SALVATAGGIO\n";
+                  exit;
+              }
           }
           else {
               /* Login Rendering */

@@ -907,7 +907,7 @@ class User {
 	  log_only("INIT MAIN DATA");
 	  
           // SHSPLIT FIXME: init_data for User class ??
-	  $user =& User::create($id, "", "");
+	  $user = User::create($id, "", "");
 	  if (@shm_put_var($shm, $tok, $user) == FALSE) {
               log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
               log_only(serialize($user));
@@ -932,7 +932,7 @@ class User {
   }
   
 
-  function save_data(&$user, $id) 
+  function save_data($user, $id) 
   {
     GLOBAL $sess;
     
