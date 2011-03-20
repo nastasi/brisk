@@ -117,7 +117,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     return (FALSE);
   }
   
-  if (($proxy_step = step_get($sess)) != FALSE) {
+  if (($proxy_step = User::step_get($sess)) != FALSE) {
     // log_rd2("Postget".$proxy_step."zizi");
     
     if ($cur_step == $proxy_step['s']) {

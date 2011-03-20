@@ -957,38 +957,38 @@ class User {
   }
 
 
+  static function step_get($sess)
+  {
+      $fp = FALSE;
+      do {
+          if (validate_sess($sess) == FALSE)
+              break;
+          
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH);
+          if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
+              break;
+          if (($s = fread($fp, 8)) == FALSE)
+              break;
+          if (strlen($s) != 8)
+              break;
+          $arr = unpack('Ls/Li', $s);
+          fclose($fp);
+          
+          // log_rd2("A0: ".$arr[0]."  A1: ".$arr[1]);
+          return ($arr);
+      } while (0);
+      
+      if ($fp != FALSE)
+          fclose($fp);
+      
+      log_rd2("STEP_GET [".$sess."]: return false ");
+      
+      return (FALSE);
+  }
 
 } // end class User
 
-
-function step_get($sess) {
-  $fp = FALSE;
-  do {
-    if (validate_sess($sess) == FALSE)
-      break;
-
-    if (file_exists(PROXY_PATH) == FALSE)
-      mkdir(PROXY_PATH);
-    if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
-      break;
-    if (($s = fread($fp, 8)) == FALSE)
-      break;
-    if (strlen($s) != 8)
-      break;
-    $arr = unpack('Ls/Li', $s);
-    fclose($fp);
-
-    // log_rd2("A0: ".$arr[0]."  A1: ".$arr[1]);
-    return ($arr);
-  } while (0);
-
-  if ($fp != FALSE)
-    fclose($fp);
-
-  log_rd2("STEP_GET: return false ");
-
-  return (FALSE);
-}
 
 function step_unproxy($sess) {
   log_rd2("UNPROXY: ".PROXY_PATH."/".$sess.".step");
