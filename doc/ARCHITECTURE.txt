@@ -1,0 +1,19 @@
+Sparse documentation about Brisk.
+
+Many things aren't documented at all, but I start with authentication workflow.
+
+
+
+AUTHENTICATION WORKFLOW
+
+--- CLI ------------
+index.php:
+  onsubmit="return j_login_manager(this);" ->
+            sync xhr(index_wr.php?mesg=getchallenge&cli_name=<username>)
+
+--- SRV ------------
+  GET index_wr.php send the string: "1|<tokens>"
+
+--- CLI ------------
+  POST index.php with passid_private field equal to calcMD5(tokens[1]+calcMD5(form.elements['passid'].value))
+
