@@ -23,6 +23,9 @@ $G_with_sidebanner2 = TRUE;
 // is poll active ?
 $G_with_poll = FALSE;
 
+// this is the prefix path to remove from backtrace 
+$G_btrace_pref_sub = "/home/nastasi/web/";
+
 $G_with_splash = TRUE;
 $G_splash_interval = 25200; // 3600 * 7
 $G_splash_idx = 3;
