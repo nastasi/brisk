@@ -871,10 +871,8 @@ class User {
 
 
   // SHSPLIT save and load function for the User class.
-  function load_data($id) 
+  static function load_data($id, $sess) 
   {
-    GLOBAL $sess;
-
     // error_log("User::load_data BEGIN", 0);
 
     $doexit = FALSE;
