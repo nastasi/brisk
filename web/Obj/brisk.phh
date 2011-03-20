@@ -895,7 +895,11 @@ class User {
       if ($shm = shm_attach($tok, $shm_sz)) {
 	$user = @shm_get_var($shm, $tok);
 	
-	log_only("bri ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($user === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($user) ?   "TRUE" : "FALSE"));
+        if ($sess != FALSE && $user->sess != $sess) {
+            $doexit = TRUE;
+            break;
+        }
+	log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
 	if (isset($user)) 
 	  log_only("bri count ".count($user));
 	
