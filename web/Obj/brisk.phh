@@ -875,6 +875,8 @@ class User {
   {
     // error_log("User::load_data BEGIN", 0);
 
+    log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
+
     $doexit = FALSE;
     do {
       if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
