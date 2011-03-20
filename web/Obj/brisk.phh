@@ -2381,32 +2381,33 @@ class Room {
           User::save_data($user_park[$i], $i);
           $room->user[$i] = $user_park[$i];
       }
+      log_load("FINISH: ".($ret == TRUE ? "TRUE" : "FALSE"));
 
       return ($ret);
   }
 
-  function lock_data()
+  static function lock_data()
   {
-    GLOBAL $sess; 
-    
-    //  echo "LOCK: ".FTOK_PATH."/main";
-    //  exit;
-    if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
-      return (FALSE);
-    }
-    // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok)) == FALSE) {
-      return (FALSE);
-    }
-    if (sem_acquire($res)) {   
-      log_lock("LOCK room");
-      return ($res);
-    }
-    else
-      return (FALSE);
+      GLOBAL $sess; 
+      
+      //  echo "LOCK: ".FTOK_PATH."/main";
+      //  exit;
+      if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
+          return (FALSE);
+      }
+      // echo "FTOK ".$tok."<br>";
+      if (($res = sem_get($tok)) == FALSE) {
+          return (FALSE);
+      }
+      if (sem_acquire($res)) {   
+          log_lock("LOCK room");
+          return ($res);
+      }
+      else
+          return (FALSE);
   }
   
-  function unlock_data($res)
+  static function unlock_data($res)
   {
     GLOBAL $sess; 
     
