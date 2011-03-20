@@ -406,7 +406,7 @@ $s = "[".$sess."] index_rd.php stats: ";
 foreach ($S_load_stat as $key => $value) {
     $s .= sprintf("%s: %d - ", $key, $value);
 }
-error_log($s, 0);
+log_crit($s);
 
 
 ?>
