@@ -2283,7 +2283,7 @@ class Room {
           shm_detach($shm);
 
           for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-              $room->user[$i] = User::load_data($i);
+              $room->user[$i] = User::load_data($i, FALSE);
           }
       }
       
