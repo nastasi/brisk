@@ -133,6 +133,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                     log_main("pre garbage_manager TRE");
                     $room->garbage_manager(FALSE);
                     Room::save_data($room);
+                    unset($room);
                 }
             }
             log_lock("U");
@@ -157,34 +158,31 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
     
 
-    if (1 == 1) { // C'è veramente qualche caso in cui serve questo step ??
-        if ($user == FALSE) {
-            do {
-                ignore_user_abort(TRUE);
-                if (($sem = Room::lock_data()) == FALSE) 
-                    break;
-                
-                log_lock("P");
-                $S_load_stat['U_heavy']++;
-                if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
-                    break;
-                }
-            } while (0);
+    if ($user == FALSE) {
+        do {
+            ignore_user_abort(TRUE);
+            if (($sem = Room::lock_data()) == FALSE) 
+                break;
             
-            if ($sem != FALSE)
-                Room::unlock_data($sem);
-            
-            ignore_user_abort(FALSE);
-            if ($user == FALSE) {
-                return (unrecerror());
+            log_lock("P");
+            $S_load_stat['U_heavy']++;
+            if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
+                break;
             }
-        }
+        } while (0);
         
-        /* Nothing changed, return. */
-        if ($cur_step == $user->step) 
-            return (FALSE);
-    } // if (0 == 1) { xx C'è veramente qualche caso in cui serve questo step ??
-
+        if ($sem != FALSE)
+            Room::unlock_data($sem);
+        
+        ignore_user_abort(FALSE);
+        if ($user == FALSE) {
+            return (unrecerror());
+        }
+    }
+    
+    /* Nothing changed, return. */
+    if ($cur_step == $user->step) 
+        return (FALSE);
     
     log_rd2("do other cur_stat[".$cur_stat."] user->stat[".$user->stat."] cur_step[".$cur_step."] user_step[".$user->step."]");
     
@@ -255,7 +253,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                                         ($is_super ? 0 : $G_splash_timeout));
                 $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
             }
-            $ret .= $room->show_room($user->step, &$user);
+            $ret .= $room->show_room($user->step, $user);
             
             // TODO uncomment and test
             /* NOTE the sets went common */
@@ -315,9 +313,9 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
               log_auth($user->sess, "Explicit logout.");
               
               $S_load_stat['R_the_end']++;
-              $room = &Room::load_data();
+              $room = Room::load_data();
               unset($user);
-              if (($user = &$room->get_user($sess, $idx)) == FALSE) {
+              if (($user = $room->get_user($sess, $idx)) == FALSE) {
                   Room::unlock_data($sem);
                   ignore_user_abort(FALSE);
                   return (unrecerror());
@@ -329,7 +327,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                   $room->room_wakeup($user);
               }
               else if ($user->subst == 'standup')
-                  $room->room_outstandup(&$user);
+                  $room->room_outstandup($user);
               else
                   log_rd2("LOGOUT FROM WHAT ???");
               
