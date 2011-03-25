@@ -29,10 +29,10 @@ require_once("Obj/brisk.phh");
 require_once("briskin5/Obj/briskin5.phh");
 
 $S_load_stat = array( 'U_first_loop' => 0,
-                    'R_garbage'    => 0,
-                    'U_heavy'      => 0,
-                    'R_minusone'   => 0,
-                    'R_the_end'    => 0 );
+                      'U_heavy'      => 0,
+                      'R_garbage'    => 0,
+                      'R_minusone'   => 0,
+                      'R_the_end'    => 0 );
 
 $mlang_indrd = array( 
                      'btn_backtotab'  => array('it' => ' torna ai tavoli ',
@@ -129,12 +129,15 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 log_only("F");
                 
                 $S_load_stat['R_garbage']++;
-                if (($room = Room::load_data()) != FALSE) {
-                    log_main("pre garbage_manager TRE");
-                    $room->garbage_manager(FALSE);
-                    Room::save_data($room);
-                    unset($room);
+                if (($room = Room::load_data()) == FALSE) {
+                    Room::unlock_data();
+                    ignore_user_abort(FALSE);
+                    return (unrecerror());
                 }
+                log_main("pre garbage_manager TRE");
+                $room->garbage_manager(FALSE);
+                Room::save_data($room);
+                unset($room);
             }
             log_lock("U");
             Room::unlock_data($sem);
@@ -298,8 +301,9 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                     break;
                 } 
                 for ($i = $cur_step ; $i < $user->step ; $i++) {
-                    log_rd2("ADDED TO THE STREAM: ".$user->comm[$i % COMM_N]);
-                    $ret .= $user->comm[$i % COMM_N];
+                    $ii = $i % COMM_N;
+                    log_rd2("ADDED TO THE STREAM: ".$user->comm[$ii]);
+                    $ret .= $user->comm[$ii];
                 }
                 $new_stat =  $user->stat;
                 $new_subst = $user->subst;
@@ -308,39 +312,39 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             
             log_mop($user->step, 'index_rd.php: after ret set');
             
-          if ($user->the_end == TRUE) {
-              log_rd2("LOGOUT BYE BYE!!");
-              log_auth($user->sess, "Explicit logout.");
-              
-              $S_load_stat['R_the_end']++;
-              $room = Room::load_data();
-              unset($user);
-              if (($user = $room->get_user($sess, $idx)) == FALSE) {
-                  Room::unlock_data($sem);
-                  ignore_user_abort(FALSE);
-                  return (unrecerror());
-              }              
-              $user->reset();
-              
-              if ($user->subst == 'sitdown') {
-                  log_load("ROOM WAKEUP");
-                  $room->room_wakeup($user);
-              }
-              else if ($user->subst == 'standup')
-                  $room->room_outstandup($user);
-              else
-                  log_rd2("LOGOUT FROM WHAT ???");
-              
-              Room::save_data($room);
-          }
-      }
-      
-      Room::unlock_data($sem);
-      ignore_user_abort(FALSE);
-  }
-  
-  
-  return ($ret);
+            if ($user->the_end == TRUE) {
+                log_rd2("LOGOUT BYE BYE!!");
+                log_auth($user->sess, "Explicit logout.");
+                
+                $S_load_stat['R_the_end']++;
+                $room = Room::load_data();
+                unset($user);
+                if (($user = $room->get_user($sess, $idx)) == FALSE) {
+                    Room::unlock_data($sem);
+                    ignore_user_abort(FALSE);
+                    return (unrecerror());
+                }              
+                $user->reset();
+                
+                if ($user->subst == 'sitdown') {
+                    log_load("ROOM WAKEUP");
+                    $room->room_wakeup($user);
+                }
+                else if ($user->subst == 'standup')
+                    $room->room_outstandup($user);
+                else
+                    log_rd2("LOGOUT FROM WHAT ???");
+                
+                Room::save_data($room);
+            }
+        }
+        
+        Room::unlock_data($sem);
+        ignore_user_abort(FALSE);
+    }
+    
+    
+    return ($ret);
 }
 
 /*
@@ -359,8 +363,6 @@ $is_page_streaming =  (stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_A
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 header('Content-type: application/xml; charset="utf-8"',true);
-// header('Content-type: text/plain; charset="utf-8"',true);
-// header('Content-type: text/html; charset="utf-8"',true);
 
 if (!isset($myfrom))
      $myfrom = "";
