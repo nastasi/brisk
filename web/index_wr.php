@@ -494,7 +494,7 @@ else if ($user->stat == 'room') {
   else if ($user->subst == 'standup') {
    
     if ($argz[0] == 'sitdown') {
-      log_wr("SITDOWN command");
+        log_wr("SITDOWN command");
 
       if ($user->the_end == TRUE) {
 	log_wr("INFO:SKIP:argz == sitdown && the_end == TRUE => ignore request.");
@@ -571,7 +571,7 @@ else if ($user->stat == 'room') {
 	//
 
         // Create new spawned table
-        $bri_sem = Briskin5::lock_data($table_idx);
+        $bri_sem = Bin5::lock_data($table_idx);
         $table_token = uniqid("");
         $room->table[$table_idx]->table_token = $table_token;
         $room->table[$table_idx]->table_start = $curtime;
@@ -609,7 +609,6 @@ else if ($user->stat == 'room') {
           $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
           $bri_user_cur->step_inc();
           $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = show_table(&$bri,&$bri_user_cur,$bri_user_cur->step+1,TRUE, FALSE);
-          
           $bri_user_cur->step_inc();
           
           log_wr("TRY PRESAVE: ".$bri_user_cur->step." TRANS STEP: ".$bri_user_cur->trans_step);
@@ -627,15 +626,14 @@ else if ($user->stat == 'room') {
           $user_cur->trans_step = $user_cur->step + 1;
           log_wr("TRANS ATTIVATO");
           
-          
           $user_cur->stat_set('table');
           $user_cur->subst = 'asta';
           $user_cur->laccwr = $curtime;
           $user_cur->step_inc();
         }
         log_wr("presave bri");
-        Briskin5::save_data($bri);
-        Briskin5::unlock_data($bri_sem);
+        Bin5::save_data($bri);
+        Bin5::unlock_data($bri_sem);
         log_wr("postsave bri");
       }
       // change room

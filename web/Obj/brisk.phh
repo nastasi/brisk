@@ -1073,11 +1073,11 @@ class Room {
 	if ($table_cur->player_n == PLAYERS_N) {
 	  log_main("PLAYERS == N TABLE ".$table_idx);
 	  
-	  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
+	  if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
 	    log_main("bin5 lock data success");
 	    
 	    $no_recovery = FALSE;
-	    if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+	    if (($bri = Bin5::load_data($table_idx)) != FALSE) {
 	      if ($table_cur->table_token != $bri->table_token) {
 		log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
 		log_main("ERROR: not matching table_start. Room: ".$table_cur->table_start."  Table: ".$bri->table_start);
@@ -1124,7 +1124,7 @@ class Room {
 		$this->room_join_wakeup(&$user_cur, FALSE, 0); 
 		$table_cur->table_token = "";
                 $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
-		Briskin5::destroy_data($table_idx);
+		Bin5::destroy_data($table_idx);
 	      }
 	      else {
 		log_main("gm:: save_data");
@@ -1133,9 +1133,9 @@ class Room {
 		  $this->user[$table_cur->player[$i]]->lacc = $bri->user[$i]->lacc;
 		}
 	      
-		Briskin5::save_data(&$bri);
+		Bin5::save_data(&$bri);
 	      }
-	    } // else if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+	    } // else if (($bri = &Bin5::load_data($table_idx)) != FALSE) {
 	    else if ($no_recovery == FALSE) {
 	      log_crit("ERROR: table ".$table_idx." unrecoverable join");
 
@@ -1163,7 +1163,7 @@ class Room {
 	      $table_cur->table_token = "";
 	    }
 
-	    Briskin5::unlock_data($sem);
+	    Bin5::unlock_data($sem);
 	  } // bri::lock_data
 	} //  if ($table_cur->player_n == PLAYERS_N) {
       } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
@@ -1936,9 +1936,9 @@ class Room {
                 $bri_user->comm[$bri_user->step % COMM_N] .= $to_tabl;
                 $bri_user->step_inc();
               }
-              Briskin5::save_data(&$bri);
+              Bin5::save_data(&$bri);
             }
-            Briskin5::unlock_data($sem);
+            Bin5::unlock_data($sem);
           } // bri::lock_data
         } //  if ($table_cur->player_n == PLAYERS_N) {
       } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
@@ -2092,15 +2092,15 @@ class Room {
       if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
         // FIXME BRISK4: include for each kind of table
         require_once("${G_base}briskin5/Obj/briskin5.phh");
-        if (($brisem = Briskin5::lock_data($table_idx)) != FALSE) { 
-          if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+        if (($brisem = Bin5::lock_data($table_idx)) != FALSE) { 
+          if (($bri = &Bin5::load_data($table_idx)) != FALSE) {
             if ($bri->the_end != TRUE) {
               $bri->user[$ghost_user->table_pos]->step_inc();
               $bri->user[$ghost_user->table_pos]->sess = $sess;
-              Briskin5::save_data(&$bri);
+              Bin5::save_data(&$bri);
             }
           }
-          Briskin5::unlock_data($brisem);
+          Bin5::unlock_data($brisem);
         }
       }
 

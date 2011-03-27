@@ -292,7 +292,7 @@ sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" $(find ${
 # .ph[pho] substitutions
 sed -i "s/define *( *PLAYERS_N, *[0-9]\+ *)/define(PLAYERS_N, $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *PLAYERS_N, *[0-9]\+ *)' {} \;)
 
-sed -i "s/define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)/define(BRISKIN5_PLAYERS_N, $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BRISKIN5_PLAYERS_N, *[0-9]\+ *)' {} \;)
+sed -i "s/define *( *BIN5_PLAYERS_N, *[0-9]\+ *)/define(BIN5_PLAYERS_N, $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *BIN5_PLAYERS_N, *[0-9]\+ *)' {} \;)
 
 sed -i "s@define *( *FTOK_PATH,[^)]*)@define(FTOK_PATH, \"$ftok_path\")@g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l 'define *( *FTOK_PATH,[^)]*)' {} \;)
 

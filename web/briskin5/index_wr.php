@@ -52,19 +52,19 @@ if ($table_idx < 0 || $table_idx >= TABLE_N)
 
 log_mop(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
 
-$sem = Briskin5::lock_data($table_idx);
+$sem = Bin5::lock_data($table_idx);
 
-if (($bri = &Briskin5::load_data($table_idx,$table_token)) == FALSE) {
+if (($bri = &Bin5::load_data($table_idx,$table_token)) == FALSE) {
   echo "Bin5 Load data error";
   log_wr("Bin5 Load data error");
-  Briskin5::unlock_data($sem);
+  Bin5::unlock_data($sem);
   exit;
 }
 
 if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
   echo "Get User Error";
   log_wr("Get User Error");
-  Briskin5::unlock_data($sem);
+  Bin5::unlock_data($sem);
   exit;
 }
 $argz = explode('|', $mesg);
@@ -148,12 +148,12 @@ else if ($user->stat == 'table') {
   else if ($argz[0] == 'exitlock') {
     if ($user->exitislock == TRUE) {
       $user->exitislock = ($user->exitislock == TRUE ? FALSE : TRUE);
-      for ($ct = 0, $i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
+      for ($ct = 0, $i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {	
         $user_cur[$i] = &$bri->user[$table->player[$i]];
         if ($user_cur[$i]->exitislock == FALSE)
           $ct++;
       }
-      for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+      for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
         $ret = sprintf('gst.st = %d;', $user_cur[$i]->step+1);
         $ret .= sprintf('exitlock_show(%d, %s);', $ct, 
                         ($user_cur[$i]->exitislock ? 'true' : 'false'));
@@ -165,7 +165,7 @@ else if ($user->stat == 'table') {
   }
   else if ($user->subst == 'asta') {
     if ($argz[0] == 'lascio' && $user->handpt <= 2) {
-      $index_cur = $table->gstart % BRISKIN5_PLAYERS_N;
+      $index_cur = $table->gstart % BIN5_PLAYERS_N;
     
       log_wr(sprintf("GIOCO FINITO !!!"));
     
@@ -175,7 +175,7 @@ else if ($user->stat == 'table') {
       $table->game_next();
       $table->game_init(&$bri->user);
     
-      for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
+      for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {	
 	$user_cur = &$bri->user[$table->player[$i]];
 
 	$ret = sprintf('gst.st = %d;', $user_cur->step+1);
@@ -187,7 +187,7 @@ else if ($user->stat == 'table') {
     else if ($argz[0] == 'asta') {
       $again = TRUE;
     
-      $index_cur = $table->gstart % BRISKIN5_PLAYERS_N;
+      $index_cur = $table->gstart % BIN5_PLAYERS_N;
       if ($user->table_pos == $index_cur &&
 	  $table->asta_pla[$index_cur]) {
 	$a_card = $argz[1];
@@ -234,17 +234,17 @@ else if ($user->stat == 'table') {
 	else {
 	  /* next step */
 	  $showst = "show_astat("; 
-	  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+	  for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
 	    $user_cur = &$bri->user[$table->player[$i]];
 	    $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "), 
 			       ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
 	  }
-	  if (BRISKIN5_PLAYERS_N == 3)
+	  if (BIN5_PLAYERS_N == 3)
 	    $showst .= ",-2,-2";
 	  $showst .= ");";
 
 	  $maxcard = -2;
-	  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+	  for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
 	    $user_cur = &$bri->user[$table->player[$i]];
 	    if ($maxcard < $user_cur->asta_card)
 	      $maxcard = $user_cur->asta_card;
@@ -253,8 +253,8 @@ else if ($user->stat == 'table') {
 	  if (($table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
 	      !($table->asta_card == 9 && $table->asta_pnt == 120)) {
 	    log_wr("ALLOPPA QUI");
-	    for ($i = 1 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
-	      $index_next = ($table->gstart + $i) % BRISKIN5_PLAYERS_N;
+	    for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
+	      $index_next = ($table->gstart + $i) % BIN5_PLAYERS_N;
 	      if ($table->asta_pla[$index_next]) {
 		log_wr("GSTART 1");
 		$table->gstart += $i;
@@ -263,10 +263,10 @@ else if ($user->stat == 'table') {
 	    }
 	  
 	  
-	    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+	    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
 	      $user_cur = &$bri->user[$table->player[$i]];
 	      $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
-	      if ($user_cur->table_pos == ($table->gstart % BRISKIN5_PLAYERS_N)) 
+	      if ($user_cur->table_pos == ($table->gstart % BIN5_PLAYERS_N)) 
 		$ret .= sprintf('dispose_asta(%d,%d, %s); remark_on();', 
 				$table->asta_card + 1, $table->asta_pnt+1, ($user_cur->handpt <= 2 ? "true" : "false"));
 	      else
@@ -287,7 +287,7 @@ else if ($user->stat == 'table') {
 	    $table->game_next();
 	    $table->game_init(&$bri->user);
 	  
-	    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
+	    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {	
 	      $user_cur = &$bri->user[$table->player[$i]];
 
 	      $ret = sprintf('gst.st = %d;', $user_cur->step+1);
@@ -301,7 +301,7 @@ else if ($user->stat == 'table') {
 	    // if a_pnt == 120 supergame ! else abbandono
 	    if ($a_pnt == 120 || $user->asta_card != -1) {
 	      $chooser = $index_cur;
-	      for ($i = 1 ; $i < BRISKIN5_PLAYERS_N ; $i++) 
+	      for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) 
 		if ($i != $chooser)
 		  $table->asta_pla[$i] = FALSE;
 	    }
@@ -311,8 +311,8 @@ else if ($user->stat == 'table') {
                                                            $user->step+1, $table->asta_card + 1,-($table->asta_pnt));
 	      $user->step_inc();
               */
-	      for ($i = 1 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
-		$chooser = ($table->gstart + $i) % BRISKIN5_PLAYERS_N;
+	      for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
+		$chooser = ($table->gstart + $i) % BIN5_PLAYERS_N;
 		if ($table->asta_pla[$chooser]) {
 		  break;
 		}
@@ -320,7 +320,7 @@ else if ($user->stat == 'table') {
 	    }
 	    $table->asta_win = $chooser;
 
-	    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+	    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
 	      $user_cur = &$bri->user[$table->player[$i]];
 	      $ret = sprintf('gst.st = %d; %s dispose_asta(%d, %d, false);', $user_cur->step+1, $showst,
                              $table->asta_card + 1,-($table->asta_pnt));
@@ -347,16 +347,16 @@ else if ($user->stat == 'table') {
       if ($table->asta_win > -1 && 
 	  $user->table_pos == $table->asta_win) {
 	$a_brisco = $argz[1];
-	if ($a_brisco >= 0 && $a_brisco < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24)) {
+	if ($a_brisco >= 0 && $a_brisco < (BIN5_PLAYERS_N == 5 ? 40 : 24)) {
 	  $table->briscola = $a_brisco;
 	  $table->friend   = $table->card[$a_brisco]->owner;
 	  log_wr("GSTART 2");
-	  $table->gstart = ($table->mazzo+1) % BRISKIN5_PLAYERS_N;
+	  $table->gstart = ($table->mazzo+1) % BIN5_PLAYERS_N;
 	  log_wr("Setta la briscola a ".$a_brisco);
 
 	  $chooser = $table->asta_win;
 	  $user_chooser = &$bri->user[$table->player[$chooser]];
-	  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+	  for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
 	    $user_cur = &$bri->user[$table->player[$i]];
 	    $user_cur->subst = 'game';
 	    $ret = sprintf('gst.st = %d; subst = "game";', $user_cur->step+1);
@@ -371,7 +371,7 @@ else if ($user->stat == 'table') {
 	    $ret .= briscola_show($bri, $table, $user_cur);
 
 	    /* first gamer */
-	    if ($i == ($table->gstart % BRISKIN5_PLAYERS_N))
+	    if ($i == ($table->gstart % BIN5_PLAYERS_N))
 	      $ret .= "is_my_time = true; remark_on();";
 	    else
 	      $ret .= "is_my_time = false; remark_off();";
@@ -402,14 +402,14 @@ else if ($user->stat == 'table') {
 	$a_y = substr($a_y,0,-2);
 
       $loggo = sprintf("A_play %s, table_pos %d == %d, mazzo %d, gstart %d, card_stat %d, card_own %d",
-		       $a_play, $user->table_pos, ($table->gstart % BRISKIN5_PLAYERS_N),
+		       $a_play, $user->table_pos, ($table->gstart % BIN5_PLAYERS_N),
 		       $table->mazzo, $table->gstart,
 		       $table->card[$a_play]->stat, $table->card[$a_play]->owner);
       log_wr("CIC".$loggo);
 			  
       /* se era il suo turno e la carta era sua ed era in mano */
-      if ($a_play >=0 && $a_play < (BRISKIN5_PLAYERS_N == 5 ? 40 : 24) &&
-	  ($user->table_pos == (($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N)) &&
+      if ($a_play >=0 && $a_play < (BIN5_PLAYERS_N == 5 ? 40 : 24) &&
+	  ($user->table_pos == (($table->gstart + $table->turn) % BIN5_PLAYERS_N)) &&
 	  $table->card[$a_play]->stat == 'hand' &&
 	  $table->card[$a_play]->owner == $user->table_pos) {
 	log_wr(sprintf("User: %s Play: %d",$user->name, $a_play));
@@ -420,23 +420,23 @@ else if ($user->stat == 'table') {
 	/*
 	 *  !!!! TURN INCREMENTED BEFORE !!!!
 	 */
-	$turn_cur = ($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N;
+	$turn_cur = ($table->gstart + $table->turn) % BIN5_PLAYERS_N;
 	$table->turn++;
 
 	$card_play = sprintf("card_play(%d,%d,%d,%d);|",
 			     $user->table_pos, $a_play, $a_x, $a_y);
-	if (($table->turn % BRISKIN5_PLAYERS_N) != 0) {     /* manche not finished */
-	  $turn_nex = ($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N;
+	if (($table->turn % BIN5_PLAYERS_N) != 0) {     /* manche not finished */
+	  $turn_nex = ($table->gstart + $table->turn) % BIN5_PLAYERS_N;
 
 	  $player_cur = "remark_off();";
 	  $player_nex = $card_play . "is_my_time = true; remark_on();";
 	  $player_oth = $card_play;
 	}
-	else if ($table->turn <= (BRISKIN5_PLAYERS_N * 8)) { /* manche finished */
+	else if ($table->turn <= (BIN5_PLAYERS_N * 8)) { /* manche finished */
 	  $winner = calculate_winner($table);
 	  log_wr("GSTART 3");
 	  $table->gstart = $winner;
-	  $turn_nex = ($table->gstart + $table->turn) % BRISKIN5_PLAYERS_N;
+	  $turn_nex = ($table->gstart + $table->turn) % BIN5_PLAYERS_N;
 
 	  log_wr(sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
 	  $card_take = sprintf("sleep(gst,2000);|cards_take(%d);|", $winner);
@@ -445,13 +445,13 @@ else if ($user->stat == 'table') {
 	    $player_nex = $card_play . $card_take;
 	  else
 	    $player_nex = "";
-	  if ($table->turn < (BRISKIN5_PLAYERS_N * 8))  /* game NOT finished */
+	  if ($table->turn < (BIN5_PLAYERS_N * 8))  /* game NOT finished */
 	    $player_nex .= "is_my_time = true; remark_on();";
 	  $player_oth = $card_play . $card_take;
 	}
 
 	log_wr(sprintf("Turn Cur %d Turn Nex %d",$turn_cur, $turn_nex));
-	for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
+	for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {	
 	  $user_cur = &$bri->user[$table->player[$i]];
 
 	  $ret = sprintf('gst.st = %d; ', $user_cur->step+1);
@@ -470,7 +470,7 @@ else if ($user->stat == 'table') {
 	  $retar[$i] = $ret;
 	}
 
-	if ($table->turn == (BRISKIN5_PLAYERS_N * 8)) { /* game finished */
+	if ($table->turn == (BIN5_PLAYERS_N * 8)) { /* game finished */
 	  log_wr(sprintf("GIOCO FINITO !!!"));
 
 
@@ -482,12 +482,12 @@ else if ($user->stat == 'table') {
           $plist = "$table->table_token|$user->table_orig|$table->player_n";
           $curtime = time();
           $ucodes = array();
-          for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+          for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
             $user_cur = &$bri->user[$table->player[$i]];
             $plist .= '|'.xcapelt($user_cur->name).'|'.$pt_cur[$i];
             $ucodes[$i] = $user_cur->code_get();
           }
-          for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+          for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
             $plist .= '|'.xcapelt($ucodes[$i]);
           }
           log_legal($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
@@ -507,14 +507,14 @@ else if ($user->stat == 'table') {
 	  $table->game_next();
 	  $table->game_init(&$bri->user);
 	  
-	  for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+	  for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
 	    $user_cur = &$bri->user[$table->player[$i]];
 	    $retar[$i] .= show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, TRUE);
 	  }
 	}
 
 
-	for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {	
+	for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {	
 	  $user_cur = &$bri->user[$table->player[$i]];
 	
 	  $user_cur->comm[$user_cur->step % COMM_N] = $retar[$i];
@@ -533,9 +533,9 @@ else if ($user->stat == 'table') {
   }
 }
 log_wr("before save data");
-Briskin5::save_data($bri);
+Bin5::save_data($bri);
 log_mop($user->step, 'bin::index_wr.php: after save_data()');
 
-Briskin5::unlock_data($sem);
+Bin5::unlock_data($sem);
 exit;
 ?>

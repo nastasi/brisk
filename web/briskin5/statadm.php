@@ -100,12 +100,12 @@ function main_file($curtime)
       
       continue;
     }
-    // echo $p++." ".BRISKIN5_PLAYERS_N."<br>";
+    // echo $p++." ".BIN5_PLAYERS_N."<br>";
     
     $found = FALSE;
     $mult = 1;
-    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
-      for ($e = $i + 1 ; $e < BRISKIN5_PLAYERS_N ; $e++) {
+    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+      for ($e = $i + 1 ; $e < BIN5_PLAYERS_N ; $e++) {
         if ($ar[10+($i*2)] == $ar[10+($e*2)]) {
           $mult = abs($ar[10+($i*2)]);
           $found = TRUE;
@@ -117,7 +117,7 @@ function main_file($curtime)
 
     if ($mult == 0)
        continue;
-    for ($i = 0 ; $i < BRISKIN5_PLAYERS_N ; $i++) {
+    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
       // echo $p." i) ".$i."<br>";
       $username = $ar[9+($i*2)];
       if (($item = $bdb->getitem_bylogin($username, &$id)) == FALSE) {
