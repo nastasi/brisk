@@ -28,6 +28,12 @@ require_once("../Obj/brisk.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once("Obj/briskin5.phh");
 
+$S_load_stat = array( 'U_first_loop' => 0,
+                      'U_heavy'      => 0,
+                      'R_garbage'    => 0,
+                      'R_minusone'   => 0,
+                      'R_the_end'    => 0 );
+
 // Use of proxies isn't allowed.
 // if (is_proxy()) {
 //   sleep(5);
