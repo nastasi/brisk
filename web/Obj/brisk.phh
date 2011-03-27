@@ -385,7 +385,7 @@ class Table {
   
   function create($idx) 
   {
-    if (($thiz =& new Table()) == FALSE)
+    if (($thiz = new Table()) == FALSE)
       return (FALSE);
 
     $thiz->idx       =   $idx;
@@ -429,7 +429,7 @@ class Table {
 
   function myclone($from)
   {
-    if (($thiz =& new Table()) == FALSE)
+    if (($thiz = new Table()) == FALSE)
       return (FALSE);
 
     $this->copy($from);
@@ -439,7 +439,7 @@ class Table {
   
   function spawn($from)
   {
-    if (($thiz =& new Table()) == FALSE)
+    if (($thiz = new Table()) == FALSE)
       return (FALSE);
     
     $thiz->idx = $from->idx;
@@ -499,7 +499,7 @@ class Table {
     return ($this->player_n - 1);
   }
   
-  function user_rem(&$room, &$user)
+  function user_rem($room, $user)
   {
     $tabpos = $user->table_pos;
     
@@ -509,7 +509,7 @@ class Table {
       /* aggiorna l'array dei giocatori al tavolo. */
       for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
 	$this->player[$i] = $this->player[$i+1];
-	$user_cur = &$room->user[$this->player[$i]];
+	$user_cur = $room->user[$this->player[$i]];
 	$user_cur->table_pos = $i;
       }
       $this->player_n--;
@@ -525,7 +525,7 @@ class Table {
   //                              ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
 
   // function act_content($isstanding, $sitted, $table, $cur_table, $allowed)
-  function act_content(&$user)
+  function act_content($user)
   {
     $ret = "";
     $isstanding = ($user->subst == 'standup');
@@ -640,7 +640,7 @@ class User {
   function create($idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     // error_log("User::create BEGIN", 0);
 
-    if (($thiz =& new User()) == FALSE)
+    if (($thiz = new User()) == FALSE)
       return (FALSE);
 
     $thiz->idx        = $idx;
@@ -729,7 +729,7 @@ class User {
 
   function myclone($from)
   {
-    if (($thiz =& new User()) == FALSE)
+    if (($thiz = new User()) == FALSE)
       return (FALSE);
     
     $thiz->copy($from);
@@ -739,7 +739,7 @@ class User {
   
   function spawn($from, $table, $table_pos)
   {
-    if (($thiz =& new User()) == FALSE)
+    if (($thiz = new User()) == FALSE)
       return (FALSE);
     
     $thiz->idx        = $from->idx;
@@ -1027,11 +1027,11 @@ class Room {
     $this->table = array();
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        $this->user[$i] =& User::create($i, "", "");
+        $this->user[$i] = User::create($i, "", "");
     }
 
     for ($i = 0 ; $i < TABLES_N ; $i++) {
-      $this->table[$i] =& Table::create($i);
+      $this->table[$i] = Table::create($i);
       /* OLD METHOD
       if ($i < 12) {
         $row = ( (((int)($i / 4)) % 2) == 0 );
@@ -1071,7 +1071,7 @@ class Room {
 
       // Before all align times with table timeout
       for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-	$table_cur =& $this->table[$table_idx];
+	$table_cur = $this->table[$table_idx];
 	// if the table is complete and exists its shared mem we get the info about users lacc
 
 	if ($table_cur->player_n == PLAYERS_N) {
@@ -1097,7 +1097,7 @@ class Room {
 	      log_main("garbage_manager: bri loaded successfully.");
 	      $bri->garbage_manager(TRUE);
 	      
-	      $bri_table = &$bri->table[0];
+	      $bri_table = $bri->table[0];
 
 	      // is the end of the table
 	      if ($bri->the_end == TRUE) {
@@ -1113,8 +1113,8 @@ class Room {
 
 		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
 		  // stat must be "table" by definition
-		  $user_cur =& $this->user[$table_cur->player[$i]];
-		  $bri_user =& $bri->user[$i];
+		  $user_cur = $this->user[$table_cur->player[$i]];
+		  $bri_user = $bri->user[$i];
 		  
 		  $user_cur->subst      = $bri_user->subst;
 		  $user_cur->step       = $bri_user->step;
@@ -1125,7 +1125,7 @@ class Room {
 
                 log_legal($curtime, $user_cur, "STAT:DESTROY_GAME", $plist);
 
-		$this->room_join_wakeup(&$user_cur, FALSE, 0); 
+		$this->room_join_wakeup($user_cur, FALSE, 0); 
 		$table_cur->table_token = "";
                 $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
 		Bin5::destroy_data($table_idx);
@@ -1137,14 +1137,14 @@ class Room {
 		  $this->user[$table_cur->player[$i]]->lacc = $bri->user[$i]->lacc;
 		}
 	      
-		Bin5::save_data(&$bri);
+		Bin5::save_data($bri);
 	      }
-	    } // else if (($bri = &Bin5::load_data($table_idx)) != FALSE) {
+	    } // else if (($bri = Bin5::load_data($table_idx)) != FALSE) {
 	    else if ($no_recovery == FALSE) {
 	      log_crit("ERROR: table ".$table_idx." unrecoverable join");
 
 	      for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-		$user_cur = &$this->user[$table_cur->player[$i]];
+		$user_cur = $this->user[$table_cur->player[$i]];
 		$user_cur->subst = "shutdowner";
 		$user_cur->step_inc();
 		
@@ -1163,7 +1163,7 @@ class Room {
               }
               log_legal($curtime, $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
               
-	      $this->room_join_wakeup(&$user_cur, TRUE, -2); 
+	      $this->room_join_wakeup($user_cur, TRUE, -2); 
 	      $table_cur->table_token = "";
 	    }
 
@@ -1175,7 +1175,7 @@ class Room {
       log_rd2("out new loop.");
 		
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-	$user_cur = &$this->user[$i];
+	$user_cur = $this->user[$i];
 	
 	log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
 	  
@@ -1195,7 +1195,7 @@ class Room {
 	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
 	      $this->room_wakeup($user_cur);
 	    else if ($user_cur->subst == 'standup')
-	      $this->room_outstandup(&$user_cur);
+	      $this->room_outstandup($user_cur);
 	    else
 	      log_rd2("LOGOUT FROM WHAT ???");
 	  }
@@ -1214,14 +1214,14 @@ class Room {
       log_rd2("GARBAGE UPDATED!");
       
       // externalized $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
-      Room::garbage_time_expire_set(time() + GARBAGE_TIMEOUT);
+      Room::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
       $ismod = TRUE;
     }
 
     return ($ismod);
   }
 
-  function show_room($user_step, &$user)
+  function show_room($user_step, $user)
   {
     GLOBAL $G_lang, $mlang_brisk;
     log_main("show_room: username: ".$user->name);
@@ -1275,7 +1275,7 @@ class Room {
   function room_wakeup($user)
   {
     $table_idx = $user->table;
-    $table = &$this->table[$table_idx];
+    $table = $this->table[$table_idx];
 
     log_main("WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
@@ -1286,7 +1286,7 @@ class Room {
       log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
       for ($i = 0 ; $i < $table->player_n ; $i++) {
-	$user_cur = &$this->user[$table->player[$i]];
+	$user_cur = $this->user[$table->player[$i]];
 	log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
 
 	if ($user->idx_get() != $table->player[$i]) {
@@ -1316,7 +1316,7 @@ class Room {
     
 
     /* aggiorna l'array dei giocatori al tavolo. */
-    $table->user_rem(&$this, &$user);
+    $table->user_rem($this, $user);
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = $this->user[$i];
@@ -1364,10 +1364,10 @@ class Room {
     }
   }
 
-  function room_join_wakeup(&$user, $update_lacc = FALSE, $trans_delta)
+  function room_join_wakeup($user, $update_lacc = FALSE, $trans_delta)
   {
     $table_idx = $user->table;
-    $table = &$this->table[$table_idx];
+    $table = $this->table[$table_idx];
     
     log_main("JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
@@ -1379,7 +1379,7 @@ class Room {
     log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
     
     for ($i = 0 ; $i < $table->player_n ; $i++) {
-      $user_cur = &$this->user[$table->player[$i]];
+      $user_cur = $this->user[$table->player[$i]];
       log_main("PREIMPOST INLOOP name: ".$user_cur->name);
       if ($user_cur->sess != "") {
 	if ($update_lacc == TRUE) {
@@ -1394,7 +1394,7 @@ class Room {
 	  $user_cur->stat_set("room");
 	  $user_cur->subst = "standup";
 	  $user_cur->table = -1;
-	  $user_wup[$user_wup_n++] = &$user_cur;
+	  $user_wup[$user_wup_n++] = $user_cur;
           
           $remove_wagon = FALSE;
           if($table->wag_own == $table->player[$i]) {
@@ -1407,13 +1407,13 @@ class Room {
     }
 
     for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
-      $table->user_rem(&$this, &$user_wup[$wup_idx]);
+      $table->user_rem($this, $user_wup[$wup_idx]);
 
     /* aggiorna l'array dei giocatori al tavolo. */
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       log_main("START LOOP");
-      $user_cur = &$this->user[$i];
+      $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room') {
 	log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
 	continue;
@@ -1449,7 +1449,7 @@ class Room {
 	  $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
 	  $user_cur->comm[$user_cur->step % COMM_N] = "";
 	  $user_cur->step_inc();
-	  $user_cur->comm[$user_cur->step % COMM_N] = $this->show_room(($user_cur->step + 1), &$user_cur);
+	  $user_cur->comm[$user_cur->step % COMM_N] = $this->show_room(($user_cur->step + 1), $user_cur);
 	  $user_cur->step_inc();
 	  log_main("POST show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
@@ -1470,23 +1470,23 @@ class Room {
     }
   }
 
-  function room_outstandup(&$user)
+  function room_outstandup($user)
   {
-    $this->room_sitdown(&$user, -1);
+    $this->room_sitdown($user, -1);
   }
   
-  function table_update(&$user)
+  function table_update($user)
   {
     log_main("table_update: pre - USER: ".$user->name);
 
     $table_idx = $user->table;
 
     if ($table_idx > -1) 
-      $table = &$this->table[$table_idx];
+      $table = $this->table[$table_idx];
     
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $ret = "";
-      $user_cur = &$this->user[$i];
+      $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
       continue;
       
@@ -1529,7 +1529,7 @@ class Room {
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $ret = "";
-      $user_cur = &$this->user[$i];
+      $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
       continue;
       
@@ -1592,7 +1592,7 @@ class Room {
           break;
         }
 
-        $table = &$this->table[$user->table];
+        $table = $this->table[$user->table];
         
         if ($table->wag_own != -1) {
           // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> 
@@ -1715,7 +1715,7 @@ class Room {
 
         $msg = "COMMAND ".$msg;
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-          $user_cur = &$this->user[$i];
+          $user_cur = $this->user[$i];
 
           if ($user_cur->sess == '')
             continue;
@@ -1910,17 +1910,17 @@ class Room {
       require_once("${G_base}briskin5/Obj/briskin5.phh");
       // Before all align times with table timeout
       for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-        $table_cur =& $this->table[$table_idx];
+        $table_cur = $this->table[$table_idx];
         // if the table is complete and exists its shared mem we get the info about users lacc
         
         if ($table_cur->player_n == PLAYERS_N) {
           log_main("PLAYERS == N TABLE ".$table_idx);
         
-          if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
+          if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
             log_main("bin5 lock data success");
             
             $no_recovery = FALSE;
-            if (($bri = &Briskin5::load_data($table_idx)) != FALSE) {
+            if (($bri = Bin5::load_data($table_idx)) != FALSE) {
               if ($table_cur->table_token != $bri->table_token) {
                 log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
                 $bri = FALSE;
@@ -1928,10 +1928,10 @@ class Room {
             }
             
             if ($bri != FALSE) {
-              $bri_table = &$bri->table[0];
+              $bri_table = $bri->table[0];
               for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
                 // stat must be "table" by definition
-                $bri_user =& $bri->user[$i];
+                $bri_user = $bri->user[$i];
               
                 if ($target != "" && $bri_user->name != $target)
                   continue;
@@ -1940,7 +1940,7 @@ class Room {
                 $bri_user->comm[$bri_user->step % COMM_N] .= $to_tabl;
                 $bri_user->step_inc();
               }
-              Bin5::save_data(&$bri);
+              Bin5::save_data($bri);
             }
             Bin5::unlock_data($sem);
           } // bri::lock_data
@@ -1950,11 +1950,11 @@ class Room {
 
     if ($update_room) {
       if ($user->stat == 'room' && $user->subst == 'standup') {
-        $this->standup_update(&$user);
+        $this->standup_update($user);
       }
       else if ($user->stat == 'room' && $user->subst == 'sitdown') {
         log_main("chatt_send pre table update");
-        $this->table_update(&$user);
+        $this->table_update($user);
         log_main("chatt_send post table update");
       }
     } // if ($update_room ...
@@ -1971,7 +1971,7 @@ class Room {
 	if (strcmp($sess, $this->user[$i]->sess) == 0) {
 	  // find it
 	  $idx = $i;
-	  $ret = &$this->user[$i];
+	  $ret = $this->user[$i];
 	  return ($ret);
 	}
       }
@@ -2080,7 +2080,7 @@ class Room {
     if ($ghost > -1 && $ghost_auth && ($authenticate != FALSE)) {
       /* swap session */
 
-      $ghost_user =& $this->user[$ghost];
+      $ghost_user = $this->user[$ghost];
       $curtime = time();
       $ghost_user->step_inc();
       if ($sess == "") {
@@ -2097,11 +2097,11 @@ class Room {
         // FIXME BRISK4: include for each kind of table
         require_once("${G_base}briskin5/Obj/briskin5.phh");
         if (($brisem = Bin5::lock_data($table_idx)) != FALSE) { 
-          if (($bri = &Bin5::load_data($table_idx)) != FALSE) {
+          if (($bri = Bin5::load_data($table_idx)) != FALSE) {
             if ($bri->the_end != TRUE) {
               $bri->user[$ghost_user->table_pos]->step_inc();
               $bri->user[$ghost_user->table_pos]->sess = $sess;
-              Bin5::save_data(&$bri);
+              Bin5::save_data($bri);
             }
           }
           Bin5::unlock_data($brisem);
@@ -2158,7 +2158,7 @@ class Room {
       
       if ($ghost > -1) {
         log_main("ghost: rename!");
-        $ghost_user =& $this->user[$ghost];
+        $ghost_user = $this->user[$ghost];
 
         if ($ghost_auth == FALSE) {
           for ($sfx = 1 ; $sfx <= MAX_PLAYERS ; $sfx++) {
@@ -2179,11 +2179,11 @@ class Room {
           $ghost_user->name = $ghostname;
           
           if ($ghost_user->stat == 'room' && $ghost_user->subst == 'standup') {
-            $this->standup_update(&$ghost_user);
+            $this->standup_update($ghost_user);
           }
           else {
             log_main("chatt_send pre table update");
-            $this->table_update(&$ghost_user);
+            $this->table_update($ghost_user);
           log_main("chatt_send post table update");
           }
         } // if ($ghost_auth == FALSE
@@ -2304,7 +2304,7 @@ class Room {
   }
   
 
-  function save_data_orig(&$room) 
+  function save_data_orig($room) 
   {
     GLOBAL $sess;
     
@@ -2339,7 +2339,7 @@ class Room {
   }
 
 
-  function save_data(&$room) 
+  function save_data($room) 
   {
       GLOBAL $sess;
     
@@ -2469,14 +2469,14 @@ class Room {
     //
     
     $sess = $user->sess;
-    $table = &$this->table[$table_idx];
+    $table = $this->table[$table_idx];
     
     if ($user->stat != 'room')
       return;
     
     $content = "[ ";
     for ($i = 0 ; $i < $table->player_n ; $i++) {
-        $user_cur = &$this->user[$table->player[$i]];
+        $user_cur = $this->user[$table->player[$i]];
         
         $flags = $user_cur->flags;
         
@@ -2826,7 +2826,7 @@ function log_auth($sess, $log)
 
 
 // function log_legal($curtime, $sess, $name, $where, $mesg) 
-function log_legal($curtime, &$user, $where, $mesg) 
+function log_legal($curtime, $user, $where, $mesg) 
 {
   GLOBAL $_SERVER;
 

@@ -582,15 +582,17 @@ else if ($user->stat == 'room') {
         }
         log_legal($curtime, $user, "STAT:CREATE_GAME", $plist);
 
-        if (($bri =& new Briskin5(&$room, $table_idx, $table_token)) == FALSE)
+        log_wr("pre new Bin5");
+        if (($bri = new Bin5($room, $table_idx, $table_token)) == FALSE)
           log_wr("bri create: FALSE");
         else
           log_wr("bri create: ".serialize($bri));
 	
+        log_wr("pre init table");
         // init table
-        $bri_table =& $bri->table[0];
-        $bri_table->init(&$bri->user);
-        $bri_table->game_init(&$bri->user);
+        $bri_table = $bri->table[0];
+        $bri_table->init($bri->user);
+        $bri_table->game_init($bri->user);
         //
         // Init spawned users.
         //
@@ -598,8 +600,8 @@ else if ($user->stat == 'room') {
         // 
         log_wr("game_init after");
         for ($i = 0 ; $i < $table->player_n ; $i++) {
-          $bri_user_cur = &$bri->user[$i];
-          $user_cur = &$room->user[$table->player[$i]];
+          $bri_user_cur = $bri->user[$i];
+          $user_cur = $room->user[$table->player[$i]];
           
           $bri_user_cur->stat_set('table');
           $bri_user_cur->subst = 'asta';
