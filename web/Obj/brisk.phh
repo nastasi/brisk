@@ -599,7 +599,8 @@ define(USER_FLAG_TY_SUSPEND, 0x400000); // done
 define(USER_FLAG_TY_DISABLE, 0x800000); // done
 
 class User {
-  var $idx;        // index in the users array
+  var $idx;        // index in the users array when you are in game
+  var $idx_orig;   // index in the users array when you aren't in game
   var $code;       // authentication code
   var $name;       // name of the user
   var $sess;       // session of the user
@@ -619,8 +620,8 @@ class User {
 
   // FIXME: the table_orig field must be removed after table field verify of index management (in spawned table
   //        it is allways ZERO
-  var $table_orig; // id of the current table (if in table state)
-  var $table;      // id of the current table (if in table state)
+  var $table;      // id of the current table when you are in game
+  var $table_orig; // id of the current table when you aren't in game
   var $table_pos;  // idx on the table
   var $table_token;// token that identify a game on a table
   var $flags;      // Bitfield with: AUTHENTICATE: 0x02 
@@ -642,36 +643,37 @@ class User {
     if (($thiz =& new User()) == FALSE)
       return (FALSE);
 
-    $thiz->idx   = $idx;
-    $thiz->code  = -1;
-    $thiz->name  = $name;
-    $thiz->sess  = $sess;
-    $thiz->ip    = $ip;
-    $thiz->lacc   = time();
-    $thiz->laccwr = time();
-    $thiz->bantime = 0;
-    $thiz->stat  = $stat;
-    $thiz->subst  = $subst;
-    $thiz->step  = 1;
-    $thiz->trans_step  = -1;
-    $thiz->comm  = array();
-    $thiz->asta_card = -2;
-    $thiz->asta_pnt  = -1;
-    $thiz->handpt = -1;
+    $thiz->idx        = $idx;
+    $thiz->idx_orig   = $idx;
+    $thiz->code       = -1;
+    $thiz->name       = $name;
+    $thiz->sess       = $sess;
+    $thiz->ip         = $ip;
+    $thiz->lacc       = time();
+    $thiz->laccwr     = time();
+    $thiz->bantime    = 0;
+    $thiz->stat       = $stat;
+    $thiz->subst      = $subst;
+    $thiz->step       = 1;
+    $thiz->trans_step = -1;
+    $thiz->comm       = array();
+    $thiz->asta_card  = -2;
+    $thiz->asta_pnt   = -1;
+    $thiz->handpt     = -1;
     $thiz->exitislock = TRUE;
 
-    $thiz->flags = 0x00;
+    $thiz->flags      = 0x00;
     
-    $thiz->chattime = array_fill(0, CHAT_N, 0);
-    $thiz->chat_cur = 0;
-    $thiz->chat_lst = "";
-    $thiz->chat_ban = 0;
-    $thiz->chat_dlt = 0;
+    $thiz->chattime   = array_fill(0, CHAT_N, 0);
+    $thiz->chat_cur   = 0;
+    $thiz->chat_lst   = "";
+    $thiz->chat_ban   = 0;
+    $thiz->chat_dlt   = 0;
 
     $thiz->table_orig = $table;
     $thiz->table      = $table;
-    $thiz->table_pos = -1;
-    $thiz->table_token = "";
+    $thiz->table_pos  = -1;
+    $thiz->table_token= "";
     $thiz->shm_sz = SHM_DIMS_U_MIN;
     return ($thiz);
   }
@@ -679,6 +681,7 @@ class User {
   function copy($from)
   {
     $this->idx        = $from->idx;
+    $this->idx_orig   = $from->idx;
     $this->code       = $from->code;
     $this->name       = $from->name;
     $this->sess       = $from->sess;
@@ -704,15 +707,15 @@ class User {
     $this->handpt     = $from->handpt;
     $this->exitislock = $from->exitislock;
 
-    $this->flags = $from->flags;
+    $this->flags      = $from->flags;
 
-    $this->chattime = array();
+    $this->chattime   = array();
     for ($i = 0 ; $i < CHAT_N ; $i++)
       $this->chattime[$i] = $from->chattime[$i];
-    $this->chat_cur = $from->chat_cur;
-    $this->chat_lst = $from->chat_lst;
-    $this->chat_ban = $from->chat_ban;
-    $this->chat_dlt = $from->chat_dlt;
+    $this->chat_cur   = $from->chat_cur;
+    $this->chat_lst   = $from->chat_lst;
+    $this->chat_ban   = $from->chat_ban;
+    $this->chat_dlt   = $from->chat_dlt;
 
     $this->table_orig = $from->table_orig;
     $this->table      = $from->table;
@@ -740,6 +743,7 @@ class User {
       return (FALSE);
     
     $thiz->idx        = $from->idx;
+    $thiz->idx_orig   = $from->idx;
     $thiz->code       = $from->code;
     $thiz->name       = $from->name;
     $thiz->sess       = $from->sess;
