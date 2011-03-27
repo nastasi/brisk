@@ -2499,7 +2499,7 @@ class Room {
       do {
           if (file_exists(PROXY_PATH) == FALSE)
               mkdir(PROXY_PATH);
-          if (($fp = @fopen(PROXY_PATH."/room_garbage_time.expired", 'rb')) == FALSE)
+          if (($fp = @fopen(PROXY_PATH."/garbage_time.expired", 'rb')) == FALSE)
               break;
           if (($s = fread($fp, 4)) == FALSE)
               break;
@@ -2523,7 +2523,7 @@ class Room {
       do {
           if (file_exists(PROXY_PATH) == FALSE)
               mkdir(PROXY_PATH);
-          if (($fp = @fopen(PROXY_PATH."/room_garbage_time.expired", 'wb')) == FALSE)
+          if (($fp = @fopen(PROXY_PATH."/garbage_time.expired", 'wb')) == FALSE)
               break;
           fwrite($fp, pack("L",$tm));
           fclose($fp);

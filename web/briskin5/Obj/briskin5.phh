@@ -683,7 +683,7 @@ class Bin5 {
   var $table;
   var $comm; // commands for many people
   var $step; // current step of the comm array
-  var $garbage_timeout;
+  // externalized var $garbage_timeout;
   var $shm_sz;
 
   var $table_idx;
@@ -1145,7 +1145,51 @@ class Bin5 {
 
     return ($is_ab);
   }
-} // end class Briskin5
+
+
+  static function garbage_time_is_expired($tm) 
+  {
+      $ret = TRUE;
+      $fp = FALSE;
+      do {
+          if (file_exists(BIN5_PROXY_PATH) == FALSE)
+              mkdir(BIN5_PROXY_PATH);
+          if (($fp = @fopen(BIN5_PROXY_PATH."/garbage_time.expired", 'rb')) == FALSE)
+              break;
+          if (($s = fread($fp, 4)) == FALSE)
+              break;
+          if (strlen($s) != 4)
+              break;
+          $arr = unpack('Le', $s);
+          if ($arr['e'] > $tm)
+              $ret = FALSE;
+      } while (0);
+      
+      if ($fp != FALSE)
+          fclose($fp);
+      
+      log_rd2("END: return ".($ret ? "TRUE" : "FALSE"));
+      
+      return ($ret);
+  }
+
+  static function garbage_time_expire_set($tm) 
+  {
+      do {
+          if (file_exists(BIN5_PROXY_PATH) == FALSE)
+              mkdir(BIN5_PROXY_PATH);
+          if (($fp = @fopen(BIN5_PROXY_PATH."/garbage_time.expired", 'wb')) == FALSE)
+              break;
+          fwrite($fp, pack("L",$tm));
+          fclose($fp);
+          
+          return (TRUE);
+      } while (0);
+      
+      return (FALSE);
+  }
+
+} // end class Bin5
 
 function locshm_exists($tok)
 {
