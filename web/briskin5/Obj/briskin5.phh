@@ -415,95 +415,270 @@ class Bin5_table extends Table {
 
     return ($ct);
   }
-} // end class Table_briskin5
+} // end class Bin5_table
 
 
 
 
 define(BIN5_USER_FLAG_RING_ENDAUCT, 0x01);
 
-class User_briskin5 extends User {
-  var $asta_card;  // 
-  var $asta_pnt;   //
-  var $handpt;     // Total card points at the beginning of the current hand.
-  var $exitislock; // Player can exit from the table ?
-  var $privflags;  // Flags for briskin5 only 
-
-  function User() {
-  }
-
-  /* CREATE NOT USED
-  function create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
-    if (($thiz =& new User()) == FALSE)
-      return (FALSE);
-
-    $thiz->asta_card = -2;
-    $thiz->asta_pnt  = -1;
-    $thiz->handpt = -1;
-    $thiz->exitislock = TRUE;
-    $thiz->privflags = 0;
-
-    return ($thiz);
-  }
-  */
-
-  function parentcopy(&$from)
-  {
-    parent::copy($from);
-  }
-
-  function copy(&$from)
-  {
-    $this->parentcopy($from);
-
-    $this->asta_card  = $from->asta_card;
-    $this->asta_pnt   = $from->asta_pnt;
-    $this->handpt     = $from->handpt;
-    $this->exitislock = $from->exitislock;
-    $this->privflags  = $from->privflags;
-  }
-
-  /* CLONE NOT USED
-  function myclone(&$from)
-  {
-    if (($thiz =& new User()) == FALSE)
-      return (FALSE);
-
-    $thiz->copy($from);
-
-    return ($thiz);
-  } 
-  */
-  
-  function spawn(&$from, $table, $table_pos)
-  {
-    GLOBAL $CO_bin5_pref_ring_endauct;
+class Bin5_user extends User {
+    var $asta_card;  // 
+    var $asta_pnt;   //
+    var $handpt;     // Total card points at the beginning of the current hand.
+    var $exitislock; // Player can exit from the table ?
+    var $privflags;  // Flags for briskin5 only 
     
-    if (($thiz =& new User_briskin5()) == FALSE)
-      return (FALSE);
+    function User() {
+    }
     
-    $thiz->parentcopy($from);
+    /* CREATE NOT USED
+     function create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+     if (($thiz =& new User()) == FALSE)
+     return (FALSE);
+     
+     $thiz->asta_card = -2;
+     $thiz->asta_pnt  = -1;
+     $thiz->handpt = -1;
+     $thiz->exitislock = TRUE;
+     $thiz->privflags = 0;
+     
+     return ($thiz);
+     }
+    */
+    
+    function parentcopy(&$from)
+    {
+        parent::copy($from);
+    }
+    
+    function copy(&$from)
+    {
+        $this->parentcopy($from);
+        
+        $this->asta_card  = $from->asta_card;
+        $this->asta_pnt   = $from->asta_pnt;
+        $this->handpt     = $from->handpt;
+        $this->exitislock = $from->exitislock;
+        $this->privflags  = $from->privflags;
+    }
+    
+    /* CLONE NOT USED
+     function myclone(&$from)
+     {
+     if (($thiz =& new User()) == FALSE)
+     return (FALSE);
+     
+     $thiz->copy($from);
+     
+     return ($thiz);
+     } 
+    */
+    
+    function spawn($from, $table, $table_pos)
+    {
+        GLOBAL $CO_bin5_pref_ring_endauct;
+        
+        if (($thiz = new Bin5_user()) == FALSE)
+            return (FALSE);
+        
+        $thiz->parentcopy($from);
+        
+        /* NOTE: at this moment idx and table_pos fields have the same value 
+                 but diffentent functions, we keep them separated for a while */
+        $thiz->idx        = $table_pos;
+        $thiz->asta_card  = -2;
+        $thiz->asta_pnt   = -1;
+        $thiz->handpt     = -1;
+        $thiz->exitislock = TRUE;
+        
+        log_wr("Bin5 constructor");
+        
+        $this->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
+        
+        $thiz->table_orig = $table;
+        $thiz->table      = 0;
+        $thiz->table_pos  = $table_pos;
+        
+        $thiz->step_inc();
 
-    $thiz->asta_card = -2;
-    $thiz->asta_pnt  = -1;
-    $thiz->handpt = -1;
-    $thiz->exitislock = TRUE;
+        return ($thiz);
+    }
 
-    log_wr("Briskin5 constructor");
+    function step_set($step) 
+    {
+        $this->step = $step & 0x7fffffff;
+        
+        do {
+            if (validate_sess($this->sess) == FALSE)
+                break;
+            if (file_exists(BIN5_PROXY_PATH) == FALSE)
+                mkdir(BIN5_PROXY_PATH, 0775, TRUE);
+            if (($fp = @fopen(BIN5_PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
+                break;
+            fwrite($fp, pack("LL",$this->step, $this->idx));
+            fclose($fp);
+            
+            log_main("step_set [".$this->sess. "] [".$this->step."]"); 
+            
+            return (TRUE);
+        } while (0);
+        
+        return (FALSE);
+    }
+    
+    function step_inc($delta = 1) {
+        $this->step += $delta;
+        /* modularization because unpack() not manage unsigned 32bit int correctly */
+        $this->step &= 0x7fffffff;
+        
+        if (validate_sess($this->sess)) {
+            if (file_exists(BIN5_PROXY_PATH) == FALSE)
+                mkdir(BIN5_PROXY_PATH);
+            $fp = fopen(BIN5_PROXY_PATH."/".$this->sess.".step", 'w');
+            fwrite($fp, pack("LL", $this->step, $this->idx));
+            fclose($fp);
+            
+            log_main("step_inc [".$this->sess. "] [".$this->step."]"); 
+            
+            return (TRUE);
+        }
+        
+        return (FALSE);
+    }
+    
+    static function step_get($sess)
+    {
+        $fp = FALSE;
+        do {
+            if (validate_sess($sess) == FALSE)
+                break;
+            
+            if (file_exists(BIN5_PROXY_PATH) == FALSE)
+                mkdir(BIN5_PROXY_PATH);
+            if (($fp = @fopen(BIN5_PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
+                break;
+            if (($s = fread($fp, 8)) == FALSE)
+                break;
+            if (strlen($s) != 8)
+                break;
+            $arr = unpack('Ls/Li', $s);
+            fclose($fp);
+            
+            // log_rd2("A0: ".$arr[0]."  A1: ".$arr[1]);
+            return ($arr);
+        } while (0);
+        
+        if ($fp != FALSE)
+            fclose($fp);
+        
+        log_rd2("STEP_GET [".$sess."]: return false ");
+        
+        return (FALSE);
+    }
+    
+    static function load_data($tab_id, $id, $sess) 
+    {
+        // error_log("Bin5_user::load_data BEGIN", 0);
+        error_log("Bin5_user::load_data BEGIN id [".$id."]", 0);
+        
+        log_main("load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
+        
+        $doexit = FALSE;
+        do {
+            if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$id, "B")) == -1) {
+                log_main("ftok failed");
+                $doexit = TRUE;
+                break;
+            }
+            
+            if (($shm_sz = sharedmem_sz($tok)) == -1) {
+                log_main("shmop_open failed");
+            }
+            
+            if ($shm_sz == -1)
+                $shm_sz = SHM_DIMS_U_MIN;
+            
+            if ($shm = shm_attach($tok, $shm_sz)) {
+                $user = @shm_get_var($shm, $tok);
+                
+                if ($sess != FALSE && $user->sess != $sess) {
+                    $doexit = TRUE;
+                    break;
+                }
+                log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
+                if (isset($user)) 
+                    log_only("bri count ".count($user));
+                
+                if ($user == FALSE) {
+                    log_only("INIT MAIN DATA");
+                    
+                    // SHSPLIT FIXME: init_data for User class ??
+                    $user = User::create($id, "", "");
+                    if (@shm_put_var($shm, $tok, $user) == FALSE) {
+                        log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
+                        log_only(serialize($user));
+                    }
+                }
+                
+                $user->shm_sz = $shm_sz;
+                
+                shm_detach($shm);
+            }
+            
+            //  
+            // SHSPLIT: load users from the shared memory
+            //
+            return ($user);
+        } while (0);
+        
+        if ($doexit)
+            exit();
+        
+        return (FALSE);
+    }
 
-    $this->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
-
-    $thiz->table_orig = $table;
-    $thiz->table      = 0;
-    $thiz->table_pos  = $table_pos;
-
-    return ($thiz);
+  static function save_data($user, $tab_id, $id) 
+  {
+      GLOBAL $sess;
+      
+      $shm =   FALSE;
+      
+      // var_dump($user);
+      error_log("Bin5_user::save_data BEGIN id [".$id."]", 0);
+      
+      if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$id, "B")) == -1) {
+          return (FALSE);
+      }
+      while ($user->shm_sz < SHM_DIMS_U_MAX) {
+          if (($shm = shm_attach($tok, $user->shm_sz)) == FALSE)
+              break;
+          
+          // log_only("PUT_VAR DI ".strlen(serialize($user)));
+          if (shm_put_var($shm, $tok, $user) != FALSE) {
+              shm_detach($shm);
+              log_main("User[".$id."] saved.");
+              return (TRUE);
+          }
+          if (shm_remove($shm) === FALSE) {
+              log_only("REMOVE FALLITA");
+              break;
+          }
+          shm_detach($shm);
+          $user->shm_sz += SHM_DIMS_U_DLT;
+      } 
+      
+      if ($shm)
+          shm_detach($shm);
+      
+      return (FALSE);
   }
-} // end class User_briskin5
+
+} // end class Bin5_user
 
 
 
-class Briskin5 {
+class Bin5 {
   var $user;
   var $table;
   var $comm; // commands for many people
@@ -620,29 +795,25 @@ class Briskin5 {
       }
       log_rd2($user_cur->sess." GARBAGE UPDATED!");
       
-      $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
+      // externalized $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
+      Bin5::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
+
       $ismod = TRUE;
     }
 
     return ($ismod);
   }
 
-
-
-
-  //
-  //  static functions
-  //
-  function load_data($table_idx, $table_token = "") 
+  // Bin5::load_data
+  static function load_data($table_idx, $table_token = "") 
   {
-    GLOBAL $G_false, $sess;
     $doexit = FALSE;
     $shm = FALSE;
 
-    log_wr("TABLE_IDX ".FTOK_PATH."/table".$table_idx);
+    log_wr("TABLE_IDX ".FTOK_PATH."/bin5/table".$table_idx."/table");
     
     do {
-      if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+      if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) {
 	log_main("ftok failed");
 	$doexit = TRUE;
 	break;
@@ -679,49 +850,60 @@ class Briskin5 {
 
     log_wr("briskin5 load_data failed");
     if ($doexit)
-      exit();
+        exit();
     
     return (FALSE);
   }
   
 
 
-  function save_data(&$bri) 
+  function save_data($bri) 
   {
-    GLOBAL $sess;
-    
-    $ret =   FALSE;
-    $shm =   FALSE;
-    
-    log_main("SAVE BRISKIN5 DATA");
-    
-    if (!isset($bri->tok))
-      return (FALSE);
-    
-    while ($bri->shm_sz < BRISKIN5_SHM_MAX) {
-      if (($shm = shm_attach($bri->tok, $bri->shm_sz)) == FALSE)
-	break;
+      GLOBAL $sess;
       
-      if (@shm_put_var($shm, $bri->tok, $bri) != FALSE) {
-	shm_detach($shm);
-	return (TRUE);
+      $ret =   FALSE;
+      $shm =   FALSE;
+      
+      log_main("SAVE BRISKIN5 DATA");
+      
+      if (!isset($bri->tok))
+          return (FALSE);
+      
+      $user_park = array();
+      for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
+          $user_park[$i] = $bri->user[$i];
+          $bri->user[$i] = FALSE;
       }
-      if (shm_remove($shm) === FALSE) {
-	log_only("REMOVE FALLITA");
-	break;
+      
+      while ($bri->shm_sz < BIN5_SHM_MAX) {
+          if (($shm = shm_attach($bri->tok, $bri->shm_sz)) == FALSE)
+              break;
+          
+          if (@shm_put_var($shm, $bri->tok, $bri) != FALSE) {
+              $ret = TRUE;
+              break;
+          }
+          if (shm_remove($shm) === FALSE) {
+              log_only("REMOVE FALLITA");
+              break;
+          }
+          shm_detach($shm);
+          $bri->shm_sz += BIN5_SHM_DLT;
+      } 
+      
+      if ($shm)
+          shm_detach($shm);
+      
+      // SHSPLIT: reattach users to the room class
+      for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
+          Bin5_user::save_data($user_park[$i], $bri->table_idx, $i);
+          $bri->user[$i] = $user_park[$i];
       }
-      shm_detach($shm);
-      $bri->shm_sz += BRISKIN5_SHM_DLT;
-    } 
-
-    log_crit("save data failed!");
-
-    if ($shm)
-      shm_detach($shm);
-    
-    return ($ret);
+      log_load("FINISH: ".($ret == TRUE ? "TRUE" : "FALSE"));
+      
+      return ($ret);
   }
-
+  
 
 
   function destroy_data($table_idx) 
@@ -735,7 +917,7 @@ class Briskin5 {
     do {
       log_main("DESTROY2 BRISKIN5 DATA");
 
-      if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) 
+      if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) 
 	break;
 
       if (($shm = @shmop_open($tok, 'a', 0, 0)) == FALSE)
@@ -763,11 +945,11 @@ class Briskin5 {
   {
     GLOBAL $sess; 
     
-    log_lock("LOCK_DATA ".FTOK_PATH."/table".$table_idx);
+    log_lock("LOCK_DATA ".FTOK_PATH."/bin5/table".$table_idx."/table");
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
     // WARNING monitor this step
-    if (($tok = @ftok(FTOK_PATH."/table".$table_idx, "B")) == -1) {
+    if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) {
       return (FALSE);
     }
     // WARNING monitor this step

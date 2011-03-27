@@ -75,211 +75,230 @@ function page_sync($sess, $page)
 
 function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx, $table_token)
 {
-  GLOBAL $is_page_streaming, $first_loop;
-  
-  $ret = FALSE;
-  $bri = FALSE;
-
-  // log_rd2("M");
-  /* Sync check (read only without modifications */
-  ignore_user_abort(TRUE);
-  if (($sem = Briskin5::lock_data($table_idx)) != FALSE) { 
-    // Aggiorna l'expire time lato server
-    if  ($first_loop == TRUE) {
-      log_only("F");
-
-      // VERIFICARE TUTTE LE LOAD_DATA E PRENDERE CONTROMISURE NEL CASO FALLISCANO //
-
-      if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) {
-	Briskin5::unlock_data($sem);
-        ignore_user_abort(FALSE);
-	return (unrecerror());
-      }
-      if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-	Briskin5::unlock_data($sem);
-        ignore_user_abort(FALSE);
-	return (unrecerror());
-      }
-      log_auth($sess, "bin5::update lacc");
-      $user->lacc = time();
-
-      $bri->garbage_manager(FALSE);
-      
-      Briskin5::save_data($bri);
-      $first_loop = FALSE;
+    GLOBAL $is_page_streaming, $first_loop, $S_load_stat;
+    
+    $ret = FALSE;
+    $bri = FALSE;
+    $user = FALSE;
+    $curtime = time();
+    
+    if (($proxy_step = Bin5_user::step_get($sess)) == FALSE) {
+        log_only2("R");
+        return (FALSE);
     }
+    
+    error_log("maincheck: step di i [".$proxy_step['i']."]", 0);
 
-    log_lock("U");
-    Briskin5::unlock_data($sem);
-    ignore_user_abort(FALSE);
-  }
-  else {
-    return (FALSE);
-  }
-  
-  if (($proxy_step = User::step_get($sess)) != FALSE) {
-    // log_rd2("Postget".$proxy_step."zizi");
+    // log_rd2("M");
+    /* Sync check (read only without modifications */
+    ignore_user_abort(TRUE);
+    if  ($first_loop == TRUE) {
+        if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
+            // Aggiorna l'expire time lato server
+            $S_load_stat['U_first_loop']++;
+            if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+                Bin5::unlock_data();
+                ignore_user_abort(FALSE);
+                return (unrecerror());
+            }
+            $user->lacc = $curtime;
+            Bin5_user::save_data($user, $proxy_step['i'], $user->idx);
+            
+            if (Bin5::garbage_time_is_expired($curtime)) {
+                log_only("F");
+                
+                $S_load_stat['R_garbage']++;
+                if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
+                    Bin5::unlock_data($sem);
+                    ignore_user_abort(FALSE);
+                    return (unrecerror());
+                }
+                
+                $bri->garbage_manager(FALSE);
+                
+                Bin5::save_data($bri);
+                unset($bri);
+            }
+            log_lock("U");
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+        } // if (($sem = Bin5::lock_data($table ...
+        else {
+            ignore_user_abort(FALSE);
+            
+            return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+        }
+        
+        $first_loop = FALSE;
+    } // if  ($first_loop == TRUE) {
     
     if ($cur_step == $proxy_step['s']) {
-      log_lock("P");
-      return (FALSE);
+        log_lock("P");
+        return (FALSE);
     }
     else {
-      log_only2("R");
+        log_only2("R");
     }
-  }
-  else {
-    log_only2("R");
-  }
-  
-  if ($bri == FALSE) {
-    do {
-      ignore_user_abort(TRUE);
-      if (($sem = Briskin5::lock_data($table_idx)) == FALSE) 
-	break;
-      
-      log_lock("P");
-      if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) 
-	break;
-    } while (0);
     
-    if ($sem != FALSE)
-      Briskin5::unlock_data($sem);
-    
-    ignore_user_abort(FALSE);
-    if ($bri == FALSE) 
-      return (unrecerror());
-  }
-  
-  if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-    return (unrecerror());
-  }
-
-  /* Nothing changed, return. */
-  if ($cur_step == $user->step) 
-    return;
-
-  log_rd2("do other ++".$cur_stat."++".$user->stat."++".$cur_step."++".$user->step);
-
-  if ($cur_step == -1) {
-    // FUNZIONE from_scratch DA QUI 
-    ignore_user_abort(TRUE);
-    $sem = Briskin5::lock_data($table_idx);
-    $bri = &Briskin5::load_data($table_idx, $table_token);
-    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-      Briskin5::unlock_data($sem);
-      ignore_user_abort(FALSE);
-      return (unrecerror());
+    if ($user == FALSE) {
+        do {
+            ignore_user_abort(TRUE);
+            if (($sem = Bin5::lock_data($table_idx)) == FALSE) 
+                break;
+            
+            log_lock("P");
+            $S_load_stat['U_heavy']++;
+            // if (($bri = &Bin5::load_data($table_idx, $table_token)) == FALSE) 
+            // if (($user = Bin5_user::load_data($table_idx, $table_token)) == FALSE) 
+            if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+                break;
+            }
+        } while (0);
+        
+        if ($sem != FALSE)
+            Bin5::unlock_data($sem);
+        
+        ignore_user_abort(FALSE);
+        if ($user == FALSE) 
+            return (unrecerror());
     }
-    if ($user->the_end) 
-      $is_page_streaming = TRUE;
+    
+    /* Nothing changed, return. */
+    if ($cur_step == $user->step) 
+        return (FALSE);
+    
+    log_rd2("do other cur_stat[".$cur_stat."] user->stat[".$user->stat."] cur_step[".$cur_step."] user_step[".$user->step."]");
 
-
-    if ($user->trans_step != -1) {
-      log_rd2("TRANS USATO ".$user->trans_step);
-      $cur_step = $user->trans_step;
-      $user->trans_step = -1;
-
-
-      Briskin5::save_data($bri);
-      Briskin5::unlock_data($sem);
-      ignore_user_abort(FALSE);
+    if ($cur_step == -1) {
+        /*
+         *  if $cur_step == -1 load the current state from the main struct
+         */
+        ignore_user_abort(TRUE);
+        $sem = Bin5::lock_data($table_idx);
+        $bri = Bin5::load_data($table_idx, $table_token);
+        $S_load_stat['R_minusone']++;
+        
+        /* unset the $user var to reload it from main structure */
+        unset($user);
+        if (($user = $bri->get_user($sess, $idx)) == FALSE) {
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+            return (unrecerror());
+        }
+        if ($user->the_end) {
+            log_rd2("main_check: the end".var_export(debug_backtrace()));
+            $is_page_streaming = TRUE;
+        }
+        
+        if ($user->trans_step != -1) {
+            log_rd2("TRANS USATO ".$user->trans_step);
+            $cur_step = $user->trans_step;
+            $user->trans_step = -1;
+            
+            Bin5::save_data($bri);
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+        }
+        else {
+            log_rd2("TRANS NON ATTIVATO");
+            
+            //       ARRAY_POP DISABLED
+            //       while (array_pop($user->comm) != NULL);
+            //       // $user->step_inc(COMM_N + 1);
+            //       Bin5::save_data($bri);
+            
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+        }
+    }
+    
+    if ($cur_step == -1) {
+        log_rd2("PRE-NEWSTAT.");
+        
+        /***************
+         *             *
+         *    TABLE    *
+         *             *
+         ***************/
+        if ($user->stat == "table") {      
+            $ret = show_table(&$bri,&$user,$user->step,FALSE,FALSE);
+            
+            log_rd2("SENDED TO THE STREAM: ".$ret);
+        }
+        log_rd2("NEWSTAT: ".$user->stat);
+        
+        $new_stat =  $user->stat;
+        $new_subst = $user->subst;
+        $new_step =  $user->step;
     }
     else {
-      log_rd2("TRANS NON ATTIVATO");
-
-//       ARRAY_POP DISABLED
-//       while (array_pop($user->comm) != NULL);
-//       // $user->step_inc(COMM_N + 1);
-//       Briskin5::save_data($bri);
-
-      Briskin5::unlock_data($sem);
-      ignore_user_abort(FALSE);
-    }
+        ignore_user_abort(TRUE);
+        $sem = Bin5::lock_data($table_idx);
+        // if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
+        if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+            return (unrecerror());
+        }
+        if ($cur_step < $user->step) {
+            do {
+                if ($cur_step + COMM_N < $user->step) {
+                    if (($cur_stat != $user->stat)) {
+                        $to_stat = $user->stat;
+                        Bin5::unlock_data($sem);
+                        ignore_user_abort(FALSE);
+                        return (page_sync($user->sess, $to_stat == "table" ? "index.php" : "../index.php"));
+                    }
+                    log_rd2("lost history, refresh from scratch");
+                    $new_step = -1;
+                    break;
+                } 
+                for ($i = $cur_step ; $i < $user->step ; $i++) {
+                    $ii = $i % COMM_N;
+                    log_wr("TRY RET ".$i."  COMM_N ".COMM_N."  II ".$ii);
+                    $ret .= $user->comm[$ii];
+                }
+                $new_stat =  $user->stat;
+                $new_subst = $user->subst;
+                $new_step =  $user->step;
+            } while (0);
+            
+            log_mop($user->step, 'bin::index_rd.php: after ret set');
+            
+            if ($user->the_end == TRUE) {
+                log_rd2("LOGOUT BYE BYE!!");
+                log_auth($user->sess, "Explicit logout.");
+                
+                $S_load_stat['R_the_end']++;
+                $bri = Bin5::load_data($table_idx, $table_token);
+                unset($user);
+                if (($user = $bri->get_user($sess, $idx)) == FALSE) {
+                    Bin5::unlock_data($sem);
+                    ignore_user_abort(FALSE);
+                    return (unrecerror());
+                }
+                
+                $tmp_sess = $user->sess;
+                $user->sess = "";
+                step_unproxy($tmp_sess);
+                $user->name = "";
+                $user->the_end = FALSE;
+                
+                if ($user->subst == 'sitdown')
+                    $bri->room_wakeup($user);
+                else if ($user->subst == 'standup')
+                    $bri->room_outstandup($user);
+                else
+                    log_rd2("LOGOUT FROM WHAT ???");
+                
+                Bin5::save_data($bri);
+            }
+        }
+        
+        Bin5::unlock_data($sem);
+        ignore_user_abort(FALSE);
   }
-      
-  if ($cur_step == -1) {
-    log_rd2("PRE-NEWSTAT.");
-
-    /***************
-     *             *
-     *    TABLE    *
-     *             *
-     ***************/
-    if ($user->stat == "table") {      
-      $ret = show_table(&$bri,&$user,$user->step,FALSE,FALSE);
-
-      log_rd2("SENDED TO THE STREAM: ".$ret);
-    }
-    log_rd2("NEWSTAT: ".$user->stat);
-
-    $new_stat =  $user->stat;
-    $new_subst = $user->subst;
-    $new_step =  $user->step;
-  }
-  else {
-    ignore_user_abort(TRUE);
-    $sem = Briskin5::lock_data($table_idx);
-    if (($bri = &Briskin5::load_data($table_idx, $table_token)) == FALSE) {
-      Briskin5::unlock_data($sem);
-      ignore_user_abort(FALSE);
-      return (unrecerror());
-    }
-    if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
-      Briskin5::unlock_data($sem);
-      ignore_user_abort(FALSE);
-      return (unrecerror());
-    }
-    if ($cur_step < $user->step) {
-      do {
-	if ($cur_step + COMM_N < $user->step) {
-	  if (($cur_stat != $user->stat)) {
-	    $to_stat = $user->stat;
-	    Briskin5::unlock_data($sem);
-	    ignore_user_abort(FALSE);
-	    return (page_sync($user->sess, $to_stat == "table" ? "index.php" : "../index.php"));
-	  }
-	  log_rd2("lost history, refresh from scratch");
-	  $new_step = -1;
-	  break;
-	} 
-	for ($i = $cur_step ; $i < $user->step ; $i++) {
-	  $ii = $i % COMM_N;
-	  log_wr("TRY RET ".$i."  COMM_N ".COMM_N."  II ".$ii);
-	  $ret .= $user->comm[$ii];
-	}
-	$new_stat =  $user->stat;
-	$new_subst = $user->subst;
-	$new_step =  $user->step;
-      } while (0);
-
-      log_mop($user->step, 'bin::index_rd.php: after ret set');
-      
-      if ($user->the_end == TRUE) {
-	log_rd2("LOGOUT BYE BYE!!");
-	log_auth($user->sess, "Explicit logout.");
-	$tmp_sess = $user->sess;
-	$user->sess = "";
-	step_unproxy($tmp_sess);
-	
-	$user->name = "";
-	$user->the_end = FALSE;
-	
-	if ($user->subst == 'sitdown')
-	  $bri->room_wakeup(&$user);
-	else if ($user->subst == 'standup')
-	  $bri->room_outstandup(&$user);
-	else
-	  log_rd2("LOGOUT FROM WHAT ???");
-	  
-	Briskin5::save_data($bri);
-      }
-    }
-	  
-    Briskin5::unlock_data($sem);
-    ignore_user_abort(FALSE);
-  }
-
+  
   
   return ($ret);
 }

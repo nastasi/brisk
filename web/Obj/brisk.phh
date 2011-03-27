@@ -854,125 +854,6 @@ class User {
       return (FALSE);
   }
 
-  function reset() {
-    $curtime = time();
-    log_legal($curtime, $this, "STAT:LOGOUT", '');
-
-    $tmp_sess = $this->sess;
-    $this->sess = "";
-    step_unproxy($tmp_sess);
-    $this->name = "";  // OK here
-    while (array_pop($this->comm) != NULL);
-    $this->step = 0;
-    $this->chattime = array_fill(0, CHAT_N, 0);
-    $this->chat_cur = 0;
-    $this->chat_lst = "";
-    $this->chat_ban = 0;
-    $this->chat_dlt = 0;
-    $this->the_end = FALSE;
-  }
-
-
-
-  // SHSPLIT save and load function for the User class.
-  static function load_data($id, $sess) 
-  {
-    // error_log("User::load_data BEGIN", 0);
-
-    log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
-
-    $doexit = FALSE;
-    do {
-      if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
-	log_main("ftok failed");
-	$doexit = TRUE;
-	break;
-      }
-    
-      if (($shm_sz = sharedmem_sz($tok)) == -1) {
-	log_main("shmop_open failed");
-      }
-	
-      if ($shm_sz == -1)
-	$shm_sz = SHM_DIMS_U_MIN;
-
-      if ($shm = shm_attach($tok, $shm_sz)) {
-	$user = @shm_get_var($shm, $tok);
-	
-        if ($sess != FALSE && $user->sess != $sess) {
-            $doexit = TRUE;
-            break;
-        }
-	log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
-	if (isset($user)) 
-	  log_only("bri count ".count($user));
-	
-	if ($user == FALSE) {
-	  log_only("INIT MAIN DATA");
-	  
-          // SHSPLIT FIXME: init_data for User class ??
-	  $user = User::create($id, "", "");
-	  if (@shm_put_var($shm, $tok, $user) == FALSE) {
-              log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
-              log_only(serialize($user));
-	  }
-	}
-
-	$user->shm_sz = $shm_sz;
-	
-	shm_detach($shm);
-      }
-      
-      //  
-      // SHSPLIT: load users from the shared memory
-      //
-      return ($user);
-    } while (0);
-    
-    if ($doexit)
-      exit();
-    
-    return (FALSE);
-  }
-  
-
-  function save_data($user, $id) 
-  {
-    GLOBAL $sess;
-    
-    $shm =   FALSE;
-    
-    // var_dump($user);
-    // error_log("User::save_data BEGIN", 0);
-
-    if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
-      return (FALSE);
-    }
-    while ($user->shm_sz < SHM_DIMS_U_MAX) {
-      if (($shm = shm_attach($tok, $user->shm_sz)) == FALSE)
-	break;
-      
-      // log_only("PUT_VAR DI ".strlen(serialize($user)));
-      if (shm_put_var($shm, $tok, $user) != FALSE) {
-	shm_detach($shm);
-	log_main("User[".$id."] saved.");
-	return (TRUE);
-      }
-      if (shm_remove($shm) === FALSE) {
-	log_only("REMOVE FALLITA");
-	break;
-      }
-      shm_detach($shm);
-      $user->shm_sz += SHM_DIMS_U_DLT;
-    } 
-
-    if ($shm)
-      shm_detach($shm);
-    
-    return (FALSE);
-  }
-
-
   static function step_get($sess)
   {
       $fp = FALSE;
@@ -1002,6 +883,122 @@ class User {
       
       return (FALSE);
   }
+
+  function reset() {
+    $curtime = time();
+    log_legal($curtime, $this, "STAT:LOGOUT", '');
+
+    $tmp_sess = $this->sess;
+    $this->sess = "";
+    step_unproxy($tmp_sess);
+    $this->name = "";  // OK here
+    while (array_pop($this->comm) != NULL);
+    $this->step = 0;
+    $this->chattime = array_fill(0, CHAT_N, 0);
+    $this->chat_cur = 0;
+    $this->chat_lst = "";
+    $this->chat_ban = 0;
+    $this->chat_dlt = 0;
+    $this->the_end = FALSE;
+  }
+
+  static function load_data($id, $sess) 
+  {
+      // error_log("User::load_data BEGIN", 0);
+      
+      log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
+      
+      $doexit = FALSE;
+      do {
+          if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+              log_main("ftok failed");
+              $doexit = TRUE;
+              break;
+          }
+          
+          if (($shm_sz = sharedmem_sz($tok)) == -1) {
+              log_main("shmop_open failed");
+          }
+          
+          if ($shm_sz == -1)
+              $shm_sz = SHM_DIMS_U_MIN;
+          
+          if ($shm = shm_attach($tok, $shm_sz)) {
+              $user = @shm_get_var($shm, $tok);
+              
+              if ($sess != FALSE && $user->sess != $sess) {
+                  $doexit = TRUE;
+                  break;
+              }
+              log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
+              if (isset($user)) 
+                  log_only("bri count ".count($user));
+              
+              if ($user == FALSE) {
+                  log_only("INIT MAIN DATA");
+                  
+                  // SHSPLIT FIXME: init_data for User class ??
+                  $user = User::create($id, "", "");
+                  if (@shm_put_var($shm, $tok, $user) == FALSE) {
+                      log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
+                      log_only(serialize($user));
+                  }
+              }
+              
+              $user->shm_sz = $shm_sz;
+              
+              shm_detach($shm);
+          }
+          
+          //  
+          // SHSPLIT: load users from the shared memory
+          //
+          return ($user);
+      } while (0);
+      
+      if ($doexit)
+          exit();
+      
+      return (FALSE);
+  }
+  
+
+  static function save_data($user, $id) 
+  {
+      GLOBAL $sess;
+      
+      $shm =   FALSE;
+      
+      // var_dump($user);
+      // error_log("User::save_data BEGIN", 0);
+      
+      if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+          return (FALSE);
+      }
+      while ($user->shm_sz < SHM_DIMS_U_MAX) {
+          if (($shm = shm_attach($tok, $user->shm_sz)) == FALSE)
+              break;
+          
+          // log_only("PUT_VAR DI ".strlen(serialize($user)));
+          if (shm_put_var($shm, $tok, $user) != FALSE) {
+              shm_detach($shm);
+              log_main("User[".$id."] saved.");
+              return (TRUE);
+          }
+          if (shm_remove($shm) === FALSE) {
+              log_only("REMOVE FALLITA");
+              break;
+          }
+          shm_detach($shm);
+          $user->shm_sz += SHM_DIMS_U_DLT;
+      } 
+      
+      if ($shm)
+          shm_detach($shm);
+      
+      return (FALSE);
+  }
+
 
 } // end class User
 
