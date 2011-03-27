@@ -51,7 +51,7 @@ class ImpPoints
         // error_log("TTOK: ".count($arr), 0);
 
         if (count($arr) != 20) {
-            error_log("COUNT: ".count($arr));
+            // error_log("COUNT: ".count($arr));
             return FALSE;
         }
 

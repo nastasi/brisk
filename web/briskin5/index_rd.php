@@ -93,7 +93,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         return (FALSE);
     }
     
-    error_log("maincheck: step di i [".$proxy_step['i']."]", 0);
+    // error_log("maincheck: step di i [".$proxy_step['i']."]", 0);
 
     // log_rd2("M");
     /* Sync check (read only without modifications */
@@ -364,6 +364,12 @@ for ($i = 0 ; time() < $endtime ; $i++) {
     echo '_';
     flush();
   }
+ }
+
+$s = "[".$sess."] briskin5/index_rd.php stats: ";
+foreach ($S_load_stat as $key => $value) {
+    $s .= sprintf("%s: %d - ", $key, $value);
 }
+log_crit($s);
 
 ?>

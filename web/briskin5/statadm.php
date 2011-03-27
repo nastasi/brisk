@@ -262,7 +262,7 @@ function main_pgsql($curtime)
                 $mtc_sql = sprintf("SELECT * from %sbin5_matches WHERE code = %d",
                                    $G_dbpfx, $tmt_obj->code);
                 
-                error_log($mtc_sql, 0);
+                // error_log($mtc_sql, 0);
                 if (($mtc_pg  = pg_query($bdb->dbconn->db(), $mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
                     log_crit("statadm: matches row select failed");
                     break;

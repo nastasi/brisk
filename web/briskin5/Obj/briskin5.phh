@@ -579,8 +579,7 @@ class Bin5_user extends User {
     
     static function load_data($tab_id, $id, $sess) 
     {
-        // error_log("Bin5_user::load_data BEGIN", 0);
-        error_log("Bin5_user::load_data BEGIN id [".$id."]", 0);
+        // error_log("Bin5_user::load_data BEGIN id [".$id."]", 0);
         
         log_main("load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
         
@@ -645,7 +644,7 @@ class Bin5_user extends User {
       $shm =   FALSE;
       
       // var_dump($user);
-      error_log("Bin5_user::save_data BEGIN id [".$id."]", 0);
+      // error_log("Bin5_user::save_data BEGIN id [".$id."]", 0);
       
       if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$id, "B")) == -1) {
           return (FALSE);
