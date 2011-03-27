@@ -183,6 +183,8 @@ if [ ! -z "$outconf" ]; then
     echo "web_only=\"$web_only\""
   ) > "$outconf"
 fi
+
+max_players=$((40 + players_n * tables_n))
 #
 #  Pre-check
 #
@@ -234,14 +236,34 @@ if [ "$web_only" = "FALSE" ]; then
     chmod 666 ${ftokk_path}/warrant
     touch ${ftokk_path}/poll
     chmod 666 ${ftokk_path}/poll
-    for i in $(seq 0 99); do 
-        touch ${ftokk_path}/table$i
-        chmod 666 ${ftokk_path}/table$i
-    done
-    for i in $(seq 0 299); do
+    for i in $(seq 0 $max_players); do
         touch ${ftokk_path}/user$i
         chmod 666 ${ftokk_path}/user$i
     done
+
+    if [ ! -d ${ftokk_path}/bin5 ]; then
+        mkdir ${ftokk_path}/bin5
+        chmod 777 ${ftokk_path}/bin5
+    fi
+
+    for i in $(seq 0 $max_players); do
+        if [ ! -d ${ftokk_path}/bin5/table$i ]; then
+            mkdir ${ftokk_path}/bin5/table$i
+        fi
+        chmod 777 ${ftokk_path}/bin5/table$i
+        touch ${ftokk_path}/bin5/table$i/table
+        chmod 666 ${ftokk_path}/bin5/table$i/table
+        for e in $(seq 0 4); do
+            touch ${ftokk_path}/bin5/table$i/user$e
+            chmod 666 ${ftokk_path}/bin5/table$i/user$e
+        done
+    done
+
+    # create subdirectories in proxy path
+    if [ ! -d ${proxy_path}/bin5 ]; then
+        mkdir ${proxy_path}/bin5
+    fi
+    chmod 777 ${proxy_path}/bin5
 fi
 install -d ${web_path}__
 for i in $(find web -type d | grep -v /CVS | sed 's/^....//g'); do
