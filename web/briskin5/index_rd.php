@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - index_rd.php
+ *  brisk - briskin5/index_rd.php
  *
  *  Copyright (C) 2006-2011 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
