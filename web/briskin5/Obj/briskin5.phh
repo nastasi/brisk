@@ -609,6 +609,19 @@ class Bin5_user extends User {
                         log_only(serialize($user));
                     }
                 }
+                else {
+                    if ($sess != FALSE) {
+                        // This part isn't strictly required but is good to verify
+                        // the coerence of cached and User class saved value of step field.
+                        $old_step = $user->step;
+                        $arr = Bin5_user::load_step($sess);
+                        $user->step = $arr['s'];
+                        if ($old_step != $user->step) {
+                            log_crit("Bin5:: steps are diffetents User->step ".$user->step." Old_step: ".$old_step);
+                        }
+
+                    }
+                }
                 
                 $user->shm_sz = $shm_sz;
                 
