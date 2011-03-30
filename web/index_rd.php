@@ -105,7 +105,9 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $user = FALSE;
     $curtime = time();
     
-    if (($proxy_step = User::step_get($sess)) == FALSE) {
+    // NOTE: qui forse si potrebbe fallback-are a una User::load_data 
+    //       anche se non ce ne dovrebbe essere mai la necessità
+    if (($proxy_step = User::load_step($sess)) == FALSE) {
         log_only2("R");
         return (FALSE);
     }

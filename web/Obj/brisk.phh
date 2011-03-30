@@ -979,6 +979,8 @@ class User {
           // log_only("PUT_VAR DI ".strlen(serialize($user)));
           if (shm_put_var($shm, $tok, $user) != FALSE) {
               shm_detach($shm);
+              if ($user->sess != "")
+                  $user->save_step();
               log_main("User[".$id."] saved.");
               return (TRUE);
           }

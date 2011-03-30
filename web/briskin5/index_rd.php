@@ -88,7 +88,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $user = FALSE;
     $curtime = time();
     
-    if (($proxy_step = Bin5_user::step_get($sess)) == FALSE) {
+    if (($proxy_step = Bin5_user::load_step($sess)) == FALSE) {
         log_only2("R");
         return (FALSE);
     }
@@ -100,13 +100,15 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
             // Aggiorna l'expire time lato server
             $S_load_stat['U_first_loop']++;
+
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
                 Bin5::unlock_data();
                 ignore_user_abort(FALSE);
                 return (unrecerror());
             }
             $user->lacc = $curtime;
-            Bin5_user::save_data($user, $proxy_step['i'], $user->idx);
+
+            Bin5_user::save_data($user, $table_idx, $user->idx);
             
             if (Bin5::garbage_time_is_expired($curtime)) {
                 log_only("F");
