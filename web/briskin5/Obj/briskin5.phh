@@ -509,22 +509,7 @@ class Bin5_user extends User {
     {
         $this->step = $step & 0x7fffffff;
         
-        do {
-            if (validate_sess($this->sess) == FALSE)
-                break;
-            if (file_exists(BIN5_PROXY_PATH) == FALSE)
-                mkdir(BIN5_PROXY_PATH, 0775, TRUE);
-            if (($fp = @fopen(BIN5_PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
-                break;
-            fwrite($fp, pack("LL",$this->step, $this->idx));
-            fclose($fp);
-            
-            log_main("step_set [".$this->sess. "] [".$this->step."]"); 
-            
-            return (TRUE);
-        } while (0);
-        
-        return (FALSE);
+        return TRUE;
     }
     
     function step_inc($delta = 1) {
@@ -532,22 +517,10 @@ class Bin5_user extends User {
         /* modularization because unpack() not manage unsigned 32bit int correctly */
         $this->step &= 0x7fffffff;
         
-        if (validate_sess($this->sess)) {
-            if (file_exists(BIN5_PROXY_PATH) == FALSE)
-                mkdir(BIN5_PROXY_PATH);
-            $fp = fopen(BIN5_PROXY_PATH."/".$this->sess.".step", 'w');
-            fwrite($fp, pack("LL", $this->step, $this->idx));
-            fclose($fp);
-            
-            log_main("step_inc [".$this->sess. "] [".$this->step."]"); 
-            
-            return (TRUE);
-        }
-        
-        return (FALSE);
+        return (TRUE);
     }
-    
-    static function step_get($sess)
+
+    static function load_step($sess)
     {
         $fp = FALSE;
         do {
@@ -576,6 +549,27 @@ class Bin5_user extends User {
         
         return (FALSE);
     }
+
+    function save_step() 
+    {
+        do {
+            if (validate_sess($this->sess) == FALSE)
+                break;
+            if (file_exists(BIN5_PROXY_PATH) == FALSE)
+                mkdir(BIN5_PROXY_PATH, 0775, TRUE);
+            if (($fp = @fopen(BIN5_PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
+                break;
+            fwrite($fp, pack("LL",$this->step, $this->idx));
+            fclose($fp);
+            
+            log_main("step_set [".$this->sess. "] [".$this->step."]"); 
+            
+            return (TRUE);
+        } while (0);
+        
+        return (FALSE);
+    }
+    
     
     static function load_data($tab_id, $id, $sess) 
     {

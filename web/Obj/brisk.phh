@@ -814,6 +814,19 @@ class User {
   {
       $this->step = $step & 0x7fffffff;
       
+      return (TRUE);
+  }
+
+  function step_inc($delta = 1) {
+      $this->step += $delta;
+      /* modularization because unpack() not manage unsigned 32bit int correctly */
+      $this->step &= 0x7fffffff;
+      
+      return TRUE;
+  }
+
+  function save_step() 
+  {
       do {
           if (validate_sess($this->sess) == FALSE)
               break;
@@ -823,7 +836,7 @@ class User {
               break;
           fwrite($fp, pack("LL",$this->step, $this->idx));
           fclose($fp);
-
+          
           log_main("step_set [".$this->sess. "] [".$this->step."]"); 
           
           return (TRUE);
@@ -832,27 +845,7 @@ class User {
       return (FALSE);
   }
   
-  function step_inc($delta = 1) {
-      $this->step += $delta;
-      /* modularization because unpack() not manage unsigned 32bit int correctly */
-      $this->step &= 0x7fffffff;
-      
-      if (validate_sess($this->sess)) {
-          if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH);
-          $fp = fopen(PROXY_PATH."/".$this->sess.".step", 'w');
-          fwrite($fp, pack("LL", $this->step, $this->idx));
-          fclose($fp);
-
-          log_main("step_inc [".$this->sess. "] [".$this->step."]"); 
-          
-          return (TRUE);
-      }
-      
-      return (FALSE);
-  }
-
-  static function step_get($sess)
+  static function load_step($sess) 
   {
       $fp = FALSE;
       do {
@@ -938,7 +931,20 @@ class User {
                       log_only(serialize($user));
                   }
               }
-              
+              else {
+                  if ($sess != FALSE) {
+                      /*
+                       *  NOTE:  this part is for check only, theoretically 
+                       *         user->step anch proxy_step are set allways at the same value
+                       */
+                      $old_step = $user->step;
+                      $arr = User::load_step($sess);
+                      $user->step = $arr['s'];
+                      if ($old_step != $user->step) {
+                          log_crit("steps are diffetents User->step ".$user->step." Old_step: ".$old_step);
+                      }
+                  }
+              }
               $user->shm_sz = $shm_sz;
               
               shm_detach($shm);
