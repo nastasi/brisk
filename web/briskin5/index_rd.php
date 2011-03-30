@@ -93,8 +93,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         return (FALSE);
     }
     
-    // error_log("maincheck: step di i [".$proxy_step['i']."]", 0);
-
     // log_rd2("M");
     /* Sync check (read only without modifications */
     ignore_user_abort(TRUE);
@@ -154,8 +152,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             
             log_lock("P");
             $S_load_stat['U_heavy']++;
-            // if (($bri = &Bin5::load_data($table_idx, $table_token)) == FALSE) 
-            // if (($user = Bin5_user::load_data($table_idx, $table_token)) == FALSE) 
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
                 break;
             }

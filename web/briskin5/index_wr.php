@@ -54,7 +54,7 @@ log_mop(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
 
 $sem = Bin5::lock_data($table_idx);
 
-if (($bri = &Bin5::load_data($table_idx,$table_token)) == FALSE) {
+if (($bri = Bin5::load_data($table_idx,$table_token)) == FALSE) {
   echo "Bin5 Load data error";
   log_wr("Bin5 Load data error");
   Bin5::unlock_data($sem);
@@ -69,7 +69,7 @@ if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
 }
 $argz = explode('|', $mesg);
 
-log_wr('POSTSPLIT: '.$argz[0]);
+log_wr('POSTSPLIT: '.$argz[0].'  user->stat: ['.$user->stat.']');
 log_mop($user->step, 'bin::index_wr.php: after get_user()');
 
 if (false && $argz[0] == 'shutdown') {
@@ -77,7 +77,7 @@ if (false && $argz[0] == 'shutdown') {
   
   log_rd2("bin5/index_wr.php: AUTO LOGOUT.");
   if ($user->stat == 'table') {
-    $bri->table_wakeup(&$user);
+    $bri->table_wakeup($user);
     // to force the logout
     $user->lacc = 0;
   }
@@ -91,7 +91,7 @@ if (false && $argz[0] == 'shutdown') {
  *********************/
 else if ($user->stat == 'table') {
   $user->laccwr = time();
-  $table = &$bri->table[$user->table];
+  $table = $bri->table[$user->table];
 
   if ($argz[0] == 'tableinfo') {
     log_wr("PER DI TABLEINFO");

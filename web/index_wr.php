@@ -113,7 +113,7 @@ if (($room = &Room::load_data()) == FALSE) {
   Room::unlock_data($sem);
   exit;
 }
-if (($user = &$room->get_user($sess, &$idx)) == FALSE) {
+if (($user = $room->get_user($sess, &$idx)) == FALSE) {
   Room::unlock_data($sem);
   $argz = explode('|', xcapemesg($mesg));
 
@@ -639,11 +639,9 @@ else if ($user->stat == 'room') {
         log_wr("postsave bri");
       }
       // change room
-      $room->room_sitdown(&$user, $table_idx);
-
-      log_wr("MOP finish");
-
+      $room->room_sitdown($user, $table_idx);
       
+      log_wr("MOP finish");
     }
     else if ($argz[0] == 'logout') {
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";

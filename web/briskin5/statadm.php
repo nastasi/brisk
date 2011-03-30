@@ -233,7 +233,6 @@ function main_pgsql($curtime)
                             FROM %sbin5_matches as m, %sbin5_games as g 
                             WHERE g.mcode = m.code GROUP BY m.code, m.ttok",
                            $G_dbpfx, $G_dbpfx, $G_dbpfx);
-        // error_log($mtc_sql, 0);
         if (pg_query($bdb->dbconn->db(), $mtc_sql) == FALSE) {
             log_crit("statadm: temporary matches table creation [$mtc_sql] failed");
             break;
@@ -241,7 +240,6 @@ function main_pgsql($curtime)
         
         $tmt_sql = sprintf("SELECT * FROM %sbin5_temp_matches WHERE  tstamp < to_timestamp(%d)",
                            $G_dbpfx, $curtime - TRI_LIMIT);
-        // error_log($tmt_sql, 0);
 
         // if deletable old matches exists then ...
         if (($tmt_pg = pg_query($bdb->dbconn->db(), $tmt_sql)) != FALSE) {
@@ -262,7 +260,6 @@ function main_pgsql($curtime)
                 $mtc_sql = sprintf("SELECT * from %sbin5_matches WHERE code = %d",
                                    $G_dbpfx, $tmt_obj->code);
                 
-                // error_log($mtc_sql, 0);
                 if (($mtc_pg  = pg_query($bdb->dbconn->db(), $mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
                     log_crit("statadm: matches row select failed");
                     break;

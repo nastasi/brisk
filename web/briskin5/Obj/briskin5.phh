@@ -579,9 +579,7 @@ class Bin5_user extends User {
     
     static function load_data($tab_id, $id, $sess) 
     {
-        // error_log("Bin5_user::load_data BEGIN id [".$id."]", 0);
-        
-        log_main("load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
+        log_main("Bin5_user::load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
         
         $doexit = FALSE;
         do {
@@ -606,8 +604,6 @@ class Bin5_user extends User {
                     break;
                 }
                 log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
-                if (isset($user)) 
-                    log_only("bri count ".count($user));
                 
                 if ($user == FALSE) {
                     log_only("INIT MAIN DATA");
@@ -642,9 +638,6 @@ class Bin5_user extends User {
       GLOBAL $sess;
       
       $shm =   FALSE;
-      
-      // var_dump($user);
-      // error_log("Bin5_user::save_data BEGIN id [".$id."]", 0);
       
       if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$id, "B")) == -1) {
           return (FALSE);
@@ -809,7 +802,7 @@ class Bin5 {
     $doexit = FALSE;
     $shm = FALSE;
 
-    log_wr("TABLE_IDX ".FTOK_PATH."/bin5/table".$table_idx."/table");
+    log_wr("TABLE_FTOK ".FTOK_PATH."/bin5/table".$table_idx."/table");
     
     do {
       if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) {

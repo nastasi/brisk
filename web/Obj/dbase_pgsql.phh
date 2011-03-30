@@ -151,28 +151,21 @@ class BriskDB
         
         /* if it exists check for a valid challenge */
         if (($a_sem = Challenges::lock_data()) != FALSE) { 
-            // error_log("loop-2", 0);
             if (($chals = &Challenges::load_data()) != FALSE) {
-                // error_log("loop-1", 0);
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
-                    // error_log("loop", 0);
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
-                        // error_log("loop2", 0);
                         log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$user_obj->pass)."]");
                         
                         if (strcmp($pass, md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
-                            // error_log("loop3", 0);
                             log_main("login_verify SUCCESS for ".$login);
                             
                             $chals->rem($login);
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
-                            // error_log("dbitem: ".print_r($ret, TRUE));
                             break;
                         }
                     }
                 } // end for ($e = 0 ...
-                // error_log("end loop-1", 0);
             }
             
             if ($chals->ismod()) {

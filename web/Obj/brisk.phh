@@ -638,8 +638,6 @@ class User {
   }
 
   function create($idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
-    // error_log("User::create BEGIN", 0);
-
     if (($thiz = new User()) == FALSE)
       return (FALSE);
 
@@ -904,8 +902,6 @@ class User {
 
   static function load_data($id, $sess) 
   {
-      // error_log("User::load_data BEGIN", 0);
-      
       log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
       
       $doexit = FALSE;
@@ -931,8 +927,6 @@ class User {
                   break;
               }
               log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
-              if (isset($user)) 
-                  log_only("bri count ".count($user));
               
               if ($user == FALSE) {
                   log_only("INIT MAIN DATA");
@@ -968,9 +962,6 @@ class User {
       GLOBAL $sess;
       
       $shm =   FALSE;
-      
-      // var_dump($user);
-      // error_log("User::save_data BEGIN", 0);
       
       if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
           return (FALSE);
@@ -2030,7 +2021,6 @@ class Room {
             log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
             
             if ($authenticate != FALSE) {
-                // error_log(print_r(&$authenticate, TRUE),0);
                 $user_type = $authenticate->type_get();
             }
             else {
@@ -2243,8 +2233,6 @@ class Room {
     GLOBAL $sess;
     $doexit = FALSE;
 
-    // error_log("Room::load_data BEGIN", 0);
-
     do {
       if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
 	log_main("ftok failed");
@@ -2270,8 +2258,6 @@ class Room {
               log_only("INIT MAIN DATA");
               shm_detach($shm);
               
-              // error_log("DE CHE", 0);
-
               $room = Room::create();
               
               if (Room::save_data($room) == FALSE)
@@ -2342,9 +2328,6 @@ class Room {
     
       $ret =   FALSE;
       $shm =   FALSE;
-    
-      // var_dump($room);
-      // error_log("Room::save_data BEGIN", 0);
     
       if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) 
           return (FALSE);
@@ -2941,6 +2924,8 @@ function playsound($filename)
 function secstoword($secs)
 {
   GLOBAL $G_lang;
+
+  $ret = "";
 
   $mins = floor($secs / 60);
   $secs = $secs % 60;
