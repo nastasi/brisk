@@ -10,11 +10,12 @@
  DONE - move the garbage timeout on file
  DONE - in index_rd load all data only when required
  - briskin5 alignment
-   . extern del garb_timeout
-   . user_load parameters verify
-   . Bin5::load_data and Bin5::save_data refactoring with
-     data split
+   DONE . extern del garb_timeout
+   DONE . user_load parameters verify
+   DONE . Bin5::load_data and Bin5::save_data refactoring with
+          data split
    . move many function into "Bin5 class"
+ - garbaging of .step files
 
  DB: - initial usage
      DONE - configurabilità file o db
