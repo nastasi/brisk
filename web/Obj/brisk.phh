@@ -858,7 +858,7 @@ class User {
               break;
           if (($s = fread($fp, 8)) == FALSE)
               break;
-          if (strlen($s) != 8)
+          if (mb_strlen($s, "ASCII") != 8)
               break;
           $arr = unpack('Ls/Li', $s);
           fclose($fp);
@@ -2494,7 +2494,7 @@ class Room {
               break;
           if (($s = fread($fp, 4)) == FALSE)
               break;
-          if (strlen($s) != 4)
+          if (mb_strlen($s, "ASCII") != 4)
               break;
           $arr = unpack('Le', $s);
           if ($arr['e'] > $tm)
