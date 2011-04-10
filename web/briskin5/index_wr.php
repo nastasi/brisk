@@ -347,7 +347,7 @@ else if ($user->stat == 'table') {
       if ($table->asta_win > -1 && 
 	  $user->table_pos == $table->asta_win) {
 	$a_brisco = $argz[1];
-	if ($a_brisco >= 0 && $a_brisco < (BIN5_PLAYERS_N == 5 ? 40 : 24)) {
+	if ($a_brisco >= 0 && $a_brisco < 40) {
 	  $table->briscola = $a_brisco;
 	  $table->friend   = $table->card[$a_brisco]->owner;
 	  log_wr("GSTART 2");
