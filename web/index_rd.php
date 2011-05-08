@@ -58,9 +58,8 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 
 function shutta()
 {
-  log_rd2("SHUTTA!".connection_status());
+  log_rd2("SHUTTA [".connection_status()."] !");
 }
-
 
 register_shutdown_function(shutta);
 
@@ -141,7 +140,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 Room::save_data($room);
                 unset($room);
             }
-            log_lock("U");
+            log_main("infolock: U");
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
         } // if (($sem = Room::lock_data()) != FALSE) { 
@@ -155,7 +154,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     } // if  ($first_loop == TRUE) {
     
     if ($cur_step == $proxy_step['s']) {
-        log_lock("P");
+        log_main("infolock: P");
         return (FALSE);
     }
     else {
@@ -169,7 +168,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             if (($sem = Room::lock_data()) == FALSE) 
                 break;
             
-            log_lock("P");
+            log_main("infolock: P");
             $S_load_stat['U_heavy']++;
             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
                 break;
