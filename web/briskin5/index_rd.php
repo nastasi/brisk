@@ -52,9 +52,8 @@ if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
 
 function shutta()
 {
-  log_rd2("bin5 SHUTTA!".connection_status());
+  log_rd2("bin5 SHUTTA [".connection_status()."] !");
 }
-
 
 register_shutdown_function(shutta);
 
@@ -75,9 +74,6 @@ function page_sync($sess, $page)
   log_rd2("PAGE_SYNC");
   return (sprintf('the_end=true; window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
 }
-
-
-
 
 function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx, $table_token)
 {
@@ -125,7 +121,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 Bin5::save_data($bri);
                 unset($bri);
             }
-            log_lock("U");
+            log_main("infolock: U");
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
         } // if (($sem = Bin5::lock_data($table ...
@@ -139,7 +135,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     } // if  ($first_loop == TRUE) {
     
     if ($cur_step == $proxy_step['s']) {
-        log_lock("P");
+        log_main("infolock: P");
         return (FALSE);
     }
     else {
@@ -152,7 +148,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             if (($sem = Bin5::lock_data($table_idx)) == FALSE) 
                 break;
             
-            log_lock("P");
+            log_main("infolock: P");
             $S_load_stat['U_heavy']++;
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
                 break;
