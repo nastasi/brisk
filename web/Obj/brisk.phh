@@ -70,7 +70,7 @@ define(DBG_LOAD, 0x0100);
 define(DBG_AUTH, 0x0200);
 define(DBG_CRIT, 0x0400);
 define(DBG_LMOP, 0x0800);
-
+define(DBG_TRAC, 0x1000);
 // NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols 
 define(BRISK_DEBUG, 0xffffffbf);
 
@@ -362,6 +362,23 @@ function xcapemesg($s)
   return (str_replace($from, $to, $s));
 }
 
+
+class Vect {
+    function Vect($a)
+    {
+        $this->el = $a;
+    }
+    
+    function getbyid($idx)
+    {
+        return ($this->el[$idx]);
+    }
+    
+    function setbyid($idx, $v)
+    {
+        $this->el[$idx] = $v;
+    }
+}
 
 class Table {
   var $idx;
@@ -1011,6 +1028,8 @@ function step_unproxy($sess) {
 
 
 class Room {
+    static $delta_t;
+
   var $user;
   var $table;
   var $comm; // commands for many people
@@ -2391,8 +2410,10 @@ class Room {
       if (($res = sem_get($tok)) == FALSE) {
           return (FALSE);
       }
-      if (sem_acquire($res)) {   
-          log_lock("LOCK room");
+      if (sem_acquire($res)) {
+          self::$delta_t = microtime(TRUE);
+          log_lock("LOCK   room         [".self::$delta_t."]");
+
           return ($res);
       }
       else
@@ -2403,7 +2424,7 @@ class Room {
   {
     GLOBAL $sess; 
     
-    log_lock("UNLOCK room");
+    log_lock("UNLOCK room         [".(microtime(TRUE) - (self::$delta_t))."]");
 
     return (sem_release($res));
   }
@@ -2566,7 +2587,10 @@ function log_mop($step, $log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LMOP) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("LMOP: [%f] [%05d] [%s] [%s]\n", gettimeofday(TRUE), $step, $log, $btrace));
         fclose($fp);
@@ -2589,7 +2613,10 @@ function log_only2($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONL2) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("ONL2: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2611,7 +2638,10 @@ function log_crit($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_CRIT) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("CRIT: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2633,7 +2663,10 @@ function log_only($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONLY) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("ONLY: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2655,7 +2688,10 @@ function log_main($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_MAIN) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("MAIN: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2676,8 +2712,11 @@ function log_rd($log)
     
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_READ) == 0)
         return;
-    
-    $btrace = btrace_line(debug_backtrace());
+
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";    
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("READ: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2699,7 +2738,10 @@ function log_rd2($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_REA2) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("REA2: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
@@ -2722,7 +2764,10 @@ function log_send($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_SEND) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("SEND: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2744,7 +2789,10 @@ function log_lock($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOCK) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("LOCK: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2766,7 +2814,10 @@ function log_wr($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_WRIT) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("WRIT: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2788,7 +2839,10 @@ function log_load($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOAD) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("LOAD: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2805,7 +2859,10 @@ function log_auth($sess, $log)
     if (( (BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_AUTH) == 0)
         return;
     
-    $btrace = btrace_line(debug_backtrace());
+    if (BRISK_DEBUG & DBG_TRAC) 
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("LOAD: [%s] [%d] [%s] [%s]\n", $sess, time(), $log, $btrace));
         fclose($fp);
@@ -2825,28 +2882,6 @@ function log_legal($curtime, $user, $where, $mesg)
                         $user->name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
     fclose($fp);
   }
-}
-
-
-function lock_banlist()
-{
-  if (($tok = @ftok(FTOK_PATH."/main", "L")) == -1) {
-    echo "FTOK FAILED";
-    exit;
-  }
-  if (($res = sem_get($tok)) == FALSE) {
-    echo "SEM_GET FAILED";
-    exit;
-  }
-  if (sem_acquire($res)) 
-    return ($res);
-  else
-    return (FALSE);
-}
-
-function unlock_banlist($res)
-{
-  return (sem_release($res));
 }
 
 function table_act_content($isstanding, $sitted, $table, $cur_table, $allowed)
@@ -2968,6 +3003,8 @@ function sharedmem_sz($tok)
 }    
 
 class Warrant {
+    static $delta_t;
+
   function lock_data()
   {
     GLOBAL $sess; 
@@ -2980,7 +3017,8 @@ class Warrant {
       return (FALSE);
     }
     if (sem_acquire($res)) {   
-      log_lock("LOCK warrant");
+        self::$delta_t = microtime(TRUE);
+        log_lock("LOCK   warrant      [".self::$delta_t."]");
       return ($res);
     }
     else
@@ -2991,13 +3029,15 @@ class Warrant {
   {
     GLOBAL $sess; 
     
-    log_lock("UNLOCK warrant");
-    
+    log_lock("UNLOCK warrant      [".(microtime(TRUE) - (self::$delta_t))."]");
+
     return (sem_release($res));
   }
 }
 
 class Poll {
+    static $delta_t;
+
   function lock_data()
   {
     GLOBAL $sess; 
@@ -3009,9 +3049,11 @@ class Poll {
     if (($res = sem_get($tok)) == FALSE) {
       return (FALSE);
     }
-    if (sem_acquire($res)) {   
-      log_lock("LOCK poll");
-      return ($res);
+    if (sem_acquire($res)) {
+        self::$delta_t = microtime(TRUE);
+        log_lock("LOCK   poll         [".self::$delta_t."]");
+      
+        return ($res);
     }
     else
       return (FALSE);
@@ -3021,7 +3063,7 @@ class Poll {
   {
     GLOBAL $sess; 
     
-    log_lock("UNLOCK poll");
+    log_lock("UNLOCK poll         [".(microtime(TRUE) - (self::$delta_t))."]");
     
     return (sem_release($res));
   }
