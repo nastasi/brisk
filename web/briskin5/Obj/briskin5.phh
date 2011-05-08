@@ -679,6 +679,8 @@ class Bin5_user extends User {
 
 
 class Bin5 {
+    static $delta_t = array();
+
   var $user;
   var $table;
   var $comm; // commands for many people
@@ -945,7 +947,7 @@ class Bin5 {
   {
     GLOBAL $sess; 
     
-    log_lock("LOCK_DATA ".FTOK_PATH."/bin5/table".$table_idx."/table");
+    log_main("lockinfo: DATA ".FTOK_PATH."/bin5/table".$table_idx."/table");
     //  echo "LOCK: ".FTOK_PATH."/main";
     //  exit;
     // WARNING monitor this step
@@ -957,20 +959,25 @@ class Bin5 {
       return (FALSE);
     }
     if (sem_acquire($res)) {   
-      log_lock("LOCK table ".$table_idx."[res: ".$res."]");
-      return ($res);
+        self::$delta_t[$table_idx] = microtime(TRUE);
+        log_lock("LOCK   table [".$table_idx."]         [".self::$delta_t[$table_idx]."]");
+
+        return (new Vect(array('res' => $res, 'tab' => $table_idx)));
     }
     else {
-      log_lock("LOCK table ".$table_idx.":FAILED");
-      return (FALSE);
+        log_lock("LOCK table ".$table_idx.":FAILED");
+        return (FALSE);
     }
   }
   
-  function unlock_data($res)
+  function unlock_data($res_vect)
   {
     GLOBAL $sess; 
-    
-    log_lock("UNLOCK table [res: ".$res."]");
+
+    $res = $res_vect->getbyid('res');
+    $tab = $res_vect->getbyid('tab');
+
+    log_lock("UNLOCK table [".$tab."]         [".(microtime(TRUE) - (self::$delta_t[$tab]))."]");
 
     return (sem_release($res));
   }
