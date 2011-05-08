@@ -44,6 +44,8 @@ class Hardban {
 }
 
 class Hardbans {
+    static $delta_t;
+
   var $item;
   var $item_n;
   var $mod;
@@ -247,7 +249,8 @@ class Hardbans {
       return (FALSE);
     }
     if (sem_acquire($res)) {   
-      log_lock("LOCK hardbans");
+        self::$delta_t = microtime(TRUE);
+        log_lock("LOCK   hardbans     [".self::$delta_t."]");
       return ($res);
     }
     else
@@ -258,7 +261,7 @@ class Hardbans {
   {
     GLOBAL $sess; 
     
-    log_lock("UNLOCK hardbans");
+    log_lock("UNLOCK hardbans     [".(microtime(TRUE) - (self::$delta_t))."]");
 
     return (sem_release($res));
   }
