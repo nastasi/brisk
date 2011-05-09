@@ -47,6 +47,8 @@ class Challenge {
 }
 
 class Challenges {
+    static $delta_t;
+
     var $item;
     var $item_n;
     var $mod;
@@ -255,7 +257,8 @@ class Challenges {
             return (FALSE);
         }
         if (sem_acquire($res)) {   
-            log_lock("LOCK challenges");
+            self::$delta_t = microtime(TRUE);
+            log_lock("LOCK   challenges   [".self::$delta_t."]");
             return ($res);
         }
         else
@@ -266,7 +269,7 @@ class Challenges {
     {
         GLOBAL $sess; 
     
-        log_lock("UNLOCK challenges");
+        log_lock("UNLOCK challenges   [".(microtime(TRUE) - (self::$delta_t))."]");
 
         return (sem_release($res));
     }
