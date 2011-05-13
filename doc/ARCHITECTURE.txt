@@ -17,3 +17,14 @@ index.php:
 --- CLI ------------
   POST index.php with passid_private field equal to calcMD5(tokens[1]+calcMD5(form.elements['passid'].value))
 
+
+
+===== Game Lifecycle =====
+
+-> bin5/index_wr.php + argz[0] == 'logout'
+   - bri->table_wakeup($user)
+     - set users subst to "shutdowner" and "shutdowned"
+     - save this: "gst.st_loc++; the_end=true; window.onbeforeunload = null; \
+                   window.onunload = null; document.location.assign("../index.php");" 
+       in user->comm var for client xhr
+     - set $bri->the_end = TRUE
