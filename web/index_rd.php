@@ -119,7 +119,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             // Aggiorna l'expire time lato server
             $S_load_stat['U_first_loop']++;
             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
-                Room::unlock_data();
+                Room::unlock_data($sem);
                 ignore_user_abort(FALSE);
                 return (unrecerror());
             }
@@ -131,7 +131,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 
                 $S_load_stat['R_garbage']++;
                 if (($room = Room::load_data()) == FALSE) {
-                    Room::unlock_data();
+                    Room::unlock_data($sem);
                     ignore_user_abort(FALSE);
                     return (unrecerror());
                 }
@@ -282,7 +282,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         $sem = Room::lock_data();
         $S_load_stat['U_heavy']++;
         if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
-            Room::unlock_data();
+            Room::unlock_data($sem);
             ignore_user_abort(FALSE);
             return (unrecerror());
         }

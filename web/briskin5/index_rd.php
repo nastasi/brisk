@@ -98,7 +98,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             $S_load_stat['U_first_loop']++;
 
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
-                Bin5::unlock_data();
+                Bin5::unlock_data($sem);
                 ignore_user_abort(FALSE);
                 return (unrecerror());
             }
