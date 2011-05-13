@@ -819,7 +819,7 @@ class User {
     /*
     if (validate_sess($this->sess)) {
       if (file_exists(PROXY_PATH) == FALSE)
-        mkdir(PROXY_PATH);
+        mkdir(PROXY_PATH, 0775, TRUE);
       $fp = fopen(PROXY_PATH."/".$this->sess.".stat", 'w');
       fwrite($fp, sprintf("%s\n",$this->stat));
       fclose($fp);
@@ -848,7 +848,7 @@ class User {
           if (validate_sess($this->sess) == FALSE)
               break;
           if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH);
+              mkdir(PROXY_PATH, 0775, TRUE);
           if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
               break;
           fwrite($fp, pack("LL",$this->step, $this->idx));
@@ -870,7 +870,7 @@ class User {
               break;
           
           if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH);
+              mkdir(PROXY_PATH, 0775, TRUE);
           if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
               break;
           if (($s = fread($fp, 8)) == FALSE)
@@ -2510,7 +2510,7 @@ class Room {
       $fp = FALSE;
       do {
           if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH);
+              mkdir(PROXY_PATH, 0775, TRUE);
           if (($fp = @fopen(PROXY_PATH."/garbage_time.expired", 'rb')) == FALSE)
               break;
           if (($s = fread($fp, 4)) == FALSE)
@@ -2534,7 +2534,7 @@ class Room {
   {
       do {
           if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH);
+              mkdir(PROXY_PATH, 0775, TRUE);
           if (($fp = @fopen(PROXY_PATH."/garbage_time.expired", 'wb')) == FALSE)
               break;
           fwrite($fp, pack("L",$tm));

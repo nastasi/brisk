@@ -528,7 +528,7 @@ class Bin5_user extends User {
                 break;
             
             if (file_exists(BIN5_PROXY_PATH) == FALSE)
-                mkdir(BIN5_PROXY_PATH);
+                mkdir(BIN5_PROXY_PATH, 0775, TRUE);
             if (($fp = @fopen(BIN5_PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
                 break;
             if (($s = fread($fp, 8)) == FALSE)
@@ -1160,7 +1160,7 @@ class Bin5 {
       $fp = FALSE;
       do {
           if (file_exists(BIN5_PROXY_PATH) == FALSE)
-              mkdir(BIN5_PROXY_PATH);
+              mkdir(BIN5_PROXY_PATH, 0775, TRUE);
           if (($fp = @fopen(BIN5_PROXY_PATH."/garbage_time.expired", 'rb')) == FALSE)
               break;
           if (($s = fread($fp, 4)) == FALSE)
@@ -1184,7 +1184,7 @@ class Bin5 {
   {
       do {
           if (file_exists(BIN5_PROXY_PATH) == FALSE)
-              mkdir(BIN5_PROXY_PATH);
+              mkdir(BIN5_PROXY_PATH, 0775, TRUE);
           if (($fp = @fopen(BIN5_PROXY_PATH."/garbage_time.expired", 'wb')) == FALSE)
               break;
           fwrite($fp, pack("L",$tm));
