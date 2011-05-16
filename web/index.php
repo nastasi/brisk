@@ -238,7 +238,10 @@ function main()
       $is_table = FALSE;
       $sem = Room::lock_data();
       log_main("lock Room");
-      $room = Room::load_data();
+      if (($room = Room::load_data()) == FALSE) {
+          log_crit("load_data failed");
+          exit();
+      }
       $curtime = time();
       
       /* Actions */

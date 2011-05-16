@@ -575,11 +575,9 @@ class Bin5_user extends User {
     {
         log_main("Bin5_user::load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
         
-        $doexit = FALSE;
         do {
             if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$id, "B")) == -1) {
                 log_main("ftok failed");
-                $doexit = TRUE;
                 break;
             }
             
@@ -594,7 +592,6 @@ class Bin5_user extends User {
                 $user = @shm_get_var($shm, $tok);
                 
                 if ($sess != FALSE && $user->sess != $sess) {
-                    $doexit = TRUE;
                     break;
                 }
                 log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
@@ -634,8 +631,7 @@ class Bin5_user extends User {
             return ($user);
         } while (0);
         
-        if ($doexit)
-            exit();
+        log_crit("Bin5_user::load_data:ret FALSE");
         
         return (FALSE);
     }
@@ -809,7 +805,6 @@ class Bin5 {
   // Bin5::load_data
   static function load_data($table_idx, $table_token = "") 
   {
-    $doexit = FALSE;
     $shm = FALSE;
 
     log_wr("TABLE_FTOK ".FTOK_PATH."/bin5/table".$table_idx."/table");
@@ -817,7 +812,6 @@ class Bin5 {
     do {
       if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) {
 	log_main("ftok failed");
-	$doexit = TRUE;
 	break;
       }
 
@@ -841,7 +835,13 @@ class Bin5 {
       shm_detach($shm);
       
       for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
-          $bri->user[$i] = Bin5_user::load_data($table_idx, $i, FALSE);
+          if (($bri->user[$i] = Bin5_user::load_data($table_idx, $i, FALSE)) == FALSE) {
+              log_crit("Bin5_user::load_data failed");
+              break;
+          }
+      }
+      if ($i < BIN5_MAX_PLAYERS) {
+          break;
       }
       
       return ($bri); 
@@ -851,8 +851,6 @@ class Bin5 {
       shm_detach($shm);
 
     log_wr("briskin5 load_data failed");
-    if ($doexit)
-        exit();
     
     return (FALSE);
   }

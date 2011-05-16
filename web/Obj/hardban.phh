@@ -157,11 +157,10 @@ class Hardbans {
   function load_data() 
   {
     GLOBAL $sess;
-    $doexit = FALSE;
+
     do {
       if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
 	log_main("ftok failed");
-	$doexit = TRUE;
 	break;
       }
     
@@ -195,9 +194,6 @@ class Hardbans {
 
       return ($hban);
     } while (0);
-    
-    if ($doexit)
-      exit();
     
     return (FALSE);
   }

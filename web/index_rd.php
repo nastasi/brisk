@@ -196,7 +196,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
          */
         ignore_user_abort(TRUE);
         $sem = Room::lock_data();
-        $room = Room::load_data();
+        if (($room = Room::load_data()) == FALSE) {
+            Room::unlock_data($sem);
+            ignore_user_abort(FALSE);
+            return (unrecerror());
+        }
         $S_load_stat['R_minusone']++;
         
         /* unset the $user var to reload it from main structure */
@@ -318,7 +322,12 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 log_auth($user->sess, "Explicit logout.");
                 
                 $S_load_stat['R_the_end']++;
-                $room = Room::load_data();
+                if (($room = Room::load_data()) == FALSE) {
+                    Room::unlock_data($sem);
+                    ignore_user_abort(FALSE);
+                    return (unrecerror());
+                }
+
                 unset($user);
                 if (($user = $room->get_user($sess, $idx)) == FALSE) {
                     Room::unlock_data($sem);

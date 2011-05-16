@@ -165,11 +165,9 @@ class Challenges {
     function load_data() 
         {
             GLOBAL $sess;
-            $doexit = FALSE;
             do {
                 if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
                     log_main("ftok failed");
-                    $doexit = TRUE;
                     break;
                 }
     
@@ -203,9 +201,6 @@ class Challenges {
 
                 return ($chals);
             } while (0);
-    
-            if ($doexit)
-                exit();
     
             return (FALSE);
         }

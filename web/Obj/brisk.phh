@@ -914,11 +914,9 @@ class User {
   {
       log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
       
-      $doexit = FALSE;
       do {
           if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
               log_main("ftok failed");
-              $doexit = TRUE;
               break;
           }
           
@@ -933,7 +931,6 @@ class User {
               $user = @shm_get_var($shm, $tok);
               
               if ($sess != FALSE && $user->sess != $sess) {
-                  $doexit = TRUE;
                   break;
               }
               log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
@@ -972,9 +969,6 @@ class User {
           //
           return ($user);
       } while (0);
-      
-      if ($doexit)
-          exit();
       
       return (FALSE);
   }
@@ -1116,7 +1110,7 @@ class Room {
 
 	      // is the end of the table
 	      if ($bri->the_end == TRUE) {
-		/*
+                  /*
 		 *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
 		 */
 		log_main("garbage_manager: INSIDE THE END.");
@@ -2258,12 +2252,10 @@ class Room {
   function load_data() 
   {
     GLOBAL $sess;
-    $doexit = FALSE;
 
     do {
       if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
 	log_main("ftok failed");
-	$doexit = TRUE;
 	break;
       }
     
@@ -2297,7 +2289,13 @@ class Room {
           shm_detach($shm);
 
           for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-              $room->user[$i] = User::load_data($i, FALSE);
+              if (($room->user[$i] = User::load_data($i, FALSE)) == FALSE) {
+                  log_crit("Bin5_user::load_data failed");
+                  break;
+              }
+          }
+          if ($i < MAX_PLAYERS) {
+              break;
           }
       }
       
@@ -2306,9 +2304,6 @@ class Room {
       //
       return ($room);
     } while (0);
-    
-    if ($doexit)
-      exit();
     
     return (FALSE);
   }

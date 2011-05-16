@@ -175,7 +175,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
          */
         ignore_user_abort(TRUE);
         $sem = Bin5::lock_data($table_idx);
-        $bri = Bin5::load_data($table_idx, $table_token);
+        if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+            return (unrecerror());
+        }
         $S_load_stat['R_minusone']++;
         
         /* unset the $user var to reload it from main structure */
@@ -270,7 +274,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 log_auth($user->sess, "Explicit logout.");
                 
                 $S_load_stat['R_the_end']++;
-                $bri = Bin5::load_data($table_idx, $table_token);
+                if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
+                    Bin5::unlock_data($sem);
+                    ignore_user_abort(FALSE);
+                    return (unrecerror());
+                }
                 unset($user);
                 if (($user = $bri->get_user($sess, $idx)) == FALSE) {
                     Bin5::unlock_data($sem);
