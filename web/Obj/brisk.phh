@@ -928,8 +928,9 @@ class User {
               $shm_sz = SHM_DIMS_U_MIN;
           
           if ($shm = shm_attach($tok, $shm_sz)) {
-              $user = @shm_get_var($shm, $tok);
-              
+              if (($user = @shm_get_var($shm, $tok)) == FALSE) {
+                  break;
+              }
               if ($sess != FALSE && $user->sess != $sess) {
                   break;
               }
@@ -2267,7 +2268,7 @@ class Room {
 	$shm_sz = SHM_DIMS_MIN;
 
       if ($shm = shm_attach($tok, $shm_sz)) {
-          $room = @shm_get_var($shm, $tok);
+          $room = @shm_get_var($shm, $tok); // CHECKED BELOW
           
           log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
           if (isset($room)) 

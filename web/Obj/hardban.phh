@@ -172,7 +172,7 @@ class Hardbans {
 	$shm_sz = HBAN_SHM_DIMS_MIN;
 
       if ($shm = shm_attach($tok, $shm_sz)) {
-	$hban = @shm_get_var($shm, $tok);
+          $hban = @shm_get_var($shm, $tok); // CHECKED BELOW
 	
 	log_only("hardban ==  ".($hban == FALSE ?   "FALSE" : "TRUE")."  hardban ===  ".($hban === FALSE ? "FALSE" : "TRUE")."  hardban isset ".(isset($hban) ?   "TRUE" : "FALSE"));
 	

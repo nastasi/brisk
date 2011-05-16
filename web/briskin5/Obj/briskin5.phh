@@ -589,7 +589,9 @@ class Bin5_user extends User {
                 $shm_sz = SHM_DIMS_U_MIN;
             
             if ($shm = shm_attach($tok, $shm_sz)) {
-                $user = @shm_get_var($shm, $tok);
+                if (($user = @shm_get_var($shm, $tok)) == FALSE) {
+                    break;
+                }
                 
                 if ($sess != FALSE && $user->sess != $sess) {
                     break;

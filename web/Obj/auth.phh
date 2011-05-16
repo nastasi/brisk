@@ -179,7 +179,7 @@ class Challenges {
                     $shm_sz = CHAL_SHM_DIMS_MIN;
 
                 if ($shm = shm_attach($tok, $shm_sz)) {
-                    $chals = @shm_get_var($shm, $tok);
+                    $chals = @shm_get_var($shm, $tok); // CHECKED BELOW
 	
                     log_only("challenges ==  ".($chals == FALSE ?   "FALSE" : "TRUE")."  challenges ===  ".($chals === FALSE ? "FALSE" : "TRUE")."  challenges isset ".(isset($chals) ?   "TRUE" : "FALSE"));
 	
