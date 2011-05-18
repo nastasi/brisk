@@ -2578,6 +2578,16 @@ function btrace_line($ar)
     return ($ret);
 }
 
+function trace_ftok($id, $add)
+{
+    // NOTE: without space to use sed to substitute "= @ftok("  with "= @ftok("
+    $tok=@ftok($id, $add);
+
+    log_shme($tok.": ".$id." + ".$add);
+
+    return ($tok);
+}
+
 function log_mop($step, $log)
 {
     GLOBAL $sess, $PHP_SELF;
