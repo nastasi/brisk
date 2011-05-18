@@ -520,7 +520,7 @@ class Bin5_user extends User {
         return (TRUE);
     }
 
-    static function load_step($sess)
+    static function load_step($tab_id, $sess)
     {
         $fp = FALSE;
         do {
@@ -529,7 +529,7 @@ class Bin5_user extends User {
             
             if (file_exists(BIN5_PROXY_PATH) == FALSE)
                 mkdir(BIN5_PROXY_PATH, 0775, TRUE);
-            if (($fp = @fopen(BIN5_PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
+            if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/".$sess.".step", 'rb')) == FALSE)
                 break;
             if (($s = fread($fp, 8)) == FALSE)
                 break;
@@ -557,7 +557,7 @@ class Bin5_user extends User {
                 break;
             if (file_exists(BIN5_PROXY_PATH) == FALSE)
                 mkdir(BIN5_PROXY_PATH, 0775, TRUE);
-            if (($fp = @fopen(BIN5_PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
+            if (($fp = @fopen(BIN5_PROXY_PATH."/table".$this->table_orig."/".$this->sess.".step", 'w')) == FALSE)
                 break;
             fwrite($fp, pack("LL",$this->step, $this->idx));
             fclose($fp);
@@ -623,7 +623,7 @@ class Bin5_user extends User {
                         // This part isn't strictly required but is good to verify
                         // the coerence of cached and User class saved value of step field.
                         $old_step = $user->step;
-                        $arr = Bin5_user::load_step($sess);
+                        $arr = Bin5_user::load_step($tab_id, $sess);
                         $user->step = $arr['s'];
                         if ($old_step != $user->step) {
                             log_crit("Bin5:: steps are diffetents User->step ".$user->step." Old_step: ".$old_step);
