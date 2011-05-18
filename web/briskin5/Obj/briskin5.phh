@@ -570,6 +570,14 @@ class Bin5_user extends User {
         return (FALSE);
     }
     
+    static function unproxy_step($tab_id, $sess)
+    {
+        log_rd2("UNPROXY: ".BIN5_PROXY_PATH."/table".$tab_id."/".$sess.".step");
+        if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
+            return;
+
+        @unlink(BIN5_PROXY_PATH."/table".$tab_id."/".$sess.".step");
+    }
     
     static function load_data($tab_id, $id, $sess) 
     {
@@ -779,7 +787,7 @@ class Bin5 {
 
 	    $tmp_sess = $user_cur->sess;
 	    $user_cur->sess = "";
-	    step_unproxy($tmp_sess);
+	    Bin5_user::step_unproxy($tmp_sess);
 	    $user_cur->name = "";
 	    $user_cur->the_end = FALSE;
 	    
@@ -925,9 +933,12 @@ class Bin5 {
     log_main("DESTROY BRISKIN5 DATA");
     
     do {
-      log_main("DESTROY2 BRISKIN5 DATA");
-
-      if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) 
+      log_main("DESTROY2 BRISKIN5 DATA [".$this->table_idx."]");
+      for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+          $this->user[$i]->destroy_data($this->table_idx);
+          Bin5_user::unproxy_step($this->table_idx, $this->user[$i]->sess);
+      }
+      if (($tok = @ftok(FTOK_PATH."/bin5/table".$this->table_idx."/table", "B")) == -1) 
 	break;
 
       if (($shm = @shmop_open($tok, 'a', 0, 0)) == FALSE)

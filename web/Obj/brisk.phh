@@ -893,13 +893,20 @@ class User {
       return (FALSE);
   }
 
+  static function unproxy_step($sess) {
+      log_rd2("UNPROXY: ".PROXY_PATH."/".$sess.".step");
+      if (file_exists(PROXY_PATH) == FALSE)
+          return;
+      @unlink(PROXY_PATH."/".$sess.".step");
+  }
+
   function reset() {
     $curtime = time();
     log_legal($curtime, $this, "STAT:LOGOUT", '');
 
     $tmp_sess = $this->sess;
     $this->sess = "";
-    step_unproxy($tmp_sess);
+    self::unproxy_step($tmp_sess);
     $this->name = "";  // OK here
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
@@ -1018,13 +1025,6 @@ class User {
 
 } // end class User
 
-
-function step_unproxy($sess) {
-  log_rd2("UNPROXY: ".PROXY_PATH."/".$sess.".step");
-  if (file_exists(PROXY_PATH) == FALSE)
-    mkdir(PROXY_PATH);
-  @unlink(PROXY_PATH."/".$sess.".step");
-}
 
 
 class Room {
