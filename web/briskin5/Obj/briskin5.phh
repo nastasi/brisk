@@ -581,7 +581,7 @@ class Bin5_user extends User {
     
     static function load_data($tab_id, $id, $sess) 
     {
-        log_main("Bin5_user::load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
+        log_load("Bin5_user::load_data: tab_id [".$tab_id."] id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
         
         do {
             if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$id, "B")) == -1) {
@@ -761,7 +761,7 @@ class Bin5 {
 
     $this->table_idx = $table_idx;
     $this->table_token = $table_token;
-    Bin5::garbage_time_expire_set(0);
+    Bin5::garbage_time_expire_set($table_idx, 0);
     
     log_wr("Bin5 constructor end");
   }
@@ -800,7 +800,7 @@ class Bin5 {
     $ismod = FALSE;
     $curtime = time();
     // externalized if ($force || $this->garbage_timeout < $curtime) {
-    if ($force || Bin5::garbage_time_is_expired($curtime)) {
+    if ($force || Bin5::garbage_time_is_expired($this->table_idx, $curtime)) {
       for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
 	$user_cur = $this->user[$i];
 	if ($user_cur->sess == "" || 
@@ -839,7 +839,7 @@ class Bin5 {
       log_rd2($user_cur->sess." GARBAGE UPDATED!");
       
       // externalized $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
-      Bin5::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
+      Bin5::garbage_time_expire_set($this->table_idx, $curtime + GARBAGE_TIMEOUT);
 
       $ismod = TRUE;
     }
@@ -1203,14 +1203,14 @@ class Bin5 {
   }
 
 
-  static function garbage_time_is_expired($tm) 
+  static function garbage_time_is_expired($tab_id, $tm) 
   {
       $ret = TRUE;
       $fp = FALSE;
       do {
           if (file_exists(BIN5_PROXY_PATH) == FALSE)
               mkdir(BIN5_PROXY_PATH, 0775, TRUE);
-          if (($fp = @fopen(BIN5_PROXY_PATH."/garbage_time.expired", 'rb')) == FALSE)
+          if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/garbage_time.expired", 'rb')) == FALSE)
               break;
           if (($s = fread($fp, 4)) == FALSE)
               break;
@@ -1229,12 +1229,12 @@ class Bin5 {
       return ($ret);
   }
 
-  static function garbage_time_expire_set($tm) 
+  static function garbage_time_expire_set($tab_id, $tm) 
   {
       do {
           if (file_exists(BIN5_PROXY_PATH) == FALSE)
               mkdir(BIN5_PROXY_PATH, 0775, TRUE);
-          if (($fp = @fopen(BIN5_PROXY_PATH."/garbage_time.expired", 'wb')) == FALSE)
+          if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/garbage_time.expired", 'wb')) == FALSE)
               break;
           fwrite($fp, pack("L",$tm));
           fclose($fp);

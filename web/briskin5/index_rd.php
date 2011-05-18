@@ -83,8 +83,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     $bri = FALSE;
     $user = FALSE;
     $curtime = time();
-    
-    if (($proxy_step = Bin5_user::load_step($sess)) == FALSE) {
+
+    if (($proxy_step = Bin5_user::load_step($table_idx, $sess)) == FALSE) {
         log_only2("R");
         return (FALSE);
     }
@@ -106,7 +106,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
             Bin5_user::save_data($user, $table_idx, $user->idx);
             
-            if (Bin5::garbage_time_is_expired($curtime)) {
+            if (Bin5::garbage_time_is_expired($table_idx, $curtime)) {
                 log_only("F");
                 
                 $S_load_stat['R_garbage']++;
@@ -288,7 +288,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 
                 $tmp_sess = $user->sess;
                 $user->sess = "";
-                step_unproxy($tmp_sess);
+                Bin5_user::unproxy_step($tmp_sess);
                 $user->name = "";
                 $user->the_end = FALSE;
                 
@@ -334,7 +334,7 @@ if (!isset($myfrom))
      $myfrom = "";
 if (!isset($subst))
      $subst = "";
-log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming."USER_AGENT:".$HTTP_USER_AGENT);
+log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming."USER_AGENT:".$HTTP_USER_AGENT."  TABLE:".$table_idx);
 
 
 $endtime = time() + STREAM_TIMEOUT;
@@ -347,7 +347,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   $pre_main = gettimeofday(TRUE);
   if (($ret = maincheck($sess, $old_stat, $old_subst, $old_step, &$stat, &$subst, &$step, $table_idx, $table_token)) != FALSE) {
     echo '@BEGIN@';
-    // log_rd2(sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
+    log_rd2(sprintf("\nSESS: [%s]\nOLD_STAT: [%s] OLD_SUBST: [%s] OLD_STEP: [%s] \nSTAT: [%s] SUBST: [%s] STEP: [%s] \nCOMM: [%s]\n", $sess, $old_stat, $old_subst, $old_step, $stat, $subst, $step, $ret));
     echo "$ret";
     echo ' @END@'; 
     log_send("EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
