@@ -1079,7 +1079,9 @@ class Room {
     $curtime = time();
 
     // externalized if ($force || $this->garbage_timeout < $curtime) {
-    if ($force || Room::garbage_time_is_expired($curtime)) {
+    if (!$force && !Room::garbage_time_is_expired($curtime)) {
+        return ($ismod);
+    }
       
       // FIXME BRISK4: include for each kind of table
       require_once("${G_base}briskin5/Obj/briskin5.phh");
@@ -1231,7 +1233,6 @@ class Room {
       // externalized $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
       Room::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
       $ismod = TRUE;
-    }
 
     return ($ismod);
   }
