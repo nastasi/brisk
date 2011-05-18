@@ -57,13 +57,13 @@ function shutta()
 
 register_shutdown_function(shutta);
 
-function unrecerror()
+function blocking_error($is_unrecoverable)
 {
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  log_rd2("UNREC_ERROR");
-  return (sprintf('the_end=true; window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
+  log_rd2("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
+  return (sprintf(($is_unrecoverable ? 'the_end=true; ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
 }
 
 function page_sync($sess, $page)
@@ -86,13 +86,15 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
     if (($proxy_step = Bin5_user::load_step($table_idx, $sess)) == FALSE) {
         log_only2("R");
-        return (FALSE);
+        ignore_user_abort(FALSE);
+        return (blocking_error(TRUE));
     }
     
     // log_rd2("M");
     /* Sync check (read only without modifications */
     ignore_user_abort(TRUE);
     if  ($first_loop == TRUE) {
+
         if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
             // Aggiorna l'expire time lato server
             $S_load_stat['U_first_loop']++;
@@ -100,7 +102,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
                 Bin5::unlock_data($sem);
                 ignore_user_abort(FALSE);
-                return (unrecerror());
+                return (blocking_error(TRUE));
             }
             $user->lacc = $curtime;
 
@@ -113,7 +115,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
                     Bin5::unlock_data($sem);
                     ignore_user_abort(FALSE);
-                    return (unrecerror());
+                    return (blocking_error(TRUE));
                 }
                 
                 $bri->garbage_manager(FALSE);
@@ -160,7 +162,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         
         ignore_user_abort(FALSE);
         if ($user == FALSE) 
-            return (unrecerror());
+            return (blocking_error(TRUE));
     }
     
     /* Nothing changed, return. */
@@ -178,7 +180,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
         $S_load_stat['R_minusone']++;
         
@@ -187,7 +189,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($user = $bri->get_user($sess, $idx)) == FALSE) {
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
         if ($user->the_end) {
             log_rd2("main_check: the end".var_export(debug_backtrace()));
@@ -242,7 +244,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
         if ($cur_step < $user->step) {
             do {
@@ -277,13 +279,13 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
                     Bin5::unlock_data($sem);
                     ignore_user_abort(FALSE);
-                    return (unrecerror());
+                    return (blocking_error(TRUE));
                 }
                 unset($user);
                 if (($user = $bri->get_user($sess, $idx)) == FALSE) {
                     Bin5::unlock_data($sem);
                     ignore_user_abort(FALSE);
-                    return (unrecerror());
+                    return (blocking_error(TRUE));
                 }
                 
                 $tmp_sess = $user->sess;
@@ -292,13 +294,14 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 $user->name = "";
                 $user->the_end = FALSE;
                 
+                /* FIXME - and now ?? 
                 if ($user->subst == 'sitdown')
                     $bri->room_wakeup($user);
                 else if ($user->subst == 'standup')
                     $bri->room_outstandup($user);
                 else
                     log_rd2("LOGOUT FROM WHAT ???");
-                
+                */
                 Bin5::save_data($bri);
             }
         }

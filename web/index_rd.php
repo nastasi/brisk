@@ -63,13 +63,13 @@ function shutta()
 
 register_shutdown_function(shutta);
 
-function unrecerror()
+function blocking_error($is_unrecoverable)
 {
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  log_rd2("UNREC_ERROR:".var_export(debug_backtrace()));
-  return (sprintf('the_end=true; window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");'));
+  log_rd2("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
+  return (sprintf(($is_unrecoverable ? 'the_end=true; ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
 }
 
 function page_sync($sess, $page, $table_idx, $table_token)
@@ -108,7 +108,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     //       anche se non ce ne dovrebbe essere mai la necessità
     if (($proxy_step = User::load_step($sess)) == FALSE) {
         log_only2("R");
-        return (FALSE);
+        ignore_user_abort(FALSE);
+        return (blocking_error(TRUE));
     }
     
     // log_rd2("M");
@@ -121,7 +122,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
                 Room::unlock_data($sem);
                 ignore_user_abort(FALSE);
-                return (unrecerror());
+                return (blocking_error(TRUE));
             }
             $user->lacc = $curtime;
             User::save_data($user, $user->idx);
@@ -133,7 +134,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 if (($room = Room::load_data()) == FALSE) {
                     Room::unlock_data($sem);
                     ignore_user_abort(FALSE);
-                    return (unrecerror());
+                    return (blocking_error(TRUE));
                 }
                 log_main("pre garbage_manager TRE");
                 $room->garbage_manager(FALSE);
@@ -180,7 +181,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         
         ignore_user_abort(FALSE);
         if ($user == FALSE) {
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
     }
     
@@ -199,7 +200,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($room = Room::load_data()) == FALSE) {
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
         $S_load_stat['R_minusone']++;
         
@@ -208,7 +209,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($user = $room->get_user($sess, $idx)) == FALSE) {
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
         
         if ($user->the_end) { 
@@ -288,7 +289,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
-            return (unrecerror());
+            return (blocking_error(TRUE));
         }
         
         if ($cur_step < $user->step) {
@@ -325,14 +326,14 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 if (($room = Room::load_data()) == FALSE) {
                     Room::unlock_data($sem);
                     ignore_user_abort(FALSE);
-                    return (unrecerror());
+                    return (blocking_error(TRUE));
                 }
 
                 unset($user);
                 if (($user = $room->get_user($sess, $idx)) == FALSE) {
                     Room::unlock_data($sem);
                     ignore_user_abort(FALSE);
-                    return (unrecerror());
+                    return (blocking_error(TRUE));
                 }              
                 $user->reset();
                 
