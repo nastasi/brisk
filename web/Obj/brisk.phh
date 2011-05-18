@@ -1145,7 +1145,8 @@ class Room {
 		$this->room_join_wakeup($user_cur, FALSE, 0); 
 		$table_cur->table_token = "";
                 $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
-		Bin5::destroy_data($table_idx);
+                        
+                        $bri->destroy_data($table_idx);
 	      }
 	      else {
 		log_main("gm:: save_data");

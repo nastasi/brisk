@@ -685,6 +685,36 @@ class Bin5_user extends User {
       return (FALSE);
   }
 
+  function destroy_data($tab_id) 
+  {
+      do {
+          if (($tok = @ftok(FTOK_PATH."/bin5/table".$tab_id."/user".$this->table_pos, "B")) == -1) {
+              log_crit("BIN5 USER DATA REMOVE FAILED 1 [".FTOK_PATH."/bin5/table".$tab_id."/user".$this->table_pos."]");
+              break;
+          }
+          
+          if (($shm = @shmop_open($tok, 'a', 0, 0)) == FALSE) {
+              log_crit("BIN5 USER DATA REMOVE FAILED 2");
+              break;
+          }
+          if (shmop_delete($shm) == 0) {
+              log_crit("BIN5 USER DATA REMOVE FAILED 3");
+              break;
+          }
+          $shm = FALSE;
+
+          log_main("BIN5 USER DATA DESTROY SUCCESS");
+          
+          // log_main("QUI CI ARRIVA [".$bri->user[0]->name."]");
+          $ret = TRUE;
+      } while (0);
+      
+      if ($shm)
+          shm_detach($shm);
+      
+      return ($ret);
+  }
+
 } // end class Bin5_user
 
 
@@ -924,7 +954,7 @@ class Bin5 {
   
 
 
-  function destroy_data($table_idx) 
+  function destroy_data() 
   {
     GLOBAL $sess;
 
