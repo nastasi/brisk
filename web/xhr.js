@@ -56,7 +56,7 @@ function xhr_rd_cb(xhr_rd)
     // console.log(xhr_rd.readyState);
 
     if (xhr_rd.readyState == 4) {
-        if (xhr_rd_watchdog != null) {
+        if (typeof xhr_rd_watchdog != 'undefined' && xhr_rd_watchdog != null) {
             hbit('C');
             clearTimeout(xhr_rd_watchdog);
             xhr_rd_watchdog = null;
@@ -91,7 +91,8 @@ function xhr_rd_abort(xhr)
 function xhr_rd_start(sess,stat,subst,step) 
 {
     if (the_end) {
-        if (xhr_rd_watchdog != null) {
+        //x alert("the_end1");
+        if (typeof xhr_rd_watchdog != 'undefined' && xhr_rd_watchdog != null) {
             hbit('C');
             clearTimeout(xhr_rd_watchdog);
             xhr_rd_watchdog = null;
@@ -196,7 +197,8 @@ function xhr_rd_poll(sess)
 		    
 		}
                 else {
-                    if (xhr_rd_watchdog != null) {
+                    //x alert("the_end2");
+                    if (typeof xhr_rd_watchdog != 'undefined' && xhr_rd_watchdog != null) {
                         clearTimeout(xhr_rd_watchdog);
                         xhr_rd_watchdog = null;
                     }
@@ -300,9 +302,12 @@ function xhr_rd_poll(sess)
 	setTimeout(xhr_rd_poll, tout, sess);
     }
     else {
-        if (xhr_rd_watchdog != null) {
-            clearTimeout(xhr_rd_watchdog);
-            xhr_rd_watchdog = null;
+        //x alert("the_end3");
+        if (typeof(xhr_rd_watchdog) != 'undefined') {
+            if (xhr_rd_watchdog != null) {
+                clearTimeout(xhr_rd_watchdog);
+                xhr_rd_watchdog = null;
+            }
         }
     }
     return;
