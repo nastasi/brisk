@@ -22,7 +22,7 @@
  */
 
 var PLAYERS_N = 3;
-var EXIT_BAN_TIME = 900;
+var EXIT_BAN_TIME = 3600;
 var cookiepath = "/brisk/";
 
 var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ', 
