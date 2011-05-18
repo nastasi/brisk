@@ -604,6 +604,8 @@ class Bin5_user extends User {
                     // SHSPLIT FIXME: init_data for User class ??
                     $user = User::create($id, "", "");
                     if (@shm_put_var($shm, $tok, $user) == FALSE) {
+                        log_shme("Bin5_user::save_data2");
+
                         log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
                         log_only(serialize($user));
                     }
@@ -652,10 +654,13 @@ class Bin5_user extends User {
               break;
           
           // log_only("PUT_VAR DI ".strlen(serialize($user)));
-          if (shm_put_var($shm, $tok, $user) != FALSE) {
+          if (@shm_put_var($shm, $tok, $user) != FALSE) {
               shm_detach($shm);
               $user->save_step();
               log_main("User[".$id."] saved.");
+
+              log_shme("Bin5_user::save_data");
+
               return (TRUE);
           }
           if (shm_remove($shm) === FALSE) {
@@ -882,6 +887,9 @@ class Bin5 {
               break;
           
           if (@shm_put_var($shm, $bri->tok, $bri) != FALSE) {
+
+              log_shme("Bin5::save_data");
+
               $ret = TRUE;
               break;
           }

@@ -184,6 +184,8 @@ class Hardbans {
 	    log_only("PUT_VAR FALLITA ".strlen(serialize($hban)));
 	    log_only(serialize($hban));
 	  }
+          log_shme("Hardban::save_data2");
+
 	}
 	$hban->shm_sz = $shm_sz;
 	
@@ -215,8 +217,9 @@ class Hardbans {
         log_only("hardban count ".count($hban->item)."  _n: ".$hban->item_n);
 
       $hban->mod = FALSE;
-      if (shm_put_var($shm, $tok, $hban) != FALSE) {
+      if (@shm_put_var($shm, $tok, $hban) != FALSE) {
 	shm_detach($shm);
+        log_shme("Hardban::save_data");
 	return (TRUE);
       }
       $hban->mod = $oldmod;

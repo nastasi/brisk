@@ -251,7 +251,7 @@ if [ "$web_only" = "FALSE" ]; then
         chmod 777 ${ftokk_path}/bin5
     fi
 
-    for i in $(seq 0 $max_players); do
+    for i in $(seq 0 $((tables_n - 1))); do
         if [ ! -d ${ftokk_path}/bin5/table$i ]; then
             mkdir ${ftokk_path}/bin5/table$i
         fi
@@ -262,13 +262,13 @@ if [ "$web_only" = "FALSE" ]; then
             touch ${ftokk_path}/bin5/table$i/user$e
             chmod 666 ${ftokk_path}/bin5/table$i/user$e
         done
+        # create subdirectories in proxy path
+        if [ ! -d ${proxy_path}/bin5/table$i ]; then
+            mkdir -p ${proxy_path}/bin5/table$i
+        fi
     done
+    chmod -R 777 ${proxy_path}/bin5
 
-    # create subdirectories in proxy path
-    if [ ! -d ${proxy_path}/bin5 ]; then
-        mkdir ${proxy_path}/bin5
-    fi
-    chmod 777 ${proxy_path}/bin5
 fi
 install -d ${web_path}__
 for i in $(find web -type d | grep -v /CVS | sed 's/^....//g'); do

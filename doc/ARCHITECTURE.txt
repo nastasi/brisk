@@ -28,3 +28,9 @@ index.php:
                    window.onunload = null; document.location.assign("../index.php");" 
        in user->comm var for client xhr
      - set $bri->the_end = TRUE
+
+
+-> index.php  (after verify session value: ~L250)
+  - garbage_manager(TRUE)
+    - allign many status var with briskin5 user values
+    - room_join_wakeup()

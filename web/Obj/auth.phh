@@ -191,6 +191,7 @@ class Challenges {
                             log_only("PUT_VAR FALLITA ".strlen(serialize($chals)));
                             log_only(serialize($chals));
                         }
+                        log_shme("Challenges::save_data2");
                     }
                     $chals->shm_sz = $shm_sz;
 	
@@ -222,7 +223,8 @@ class Challenges {
                 log_only("challenges count ".count($chals->item)."  _n: ".$chals->item_n);
 
             $chals->mod = FALSE;
-            if (shm_put_var($shm, $tok, $chals) != FALSE) {
+            if (@shm_put_var($shm, $tok, $chals) != FALSE) {
+                log_shme("Challenges::save_data");
                 shm_detach($shm);
                 return (TRUE);
             }
