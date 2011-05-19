@@ -992,7 +992,7 @@ class Bin5 {
     return ($ret);
   }
 
-  function lock_data($table_idx)
+  static function lock_data($table_idx)
   {
     GLOBAL $sess; 
     
@@ -1019,7 +1019,7 @@ class Bin5 {
     }
   }
   
-  function unlock_data($res_vect)
+  static function unlock_data($res_vect)
   {
     GLOBAL $sess; 
 

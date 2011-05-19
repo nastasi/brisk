@@ -238,7 +238,7 @@ class Hardbans {
     return (FALSE);
   }
 
-  function lock_data()
+  static function lock_data()
   {
     if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
       return (FALSE);
@@ -256,7 +256,7 @@ class Hardbans {
       return (FALSE);
   }
   
-  function unlock_data($res)
+  static function unlock_data($res)
   {
     GLOBAL $sess; 
     

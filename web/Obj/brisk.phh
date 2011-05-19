@@ -3047,7 +3047,7 @@ function sharedmem_sz($tok)
 class Warrant {
     static $delta_t;
 
-  function lock_data()
+  static function lock_data()
   {
     GLOBAL $sess; 
     
@@ -3067,7 +3067,7 @@ class Warrant {
       return (FALSE);
   }
   
-  function unlock_data($res)
+  static function unlock_data($res)
   {
     GLOBAL $sess; 
     
@@ -3080,7 +3080,7 @@ class Warrant {
 class Poll {
     static $delta_t;
 
-  function lock_data()
+    static function lock_data()
   {
     GLOBAL $sess; 
     
@@ -3101,7 +3101,7 @@ class Poll {
       return (FALSE);
   }
   
-  function unlock_data($res)
+  static function unlock_data($res)
   {
     GLOBAL $sess; 
     
