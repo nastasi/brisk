@@ -57,6 +57,7 @@ define(BAN_TIME, 3600);
 define(GARBAGE_TIMEOUT, 10);
 define(NICKSERV, "<i>BriskServ</i>");
 
+define(LOCK_SHARE_MAX, 10000);
 
 define(DBG_ONL2, 0x0001);
 define(DBG_ONLY, 0x0002);
@@ -1094,7 +1095,7 @@ class Room {
 	if ($table_cur->player_n == PLAYERS_N) {
 	  log_main("PLAYERS == N TABLE ".$table_idx);
 	  
-	  if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
+	  if (($sem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
 	    log_main("bin5 lock data success");
 	    
 	    $no_recovery = FALSE;
@@ -1933,7 +1934,7 @@ class Room {
         if ($table_cur->player_n == PLAYERS_N) {
           log_main("PLAYERS == N TABLE ".$table_idx);
         
-          if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
+          if (($sem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
             log_main("bin5 lock data success");
             
             $no_recovery = FALSE;
@@ -2112,7 +2113,7 @@ class Room {
       if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
         // FIXME BRISK4: include for each kind of table
         require_once("${G_base}briskin5/Obj/briskin5.phh");
-        if (($brisem = Bin5::lock_data($table_idx)) != FALSE) { 
+        if (($brisem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
           if (($bri = Bin5::load_data($table_idx)) != FALSE) {
             if ($bri->the_end != TRUE) {
               $bri->user[$ghost_user->table_pos]->step_inc();
@@ -2403,7 +2404,7 @@ class Room {
       return ($ret);
   }
 
-  static function lock_data()
+  static function lock_data($is_exclusive)
   {
       GLOBAL $sess; 
       
@@ -2413,7 +2414,7 @@ class Room {
           return (FALSE);
       }
       // echo "FTOK ".$tok."<br>";
-      if (($res = sem_get($tok)) == FALSE) {
+      if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
           return (FALSE);
       }
       if (sem_acquire($res)) {
@@ -3047,7 +3048,7 @@ function sharedmem_sz($tok)
 class Warrant {
     static $delta_t;
 
-  static function lock_data()
+  static function lock_data($is_exclusive)
   {
     GLOBAL $sess; 
     
@@ -3055,7 +3056,7 @@ class Warrant {
       return (FALSE);
     }
     // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok)) == FALSE) {
+    if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
       return (FALSE);
     }
     if (sem_acquire($res)) {   
@@ -3080,7 +3081,7 @@ class Warrant {
 class Poll {
     static $delta_t;
 
-    static function lock_data()
+  static function lock_data($is_exclusive)
   {
     GLOBAL $sess; 
     
@@ -3088,7 +3089,7 @@ class Poll {
       return (FALSE);
     }
     // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok)) == FALSE) {
+    if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
       return (FALSE);
     }
     if (sem_acquire($res)) {

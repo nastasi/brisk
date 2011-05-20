@@ -244,13 +244,13 @@ class Challenges {
         return (FALSE);
     }
 
-    static function lock_data()
+    static function lock_data($is_exclusive)
     {
         if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
             return (FALSE);
         }
         // echo "FTOK ".$tok."<br>";
-        if (($res = sem_get($tok)) == FALSE) {
+        if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
             return (FALSE);
         }
         if (sem_acquire($res)) {   

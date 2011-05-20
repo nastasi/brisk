@@ -238,13 +238,13 @@ class Hardbans {
     return (FALSE);
   }
 
-  static function lock_data()
+  static function lock_data($is_exclusive)
   {
     if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
       return (FALSE);
     }
     // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok)) == FALSE) {
+    if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
       return (FALSE);
     }
     if (sem_acquire($res)) {   
@@ -270,7 +270,7 @@ class Hardbans {
   {
     $bantime = -1;
     /* if it exists check for a valid challenge */
-    if (($a_sem = Hardbans::lock_data()) != FALSE) { 
+    if (($a_sem = Hardbans::lock_data(TRUE)) != FALSE) { 
       
       if (($hban = &Hardbans::load_data()) != FALSE) {
         for ($e = 0 ; $e < $hban->item_n ; $e++) {
@@ -304,7 +304,7 @@ class Hardbans {
   {
     $found = FALSE;
     /* if it exists check for a valid challenge */
-    if (($a_sem = Hardbans::lock_data()) != FALSE) { 
+    if (($a_sem = Hardbans::lock_data(TRUE)) != FALSE) { 
       
       if (($hban = &Hardbans::load_data()) != FALSE) {
 

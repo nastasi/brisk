@@ -116,7 +116,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     /* Sync check (read only without modifications */
     ignore_user_abort(TRUE);
     if  ($first_loop == TRUE) {
-        if (($sem = Room::lock_data()) != FALSE) { 
+        if (($sem = Room::lock_data(TRUE)) != FALSE) { 
             // Aggiorna l'expire time lato server
             $S_load_stat['U_first_loop']++;
             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
@@ -144,7 +144,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             log_main("infolock: U");
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
-        } // if (($sem = Room::lock_data()) != FALSE) { 
+        } // if (($sem = Room::lock_data(TRUE)) != FALSE) { 
         else {
             // wait 20 secs, then restart the xhr 
             ignore_user_abort(FALSE);
@@ -166,7 +166,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if ($user == FALSE) {
         do {
             ignore_user_abort(TRUE);
-            if (($sem = Room::lock_data()) == FALSE) 
+            if (($sem = Room::lock_data(TRUE)) == FALSE) 
                 break;
             
             log_main("infolock: P");
@@ -196,7 +196,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
          *  if $cur_step == -1 load the current state from the main struct
          */
         ignore_user_abort(TRUE);
-        $sem = Room::lock_data();
+        $sem = Room::lock_data(TRUE);
         if (($room = Room::load_data()) == FALSE) {
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
@@ -284,7 +284,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     else {
         // TODO: verify if we can use only $user struct 
         ignore_user_abort(TRUE);
-        $sem = Room::lock_data();
+        $sem = Room::lock_data(TRUE);
         $S_load_stat['U_heavy']++;
         if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
             Room::unlock_data($sem);

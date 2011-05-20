@@ -106,7 +106,7 @@ log_wr('COMM: '.xcapemesg($mesg));
 $curtime = time();
 $dt = date("H:i ", $curtime);
 
-$sem = Room::lock_data();
+$sem = Room::lock_data(TRUE);
 if (($room = &Room::load_data()) == FALSE) {
   echo "Load data error";
   log_wr("Load data error");
@@ -119,7 +119,7 @@ if (($user = $room->get_user($sess, &$idx)) == FALSE) {
 
   if ($argz[0] == 'getchallenge') {
       GLOBAL $cli_name;
-      if (($a_sem = Challenges::lock_data()) != FALSE) { 
+      if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) { 
           log_main("chal lock data success");
           
           if (($chals = &Challenges::load_data()) != FALSE) {
@@ -209,7 +209,7 @@ else if ($argz[0] == 'warranty') {
 
   log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
   if ($user->flags & USER_FLAG_AUTH) {
-    if (($wa_lock = Warrant::lock_data()) != FALSE) {
+    if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
       if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
         /* Unix time | session | nickname | IP | where was | mesg */
         fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, $user->name, xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
@@ -247,7 +247,7 @@ else if ($argz[0] == 'mesgtoadm') {
     
     log_wr("INFO:SKIP:argz == mesgtoadm name: [".$user->name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
     if ($user->flags & USER_FLAG_AUTH) {
-        if (($wa_lock = Warrant::lock_data()) != FALSE) {
+        if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
             if (($bdb = BriskDB::create()) != FALSE) {
                 $bdb->users_load();
                 
@@ -339,7 +339,7 @@ else if ($argz[0] == 'poll') {
       break;
     }
     
-    if (($poll_lock = Poll::lock_data()) == FALSE) {
+    if (($poll_lock = Poll::lock_data(TRUE)) == FALSE) {
       /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
       $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
       log_wr("break3");
@@ -571,7 +571,7 @@ else if ($user->stat == 'room') {
 	//
 
         // Create new spawned table
-        $bri_sem = Bin5::lock_data($table_idx);
+        $bri_sem = Bin5::lock_data(TRUE, $table_idx);
         $table_token = uniqid("");
         $room->table[$table_idx]->table_token = $table_token;
         $room->table[$table_idx]->table_start = $curtime;

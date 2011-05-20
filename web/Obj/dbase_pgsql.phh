@@ -150,7 +150,7 @@ class BriskDB
         log_main("login[".$user_obj->code."]: ".$user_obj->login);
         
         /* if it exists check for a valid challenge */
-        if (($a_sem = Challenges::lock_data()) != FALSE) { 
+        if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) { 
             if (($chals = &Challenges::load_data()) != FALSE) {
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);

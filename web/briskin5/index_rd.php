@@ -95,7 +95,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     ignore_user_abort(TRUE);
     if  ($first_loop == TRUE) {
 
-        if (($sem = Bin5::lock_data($table_idx)) != FALSE) { 
+        if (($sem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
             // Aggiorna l'expire time lato server
             $S_load_stat['U_first_loop']++;
 
@@ -126,7 +126,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             log_main("infolock: U");
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
-        } // if (($sem = Bin5::lock_data($table ...
+        } // if (($sem = Bin5::lock_data(TRUE, $table ...
         else {
             ignore_user_abort(FALSE);
             
@@ -147,7 +147,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if ($user == FALSE) {
         do {
             ignore_user_abort(TRUE);
-            if (($sem = Bin5::lock_data($table_idx)) == FALSE) 
+            if (($sem = Bin5::lock_data(TRUE, $table_idx)) == FALSE) 
                 break;
             
             log_main("infolock: P");
@@ -176,7 +176,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
          *  if $cur_step == -1 load the current state from the main struct
          */
         ignore_user_abort(TRUE);
-        $sem = Bin5::lock_data($table_idx);
+        $sem = Bin5::lock_data(TRUE, $table_idx);
         if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
@@ -239,7 +239,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     }
     else {
         ignore_user_abort(TRUE);
-        $sem = Bin5::lock_data($table_idx);
+        $sem = Bin5::lock_data(TRUE, $table_idx);
         // if (($user = &$bri->get_user($sess, $idx)) == FALSE) {
         if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
             Bin5::unlock_data($sem);

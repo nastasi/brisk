@@ -145,7 +145,7 @@ class BriskDB {
                 log_main("login[".$i."]: ".$this->item[$i]->login);
                 
                 /* if it exists check for a valid challenge */
-                if (($a_sem = Challenges::lock_data()) != FALSE) { 
+                if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) { 
                     
                     if (($chals = &Challenges::load_data()) != FALSE) {
                         for ($e = 0 ; $e < $chals->item_n ; $e++) {

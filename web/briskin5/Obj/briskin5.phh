@@ -992,7 +992,7 @@ class Bin5 {
     return ($ret);
   }
 
-  static function lock_data($table_idx)
+  static function lock_data($is_exclusive, $table_idx)
   {
     GLOBAL $sess; 
     
@@ -1004,7 +1004,7 @@ class Bin5 {
       return (FALSE);
     }
     // WARNING monitor this step
-    if (($res = @sem_get($tok)) == FALSE) {
+    if (($res = @sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
       return (FALSE);
     }
     if (sem_acquire($res)) {   

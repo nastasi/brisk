@@ -236,7 +236,7 @@ function main()
   
   if (isset($BRISK_SHOWHTML) == FALSE) {
       $is_table = FALSE;
-      $sem = Room::lock_data();
+      $sem = Room::lock_data(TRUE);
       log_main("lock Room");
       if (($room = Room::load_data()) == FALSE) {
           log_crit("load_data failed");

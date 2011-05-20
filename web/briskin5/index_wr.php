@@ -52,7 +52,7 @@ if ($table_idx < 0 || $table_idx >= TABLE_N)
 
 log_mop(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
 
-$sem = Bin5::lock_data($table_idx);
+$sem = Bin5::lock_data(TRUE, $table_idx);
 
 if (($bri = Bin5::load_data($table_idx,$table_token)) == FALSE) {
   echo "Bin5 Load data error";
