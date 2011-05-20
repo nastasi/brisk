@@ -175,6 +175,10 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         /*
          *  if $cur_step == -1 load the current state from the main struct
          */
+        
+        /* unset the $user var to reload it from main structure */
+        unset($user);
+
         ignore_user_abort(TRUE);
         $sem = Bin5::lock_data(TRUE, $table_idx);
         if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
@@ -183,9 +187,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             return (blocking_error(TRUE));
         }
         $S_load_stat['R_minusone']++;
-        
-        /* unset the $user var to reload it from main structure */
-        unset($user);
+
         if (($user = $bri->get_user($sess, $idx)) == FALSE) {
             Bin5::unlock_data($sem);
             ignore_user_abort(FALSE);
@@ -274,6 +276,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             if ($user->the_end == TRUE) {
                 log_rd2("LOGOUT BYE BYE!!");
                 log_auth($user->sess, "Explicit logout.");
+
+                unset($user);
                 
                 $S_load_stat['R_the_end']++;
                 if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
@@ -281,7 +285,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                     ignore_user_abort(FALSE);
                     return (blocking_error(TRUE));
                 }
-                unset($user);
                 if (($user = $bri->get_user($sess, $idx)) == FALSE) {
                     Bin5::unlock_data($sem);
                     ignore_user_abort(FALSE);
