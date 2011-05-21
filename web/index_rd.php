@@ -125,6 +125,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 return (blocking_error(TRUE));
             }
             $user->lacc = $curtime;
+            // lacc field updated
             User::save_data($user, $user->idx);
             
             if (Room::garbage_time_is_expired($curtime)) {
@@ -166,7 +167,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if ($user == FALSE) {
         do {
             ignore_user_abort(TRUE);
-            if (($sem = Room::lock_data(TRUE)) == FALSE) 
+            if (($sem = Room::lock_data(FALSE)) == FALSE) 
                 break;
             
             log_main("infolock: P");
@@ -284,9 +285,8 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         log_rd2("NEWSTAT: ".$user->stat);
     }
     else {
-        // TODO: verify if we can use only $user struct 
         ignore_user_abort(TRUE);
-        $sem = Room::lock_data(TRUE);
+        $sem = Room::lock_data(FALSE);
         $S_load_stat['U_heavy']++;
         if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
             Room::unlock_data($sem);
@@ -321,9 +321,11 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             log_mop($user->step, 'index_rd.php: after ret set');
             
             if ($user->the_end == TRUE) {
-                log_rd2("LOGOUT BYE BYE!!");
-                log_auth($user->sess, "Explicit logout.");
+                Room::unlock_data($sem);
                 
+                /* Switch to exclusive locking */
+                $sem = Room::lock_data(TRUE);
+
                 unset($user);
 
                 $S_load_stat['R_the_end']++;
@@ -338,18 +340,24 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                     ignore_user_abort(FALSE);
                     return (blocking_error(TRUE));
                 }              
-                $user->reset();
+
+                log_rd2("LOGOUT BYE BYE!!");
+                log_auth($user->sess, "Explicit logout.");
                 
-                if ($user->subst == 'sitdown') {
-                    log_load("ROOM WAKEUP");
-                    $room->room_wakeup($user);
+                if ($user->the_end == TRUE) {
+                    $user->reset();
+                    
+                    if ($user->subst == 'sitdown') {
+                        log_load("ROOM WAKEUP");
+                        $room->room_wakeup($user);
+                    }
+                    else if ($user->subst == 'standup')
+                        $room->room_outstandup($user);
+                    else
+                        log_rd2("LOGOUT FROM WHAT ???");
+                    
+                    Room::save_data($room);
                 }
-                else if ($user->subst == 'standup')
-                    $room->room_outstandup($user);
-                else
-                    log_rd2("LOGOUT FROM WHAT ???");
-                
-                Room::save_data($room);
             }
         }
         
