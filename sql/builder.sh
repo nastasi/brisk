@@ -65,8 +65,10 @@ elif [ "$1" = "rebuild" ]; then
         echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) \
         | sqlexe $sht
 elif [ "$1" = "psql" ]; then
+   shift
    psql -h $DBHOST -U $DBUSER $DBBASE $@
 elif [ "$1" = "piped" ]; then
+   shift
    psql -h $DBHOST -U $DBUSER $DBBASE -t -q -A -F '|' $@
 elif [ "$1" = "dump" ]; then
     if [ $# -eq 1 ]; then
