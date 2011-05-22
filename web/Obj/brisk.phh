@@ -284,6 +284,39 @@ Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+function webservers_exceeded()
+{
+    return(file_exists(PROXY_PATH."/webservers_exceded.flag"));
+}
+
+function check_webservers()
+{
+    GLOBAL $G_webserver_max;
+
+    $ct = 0;
+
+    $dh = opendir('/proc');
+    while (($file = readdir($dh)) !== false) {
+        if (preg_match('/[0-9]+/', $file)) {
+            $cmdline = explode("\0", file_get_contents('/proc/'.$file.'/cmdline'));
+            // echo "xxx".$cmdline[0].$n;
+            if (strstr('/usr/sbin/apache2', $cmdline[0]) != FALSE) {
+                // echo "yyy".$cmdline[0].$n;
+                $ct++;
+            }
+        }
+    }
+    closedir($dh);
+
+    if ($ct >= $G_webserver_max) {
+        touch(PROXY_PATH."/webservers_exceded.flag");
+    }
+    else {
+        unlink(PROXY_PATH."/webservers_exceded.flag");
+    }
+    return ($ct);
+}
+
 $escinp_from = array( "\""     );
 $escinp_to = array(   "&quot;" );
 
@@ -1084,6 +1117,7 @@ class Room {
         return ($ismod);
     }
       
+        check_webservers();
       // FIXME BRISK4: include for each kind of table
       require_once("${G_base}briskin5/Obj/briskin5.phh");
 
