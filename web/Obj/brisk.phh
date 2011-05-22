@@ -284,12 +284,34 @@ Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+function file_lock($fname, $is_exclusive)
+{
+    if (($res = fopen($fname, "r+")) == FALSE) {
+        return (FALSE);
+    }
+        
+    if (flock($res, ($is_exclusive ? LOCK_EX : LOCK_SH)) == FALSE) {
+        fclose($res);
+        return (FALSE);
+    }
+
+    return ($res);
+}
+
+function file_unlock($res)
+{
+    if ($res != FALSE) {
+        flock($res, LOCK_UN);
+        fclose($res);
+    }
+}
+
 function webservers_exceeded()
 {
     return(file_exists(PROXY_PATH."/webservers_exceded.flag"));
 }
 
-function check_webservers()
+function webservers_check()
 {
     GLOBAL $G_webserver_max;
 
@@ -1117,7 +1139,7 @@ class Room {
         return ($ismod);
     }
       
-        check_webservers();
+    webservers_check();
       // FIXME BRISK4: include for each kind of table
       require_once("${G_base}briskin5/Obj/briskin5.phh");
 
