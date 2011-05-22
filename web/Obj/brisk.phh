@@ -2462,25 +2462,14 @@ class Room {
 
   static function lock_data($is_exclusive)
   {
-      GLOBAL $sess; 
-      
-      //  echo "LOCK: ".FTOK_PATH."/main";
-      //  exit;
-      if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
-          return (FALSE);
-      }
-      // echo "FTOK ".$tok."<br>";
-      if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
-          return (FALSE);
-      }
-      if (sem_acquire($res)) {
+      if (($res = file_lock(FTOK_PATH."/main", $is_exclusive)) != FALSE) {
           self::$delta_t = microtime(TRUE);
           log_lock("LOCK   room         [".self::$delta_t."]");
-
+          
           return ($res);
       }
-      else
-          return (FALSE);
+
+      return (FALSE);
   }
   
   static function unlock_data($res)
@@ -2489,7 +2478,7 @@ class Room {
     
     log_lock("UNLOCK room         [".(microtime(TRUE) - (self::$delta_t))."]");
 
-    return (sem_release($res));
+    file_unlock($res);
   }
 
 
@@ -3106,21 +3095,13 @@ class Warrant {
 
   static function lock_data($is_exclusive)
   {
-    GLOBAL $sess; 
-    
-    if (($tok = @ftok(FTOK_PATH."/warrant", "B")) == -1) {
-      return (FALSE);
-    }
-    // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
-      return (FALSE);
-    }
-    if (sem_acquire($res)) {   
-        self::$delta_t = microtime(TRUE);
-        log_lock("LOCK   warrant      [".self::$delta_t."]");
-      return ($res);
-    }
-    else
+      if (($res = file_lock(FTOK_PATH."/warrant", $is_exclusive)) != FALSE) {
+          self::$delta_t = microtime(TRUE);
+          log_lock("LOCK   warrant      [".self::$delta_t."]");
+          
+          return ($res);
+      }
+
       return (FALSE);
   }
   
@@ -3130,7 +3111,7 @@ class Warrant {
     
     log_lock("UNLOCK warrant      [".(microtime(TRUE) - (self::$delta_t))."]");
 
-    return (sem_release($res));
+    file_unlock($res);
   }
 }
 
@@ -3139,22 +3120,13 @@ class Poll {
 
   static function lock_data($is_exclusive)
   {
-    GLOBAL $sess; 
-    
-    if (($tok = @ftok(FTOK_PATH."/poll", "B")) == -1) {
-      return (FALSE);
-    }
-    // echo "FTOK ".$tok."<br>";
-    if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
-      return (FALSE);
-    }
-    if (sem_acquire($res)) {
-        self::$delta_t = microtime(TRUE);
-        log_lock("LOCK   poll         [".self::$delta_t."]");
-      
-        return ($res);
-    }
-    else
+      if (($res = file_lock(FTOK_PATH."/poll", $is_exclusive)) != FALSE) {
+          self::$delta_t = microtime(TRUE);
+          log_lock("LOCK   poll         [".self::$delta_t."]");
+          
+          return ($res);
+      }
+
       return (FALSE);
   }
   
@@ -3164,7 +3136,7 @@ class Poll {
     
     log_lock("UNLOCK poll         [".(microtime(TRUE) - (self::$delta_t))."]");
     
-    return (sem_release($res));
+    file_unlock($res);
   }
 }
 

@@ -246,20 +246,14 @@ class Challenges {
 
     static function lock_data($is_exclusive)
     {
-        if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
-            return (FALSE);
-        }
-        // echo "FTOK ".$tok."<br>";
-        if (($res = sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
-            return (FALSE);
-        }
-        if (sem_acquire($res)) {   
-            self::$delta_t = microtime(TRUE);
-            log_lock("LOCK   challenges   [".self::$delta_t."]");
-            return ($res);
-        }
-        else
-            return (FALSE);
+      if (($res = file_lock(FTOK_PATH."/challenges", $is_exclusive)) != FALSE) {
+          self::$delta_t = microtime(TRUE);
+          log_lock("LOCK   challenges   [".self::$delta_t."]");
+          
+          return ($res);
+      }
+
+      return (FALSE);
     }
   
     static function unlock_data($res)
@@ -268,7 +262,7 @@ class Challenges {
     
         log_lock("UNLOCK challenges   [".(microtime(TRUE) - (self::$delta_t))."]");
 
-        return (sem_release($res));
+        file_unlock($res);
     }
 } // End CLASS Challenges
 

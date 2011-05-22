@@ -994,30 +994,16 @@ class Bin5 {
 
   static function lock_data($is_exclusive, $table_idx)
   {
-    GLOBAL $sess; 
-    
-    log_main("lockinfo: DATA ".FTOK_PATH."/bin5/table".$table_idx."/table");
-    //  echo "LOCK: ".FTOK_PATH."/main";
-    //  exit;
-    // WARNING monitor this step
-    if (($tok = @ftok(FTOK_PATH."/bin5/table".$table_idx."/table", "B")) == -1) {
+      if (($res = file_lock(FTOK_PATH."/bin5/table".$table_idx."/table", $is_exclusive)) != FALSE) {
+          self::$delta_t = microtime(TRUE);
+          log_lock("LOCK   table [".$table_idx."]         [".self::$delta_t[$table_idx]."]");
+          
+          return (new Vect(array('res' => $res, 'tab' => $table_idx)));
+      }
+      
       return (FALSE);
-    }
-    // WARNING monitor this step
-    if (($res = @sem_get($tok, ($is_exclusive ? 1 : LOCK_SHARE_MAX) )) == FALSE) {
-      return (FALSE);
-    }
-    if (sem_acquire($res)) {   
-        self::$delta_t[$table_idx] = microtime(TRUE);
-        log_lock("LOCK   table [".$table_idx."]         [".self::$delta_t[$table_idx]."]");
-
-        return (new Vect(array('res' => $res, 'tab' => $table_idx)));
-    }
-    else {
-        log_lock("LOCK table ".$table_idx.":FAILED");
-        return (FALSE);
-    }
   }
+
   
   static function unlock_data($res_vect)
   {
@@ -1028,7 +1014,7 @@ class Bin5 {
 
     log_lock("UNLOCK table [".$tab."]         [".(microtime(TRUE) - (self::$delta_t[$tab]))."]");
 
-    return (sem_release($res));
+    file_unlock($res);
   }
 
 
