@@ -28,11 +28,12 @@ require_once("../Obj/brisk.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once("Obj/briskin5.phh");
 
-$S_load_stat = array( 'U_first_loop' => 0,
-                      'U_heavy'      => 0,
-                      'R_garbage'    => 0,
-                      'R_minusone'   => 0,
-                      'R_the_end'    => 0 );
+$S_load_stat = array( 'rU_heavy'      => 0,
+                      'wL_laccgarb'   => 0,
+                      'wU_lacc_upd'   => 0,
+                      'wR_garbage'    => 0,
+                      'wR_minusone'   => 0,
+                      'wR_the_end'    => 0 );
 
 // Use of proxies isn't allowed.
 // if (is_proxy()) {
@@ -42,7 +43,7 @@ $S_load_stat = array( 'U_first_loop' => 0,
 
 log_load("LOAD: bin5/index_rd.php ".$QUERY_STRING);
 
-$first_loop = TRUE;
+// $first_loop = TRUE;
 $the_end = FALSE;
 
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
@@ -77,8 +78,9 @@ function page_sync($sess, $page)
 
 function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx, $table_token)
 {
-    GLOBAL $is_page_streaming, $first_loop, $S_load_stat;
-    
+    GLOBAL $is_page_streaming, $S_load_stat;
+    // GLOBAL $first_loop;
+
     $ret = FALSE;
     $bri = FALSE;
     $user = FALSE;
@@ -93,48 +95,112 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // log_rd2("M");
     /* Sync check (read only without modifications */
     ignore_user_abort(TRUE);
-    if  ($first_loop == TRUE) {
 
-        if (($sem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
-            // Aggiorna l'expire time lato server
-            $S_load_stat['U_first_loop']++;
+    // shared locking to load info
+    if (($sem = Bin5::lock_data(FALSE, $table_idx)) == FALSE) { 
+        // wait 20 secs, then restart the xhr 
+        ignore_user_abort(FALSE);
+        return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+    }
 
-            if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+    if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+        Bin5::unlock_data($sem);
+        ignore_user_abort(FALSE);
+        return (blocking_error(TRUE));
+    }
+
+    /* if lacc time great than STREAM_TIMEOUT or the room garbage_time is expired 
+        switch to exclusive locking and verify again the conditions */
+
+    if ((($curtime - $user->lacc) > STREAM_TIMEOUT) || Bin5::garbage_time_is_expired($table_idx, $curtime)) {
+        Bin5::unlock_data($sem);
+        
+        // exclusive locking to modify info
+        if (($sem = Bin5::lock_data(TRUE, $table_idx)) == FALSE) { 
+            // wait 20 secs, then restart the xhr 
+            ignore_user_abort(FALSE);
+            return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+        }
+        $S_load_stat['wL_laccgarb']++;
+
+        unset($user);
+        // load again the user data after new lock
+        if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+            Bin5::unlock_data($sem);
+            ignore_user_abort(FALSE);
+            return (blocking_error(TRUE));
+        }
+
+        if (($curtime - $user->lacc) > STREAM_TIMEOUT) {
+            $S_load_stat['wU_lacc_upd']++;
+            $user->lacc = $curtime;
+            // lacc field updated
+            Bin5_user::save_data($user, $table_idx, $user->idx);            
+        }
+
+        if (Bin5::garbage_time_is_expired($table_idx, $curtime)) {
+            log_only("F");
+                
+            $S_load_stat['wR_garbage']++;
+            if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
                 Bin5::unlock_data($sem);
                 ignore_user_abort(FALSE);
                 return (blocking_error(TRUE));
             }
-            $user->lacc = $curtime;
-
-            Bin5_user::save_data($user, $table_idx, $user->idx);
-            
-            if (Bin5::garbage_time_is_expired($table_idx, $curtime)) {
-                log_only("F");
                 
-                $S_load_stat['R_garbage']++;
-                if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
-                    Bin5::unlock_data($sem);
-                    ignore_user_abort(FALSE);
-                    return (blocking_error(TRUE));
-                }
+            $bri->garbage_manager(FALSE);
                 
-                $bri->garbage_manager(FALSE);
-                
-                Bin5::save_data($bri);
-                unset($bri);
-            }
-            log_main("infolock: U");
-            Bin5::unlock_data($sem);
-            ignore_user_abort(FALSE);
-        } // if (($sem = Bin5::lock_data(TRUE, $table ...
-        else {
-            ignore_user_abort(FALSE);
-            
-            return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+            Bin5::save_data($bri);
+            unset($bri);
         }
+    }
+    log_main("infolock: U");
+    Bin5::unlock_data($sem);
+    ignore_user_abort(FALSE);
+
+
+//     if  ($first_loop == TRUE) {
+
+//         if (($sem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
+//             // Aggiorna l'expire time lato server
+//             $S_load_stat['rU_first_loop']++;
+
+//             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
+//                 Bin5::unlock_data($sem);
+//                 ignore_user_abort(FALSE);
+//                 return (blocking_error(TRUE));
+//             }
+//             $user->lacc = $curtime;
+
+//             Bin5_user::save_data($user, $table_idx, $user->idx);
+            
+//             if (Bin5::garbage_time_is_expired($table_idx, $curtime)) {
+//                 log_only("F");
+                
+//                 $S_load_stat['wR_garbage']++;
+//                 if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
+//                     Bin5::unlock_data($sem);
+//                     ignore_user_abort(FALSE);
+//                     return (blocking_error(TRUE));
+//                 }
+                
+//                 $bri->garbage_manager(FALSE);
+                
+//                 Bin5::save_data($bri);
+//                 unset($bri);
+//             }
+//             log_main("infolock: U");
+//             Bin5::unlock_data($sem);
+//             ignore_user_abort(FALSE);
+//         } // if (($sem = Bin5::lock_data(TRUE, $table ...
+//         else {
+//             ignore_user_abort(FALSE);
+            
+//             return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+//         }
         
-        $first_loop = FALSE;
-    } // if  ($first_loop == TRUE) {
+//         $first_loop = FALSE;
+//     } // if  ($first_loop == TRUE) {
     
     if ($cur_step == $proxy_step['s']) {
         log_main("infolock: P");
@@ -151,7 +217,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 break;
             
             log_main("infolock: P");
-            $S_load_stat['U_heavy']++;
+            $S_load_stat['rU_heavy']++;
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
                 break;
             }
@@ -186,7 +252,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             ignore_user_abort(FALSE);
             return (blocking_error(TRUE));
         }
-        $S_load_stat['R_minusone']++;
+        $S_load_stat['wR_minusone']++;
 
         if (($user = $bri->get_user($sess, $idx)) == FALSE) {
             Bin5::unlock_data($sem);
@@ -279,7 +345,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
                 unset($user);
                 
-                $S_load_stat['R_the_end']++;
+                $S_load_stat['wR_the_end']++;
                 if (($bri = Bin5::load_data($table_idx, $table_token)) == FALSE) {
                     Bin5::unlock_data($sem);
                     ignore_user_abort(FALSE);
@@ -374,10 +440,17 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   }
  }
 
-$s = "[".$sess."] briskin5/index_rd.php stats: ";
+$s = ""; 
+$tr = 0;
+$tw = 0;
 foreach ($S_load_stat as $key => $value) {
     $s .= sprintf("%s: %d - ", $key, $value);
+    if (substr($key, 0, 1) == "w")
+        $tw += $value;
+    else
+        $tr += $value;
 }
+$s = sprintf("briskin5/index_rd.php stats:  R: %d W: %d - %s", $tr, $tw, $s);
 log_crit($s);
 
 ?>

@@ -28,11 +28,12 @@ require_once("Obj/brisk.phh");
 // require_once("Obj/proxyscan.phh");
 require_once("briskin5/Obj/briskin5.phh");
 
-$S_load_stat = array( 'U_first_loop' => 0,
-                      'U_heavy'      => 0,
-                      'R_garbage'    => 0,
-                      'R_minusone'   => 0,
-                      'R_the_end'    => 0 );
+$S_load_stat = array( 'rU_heavy'      => 0,
+                      'wL_laccgarb'   => 0,
+                      'wU_lacc_upd'   => 0,
+                      'wR_garbage'    => 0,
+                      'wR_minusone'   => 0,
+                      'wR_the_end'    => 0 );
 
 $mlang_indrd = array( 
                      'btn_backtotab'  => array('it' => ' torna ai tavoli ',
@@ -48,7 +49,7 @@ $mlang_indrd = array(
 //}
 log_load("index_rd.php");
 
-$first_loop = TRUE;
+// $first_loop = TRUE;
 $the_end = FALSE;
 
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
@@ -89,7 +90,8 @@ function page_sync($sess, $page, $table_idx, $table_token)
 
 function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step)
 {
-    GLOBAL $G_lang, $mlang_indrd, $is_page_streaming, $first_loop;
+    GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
+    // GLOBAL $first_loop;
     GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
     GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
     $CO_splashdate = "CO_splashdate".$G_splash_idx;
@@ -115,45 +117,109 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     // log_rd2("M");
     /* Sync check (read only without modifications */
     ignore_user_abort(TRUE);
-    if  ($first_loop == TRUE) {
-        if (($sem = Room::lock_data(TRUE)) != FALSE) { 
-            // Aggiorna l'expire time lato server
-            $S_load_stat['U_first_loop']++;
-            if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
+
+
+    /* shared locking to load info */
+    if (($sem = Room::lock_data(FALSE)) == FALSE) { 
+        // wait 20 secs, then restart the xhr 
+        ignore_user_abort(FALSE);
+        return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+    }
+    
+    // Verifica l'expire time lato server
+    if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
+        Room::unlock_data($sem);
+        ignore_user_abort(FALSE);
+        return (blocking_error(TRUE));
+    }
+    /* if lacc time great than STREAM_TIMEOUT or the room garbage_time is expired 
+         switch to exclusive locking and verify again the conditions */
+    if ((($curtime - $user->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) {
+        /* there is some info that require to change data, switch to exclusive locking */
+        Room::unlock_data($sem);
+        if (($sem = Room::lock_data(TRUE)) == FALSE) { 
+            // wait 20 secs, then restart the xhr 
+            ignore_user_abort(FALSE);
+            return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+        }
+        $S_load_stat['wL_laccgarb']++;
+
+        // load again the data after locking
+        unset($user);
+        // Verifica l'expire time lato server
+        if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
+            Room::unlock_data($sem);
+            ignore_user_abort(FALSE);
+            return (blocking_error(TRUE));
+        }
+
+        if (($curtime - $user->lacc) >=  STREAM_TIMEOUT) {
+            $S_load_stat['wU_lacc_upd']++;
+            $user->lacc = $curtime;
+            // lacc field updated
+            User::save_data($user, $user->idx);
+        }
+        
+        if (Room::garbage_time_is_expired($curtime)) {
+            log_only("F");
+            
+            $S_load_stat['wR_garbage']++;
+            if (($room = Room::load_data()) == FALSE) {
                 Room::unlock_data($sem);
                 ignore_user_abort(FALSE);
                 return (blocking_error(TRUE));
             }
-            $user->lacc = $curtime;
-            // lacc field updated
-            User::save_data($user, $user->idx);
-            
-            if (Room::garbage_time_is_expired($curtime)) {
-                log_only("F");
-                
-                $S_load_stat['R_garbage']++;
-                if (($room = Room::load_data()) == FALSE) {
-                    Room::unlock_data($sem);
-                    ignore_user_abort(FALSE);
-                    return (blocking_error(TRUE));
-                }
-                log_main("pre garbage_manager TRE");
-                $room->garbage_manager(FALSE);
-                Room::save_data($room);
-                unset($room);
-            }
-            log_main("infolock: U");
-            Room::unlock_data($sem);
-            ignore_user_abort(FALSE);
-        } // if (($sem = Room::lock_data(TRUE)) != FALSE) { 
-        else {
-            // wait 20 secs, then restart the xhr 
-            ignore_user_abort(FALSE);
-            
-            return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+            log_main("pre garbage_manager TRE");
+            $room->garbage_manager(FALSE);
+            Room::save_data($room);
+            unset($room);
         }
-        $first_loop = FALSE;
-    } // if  ($first_loop == TRUE) {
+    }
+    log_main("infolock: U");
+    Room::unlock_data($sem);
+    ignore_user_abort(FALSE);
+
+    
+    
+//     if  ($first_loop == TRUE) {
+//         if (($sem = Room::lock_data(TRUE)) != FALSE) { 
+//             // Aggiorna l'expire time lato server
+//             $S_load_stat['U_first_loop']++;
+//             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
+//                 Room::unlock_data($sem);
+//                 ignore_user_abort(FALSE);
+//                 return (blocking_error(TRUE));
+//             }
+//             $user->lacc = $curtime;
+//             // lacc field updated
+//             User::save_data($user, $user->idx);
+            
+//             if (Room::garbage_time_is_expired($curtime)) {
+//                 log_only("F");
+                
+//                 $S_load_stat['R_garbage']++;
+//                 if (($room = Room::load_data()) == FALSE) {
+//                     Room::unlock_data($sem);
+//                     ignore_user_abort(FALSE);
+//                     return (blocking_error(TRUE));
+//                 }
+//                 log_main("pre garbage_manager TRE");
+//                 $room->garbage_manager(FALSE);
+//                 Room::save_data($room);
+//                 unset($room);
+//             }
+//             log_main("infolock: U");
+//             Room::unlock_data($sem);
+//             ignore_user_abort(FALSE);
+//         } // if (($sem = Room::lock_data(TRUE)) != FALSE) { 
+//         else {
+//             // wait 20 secs, then restart the xhr 
+//             ignore_user_abort(FALSE);
+            
+//             return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
+//         }
+//         $first_loop = FALSE;
+//     } // if  ($first_loop == TRUE) {
     
     if ($cur_step == $proxy_step['s']) {
         log_main("infolock: P");
@@ -162,7 +228,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     else {
         log_only2("R");
     }
-    
 
     if ($user == FALSE) {
         do {
@@ -171,7 +236,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 break;
             
             log_main("infolock: P");
-            $S_load_stat['U_heavy']++;
+            $S_load_stat['rU_heavy']++;
             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
                 break;
             }
@@ -207,7 +272,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             ignore_user_abort(FALSE);
             return (blocking_error(TRUE));
         }
-        $S_load_stat['R_minusone']++;
+        $S_load_stat['wR_minusone']++;
         
         if (($user = $room->get_user($sess, $idx)) == FALSE) {
             Room::unlock_data($sem);
@@ -287,7 +352,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     else {
         ignore_user_abort(TRUE);
         $sem = Room::lock_data(FALSE);
-        $S_load_stat['U_heavy']++;
+        $S_load_stat['rU_heavy']++;
         if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
             Room::unlock_data($sem);
             ignore_user_abort(FALSE);
@@ -328,7 +393,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 
                 unset($user);
 
-                $S_load_stat['R_the_end']++;
+                $S_load_stat['wR_the_end']++;
                 if (($room = Room::load_data()) == FALSE) {
                     Room::unlock_data($sem);
                     ignore_user_abort(FALSE);
@@ -380,7 +445,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
    step
 */
 
-$is_page_streaming =  (webservers_exceeded() || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
+$is_page_streaming = (webservers_exceeded() || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
@@ -424,11 +489,17 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   }
  }
 
-$s = "[".$sess."] index_rd.php stats: ";
+$s = ""; 
+$tr = 0;
+$tw = 0;
 foreach ($S_load_stat as $key => $value) {
     $s .= sprintf("%s: %d - ", $key, $value);
+    if (substr($key, 0, 1) == "w")
+        $tw += $value;
+    else
+        $tr += $value;
 }
+$s = sprintf("index_rd.php stats:  R: %d W: %d - %s", $tr, $tw, $s);
 log_crit($s);
-
 
 ?>
