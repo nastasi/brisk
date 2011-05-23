@@ -12,6 +12,9 @@ $G_room_roadmap = '<div style=\"text-align: left;\"><ul>
 $G_proxy_white_list = array();
 $G_alarm_passwd = "yourpasswd";
 $G_is_local = FALSE;
+
+$G_webserver_max = 120;
+
 $G_black_list = array();
 
 // is the top banner active ?
