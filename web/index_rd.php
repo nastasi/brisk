@@ -29,7 +29,7 @@ require_once("Obj/brisk.phh");
 require_once("briskin5/Obj/briskin5.phh");
 
 $S_load_stat = array( 'rU_heavy'      => 0,
-                      'wL_laccgarb'   => 0,
+                      'lL_laccgarb'   => 0,
                       'wU_lacc_upd'   => 0,
                       'wR_garbage'    => 0,
                       'wR_minusone'   => 0,
@@ -69,7 +69,7 @@ function blocking_error($is_unrecoverable)
   GLOBAL $is_page_streaming;
 
   $is_page_streaming = TRUE;
-  log_rd2("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
+  log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
   return (sprintf(($is_unrecoverable ? 'the_end=true; ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
 }
 
@@ -142,7 +142,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             ignore_user_abort(FALSE);
             return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
         }
-        $S_load_stat['wL_laccgarb']++;
+        $S_load_stat['lL_laccgarb']++;
 
         // load again the data after locking
         unset($user);
@@ -229,6 +229,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         log_only2("R");
     }
 
+    $S_load_stat['rU_heavy']++;
     if ($user == FALSE) {
         do {
             ignore_user_abort(TRUE);
@@ -236,7 +237,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 break;
             
             log_main("infolock: P");
-            $S_load_stat['rU_heavy']++;
             if (($user = User::load_data($proxy_step['i'], $sess)) == FALSE) {
                 break;
             }
@@ -496,7 +496,7 @@ foreach ($S_load_stat as $key => $value) {
     $s .= sprintf("%s: %d - ", $key, $value);
     if (substr($key, 0, 1) == "w")
         $tw += $value;
-    else
+    else if (substr($key, 0, 1) == "r")
         $tr += $value;
 }
 $s = sprintf("index_rd.php stats:  R: %d W: %d - %s", $tr, $tw, $s);

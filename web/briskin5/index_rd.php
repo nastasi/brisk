@@ -29,7 +29,7 @@ require_once("../Obj/brisk.phh");
 require_once("Obj/briskin5.phh");
 
 $S_load_stat = array( 'rU_heavy'      => 0,
-                      'wL_laccgarb'   => 0,
+                      'lL_laccgarb'   => 0,
                       'wU_lacc_upd'   => 0,
                       'wR_garbage'    => 0,
                       'wR_minusone'   => 0,
@@ -121,7 +121,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             ignore_user_abort(FALSE);
             return ("sleep(gst,20000);|xhr_rd_abort(xhr_rd);");
         }
-        $S_load_stat['wL_laccgarb']++;
+        $S_load_stat['lL_laccgarb']++;
 
         unset($user);
         // load again the user data after new lock
@@ -210,6 +210,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         log_only2("R");
     }
     
+    $S_load_stat['rU_heavy']++;
     if ($user == FALSE) {
         do {
             ignore_user_abort(TRUE);
@@ -217,7 +218,6 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 break;
             
             log_main("infolock: P");
-            $S_load_stat['rU_heavy']++;
             if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
                 break;
             }
@@ -447,7 +447,7 @@ foreach ($S_load_stat as $key => $value) {
     $s .= sprintf("%s: %d - ", $key, $value);
     if (substr($key, 0, 1) == "w")
         $tw += $value;
-    else
+    else if (substr($key, 0, 1) == "r")
         $tr += $value;
 }
 $s = sprintf("briskin5/index_rd.php stats:  R: %d W: %d - %s", $tr, $tw, $s);
