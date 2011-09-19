@@ -2148,7 +2148,7 @@ class Room {
 
     log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
 
-    /* there is another user logged with your account and you and him have authenticated => che new user
+    /* there is another user logged with your account and you and him have authenticated => new user
        get the session of the old user */
     if ($ghost > -1 && $ghost_auth && ($authenticate != FALSE)) {
       /* swap session */
