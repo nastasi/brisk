@@ -423,8 +423,8 @@ for ($i = 0 ; time() < $endtime ; $i++) {
     echo "$ret";
     echo ' @END@'; 
     log_send("EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
-    flush();
-    log_mop(0, 'bin::index_rd.php: after flush (begin: '.sprintf("%f", $pre_main).')');
+    mop_flush();
+    log_mop(0, 'bin::index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     if ($is_page_streaming)
       break;
   }
@@ -436,7 +436,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
   if (($i % 10) == 0) {
     // log_rd2("TIME: ".time());
     echo '_';
-    flush();
+    mop_flush();
   }
  }
 

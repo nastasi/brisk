@@ -410,10 +410,10 @@ function main()
     GLOBAL $G_dbasetype, $G_alarm_passwd, $pazz;
     
     echo "Inizio.<br>";
-    flush();
+    mop_flush();
     if ($pazz != $G_alarm_passwd) {
         echo "Wrong password<br>";
-        flush();
+        mop_flush();
         exit;
     }
     
@@ -428,7 +428,7 @@ function main()
         echo "Failed.<br>\n";
     
     echo "Fine.\n";
-    flush();
+    mop_flush();
 }
 
 main();

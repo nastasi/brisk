@@ -284,6 +284,12 @@ Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+function mop_flush()
+{
+    flush();
+    ob_flush();
+}
+
 function file_lock($fname, $is_exclusive)
 {
     if (($res = fopen($fname, "r+")) == FALSE) {
