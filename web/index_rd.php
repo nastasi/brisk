@@ -280,7 +280,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             return (blocking_error(TRUE));
         }
         
-        if ($user->the_end) { 
+        if ($user->the_end == TRUE) { 
             log_rd2("main_check: the end".var_export(debug_backtrace()));
             $is_page_streaming = TRUE;
         }
