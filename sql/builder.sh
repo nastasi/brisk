@@ -9,6 +9,7 @@ if [ -f $HOME/.db.conf ]; then
 else
     DBHOST=127.0.0.1
     DBUSER=brisk
+    DBPORT=5432
     DBBASE=brisk
     DBPASS=briskpass
     PFX="bsk_"
@@ -18,15 +19,20 @@ if [ -f $HOME/.brisk_install ]; then
     source $HOME/.brisk_install
 fi
 
-
+pg_args=""
+test "$DBHOST" != "" && pg_args="$pg_args -h $DBHOST"
+test "$DBUSER" != "" && pg_args="$pg_args -U $DBUSER"
+test "$DBPORT" != "" && pg_args="$pg_args -p $DBPORT"
+test "$DBBASE" != "" && pg_args="$pg_args $DBBASE"
+	
 sqlexe () {
     local sht
     sht=$1
     
     if [ $sht -eq 1 ];  then 
-        sed "s/#PFX#/$PFX/g" | psql -a -h $DBHOST -U $DBUSER $DBBASE 2>&1 | egrep 'ERROR|^-- MESG' 
+        sed "s/#PFX#/$PFX/g" | psql -a $pg_args 2>&1 | egrep 'ERROR|^-- MESG' 
     else
-        sed "s/#PFX#/$PFX/g" | psql -a -h $DBHOST -U $DBUSER $DBBASE
+        sed "s/#PFX#/$PFX/g" | psql -a $pg_args
     fi
 
     return 0
@@ -66,10 +72,10 @@ elif [ "$1" = "rebuild" ]; then
         | sqlexe $sht
 elif [ "$1" = "psql" ]; then
    shift
-   psql -h $DBHOST -U $DBUSER $DBBASE $@
+   psql $pg_args $@
 elif [ "$1" = "piped" ]; then
    shift
-   psql -h $DBHOST -U $DBUSER $DBBASE -t -q -A -F '|' $@
+   psql $pg_args -t -q -A -F '|' $@
 elif [ "$1" = "dump" ]; then
     if [ $# -eq 1 ]; then
         pg_dump -a --inserts -h $DBHOST -U $DBUSER $DBBASE
@@ -83,7 +89,7 @@ elif [ "$1" = "dumpall" ]; then
         pg_dump -h $DBHOST -U $DBUSER $DBBASE > $2
     fi
 elif [ "$1" = "add" ]; then
-    cat "$2" | psql -h $DBHOST -U $DBUSER $DBBASE
+    cat "$2" | psql $pg_args
 else
     echo " USAGE"
     echo "   ./builder create"
