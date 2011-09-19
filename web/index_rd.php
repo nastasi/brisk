@@ -348,7 +348,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
             return (page_sync($user->sess, "briskin5/index.php", $user->table, $user->table_token));
         }
         log_rd2("NEWSTAT: ".$user->stat);
-    }
+    } /* if ($cur_step == -1) { */
     else {
         ignore_user_abort(TRUE);
         $sem = Room::lock_data(FALSE);
@@ -422,13 +422,13 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                         log_rd2("LOGOUT FROM WHAT ???");
                     
                     Room::save_data($room);
-                }
-            }
-        }
+                } /* if ($user->the_end == TRUE) { ... */
+            } /* if ($user->the_end == TRUE) { ... */
+        } /* if ($cur_step < $user->step) { */
         
         Room::unlock_data($sem);
         ignore_user_abort(FALSE);
-    }
+    }  /* else of if ($cur_step == -1) { */
     
     
     return ($ret);
