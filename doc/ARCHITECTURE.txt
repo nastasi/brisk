@@ -32,5 +32,6 @@ index.php:
 
 -> index.php  (after verify session value: ~L250)
   - garbage_manager(TRUE)
-    - allign many status var with briskin5 user values
+    - align many status var with briskin5 user values
     - room_join_wakeup()
+
