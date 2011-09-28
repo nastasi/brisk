@@ -3,7 +3,7 @@
 #
 # Defaults
 #
-CONFIG_FILE="$HOME/.brosk_install"
+CONFIG_FILE="$HOME/.brisk_install"
 
 players_n=3
 tables_n=44
