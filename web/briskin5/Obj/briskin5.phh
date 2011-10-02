@@ -527,8 +527,8 @@ class Bin5_user extends User {
             if (validate_sess($sess) == FALSE)
                 break;
             
-            if (file_exists(BIN5_PROXY_PATH) == FALSE)
-                mkdir(BIN5_PROXY_PATH, 0775, TRUE);
+            if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
+                mkdir(BIN5_PROXY_PATH."/table".$tab_id, 0775, TRUE);
             if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/".$sess.".step", 'rb')) == FALSE)
                 break;
             if (($s = fread($fp, 8)) == FALSE)
@@ -555,8 +555,8 @@ class Bin5_user extends User {
         do {
             if (validate_sess($this->sess) == FALSE)
                 break;
-            if (file_exists(BIN5_PROXY_PATH) == FALSE)
-                mkdir(BIN5_PROXY_PATH, 0775, TRUE);
+            if (file_exists(BIN5_PROXY_PATH."/table".$this->table_orig) == FALSE)
+                mkdir(BIN5_PROXY_PATH."/table".$this->table_orig, 0775, TRUE);
             if (($fp = @fopen(BIN5_PROXY_PATH."/table".$this->table_orig."/".$this->sess.".step", 'w')) == FALSE)
                 break;
             fwrite($fp, pack("LL",$this->step, $this->idx));
@@ -1194,8 +1194,8 @@ class Bin5 {
       $ret = TRUE;
       $fp = FALSE;
       do {
-          if (file_exists(BIN5_PROXY_PATH) == FALSE)
-              mkdir(BIN5_PROXY_PATH, 0775, TRUE);
+          if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
+              mkdir(BIN5_PROXY_PATH."/table".$tab_id, 0775, TRUE);
           if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/garbage_time.expired", 'rb')) == FALSE)
               break;
           if (($s = fread($fp, 4)) == FALSE)
@@ -1218,8 +1218,8 @@ class Bin5 {
   static function garbage_time_expire_set($tab_id, $tm) 
   {
       do {
-          if (file_exists(BIN5_PROXY_PATH) == FALSE)
-              mkdir(BIN5_PROXY_PATH, 0775, TRUE);
+          if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
+              mkdir(BIN5_PROXY_PATH."/table".$tab_id, 0775, TRUE);
           if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/garbage_time.expired", 'wb')) == FALSE)
               break;
           fwrite($fp, pack("L",$tm));
