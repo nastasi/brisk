@@ -242,21 +242,18 @@ function table_walk(curtag)
 function j_stand_tdcont(el)
 {
     var content = "";
+    var val_el;
 
-    if (el[0] & 0x01)
-        content += '<b>';
+    val_el = el[0] & 0x03;
     
-    if (el[0] & 0x02)
-        content += '<i>';
+    if (val_el > 0) 
+        content += '<span class="au'+val_el+'">';
     
     content += el[1];
     
-    if (el[0] & 0x02)
-        content += '</i>';
-    
-    if (el[0] & 0x01)
-        content += '</b>';
-            
+    if (val_el > 0) 
+        content += '</span>';
+
     content += state_add(el[0]);
     
     return (content);
@@ -448,19 +445,18 @@ function j_tab_cont(table_idx, data)
     var content = '';
 
     for (i = 0 ; i < data.length ; i++) {
-        if (data[i][0] & 0x01)
-            content += '<b>';
-
-        if (data[i][0] & 0x02)
-            content += '<i>';
-
+        var val_el;
+        
+        val_el = data[i][0] & 0x03;
+        
+        if (val_el > 0)
+            content += '<span class="au'+val_el+'">';
+    
         content += data[i][1];
         
-        if (data[i][0] & 0x02)
-            content += '</i>';
+        if (val_el > 0)
+            content += '</span>';
 
-        if (data[i][0] & 0x01)
-            content += '</b>';
         content += state_add(data[i][0]);
 
         content += '<br>';

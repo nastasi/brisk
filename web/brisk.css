@@ -206,3 +206,20 @@ input.button:active {
 img.button:hover {
     cursor: pointer;
 }
+
+span.au1 {
+    font-weight: bold;
+}
+
+span.au2 {
+    font-style: italic;
+/*    text-decoration: underline; */
+    background-color: #bafcba;
+}
+
+span.au3 {
+    font-weight: bold;
+    font-style: italic;
+/*    text-decoration: underline; */
+    background-color: #bafcba;
+}
