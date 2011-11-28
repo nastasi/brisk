@@ -1051,7 +1051,7 @@ class Bin5 {
 	// 	if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	if ($user_cur->sess == '')
 	  continue;
-	if ($user_cur->name == $name_new) {
+        if (strcasecmp($user_cur->name, $name_new) == 0) {
 	  $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
           $premsg = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));

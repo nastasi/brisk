@@ -1802,7 +1802,7 @@ class Room {
 
           if ($user_cur->sess == '')
             continue;
-          if ($user_cur->name == $name_new)
+          if (strcasecmp($user_cur->name,$name_new) == 0)
             break;
           }
         if ($i <  MAX_PLAYERS) {
@@ -2249,7 +2249,7 @@ class Room {
               if (strcmp("", $this->user[$i]->sess) == 0) 
                 continue;
               
-              if (strcmp($this->user[$i]->name, $ghostname) == 0) {
+              if (strcasecmp($this->user[$i]->name, $ghostname) == 0) {
                 $ghostname = '';
                 break;
               }
