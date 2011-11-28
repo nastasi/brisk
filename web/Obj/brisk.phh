@@ -2658,7 +2658,7 @@ function log_mop($step, $log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LMOP) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2684,7 +2684,7 @@ function log_only2($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONL2) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2709,7 +2709,7 @@ function log_crit($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_CRIT) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2734,7 +2734,7 @@ function log_only($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONLY) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2759,7 +2759,7 @@ function log_main($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_MAIN) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2784,7 +2784,7 @@ function log_rd($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_READ) == 0)
         return;
 
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";    
@@ -2809,7 +2809,7 @@ function log_rd2($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_REA2) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2834,8 +2834,8 @@ function log_send($log)
     
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_SEND) == 0)
         return;
-    
-    if (BRISK_DEBUG & DBG_TRAC) 
+
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)    
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2860,7 +2860,7 @@ function log_lock($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOCK) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2885,7 +2885,7 @@ function log_wr($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_WRIT) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2910,7 +2910,7 @@ function log_load($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOAD) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2930,7 +2930,7 @@ function log_auth($sess, $log)
     if (( (BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_AUTH) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2955,7 +2955,7 @@ function log_shme($log)
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_SHME) == 0)
         return;
     
-    if (BRISK_DEBUG & DBG_TRAC) 
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
