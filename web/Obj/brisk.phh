@@ -321,6 +321,9 @@ function webservers_check()
 {
     GLOBAL $G_webserver_max;
 
+    /* FIXME: check all procs expirations */
+    return (10);
+
     $ct = 0;
 
     $dh = opendir('/proc');
