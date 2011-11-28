@@ -28,7 +28,6 @@ require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
 require_once("Obj/proxyscan.phh");
 
-
 $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati.',
                                              'en' => 'Wrong user and/or password.'),
                      'userpassmust' => array('it' => 'Il nickname deve contenere almeno una lettera o una cifra.',

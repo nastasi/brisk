@@ -2366,7 +2366,7 @@ class Room {
 
           for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
               if (($room->user[$i] = User::load_data($i, FALSE)) == FALSE) {
-                  log_crit("Bin5_user::load_data failed");
+                  log_crit("User::load_data failed");
                   break;
               }
           }

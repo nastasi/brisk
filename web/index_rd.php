@@ -474,8 +474,8 @@ for ($i = 0 ; time() < $endtime ; $i++) {
     log_send("IS_PAGE: ".($is_page_streaming == TRUE ? "TRUE" : "FALSE")."EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
     mop_flush();
     log_mop(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
-    if ($is_page_streaming)
-      break;
+    if ($is_page_streaming) 
+        break;
   }
   $old_stat =  $stat;
   $old_subst = $subst;
@@ -502,5 +502,4 @@ foreach ($S_load_stat as $key => $value) {
 }
 $s = sprintf("index_rd.php stats:  R: %d W: %d - %s", $tr, $tw, $s);
 log_crit($s);
-
 ?>
