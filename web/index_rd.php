@@ -486,6 +486,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
     // log_rd2("TIME: ".time());
     echo '_';
     mop_flush();
+    log_crit("flush");
   }
  }
 

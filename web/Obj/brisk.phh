@@ -286,8 +286,8 @@ Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 
 function mop_flush()
 {
-    flush();
     ob_flush();
+    flush();
 }
 
 function file_lock($fname, $is_exclusive)
