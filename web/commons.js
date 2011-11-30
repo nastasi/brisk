@@ -765,6 +765,30 @@ var chatt_lines_n = 0;
 
 var CHATT_MAXLINES = 40;
 
+function user_decorator(user)
+{
+    var name;
+    var flags = user[0];
+    if ((flags & 0x03) != 0)
+        name = "<span class='au" + (flags & 0x03) + "'>"+user[1]+"</span>";
+    else
+        name = user[1];
+
+    return (name);
+}
+
+function user_dec_and_state(el)
+{
+    var content = "";
+    var val_el;
+
+    content = user_decorator(el);
+    content += state_add(el[0]);
+    
+    return (content);
+}
+
+
 /* PRO CHATT */
 function chatt_sub(dt,data,str)
 {
@@ -773,38 +797,33 @@ function chatt_sub(dt,data,str)
     var flags;
     var isauth;
 
-    flags = data[0];
-    if (flags & 0x02)
-        name = "<i>"+data[1]+"</i>";
-    else
-        name = data[1];
-    // alert ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight);
+    name = user_decorator(data)
 
-  if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
-      must_scroll = true;
+    if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
+        must_scroll = true;
 
-  // alert("ARRIVA NAME: "+ name + "  STR:"+str);
-  if (chatt_lines_n == CHATT_MAXLINES) {
-    $("txt").innerHTML = "";
-    for (i = 0 ; i < (CHATT_MAXLINES - 1) ; i++) {
-      chatt_lines[i] = chatt_lines[i+1];
-      $("txt").innerHTML += chatt_lines[i];
+    // alert("ARRIVA NAME: "+ name + "  STR:"+str);
+    if (chatt_lines_n == CHATT_MAXLINES) {
+        $("txt").innerHTML = "";
+        for (i = 0 ; i < (CHATT_MAXLINES - 1) ; i++) {
+            chatt_lines[i] = chatt_lines[i+1];
+            $("txt").innerHTML += chatt_lines[i];
+        }
+        chatt_lines[i] = dt+name+str+ "<br>";
+        $("txt").innerHTML += chatt_lines[i];
     }
-    chatt_lines[i] = dt+"<b>"+name+"</b> "+str+ "<br>";
-    $("txt").innerHTML += chatt_lines[i];
-  }
-  else {
-    chatt_lines[chatt_lines_n] = dt+"<b>"+name+"</b> "+str+ "<br>";
-    $("txt").innerHTML += chatt_lines[chatt_lines_n];
-    chatt_lines_n++;
-  }
-  // $("txt").innerHTML;
+    else {
+        chatt_lines[chatt_lines_n] = dt+"<b>"+name+"</b> "+str+ "<br>";
+        $("txt").innerHTML += chatt_lines[chatt_lines_n];
+        chatt_lines_n++;
+    }
+    // $("txt").innerHTML;
 
-
-  if (must_scroll) {
-      $("txt").scrollTop = 10000000;
-  }
-  // alert("scTOP "+$("txt").scrollTop+"  scHEIGHT: "+$("txt").scrollHeight+" HEIGHT: "+getStyle($("txt"),"height", "height") );
+    
+    if (must_scroll) {
+        $("txt").scrollTop = 10000000;
+    }
+    // alert("scTOP "+$("txt").scrollTop+"  scHEIGHT: "+$("txt").scrollHeight+" HEIGHT: "+getStyle($("txt"),"height", "height") );
 }
 
 /*

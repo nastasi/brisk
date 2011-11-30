@@ -272,15 +272,15 @@ function act_reload()
 function set_names(so,ea,ne,nw,we)
 {
     // alert("SET NAME");
-    $("name").innerHTML = italizer(so);
-    $("name").title = unescapeHTML(so[1]); 
-    $("name_ea").innerHTML = italizer(ea);
+    $("name").innerHTML    = user_decorator(so);
+    $("name").title    = unescapeHTML(so[1]); 
+    $("name_ea").innerHTML = user_decorator(ea);
     $("name_ea").title = unescapeHTML(ea[1]);
-    $("name_ne").innerHTML = italizer(ne);
+    $("name_ne").innerHTML = user_decorator(ne);
     $("name_ne").title = unescapeHTML(ne[1]);
-    $("name_nw").innerHTML = italizer(nw);
+    $("name_nw").innerHTML = user_decorator(nw);
     $("name_nw").title = unescapeHTML(nw[1]);
-    $("name_we").innerHTML = italizer(we);
+    $("name_we").innerHTML = user_decorator(we);
     $("name_we").title = unescapeHTML(we[1]);
 
     for (i = 0 ; i < PLAYERS_N ; i++) 

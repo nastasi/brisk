@@ -241,22 +241,7 @@ function table_walk(curtag)
 
 function j_stand_tdcont(el)
 {
-    var content = "";
-    var val_el;
-
-    val_el = el[0] & 0x03;
-    
-    if (val_el > 0) 
-        content += '<span class="au'+val_el+'">';
-    
-    content += el[1];
-    
-    if (val_el > 0) 
-        content += '</span>';
-
-    content += state_add(el[0]);
-    
-    return (content);
+    return (user_dec_and_state(el));
 }
 
 function j_stand_cont(ddata)
@@ -445,19 +430,9 @@ function j_tab_cont(table_idx, data)
     var content = '';
 
     for (i = 0 ; i < data.length ; i++) {
-        var val_el;
-        
-        val_el = data[i][0] & 0x03;
-        
-        if (val_el > 0)
-            content += '<span class="au'+val_el+'">';
-    
-        content += data[i][1];
-        
-        if (val_el > 0)
-            content += '</span>';
-
-        content += state_add(data[i][0]);
+        // content += user_decorator(data[i]);
+        // content += state_add(data[i][0]);
+        content += j_stand_tdcont(data[i]);
 
         content += '<br>';
     }
