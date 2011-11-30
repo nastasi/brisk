@@ -1087,6 +1087,13 @@ class User {
       return (FALSE);
   }
 
+  function myname_innerHTML()
+  {
+      $class_id = ($this->flags & USER_FLAG_AUTH) + 1;
+      
+      return (sprintf('$("myname").innerHTML = "<span class=\"au%d\">%s</span>";', $class_id, 
+                      xcape($this->name,ENT_COMPAT,"UTF-8")));
+  }
 
 } // end class User
 
@@ -1335,9 +1342,8 @@ class Room {
     }
 
     $ret .= sprintf('subst = "%s";', $user->subst);
-    $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
-    $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
-    $ret .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', $itin, xcape($user->name), $itou);
+    $ret .= $user->myname_innerHTML();
+
     for ($i = 0 ; $i < TABLES_N ; $i++) {
 
       $ret .= $this->table_content($user, $i);
@@ -1578,9 +1584,7 @@ class Room {
 	$ret .= $this->table_content($user_cur, $table_idx);
       
       if ($user->idx_get() == $i) {
-        $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
-        $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
-	$ret .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>: ";', $itin, xcape($user->name), $itou);
+          $ret .= $user->myname_innerHTML();
       }
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
       $user_cur->step_inc();
@@ -2301,11 +2305,7 @@ class Room {
       if ($user_cur->stat == 'room') {
 	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".$this->standup_content($user_cur);
 	if ($user->idx_get() == $i) {
-          $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
-          $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
-
-	  $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>: ";', 
-                                                               $itin, xcape($user->name), $itou);
+          $user_cur->comm[$user_cur->step % COMM_N] .= $user->myname_innerHTML();
 	}
 	log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
 	

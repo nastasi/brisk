@@ -1105,10 +1105,7 @@ class Bin5 {
                       (BIN5_PLAYERS_N == 3 ? 0:  $this->user[$table->player[($user_cur->table_pos+4) % BIN5_PLAYERS_N]]->flags),
                       (BIN5_PLAYERS_N == 3 ? "" :  xcape($this->user[$table->player[($user_cur->table_pos+4) % BIN5_PLAYERS_N]]->name)));
 	    if ($user_cur == $user) {
-              $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
-              $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
-	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', 
-								   $itin, xcape($user->name), $itou);
+                $user_cur->comm[$user_cur->step % COMM_N] .= $user_cur->myname_innerHTML();
             }
 	    $user_cur->step_inc();
 	  }
@@ -1372,10 +1369,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
     $ret .= "background_set();";
     
     /* USERS INFO */
-    $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
-    $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
-
-    $ret .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', $itin, xcape($user->name), $itou);
+    $ret .= $user->myname_innerHTML();
     $ret .= sprintf('set_names([%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"]); ',
 		    $room->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->flags,
 		    xcape($room->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->name),
