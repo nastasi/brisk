@@ -1108,7 +1108,7 @@ class Bin5 {
               $itin = ($user->flags & USER_FLAG_AUTH ? "<i>" : "");
               $itou = ($user->flags & USER_FLAG_AUTH ? "</i>" : "");
 	      $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$("myname").innerHTML = "<b>%s%s%s</b>";', 
-								   $itin, xcape($user->name,ENT_COMPAT,"UTF-8"), $itou);
+								   $itin, xcape($user->name), $itou);
             }
 	    $user_cur->step_inc();
 	  }
