@@ -100,7 +100,7 @@ if (array_search($_SERVER['REMOTE_ADDR'], $G_black_list) !== FALSE) {
 
 $is_spawn = FALSE;
 
-log_mop(0, 'index_wr.php: COMM: '.xcapemesg($mesg));
+log_wr(0, 'index_wr.php: COMM: '.xcapemesg($mesg));
 log_wr('COMM: '.xcapemesg($mesg));
 
 $curtime = time();
@@ -186,7 +186,7 @@ $argz = explode('|', xcapemesg($mesg));
 
 log_wr('POSTSPLIT: '.$argz[0]);
 
-log_mop($user->step, 'index_wr.php: after get_user()');
+log_wr($user->step, 'index_wr.php: after get_user()');
 
 if ($argz[0] == 'shutdown') {
   log_auth($user->sess, "Shutdown session.");
@@ -670,7 +670,7 @@ else if ($user->stat == 'room') {
 }
 log_wr("before save data");
 Room::save_data($room);
-log_mop($user->step, 'index_wr.php: after save_data()');
+log_wr($user->step, 'index_wr.php: after save_data()');
 
 Room::unlock_data($sem);
 exit;

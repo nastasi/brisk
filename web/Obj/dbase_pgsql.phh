@@ -55,7 +55,7 @@ class DBConn
         }
 
         $out = new DBConn();
-        
+
         return $out;
     }
     function db()
@@ -84,8 +84,9 @@ class BriskDB
         log_main("BriskDB create:start");
         
         do {
-            if (($dbconn = DBConn::create()) == FALSE) 
+            if (($dbconn = DBConn::create()) == FALSE) {
                 break;
+            }
             
             $ret = new BriskDB($dbconn);
         } while (0);

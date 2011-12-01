@@ -383,7 +383,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
                 $new_step =  $user->step;
             } while (0);
             
-            log_mop($user->step, 'index_rd.php: after ret set');
+            log_rd2($user->step, 'index_rd.php: after ret set');
             
             if ($user->the_end == TRUE) {
                 Room::unlock_data($sem);
@@ -473,7 +473,7 @@ for ($i = 0 ; time() < $endtime ; $i++) {
     echo ' @END@'; 
     log_send("IS_PAGE: ".($is_page_streaming == TRUE ? "TRUE" : "FALSE")."EXT_STEP: ".$ext_step." ENDTIME: [".$endtime."] ".$ret);
     mop_flush();
-    log_mop(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
+    log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     if ($is_page_streaming) 
         break;
   }

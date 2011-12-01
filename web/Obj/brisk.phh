@@ -74,7 +74,7 @@ define(DBG_LMOP, 0x0800);
 define(DBG_TRAC, 0x1000);
 define(DBG_SHME, 0x2000);
 // NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols 
-define(BRISK_DEBUG, 0xffffffbf);
+define(BRISK_DEBUG, 0x0800);
 
 define(BRISK_SINGLE_DEBUG,0);
 define(BRISK_SINGLE_SESS, "");

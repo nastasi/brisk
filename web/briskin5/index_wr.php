@@ -50,7 +50,7 @@ log_wr('COMM: '.$mesg);
 if ($table_idx < 0 || $table_idx >= TABLE_N)
      exit;
 
-log_mop(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
+log_wr(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
 
 $sem = Bin5::lock_data(TRUE, $table_idx);
 
@@ -70,7 +70,7 @@ if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
 $argz = explode('|', $mesg);
 
 log_wr('POSTSPLIT: '.$argz[0].'  user->stat: ['.$user->stat.']');
-log_mop($user->step, 'bin::index_wr.php: after get_user()');
+log_wr($user->step, 'bin::index_wr.php: after get_user()');
 
 if (false && $argz[0] == 'shutdown') {
   log_auth($user_cur->sess, "Shutdown session. delegate to room gc the autologout");
@@ -534,7 +534,7 @@ else if ($user->stat == 'table') {
 }
 log_wr("before save data");
 Bin5::save_data($bri);
-log_mop($user->step, 'bin::index_wr.php: after save_data()');
+log_wr($user->step, 'bin::index_wr.php: after save_data()');
 
 Bin5::unlock_data($sem);
 exit;
