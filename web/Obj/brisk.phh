@@ -292,7 +292,7 @@ function mop_flush()
 
 function file_lock($fname, $is_exclusive)
 {
-    if (($res = fopen($fname, "r+")) == FALSE) {
+    if (($res = @fopen($fname, "r+")) == FALSE) {
         return (FALSE);
     }
         
@@ -886,7 +886,7 @@ class User {
     if (validate_sess($this->sess)) {
       if (file_exists(PROXY_PATH) == FALSE)
         mkdir(PROXY_PATH, 0775, TRUE);
-      $fp = fopen(PROXY_PATH."/".$this->sess.".stat", 'w');
+      $fp = @fopen(PROXY_PATH."/".$this->sess.".stat", 'w');
       fwrite($fp, sprintf("%s\n",$this->stat));
       fclose($fp);
     }
