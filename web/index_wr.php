@@ -503,7 +503,7 @@ else if ($user->stat == 'room') {
       }
 
       // Take parameters
-      $table_idx = $argz[1];
+      $table_idx = (int)$argz[1];
       $table = &$room->table[$table_idx];
     
       if ($G_shutdown || $table->wakeup_time > $curtime || 

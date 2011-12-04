@@ -47,6 +47,7 @@ log_load("bin5/index_wr.php");
  */
 log_wr('COMM: '.$mesg);
 
+$table_idx = (int)$table_idx;
 if ($table_idx < 0 || $table_idx >= TABLE_N)
      exit;
 
