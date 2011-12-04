@@ -796,8 +796,8 @@ function chatt_sub(dt,data,str)
     var name;
     var flags;
     var isauth;
-
-    name = user_decorator(data)
+    var bolder = [ (data[0] | 1), data[1] ];
+    name = user_decorator(bolder);
 
     if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
         must_scroll = true;
@@ -809,11 +809,11 @@ function chatt_sub(dt,data,str)
             chatt_lines[i] = chatt_lines[i+1];
             $("txt").innerHTML += chatt_lines[i];
         }
-        chatt_lines[i] = dt+name+str+ "<br>";
+        chatt_lines[i] = dt+name+": "+str+ "<br>";
         $("txt").innerHTML += chatt_lines[i];
     }
     else {
-        chatt_lines[chatt_lines_n] = dt+"<b>"+name+"</b> "+str+ "<br>";
+        chatt_lines[chatt_lines_n] = dt+name+": "+str+ "<br>";
         $("txt").innerHTML += chatt_lines[chatt_lines_n];
         chatt_lines_n++;
     }
