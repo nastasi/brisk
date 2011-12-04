@@ -48,7 +48,7 @@ log_load("bin5/index_wr.php");
 log_wr('COMM: '.$mesg);
 
 $table_idx = (int)$table_idx;
-if ($table_idx < 0 || $table_idx >= TABLE_N)
+if ($table_idx < 0 || $table_idx >= TABLES_N)
      exit;
 
 log_wr(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
