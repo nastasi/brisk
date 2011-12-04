@@ -212,7 +212,7 @@ else if ($argz[0] == 'warranty') {
     if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
       if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
         /* Unix time | session | nickname | IP | where was | mesg */
-        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, $user->name, xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
+          fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
         fclose($fp);
       }
       Warrant::unlock_data($wa_lock);
