@@ -201,6 +201,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+IFS='
+'
 #
 #  Installation
 #
@@ -271,17 +273,13 @@ if [ "$web_only" = "FALSE" ]; then
 
 fi
 install -d ${web_path}__
-for i in $(find web -type d | grep -v /CVS | sed 's/^....//g'); do
+for i in $(find web -type d | sed 's/^....//g'); do
     install -d ${web_path}__/$i 
 done
 
-for i in $(find web -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | grep -v /CVS | sed 's/^....//g'); do
-    install -m 644 web/$i ${web_path}__/$i
+for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | sed 's/^....//g'); do
+    install -m 644 "web/$i" "${web_path}__/$i"
 done
-
-cd web
-find . -name '.htaccess' -exec install -m 644 {} ${web_path}__/{} \;
-cd - >/dev/null 2>&1
 
 if [ $players_n -eq 5 ]; then
    send_time=250
