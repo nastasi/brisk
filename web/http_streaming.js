@@ -25,7 +25,6 @@
  *
  *   NOT MANDATORY
  *   - gst management
- *   - sandbox management
  *   - myfrom into the constructor
  *   - target page into the constructor
  *   - type of streaming into the constructor
@@ -34,10 +33,11 @@
  *
  *   DONE - xhr_rd prefix remove from inner class attrs
  *   DONE - move hbit implementation to external file
+ *   DONE - sandbox management
  *
  */
 
-function http_streaming(cookiename)
+function http_streaming(cookiename, sandbox)
 {
     this.xhr = createXMLHttpRequest();
     // this.xhr.setRequestHeader("Content-type", "text/html; charset=utf-8");
@@ -46,6 +46,8 @@ function http_streaming(cookiename)
 
 http_streaming.prototype = {
     cookiename: null,
+    sandbox: null,
+
     cookiepath: "/brisk/",
     xhr: null,
     watchdog: null,
@@ -167,11 +169,12 @@ http_streaming.prototype = {
 	  this.xhr.abort();	
           }
         */
-        var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+gst.st+" step_loc = "+gst.st_loc+" step_loc_new = "+gst.st_loc_new+" STOP: "+this.stopped;
-        
-        if (zug != $("sandbox").innerHTML)
-	    $("sandbox").innerHTML = zug;
-        
+        if (this.sandbox != null) {
+            var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+gst.st+" step_loc = "+gst.st_loc+" step_loc_new = "+gst.st_loc_new+" STOP: "+this.stopped;
+            
+            if (zug != this.sandbox.innerHTML)
+	        this.sandbox.innerHTML = zug;
+        }
         /* heartbit log */
         this.hbit("_");
         do {

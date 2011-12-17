@@ -1064,7 +1064,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-     hstm = new http_streaming("sess");
+     hstm = new http_streaming("sess", $('sandbox'));
      hstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
