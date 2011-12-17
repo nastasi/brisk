@@ -1063,7 +1063,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-     hstm = new http_streaming(gst, 'index_php', 'sess', $('sandbox'), 'index_rd.php');
+     hstm = new http_streaming(gst, 'index_php', 'sess', $('sandbox'), 'index_rd.php', function(com){eval(com);});
      hstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;

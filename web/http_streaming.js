@@ -26,8 +26,8 @@
  *   NOT MANDATORY
  *   - type of streaming into the constructor
  *   - all iframe related streaming add
- *   - substitute fixed "eval" with a generic command hunks processor
  *
+ *   DONE - substitute fixed "eval" with a generic command hunks processor
  *   DONE - myfrom (now from) into the constructor
  *   DONE - target page into the constructor
  *   DONE - gst management
@@ -37,7 +37,7 @@
  *
  */
 
-function http_streaming(gst, from, cookiename, sandbox, targetpage)
+function http_streaming(gst, from, cookiename, sandbox, targetpage, cmdproc)
 {
     this.xhr = createXMLHttpRequest();
     // this.xhr.setRequestHeader("Content-type", "text/html; charset=utf-8");
@@ -47,6 +47,7 @@ function http_streaming(gst, from, cookiename, sandbox, targetpage)
     this.cookiename = cookiename;
     this.sandbox = sandbox;
     this.targetpage = targetpage;
+    this.cmdproc = cmdproc;
 }
 
 http_streaming.prototype = {
@@ -55,6 +56,7 @@ http_streaming.prototype = {
     cookiename: null,
     sandbox: null,
     targetpage: null,
+    cmdproc: null,
 
     /* cookiepath is automatically customized in installation phase */
     cookiepath: "/brisk/",
@@ -201,7 +203,7 @@ http_streaming.prototype = {
 	        // $("xhrdeltalog").innerHTML = "EVALL: "+singlecomm.replace("<", "&lt;", "g"); +"<br>";
 	        this.hbit("+");
                 
-	        eval(singlecomm);
+	        this.cmdproc(singlecomm);
 	        again = 1;
 	    }
 	    else {
