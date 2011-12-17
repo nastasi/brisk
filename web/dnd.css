@@ -31,14 +31,14 @@ body {
   position:     absolute; 
   border-style: solid;
   border-width: 1px;
-  border-color: grey;
+  border-color: gray;
   }
 */
 img.card {
     position:     absolute; 
     border-style: solid;
     border-width: 1px;
-    border-color: grey;
+    border-color: gray;
     visibility:   hidden;
     left: 100;
     top:  200;
@@ -48,7 +48,7 @@ img.cover {
     position:     absolute; 
     border-style: solid;
     border-width: 1px;
-    border-color: lightgrey;
+    border-color: lightgray;
     visibility:   hidden;
 }
 

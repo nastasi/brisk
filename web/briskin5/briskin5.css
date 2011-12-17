@@ -40,7 +40,7 @@ body {
 .chattshort {
     height: 70px;
     overflow: auto;
-    border: 1px solid grey;
+    border: 1px solid gray;
     vertical-align: text-bottom;
     text-align: left;
     /*	font-size: 10pt;*/
@@ -83,7 +83,7 @@ img.card {
     position:     absolute; 
     border-style: solid;
     border-width: 1px;
-    border-color: grey;
+    border-color: gray;
     visibility:   hidden;
 }
 
@@ -98,7 +98,7 @@ img.cover {
     position:     absolute; 
     border-style: solid;
     border-width: 1px;
-    border-color: lightgrey;
+    border-color: lightgray;
     visibility:   hidden;
 }
 
@@ -260,7 +260,7 @@ div.table_commands {
 
 .pubinfo {
     /*  background-color: red;  */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 475px;
@@ -271,7 +271,7 @@ div.table_commands {
 
 .pubinfo_iscalling {
     /*  background-color: red;  */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 475px;
@@ -305,7 +305,7 @@ div.table_commands {
 }  
 
 .pubinfo_we {
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -315,7 +315,7 @@ div.table_commands {
 }
 
 .pubinfo_we_iscalling {
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -341,7 +341,7 @@ div.table_commands {
 
 .pubinfo_nw {
     /*  background-color: red;  */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 125px;
@@ -352,7 +352,7 @@ div.table_commands {
 
 .pubinfo_nw_iscalling {
     /*  background-color: red;  */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 125px;
@@ -378,7 +378,7 @@ div.table_commands {
 
 .pubinfo_ne {
     /*  background-color: red;  */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 125px;
@@ -389,7 +389,7 @@ div.table_commands {
 
 .pubinfo_ne_iscalling {
     /*  background-color: red;  */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 125px;
@@ -415,7 +415,7 @@ div.table_commands {
 
 .pubinfo_ea {
     /*  background-color: red; */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -426,7 +426,7 @@ div.table_commands {
 
 .pubinfo_ea_iscalling {
     /*  background-color: red; */
-    color: grey;
+    color: gray;
     visibility: visible;
     position: absolute;
     top: 250px;
