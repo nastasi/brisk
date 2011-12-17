@@ -71,7 +71,6 @@ header('Content-type: text/html; charset="utf-8"',true);
    var stat = "table";
    var subst = "none";
    var table_pos = "";
-   var myfrom = "table_php";
    var g_withflash = false;
 
    var asta_ptr;
@@ -101,7 +100,7 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  hstm = new http_streaming("sess", $('sandbox'));
+  hstm = new http_streaming(gst, 'table_php', 'sess', $('sandbox'), 'index_rd.php');
   hstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  

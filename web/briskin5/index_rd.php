@@ -402,11 +402,11 @@ header('Content-type: application/xml; charset="utf-8"',true);
 // header('Content-type: text/plain; charset="utf-8"',true);
 // header('Content-type: text/html; charset="utf-8"',true);
 
-if (!isset($myfrom))
-     $myfrom = "";
+if (!isset($from))
+     $from = "";
 if (!isset($subst))
      $subst = "";
-log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming."USER_AGENT:".$HTTP_USER_AGENT."  TABLE:".$table_idx);
+log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." FROM: ".$from. "IS_PAGE:" . $is_page_streaming."USER_AGENT:".$HTTP_USER_AGENT."  TABLE:".$table_idx);
 
 
 $endtime = time() + STREAM_TIMEOUT;

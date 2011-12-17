@@ -1032,7 +1032,6 @@ echo "$body"; ?>
    var g_withflash = false;
    var g_imgct= 0;
    var g_imgtot = g_preload_img_arr.length;
-   var myfrom = "index_php";
    var g_brow = null;
    var spo_slide, sup_slide;
 
@@ -1064,7 +1063,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-     hstm = new http_streaming("sess", $('sandbox'));
+     hstm = new http_streaming(gst, 'index_php', 'sess', $('sandbox'), 'index_rd.php');
      hstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;

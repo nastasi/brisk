@@ -451,11 +451,11 @@ header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 header('Content-type: application/xml; charset="utf-8"',true);
 
-if (!isset($myfrom))
-     $myfrom = "";
+if (!isset($from))
+     $from = "";
 if (!isset($subst))
      $subst = "";
-log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." MYFROM: ".$myfrom. "IS_PAGE:" . $is_page_streaming);
+log_rd2("FROM OUTSIDE - STAT: ".$stat." SUBST: ".$subst." STEP: ".$step." FROM: ".$from. "IS_PAGE:" . $is_page_streaming);
 
 
 $endtime = time() + STREAM_TIMEOUT;

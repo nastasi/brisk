@@ -24,30 +24,39 @@
  *   MANDATORY
  *
  *   NOT MANDATORY
- *   - gst management
- *   - myfrom into the constructor
- *   - target page into the constructor
  *   - type of streaming into the constructor
  *   - all iframe related streaming add
  *   - substitute fixed "eval" with a generic command hunks processor
  *
+ *   DONE - myfrom (now from) into the constructor
+ *   DONE - target page into the constructor
+ *   DONE - gst management
  *   DONE - xhr_rd prefix remove from inner class attrs
  *   DONE - move hbit implementation to external file
  *   DONE - sandbox management
  *
  */
 
-function http_streaming(cookiename, sandbox)
+function http_streaming(gst, from, cookiename, sandbox, targetpage)
 {
     this.xhr = createXMLHttpRequest();
     // this.xhr.setRequestHeader("Content-type", "text/html; charset=utf-8");
+
+    this.gst = gst;
+    this.from = from;
     this.cookiename = cookiename;
+    this.sandbox = sandbox;
+    this.targetpage = targetpage;
 }
 
 http_streaming.prototype = {
+    gst: null,
+    from: null,
     cookiename: null,
     sandbox: null,
+    targetpage: null,
 
+    /* cookiepath is automatically customized in installation phase */
     cookiepath: "/brisk/",
     xhr: null,
     watchdog: null,
@@ -117,7 +126,7 @@ http_streaming.prototype = {
             }
 	    return;
         }
-        createCookie(this.cookie_name, sess, 24*365, this.cookiepath);
+        createCookie(this.cookiename, sess, 24*365, this.cookiepath);
         
         // NOTE: *ctx = "" to prevent konqueror stream commands duplication.
         this.oldctx = "";
@@ -126,7 +135,7 @@ http_streaming.prototype = {
         /* NOTE document.uniqueID exists only under IE  */
         // if (g_is_spawn == 1)
         // alert("di qui3: "+(g_is_spawn == 1 ? "&table_idx="+g_table_idx : ""));
-        this.xhr.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom, true);
+        this.xhr.open('GET', this.targetpage+'?'+this.cookie_name+'='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&from="+this.from, true);
         //    try { 
 
         var self = this;
@@ -170,7 +179,7 @@ http_streaming.prototype = {
           }
         */
         if (this.sandbox != null) {
-            var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+gst.st+" step_loc = "+gst.st_loc+" step_loc_new = "+gst.st_loc_new+" STOP: "+this.stopped;
+            var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new+" STOP: "+this.stopped;
             
             if (zug != this.sandbox.innerHTML)
 	        this.sandbox.innerHTML = zug;
@@ -180,14 +189,14 @@ http_streaming.prototype = {
         do {
 	    again = 0;
 	    xhrrestart = 0;
-	    if (gst.st_loc < gst.st_loc_new) {
+	    if (this.gst.st_loc < this.gst.st_loc_new) {
 	        // there is some slow actions running
 	        break;
 	    }
-	    else if (gst.comms.length > 0) {
+	    else if (this.gst.comms.length > 0) {
 	        var singlecomm;
                 
-	        singlecomm = gst.comms.shift();
+	        singlecomm = this.gst.comms.shift();
 	        // alert("EXE"+gugu);
 	        // $("xhrdeltalog").innerHTML = "EVALL: "+singlecomm.replace("<", "&lt;", "g"); +"<br>";
 	        this.hbit("+");
@@ -213,13 +222,13 @@ http_streaming.prototype = {
 
                                 this.delayed = setTimeout(
                                     function(f_obj, f_sess, f_stat, f_subst, f_step){ f_obj.run(f_sess, f_stat, f_subst, f_step); },
-                                    this.delay, this, sess, stat, subst, gst.st);
+                                    this.delay, this, sess, stat, subst, this.gst.st);
                                 // console.log("XXX DI QUI post"+this.delayed);
                             }
                         }
                         else {
                             // console.log("yyy DI QUI "+this.delay);
-                            this.run(sess, stat, subst, gst.st);
+                            this.run(sess, stat, subst, this.gst.st);
                         }
 		    }
                     
@@ -301,7 +310,7 @@ http_streaming.prototype = {
 		        // $("sandbox").innerHTML += "POST COMMARR<br>";
 		        for (i = 0 ; i < comm_arr.length ; i++) {
 			    var temp = comm_arr[i].replace(comm_clean,"$1").split("|");
-			    gst.comms = gst.comms.concat(temp);
+			    this.gst.comms = this.gst.comms.concat(temp);
 			    // XX alert("COMM_ARR["+i+"]: "+comm_arr[i]+"  LEN:"+comm_arr[i].length);
 			    comm_len += comm_arr[i].length;
 		        }
@@ -325,13 +334,13 @@ http_streaming.prototype = {
                     
                     this.delayed = setTimeout(
                         function(obj, sess, stat, subst, step){ obj.run(sess, stat, subst, step); },
-                        this.delay, this, sess, stat, subst, gst.st);
+                        this.delay, this, sess, stat, subst, this.gst.st);
                     // console.log("XXX DI QUO post"+this.delayed);
                 }
             }
             else {
                 // console.log("yyy DI QUO "+this.delay);
-                this.run(sess, stat, subst, gst.st);
+                this.run(sess, stat, subst, this.gst.st);
             }
             
         }
