@@ -8,15 +8,15 @@ CONFIG_FILE="$HOME/.brisk_install"
 players_n=3
 tables_n=44
 tables_auth_n=12
-brisk_auth_conf="brosk_auth.conf.pho"
+brisk_auth_conf="brisk_auth.conf.pho"
 brisk_debug="0x0400"
 # brisk_debug="0xffff"
-web_path="/home/nastasi/web/brosk"
-ftok_path="/home/nastasi/brisk-priv/ftok/brosk"
-proxy_path="/home/nastasi/brisk-priv/proxy/brosk"
-legal_path="/home/nastasi/brisk-priv/brosk"
-cookie_path="/brosk/"
-brisk_conf="brosk.conf.pho"
+web_path="/home/nastasi/web/brisk"
+ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
+proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
+legal_path="/home/nastasi/brisk-priv/brisk"
+cookie_path="/brisk/"
+brisk_conf="brisk.conf.pho"
 web_only="FALSE"
 
 
