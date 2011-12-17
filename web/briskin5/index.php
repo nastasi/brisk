@@ -64,7 +64,8 @@ header('Content-type: text/html; charset="utf-8"',true);
 </head>
 <body>
 <SCRIPT type="text/javascript">
-   var sess;
+   var sess = "not_connected";
+   var hstm;
    var g_lang = "<?php echo "$G_lang"; ?>";
    var stat = "table";
    var subst = "none";
@@ -72,12 +73,11 @@ header('Content-type: text/html; charset="utf-8"',true);
    var myfrom = "table_php";
    var g_withflash = false;
 
-var asta_ptr;
-var area_ptr;
+   var asta_ptr;
+   var area_ptr;
 
-var gst  = new globst();
-gst.st = <?php 
-
+   var gst  = new globst();
+   gst.st = <?php 
 log_load("bin5/index.php");
 
 if (isset($laststate) == false) {
@@ -99,13 +99,14 @@ window.onload = function() {
   preferences_init();
   preferences_update();
 
-  xhr_rd = createXMLHttpRequest();
   sess = "<?php echo "$sess"; ?>";
+  hstm = new http_streaming();
+  hstm.hbit_set(hbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
   window.onunload = onunload_cb;  
 
-  setTimeout(xhr_rd_poll, 0, sess); 
+  hstm.xhr_rd_poll(sess); 
   setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
 }
 </SCRIPT>

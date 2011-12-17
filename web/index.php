@@ -870,17 +870,17 @@ supported by:<br>
 <title>Brisk</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
+<script type="text/javascript" src="commons.js"></script> 
+<script type="text/javascript" src="myconsole.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <!-- <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script> -->
-<script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="md5.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
-<!-- <script type="text/javascript" src="myconsole.js"></script>  -->
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 
@@ -895,6 +895,7 @@ supported by:<br>
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
    var g_brow = null;
+   var hstm = null;
    var sess = "not_connected";
    var spo_slide, sup_slide;
 
@@ -1003,21 +1004,21 @@ echo "$body"; ?>
 <head>
 <title>Brisk</title>
 <link rel="shortcut icon" href="img/brisk_ico.png">
+<script type="text/javascript" src="commons.js"></script>
+<script type="text/javascript" src="myconsole.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <!-- <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script> -->
-<script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="xhr.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
-<!-- <script type="text/javascript" src="myconsole.js"></script>  -->
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 <SCRIPT type="text/javascript"><!--
-   var sess;
+   var sess = "not_connected";
    var g_lang = "<? echo $G_lang; ?>";
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
@@ -1064,9 +1065,10 @@ else {
     }
 
 ?>
-     xhr_rd = createXMLHttpRequest();
-     // xhr_rd.setRequestHeader("Content-type", "text/html; charset=utf-8");
      sess = "<?php echo "$sess"; ?>";
+     hstm = new http_streaming();
+     hstm.hbit_set(hbit);
+     // xhr_rd.setRequestHeader("Content-type", "text/html; charset=utf-8");
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
      window.onbeforeunload = onbeforeunload_cb;
@@ -1077,7 +1079,8 @@ else {
      else
        $("proflashext").innerHTML = "";
 
-     setTimeout(xhr_rd_poll, 0, sess); 
+     // console.log("session from main: "+sess);
+     hstm.xhr_rd_poll(sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();

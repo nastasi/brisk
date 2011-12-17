@@ -425,7 +425,7 @@ function postact_logout()
 {
     // alert("postact_logout");
     try { 
-	xhr_rd.abort();
+	hstm.abort();
     } catch (e) {}
 
     // eraseCookie("sess");
@@ -854,53 +854,19 @@ function eraseCookie(name) {
 	createCookie(name,"",-1);
 }
 
-var onunload_times = 0;
-
-
 function onbeforeunload_cb () {
     return("");
 }
 
-function onunload_cb_old () {
-    var u = 0;
-    
-    //    if (nonunload == true)
-    //     return true;
-    
-    if (onunload_times == 0) {
-        // MLANG "    Vuoi veramente abbandonare la briscola ?\n(clicca annulla o cancel se vuoi ricaricare la briscola)"
-	var res = window.confirm(mlang_commons['brileav'][g_lang]);
-	if (res == true) {
-	    the_end = true; 
-	    act_shutdown();
-	    // while (1) 
-	    //	u++;
-	}
-	else {
-	    try {
-		document.location.href = self.location; //  = self.location;
-                // alert ("passiamo di qui"+self.location);
-                return (false);
-	    } catch (e) {
-                // MLANG "Ripristino della briscola fallito, per non perdere la sessione ricaricare la pagina manualmente."
-		alert(mlang_commons['brireco'][g_lang]);
-	    }
-	}
-	onunload_times++;
-    }
-    
-    return(false);
-}
-
 function onunload_cb () {
     
-    the_end = true; 
+    if (typeof(hstm) != "undefined")
+        hstm.the_end = true; 
 
     act_shutdown();
     
     return(false);
 }
-
 
 function room_checkspace(emme,tables,inpe)
 {

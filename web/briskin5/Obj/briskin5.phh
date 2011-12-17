@@ -1153,7 +1153,7 @@ class Bin5 {
       $user_cur->laccwr = $curtime;
 
       $ret = "gst.st = ".($user_cur->step+1)."; ";
-      $ret .= 'gst.st_loc++; the_end=true; window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");|';
+      $ret .= 'gst.st_loc++; hstm.the_end=true; window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");|';
 
       log_wr($user_cur->sess." BIN5_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;

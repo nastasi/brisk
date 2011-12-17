@@ -123,7 +123,7 @@ var standup_data_old = null;
 
 function table_add(curtag, td)
 {
-    var tbody  = null, tr;
+    var tbody  = null, tr, ct;
 
     do {
         // console.log("wt: "+curtag.tagName);
