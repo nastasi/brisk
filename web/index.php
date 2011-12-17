@@ -873,9 +873,8 @@ supported by:<br>
 <script type="text/javascript" src="commons.js"></script> 
 <script type="text/javascript" src="myconsole.js"></script>
 <script type="text/javascript" src="menu.js"></script>
-<!-- <script type="text/javascript" src="dnd.js"></script>
-<script type="text/javascript" src="dom-drag.js"></script> -->
-<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="heartbit.js"></script>
+<script type="text/javascript" src="http_streaming.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
@@ -1007,10 +1006,9 @@ echo "$body"; ?>
 <script type="text/javascript" src="commons.js"></script>
 <script type="text/javascript" src="myconsole.js"></script>
 <script type="text/javascript" src="menu.js"></script>
-<!-- <script type="text/javascript" src="dnd.js"></script>
-<script type="text/javascript" src="dom-drag.js"></script> -->
 <script type="text/javascript" src="ticker.js"></script>
-<script type="text/javascript" src="xhr.js"></script>
+<script type="text/javascript" src="heartbit.js"></script>
+<script type="text/javascript" src="http_streaming.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
@@ -1067,8 +1065,7 @@ else {
 ?>
      sess = "<?php echo "$sess"; ?>";
      hstm = new http_streaming("sess");
-     hstm.hbit_set(hbit);
-     // xhr_rd.setRequestHeader("Content-type", "text/html; charset=utf-8");
+     hstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
      window.onbeforeunload = onbeforeunload_cb;

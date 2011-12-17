@@ -1,5 +1,5 @@
 /*
- *  brisk - xhr.js
+ *  brisk - http_streaming.js
  *
  *  Copyright (C) 2006-2011 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
@@ -24,7 +24,6 @@
  *   MANDATORY
  *
  *   NOT MANDATORY
- *   - remove hbit imple
  *   - gst management
  *   - sandbox management
  *   - myfrom into the constructor
@@ -34,23 +33,14 @@
  *   - substitute fixed "eval" with a generic command hunks processor
  *
  *   DONE - xhr_rd prefix remove from inner class attrs
+ *   DONE - move hbit implementation to external file
  *
  */
-
-function hbit(symb)
-{
-    if ($("heartbit").innerHTML.length >= 120) {
-        $("heartbit").innerHTML = $("heartbit").innerHTML.substring(10);
-        $("heartbit").innerHTML += symb;
-    }
-    else {
-        $("heartbit").innerHTML += symb;
-    }
-}
 
 function http_streaming(cookiename)
 {
     this.xhr = createXMLHttpRequest();
+    // this.xhr.setRequestHeader("Content-type", "text/html; charset=utf-8");
     this.cookiename = cookiename;
 }
 

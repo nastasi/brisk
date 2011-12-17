@@ -313,7 +313,7 @@ sed -i "s@define *( *BRISK_CONF,[^)]*)@define(BRISK_CONF, \"$brisk_conf\")@g" ${
 
 sed -i "s@define *( *BRISK_AUTH_CONF,[^)]*)@define(BRISK_AUTH_CONF, \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
 
-sed -i "s@\( \+xhr_rd_cookiepath *: *\)\"[^\"]*\" *,@\1 \"$cookie_path\",@g" ${web_path}__/xhr.js
+sed -i "s@\( \+xhr_rd_cookiepath *: *\)\"[^\"]*\" *,@\1 \"$cookie_path\",@g" ${web_path}__/http_streaming.js
 sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}__/commons.js
 
 if [ -d ${web_path} ]; then

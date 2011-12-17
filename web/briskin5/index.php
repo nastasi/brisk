@@ -53,7 +53,8 @@ header('Content-type: text/html; charset="utf-8"',true);
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
 <script type="text/javascript" src="../commons.js"></script> 
-<script type="text/javascript" src="../xhr.js"></script>
+<script type="text/javascript" src="../heartbit.js"></script>
+<script type="text/javascript" src="../http_streaming.js"></script>
 <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
@@ -101,7 +102,7 @@ window.onload = function() {
 
   sess = "<?php echo "$sess"; ?>";
   hstm = new http_streaming("sess");
-  hstm.hbit_set(hbit);
+  hstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
   window.onunload = onunload_cb;  
