@@ -1066,7 +1066,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-     hstm = new http_streaming();
+     hstm = new http_streaming("sess");
      hstm.hbit_set(hbit);
      // xhr_rd.setRequestHeader("Content-type", "text/html; charset=utf-8");
      tra = new train($('room_tit'));
@@ -1080,7 +1080,7 @@ else {
        $("proflashext").innerHTML = "";
 
      // console.log("session from main: "+sess);
-     hstm.xhr_rd_poll(sess); 
+     hstm.start(sess); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();

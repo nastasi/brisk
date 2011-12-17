@@ -1416,7 +1416,7 @@ class Room {
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
       if ($from_table && ($user_cur->table == $table_idx || $user->idx_get() == $i)) {
-	$ret .= 'gst.st_loc++; hstm.the_end=true; window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
+	$ret .= 'gst.st_loc++; hstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
 	// $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
 	log_main("DOCUMENT.index.php: from table");
       }

@@ -24,14 +24,16 @@
  *   MANDATORY
  *
  *   NOT MANDATORY
+ *   - remove hbit imple
  *   - gst management
  *   - sandbox management
  *   - myfrom into the constructor
  *   - target page into the constructor
  *   - type of streaming into the constructor
  *   - all iframe related streaming add
- *   - xhr_rd prefix remove from inner class attrs
  *   - substitute fixed "eval" with a generic command hunks processor
+ *
+ *   DONE - xhr_rd prefix remove from inner class attrs
  *
  */
 
@@ -44,31 +46,29 @@ function hbit(symb)
     else {
         $("heartbit").innerHTML += symb;
     }
-    // $("heartbit").innerHTML = $("heartbit").innerHTML.substring(20,20); // DA METTERE APPOSTO!!!!
-    // console.log($("heartbit").innerHTML);
-        
 }
 
-function http_streaming()
+function http_streaming(cookiename)
 {
-    this.xhr_rd = createXMLHttpRequest();
+    this.xhr = createXMLHttpRequest();
+    this.cookiename = cookiename;
 }
 
 http_streaming.prototype = {
-    xhr_rd_cookiepath: "/brisk/",
-
-    xhr_rd: null,
-    xhr_rd_watchdog: null,
-    xhr_rd_delay: 0,
-    xhr_rd_delayed: null,
-    xhr_rd_stopped: true,
+    cookiename: null,
+    cookiepath: "/brisk/",
+    xhr: null,
+    watchdog: null,
+    delay: 0,
+    delayed: null,
+    stopped: true,
     the_end: false,
-    xhr_rd_oldctx: "",
-    xhr_rd_newctx: "",
-    xhr_rd_cur_n: -1,
-    xhr_rd_old_n: -1,
-    xhr_rd_checkedlen: 0,
-    watchdog: 0,
+    oldctx: "",
+    newctx: "",
+    cur_n: -1,
+    old_n: -1,
+    checkedlen: 0,
+    /* watchdog_old: 0, */
     ct: 0,
 
     hbit: function () {
@@ -78,80 +78,90 @@ http_streaming.prototype = {
         this.hbit = hbit;
     },
 
-    xhr_rd_cb: function () {
+    xhr_cb: function () {
         var ret;
         
-        if (this.xhr_rd.readyState == 4) {
-            if (this.xhr_rd_watchdog != null) {
+        if (this.xhr.readyState == 4) {
+            if (this.watchdog != null) {
                 this.hbit('C');
-                clearTimeout(this.xhr_rd_watchdog);
-                this.xhr_rd_watchdog = null;
+                clearTimeout(this.watchdog);
+                this.watchdog = null;
             }
             
-            // console.log("SS: "+safestatus(xhr_rd));
+            // console.log("SS: "+safestatus(xhr));
             
 	    try {
-	        if ((ret = safestatus(this.xhr_rd)) == 200) {
-                    this.xhr_rd_delay = 0;
-                    // console.log("del a null "+this.xhr_rd_delayed);
+	        if ((ret = safestatus(this.xhr)) == 200) {
+                    this.delay = 0;
+                    // console.log("del a null "+this.delayed);
 	        } else if (ret != -1) {
-                    this.xhr_rd_delay = 5000;
+                    this.delay = 5000;
                     this.hbit('X');
 		    // alert('There was a problem with the request.' + ret);
 	        }
 	    } catch(b) {};
             
-            this.xhr_rd_delayed = null;
-	    this.xhr_rd_stopped = true;
+            this.delayed = null;
+	    this.stopped = true;
         }
     },
 
-    xhr_rd_abort: function()
+    xhr_abort: function()
     {
         this.hbit('A');
-        if (this.xhr_rd != null)
-            this.xhr_rd.abort();
+        if (this.xhr != null)
+            this.xhr.abort();
         // alert("de che");
     },
 
-    xhr_rd_start: function(sess, stat, subst, step) 
+    run: function(sess, stat, subst, step) 
     {
         if (this.the_end) {
             //x alert("the_end1");
-            if (this.xhr_rd_watchdog != null) {
+            if (this.watchdog != null) {
                 this.hbit('C');
-                clearTimeout(this.xhr_rd_watchdog);
-                this.xhr_rd_watchdog = null;
+                clearTimeout(this.watchdog);
+                this.watchdog = null;
             }
 	    return;
         }
-        createCookie("sess", sess, 24*365, this.xhr_rd_cookiepath);
+        createCookie(this.cookie_name, sess, 24*365, this.cookiepath);
         
         // NOTE: *ctx = "" to prevent konqueror stream commands duplication.
-        this.xhr_rd_oldctx = "";
-        this.xhr_rd_newctx = "";
+        this.oldctx = "";
+        this.newctx = "";
         
         /* NOTE document.uniqueID exists only under IE  */
         // if (g_is_spawn == 1)
         // alert("di qui3: "+(g_is_spawn == 1 ? "&table_idx="+g_table_idx : ""));
-        this.xhr_rd.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom, true);
+        this.xhr.open('GET', 'index_rd.php?sess='+sess+"&stat="+stat+"&subst="+subst+"&step="+step+"&onlyone="+(document.uniqueID ? "TRUE" : "FALSE")+"&myfrom="+myfrom, true);
         //    try { 
 
         var self = this;
-        this.xhr_rd.onreadystatechange = function () { self.xhr_rd_cb(); };
-        this.xhr_rd.send(null);
+        this.xhr.onreadystatechange = function () { self.xhr_cb(); };
+        this.xhr.send(null);
         // 
         // TODO: qui avvio del timer per riavviare xhr
         // 
-        this.xhr_rd_watchdog = setTimeout(function(obj){ obj.xhr_rd_abort(); }, 60000, this);
-        this.xhr_rd_cur_n++;
-        this.xhr_rd_stopped = false;
+        this.watchdog = setTimeout(function(obj){ obj.xhr_abort(); }, 60000, this);
+        this.cur_n++;
+        this.stopped = false;
         // } catch (e) {}
     },
     
     /* WORK HERE TO RUN WIN OR LIN STREAM */
     
-    xhr_rd_poll: function(sess)
+    start: function(sess)
+    {
+        this.poll(sess);
+    },
+
+    stop: function()
+    {
+        this.the_end = true;
+    },
+
+    poll: function(sess)
     {
         var tout = 100;
         var again;
@@ -160,14 +170,14 @@ http_streaming.prototype = {
         this.ct++;
         
         /*
-          if (this.watchdog >= 50) {
-	  this.watchdog = 0;
-	  // alert("ABORT XHR_RD");
-	  this.xhr_rd_stopped = true;
-	  this.xhr_rd.abort();	
+          if (this.watchdog_old >= 50) {
+	  this.watchdog_old = 0;
+	  // alert("ABORT XHR");
+	  this.stopped = true;
+	  this.xhr.abort();	
           }
         */
-        var zug = "XHR_RD_POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+gst.st+" step_loc = "+gst.st_loc+" step_loc_new = "+gst.st_loc_new+" STOP: "+this.xhr_rd_stopped;
+        var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+gst.st+" step_loc = "+gst.st_loc+" step_loc_new = "+gst.st_loc_new+" STOP: "+this.stopped;
         
         if (zug != $("sandbox").innerHTML)
 	    $("sandbox").innerHTML = zug;
@@ -195,45 +205,45 @@ http_streaming.prototype = {
 	    else {
 	        xhrrestart = 1;
 	        try { 
-	            if (this.xhr_rd == null)
+	            if (this.xhr == null)
                         throw "restart";
-		    if (this.xhr_rd.responseText != null)
-                        this.xhr_rd_newctx = this.xhr_rd.responseText;
+		    if (this.xhr.responseText != null)
+                        this.newctx = this.xhr.responseText;
 	        }
 	        catch (e) {
-		    if (this.xhr_rd_stopped == true) {
-		        this.xhr_rd_stopped = false;
+		    if (this.stopped == true) {
+		        this.stopped = false;
 		        // XX $("xhrstart").innerHTML += "XHRSTART: da catch<br>";
-                        if (this.xhr_rd_delay > 0) {
-                            if (this.xhr_rd_delayed == null) {
-                                // console.log("XXX DI QUI "+this.xhr_rd_delay);
+                        if (this.delay > 0) {
+                            if (this.delayed == null) {
+                                // console.log("XXX DI QUI "+this.delay);
 
-                                this.xhr_rd_delayed = setTimeout(
-                                    function(f_obj, f_sess, f_stat, f_subst, f_step){ f_obj.xhr_rd_start(f_sess, f_stat, f_subst, f_step); },
-                                    this.xhr_rd_delay, this, sess, stat, subst, gst.st);
-                                // console.log("XXX DI QUI post"+this.xhr_rd_delayed);
+                                this.delayed = setTimeout(
+                                    function(f_obj, f_sess, f_stat, f_subst, f_step){ f_obj.run(f_sess, f_stat, f_subst, f_step); },
+                                    this.delay, this, sess, stat, subst, gst.st);
+                                // console.log("XXX DI QUI post"+this.delayed);
                             }
                         }
                         else {
-                            // console.log("yyy DI QUI "+this.xhr_rd_delay);
-                            this.xhr_rd_start(sess, stat, subst, gst.st);
+                            // console.log("yyy DI QUI "+this.delay);
+                            this.run(sess, stat, subst, gst.st);
                         }
 		    }
                     
 		    
 		    // $("sandbox").innerHTML += "return 1<br>";
 		    if (this.the_end != true) {
-		        this.watchdog = 0;
-                        setTimeout(function(obj, sess){ obj.xhr_rd_poll(sess); }, tout, this, sess);
+		        /* this.watchdog_old = 0; */
+                        setTimeout(function(obj, sess){ obj.poll(sess); }, tout, this, sess);
 		        
 		        // this.hbit(".");
 		        
 		    }
                     else {
                         //x alert("the_end2");
-                        if (this.xhr_rd_watchdog != null) {
-                            clearTimeout(this.xhr_rd_watchdog);
-                            this.xhr_rd_watchdog = null;
+                        if (this.watchdog != null) {
+                            clearTimeout(this.watchdog);
+                            this.watchdog = null;
                         }
                     }    
                     return;
@@ -241,9 +251,9 @@ http_streaming.prototype = {
                 
                 
                 // no new char from the last loop, break
-                if (this.xhr_rd_old_n == this.xhr_rd_cur_n && 
-                    this.xhr_rd_newctx.length == this.xhr_rd_checkedlen) {
-                    this.watchdog++;
+                if (this.old_n == this.cur_n && 
+                    this.newctx.length == this.checkedlen) {
+                    /* this.watchdog++; */
                     break;
                 }
                 else {
@@ -257,33 +267,33 @@ http_streaming.prototype = {
 		    var delta = 0;
 		    var match_lines = /^_*$/;
                     
-		    this.watchdog = 0;
+		    /* this.watchdog = 0; */
 		    this.hbit("/\\");
                     
 		    // check for the same command group
-		    if (this.xhr_rd_old_n != this.xhr_rd_cur_n) {
-		        this.xhr_rd_old_n = this.xhr_rd_cur_n;
-		        this.xhr_rd_checkedlen = 0;
-		        this.xhr_rd_oldctx = "";
+		    if (this.old_n != this.cur_n) {
+		        this.old_n = this.cur_n;
+		        this.checkedlen = 0;
+		        this.oldctx = "";
 		    }
 		    else
-		        delta = this.xhr_rd_oldctx.length;
+		        delta = this.oldctx.length;
                     
 		    // $("xhrlog").innerHTML += "EVERY SEC<br>";		
-		    for (i = delta ; i < this.xhr_rd_newctx.length ; i++) {
-		        if (this.xhr_rd_newctx[i] != '_') 
+		    for (i = delta ; i < this.newctx.length ; i++) {
+		        if (this.newctx[i] != '_') 
 			    break;
 		    }
-		    if (i == this.xhr_rd_newctx.length) {
-		        this.xhr_rd_checkedlen = i;
+		    if (i == this.newctx.length) {
+		        this.checkedlen = i;
 		        break;
 		    }
                     
 		    // $("xhrlog").innerHTML += "CHECK COM<br>";		
 		    // extracts the new part of the command string
-		    comm_newpart = this.xhr_rd_newctx.substr(delta);
+		    comm_newpart = this.newctx.substr(delta);
 		    
-		    // XX $("xhrlog").innerHTML = xhr_rd_newctx.replace("<", "&lt;", "g");
+		    // XX $("xhrlog").innerHTML = newctx.replace("<", "&lt;", "g");
                     
 		    // $("response").innerHTML = comm_newpart;
 		    comm_match = /_*@BEGIN@(.*?)@END@/g;
@@ -294,7 +304,7 @@ http_streaming.prototype = {
 		    // $("sandbox").innerHTML += "PRE COMMARR<br>";
 		    if (comm_arr) {
 		        // XX $("xhrdeltalog").innerHTML += "DELTA: "+delta +"<br>";
-		        // XX alert("xhr_rd_newctx: "+this.xhr_rd_newctx);
+		        // XX alert("newctx: "+this.newctx);
 		        // $("sandbox").innerHTML += "POST COMMARR<br>";
 		        for (i = 0 ; i < comm_arr.length ; i++) {
 			    var temp = comm_arr[i].replace(comm_clean,"$1").split("|");
@@ -303,44 +313,44 @@ http_streaming.prototype = {
 			    comm_len += comm_arr[i].length;
 		        }
 		        tout = 0;
-		        this.xhr_rd_oldctx += comm_newpart.substr(0,comm_len);
-		        // XX alert("XHR_RD_OLDCTX: "+this.xhr_rd_oldctx);
+		        this.oldctx += comm_newpart.substr(0,comm_len);
+		        // XX alert("OLDCTX: "+this.oldctx);
 		        again = 1;
 		    }
-		    this.xhr_rd_checkedlen = this.xhr_rd_oldctx.length;
+		    this.checkedlen = this.oldctx.length;
 	        }
 	    }
         } while (again);
 
-        if (xhrrestart == 1 && this.xhr_rd_stopped == true) {
+        if (xhrrestart == 1 && this.stopped == true) {
 	    // $("sandbox").innerHTML += "LITTLE IF<br>";
 	    // alert("di qui");
 	    // XX $("xhrstart").innerHTML += "XHRSTART: da end poll<br>";
-            if (this.xhr_rd_delay > 0) {
-                if (this.xhr_rd_delayed == null) {
-                    // console.log("XXX DI QUO "+this.xhr_rd_delay);
+            if (this.delay > 0) {
+                if (this.delayed == null) {
+                    // console.log("XXX DI QUO "+this.delay);
                     
-                    this.xhr_rd_delayed = setTimeout(
-                        function(obj, sess, stat, subst, step){ obj.xhr_rd_start(sess, stat, subst, step); },
-                        this.xhr_rd_delay, this, sess, stat, subst, gst.st);
-                    // console.log("XXX DI QUO post"+this.xhr_rd_delayed);
+                    this.delayed = setTimeout(
+                        function(obj, sess, stat, subst, step){ obj.run(sess, stat, subst, step); },
+                        this.delay, this, sess, stat, subst, gst.st);
+                    // console.log("XXX DI QUO post"+this.delayed);
                 }
             }
             else {
-                // console.log("yyy DI QUO "+this.xhr_rd_delay);
-                this.xhr_rd_start(sess, stat, subst, gst.st);
+                // console.log("yyy DI QUO "+this.delay);
+                this.run(sess, stat, subst, gst.st);
             }
             
         }
         
         if (this.the_end != true) {
-	    setTimeout(function(obj, sess){ obj.xhr_rd_poll(sess); }, tout, this, sess);
+	    setTimeout(function(obj, sess){ obj.poll(sess); }, tout, this, sess);
         }
         else {
             //x alert("the_end3");
-            if (this.xhr_rd_watchdog != null) {
-                clearTimeout(this.xhr_rd_watchdog);
-                this.xhr_rd_watchdog = null;
+            if (this.watchdog != null) {
+                clearTimeout(this.watchdog);
+                this.watchdog = null;
             }
         }
         return;
@@ -349,9 +359,9 @@ http_streaming.prototype = {
     
 /*
   window.onload = function () {
-  xhr_rd = createXMLHttpRequest();
+  xhr = createXMLHttpRequest();
 
   sess = $("user").value;
-  window.setTimeout(xhr_rd_poll, 0, sess);
+  window.setTimeout(poll, 0, sess);
   };
 */

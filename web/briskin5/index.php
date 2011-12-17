@@ -65,7 +65,7 @@ header('Content-type: text/html; charset="utf-8"',true);
 <body>
 <SCRIPT type="text/javascript">
    var sess = "not_connected";
-   var hstm;
+   var hstm = null;
    var g_lang = "<?php echo "$G_lang"; ?>";
    var stat = "table";
    var subst = "none";
@@ -100,13 +100,13 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  hstm = new http_streaming();
+  hstm = new http_streaming("sess");
   hstm.hbit_set(hbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
   window.onunload = onunload_cb;  
 
-  hstm.xhr_rd_poll(sess); 
+  hstm.start(sess); 
   setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
 }
 </SCRIPT>

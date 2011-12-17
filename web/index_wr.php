@@ -622,7 +622,7 @@ else if ($user->stat == 'room') {
           while (array_pop($user_cur->comm) != NULL);
           
           $ret = "";
-          $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); hstm.the_end=true; window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
+          $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); hstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
           
           $user_cur->comm[$user_cur->step % COMM_N] = $ret;
           $user_cur->trans_step = $user_cur->step + 1;
