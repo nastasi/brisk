@@ -1,28 +1,74 @@
-function myconsole(ena) {
+function xynt_console(ena) {
     var conbody, condiv;
 
     this.enable = ena;
     if (ena) {
-        this.win = window.open("","","scrollbars=yes,height=500,width=400,left=0,top=800");
+        this.win = window.open("","xyntconsole","scrollbars=yes,height=500,width=800,left=0,top=800");
+
         conbody = this.win.document.createElement("body");
         this.div = condiv = this.win.document.createElement("div");
 
         conbody.id = "console_body";
         this.win.document.body.appendChild(condiv);
+        this.win.document.title = "xynt console";
     }
 }
 
-myconsole.prototype = {
+xynt_console.prototype = {
     win: null,
     div: null,
     enable: false,
+
+    escapeHTML: function(s) {
+        var v = s+"";
+        return v.replace(/&/g,'&amp;').
+                replace(/ /g,'&nbsp;').
+                replace(/"/g,'&quot;').
+            // replace(/'/g,'&#039;').
+                replace(/>/g,'&gt;').
+                replace(/</g,'&lt;').                        
+                replace(/\n/g, "<br>\n");
+    },
 
     log: function(s) {
         if (!this.enable) {
             return;
         }
-        this.div.innerHTML += s + "<br>";
+        if (typeof(s) == "string" || typeof(s) == "function") {
+            this.div.innerHTML += this.escapeHTML(s);
+        }
+        else {
+            ind = 4;
+            this.dump_obj(s,ind);
+        }
+        this.div.innerHTML += "<hr style=\"height: 1px;\">\n";
         this.win.document.body.scrollTop = 10000000;
+    },
+
+    dump_obj: function(s, ind) {
+        var sind = "";
+
+        sind = "<span style=\"background-color:#f0f0f0;\">";
+        for (i = 0 ; i < ind ; i++) {
+            sind += "&nbsp;";
+        }
+        sind += "</span>";
+        for (i in s) {
+            if (typeof(s[i]) == 'string' || typeof(s[i]) == "function") {
+                var ret = "";
+                var arr = this.escapeHTML(s[i]).split("\n");
+                for (el in arr) {
+                    ret += sind + arr[el] + "\n";
+                }
+                // this.div.innerHTML += "xx["+this.escapeHTML(i) + "] : [" + ret + "]<hr style=\"height: 1px; width: 100px;\"><br>\n";
+                this.div.innerHTML += this.escapeHTML(i)+"<br>\n";
+                this.div.innerHTML += ret + "<hr style=\"height: 1px; width: 100px;\"><br>\n";
+            }
+            else {
+                this.dump_obj(s[i], ind+4);
+            }
+        }       
+        // this.div.innerHTML += "post-loop<br>";
     },
 
     logger: function(s) {
@@ -43,23 +89,22 @@ myconsole.prototype = {
 /*
  *  create and destroy 
  */
-var ismyconsole = false;
+var is_xynt_console = false;
 var console_enable = true;
 
 if(typeof(console) == "undefined") {
     var console;
-    
-    console = new myconsole(console_enable);
 
-    ismyconsole = true;
+    console = new xynt_console(console_enable);
+
+    is_xynt_console = true;
 }
 else {
-    // console.logger = console.log;
-    // console.log = function () { return 0; }
+    // conzole.logger = console.log;
+    // conzole.log = function () { return 0; }
 }
-
 function deconsole() {
-    if (ismyconsole) {
+    if (is_xynt_console) {
         console.close();
     }
 }
