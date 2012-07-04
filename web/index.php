@@ -1077,7 +1077,7 @@ else {
        $("proflashext").innerHTML = "";
 
      // console.log("session from main: "+sess);
-     hstm.start(); 
+     hstm.start();
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();

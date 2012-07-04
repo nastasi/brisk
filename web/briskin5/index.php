@@ -54,7 +54,7 @@ header('Content-type: text/html; charset="utf-8"',true);
 <link rel="shortcut icon" href="../img/brisk_ico.png">
 <script type="text/javascript" src="../commons.js"></script> 
 <script type="text/javascript" src="../heartbit.js"></script>
-<script type="text/javascript" src="../http_streaming.js"></script>
+<script type="text/javascript" src="../xynt-http-streaming.js"></script>
 <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
@@ -100,13 +100,13 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  hstm = new http_streaming(gst, 'table_php', 'sess', $('sandbox'), 'index_rd.php', function(com){eval(com);});
+  hstm = new http_streaming(window, console, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
   hstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
   window.onunload = onunload_cb;  
 
-  hstm.start(sess); 
+  hstm.start(); 
   setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
 }
 </SCRIPT>
