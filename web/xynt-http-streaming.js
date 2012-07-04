@@ -101,8 +101,14 @@ http_streaming.prototype = {
         if ( (this.watchdog_ct % this.watchdog_checktm) == 0 || !this.watchable) {
             if (!this.watchable) {
                 do {
-                    if (typeof(this.ifra.contentWindow.http_streaming) == 'undefined')
-                        break;
+                    try{
+                        if (typeof(this.ifra.contentWindow.http_streaming) == 'undefined')
+                            break;
+                    }
+                    catch(b) {
+	                break;
+                    }
+
                     /*
                       on IE7 the the window frame scope is cleaned after the href is set, so we wait 
                       for a well know variable value before assign this object value to it (OO is a passion)
@@ -136,9 +142,14 @@ http_streaming.prototype = {
             // alert("do--while begin ["+again+"]");
 	    // CHECK: maybe again here isn't needed 
             again = 0;
-            if (typeof(this.ifra.contentWindow.ctx_new)     == 'undefined' ||
-                typeof(this.ifra.contentWindow.ctx_old_len) == 'undefined')
-                break;
+            try {
+                if (typeof(this.ifra.contentWindow.ctx_new)     == 'undefined' ||
+                    typeof(this.ifra.contentWindow.ctx_old_len) == 'undefined')
+                    break;
+            }
+            catch(b) {
+	        break;
+            }
             
             ctx_new_len = this.ifra.contentWindow.ctx_new.length;
             if (ctx_new_len <= this.ifra.contentWindow.ctx_old_len) {
