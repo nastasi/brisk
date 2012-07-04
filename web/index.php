@@ -874,7 +874,7 @@ supported by:<br>
 <script type="text/javascript" src="myconsole.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
-<script type="text/javascript" src="http_streaming.js"></script>
+<script type="text/javascript" src="xynt-http-streaming.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
@@ -1002,13 +1002,14 @@ echo "$body"; ?>
 <html>
 <head>
 <title>Brisk</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script>
 <script type="text/javascript" src="myconsole.js"></script>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
-<script type="text/javascript" src="http_streaming.js"></script>
+<script type="text/javascript" src="xynt-http-streaming.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
@@ -1063,7 +1064,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-     hstm = new http_streaming(gst, 'index_php', 'sess', $('sandbox'), 'index_rd.php', function(com){eval(com);});
+     hstm = new http_streaming(window, console, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
      hstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
@@ -1076,7 +1077,7 @@ else {
        $("proflashext").innerHTML = "";
 
      // console.log("session from main: "+sess);
-     hstm.start(sess); 
+     hstm.start(); 
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();

@@ -693,6 +693,7 @@ function $(id) {
     return document.getElementById(id); 
 }
 
+
 function globst() {
     this.st = -1;
     this.st_loc = -1;
@@ -700,7 +701,29 @@ function globst() {
     this.comms  = new Array;
 }
 
+globst.prototype = {
+    st: -1,
+    st_loc: -1,
+    st_loc_new: -1,
+    comms: null,
+    sleep_hdl: null,
 
+    sleep: function(delay) {
+        st.st_loc_new++;
+
+        if (!this.the_end) {
+            this.sleep_hdl = setTimeout(function(obj){ if (obj.st_loc_new > obj.st_loc) { obj.st_loc++; obj.sleep_hdl = null; }},
+	                                delay, this);
+        }
+    },
+
+    abort: function() {
+        if (this.sleep_hdl != null) {
+            clearTimeout(this.sleep_hdl);
+            this.sleep_hdl = null;
+        }
+    }
+}
 
 function remark_step()
 {
@@ -1058,4 +1081,86 @@ function set_checked_value(radioObj, newValue) {
 			radioObj[i].checked = true;
 		}
 	}
+}
+
+function url_append_arg(url, name, value)
+{
+    var pos, sep, pref, rest;
+
+    if ((pos = url.indexOf('?'+name+'=')) == -1) {
+        pos = url.indexOf('&'+name+'=');
+    }
+    if (pos == -1) {
+        if ((pos = url.indexOf('?')) != -1)
+            sep = '&';
+        else
+            sep = '?';
+
+        return (url+sep+name+"="+encodeURIComponent(value));
+    }
+    else {
+        pref = url.substring(0, pos+1);
+        rest = url.substring(pos+1);
+        // alert("rest: "+rest+"  pos: "+pos);
+        if ((pos = rest.indexOf('&')) != -1) {
+            rest = rest.substring(pos);
+        }
+        else {
+            rest = "";
+        }
+        return (pref+name+"="+encodeURIComponent(value)+rest);
+    }
+}
+
+function url_append_args(url)
+{
+    var i, ret;
+
+    ret = url;
+    for (i = 1 ; i < arguments.length-1 ; i+= 2) {
+        ret = url_append_arg(ret, arguments[i], arguments[i+1]);
+    }
+
+    return (ret);
+}
+
+function url_complete(parent, url)
+{
+    var p, p2, rest;
+    var host = "", path = "";
+
+    // host extraction
+    p = parent.indexOf("://");
+    if (p > -1) {
+        rest = parent.substring(p+3);
+        p2 = rest.indexOf("/");
+        if (p2 > -1) {
+            host = parent.substring(0, p+3+p2);
+            rest = parent.substring(p+3+p2);
+        }
+        else {
+            host = rest;
+            rest = "";
+        }
+    }
+    else {
+        rest = parent;
+    }
+
+    // path extraction
+    p = rest.lastIndexOf("/");
+    if (p > -1) {
+        path = rest.substring(0, p+1);
+    }
+
+    // alert("host: ["+host+"]  path: ["+path+"]");
+    if (url.substring(0,6) == 'http:/' || url.substring(0,7) == 'https:/') {
+        return (url);
+    }
+    else if (url.substring(0,1) == '/') {
+        return (host+url);
+    }
+    else {
+        return (host+path+url);
+    }
 }

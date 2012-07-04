@@ -348,6 +348,15 @@ function webservers_check()
     return ($ct);
 }
 
+$escpush_from = array("\\", "\"");
+$escpush_to   = array("\\\\", "\\\"");
+function escpush($s)
+{
+    GLOBAL $escpush_from, $escpush_to;
+
+    return str_replace($escpush_from, $escpush_to, $s);
+}
+
 $escinp_from = array( "\""     );
 $escinp_to = array(   "&quot;" );
 
