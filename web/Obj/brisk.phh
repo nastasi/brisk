@@ -23,61 +23,61 @@
  */
 
 
-define(BRISK_CONF, "brisk.conf.pho");
-define(FTOK_PATH, "/var/lib/brisk");
-define(LEGAL_PATH, "/tmp/legal_brisk");
-define(PROXY_PATH, "/var/lib/brisk_proxy");
-define(TABLES_N, 36);
-define(TABLES_AUTH_N, 4);
-define(PLAYERS_N, 3);
-define(MAX_POINTS, 5);
-define(MAX_PLAYERS, (20 + (PLAYERS_N * TABLES_N)));
-define(SHM_DIMS_MIN, (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
-define(SHM_DIMS_MAX, SHM_DIMS_MIN + 1048576);
-define(SHM_DIMS_DLT, 65536);
+define('BRISK_CONF', "brisk.conf.pho");
+define('FTOK_PATH', "/var/lib/brisk");
+define('LEGAL_PATH', "/tmp/legal_brisk");
+define('PROXY_PATH', "/var/lib/brisk_proxy");
+define('TABLES_N', 36);
+define('TABLES_AUTH_N', 4);
+define('PLAYERS_N', 3);
+define('MAX_POINTS', 5);
+define('MAX_PLAYERS', (20 + (PLAYERS_N * TABLES_N)));
+define('SHM_DIMS_MIN', (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
+define('SHM_DIMS_MAX', SHM_DIMS_MIN + 1048576);
+define('SHM_DIMS_DLT', 65536);
 
-define(SHM_DIMS_U_MIN, 4096);
-define(SHM_DIMS_U_MAX, 65536);
-define(SHM_DIMS_U_DLT, 4096);
+define('SHM_DIMS_U_MIN', 4096);
+define('SHM_DIMS_U_MAX', 65536);
+define('SHM_DIMS_U_DLT', 4096);
 
-define(COMM_N, 18);
-define(COMM_GEN_N, 50);
+define('COMM_N', 18);
+define('COMM_GEN_N', 50);
 
-define(CHAT_N, 3);
-define(CHAT_ILL_TIME, 6);
+define('CHAT_N', 3);
+define('CHAT_ILL_TIME', 6);
 
-define(SESS_LEN, 13);
-define(STREAM_TIMEOUT, 20);
-define(EXPIRE_TIME_RD, 180);
-define(EXPIRE_TIME_SMAMMA, 360); 
-define(EXPIRE_TIME_WAG, 10);
-define(WAKEUP_TIME, 12); 
+define('SESS_LEN', 13);
+define('STREAM_TIMEOUT', 60);
+define('EXPIRE_TIME_RD', 180);
+define('EXPIRE_TIME_SMAMMA', 360);
+define('EXPIRE_TIME_WAG', 10);
+define('WAKEUP_TIME', 12);
 // BAN_TIME da allineare anche in commons.js
-define(BAN_TIME, 3600); 
-define(GARBAGE_TIMEOUT, 10);
-define(NICKSERV, "<i>BriskServ</i>");
+define('BAN_TIME', 3600);
+define('GARBAGE_TIMEOUT', 10);
+define('NICKSERV', "<i>BriskServ</i>");
 
-define(LOCK_SHARE_MAX, 10000);
+define('LOCK_SHARE_MAX', 10000);
 
-define(DBG_ONL2, 0x0001);
-define(DBG_ONLY, 0x0002);
-define(DBG_MAIN, 0x0004);
-define(DBG_READ, 0x0008);
-define(DBG_REA2, 0x0010);
-define(DBG_SEND, 0x0020);
-define(DBG_LOCK, 0x0040);
-define(DBG_WRIT, 0x0080);
-define(DBG_LOAD, 0x0100);
-define(DBG_AUTH, 0x0200);
-define(DBG_CRIT, 0x0400);
-define(DBG_LMOP, 0x0800);
-define(DBG_TRAC, 0x1000);
-define(DBG_SHME, 0x2000);
+define('DBG_ONL2', 0x0001);
+define('DBG_ONLY', 0x0002);
+define('DBG_MAIN', 0x0004);
+define('DBG_READ', 0x0008);
+define('DBG_REA2', 0x0010);
+define('DBG_SEND', 0x0020);
+define('DBG_LOCK', 0x0040);
+define('DBG_WRIT', 0x0080);
+define('DBG_LOAD', 0x0100);
+define('DBG_AUTH', 0x0200);
+define('DBG_CRIT', 0x0400);
+define('DBG_LMOP', 0x0800);
+define('DBG_TRAC', 0x1000);
+define('DBG_SHME', 0x2000);
 // NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols 
-define(BRISK_DEBUG, 0x0800);
+define('BRISK_DEBUG', 0x0800);
 
-define(BRISK_SINGLE_DEBUG,0);
-define(BRISK_SINGLE_SESS, "");
+define('BRISK_SINGLE_DEBUG',0);
+define('BRISK_SINGLE_SESS', "");
 // define(DEBUGGING, "local");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
@@ -658,37 +658,37 @@ class Table {
 
 
 // User flags
-define(USER_FLAG_AUTH,     0x02);
+define('USER_FLAG_AUTH',     0x02);
 
-define(USER_FLAG_MAP_AUTH, 0x0c);
-define(USER_FLAG_LISTAUTH, 0x04);
-define(USER_FLAG_ISOLAUTH, 0x08);
+define('USER_FLAG_MAP_AUTH', 0x0c);
+define('USER_FLAG_LISTAUTH', 0x04);
+define('USER_FLAG_ISOLAUTH', 0x08);
 
-define(USER_FLAG_DBFAILED, 0x10); 
+define('USER_FLAG_DBFAILED', 0x10);
 
 //   user status
-define(USER_FLAG_S_NORM,  0x000); // done
-define(USER_FLAG_S_PAU,   0x100); // done
-define(USER_FLAG_S_OUT,   0x200); // done
-define(USER_FLAG_S_DOG,   0x300); // done
-define(USER_FLAG_S_EAT,   0x400); // done
-define(USER_FLAG_S_WRK,   0x500); // done
-define(USER_FLAG_S_SMK,   0x600); // done
-define(USER_FLAG_S_EYE,   0x700); // done
-define(USER_FLAG_S_RABB,  0x800); // done
-define(USER_FLAG_S_SOCC,  0x900); // done
-define(USER_FLAG_S_BABY,  0xa00); // done
-define(USER_FLAG_S_MOP,   0xb00); // done
+define('USER_FLAG_S_NORM',  0x000); // done
+define('USER_FLAG_S_PAU',   0x100); // done
+define('USER_FLAG_S_OUT',   0x200); // done
+define('USER_FLAG_S_DOG',   0x300); // done
+define('USER_FLAG_S_EAT',   0x400); // done
+define('USER_FLAG_S_WRK',   0x500); // done
+define('USER_FLAG_S_SMK',   0x600); // done
+define('USER_FLAG_S_EYE',   0x700); // done
+define('USER_FLAG_S_RABB',  0x800); // done
+define('USER_FLAG_S_SOCC',  0x900); // done
+define('USER_FLAG_S_BABY',  0xa00); // done
+define('USER_FLAG_S_MOP',   0xb00); // done
 
-define(USER_FLAG_S_ALL,   0xf00); // done
+define('USER_FLAG_S_ALL',   0xf00); // done
 
 /* type of user normal, supporter etc ... */
-define(USER_FLAG_TY_ALL,     0xff0000); // done
-define(USER_FLAG_TY_NORM,    0x010000); // done
-define(USER_FLAG_TY_SUPER,   0x020000); // done
+define('USER_FLAG_TY_ALL',     0xff0000); // done
+define('USER_FLAG_TY_NORM',    0x010000); // done
+define('USER_FLAG_TY_SUPER',   0x020000); // done
 //  ... other usefull status ...
-define(USER_FLAG_TY_SUSPEND, 0x400000); // done
-define(USER_FLAG_TY_DISABLE, 0x800000); // done
+define('USER_FLAG_TY_SUSPEND', 0x400000); // done
+define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
 class User {
   var $idx;        // index in the users array when you are in game
