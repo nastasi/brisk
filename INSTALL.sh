@@ -5,6 +5,9 @@
 #
 CONFIG_FILE="$HOME/.brisk_install"
 
+apache_path="/etc/apache2/sites-available/"
+apache_conf="default"
+
 players_n=3
 tables_n=44
 tables_auth_n=12
@@ -280,6 +283,7 @@ done
 for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
+chmod 755 "${web_path}__/spush/brisk-spush.php"
 
 if [ $players_n -eq 5 ]; then
    send_time=250

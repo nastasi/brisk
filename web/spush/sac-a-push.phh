@@ -1,0 +1,53 @@
+<?php
+
+function spu_process_info($stream_info, &$header, &$get, &$post)
+{
+    $check_post = FALSE;
+    $header = array();
+    $get = array();
+    $post = array();
+    foreach(preg_split("/(\r?\n)/", $stream_info) as $line) {
+        // printf("LINE: [%s]\n", $line);
+        if ($check_post) {
+            if (!isset($header['The-Request'])) {
+                return FALSE;
+            }
+            $req = explode(" ", $header['The-Request']);
+            $method = $req[0];
+            // GET params management
+            $get_vars = explode('?', $req[1], 2);
+            if (count($get_vars) > 1) {
+                $a = explode('&', $get_vars[1]);
+                printf("A COUNT: [%s] %d\n", $a[0], count($a));
+                for ($i = 0 ; $i < count($a) ; $i++) {
+                    $b = explode('=', $a[$i]);
+                    $get[$b[0]] = urldecode($b[1]);
+                }
+            }
+            // POST params management
+            if ($req[0] == 'POST') {
+                if ($header['Content-Type'] != 'application/x-www-form-urlencoded' 
+                    || !isset($header['Content-Length'])) {
+                    return FALSE;
+                }
+                $post_len = mb_strlen($line, "latin1");
+                $a = explode('&', $line);
+                for ($i = 0 ; $i < count($a) ; $i++) {
+                    $b = explode('=', $a[$i]);
+                    $post[$b[0]] = urldecode($b[1]);
+                }
+                printf("INFO: postlen: %d\n", $post_len);
+            }
+            break;
+        }
+        if ($line == "") {
+            $check_post = TRUE;
+            continue;
+        }
+        $split = explode(":", $line, 2);
+        $header[$split[0]] = $split[1];        
+    }
+    return $method;
+}
+
+?>
