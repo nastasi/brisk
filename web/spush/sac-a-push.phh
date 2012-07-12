@@ -1,6 +1,6 @@
 <?php
 
-function spu_process_info($stream_info, &$header, &$get, &$post)
+function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cookie)
 {
     $check_post = FALSE;
     $header = array();
@@ -14,6 +14,19 @@ function spu_process_info($stream_info, &$header, &$get, &$post)
             }
             $req = explode(" ", $header['The-Request']);
             $method = $req[0];
+            $path =   $req[1];
+
+            if (isset($header['Cookie'])) {
+                $cookies = explode(";", $header['Cookie']);
+                for ($i = 0 ; $i < count($cookies) ; $i++) {
+                    $nameval = explode("=", trim($cookies[$i]));
+                    if (count($nameval) != 2) {
+                        printf("WARNING: malformat cookie element [%s]\n", $cookies[$i]);
+                        continue;
+                    }
+                    $cookie[$nameval[0]] = urldecode($nameval[1]);
+                }
+            }
             // GET params management
             $get_vars = explode('?', $req[1], 2);
             if (count($get_vars) > 1) {
@@ -47,7 +60,7 @@ function spu_process_info($stream_info, &$header, &$get, &$post)
         $split = explode(":", $line, 2);
         $header[$split[0]] = $split[1];        
     }
-    return $method;
+    return $path;
 }
 
 ?>

@@ -20,9 +20,13 @@
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
  *
- */
 
-$G_base = "";
+
+TODO:
+  - header
+  - setcookie
+  - gestire per intero la var globale di output
+*/
 
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
@@ -175,9 +179,7 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'Close.')
                      );
 
-// Use of proxies isn't allowed.
-if (!$G_is_local && is_proxy()) 
-   exit;
+
 
 require_once("briskin5/Obj/briskin5.phh");
 if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
@@ -218,7 +220,7 @@ function carousel_top()
     return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" src="img/briskshop%d.gif"></a>', $rn));
 }
 
-function main()
+function index_main(&$room)
 {
   GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
   GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -227,6 +229,12 @@ function main()
   GLOBAL $G_with_poll;
   GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
   GLOBAL $G_lang, $G_lng, $mlang_room;
+
+  // Use of proxies isn't allowed.
+  if (!$G_is_local && is_proxy()) {
+      return FALSE;
+  }
+
   $is_login = FALSE;
   $body = "";
   $tables = "";
@@ -235,12 +243,7 @@ function main()
   
   if (isset($BRISK_SHOWHTML) == FALSE) {
       $is_table = FALSE;
-      $sem = Room::lock_data(TRUE);
       log_main("lock Room");
-      if (($room = Room::load_data()) == FALSE) {
-          log_crit("load_data failed");
-          exit();
-      }
       $curtime = time();
       
       /* Actions */
@@ -252,24 +255,14 @@ function main()
           if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
               log_main("user stat: ".$user->stat);
               if ($user->stat == "table") {
-                  if (Room::save_data(&$room) == FALSE) {
-                      echo "ERRORE SALVATAGGIO\n";
-                      exit;
-                  }
-                  log_main("unlock Room");
-                  Room::unlock_data($sem);
                   setcookie("table_token", $user->table_token, $curtime + 31536000);
                   setcookie("table_idx", $user->table, $curtime + 31536000);
                   header ("Location: briskin5/index.php");
-                  exit;
+                  return TRUE;
               }
               $ACTION = "room";
           }
           
-          if (Room::save_data(&$room) == FALSE) {
-              echo "ERRORE SALVATAGGIO\n";
-              exit;
-          }
       }
       
       if ($ACTION == "login" && isset($name)) {
@@ -293,26 +286,16 @@ function main()
               
               // recovery lost game
               if ($user->stat == "table") {
-                  if (Room::save_data(&$room) == FALSE) {
-                      echo "ERRORE SALVATAGGIO\n";
-                      exit;
-                  }
-                  log_main("unlock Room");
-                  Room::unlock_data($sem);
                   setcookie("table_token", $user->table_token, $curtime + 31536000);
                   setcookie("table_idx", $user->table, $curtime + 31536000);
                   header ("Location: briskin5/index.php");
-                  exit;
+                  return TRUE;
               }
               
               
               // setcookie ("sess", "", time() + 180);      
               $room->standup_update(&$user);
               
-              if (Room::save_data($room) == FALSE) {
-                  echo "ERRORE SALVATAGGIO\n";
-                  exit;
-              }
           }
           else {
               /* Login Rendering */
@@ -343,7 +326,6 @@ function main()
               $body .= '<div class="urgmsg"><b>'.$mlang_room['userpass'.$sfx][$G_lang].'</b></div>';
           }
       }
-      Room::unlock_data($sem);
   }
   /* Rendering. */
 
@@ -353,7 +335,7 @@ function main()
   else if ($BRISK_SHOWHTML == "debuglogin") {
       $ACTION = "login";
   }
-  
+
   if ($ACTION == "room") {
       $tables .= '<div class="room_tab">';
       $tables .= '<table class="room_tab">';
@@ -1212,7 +1194,5 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <?php
    }
 }
-
-main();
 
 ?>

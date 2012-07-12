@@ -27,8 +27,10 @@ $G_base = "../";
 
 require_once("./brisk-spush.phh");
 require_once("../Obj/brisk.phh");
+require_once("../Obj/auth.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once("./sac-a-push.phh");
+require_once("../index.php");
 
 define('SITE_PREFIX', '/brisk/');
 
@@ -117,13 +119,41 @@ function user_get_sess($user_arr, $sess)
     return FALSE;
 }
 
+function headers_get()
+{
+    $s = "";
+    $s .= "HTTP/1.1 200 OK\r\n";
+    $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
+    $s .= "Connection: close\r\n";
+    $s .= "Content-Type: text/html\r\n";
+    $s .= "Mop: was/here\r\n";
+    $s .= "\r\n";
 
+    return ($s);
+}
+
+
+/*
+ *  Caching system using ob php system to cache old style pages
+ *  to a var and than send it with more calm
+ */
+$G_headers = "";
+$G_content = "";
+
+function spu_store($s)
+{
+    GLOBAL $G_content;
+
+    $G_content .= $s;
+
+    return '';
+}
 function shutta()
 {
   log_rd2("SHUTTA [".connection_status()."] !");
 }
 
-register_shutdown_function(shutta);
+register_shutdown_function('shutta');
 
 /*
  *  MAIN
@@ -132,37 +162,33 @@ $shutdown = FALSE;
 
 function main()
 {
-    GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
-    // GLOBAL $first_loop;
-    GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
-    GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
-    $CO_splashdate = "CO_splashdate".$G_splash_idx;
-    GLOBAL $$CO_splashdate;
-    
-    GLOBAL $S_load_stat;
-
-
-
+    GLOBAL $G_headers, $G_content;
     GLOBAL $shutdown;
     $main_loop = TRUE;
 
-    $user_a = array();
-    $s2u  = array();
-    for ($i = 0 ; $i < 10 ; $i++) {
-        $user_a[$i] = new SPUser($i, 0, NULL);
+    /*
+     *  INIT
+     */
+
+    $FILE_SOCKET = "/tmp/brisk.sock";
+    $UNIX_SOCKET = "unix://$FILE_SOCKET";
+    $debug = 0;
+    $fixed_fd = 2;
+    $socks = array();
+
+    $blocking_mode = 0; // 0 for non-blocking
+
+    if (($room = Room::create()) == FALSE) {
+        log_crit("load_data failed");
+        return FALSE;
     }
+
+    $s2u  = array();
 
     $rndstr = "";
     for ($i = 0 ; $i < 4096 ; $i++) {
         $rndstr .= chr(mt_rand(65, 90));
     }
-
-    $FILE_SOCKET = "/tmp/test001.sock";
-    $UNIX_SOCKET = "unix://$FILE_SOCKET";
-    $debug = 0;
-    $fixed_fd = 2;
-
-    $blocking_mode = 0; // 0 for non-blocking
 
     if (file_exists($FILE_SOCKET)) {
         unlink($FILE_SOCKET);
@@ -173,8 +199,6 @@ function main()
         exit(11);
     }
     umask($old_umask);
-
-    $socks = array();
 
     if (($in = fopen("php://stdin", "r")) === FALSE) {
         exit(11);
@@ -212,45 +236,70 @@ function main()
                     printf("NUOVA CONNEX\n");
                     $new_unix = stream_socket_accept($list);
                     $stream_info = "";
+                    $method      = "";
+                    $get         = "";
+                    $post        = "";
                     if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
                         printf("RECEIVED HEADER:\n%s", $stream_info);
-                        $m = spu_process_info($stream_info, $header, $get, $post);
-                        printf("M: %s\nHEADER:\n", $m);
+                        $path = spu_process_info($stream_info, $method, $header, $get, $post, $cookie);
+                        printf("PATH: [%s]\n", $path);
+                        printf("M: %s\nHEADER:\n", $method);
                         print_r($header);
                         printf("GET:\n");
                         print_r($get);
                         printf("POST:\n");
                         print_r($post);
+                        printf("COOKIE:\n");
+                        print_r($cookie);
 
-                        /* TODO: here stuff to decide if it is old or new user */
-                        if (($user_cur = user_get_sess($user_a, $get['sess'])) != FALSE) {
-                            /* close the previous socket */
-                            unset($s2u[intval($user_cur->sock_get())]);
-                            unset($socks[intval($user_cur->sock_get())]);
-                            fclose($user_cur->sock_get());
-                            /* assign the new socket */
-                            $user_cur->sock_set($new_socket);
-                            $id = $user_cur->id_get();
-                            $s2u[intval($new_socket)] = $id;
-                            $socks[intval($new_socket)] = $new_socket;
-                            fwrite($new_socket, $rndstr);
-                            fflush($new_socket);
-                        }
-                        else if (($user_cur = user_get_free($user_a)) != FALSE) {
-                            stream_set_blocking($new_socket, $blocking_mode); // Set the stream to non-blocking
-                            $socks[intval($new_socket)] = $new_socket;
-                            
-                            $id = $user_cur->id_get();
-                            $user_a[$id]->enable($new_socket, $get['sess']);
-                            printf("s2u: ci passo %d\n", intval($new_socket));
-                            $s2u[intval($new_socket)] = $id;
-                            
-                            fwrite($new_socket, $rndstr);
-                            fflush($new_socket);
-                        }
-                        else {
-                            printf("Too many opened users\n");
+                        switch ($path) {
+                        case SITE_PREFIX:
+                        case SITE_PREFIX."index.php":
+                            $G_headers = "";
+                            ob_start();
+                            index_main($room);
+                            $content = ob_get_flush();
+
+                            printf("OUT: [%s]\n", $G_content);
+                            fwrite($new_socket, headers_get().$content);
                             fclose($new_socket);
+                            break;
+                        }
+                            
+
+
+
+                        if (0 == 1) {
+                            /* TODO: here stuff to decide if it is old or new user */
+                            if (($user_cur = user_get_sess($user_a, $get['sess'])) != FALSE) {
+                                /* close the previous socket */
+                                unset($s2u[intval($user_cur->sock_get())]);
+                                unset($socks[intval($user_cur->sock_get())]);
+                                fclose($user_cur->sock_get());
+                                /* assign the new socket */
+                                $user_cur->sock_set($new_socket);
+                                $id = $user_cur->id_get();
+                                $s2u[intval($new_socket)] = $id;
+                                $socks[intval($new_socket)] = $new_socket;
+                                fwrite($new_socket, $rndstr);
+                                fflush($new_socket);
+                            }
+                            else if (($user_cur = user_get_free($user_a)) != FALSE) {
+                                stream_set_blocking($new_socket, $blocking_mode); // Set the stream to non-blocking
+                                $socks[intval($new_socket)] = $new_socket;
+
+                                $id = $user_cur->id_get();
+                                $user_a[$id]->enable($new_socket, $get['sess']);
+                                printf("s2u: ci passo %d\n", intval($new_socket));
+                                $s2u[intval($new_socket)] = $id;
+
+                                fwrite($new_socket, $rndstr);
+                                fflush($new_socket);
+                            }
+                            else {
+                                printf("Too many opened users\n");
+                                fclose($new_socket);
+                            }
                         }
                     }
                     else {
