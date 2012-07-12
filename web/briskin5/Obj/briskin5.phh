@@ -21,13 +21,13 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  */
-define(BIN5_PLAYERS_N, 3);
-define(BIN5_MAX_PLAYERS, BIN5_PLAYERS_N);
-// define(BIN5_SHM_MIN, (50000 * BIN5_MAX_PLAYERS));
-define(BIN5_SHM_MIN, 32768);
-define(BIN5_SHM_MAX, (BIN5_SHM_MIN + 1048576));
-define(BIN5_SHM_DLT, 32768);
-define(BIN5_PROXY_PATH, PROXY_PATH."/bin5");
+define('BIN5_PLAYERS_N', 3);
+define('BIN5_MAX_PLAYERS', BIN5_PLAYERS_N);
+// define(BIN5_SHM_MIN', (50000 * BIN5_MAX_PLAYERS));
+define('BIN5_SHM_MIN', 32768);
+define('BIN5_SHM_MAX', (BIN5_SHM_MIN + 1048576));
+define('BIN5_SHM_DLT', 32768);
+define('BIN5_PROXY_PATH', PROXY_PATH."/bin5");
 
 $mlang_bin5_bin5 = array( 
                          'info_part' => array( 'it' => '<hr>Nell\'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>',
@@ -420,7 +420,7 @@ class Bin5_table extends Table {
 
 
 
-define(BIN5_USER_FLAG_RING_ENDAUCT, 0x01);
+define('BIN5_USER_FLAG_RING_ENDAUCT', 0x01);
 
 class Bin5_user extends User {
     var $asta_card;  // 

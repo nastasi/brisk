@@ -24,11 +24,11 @@
 
 require_once("${G_base}Obj/dbase_${G_dbasetype}.phh");
 
-define(CHAL_SHM_DIMS_MIN, 16384);
-define(CHAL_SHM_DIMS_MAX, 65536);
-define(CHAL_SHM_DIMS_DLT, 16384);
-define(CHAL_VALID_TIME,      15);
-define(CHAL_GARBAGE_TIMEOUT,  5);
+define('CHAL_SHM_DIMS_MIN', 16384);
+define('CHAL_SHM_DIMS_MAX', 65536);
+define('CHAL_SHM_DIMS_DLT', 16384);
+define('CHAL_VALID_TIME',      15);
+define('CHAL_GARBAGE_TIMEOUT',  5);
 
 
 class Challenge {

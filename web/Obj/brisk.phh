@@ -78,7 +78,7 @@ define('BRISK_DEBUG', 0x0800);
 
 define('BRISK_SINGLE_DEBUG',0);
 define('BRISK_SINGLE_SESS', "");
-// define(DEBUGGING, "local");
+define('DEBUGGING', "no-debugging");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 

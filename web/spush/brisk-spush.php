@@ -30,6 +30,8 @@ require_once("../Obj/brisk.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once("./sac-a-push.phh");
 
+define('SITE_PREFIX', '/brisk/');
+
 class SPUser {
     var $id;
     var $sess;
