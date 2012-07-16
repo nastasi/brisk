@@ -21,16 +21,26 @@
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
  *
+ * TODO
+ *   setcookie (for tables only)
+ *   keepalive
+ *   chunked 
+ *   index_rd.php porting
+ *   index.php auth part
+ *   generic var management from internet
  */
 
 $G_base = "../";
 
-require_once("./brisk-spush.phh");
-require_once("../Obj/brisk.phh");
-require_once("../Obj/auth.phh");
-// require_once("../Obj/proxyscan.phh");
 require_once("./sac-a-push.phh");
-require_once("../index.php");
+require_once("./brisk-spush.phh");
+require_once($G_base."Obj/brisk.phh");
+require_once($G_base."Obj/auth.phh");
+// require_once("../Obj/proxyscan.phh");
+require_once($G_base."index.php");
+require_once($G_base."index_wr.php");
+require_once($G_base."index_rd_ifra.php");
+require_once($G_base."briskin5/Obj/briskin5.phh");
 
 define('SITE_PREFIX', '/brisk/');
 
@@ -119,13 +129,20 @@ function user_get_sess($user_arr, $sess)
     return FALSE;
 }
 
-function headers_get()
+function headers_render($header)
 {
+    
     $s = "";
     $s .= "HTTP/1.1 200 OK\r\n";
-    $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
-    $s .= "Connection: close\r\n";
-    $s .= "Content-Type: text/html\r\n";
+    if (!isset($header['Date']))
+        $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
+    if (!isset($header['Connection']))
+        $s .= "Connection: close\r\n";
+    if (!isset($header['Content-Type']))
+        $s .= "Content-Type: text/html\r\n";
+    foreach($header as $key => $value) {
+        $s .= sprintf("%s: %s\r\n", $key, $value);
+    }
     $s .= "Mop: was/here\r\n";
     $s .= "\r\n";
 
@@ -138,16 +155,7 @@ function headers_get()
  *  to a var and than send it with more calm
  */
 $G_headers = "";
-$G_content = "";
 
-function spu_store($s)
-{
-    GLOBAL $G_content;
-
-    $G_content .= $s;
-
-    return '';
-}
 function shutta()
 {
   log_rd2("SHUTTA [".connection_status()."] !");
@@ -162,7 +170,7 @@ $shutdown = FALSE;
 
 function main()
 {
-    GLOBAL $G_headers, $G_content;
+    GLOBAL $G_headers;
     GLOBAL $shutdown;
     $main_loop = TRUE;
 
@@ -237,8 +245,9 @@ function main()
                     $new_unix = stream_socket_accept($list);
                     $stream_info = "";
                     $method      = "";
-                    $get         = "";
-                    $post        = "";
+                    $get         = array();
+                    $post        = array();
+                    $cookie      = array();
                     if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
                         printf("RECEIVED HEADER:\n%s", $stream_info);
                         $path = spu_process_info($stream_info, $method, $header, $get, $post, $cookie);
@@ -255,14 +264,54 @@ function main()
                         switch ($path) {
                         case SITE_PREFIX:
                         case SITE_PREFIX."index.php":
-                            $G_headers = "";
+                            $header_out = array();
                             ob_start();
-                            index_main($room);
+                            index_main($room, $header_out, $get, $post, $cookie);
                             $content = ob_get_flush();
 
-                            printf("OUT: [%s]\n", $G_content);
-                            fwrite($new_socket, headers_get().$content);
+                            // printf("OUT: [%s]\n", $G_content);
+                            fwrite($new_socket, headers_render($header_out).$content);
                             fclose($new_socket);
+                            break;
+                        case SITE_PREFIX."index_wr.php":
+                            $G_headers = "";
+                            ob_start();
+                            index_wr_main($room, socket_getpeername($$new_socket), $get, $post, $cookie);
+                            $content = ob_get_flush();
+                            
+                            // printf("OUT: [%s]\n", $G_content);
+                            fwrite($new_socket, headers_render($header_out).$content);
+                            fclose($new_socket);
+                            break;
+                        case SITE_PREFIX."index_rd_ifra.php":
+                            do {
+                                if (!isset($cookie['sess'])) {
+                                    fclose($new_socket);
+                                    break;
+                                }
+                                if (($user = $room->get_user($cookie['sess'], $idx)) == FALSE) {
+                                    fclose($new_socket);
+                                    break;
+                                }
+                                if (($prev = $user->rd_socket_get()) != NULL) {
+                                    unset($s2u[intval($user->rd_socket_get())]);
+                                    unset($socks[intval($user->rd_socket_get())]);
+                                    fclose($user->rd_socket_get());
+                                    $user->rd_socket_set(NULL);
+                                }
+
+                                $header_out = array();
+                                $body = "";
+                                index_rd_ifra_init($room, $user, $header_out, $body, $get, $post, $cookie);
+                                stream_set_blocking($new_socket, $blocking_mode); // Set the stream to non-blocking
+                                fwrite($new_socket, headers_render($header_out).$body);
+                                fflush($new_socket);
+
+                                $s2u[intval($new_socket)] = $idx;
+                                $socks[intval($new_socket)] = $new_socket;                                
+                                $user->rd_socket_set($new_socket);
+                            } while (FALSE);
+
                             break;
                         }
                             
@@ -319,8 +368,11 @@ function main()
                             printf("Arrivati %d bytes da stdin\n", strlen($buf));
                         }
                         else {
+                            // $user_a[$s2u[intval($sock)]]->disable();
+                            if ($room->user[$s2u[intval($sock)]]->rd_socket_get() != NULL) {
+                                $room->user[$s2u[intval($sock)]]->rd_socket_set(NULL);
+                            }
                             unset($socks[intval($sock)]);
-                            $user_a[$s2u[intval($sock)]]->disable();
                             unset($s2u[intval($sock)]);
                             fclose($sock);
                         }
@@ -353,10 +405,16 @@ function main()
 
 
 
-        if (0 == 1) { // WRITE PART EXAMPLE 
-            // sleep(3);
-            foreach ($socks as $k => $sock) {
-                fwrite($sock, sprintf("DI QUI CI PASSO [%d]\n", $user_a[$s2u[intval($sock)]]->cnt_inc()));
+        foreach ($socks as $k => $sock) {
+            if (isset($s2u[intval($sock)])) {
+                $body = "";
+                
+
+                $header_out = array();
+                $body = "";
+                index_rd_ifra_main($room, $room->user[$s2u[intval($sock)]], $body);
+                echo "SPIA: [$body]\n";
+                fwrite($sock, headers_render($header_out).$body);
                 fflush($sock);
             }
         }

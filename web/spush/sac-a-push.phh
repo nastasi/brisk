@@ -14,7 +14,6 @@ function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cook
             }
             $req = explode(" ", $header['The-Request']);
             $method = $req[0];
-            $path =   $req[1];
 
             if (isset($header['Cookie'])) {
                 $cookies = explode(";", $header['Cookie']);
@@ -29,6 +28,7 @@ function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cook
             }
             // GET params management
             $get_vars = explode('?', $req[1], 2);
+            $path =   $get_vars[0];
             if (count($get_vars) > 1) {
                 $a = explode('&', $get_vars[1]);
                 printf("A COUNT: [%s] %d\n", $a[0], count($a));
@@ -63,4 +63,17 @@ function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cook
     return $path;
 }
 
+function gpcs_var($name, $get, $post, $cookie)
+{
+    if (isset($GLOBALS[$name])) 
+        return FALSE;
+    else if (isset($cookie[$name])) 
+        return ($cookie[$name]);
+    else if (isset($post[$name])) 
+        return ($post[$name]);
+    else if (isset($get[$name])) 
+        return ($get[$name]);
+
+    return FALSE;
+}
 ?>

@@ -220,20 +220,32 @@ function carousel_top()
     return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" src="img/briskshop%d.gif"></a>', $rn));
 }
 
-function index_main(&$room)
+function index_main(&$room, &$header_out, $get, $post, $cookie)
 {
-  GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
-  GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
-  GLOBAL $G_with_sidebanner, $G_sidebanner; 
-  GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
-  GLOBAL $G_with_poll;
-  GLOBAL $sess, $name, $pass_private, $table_idx, $table_token, $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
-  GLOBAL $G_lang, $G_lng, $mlang_room;
+    GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
+    GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
+    GLOBAL $G_with_sidebanner, $G_sidebanner; 
+    GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
+    GLOBAL $G_with_poll;
+    GLOBAL $G_lang, $G_lng, $mlang_room;
+    GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
 
-  // Use of proxies isn't allowed.
-  if (!$G_is_local && is_proxy()) {
-      return FALSE;
-  }
+    if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE) 
+        unset($sess);
+    if (($name = gpcs_var('name', $get, $post, $cookie)) === FALSE)
+        unset($name);
+    if (($pass_private = gpcs_var('pass_private', $get, $post, $cookie)) === FALSE)
+        unset ($pass_private);
+    if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
+        unset ($table_idx);
+    if (($table_token = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
+        unset ($table_token);
+    
+    
+    // Use of proxies isn't allowed.
+    if (!$G_is_local && is_proxy()) {
+        return FALSE;
+    }
 
   $is_login = FALSE;
   $body = "";
@@ -257,7 +269,7 @@ function index_main(&$room)
               if ($user->stat == "table") {
                   setcookie("table_token", $user->table_token, $curtime + 31536000);
                   setcookie("table_idx", $user->table, $curtime + 31536000);
-                  header ("Location: briskin5/index.php");
+                  $header_out['Location'] = "Location: briskin5/index.php";
                   return TRUE;
               }
               $ACTION = "room";
@@ -288,7 +300,7 @@ function index_main(&$room)
               if ($user->stat == "table") {
                   setcookie("table_token", $user->table_token, $curtime + 31536000);
                   setcookie("table_idx", $user->table, $curtime + 31536000);
-                  header ("Location: briskin5/index.php");
+                  $header_out['Location'] = "Location: briskin5/index.php";
                   return TRUE;
               }
               
@@ -845,7 +857,7 @@ supported by:<br>
     
   /* Templates. */
   if ($ACTION == 'login') {
-    header('Content-type: text/html; charset="utf-8"',true);
+      $header_out['Content-type'] = "text/html; charset=\"utf-8\"";
 ?>
 <html>
 <head>
@@ -979,7 +991,7 @@ echo "$body"; ?>
 <?php
   }
   else if ($ACTION == 'room') {
-    header('Content-type: text/html; charset="utf-8"',true);
+      $header_out['Content-type'] = "text/html; charset=\"utf-8\"";
   ?>
 <html>
 <head>

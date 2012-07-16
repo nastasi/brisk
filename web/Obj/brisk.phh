@@ -704,6 +704,14 @@ class User {
   var $subst;      // substatus for each status   
   var $step;       // step of the current status
   var $trans_step; // step to enable transition between pages (disable == -1)
+
+  var $rd_socket;  // socket handle of push stream
+  var $rd_endtime; // end time for push stream
+  var $rd_stat;    // actual status of push stream
+  var $rd_subst;   // actual substatus of push stream
+  var $rd_step;    // actual step of push stream
+  var $rd_from;    // referer
+  var $rd_scristp; // current script step (for each session) 
   var $comm;       // commands array
   // var $asta_card;  // 
   // var $asta_pnt;   //
@@ -747,6 +755,15 @@ class User {
     $thiz->step       = 1;
     $thiz->trans_step = -1;
     $thiz->comm       = array();
+
+    $thiz->rd_socket  = NULL;
+    $thiz->rd_endtime = -1;
+    $thiz->rd_stat    = -1;
+    $thiz->rd_subst   = "";
+    $thiz->rd_step    = -1;
+    $thiz->rd_from    = "";
+    $thiz->rd_scristp = -1;
+
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
     $thiz->handpt     = -1;
@@ -879,6 +896,14 @@ class User {
     return ($thiz);
   }
 
+  function rd_socket_get() {
+      return ($this->rd_socket);
+  }
+
+  function rd_socket_set($sock) {
+      $this->rd_socket = $sock;
+  }
+
   function idx_get() {
       return ($this->idx);
   }
@@ -916,6 +941,17 @@ class User {
       
       return TRUE;
   }
+
+  function rd_data_set($endtime, $stat, $subst, $step, $from)
+  {
+      $this->rd_endtime = $endtime;
+      $this->rd_stat    = $stat;
+      $this->rd_subst   = $subst;
+      $this->rd_step    = $step;
+      $this->rd_from    = $from;
+      $this->rd_scristp = 0;
+  }
+
 
   function save_step() 
   {
