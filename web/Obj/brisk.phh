@@ -275,7 +275,7 @@ $G_room_about = array( 'it' => '<br>
   briscola chiamata in salsa ajax
 </div>
 <br><b>version '.$G_brisk_version.'</b><br><br>
-Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>',
+Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>',
                       'en' => '<br>
 <div id=\\"header\\" class=\\"header\\">
   <img class=\\"nobo\\" src=\\"img/brisk_logo64.png\\">

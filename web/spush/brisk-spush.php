@@ -22,6 +22,7 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  * TODO
+ *   problema con getpeer (HOSTADDR)
  *   setcookie (for tables only)
  *   keepalive
  *   chunked 
@@ -267,17 +268,22 @@ function main()
                             $header_out = array();
                             ob_start();
                             index_main($room, $header_out, $get, $post, $cookie);
-                            $content = ob_get_flush();
-
+                            $content = ob_get_contents();
+                            ob_end_clean();
                             // printf("OUT: [%s]\n", $G_content);
                             fwrite($new_socket, headers_render($header_out).$content);
                             fclose($new_socket);
                             break;
                         case SITE_PREFIX."index_wr.php":
                             $G_headers = "";
+                            $addr = "";
+                            $ret = socket_getpeername($new_socket, $addr);
+                            // printf("RET: %d\n", $ret);
+                            // exit(123);
                             ob_start();
-                            index_wr_main($room, socket_getpeername($$new_socket), $get, $post, $cookie);
-                            $content = ob_get_flush();
+                            index_wr_main($room, $addr, $get, $post, $cookie);
+                            $content = ob_get_contents();
+                            ob_end_clean();
                             
                             // printf("OUT: [%s]\n", $G_content);
                             fwrite($new_socket, headers_render($header_out).$content);
@@ -413,7 +419,7 @@ function main()
                 $header_out = array();
                 $body = "";
                 index_rd_ifra_main($room, $room->user[$s2u[intval($sock)]], $body);
-                echo "SPIA: [$body]\n";
+                echo "SPIA: [".substr($body, 0, 60)."...]\n";
                 fwrite($sock, headers_render($header_out).$body);
                 fflush($sock);
             }

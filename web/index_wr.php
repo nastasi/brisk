@@ -22,8 +22,8 @@
  *
  */
 
-require_once("Obj/brisk.phh");
-require_once("Obj/auth.phh");
+// require_once("Obj/brisk.phh");
+// require_once("Obj/auth.phh");
 // require_once("Obj/proxyscan.phh");
 
 // Use of proxies isn't allowed.
@@ -81,12 +81,15 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 
 function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 {
-    GLOBAL $G_black_list;
+    GLOBAL $G_black_list, $G_lang, $G_room_help, $G_room_about, $mlang_indwr;
 
     log_load("index_wr.php");
 
     if (($mesg = gpcs_var('mesg', $get, $post, $cookie)) === FALSE) 
         unset($mesg);
+
+    if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
+        $sess = "";
 
     
     if (DEBUGGING == "local" && $remote_addr != '127.0.0.1') {
@@ -154,16 +157,16 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
                 return FALSE;
             }
         }
-  /* else if ($argz[0] == 'auth') { */
-  /*   printf("challenge|ok"); */
-  /* } */
-  /* else if ($argz[0] == 'help') { */
-  /*   /\* MLANG: "torna ai tavoli" *\/  */
-  /*   echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 600, 500); */
-  /* } */
-  /* else if ($argz[0] == 'about') { */
-  /*   echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 220); */
-  /* } */
+        else if ($argz[0] == 'auth') {
+            printf("challenge|ok");
+        }
+        else if ($argz[0] == 'help') {
+            /* MLANG: "torna ai tavoli" */
+            echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 600, 500);
+        }
+        else if ($argz[0] == 'about') {
+            echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 220);
+        }
   /* else if ($argz[0] == 'passwdhowto') { */
   /*   echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200); */
   /* } */
