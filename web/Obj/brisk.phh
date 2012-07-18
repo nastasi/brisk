@@ -3008,7 +3008,7 @@ function log_auth($sess, $log)
     if (( (BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_AUTH) == 0)
         return;
     
-    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
+    if ((BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -3173,7 +3173,7 @@ function sharedmem_sz($tok)
   $shm_sz = shmop_size($shm_id);
   shmop_close($shm_id);
   
-  log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
+  // log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
   return ($shm_sz);
 }    
 
