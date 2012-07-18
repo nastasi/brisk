@@ -222,7 +222,9 @@ function main()
     stream_set_blocking($list, $blocking_mode); # Set the stream to non-blocking
 
     while ($main_loop) {
-        echo "IN LOOP\n";
+        $curtime = time();
+        printf("IN LOOP: Current opened: %d\n", count($socks));
+
         /* Prepare the read array */
         if ($shutdown) 
             $read   = array_merge(array("$in" => $in), $socks);
