@@ -51,91 +51,6 @@ require_once($G_base."briskin5/Obj/briskin5.phh");
 
 define('SITE_PREFIX', '/brisk/');
 
-class SPUser {
-    var $id;
-    var $sess;
-    var $cnt;
-    var $sock;
-    
-    function SPUser($id)
-    {
-        $this->id = $id;
-        $this->cnt = -1;
-        $this->sock = NULL;
-    }
-
-    function enable($sock, $sess)
-    {
-        $this->sess = $sess;
-        $this->cnt = 0;
-        $this->sock = $sock;
-
-        return ($this->id);
-    }
-
-    function disable()
-    {
-        $this->cnt = -1;
-        $this->sock = NULL;
-    }
-
-    function is_enable()
-    {
-        return ($this->cnt < 0 ? FALSE : TRUE);
-    }
-
-    function sock_get()
-    {
-        return $this->sock;
-    }
-
-    function sock_set($sock)
-    {
-        $this->sock = $sock;
-    }
-
-    function id_get()
-    {
-        return $this->id;
-    }
-    
-    function sess_get()
-    {
-        return $this->sess;
-    }
-
-    function cnt_get()
-    {
-        return $this->cnt;
-    }
-
-    function cnt_inc()
-    {
-        return $this->cnt++;
-    }
-}
-
-function user_get_free($user_arr)
-{
-    foreach ($user_arr as $i => $user) {
-        if (!$user->is_enable()) {
-            return ($user);
-        }
-    }
-    return FALSE;
-}
-
-function user_get_sess($user_arr, $sess)
-{
-    foreach ($user_arr as $i => $user) {
-        printf("SESS: [%s]  cur: [%s]\n", $user->sess_get(), $sess);
-        if ($user->sess_get() == $sess) {
-            return ($user);
-        }
-    }
-    return FALSE;
-}
-
 function headers_render($header)
 {
     
@@ -155,7 +70,6 @@ function headers_render($header)
 
     return ($s);
 }
-
 
 /*
  *  Caching system using ob php system to cache old style pages
@@ -329,42 +243,6 @@ function main()
                             } while (FALSE);
 
                             break;
-                        }
-                            
-
-
-
-                        if (0 == 1) {
-                            /* TODO: here stuff to decide if it is old or new user */
-                            if (($user_cur = user_get_sess($user_a, $get['sess'])) != FALSE) {
-                                /* close the previous socket */
-                                unset($s2u[intval($user_cur->sock_get())]);
-                                unset($socks[intval($user_cur->sock_get())]);
-                                fclose($user_cur->sock_get());
-                                /* assign the new socket */
-                                $user_cur->sock_set($new_socket);
-                                $id = $user_cur->id_get();
-                                $s2u[intval($new_socket)] = $id;
-                                $socks[intval($new_socket)] = $new_socket;
-                                fwrite($new_socket, $rndstr);
-                                fflush($new_socket);
-                            }
-                            else if (($user_cur = user_get_free($user_a)) != FALSE) {
-                                stream_set_blocking($new_socket, $blocking_mode); // Set the stream to non-blocking
-                                $socks[intval($new_socket)] = $new_socket;
-
-                                $id = $user_cur->id_get();
-                                $user_a[$id]->enable($new_socket, $get['sess']);
-                                printf("s2u: ci passo %d\n", intval($new_socket));
-                                $s2u[intval($new_socket)] = $id;
-
-                                fwrite($new_socket, $rndstr);
-                                fflush($new_socket);
-                            }
-                            else {
-                                printf("Too many opened users\n");
-                                fclose($new_socket);
-                            }
                         }
                     }
                     else {
