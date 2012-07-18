@@ -167,12 +167,12 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
         else if ($argz[0] == 'about') {
             echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 220);
         }
-  /* else if ($argz[0] == 'passwdhowto') { */
-  /*   echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200); */
-  /* } */
-  /* else if ($argz[0] == 'roadmap') { */
-  /*   echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200); */
-  /* } */
+        else if ($argz[0] == 'passwdhowto') {
+            echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
+        }
+        else if ($argz[0] == 'roadmap') {
+            echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
+        }
   /* else if ($argz[0] == 'placing') { */
   /*   require_once("briskin5/Obj/briskin5.phh"); */
   /*   require_once("briskin5/Obj/placing.phh"); */
@@ -193,26 +193,26 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 
 
 
-/* $argz = explode('|', xcapemesg($mesg)); */
+    $argz = explode('|', xcapemesg($mesg));
 
-/* log_wr('POSTSPLIT: '.$argz[0]); */
+    log_wr('POSTSPLIT: '.$argz[0]);
 
-/* log_wr($user->step, 'index_wr.php: after get_user()'); */
+    log_wr($user->step, 'index_wr.php: after get_user()');
 
-/* if ($argz[0] == 'shutdown') { */
-/*   log_auth($user->sess, "Shutdown session."); */
+    if ($argz[0] == 'shutdown') {
+        log_auth($user->sess, "Shutdown session.");
 
-/*   $user->reset(); */
+        $user->reset();
 
-/*   log_rd2("AUTO LOGOUT."); */
-/*   if ($user->subst == 'sitdown' || $user->stat == 'table') */
-/*     $room->room_wakeup($user); */
-/*   else if ($user->subst == 'standup') */
-/*     $room->room_outstandup(&$user); */
-/*   else { */
-/*     log_rd2("SHUTDOWN FROM WHAT ???"); */
-/*   } */
-/* } */
+        log_rd2("AUTO LOGOUT.");
+        if ($user->subst == 'sitdown' || $user->stat == 'table')
+            $room->room_wakeup($user);
+        else if ($user->subst == 'standup')
+            $room->room_outstandup(&$user);
+        else {
+            log_rd2("SHUTDOWN FROM WHAT ???");
+        }
+    }
 /* else if ($argz[0] == 'warranty') { */
 /*   GLOBAL $cli_name, $cli_email; */
 
@@ -415,44 +415,43 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 /*   echo "$echont"; */
 /* } */
 
-/* /\****************** */
-/*  *                * */
-/*  *   STAT: room   * */
-/*  *                * */
-/*  ******************\/ */
-/* else if ($user->stat == 'room') { */
-/*   $user->laccwr = time(); */
+/******************
+ *                *
+ *   STAT: room   *
+ *                *
+ ******************/
+    else if ($user->stat == 'room') {
+        $user->laccwr = time();
 
-/*   if ($argz[0] == 'help') { */
-/*     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; "; */
-/*     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500); */
+        if ($argz[0] == 'help') {
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
 
-/*     log_wr($user->comm[$user->step % COMM_N]); */
-/*     $user->step_inc(); */
-    
-/*   } */
-/*   else if ($argz[0] == 'passwdhowto') { */
-/*     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; "; */
-/*     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500); */
+            log_wr($user->comm[$user->step % COMM_N]);
+            $user->step_inc();
 
-/*     log_wr($user->comm[$user->step % COMM_N]); */
-/*     $user->step_inc(); */
-    
-/*   } */
-/*   else if ($argz[0] == 'splash') { */
-/*     GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx; */
-/*     GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout; */
-/*     $CO_splashdate = "CO_splashdate".$G_splash_idx; */
-/*     GLOBAL $$CO_splashdate; */
+        }
+        else if ($argz[0] == 'passwdhowto') {
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 600, 500);
 
-/*     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; "; */
+            log_wr($user->comm[$user->step % COMM_N]);
+            $user->step_inc();
 
+        }
+        else if ($argz[0] == 'splash') {
+            GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
+            GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
+            $CO_splashdate = "CO_splashdate".$G_splash_idx;
+            GLOBAL $$CO_splashdate;
 
-/*     $user->comm[$user->step % COMM_N] .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], $G_splash_w, $G_splash_h, true, 0); */
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
-/*     log_wr($user->comm[$user->step % COMM_N]); */
-/*     $user->step_inc(); */
-/*   } */
+            $user->comm[$user->step % COMM_N] .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], $G_splash_w, $G_splash_h, true, 0);
+
+            log_wr($user->comm[$user->step % COMM_N]);
+            $user->step_inc();
+        }
 /*   else if ($argz[0] == 'about') { */
 /*     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; "; */
 /*     $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200); */
@@ -494,9 +493,9 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 /*     $user->step_inc(); */
     
 /*   } */
-/*   else if ($argz[0] == 'chatt') { */
-/*     $room->chatt_send(&$user, xcapemesg($mesg)); */
-/*   } */
+        else if ($argz[0] == 'chatt') {
+            $room->chatt_send(&$user, xcapemesg($mesg));
+        }
 /*   /\********************** */
 /*    *                    * */
 /*    *   SUBST: standup   * */
@@ -654,13 +653,13 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
       
 /*       log_wr("MOP finish"); */
 /*     } */
-/*     else if ($argz[0] == 'logout') { */
-/*       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; "; */
-/*       $user->comm[$user->step % COMM_N] .= 'postact_logout();'; */
-/*       $user->the_end = TRUE; */
-/*       $user->step_inc(); */
-/*     } */
-/*   } */
+        else if ($argz[0] == 'logout') {
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            $user->comm[$user->step % COMM_N] .= 'postact_logout();';
+            $user->the_end = TRUE;
+            $user->step_inc();
+        }
+    }
 /*   /\********************** */
 /*    *                    * */
 /*    *   SUBST: sitdown   * */
