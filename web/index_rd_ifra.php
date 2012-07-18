@@ -560,9 +560,8 @@ function index_rd_ifra_init(&$room, &$user, &$header_out, &$body, $get, $post, $
 <script type=\"text/javascript\" src=\"xynt-http-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
 var http_streaming = \"ready\";");
-    if (isset($st)) {
-        $body .= sprintf("last_clean = %d;\n", $st);
-    }
+    if ($user->rd_scristp > 0)
+        $body .= sprintf("last_clean = %d;\n", ($user->rd_scristp-1));
     $body .= sprintf("
 window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
 </script> 
