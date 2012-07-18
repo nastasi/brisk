@@ -220,7 +220,7 @@ function carousel_top()
     return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" src="img/briskshop%d.gif"></a>', $rn));
 }
 
-function index_main(&$room, &$header_out, $get, $post, $cookie)
+function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -287,7 +287,7 @@ function index_main(&$room, &$header_out, $get, $post, $cookie)
           
           $room->garbage_manager(TRUE);
           /* try login */
-          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $_SERVER['REMOTE_ADDR'])) != FALSE) {
+          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $addr)) != FALSE) {
               $ACTION = "room";
               if ($idx < 0) {
                   $idx = -$idx - 1;

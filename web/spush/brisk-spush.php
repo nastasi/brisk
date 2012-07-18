@@ -262,12 +262,14 @@ function main()
                         printf("COOKIE:\n");
                         print_r($cookie);
 
+                        $addr = stream_socket_get_name($new_socket, TRUE);
+
                         switch ($path) {
                         case SITE_PREFIX:
                         case SITE_PREFIX."index.php":
                             $header_out = array();
                             ob_start();
-                            index_main($room, $header_out, $get, $post, $cookie);
+                            index_main($room, $header_out, $addr, $get, $post, $cookie);
                             $content = ob_get_contents();
                             ob_end_clean();
                             // printf("OUT: [%s]\n", $G_content);
@@ -275,10 +277,10 @@ function main()
                             fclose($new_socket);
                             break;
                         case SITE_PREFIX."index_wr.php":
-                            $G_headers = "";
+                            $header_out = array();
                             $addr = "";
-                            $ret = socket_getpeername($new_socket, $addr);
-                            // printf("RET: %d\n", $ret);
+                            // $ret = socket_getpeername($new_socket, $addr);
+                            printf("RET: %s\n", $addr);
                             // exit(123);
                             ob_start();
                             index_wr_main($room, $addr, $get, $post, $cookie);
