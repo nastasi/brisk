@@ -130,6 +130,7 @@ function blocking_error($is_unrecoverable)
   return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
 }
 
+// FIXME TO SUPPORT iframe
 function page_sync($sess, $page, $table_idx, $table_token)
 {
   GLOBAL $is_page_streaming;
@@ -489,6 +490,33 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
     
     
     return ($ret);
+}
+
+function index_rd_ifra_fini($is_unrecoverable)
+{
+    GLOBAL $G_four_rnd_string;
+
+    // IF IFRAME THEN:
+    $body = "";
+    $body .= sprintf("<html>
+<head>
+<script type=\"text/javascript\" src=\"commons.js\"></script>
+<script type=\"text/javascript\" src=\"xynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\">
+var http_streaming = \"ready\";");
+    $body .= sprintf("
+window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+</script>
+</head>
+<body>");
+    $body .= sprintf("<!-- \n%s -->\n", $G_four_rnd_string);
+    $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"%s\");
+// -->
+</script>", 0, escpush(blocking_error($is_unrecoverable)) );
+    // ELSE IF XHR THEN:
+    // return (blocking_error($is_unrecoverable));
+    return ($body);
 }
 
 /*

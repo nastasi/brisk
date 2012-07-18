@@ -690,7 +690,9 @@ define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_SUSPEND', 0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
-define('RD_STREAM_TIMEOUT', 4);
+// 240 is the right value, 600 is for fwrite error test
+define('RD_ENDTIME_DELTA',  240);
+define('RD_KEEPALIVE_TOUT',   4);
 
 class User {
   var $idx;        // index in the users array when you are in game
@@ -714,7 +716,8 @@ class User {
   var $rd_step;    // actual step of push stream
   var $rd_from;    // referer
   var $rd_scristp; // current script step (for each session) 
-  var $rd_tout;    // if no message are sent after RD_STREAM_TIMEOUT secs we send a keepalive from server
+  var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
+  var $rd_cache;   // store place where failed fwrite data
 
   var $comm;       // commands array
   // var $asta_card;  // 
@@ -767,7 +770,8 @@ class User {
     $thiz->rd_step    = -1;
     $thiz->rd_from    = "";
     $thiz->rd_scristp = -1;
-    $thiz->rd_tout    = -1;
+    $thiz->rd_kalive  = -1;
+    $thiz->rd_cache   = "";
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -903,13 +907,13 @@ class User {
 
   function rd_data_set($curtime, $stat, $subst, $step, $from)
   {
-      $this->rd_endtime = $curtime + STREAM_TIMEOUT;
+      $this->rd_endtime = $curtime + RD_ENDTIME_DELTA;
       $this->rd_stat    = $stat;
       $this->rd_subst   = $subst;
       $this->rd_step    = $step;
       $this->rd_from    = $from;
       $this->rd_scristp = 0;
-      $this->rd_tout    = $curtime + RD_STREAM_TIMEOUT;
+      $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
   }
 
   function rd_socket_get() {
@@ -920,31 +924,41 @@ class User {
       $this->rd_socket = $sock;
   }
 
-  function rd_tout_get()
+  function rd_kalive_get()
   {
-      return ($this->rd_tout);
+      return ($this->rd_kalive);
   }
 
-  function rd_tout_set($tm)
+  function rd_kalive_set($tm)
   {
-      $this->rd_tout = $tm;
+      $this->rd_kalive = $tm;
   }
 
-  function rd_tout_is_expired($tm)
+  function rd_kalive_is_expired($tm)
   {
-      // printf("rd_tout %d tm %d\n", $this->rd_tout, $tm);
-      return ($this->rd_tout < $tm);
+      // printf("rd_kalive %d tm %d\n", $this->rd_kalive, $tm);
+      return ($this->rd_kalive < $tm);
   }
 
   function rd_endtime_is_expired($tm)
   {
-      // printf("rd_endtime %d tm %d\n", $this->rd_tout, $tm);
+      // printf("rd_endtime %d tm %d\n", $this->rd_kalive, $tm);
       return ($this->rd_endtime < $tm);
   }
 
-  function rd_tout_reset($tm)
+  function rd_kalive_reset($tm)
   {
-      $this->rd_tout = $tm + RD_STREAM_TIMEOUT;
+      $this->rd_kalive = $tm + RD_KEEPALIVE_TOUT;
+  }
+
+  function rd_cache_get()
+  {
+      return ($this->rd_cache);
+  }
+
+  function rd_cache_set($cache)
+  {
+      $this->rd_cache = $cache;
   }
 
   function idx_get() {

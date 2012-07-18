@@ -151,7 +151,7 @@ function main()
         }
         $write  = NULL;
         $except = NULL;
-        $num_changed_sockets = stream_select($read, $write, $except, 1); // 0, 250000);
+        $num_changed_sockets = stream_select($read, $write, $except, 0, 250000);
         
         if ($num_changed_sockets === FALSE) {
             printf("No data in 5 secs");
@@ -172,6 +172,7 @@ function main()
                     $post        = array();
                     $cookie      = array();
                     if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
+                        stream_set_blocking($new_socket, $blocking_mode); // Set the stream to non-blocking
                         printf("RECEIVED HEADER:\n%s", $stream_info);
                         $path = spu_process_info($stream_info, $method, $header, $get, $post, $cookie);
                         printf("PATH: [%s]\n", $path);
@@ -215,25 +216,26 @@ function main()
                             break;
                         case SITE_PREFIX."index_rd_ifra.php":
                             do {
-                                if (!isset($cookie['sess'])) {
+                                $header_out = array();
+                                if (!isset($cookie['sess'])
+                                    || (($user = $room->get_user($cookie['sess'], $idx)) == FALSE)) {
+                                    $body = index_rd_ifra_fini(TRUE);
+                                    fwrite($new_socket, headers_render($header_out).$body);
+                                    fflush($new_socket);
                                     fclose($new_socket);
                                     break;
                                 }
-                                if (($user = $room->get_user($cookie['sess'], $idx)) == FALSE) {
-                                    fclose($new_socket);
-                                    break;
-                                }
+                                // close a previous opened index_read_ifra socket, if exists
                                 if (($prev = $user->rd_socket_get()) != NULL) {
                                     unset($s2u[intval($user->rd_socket_get())]);
                                     unset($socks[intval($user->rd_socket_get())]);
                                     fclose($user->rd_socket_get());
+                                    printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
                                     $user->rd_socket_set(NULL);
                                 }
 
-                                $header_out = array();
                                 $body = "";
                                 index_rd_ifra_init($room, $user, $header_out, $body, $get, $post, $cookie);
-                                stream_set_blocking($new_socket, $blocking_mode); // Set the stream to non-blocking
                                 fwrite($new_socket, headers_render($header_out).$body);
                                 fflush($new_socket);
 
@@ -269,6 +271,7 @@ function main()
                             unset($socks[intval($sock)]);
                             unset($s2u[intval($sock)]);
                             fclose($sock);
+                            printf("CLOSE ON READ\n");
                         }
                         if ($debug > 1) {
                             printf("post unset\n");
@@ -294,26 +297,30 @@ function main()
             }
         }
 
-
-
-
         foreach ($socks as $k => $sock) {
             if (isset($s2u[intval($sock)])) {
-                $body = "";
-                
-
-                $body = "";
                 $user = $room->user[$s2u[intval($sock)]];
-                index_rd_ifra_main($room, $user, $body);
-                if ($body == "" && $user->rd_tout_is_expired($curtime)) {
+                $body = $user->rd_cache_get();
+                if ($body == "")
+                    index_rd_ifra_main($room, $user, $body);
+
+                if ($body == "" && $user->rd_kalive_is_expired($curtime)) {
                     $body = index_rd_ifra_keepalive($user);
                 }
 
                 if ($body != "") {
                     echo "SPIA: [".substr($body, 0, 60)."...]\n";
-                    fwrite($sock, $body);
+                    $body_l = mb_strlen($body, "LATIN1");
+                    $ret = @fwrite($sock, $body);
+                    if ($ret < $body_l) {
+                        printf("TROUBLE WITH FWRITE: %d\n", $ret);
+                        $user->rd_cache_set(mb_substr($body, $ret, $body_l - $ret, "LATIN1"));
+                    }
+                    else {
+                        $user->rd_cache_set("");
+                    }
                     fflush($sock);
-                    $user->rd_tout_reset($curtime);
+                    $user->rd_kalive_reset($curtime);
                 }
 
                 // close socket after a while to prevent client memory consumption
@@ -325,6 +332,7 @@ function main()
                     unset($socks[intval($sock)]);
                     unset($s2u[intval($sock)]);
                     fclose($sock);
+                    printf("CLOSE ON LOOP\n");
                 }
             }
         }
