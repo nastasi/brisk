@@ -22,16 +22,21 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  * TODO
- *   index_wr.php::chat
- *   index_wr.php::reload
- *   index_wr.php::exit
  *
- *   setcookie (for tables only)
- *   keepalive
- *   chunked 
- *   BUG - after restart index_rd.php receive from prev clients a lot of req
+ *   - fwrite other issues
+ *   - run tables
+ *   - setcookie (for tables only)
+ *   - keepalive management
+ *   - chunked
+ *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
+ *   DONE - index_rd_ifra: last_clean issue
+ *   DONE - fwrite failed error management (select, buffer where store unsent data, and fwrite check and retry)
+ *   ABRT - index_wr.php::reload - reload is js-only function
+ *   DONE - bug: after restart index_rd.php receive from prev clients a lot of req
+ *   DONE - index_wr.php::chat
+ *   DONE - index_wr.php::exit
  *   DONE - index_rd.php porting
  *   DONE - generic var management from internet
  *   DONE - index.php auth part
