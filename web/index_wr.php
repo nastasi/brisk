@@ -96,11 +96,11 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
         echo "Debugging time!";
         return (FALSE);
     }
-    
+
     /*
      *  MAIN
      */
-    
+
     /* if the IP is banned, exit without do nothing */
     if (array_search($remote_addr, $G_black_list) !== FALSE) {
         sleep(5);
@@ -117,7 +117,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
     
     if (($user = $room->get_user($sess, &$idx)) == FALSE) {
         $argz = explode('|', xcapemesg($mesg));
-        
+
         if ($argz[0] == 'getchallenge') {
             if (isset($get['cli_name']))
                 $cli_name = $get['cli_name'];

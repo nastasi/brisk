@@ -229,7 +229,7 @@ function main()
         }
         $write  = NULL;
         $except = NULL;
-        $num_changed_sockets = stream_select($read, $write, $except, 5);
+        $num_changed_sockets = stream_select($read, $write, $except, 1); // 0, 250000);
         
         if ($num_changed_sockets === FALSE) {
             printf("No data in 5 secs");
@@ -409,19 +409,35 @@ function main()
 
 
 
-
-
         foreach ($socks as $k => $sock) {
             if (isset($s2u[intval($sock)])) {
                 $body = "";
                 
 
-                $header_out = array();
                 $body = "";
-                index_rd_ifra_main($room, $room->user[$s2u[intval($sock)]], $body);
-                echo "SPIA: [".substr($body, 0, 60)."...]\n";
-                fwrite($sock, headers_render($header_out).$body);
-                fflush($sock);
+                $user = $room->user[$s2u[intval($sock)]];
+                index_rd_ifra_main($room, $user, $body);
+                if ($body == "" && $user->rd_tout_is_expired($curtime)) {
+                    $body = index_rd_ifra_keepalive($user);
+                }
+
+                if ($body != "") {
+                    echo "SPIA: [".substr($body, 0, 60)."...]\n";
+                    fwrite($sock, $body);
+                    fflush($sock);
+                    $user->rd_tout_reset($curtime);
+                }
+
+                // close socket after a while to prevent client memory consumption
+                if ($user->rd_endtime_is_expired($curtime)) {
+                    // $user_a[$s2u[intval($sock)]]->disable();
+                    if ($room->user[$s2u[intval($sock)]]->rd_socket_get() != NULL) {
+                        $room->user[$s2u[intval($sock)]]->rd_socket_set(NULL);
+                    }
+                    unset($socks[intval($sock)]);
+                    unset($s2u[intval($sock)]);
+                    fclose($sock);
+                }
             }
         }
     }

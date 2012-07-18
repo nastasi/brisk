@@ -505,6 +505,8 @@ function index_rd_ifra_init(&$room, &$user, &$header_out, &$body, $get, $post, $
 {
     GLOBAL $G_four_rnd_string;
 
+    $curtime = time();
+
     $is_page_streaming = FALSE; // (webservers_exceeded() || stristr($HTTP_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; rv:5.0)") || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
     $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
@@ -522,7 +524,7 @@ function index_rd_ifra_init(&$room, &$user, &$header_out, &$body, $get, $post, $
     if (($step  = gpcs_var('step', $get, $post, $cookie)) === FALSE) 
         unset($step);
     
-    $user->rd_data_set(time() + STREAM_TIMEOUT, $stat, $subst, $step, $from);
+    $user->rd_data_set($curtime, $stat, $subst, $step, $from);
 
     $body .= sprintf("<html>
 <head>
@@ -613,5 +615,14 @@ push(\"%s\");
     /* log_crit($s); */
 
     return TRUE;
+}
+
+function index_rd_ifra_keepalive(&$user)
+{
+    return (sprintf("<script id='hs%d' type='text/javascript'><!--
+push(null);
+// -->
+</script>", $user->rd_scristp++));
+
 }
 ?>

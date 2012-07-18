@@ -690,6 +690,8 @@ define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_SUSPEND', 0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
+define('RD_STREAM_TIMEOUT', 4);
+
 class User {
   var $idx;        // index in the users array when you are in game
   var $idx_orig;   // index in the users array when you aren't in game
@@ -712,6 +714,8 @@ class User {
   var $rd_step;    // actual step of push stream
   var $rd_from;    // referer
   var $rd_scristp; // current script step (for each session) 
+  var $rd_tout;    // if no message are sent after RD_STREAM_TIMEOUT secs we send a keepalive from server
+
   var $comm;       // commands array
   // var $asta_card;  // 
   // var $asta_pnt;   //
@@ -763,6 +767,7 @@ class User {
     $thiz->rd_step    = -1;
     $thiz->rd_from    = "";
     $thiz->rd_scristp = -1;
+    $thiz->rd_tout    = -1;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -896,12 +901,50 @@ class User {
     return ($thiz);
   }
 
+  function rd_data_set($curtime, $stat, $subst, $step, $from)
+  {
+      $this->rd_endtime = $curtime + STREAM_TIMEOUT;
+      $this->rd_stat    = $stat;
+      $this->rd_subst   = $subst;
+      $this->rd_step    = $step;
+      $this->rd_from    = $from;
+      $this->rd_scristp = 0;
+      $this->rd_tout    = $curtime + RD_STREAM_TIMEOUT;
+  }
+
   function rd_socket_get() {
       return ($this->rd_socket);
   }
 
   function rd_socket_set($sock) {
       $this->rd_socket = $sock;
+  }
+
+  function rd_tout_get()
+  {
+      return ($this->rd_tout);
+  }
+
+  function rd_tout_set($tm)
+  {
+      $this->rd_tout = $tm;
+  }
+
+  function rd_tout_is_expired($tm)
+  {
+      // printf("rd_tout %d tm %d\n", $this->rd_tout, $tm);
+      return ($this->rd_tout < $tm);
+  }
+
+  function rd_endtime_is_expired($tm)
+  {
+      // printf("rd_endtime %d tm %d\n", $this->rd_tout, $tm);
+      return ($this->rd_endtime < $tm);
+  }
+
+  function rd_tout_reset($tm)
+  {
+      $this->rd_tout = $tm + RD_STREAM_TIMEOUT;
   }
 
   function idx_get() {
@@ -940,16 +983,6 @@ class User {
       $this->step &= 0x7fffffff;
       
       return TRUE;
-  }
-
-  function rd_data_set($endtime, $stat, $subst, $step, $from)
-  {
-      $this->rd_endtime = $endtime;
-      $this->rd_stat    = $stat;
-      $this->rd_subst   = $subst;
-      $this->rd_step    = $step;
-      $this->rd_from    = $from;
-      $this->rd_scristp = 0;
   }
 
 
