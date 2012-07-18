@@ -22,13 +22,19 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  * TODO
- *   problema con getpeer (HOSTADDR)
+ *   index_wr.php::chat
+ *   index_wr.php::reload
+ *   index_wr.php::exit
+ *
  *   setcookie (for tables only)
  *   keepalive
  *   chunked 
- *   index_rd.php porting
- *   index.php auth part
- *   generic var management from internet
+ *   BUG - after restart index_rd.php receive from prev clients a lot of req
+ *   DONE/FROZEN - problema con getpeer (HOSTADDR)
+ *
+ *   DONE - index_rd.php porting
+ *   DONE - generic var management from internet
+ *   DONE - index.php auth part
  */
 
 $G_base = "../";
