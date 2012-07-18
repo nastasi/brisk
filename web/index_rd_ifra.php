@@ -575,6 +575,8 @@ window.onload = function () { if (http_streaming != \"ready\") { http_streaming.
 function index_rd_ifra_main(&$room, &$user, &$body)
 {
     GLOBAL $is_page_streaming;
+    // FIXME: only to test fwrite
+    // GLOBAL $G_four_rnd_string;
 
     $is_page_streaming = FALSE;
     log_rd2("FROM OUTSIDE - STAT: ".$user->rd_stat." SUBST: ".$user->rd_subst." STEP: ".$user->rd_step." FROM: ".$user->rd_from. "IS_PAGE:" . $is_page_streaming);
@@ -597,6 +599,11 @@ function index_rd_ifra_main(&$room, &$user, &$body)
                 echo "$ret";
                 echo ' @END@'; 
             }
+
+            // FIXME only to test fwrite
+            // for ($u = 0 ; $u < 10 ; $u++) {
+            //    $body .= sprintf("<!-- \n%s -->\n", $G_four_rnd_string);
+            // }
             $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");
 // -->
