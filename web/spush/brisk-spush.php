@@ -23,8 +23,10 @@
  *
  * TODO
  *
+ *   - from room to table
+ *   - from table to room
  *   - fwrite other issues
- *   - run tables
+ *   - manage and test cross forwarder between table and room
  *   - setcookie (for tables only)
  *   - keepalive management
  *   - chunked
