@@ -23,6 +23,7 @@
  *
  * TODO
  *
+ *   - partial write for normal page management
  *   - from room to table
  *   - from table to room
  *   - fwrite other issues
@@ -202,8 +203,19 @@ function main()
                             index_main($room, $header_out, $addr, $get, $post, $cookie);
                             $content = ob_get_contents();
                             ob_end_clean();
-                            // printf("OUT: [%s]\n", $G_content);
-                            fwrite($new_socket, headers_render($header_out).$content);
+                            $content_sz = mb_strlen($content, "LATIN1");
+                            $hea = headers_render($header_out);
+
+                            // TODO: FIX THIS PART TO A SPAWN WRITE AS CUEUE.
+                            printf("OUT: [%d]\n", $content_sz);
+                            for ($w = 0 ; $w < 10 ; $w++) {
+                                if (($wret = fwrite($new_socket, $content, $content_sz)) == $content_sz
+                                    || $wret <= 0)
+                                    break;
+                                printf("wret: [%d]\n", $wret);
+                                $content = substr($content, $wret, $content_sz - $wret);
+                                usleep(100000);
+                            }
                             fclose($new_socket);
                             break;
                         case SITE_PREFIX."index_wr.php":
