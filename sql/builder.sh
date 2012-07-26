@@ -3,8 +3,9 @@
 #
 #  all this part is from mopshop and we will use it to construct the brisk database
 #
-
-if [ -f $HOME/.db.conf ]; then
+if [ -f $HOME/.brisk-db.conf ]; then
+    source $HOME/.brisk-db.conf
+elif [ -f $HOME/.db.conf ]; then
     source $HOME/.db.conf
 else
     DBHOST=127.0.0.1

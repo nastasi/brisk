@@ -243,7 +243,7 @@ function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
     
     
     // Use of proxies isn't allowed.
-    if (!$G_is_local && is_proxy()) {
+    if (!$G_is_local && is_proxy($addr)) {
         return FALSE;
     }
 
@@ -294,7 +294,7 @@ function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
                   $is_login = TRUE;
               }
               
-              log_legal($curtime, $user, "STAT:LOGIN", '');
+              log_legal($curtime, $addr, $user, "STAT:LOGIN", '');
               
               // recovery lost game
               if ($user->stat == "table") {
@@ -1058,7 +1058,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-     hstm = new http_streaming(window, console, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+hstm = new http_streaming(window, null /* console*/ , gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
      hstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;

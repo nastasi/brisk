@@ -590,7 +590,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 /*         for ($i = 0 ; $i < $table->player_n ; $i++) { */
 /*           $plist .= '|'.$room->user[$table->player[$i]]->sess; */
 /*         } */
-/*         log_legal($curtime, $user, "STAT:CREATE_GAME", $plist); */
+/*         log_legal($curtime, 'xxx', $user, "STAT:CREATE_GAME", $plist); */
 
 /*         log_wr("pre new Bin5"); */
 /*         if (($bri = new Bin5($room, $table_idx, $table_token)) == FALSE) */

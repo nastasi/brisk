@@ -717,7 +717,7 @@ class User {
   var $rd_from;    // referer
   var $rd_scristp; // current script step (for each session) 
   var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
-  var $rd_cache;   // store place where failed fwrite data
+  var $rd_cache;   // place where store failed fwrite data
 
   var $comm;       // commands array
   // var $asta_card;  // 
@@ -1059,7 +1059,7 @@ class User {
 
   function reset() {
     $curtime = time();
-    log_legal($curtime, $this, "STAT:LOGOUT", '');
+    log_legal($curtime, 'xxx', $this, "STAT:LOGOUT", '');
 
     $tmp_sess = $this->sess;
     $this->sess = "";
@@ -1305,7 +1305,7 @@ class Room {
 		  $user_cur->bantime    = $bri_user->bantime;
 		}
 
-                log_legal($curtime, $user_cur, "STAT:DESTROY_GAME", $plist);
+                log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME", $plist);
 
 		$this->room_join_wakeup($user_cur, FALSE, 0); 
 		$table_cur->table_token = "";
@@ -1344,7 +1344,7 @@ class Room {
               for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
                 $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
               }
-              log_legal($curtime, $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
+              log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
               
 	      $this->room_join_wakeup($user_cur, TRUE, -2); 
 	      $table_cur->table_token = "";
@@ -2031,7 +2031,7 @@ class Room {
         $to_room = $to_user;
       }
 
-      log_legal($curtime, $user, 
+      log_legal($curtime, 'xxx', $user, 
 		($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
       
       $user->chat_lst = "$msg";
@@ -3060,15 +3060,14 @@ function log_shme($log)
 
 
 // function log_legal($curtime, $sess, $name, $where, $mesg) 
-function log_legal($curtime, $user, $where, $mesg) 
+function log_legal($curtime, $addr, $user, $where, $mesg) 
 {
-  GLOBAL $_SERVER;
 
   if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {
     /* Unix time | session | nickname | IP | where was | mesg */
     fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
                         ($user->flags & USER_FLAG_AUTH ? 'A' : 'N'),
-                        $user->name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+                        $user->name, $addr, $where , $mesg));
     fclose($fp);
   }
 }

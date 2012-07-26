@@ -24,6 +24,7 @@
  * TODO
  *
  *   - partial write for normal page management
+ *   - log legal address fix
  *   - from room to table
  *   - from table to room
  *   - fwrite other issues
@@ -121,6 +122,7 @@ function main()
     }
 
     $s2u  = array();
+    $pages_flush = array();
 
     $rndstr = "";
     for ($i = 0 ; $i < 4096 ; $i++) {
@@ -145,7 +147,7 @@ function main()
 
     while ($main_loop) {
         $curtime = time();
-        printf("IN LOOP: Current opened: %d\n", count($socks));
+        printf("IN LOOP: Current opened: %d  pages_flush: %d\n", count($socks), count($pages_flush));
 
         /* Prepare the read array */
         if ($shutdown) 
@@ -203,20 +205,14 @@ function main()
                             index_main($room, $header_out, $addr, $get, $post, $cookie);
                             $content = ob_get_contents();
                             ob_end_clean();
-                            $content_sz = mb_strlen($content, "LATIN1");
-                            $hea = headers_render($header_out);
 
-                            // TODO: FIX THIS PART TO A SPAWN WRITE AS CUEUE.
-                            printf("OUT: [%d]\n", $content_sz);
-                            for ($w = 0 ; $w < 10 ; $w++) {
-                                if (($wret = fwrite($new_socket, $content, $content_sz)) == $content_sz
-                                    || $wret <= 0)
-                                    break;
-                                printf("wret: [%d]\n", $wret);
-                                $content = substr($content, $wret, $content_sz - $wret);
-                                usleep(100000);
+                            $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
+
+                            if ($pgflush->try_flush($curtime) == FALSE) {
+                                // Add $pgflush to the pgflush array
+                                array_push($pages_flush, $pgflush);
                             }
-                            fclose($new_socket);
+
                             break;
                         case SITE_PREFIX."index_wr.php":
                             $header_out = array();
@@ -316,6 +312,13 @@ function main()
             }
         }
 
+
+        foreach ($pages_flush as $k => $pgflush) {
+            if ($pgflush->try_flush($curtime) == TRUE) {
+                unset($pages_flush[$k]);
+            }
+        }
+
         foreach ($socks as $k => $sock) {
             if (isset($s2u[intval($sock)])) {
                 $user = $room->user[$s2u[intval($sock)]];
@@ -329,11 +332,11 @@ function main()
 
                 if ($body != "") {
                     echo "SPIA: [".substr($body, 0, 60)."...]\n";
-                    $body_l = mb_strlen($body, "LATIN1");
+                    $body_l = mb_strlen($body, "ASCII");
                     $ret = @fwrite($sock, $body);
                     if ($ret < $body_l) {
                         printf("TROUBLE WITH FWRITE: %d\n", $ret);
-                        $user->rd_cache_set(mb_substr($body, $ret, $body_l - $ret, "LATIN1"));
+                        $user->rd_cache_set(mb_substr($body, $ret, $body_l - $ret, "ASCII"));
                     }
                     else {
                         $user->rd_cache_set("");

@@ -128,16 +128,16 @@ class proxy_detector {
    * BOOL $proxy = detect( VOID )
    *	Start detection and return TRUE if a proxy server is detected...
    */
-  function detect(){
+  function detect($addr){
     GLOBAL $G_proxy_white_list;
     $log = "";
 
     foreach($G_proxy_white_list as $authproxy) {
-      if ($_SERVER['REMOTE_ADDR'] == $authproxy)
+      if ($addr == $authproxy)
 	return (FALSE);
     }
 
-    if ($this->exists_in_rbl($_SERVER['REMOTE_ADDR']) == TRUE)
+    if ($this->exists_in_rbl($addr) == TRUE)
       return (TRUE);
 
 //     //scan all headers
@@ -149,11 +149,11 @@ class proxy_detector {
 
     //let's do something...
     if($log){
-      $log = $this->lastLog = date("Y-m-d H:i:s")."\nDetected proxy server: ".gethostbyaddr($_SERVER['REMOTE_ADDR'])." ({$_SERVER['REMOTE_ADDR']})\n".$log;
+      $log = $this->lastLog = date("Y-m-d H:i:s")."\nDetected proxy server: ".gethostbyaddr($addr)." ({$addr})\n".$log;
 
       //mail message
       if($this->getConfig('MAIL_ALERT_TO'))
-	mail($this->getConfig('MAIL_ALERT_TO'),"Proxy detected at {$_SERVER['REQUEST_URI']}",$log);
+	mail($this->getConfig('MAIL_ALERT_TO'),"Proxy detected at {$addr}",$log);
 
       //write to file
       $f = $this->getConfig('LOG_FILE');
@@ -177,15 +177,15 @@ class proxy_detector {
 }
 
 //init class
-function is_proxy()
+function is_proxy($addr)
 {
   $proxy = new proxy_detector();
   
   //start detect
-  if($proxy->detect()) {
+  if($proxy->detect($addr)) {
     //returned TRUE, lets die...
     echo "<br><br><div style=\"text-align:center;\"><h1>Accesso attaverso proxy non consentito.</h1><br><br>";
-    echo "Se state utilizzando un proxy privato e volete che sia autorizzato mandate il suo indirizzo IP (".$_SERVER['REMOTE_ADDR'].") e il suo proprietario all'indirizzo di posta elettronica <a href=\"mailto:brisk@alternativeoutput.it\">brisk@alternativeoutput.it</a><br><br></div>";
+    echo "Se state utilizzando un proxy privato e volete che sia autorizzato mandate il suo indirizzo IP (".$addr.") e il suo proprietario all'indirizzo di posta elettronica <a href=\"mailto:brisk@alternativeoutput.it\">brisk@alternativeoutput.it</a><br><br></div>";
     
     //parse logged info
     echo nl2br($proxy->getLog());

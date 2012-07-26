@@ -24,4 +24,48 @@
 
 $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
+
+class PageFlush {
+
+  var $socket; // socket handler of page stream
+  var $kalive; // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
+  var $msg;    // place where store failed fwrite data
+  var $msg_sz; // size of content
+
+  function PageFlush($socket, $curtime, $kalive, $header_out, $body)
+  {
+      // $body_sz = mb_strlen($body, "ASCII");
+      // add length to header_out 
+      $hea = headers_render($header_out);
+
+      $this->socket = $socket;
+      $this->kalive = $curtime + $kalive;
+      $this->msg    = $hea.$body;
+      $this->msg_sz = mb_strlen($this->msg, "ASCII");
+  }
+
+  /* return TRUE if is removable from it's list */
+  function try_flush($curtime)
+  {
+      if ($this->kalive < $curtime) {
+          fclose($this->socket);
+          return TRUE;
+      }   
+
+      $wret = @fwrite($this->socket, $this->msg);
+      if ($wret == FALSE && $wret !== FALSE) {
+          printf("PageFlush::try_flush: wret 0 but not FALSE\n");
+      }
+      if ($wret == $this->msg_sz) {
+          fclose($this->socket);
+          return TRUE;
+      }
+      $this->msg_sz -= $wret;
+      $this->msg    = mb_substr($this->msg, $wret, $this->msg_sz, "ASCII");
+
+      return FALSE;
+  }
+
+}
+
 ?>

@@ -1128,7 +1128,7 @@ class Bin5 {
 							     $dt, $user->flags, xcape($user->name), xcape($user_mesg));
 	$user_cur->step_inc();
       }
-      log_legal($curtime, $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table_orig),$user_mesg);
+      log_legal($curtime, 'xxx', $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table_orig),$user_mesg);
     }
   }
 

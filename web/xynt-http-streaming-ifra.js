@@ -31,7 +31,7 @@ function push(s) {
     if (s != null) {
         ctx_new = ctx_new + "@BEGIN@" + s + "@END@";
         // FIXME: remove this barbarian log
-        window.parent.console.log("ifra: CTX_NEW: ["+ctx_new+"]");
+        // window.parent.console.log("ifra: CTX_NEW: ["+ctx_new+"]");
         
     }
     else {
