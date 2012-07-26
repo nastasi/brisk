@@ -173,6 +173,11 @@ function main()
             }
             /* At least at one of the sockets something interesting happened */
             foreach ($read as $i => $sock) {
+                /* is_resource check is required because there is the possibility that
+                   during new request an old connection is closed */
+                if (!is_resource($sock)) {
+                    continue;
+                }
                 if ($sock === $list) {
                     printf("NUOVA CONNEX\n");
                     $new_unix = stream_socket_accept($list);
