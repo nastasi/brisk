@@ -250,11 +250,11 @@ function send_mesg(mesg)
     // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
     xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+'mesg='+mesg, (is_conn ? true : false));
     xhr_wr.onreadystatechange = function() { return; };
-    if (typeof(console) == 'object') {
-        if (typeof(console.log) == 'function') {
+    console.log(typeof(g_debug));
+    if (typeof(g_debug) == 'number' && g_debug > 0
+        && typeof(console) == 'object' && typeof(console.log) == 'function') {
             var ldate = new Date();
             console.log(ldate.getTime()+':MESG:'+mesg);
-        }
     }
     xhr_wr.send(null);
 

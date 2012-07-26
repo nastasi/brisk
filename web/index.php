@@ -865,7 +865,7 @@ supported by:<br>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script> 
-<script type="text/javascript" src="myconsole.js"></script>
+<!--<script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
 <script type="text/javascript" src="xynt-http-streaming.js"></script>
@@ -878,13 +878,14 @@ supported by:<br>
 <link rel="stylesheet" type="text/css" href="room.css">
 
 <SCRIPT type="text/javascript"><!--
+   var g_debug = 0;
    var g_lang = "<? echo $G_lang; ?>";
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
    var g_listen;
    var g_withflash = false;
-   var g_is_spawn = 0; 
+   var g_is_spawn = 0;
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
    var g_brow = null;
@@ -999,7 +1000,7 @@ echo "$body"; ?>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script>
-<script type="text/javascript" src="myconsole.js"></script>
+     <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
@@ -1012,6 +1013,7 @@ echo "$body"; ?>
 <link rel="stylesheet" type="text/css" href="room.css">
 <SCRIPT type="text/javascript"><!--
    var sess = "not_connected";
+   var g_debug = 0;
    var g_lang = "<? echo $G_lang; ?>";
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
