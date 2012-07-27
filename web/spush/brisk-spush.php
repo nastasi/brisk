@@ -226,18 +226,17 @@ function main()
                             break;
                         case SITE_PREFIX."index_wr.php":
                             $header_out = array();
-                            $addr = "";
-                            // $ret = socket_getpeername($new_socket, $addr);
-                            printf("RET: %s\n", $addr);
-                            // exit(123);
                             ob_start();
                             index_wr_main($room, $addr, $get, $post, $cookie);
                             $content = ob_get_contents();
                             ob_end_clean();
-                            
-                            // printf("OUT: [%s]\n", $G_content);
-                            fwrite($new_socket, headers_render($header_out).$content);
-                            fclose($new_socket);
+
+                            $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
+
+                            if ($pgflush->try_flush($curtime) == FALSE) {
+                                // Add $pgflush to the pgflush array
+                                array_push($pages_flush, $pgflush);
+                            }
                             break;
                         case SITE_PREFIX."index_rd_ifra.php":
                             do {
