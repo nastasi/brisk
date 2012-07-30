@@ -243,10 +243,14 @@ function main()
                                 $header_out = array();
                                 if (!isset($cookie['sess'])
                                     || (($user = $room->get_user($cookie['sess'], $idx)) == FALSE)) {
-                                    $body = index_rd_ifra_fini(TRUE);
-                                    fwrite($new_socket, headers_render($header_out).$body);
-                                    fflush($new_socket);
-                                    fclose($new_socket);
+                                    $content = index_rd_ifra_fini(TRUE);
+                                    
+                                    $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
+
+                                    if ($pgflush->try_flush($curtime) == FALSE) {
+                                        // Add $pgflush to the pgflush array
+                                        array_push($pages_flush, $pgflush);
+                                    }
                                     break;
                                 }
                                 // close a previous opened index_read_ifra socket, if exists
