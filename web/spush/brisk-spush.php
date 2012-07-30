@@ -344,21 +344,21 @@ function main()
         foreach ($socks as $k => $sock) {
             if (isset($s2u[intval($sock)])) {
                 $user = $room->user[$s2u[intval($sock)]];
-                $body = $user->rd_cache_get();
-                if ($body == "")
-                    index_rd_ifra_main($room, $user, $body);
+                $content = $user->rd_cache_get();
+                if ($content == "")
+                    index_rd_ifra_main($room, $user, $content);
 
-                if ($body == "" && $user->rd_kalive_is_expired($curtime)) {
-                    $body = index_rd_ifra_keepalive($user);
+                if ($content == "" && $user->rd_kalive_is_expired($curtime)) {
+                    $content = index_rd_ifra_keepalive($user);
                 }
 
-                if ($body != "") {
-                    echo "SPIA: [".substr($body, 0, 60)."...]\n";
-                    $body_l = mb_strlen($body, "ASCII");
-                    $ret = @fwrite($sock, $body);
-                    if ($ret < $body_l) {
-                        printf("TROUBLE WITH FWRITE: %d\n", $ret);
-                        $user->rd_cache_set(mb_substr($body, $ret, $body_l - $ret, "ASCII"));
+                if ($content != "") {
+                    echo "SPIA: [".substr($content, 0, 60)."...]\n";
+                    $content_l = mb_strlen($content, "ASCII");
+                    $wret = @fwrite($sock, $content);
+                    if ($wret < $content_l) {
+                        printf("TROUBLE WITH FWRITE: %d\n", $wret);
+                        $user->rd_cache_set(mb_substr($content, $wret, $content_l - $wret, "ASCII"));
                     }
                     else {
                         $user->rd_cache_set("");
