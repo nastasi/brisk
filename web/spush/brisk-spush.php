@@ -268,8 +268,8 @@ function main()
 
                                 $wret = @fwrite($new_socket, headers_render($header_out).$content);
                                 if ($wret < $content_l) {
-                                    printf("TROUBLES WITH FWRITE: %d\n", $ret);
-                                    $user->rd_cache_set(mb_substr($content, $ret, $content_l - $ret, "ASCII"));
+                                    printf("TROUBLES WITH FWRITE: %d\n", $wret);
+                                    $user->rd_cache_set(mb_substr($content, $wret, $content_l - $wret, "ASCII"));
                                 }
                                 else {
                                     $user->rd_cache_set("");
