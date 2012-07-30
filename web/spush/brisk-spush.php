@@ -262,9 +262,18 @@ function main()
                                     $user->rd_socket_set(NULL);
                                 }
 
-                                $body = "";
-                                index_rd_ifra_init($room, $user, $header_out, $body, $get, $post, $cookie);
-                                fwrite($new_socket, headers_render($header_out).$body);
+                                $content = "";
+                                index_rd_ifra_init($room, $user, $header_out, $content, $get, $post, $cookie);
+                                $content_l = mb_strlen($content, "ASCII");
+
+                                $wret = @fwrite($new_socket, headers_render($header_out).$content);
+                                if ($wret < $content_l) {
+                                    printf("TROUBLES WITH FWRITE: %d\n", $ret);
+                                    $user->rd_cache_set(mb_substr($content, $ret, $content_l - $ret, "ASCII"));
+                                }
+                                else {
+                                    $user->rd_cache_set("");
+                                }
                                 fflush($new_socket);
 
                                 $s2u[intval($new_socket)] = $idx;
