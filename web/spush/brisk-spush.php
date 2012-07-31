@@ -23,6 +23,8 @@
  *
  * TODO
  *
+ *   WIP - chunked
+ *
  *   - BUG: logout failed
  *   - BUG: fast loop on stream index_rd_ifra page
  *
@@ -34,7 +36,6 @@
  *   - manage and test cross forwarder between table and room
  *   - setcookie (for tables only)
  *   - keepalive management
- *   - chunked
  *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
@@ -65,7 +66,7 @@ require_once($G_base."briskin5/Obj/briskin5.phh");
 
 define('SITE_PREFIX', '/brisk/');
 
-function headers_render($header)
+function headers_render($header, $len)
 {
     
     $s = "";
@@ -79,7 +80,15 @@ function headers_render($header)
     foreach($header as $key => $value) {
         $s .= sprintf("%s: %s\r\n", $key, $value);
     }
-    $s .= "Mop: was/here\r\n";
+    if ($len == -1) {
+        $s .= "Cache-Control: no-cache, must-revalidate\r\n";
+        $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
+        $s .= "Content-Encoding: chunked\r\n";
+        $s .= "Transfer-Encoding: chunked\r\n";
+    }
+    else if ($len > 0) {
+        $s .= sprintf("Content-Length: %d\r\n", $len);
+    }
     $s .= "\r\n";
 
     return ($s);
@@ -102,6 +111,18 @@ register_shutdown_function('shutta');
  *  MAIN
  */
 $shutdown = FALSE;
+
+function chunked_content($content)
+{
+    $content_l = mb_strlen($content, "ASCII");
+
+    return (sprintf("%X\r\n%s\r\n", $content_l, $content));
+}
+
+function chunked_fini()
+{
+    return sprintf("0\r\n");
+}
 
 function main()
 {
@@ -264,12 +285,14 @@ function main()
 
                                 $content = "";
                                 index_rd_ifra_init($room, $user, $header_out, $content, $get, $post, $cookie);
-                                $content_l = mb_strlen($content, "ASCII");
 
-                                $wret = @fwrite($new_socket, headers_render($header_out).$content);
-                                if ($wret < $content_l) {
+                                $response = headers_render($header_out, -1).chunked_content($content);
+                                $response_l = mb_strlen($response, "ASCII");
+
+                                $wret = @fwrite($new_socket, $response, $response_l);
+                                if ($wret < $response_l) {
                                     printf("TROUBLES WITH FWRITE: %d\n", $wret);
-                                    $user->rd_cache_set(mb_substr($content, $wret, $content_l - $wret, "ASCII"));
+                                    $user->rd_cache_set(mb_substr($content, $wret, $response_l - $wret, "ASCII"));
                                 }
                                 else {
                                     $user->rd_cache_set("");
@@ -344,21 +367,26 @@ function main()
         foreach ($socks as $k => $sock) {
             if (isset($s2u[intval($sock)])) {
                 $user = $room->user[$s2u[intval($sock)]];
-                $content = $user->rd_cache_get();
-                if ($content == "")
+                $response = $user->rd_cache_get();
+                if ($response == "") {
+                    $content = "";
                     index_rd_ifra_main($room, $user, $content);
 
-                if ($content == "" && $user->rd_kalive_is_expired($curtime)) {
-                    $content = index_rd_ifra_keepalive($user);
+                    if ($content == "" && $user->rd_kalive_is_expired($curtime)) {
+                        $content = index_rd_ifra_keepalive($user);
+                    }
+                    if ($content != "") {
+                        $response = chunked_content($content);
+                    }
                 }
 
-                if ($content != "") {
-                    echo "SPIA: [".substr($content, 0, 60)."...]\n";
-                    $content_l = mb_strlen($content, "ASCII");
-                    $wret = @fwrite($sock, $content);
-                    if ($wret < $content_l) {
+                if ($response != "") {
+                    echo "SPIA: [".substr($response, 0, 60)."...]\n";
+                    $response_l = mb_strlen($response, "ASCII");
+                    $wret = @fwrite($sock, $response);
+                    if ($wret < $response_l) {
                         printf("TROUBLE WITH FWRITE: %d\n", $wret);
-                        $user->rd_cache_set(mb_substr($content, $wret, $content_l - $wret, "ASCII"));
+                        $user->rd_cache_set(mb_substr($response, $wret, $response_l - $wret, "ASCII"));
                     }
                     else {
                         $user->rd_cache_set("");

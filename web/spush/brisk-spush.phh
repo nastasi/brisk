@@ -36,7 +36,7 @@ class PageFlush {
   {
       // $body_sz = mb_strlen($body, "ASCII");
       // add length to header_out 
-      $hea = headers_render($header_out);
+      $hea = headers_render($header_out, 0);
 
       $this->socket = $socket;
       $this->kalive = $curtime + $kalive;
