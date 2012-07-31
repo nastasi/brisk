@@ -93,7 +93,7 @@ http_streaming.prototype = {
 
         if (this.sandbox != null) {
             // from old: var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new+" STOP: "+this.stopped;
-            var zug = "WATCHDOG step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new;          
+            var zug = "WATCHDOG  sess = ["+this.sess+"]  step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new;          
             if (zug != this.sandbox.innerHTML)
 	        this.sandbox.innerHTML = zug;
         }
