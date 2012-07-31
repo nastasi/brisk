@@ -69,6 +69,7 @@ http_streaming.prototype = {
 
         // this.log(this.ifra);
         this.ifra.contentWindow.location.href = this.page;
+        // this.ifra.src = this.page;
         this.watchdog_ct  = 0;
         if (!this.the_end) {
             this.watchdog_hdl = setTimeout(function(obj) { obj.log("tout1"); obj.watchdog(); }, 0, this);
