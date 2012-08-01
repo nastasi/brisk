@@ -23,7 +23,6 @@
  *
  * TODO
  *
- *   WIP - chunked
  *
  *   - BUG: logout failed
  *   - BUG: fast loop on stream index_rd_ifra page
@@ -32,13 +31,14 @@
  *   - log_legal address fix
  *   - from room to table
  *   - from table to room
- *   - fwrite other issues
+ *   - index_wr other issues
  *   - manage and test cross forwarder between table and room
  *   - setcookie (for tables only)
  *   - keepalive management
  *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
+ *   DONE - chunked
  *   DONE - bug: read from a not resource handle (already closed because a new socket substitute it)
  *   DONE - partial write for normal page management
  *   DONE - index_rd_ifra: last_clean issue
