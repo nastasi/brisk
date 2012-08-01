@@ -23,18 +23,18 @@
  */
 
 
-define(TOP_NUM, 10);
-define(TRI_LIMIT, (90 * 24 * 60 * 60));
-define(TRI_MIN_GAMES, 70);
-define(TRI_MAX_GAMES, 140);
+define('TOP_NUM', 10);
+define('TRI_LIMIT', (90 * 24 * 60 * 60));
+define('TRI_MIN_GAMES', 70);
+define('TRI_MAX_GAMES', 140);
 
-define(MON_LIMIT, (30 * 24 * 60 * 60));
-define(MON_MIN_GAMES, 35);
-define(MON_MAX_GAMES, 70);
+define('MON_LIMIT', (30 * 24 * 60 * 60));
+define('MON_MIN_GAMES', 35);
+define('MON_MAX_GAMES', 70);
 
-define(WEE_LIMIT, (7 * 24 * 60 * 60));
-define(WEE_MIN_GAMES, 10);
-define(WEE_MAX_GAMES, 35);
+define('WEE_LIMIT', (7 * 24 * 60 * 60));
+define('WEE_MIN_GAMES', 10);
+define('WEE_MAX_GAMES', 35);
 
 
 class Ptsgam {
