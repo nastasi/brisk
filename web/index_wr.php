@@ -442,8 +442,11 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
         else if ($argz[0] == 'splash') {
             GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
             GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
-            $CO_splashdate = "CO_splashdate".$G_splash_idx;
-            GLOBAL $$CO_splashdate;
+            /* $CO_splashdate = "CO_splashdate".$G_splash_idx; */
+            /* if (($$CO_splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)  */
+            /*     $$CO_splashdate = ""; */
+
+            /* GLOBAL $$CO_splashdate; */
 
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 

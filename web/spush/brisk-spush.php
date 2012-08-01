@@ -370,7 +370,7 @@ function main()
                 $response = $user->rd_cache_get();
                 if ($response == "") {
                     $content = "";
-                    index_rd_ifra_main($room, $user, $content);
+                    index_rd_ifra_main($room, $user, $content, $get, $post, $cookie);
 
                     if ($content == "" && $user->rd_kalive_is_expired($curtime)) {
                         $content = index_rd_ifra_keepalive($user);

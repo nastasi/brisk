@@ -146,14 +146,14 @@ function page_sync($sess, $page, $table_idx, $table_token)
 
 
 
-function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step)
+function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate)
 {
     GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
     // GLOBAL $first_loop;
     GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
     GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
     $CO_splashdate = "CO_splashdate".$G_splash_idx;
-    GLOBAL $$CO_splashdate;
+    $$CO_splashdate = $splashdate;
     
     GLOBAL $S_load_stat;
 
@@ -572,11 +572,15 @@ window.onload = function () { if (http_streaming != \"ready\") { http_streaming.
     return TRUE;
 }
 
-function index_rd_ifra_main(&$room, &$user, &$body)
+function index_rd_ifra_main(&$room, &$user, &$body, $get, $post, $cookie)
 {
-    GLOBAL $is_page_streaming;
+    GLOBAL $is_page_streaming, $G_splash_idx;
     // FIXME: only to test fwrite
     // GLOBAL $G_four_rnd_string;
+
+    $CO_splashdate = "CO_splashdate".$G_splash_idx;
+    if (($splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)
+        $splashdate = ""; 
 
     $is_page_streaming = FALSE;
     log_rd2("FROM OUTSIDE - STAT: ".$user->rd_stat." SUBST: ".$user->rd_subst." STEP: ".$user->rd_step." FROM: ".$user->rd_from. "IS_PAGE:" . $is_page_streaming);
@@ -591,7 +595,7 @@ function index_rd_ifra_main(&$room, &$user, &$body)
         $old_stat  = $user->rd_stat;
         $old_subst = $user->rd_subst;
         $old_step  = $user->rd_step;
-        if (($ret = maincheck($room, $user, $old_stat, $old_subst, $old_step, $user->rd_stat, $user->rd_subst, $user->rd_step)) != FALSE) {
+        if (($ret = maincheck($room, $user, $old_stat, $old_subst, $old_step, $user->rd_stat, $user->rd_subst, $user->rd_step, $splashdate)) != FALSE) {
             // $no_data = FALSE;
             if (0 == 1) {
                 echo '@BEGIN@';
