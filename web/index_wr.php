@@ -165,7 +165,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
             echo show_notify(str_replace("\n", " ", $G_room_help[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 600, 500);
         }
         else if ($argz[0] == 'about') {
-            echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 220);
+            echo show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 230);
         }
         else if ($argz[0] == 'passwdhowto') {
             echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
