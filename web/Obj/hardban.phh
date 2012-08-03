@@ -22,11 +22,11 @@
  *
  */
 
-define(HBAN_SHM_DIMS_MIN, 16384);
-define(HBAN_SHM_DIMS_MAX, 65536);
-define(HBAN_SHM_DIMS_DLT, 16384);
-define(HBAN_VALID_TIME,      15);
-define(HBAN_GARBAGE_TIMEOUT,  5);
+define('HBAN_SHM_DIMS_MIN', 16384);
+define('HBAN_SHM_DIMS_MAX', 65536);
+define('HBAN_SHM_DIMS_DLT', 16384);
+define('HBAN_VALID_TIME',      15);
+define('HBAN_GARBAGE_TIMEOUT',  5);
 
 class Hardban {
   var $login;
