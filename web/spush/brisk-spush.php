@@ -329,7 +329,7 @@ class Sac_a_push {
                                     }
                                     fflush($new_socket);
                                     
-                                    $this->s2u[intval($new_socket)] = $idx;
+                                    $this->s2u[intval($new_socket)] = $user;
                                     $this->socks[intval($new_socket)] = $new_socket;                                
                                     $user->rd_socket_set($new_socket);
                                 } while (FALSE);
@@ -360,8 +360,8 @@ class Sac_a_push {
                             }
                             else {
                                 // $user_a[$s2u[intval($sock)]]->disable();
-                                if ($this->room->user[$this->s2u[intval($sock)]]->rd_socket_get() != NULL) {
-                                    $this->room->user[$this->s2u[intval($sock)]]->rd_socket_set(NULL);
+                                if ($this->s2u[intval($sock)]->rd_socket_get() != NULL) {
+                                    $this->s2u[intval($sock)]->rd_socket_set(NULL);
                                 }
                                 unset($this->socks[intval($sock)]);
                                 unset($this->s2u[intval($sock)]);
@@ -401,7 +401,7 @@ class Sac_a_push {
             
             foreach ($this->socks as $k => $sock) {
                 if (isset($this->s2u[intval($sock)])) {
-                    $user = $this->room->user[$this->s2u[intval($sock)]];
+                    $user = $this->s2u[intval($sock)];
                     $response = $user->rd_cache_get();
                     if ($response == "") {
                         $content = "";
@@ -433,8 +433,8 @@ class Sac_a_push {
                     // close socket after a while to prevent client memory consumption
                     if ($user->rd_endtime_is_expired($curtime)) {
                         // $user_a[$s2u[intval($sock)]]->disable();
-                        if ($this->room->user[$this->s2u[intval($sock)]]->rd_socket_get() != NULL) {
-                            $this->room->user[$this->s2u[intval($sock)]]->rd_socket_set(NULL);
+                        if ($this->s2u[intval($sock)]->rd_socket_get() != NULL) {
+                            $this->s2u[intval($sock)]->rd_socket_set(NULL);
                         }
                         unset($this->socks[intval($sock)]);
                         unset($this->s2u[intval($sock)]);
@@ -449,11 +449,11 @@ class Sac_a_push {
 
 function main()
 {
-    if (($sap = Sac_a_push::create("/tmp/brisk.sock", 0, 0)) === FALSE) {
+    if (($s_a_p = Sac_a_push::create("/tmp/brisk.sock", 0, 0)) === FALSE) {
         exit(1);
     }
 
-    $sap->run();
+    $s_a_p->run();
 
     exit(0);
 }
