@@ -2169,6 +2169,80 @@ class Room {
       return (FALSE);
   }
 
+  function request_mgr(&$s_a_p, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
+  {
+      printf("NEW_SOCKET (root): %d\n", intval($new_socket));
+
+      switch ($path) {
+      case SITE_PREFIX:
+      case SITE_PREFIX."index.php":
+          ob_start();
+      index_main($this, $header_out, $addr, $get, $post, $cookie);
+      $content = ob_get_contents();
+      ob_end_clean();
+
+      $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+      return TRUE;
+
+      break;
+      case SITE_PREFIX."index_wr.php":
+          ob_start();
+          index_wr_main($this, $addr, $get, $post, $cookie);
+          $content = ob_get_contents();
+          ob_end_clean();
+
+          $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+          return TRUE;
+
+          break;
+      case SITE_PREFIX."index_rd_ifra.php":
+          do {
+              if (!isset($cookie['sess'])
+                  || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
+                  $content = User::stream_fini(TRUE);
+                  
+                  $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+                  return TRUE;
+
+                  break;
+              }
+              // close a previous opened index_read_ifra socket, if exists
+              if (($prev = $user->rd_socket_get()) != NULL) {
+                  $s_a_p->socks_unset($user->rd_socket_get());
+                  fclose($user->rd_socket_get());
+                  printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
+                  $user->rd_socket_set(NULL);
+              }
+              
+              $content = "";
+              $user->stream_init($header_out, $content, $get, $post, $cookie);
+              
+              $response = headers_render($header_out, -1).chunked_content($content);
+              $response_l = mb_strlen($response, "ASCII");
+              
+              $wret = @fwrite($new_socket, $response, $response_l);
+              if ($wret < $response_l) {
+                  printf("TROUBLES WITH FWRITE: %d\n", $wret);
+                  $user->rd_cache_set(mb_substr($content, $wret, $response_l - $wret, "ASCII"));
+              }
+              else {
+                  $user->rd_cache_set("");
+              }
+              fflush($new_socket);
+              
+              
+              $s_a_p->socks_set($new_socket, $user);
+              $user->rd_socket_set($new_socket);
+              printf(" - qui ci siamo - ");
+              return TRUE;
+          } while (FALSE);
+          
+          return FALSE;
+          break;
+      }
+
+      return (FALSE);
+  }
 
 } // end class Room
 
