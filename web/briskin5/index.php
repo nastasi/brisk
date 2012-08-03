@@ -43,10 +43,10 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
 
 // Use of proxies isn't allowed.
 if (is_proxy()) {
-  exit;
+    return (FALSE);
 }
 
-header('Content-type: text/html; charset="utf-8"',true);
+// header('Content-type: text/html; charset="utf-8"',true);
 ?>
 <html>
 <head>

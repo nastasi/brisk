@@ -1,0 +1,974 @@
+<?php
+/*
+ *  brisk - Obj/user.phh
+ *
+ *  Copyright (C) 2012 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+// User flags
+define('USER_FLAG_AUTH',     0x02);
+
+define('USER_FLAG_MAP_AUTH', 0x0c);
+define('USER_FLAG_LISTAUTH', 0x04);
+define('USER_FLAG_ISOLAUTH', 0x08);
+
+define('USER_FLAG_DBFAILED', 0x10);
+
+//   user status
+define('USER_FLAG_S_NORM',  0x000); // done
+define('USER_FLAG_S_PAU',   0x100); // done
+define('USER_FLAG_S_OUT',   0x200); // done
+define('USER_FLAG_S_DOG',   0x300); // done
+define('USER_FLAG_S_EAT',   0x400); // done
+define('USER_FLAG_S_WRK',   0x500); // done
+define('USER_FLAG_S_SMK',   0x600); // done
+define('USER_FLAG_S_EYE',   0x700); // done
+define('USER_FLAG_S_RABB',  0x800); // done
+define('USER_FLAG_S_SOCC',  0x900); // done
+define('USER_FLAG_S_BABY',  0xa00); // done
+define('USER_FLAG_S_MOP',   0xb00); // done
+
+define('USER_FLAG_S_ALL',   0xf00); // done
+
+/* type of user normal, supporter etc ... */
+define('USER_FLAG_TY_ALL',     0xff0000); // done
+define('USER_FLAG_TY_NORM',    0x010000); // done
+define('USER_FLAG_TY_SUPER',   0x020000); // done
+//  ... other usefull status ...
+define('USER_FLAG_TY_SUSPEND', 0x400000); // done
+define('USER_FLAG_TY_DISABLE', 0x800000); // done
+
+// 240 is the right value, 600 is for fwrite error test
+define('RD_ENDTIME_DELTA',  240);
+define('RD_KEEPALIVE_TOUT',   4);
+
+$G_four_rnd_string = 
+ "GGZDGDRBXDWFXHGPYAAVDXEKFDUWSTEDTDVXBXQPMZAIFPNLRPTWMJAZRHXTIRNZ"
+."HTZXAUVJDCLXENDCLIZXSSEQQGUADYEKNNANJWEGRUFHPLUNSEROZQJSLMUYNUVG"
+."FPLQAGCMTTGIRRXZFBFQFTRBYPHTWFSXFKHKYBRDAOSOURCMEVGPVXJVUQAOCFPV"
+."OQSUBOYWOZLDGRPQQIBNOTHFUHTCRRZOBCUONAXIYUYCJBFTVNWIITVHBYLNMPWR"
+."LPMMIROZVRUNYXSJSMJINSXGACXDMJAEPNFFAERHVDJELXSPPJWKMNFGVGAPTIMR"
+."VMVMVCLWKMPOAJWZGPSPFEXVNQANXGLZIQSCBIYVFSTXZOODZYCXUVUZFCLFGHUJ"
+."TXZWFHSMFJQAZOQRANKZJAUJHFJIKHIIEQUSDXUBRPQBKMIAVTWYQEOIMYKKDTEV"
+."EYERPXKFJXWNIMJPOFFMWJCJSLFZKPNRNVXIDLUSRVBGLUCQZCUQCZNAORDXMRSS"
+."UBNMPXJDQXXLMQRCTOCCJJWHFSUWBNWXWZHPKWYYKPZIMBXTYAZXJJQSBLNAQGJI"
+."AIXZUHNTQYFSGUYMVOWEGUWWRBEMRJHXXOMLRXXWJZLPGLMKEANZWWXIXPIUTURJ"
+."TCXYIKIPNTSUIOWBCEVQHLTHYQNGBHAOPREWGJVOQKNUKTXVTMBRHCERDGYWQVXB"
+."BCZUGMIJXALLIOSXCYMEIDNTPLGRMKXKVFKWGRFKCBIRASOOYIFTLXFSBEOJSDFN"
+."PHSWPGERDYIGUPDXUBSAFCHTPJNBORIRMAOCKGAMFFZUBTVSGEEFMYMEBPUVCRSP"
+."DEEAROBQLJHNMCDAFMPLUKNZXTTJJIULUTDTLEZLVMRLKNLXGCQIGFCBHEWDHNPW"
+."VRONBYCXVRGNQUMFSRADSIFLNRMQXAZKQUKYXGOAKTSLWVSBJMQYZMULCNYKFFUC"
+."LKIPNJOURQLYDHLZYPHEJXPBYTXTGVZOGQUZXAORYINAOTRJCNEDPAXSJIQICWEY"
+."UEJPQALSYHKYZLPJTMBLIDNFRFLTIOVZZTEWPSJCUNDWUDZWJKDDRJEXOICJBSYP"
+."ZHLECBYVMMYLCCPCSVOVPEHEWQDJYSCOWTKFHTWVTSBCQSFKQFCNTGOQBEPSEXKR"
+."AMJIKXZCWLPXMEUBLRJHNEVGMTGARBOBLOYPWUCWSBVTMZBIBRDCNOYXLPSDZODN"
+."JSZXXQUCJZKIYOCCRHYALAJSYXFMWBAOIVAJWIAPOECUJAMFPCOCZDBDHRTBUWWJ"
+."EJYZESNKIXFEBENSOHLCNSQPWGGJLOMTFEZVWWQAKPIFGUUUMWOKLXDUPFMOEKQG"
+."ELOIQAUJPPIJZWKTCYQTJWXCBJMQWIOLQWJIASSXSFLWGUSETHRKEJHCHBOFLJJC"
+."KPPLOTKBXSKUOSNSFHOJRCKXOKQHETCGSMABVALDSBAXBQRFNNJGIDZMNUYQYDHX"
+."DJAHJBJSUEHADPSHOPOXEIRQPEAJEMEBWNXTOSGEQFUVXVHZDYHRUXCRICUHYUHA"
+."FXXGTKWVDDMDSLXEVKZUNTEUKWAGSAWPHGQHEBUMQDHZDVIFVFNDXDUEVZVGSBCQ"
+."STWYUOIHBOQQBAIAQJVNDZQVWHNXHMROIMXNCZRHYXUBFYLEZTWFCYOVILASEFSH"
+."ZUQSNNTYEOCSTRDJPFHCPTDEWCQNEDFOQCZMXKCFIANKWOVDARXWRUCTPYPGTEZB"
+."PERZIMOHRCNBYYJVYFBQJARSULMIAQPILDHEMKNVWMGFQBGZRSQZWZBMSDYKLOTA"
+."VUILKBJADGDTEZENLJEOYPXIXJWIJXONTLXBRLIJFQZORAJIIZQRCUOZLVUTIHXI"
+."NDRVVDJTEIKVLKZVRWHINEYVRGJHXLRNDCNFIYFRUUWMKKGHCPWLZKFULMJOIGJZ"
+."OONOCNPLEJIBKYFDGEQEMMWYBNBWPDRCEIUMFTYAULDBHSHAGPFWVTZXYQGUAXYN"
+."JGGOAMNBBFFSCDSXRTPOHBOVZEXYKAENIWSMBOXGQQTDTIBPSXFHMQUMMKNYYWIC"
+."MFDWSMZDWHGCEWQHFTIMDGTMCEFKWMBAVPEBTCKHRRTLAYEGZTINIWYCUJRZMBPS"
+."TLLEDLEPSAFMQPHYNJWBSSXKEMKLEZIAVNYIOUOTKGYUYJBKBSBQCFRXKOQABUWF"
+."YCNLGXGTLWMLEJVSNDIAMYSXSYFLMNGBOZSREPCPQLRCLNYFVKTWUWBNYAPZTJVO"
+."ONEPJBVBIOPBGVUNWUWZZBJEBDWUWUNFDBOICCGKXDBQWSWFUMIYRCXHLDWFKDUO"
+."PBGTXWNOMUEBENXMARIGPKDETSZNTRODQZYNJJDMYSUBOLPWOEWEVESPLXIKLELG"
+."DCIPTCCKJNNDBRCNVNHVZWPKWPUWLSOORQHNXRBZHHIYPJNBIRCZCIGGEMYKNWXV"
+."TLCLXTIYRVUXONAJUCNMWHNMUSHRWHOEQTTGYJRJEZKNHLVUXUKQQYREZXWRNQKO"
+."BDZTUGIKACSXLRJLESYYPLRFCFVSWJSZYPJBLBTPSEGUZOEXDIXEVWZJEOMOJOIB"
+."QNXNFUXBRJYXMDXQOLVWVLZZMTEMTYRZBWUEEFIBOWXAPKEIQIZZCLMWAOBZVFTP"
+."QQPBYCCLEYRLXVBPMUUMUDPECMDFSVJNKKAEMBYJJXMZGWYTAHECIXAFGWAOGIWV"
+."GAOHCMVHJZVWZCHJWGJJDBZNDXPXOYTDVZEDPWZIIMQVCQPLQIEOSRPVVICTZKGX"
+."JXSFDFUHKKOTXTEGLDSCAODMCVGSSEYANCXJDATMRJRIDLLIJHINSOXJQDEABCVU"
+."WFXWKXJQEREZDLOVUQHYBESHNJWTESPNDVIKYLCTNQEVVUXAWFNQEYIVZXNMJEPL"
+."MFMTOKXXFQYYVBHAXYQVUBALQLSNJSVOTZDDTOZMUEVZJATXQNQVSFXWTGACHUDD"
+."QXCPCRLSREKXHKJNUYUJGIGCNWXUSXOGGYPQWFZDJCKKZONXJUSJKBYIPJSMPVIN"
+."UFBIFNROMBTKQPBIZYJWLPQIJLNTLHTUEWFINOQQDAHCXXKVADTEDBANOPIJBXXC"
+."NAEZOVJAISUQBCBNOYIJBXMRPYPKXBFKFVGQLOEFPOCTZHJXKGUPZQPZOZWXXSSH"
+."SLBGVGVPRAFJCVRKWLSWLMHBMYOKVJDCZSQBLTGSOJDJHOVIDEBKJZNAQYLFIEYS"
+."AYHOSGGDDJAAVTMBYFREMEPLWZXYZUYYRQWKQBLKAPDXMMHCBWSARJCHPGZFCVJG"
+."OXXKCMWTVMKHUUSUMQOGNIHKIIAXNOAHPRIWHDOBJTRKSZAKOMHWTPQQXGZBOPIP"
+."FQEVUBULHGESOARVICLMSUSHHTVYLFMLHFGKJNPYIYEMLBAZMLIDDSWRCVFOUSGC"
+."TUQHWTUHRJUZHYQOKTWTLRVOSWRPSYBOBSZHZLRZEIZKKCMLNYICCUTIXNXETTKL"
+."PYIFTUDCMWRQBZDROXTTVTAOOIQHIWOZESRHKPNGNCSHNAVEWUSGOTZCRNFSIXGF"
+."QJUMUFPEZBFPOVGZZDCGDKEODSWAPNDNHVJUQDYLCXWNXSCDFFFPBTDOIZIZLBBP"
+."ZXZYWTTPEUUCKXGBTXAJBAXYLMUVWWGWZYTXTKYVRXSOXOBHERLZJPRDXIQZRQLU"
+."TXCLIJNKIRWMVQEJTLHZIDTNGBOYSULGWUTSYTKGNMGZFWKXCCZXGOQGZNQFZJUK"
+."JMBQPQPZOPYTQMPEFTZUDLIIBZAZSZAPNILMIKMPKXJIRHRQMFSTJKAPIIQWOFYQ"
+."HGANJGJSUGDIENDVEQFEMUJBGMZBPHLOARCVGMUUCHLCDDNKSJSCKYSALUAGUZFN"
+."YVURVLREBESGXPANIDKGLPJZGXLKFKTPEQBQEINOYYZTBMPFBLBKIKVPAPFDKKRZ"
+."YMVUBYCYTRXCIICUPTXKGQOIJSVSWPYVALIROWGVXDXGNSRVZOLEJHNRSUKHNTRJ"
+."LQZQKBEFXYKIPXJRZMQMJKUGCNUKBZBWABPLHMAJJZVBCWOQYCLSGDUKJSTHTVXV"
+."OUGJVADGJWGVNBNXYRZDSNLOZDIQRKOQAKJJDKXRMMTXRVTLOMTETNROPDYNXAGR";
+
+$S_load_stat = array( 'rU_heavy'      => 0,
+                      'lL_laccgarb'   => 0,
+                      'wU_lacc_upd'   => 0,
+                      'wR_garbage'    => 0,
+                      'wR_minusone'   => 0,
+                      'wR_the_end'    => 0 );
+
+$mlang_indrd = array( 
+                     'btn_backtotab'  => array('it' => ' torna ai tavoli ',
+                                               'en' => ' back to tables '),
+                     'btn_btotabsup'  => array('it' => ' grazie della donazione, torna ai tavoli ',
+                                               'en' => ' thank you for donation, back to tables ') 
+                     );
+
+class User {
+  var $room;       // reference to the room where the user is registered
+  var $idx;        // index in the users array when you are in game
+  var $idx_orig;   // index in the users array when you aren't in game
+  var $code;       // authentication code
+  var $name;       // name of the user
+  var $sess;       // session of the user
+  var $ip;         // ip of the user
+  var $lacc;       // last access (for the cleanup)
+  var $laccwr;     // last access (for the cleanup)
+  var $bantime;    // timeout to temporary ban
+  var $stat;       // status (outdoor, room, table, game, ...)
+  var $subst;      // substatus for each status   
+  var $step;       // step of the current status
+  var $trans_step; // step to enable transition between pages (disable == -1)
+
+  var $rd_socket;  // socket handle of push stream
+  var $rd_endtime; // end time for push stream
+  var $rd_stat;    // actual status of push stream
+  var $rd_subst;   // actual substatus of push stream
+  var $rd_step;    // actual step of push stream
+  var $rd_from;    // referer
+  var $rd_scristp; // current script step (for each session) 
+  var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
+  var $rd_cache;   // place where store failed fwrite data
+
+  var $comm;       // commands array
+  // var $asta_card;  // 
+  // var $asta_pnt;   //
+  // var $handpt;     // Total card points at the beginning of the current hand.
+  // var $exitislock; // Player can exit from the table ?
+
+  // FIXME: the table_orig field must be removed after table field verify of index management (in spawned table
+  //        it is allways ZERO
+  var $table;      // id of the current table when you are in game
+  var $table_orig; // id of the current table when you aren't in game
+  var $table_pos;  // idx on the table
+  var $table_token;// token that identify a game on a table
+  var $flags;      // Bitfield with: AUTHENTICATE: 0x02 
+  var $the_end;    // Flag to change the end of the session
+
+  var $chat_lst;      // Last chat line
+  var $chattime;      // Array of chat times
+  var $chat_cur;      // Current chat line number
+  var $chat_ban;      // Time for ban chat
+  var $chat_dlt;      // Delta t for ban
+  var $shm_sz;
+
+  function User() {
+  }
+
+  function create(&$room, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+    if (($thiz = new User()) == FALSE)
+      return (FALSE);
+
+    $thiz->room       = &$room;
+    $thiz->idx        = $idx;
+    $thiz->idx_orig   = $idx;
+    $thiz->code       = -1;
+    $thiz->name       = $name;
+    $thiz->sess       = $sess;
+    $thiz->ip         = $ip;
+    $thiz->lacc       = time();
+    $thiz->laccwr     = time();
+    $thiz->bantime    = 0;
+    $thiz->stat       = $stat;
+    $thiz->subst      = $subst;
+    $thiz->step       = 1;
+    $thiz->trans_step = -1;
+    $thiz->comm       = array();
+
+    $thiz->rd_socket  = NULL;
+    $thiz->rd_endtime = -1;
+    $thiz->rd_stat    = -1;
+    $thiz->rd_subst   = "";
+    $thiz->rd_step    = -1;
+    $thiz->rd_from    = "";
+    $thiz->rd_scristp = -1;
+    $thiz->rd_kalive  = -1;
+    $thiz->rd_cache   = "";
+
+    $thiz->asta_card  = -2;
+    $thiz->asta_pnt   = -1;
+    $thiz->handpt     = -1;
+    $thiz->exitislock = TRUE;
+
+    $thiz->flags      = 0x00;
+    
+    $thiz->chattime   = array_fill(0, CHAT_N, 0);
+    $thiz->chat_cur   = 0;
+    $thiz->chat_lst   = "";
+    $thiz->chat_ban   = 0;
+    $thiz->chat_dlt   = 0;
+
+    $thiz->table_orig = $table;
+    $thiz->table      = $table;
+    $thiz->table_pos  = -1;
+    $thiz->table_token= "";
+    $thiz->shm_sz = SHM_DIMS_U_MIN;
+    return ($thiz);
+  }
+
+  function copy($from)
+  {
+    $this->idx        = $from->idx;
+    $this->idx_orig   = $from->idx;
+    $this->code       = $from->code;
+    $this->name       = $from->name;
+    $this->sess       = $from->sess;
+    $this->ip         = $from->ip;
+    $this->lacc       = $from->lacc;
+    $this->laccwr     = $from->laccwr;
+    $this->bantime    = $from->bantime;
+    $this->stat       = $from->stat;
+    $this->subst      = $from->subst;
+    $this->step       = $from->step;
+    $this->trans_step = $from->trans_step;
+    $this->comm       = array();
+
+    $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
+    for ($i = $i_start ; $i < $from->step ; $i++) {
+        $ii = $i % COMM_N;
+        if (isset($from->comm[$ii])) {
+            $this->comm[$ii] = $from->comm[$ii];
+        }
+    }
+    $this->asta_card  = $from->asta_card;
+    $this->asta_pnt   = $from->asta_pnt;
+    $this->handpt     = $from->handpt;
+    $this->exitislock = $from->exitislock;
+
+    $this->flags      = $from->flags;
+
+    $this->chattime   = array();
+    for ($i = 0 ; $i < CHAT_N ; $i++)
+      $this->chattime[$i] = $from->chattime[$i];
+    $this->chat_cur   = $from->chat_cur;
+    $this->chat_lst   = $from->chat_lst;
+    $this->chat_ban   = $from->chat_ban;
+    $this->chat_dlt   = $from->chat_dlt;
+
+    $this->table_orig = $from->table_orig;
+    $this->table      = $from->table;
+    $this->table_pos  = $from->table_pos;
+    $this->table_token = $from->table_token;
+    $this->the_end    = $from->the_end;
+    $this->shm_sz     = $from->shm_sz;
+    return (TRUE);
+  }
+
+
+  function myclone($from)
+  {
+    if (($thiz = new User()) == FALSE)
+      return (FALSE);
+    
+    $thiz->copy($from);
+
+    return ($thiz);
+  }
+  
+  function spawn($from, $table, $table_pos)
+  {
+    if (($thiz = new User()) == FALSE)
+      return (FALSE);
+    
+    $thiz->idx        = $from->idx;
+    $thiz->idx_orig   = $from->idx;
+    $thiz->code       = $from->code;
+    $thiz->name       = $from->name;
+    $thiz->sess       = $from->sess;
+    $thiz->ip         = $from->ip;
+    $thiz->lacc       = $from->lacc;
+    $thiz->laccwr     = $from->laccwr;
+    $thiz->bantime    = $from->bantime;
+    $thiz->stat       = $from->stat;
+    $thiz->subst      = $from->subst;
+    $thiz->step       = $from->step;
+    $thiz->trans_step = $from->trans_step;
+    $thiz->comm       = array();
+
+    /*
+    $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
+    for ($i = $i_start ; $i < $from->step ; $i++) {
+      log_wr("TRY PUSH:".$i);
+      $ii = $i % COMM_N;
+      $thiz->comm[$ii]   = $from->comm[$ii];
+    }
+    */
+    $thiz->asta_card  = $from->asta_card;
+    $thiz->asta_pnt   = $from->asta_pnt;
+    $thiz->handpt     = $from->handpt;
+    $thiz->exitislock = $from->exitislock;
+    $thiz->the_end    = $from->the_end;
+
+    $thiz->flags      = $from->flags;
+
+    $thiz->chattime   = array_fill(0, CHAT_N, 0);
+    $thiz->chat_cur   = 0;
+    $thiz->chat_lst   = "";
+    $thiz->chat_ban   = 0;
+    $thiz->chat_dlt   = 0;
+
+
+    $thiz->table_orig = $table;
+    $thiz->table      = 0;
+    $thiz->table_pos  = $table_pos;
+    $thiz->table_token = $from->table_token;
+    $thiz->shm_sz      = $from->shm_sz;
+
+    return ($thiz);
+  }
+
+  function rd_data_set($curtime, $stat, $subst, $step, $from)
+  {
+      $this->rd_endtime = $curtime + RD_ENDTIME_DELTA;
+      $this->rd_stat    = $stat;
+      $this->rd_subst   = $subst;
+      $this->rd_step    = $step;
+      $this->rd_from    = $from;
+      $this->rd_scristp = 0;
+      $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
+  }
+
+  function rd_socket_get() {
+      return ($this->rd_socket);
+  }
+
+  function rd_socket_set($sock) {
+      $this->rd_socket = $sock;
+  }
+
+  function rd_kalive_get()
+  {
+      return ($this->rd_kalive);
+  }
+
+  function rd_kalive_set($tm)
+  {
+      $this->rd_kalive = $tm;
+  }
+
+  function rd_kalive_is_expired($tm)
+  {
+      // printf("rd_kalive %d tm %d\n", $this->rd_kalive, $tm);
+      return ($this->rd_kalive < $tm);
+  }
+
+  function rd_endtime_is_expired($tm)
+  {
+      // printf("rd_endtime %d tm %d\n", $this->rd_kalive, $tm);
+      return ($this->rd_endtime < $tm);
+  }
+
+  function rd_kalive_reset($tm)
+  {
+      $this->rd_kalive = $tm + RD_KEEPALIVE_TOUT;
+  }
+
+  function rd_cache_get()
+  {
+      return ($this->rd_cache);
+  }
+
+  function rd_cache_set($cache)
+  {
+      $this->rd_cache = $cache;
+  }
+
+  function idx_get() {
+      return ($this->idx);
+  }
+
+  function code_get() {
+      return ($this->code);
+  }
+  
+  function stat_set($stat) {
+    log_main("sess: [".$this->sess. "] NEW STAT: [".$stat."]"); 
+    $this->stat = "$stat";
+    
+    /*
+    if (validate_sess($this->sess)) {
+      if (file_exists(PROXY_PATH) == FALSE)
+        mkdir(PROXY_PATH, 0775, TRUE);
+      $fp = @fopen(PROXY_PATH."/".$this->sess.".stat", 'w');
+      fwrite($fp, sprintf("%s\n",$this->stat));
+      fclose($fp);
+    }
+    */
+  }
+
+  function step_set($step) 
+  {
+      $this->step = $step & 0x7fffffff;
+      
+      return (TRUE);
+  }
+
+  function step_inc($delta = 1) {
+      $this->step += $delta;
+      /* modularization because unpack() not manage unsigned 32bit int correctly */
+      $this->step &= 0x7fffffff;
+      
+      return TRUE;
+  }
+
+
+  function save_step() 
+  {
+      do {
+          if (validate_sess($this->sess) == FALSE)
+              break;
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH, 0775, TRUE);
+          if (($fp = @fopen(PROXY_PATH."/".$this->sess.".step", 'w')) == FALSE)
+              break;
+          fwrite($fp, pack("LL",$this->step, $this->idx));
+          fclose($fp);
+          
+          log_main("step_set [".$this->sess. "] [".$this->step."]"); 
+          
+          return (TRUE);
+      } while (0);
+      
+      return (FALSE);
+  }
+  
+  static function load_step($sess) 
+  {
+      $fp = FALSE;
+      do {
+          if (validate_sess($sess) == FALSE)
+              break;
+          
+          if (file_exists(PROXY_PATH) == FALSE)
+              mkdir(PROXY_PATH, 0775, TRUE);
+          if (($fp = @fopen(PROXY_PATH."/".$sess.".step", 'rb')) == FALSE)
+              break;
+          if (($s = fread($fp, 8)) == FALSE)
+              break;
+          if (mb_strlen($s, "ASCII") != 8)
+              break;
+          $arr = unpack('Ls/Li', $s);
+          fclose($fp);
+          
+          // log_rd2("A0: ".$arr[0]."  A1: ".$arr[1]);
+          return ($arr);
+      } while (0);
+      
+      if ($fp != FALSE)
+          fclose($fp);
+      
+      log_rd2("STEP_GET [".$sess."]: return false ");
+      
+      return (FALSE);
+  }
+
+  static function unproxy_step($sess) {
+      log_rd2("UNPROXY: ".PROXY_PATH."/".$sess.".step");
+      if (file_exists(PROXY_PATH) == FALSE)
+          return;
+      @unlink(PROXY_PATH."/".$sess.".step");
+  }
+
+  function reset() {
+    $curtime = time();
+    log_legal($curtime, 'xxx', $this, "STAT:LOGOUT", '');
+
+    $tmp_sess = $this->sess;
+    $this->sess = "";
+    self::unproxy_step($tmp_sess);
+    $this->name = "";  // OK here
+    while (array_pop($this->comm) != NULL);
+    $this->step = 0;
+    $this->chattime = array_fill(0, CHAT_N, 0);
+    $this->chat_cur = 0;
+    $this->chat_lst = "";
+    $this->chat_ban = 0;
+    $this->chat_dlt = 0;
+    $this->the_end = FALSE;
+  }
+
+  static function load_data($id, $sess) 
+  {
+      log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
+      
+      do {
+          if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+              log_main("ftok failed");
+              break;
+          }
+          
+          if (($shm_sz = sharedmem_sz($tok)) == -1) {
+              log_main("shmop_open failed");
+          }
+          
+          if ($shm_sz == -1)
+              $shm_sz = SHM_DIMS_U_MIN;
+          
+          if ($shm = shm_attach($tok, $shm_sz)) {
+              if (($user = @shm_get_var($shm, $tok)) == FALSE) {
+                  break;
+              }
+              if ($sess != FALSE && $user->sess != $sess) {
+                  break;
+              }
+              log_only("user ==  ".($user == FALSE ?   "FALSE" : "TRUE")."  user ===  ".($user === FALSE ? "FALSE" : "TRUE")."  user isset ".(isset($user) ?   "TRUE" : "FALSE"));
+              
+              if ($user == FALSE) {
+                  log_only("INIT MAIN DATA");
+                  
+                  // SHSPLIT FIXME: init_data for User class ??
+                  $user = self::create($id, "", "");
+                  if (@shm_put_var($shm, $tok, $user) == FALSE) {
+                      log_only("PUT_VAR FALLITA ".strlen(serialize($user)));
+                      log_only(serialize($user));
+                  }
+                  log_shme("User::save_data2");
+              }
+              else {
+                  if ($sess != FALSE) {
+                      /*
+                       *  NOTE:  this part is for check only, theoretically 
+                       *         user->step anch proxy_step are set allways at the same value
+                       */
+                      $old_step = $user->step;
+                      $arr = self::load_step($sess);
+                      $user->step = $arr['s'];
+                      if ($old_step != $user->step) {
+                          log_crit("steps are diffetents User->step ".$user->step." Old_step: ".$old_step);
+                      }
+                  }
+              }
+              $user->shm_sz = $shm_sz;
+              
+              shm_detach($shm);
+          }
+          
+          //  
+          // SHSPLIT: load users from the shared memory
+          //
+          return ($user);
+      } while (0);
+      
+      return (FALSE);
+  }
+  
+
+  static function save_data($user, $id) 
+  {
+      GLOBAL $sess;
+      
+      $shm =   FALSE;
+      
+      if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+          return (FALSE);
+      }
+      while ($user->shm_sz < SHM_DIMS_U_MAX) {
+          if (($shm = shm_attach($tok, $user->shm_sz)) == FALSE)
+              break;
+          
+          // log_only("PUT_VAR DI ".strlen(serialize($user)));
+          if (@shm_put_var($shm, $tok, $user) != FALSE) {
+              shm_detach($shm);
+              if ($user->sess != "")
+                  $user->save_step();
+
+              log_shme("User::save_data");
+
+              log_main("User[".$id."] saved.");
+              return (TRUE);
+          }
+          if (shm_remove($shm) === FALSE) {
+              log_only("REMOVE FALLITA");
+              break;
+          }
+          shm_detach($shm);
+          $user->shm_sz += SHM_DIMS_U_DLT;
+      } 
+      
+      if ($shm)
+          shm_detach($shm);
+      
+      return (FALSE);
+  }
+
+  function myname_innerHTML()
+  {
+      $class_id = ($this->flags & USER_FLAG_AUTH) + 1;
+      
+      return (sprintf('$("myname").innerHTML = "<span class=\"au%d\">%s</span>";', $class_id, 
+                      xcape($this->name,ENT_COMPAT,"UTF-8")));
+  }
+
+  /* INDEX_RD_IFRA PORT */
+
+  static function blocking_error($is_unrecoverable)
+  {
+      GLOBAL $is_page_streaming;
+      
+      $is_page_streaming = TRUE;
+      log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
+      return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
+  }
+  
+  // FIXME TO SUPPORT iframe
+  static function page_sync($sess, $page, $table_idx, $table_token)
+  {
+      GLOBAL $is_page_streaming;
+      
+      log_rd2("page_sync:".var_export(debug_backtrace()));
+      
+      $is_page_streaming = TRUE;
+      
+      log_rd2("PAGE_SYNC");
+      return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); hstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
+  }
+
+
+
+
+  function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate)
+  {
+      GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
+      // GLOBAL $first_loop;
+      GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
+      GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
+      $CO_splashdate = "CO_splashdate".$G_splash_idx;
+      $$CO_splashdate = $splashdate;
+      
+      GLOBAL $S_load_stat;
+      
+      log_rd("maincheck begin");
+      
+      $ret = FALSE;
+      $curtime = time();
+      
+      if ((($curtime - $this->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) {
+          $S_load_stat['lL_laccgarb']++;
+          
+          if (($curtime - $this->lacc) >=  STREAM_TIMEOUT) {
+              $S_load_stat['wU_lacc_upd']++;
+              $this->lacc = $curtime;
+          }
+          
+          if (Room::garbage_time_is_expired($curtime)) {
+              log_only("F");
+              
+              $S_load_stat['wR_garbage']++;
+              log_main("pre garbage_manager TRE");
+              $this->room->garbage_manager(FALSE);
+          }
+      }
+      
+      /* Nothing changed, return. */
+      if ($cur_step == $this->step) 
+          return (FALSE);
+      
+      log_rd2("do other cur_stat[".$cur_stat."] user->stat[".$this->stat."] cur_step[".$cur_step."] user_step[".$this->step."]");
+      
+      if ($cur_step == -1) {
+          /*
+           *  if $cur_step == -1 load the current state from the main struct
+           */
+          
+          $S_load_stat['wR_minusone']++;
+          
+          if ($this->the_end == TRUE) { 
+              log_rd2("main_check: the end".var_export(debug_backtrace()));
+              $is_page_streaming = TRUE;
+          }
+          
+          if ($this->trans_step != -1) {
+              log_rd2("TRANS USATO ".$this->trans_step);
+              $cur_step = $this->trans_step;
+              $this->trans_step = -1;
+          }
+          else {
+              log_rd2("TRANS NON ATTIVATO");
+          }
+      }
+      
+      
+      /* this part I suppose is read only on $this->room structure */
+      if ($cur_step == -1) {
+          log_rd2("PRE-NEWSTAT: ".$this->stat);
+          
+          if ($this->stat == 'room') {
+              log_rd("roomma ".$this->step);
+              $curtime = time();
+              
+              if ($G_with_splash &&
+                  ($$CO_splashdate < $curtime - $G_splash_interval ||
+                   $$CO_splashdate > $curtime)) {
+                  $is_super = $this->flags & USER_FLAG_TY_SUPER;
+                  $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 
+                                          ($is_super ? 0 : $G_splash_timeout), 
+                                          $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], 
+                                          $G_splash_w, $G_splash_h, true, 
+                                          ($is_super ? 0 : $G_splash_timeout));
+                  $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
+              }
+              $ret .= $this->room->show_room($this->step, $this);
+              
+              // TODO uncomment and test
+              /* NOTE the sets went common */
+              $new_stat =  $this->stat;
+              $new_subst = $this->subst;
+              $new_step =  $this->step;
+          }
+          /***************
+           *             *
+           *    TABLE    *
+           *             *
+           ***************/
+          else if ($this->stat == 'table') {
+              log_load("RESYNC");
+              return (self::page_sync($this->sess, "briskin5/index.php", $this->table, $this->table_token));
+          }
+          log_rd2("NEWSTAT: ".$this->stat);
+      } /* if ($cur_step == -1) { */
+      else {
+          /* $sem = Room::lock_data(FALSE); */
+          $S_load_stat['rU_heavy']++;
+          
+          if ($cur_step < $this->step) {
+              do {
+                  if ($cur_step + COMM_N < $this->step) {
+                      if (($cur_stat != $this->stat)) {
+                          $to_stat = $this->stat;
+                          /* Room::unlock_data($sem); */
+                          log_load("RESYNC");
+                          return (self::page_sync($this->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $this->table, $this->table_token));
+                      }
+                      log_rd2("lost history, refresh from scratch");
+                      $new_step = -1;
+                      break;
+                  } 
+                  for ($i = $cur_step ; $i < $this->step ; $i++) {
+                      $ii = $i % COMM_N;
+                      log_rd2("ADDED TO THE STREAM: ".$this->comm[$ii]);
+                      $ret .= $this->comm[$ii];
+                  }
+                  $new_stat =  $this->stat;
+                  $new_subst = $this->subst;
+                  $new_step =  $this->step;
+              } while (0);
+              
+              log_rd2($this->step, 'index_rd.php: after ret set');
+              
+              if ($this->the_end == TRUE) {
+                  log_rd2("LOGOUT BYE BYE!!");
+                  log_auth($this->sess, "Explicit logout.");
+                  
+                  if ($this->the_end == TRUE) {
+                      $this->reset();
+                      
+                      if ($this->subst == 'sitdown') {
+                          log_load("ROOM WAKEUP");
+                          $this->room->room_wakeup($this);
+                      }
+                      else if ($this->subst == 'standup')
+                          $this->room->room_outstandup($this);
+                      else
+                          log_rd2("LOGOUT FROM WHAT ???");
+                      
+                  } /* if ($this->the_end == TRUE) { ... */
+              } /* if ($this->the_end == TRUE) { ... */
+          } /* if ($cur_step < $this->step) { */
+          
+          /* Room::unlock_data($sem); */
+      }  /* else of if ($cur_step == -1) { */
+      
+    
+      return ($ret);
+  }  //   function maincheck (...
+
+static function stream_fini($is_unrecoverable)
+{
+    GLOBAL $G_four_rnd_string;
+
+    // IF IFRAME THEN:
+    $body = "";
+    $body .= sprintf("<html>
+<head>
+<script type=\"text/javascript\" src=\"commons.js\"></script>
+<script type=\"text/javascript\" src=\"xynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\">
+var http_streaming = \"ready\";");
+    $body .= sprintf("
+window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+</script>
+</head>
+<body>");
+    $body .= sprintf("<!-- \n%s -->\n", $G_four_rnd_string);
+    $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"%s\");
+// -->
+</script>", 0, escpush(self::blocking_error($is_unrecoverable)) );
+    // ELSE IF XHR THEN:
+    // return (self::blocking_error($is_unrecoverable));
+    return ($body);
+}
+
+/*
+ *  MAIN
+ */
+
+/*
+   FROM THE EXTERN 
+   sess
+   stat
+   step
+*/
+function stream_init(&$header_out, &$body, $get, $post, $cookie)
+{
+    GLOBAL $G_four_rnd_string;
+
+    $curtime = time();
+
+    $is_page_streaming = FALSE; // (webservers_exceeded() || stristr($HTTP_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; rv:5.0)") || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
+
+    $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
+    $header_out['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT'; // Date in the past
+    $header_out['Content-type']  = 'text/html; charset="utf-8"';
+
+    log_load("index_rd_ifra_init.php");
+
+    if (($from  = gpcs_var('from', $get, $post, $cookie)) === FALSE)
+        $from = "";
+    if (($stat  = gpcs_var('stat', $get, $post, $cookie)) === FALSE) 
+        $stat = "";
+    if (($subst = gpcs_var('subst', $get, $post, $cookie)) === FALSE) 
+        $subst = "";
+    if (($step  = gpcs_var('step', $get, $post, $cookie)) === FALSE) 
+        unset($step);
+    
+    $this->rd_data_set($curtime, $stat, $subst, $step, $from);
+
+    $body .= sprintf("<html>
+<head>
+<script type=\"text/javascript\" src=\"commons.js\"></script>
+<script type=\"text/javascript\" src=\"xynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\">
+var http_streaming = \"ready\";");
+    if ($this->rd_scristp > 0)
+        $body .= sprintf("last_clean = %d;\n", ($this->rd_scristp-1));
+    $body .= sprintf("
+window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+</script> 
+</head>
+<body>");
+    $body .= sprintf("<!-- \n%s -->\n", $G_four_rnd_string);
+
+    return TRUE;
+}
+
+function stream_main(&$body, $get, $post, $cookie)
+{
+    GLOBAL $is_page_streaming, $G_splash_idx;
+    // FIXME: only to test fwrite
+    // GLOBAL $G_four_rnd_string;
+
+    $CO_splashdate = "CO_splashdate".$G_splash_idx;
+    if (($splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)
+        $splashdate = ""; 
+
+    $is_page_streaming = FALSE;
+    log_rd2("FROM OUTSIDE - STAT: ".$this->rd_stat." SUBST: ".$this->rd_subst." STEP: ".$this->rd_step." FROM: ".$this->rd_from. "IS_PAGE:" . $is_page_streaming);
+    
+    
+    $pre_main = gettimeofday(TRUE);
+    
+    $old_stat  = $this->rd_stat;
+    $old_subst = $this->rd_subst;
+    $old_step  = $this->rd_step;
+    if (($ret = maincheck($this, $old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate)) != FALSE) {
+        $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"%s\");
+// -->
+</script>", $this->rd_scristp++, escpush($ret) );
+        
+        log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
+        if ($is_page_streaming) 
+            return TRUE;
+    }
+    
+    return TRUE;
+}
+
+function stream_keepalive()
+{
+    return (sprintf("<script id='hs%d' type='text/javascript'><!--
+push(null);
+// -->
+</script>", $this->rd_scristp++));
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+} // end class User
+
+
+?>

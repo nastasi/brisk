@@ -146,7 +146,7 @@ function page_sync($sess, $page, $table_idx, $table_token)
 
 
 
-function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate)
+function maincheck(&$user, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate)
 {
     GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
     // GLOBAL $first_loop;
@@ -160,7 +160,7 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
     log_rd("maincheck begin");
 
     $ret = FALSE;
-    // $room = FALSE;
+    // $user->room = FALSE;
     // $user = FALSE;
     $curtime = time();
     
@@ -222,15 +222,15 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
             log_only("F");
             
             $S_load_stat['wR_garbage']++;
-            /* if (($room = Room::load_data()) == FALSE) { */
+            /* if (($user->room = Room::load_data()) == FALSE) { */
             /*     Room::unlock_data($sem); */
             /*     ignore_user_abort(FALSE); */
             /*     return (blocking_error(TRUE)); */
             /* } */
             log_main("pre garbage_manager TRE");
-            $room->garbage_manager(FALSE);
-            /* Room::save_data($room); */
-            /* unset($room); */
+            $user->room->garbage_manager(FALSE);
+            /* Room::save_data($user->room); */
+            /* unset($user->room); */
         }
     }
     log_main("infolock: U");
@@ -256,15 +256,15 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
 //                 log_only("F");
                 
 //                 $S_load_stat['R_garbage']++;
-//                 if (($room = Room::load_data()) == FALSE) {
+//                 if (($user->room = Room::load_data()) == FALSE) {
 //                     Room::unlock_data($sem);
 //                     ignore_user_abort(FALSE);
 //                     return (blocking_error(TRUE));
 //                 }
 //                 log_main("pre garbage_manager TRE");
-//                 $room->garbage_manager(FALSE);
-//                 Room::save_data($room);
-//                 unset($room);
+//                 $user->room->garbage_manager(FALSE);
+//                 Room::save_data($user->room);
+//                 unset($user->room);
 //             }
 //             log_main("infolock: U");
 //             Room::unlock_data($sem);
@@ -325,14 +325,14 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
 
         ignore_user_abort(TRUE);
         /* $sem = Room::lock_data(TRUE); */
-        /* if (($room = Room::load_data()) == FALSE) { */
+        /* if (($user->room = Room::load_data()) == FALSE) { */
         /*     Room::unlock_data($sem); */
         /*     ignore_user_abort(FALSE); */
         /*     return (blocking_error(TRUE)); */
         /* } */
         $S_load_stat['wR_minusone']++;
         
-        /* if (($user = $room->get_user($sess, $idx)) == FALSE) { */
+        /* if (($user = $user->room->get_user($sess, $idx)) == FALSE) { */
         /*     Room::unlock_data($sem); */
         /*     ignore_user_abort(FALSE); */
         /*     return (blocking_error(TRUE)); */
@@ -348,7 +348,7 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
             $cur_step = $user->trans_step;
             $user->trans_step = -1;
             
-            /* Room::save_data($room); */
+            /* Room::save_data($user->room); */
             /* Room::unlock_data($sem); */
             ignore_user_abort(FALSE);
         }
@@ -360,7 +360,7 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
             //          log_rd2("clean element [".$el."]");
             //        }
             //        //        $user->step_inc(COMM_N + 1);
-            //        Room::save_data($room);
+            //        Room::save_data($user->room);
             //        //        $new_step = $user->step;
             
             /* Room::unlock_data($sem); */
@@ -369,7 +369,7 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
     }
     
     
-    /* this part I suppose is read only on $room structure */
+    /* this part I suppose is read only on $user->room structure */
     if ($cur_step == -1) {
         log_rd2("PRE-NEWSTAT: ".$user->stat);
         
@@ -388,7 +388,7 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
                                         ($is_super ? 0 : $G_splash_timeout));
                 $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
             }
-            $ret .= $room->show_room($user->step, $user);
+            $ret .= $user->room->show_room($user->step, $user);
             
             // TODO uncomment and test
             /* NOTE the sets went common */
@@ -452,13 +452,13 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
                 /* unset($user); */
 
                 $S_load_stat['wR_the_end']++;
-                /* if (($room = Room::load_data()) == FALSE) { */
+                /* if (($user->room = Room::load_data()) == FALSE) { */
                 /*     Room::unlock_data($sem); */
                 /*     ignore_user_abort(FALSE); */
                 /*     return (blocking_error(TRUE)); */
                 /* } */
 
-                /* if (($user = $room->get_user($sess, $idx)) == FALSE) { */
+                /* if (($user = $user->room->get_user($sess, $idx)) == FALSE) { */
                 /*     Room::unlock_data($sem); */
                 /*     ignore_user_abort(FALSE); */
                 /*     return (blocking_error(TRUE)); */
@@ -472,14 +472,14 @@ function maincheck(&$room, &$user, $cur_stat, $cur_subst, $cur_step, &$new_stat,
                     
                     if ($user->subst == 'sitdown') {
                         log_load("ROOM WAKEUP");
-                        $room->room_wakeup($user);
+                        $user->room->room_wakeup($user);
                     }
                     else if ($user->subst == 'standup')
-                        $room->room_outstandup($user);
+                        $user->room->room_outstandup($user);
                     else
                         log_rd2("LOGOUT FROM WHAT ???");
                     
-                    /* Room::save_data($room); */
+                    /* Room::save_data($user->room); */
                 } /* if ($user->the_end == TRUE) { ... */
             } /* if ($user->the_end == TRUE) { ... */
         } /* if ($cur_step < $user->step) { */
@@ -529,7 +529,7 @@ push(\"%s\");
    stat
    step
 */
-function index_rd_ifra_init(&$room, &$user, &$header_out, &$body, $get, $post, $cookie)
+function index_rd_ifra_init(&$user, &$header_out, &$body, $get, $post, $cookie)
 {
     GLOBAL $G_four_rnd_string;
 
@@ -572,7 +572,7 @@ window.onload = function () { if (http_streaming != \"ready\") { http_streaming.
     return TRUE;
 }
 
-function index_rd_ifra_main(&$room, &$user, &$body, $get, $post, $cookie)
+function index_rd_ifra_main(&$user, &$body, $get, $post, $cookie)
 {
     GLOBAL $is_page_streaming, $G_splash_idx;
     // FIXME: only to test fwrite
@@ -595,7 +595,7 @@ function index_rd_ifra_main(&$room, &$user, &$body, $get, $post, $cookie)
         $old_stat  = $user->rd_stat;
         $old_subst = $user->rd_subst;
         $old_step  = $user->rd_step;
-        if (($ret = maincheck($room, $user, $old_stat, $old_subst, $old_step, $user->rd_stat, $user->rd_subst, $user->rd_step, $splashdate)) != FALSE) {
+        if (($ret = maincheck($user, $old_stat, $old_subst, $old_step, $user->rd_stat, $user->rd_subst, $user->rd_step, $splashdate)) != FALSE) {
             // $no_data = FALSE;
             if (0 == 1) {
                 echo '@BEGIN@';

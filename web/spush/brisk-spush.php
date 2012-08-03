@@ -56,6 +56,7 @@ $G_base = "../";
 
 require_once("./sac-a-push.phh");
 require_once("./brisk-spush.phh");
+require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/auth.phh");
 // require_once("../Obj/proxyscan.phh");
@@ -294,7 +295,7 @@ class Sac_a_push {
                                 do {
                                     if (!isset($cookie['sess'])
                                         || (($user = $this->room->get_user($cookie['sess'], $idx)) == FALSE)) {
-                                        $content = index_rd_ifra_fini(TRUE);
+                                        $content = User::stream_fini(TRUE);
                                         
                                         $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
                                         
@@ -314,7 +315,7 @@ class Sac_a_push {
                                     }
                                     
                                     $content = "";
-                                    index_rd_ifra_init($this->room, $user, $header_out, $content, $get, $post, $cookie);
+                                    $user->stream_init($header_out, $content, $get, $post, $cookie);
                                     
                                     $response = headers_render($header_out, -1).chunked_content($content);
                                     $response_l = mb_strlen($response, "ASCII");
@@ -392,23 +393,25 @@ class Sac_a_push {
                 }
             }
             
-            
+
+            /* manage unfinished pages */
             foreach ($this->pages_flush as $k => $pgflush) {
                 if ($pgflush->try_flush($curtime) == TRUE) {
                     unset($this->pages_flush[$k]);
                 }
             }
             
+            /* manage open streaming */
             foreach ($this->socks as $k => $sock) {
                 if (isset($this->s2u[intval($sock)])) {
                     $user = $this->s2u[intval($sock)];
                     $response = $user->rd_cache_get();
                     if ($response == "") {
                         $content = "";
-                        index_rd_ifra_main($this->room, $user, $content, $get, $post, $cookie);
+                        $user->stream_main($content, $get, $post, $cookie);
                         
                         if ($content == "" && $user->rd_kalive_is_expired($curtime)) {
-                            $content = index_rd_ifra_keepalive($user);
+                            $content = $user->stream_keepalive();
                         }
                         if ($content != "") {
                             $response = chunked_content($content);
