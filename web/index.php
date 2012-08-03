@@ -231,7 +231,7 @@ function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
 
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE) 
-        unset($sess);
+        $sess = "";
     if (($name = gpcs_var('name', $get, $post, $cookie)) === FALSE)
         unset($name);
     if (($pass_private = gpcs_var('pass_private', $get, $post, $cookie)) === FALSE)

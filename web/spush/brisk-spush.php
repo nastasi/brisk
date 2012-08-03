@@ -98,7 +98,6 @@ function headers_render($header, $len)
  *  Caching system using ob php system to cache old style pages
  *  to a var and than send it with more calm
  */
-$G_headers = "";
 
 function shutta()
 {
@@ -110,7 +109,6 @@ register_shutdown_function('shutta');
 /*
  *  MAIN
  */
-$shutdown = FALSE;
 
 function chunked_content($content)
 {

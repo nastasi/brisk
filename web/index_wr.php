@@ -81,7 +81,7 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 
 function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 {
-    GLOBAL $G_black_list, $G_lang, $G_room_help, $G_room_about, $mlang_indwr;
+    GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $mlang_indwr;
 
     log_load("index_wr.php");
 
@@ -346,7 +346,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 
         $dobreak = FALSE;
         do {
-            log_wr("INFO:SKIP:argz == poll name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
+            log_wr("INFO:SKIP:argz == poll name: [".$cli_poll_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
             if (($user->flags & USER_FLAG_AUTH) != USER_FLAG_AUTH) {
                 // MLANG: <b>Per partecipare al sondaggio devi essere autenticato.</b>
                 $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['pollmust'][$G_lang]);
@@ -572,8 +572,6 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
                 if ($table->player_n == PLAYERS_N) {
                     log_wr("WARN:FSM: Sitdown unreachable, table full.");
                     return FALSE;
-                    Room::unlock_data($sem);
-                    exit;
                 }
       
                 // set new status
@@ -595,7 +593,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
                     //
                     
                     // Create new spawned table
-                    $bri_sem = Bin5::lock_data(TRUE, $table_idx);
+                    // $bri_sem = Bin5::lock_data(TRUE, $table_idx);
                     $table_token = uniqid("");
                     $room->table[$table_idx]->table_token = $table_token;
                     $room->table[$table_idx]->table_start = $curtime;
