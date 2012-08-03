@@ -173,7 +173,7 @@ class Sac_a_push {
     var $debug;
     var $blocking_mode;
 
-    var $room;
+    var $app;
     var $bin5;
 
     var $curtime;
@@ -187,11 +187,11 @@ class Sac_a_push {
 
     // Sac_a_push::create("/tmp/brisk.sock", 0, 0
 
-    static function create(&$room, $sockname, $debug, $blocking_mode)
+    static function create(&$app, $sockname, $debug, $blocking_mode)
     {        
         $thiz = new Sac_a_push();
         
-        $thiz->room = $room;
+        $thiz->app = $app;
         $thiz->file_socket = $sockname;
         $thiz->unix_socket = "unix://$sockname";
         $thiz->debug = $debug;
@@ -326,7 +326,7 @@ class Sac_a_push {
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             $header_out = array();
 
-                            $this->room->request_mgr($this, $header_out, $new_socket, $path, $addr, $get, $post, $cookie);
+                            $this->app->request_mgr($this, $header_out, $new_socket, $path, $addr, $get, $post, $cookie);
                             printf("number of sockets after %d\n", count($this->socks));
                         }
                         else {
