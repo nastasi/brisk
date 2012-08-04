@@ -62,8 +62,9 @@ require_once($G_base."Obj/auth.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once($G_base."index.php");
 require_once($G_base."index_wr.php");
-require_once($G_base."index_rd_ifra.php");
 require_once($G_base."briskin5/Obj/briskin5.phh");
+require_once($G_base."briskin5/index.php");
+require_once($G_base."briskin5/index_wr.php");
 
 
 function main()

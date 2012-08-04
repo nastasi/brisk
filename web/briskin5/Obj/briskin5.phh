@@ -428,6 +428,8 @@ class Bin5_user extends User {
     var $handpt;     // Total card points at the beginning of the current hand.
     var $exitislock; // Player can exit from the table ?
     var $privflags;  // Flags for briskin5 only 
+
+    const BASE = "../";
     
     function User() {
     }
@@ -1249,6 +1251,96 @@ class Bin5 {
         return (FALSE);
     }
 
+    static function request_mgr(&$s_a_p, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
+    {
+        printf("NEW_SOCKET (root): %d\n", intval($new_socket));
+        
+        if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE) 
+            unset($table_idx);
+        
+        if (($table_token = gpcs_var('table_token', $get, $post, $cookie)) === FALSE) 
+            unset($table_token);
+
+        switch ($path) {
+        case "":
+        case "index.php":
+            ob_start();
+            bin5_index_main($header_out, $addr, $get, $post, $cookie);
+            $content = ob_get_contents();
+            ob_end_clean();
+        
+            $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+            return TRUE;
+        
+        break;
+        case "index_wr.php":
+            $bri = $s_a_p->app->match_get($table_idx, $table_token);
+            ob_start();
+            bin5_index_wr_main($bri, $addr, $get, $post, $cookie);
+            $content = ob_get_contents();
+            ob_end_clean();
+            
+            $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+            return TRUE;
+            
+            break;
+        case "index_rd_ifra.php":
+            do {
+                if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL) {
+                    return (FALSE);
+                }
+                if (!isset($cookie['sess'])
+                    || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
+                    $content = Bin5_user::stream_fini(TRUE);
+                    
+                    $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+                    return TRUE;
+                    
+                    break;
+                }
+                // close a previous opened index_read_ifra socket, if exists
+                if (($prev = $user->rd_socket_get()) != NULL) {
+                    $s_a_p->socks_unset($user->rd_socket_get());
+                    fclose($user->rd_socket_get());
+                    printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
+                    $user->rd_socket_set(NULL);
+                }
+                
+                $content = "";
+                $user->stream_init($header_out, $content, $get, $post, $cookie);
+                $response = headers_render($header_out, -1).chunked_content($content);
+                $response_l = mb_strlen($response, "ASCII");
+                
+                $wret = @fwrite($new_socket, $response, $response_l);
+                if ($wret < $response_l) {
+                    printf("TROUBLES WITH FWRITE: %d\n", $wret);
+                    $user->rd_cache_set(mb_substr($content, $wret, $response_l - $wret, "ASCII"));
+                }
+                else {
+                    $user->rd_cache_set("");
+                }
+                fflush($new_socket);
+                
+                
+                $s_a_p->socks_set($new_socket, $user);
+                $user->rd_socket_set($new_socket);
+                printf(" - qui ci siamo - ");
+                return TRUE;
+            } while (FALSE);
+            
+            return FALSE;
+            break;
+            
+        default:
+            return FALSE;
+            break;
+      }
+
+      return (FALSE);
+  }
+
+
+
 } // end class Bin5
 
 function locshm_exists($tok)
@@ -1783,15 +1875,13 @@ function game_result($asta_pnt, $pnt)
     }
 }
 
-function log_points($curtime, $user, $where, $mesg) 
+function log_points($remote_addr, $curtime, $user, $where, $mesg) 
 {
-    GLOBAL $_SERVER;
-
     if (($fp = @fopen(LEGAL_PATH."/points.log", 'a')) != FALSE) {
         /* Unix time | session | nickname | IP | where was | mesg */
         fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
                             ($user->flags & USER_FLAG_AUTH ? 'A' : 'N'),
-                            $user->name, $_SERVER['REMOTE_ADDR'], $where , $mesg));
+                            $user->name, $remote_addr, $where , $mesg));
         fclose($fp);
     }
 }

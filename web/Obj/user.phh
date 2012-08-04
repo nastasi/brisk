@@ -186,6 +186,8 @@ class User {
   var $chat_dlt;      // Delta t for ban
   var $shm_sz;
 
+  const BASE = "";    // basepath for absolute web references
+
   function User() {
   }
 
@@ -676,22 +678,22 @@ class User {
       $ret = FALSE;
       $curtime = time();
       
-      if ((($curtime - $this->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) {
-          $S_load_stat['lL_laccgarb']++;
+      /* if ((($curtime - $this->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) { */
+      /*     $S_load_stat['lL_laccgarb']++; */
           
-          if (($curtime - $this->lacc) >=  STREAM_TIMEOUT) {
-              $S_load_stat['wU_lacc_upd']++;
-              $this->lacc = $curtime;
-          }
+      /*     if (($curtime - $this->lacc) >=  STREAM_TIMEOUT) { */
+      /*         $S_load_stat['wU_lacc_upd']++; */
+      /*         $this->lacc = $curtime; */
+      /*     } */
           
-          if (Room::garbage_time_is_expired($curtime)) {
-              log_only("F");
+      /*     if (Room::garbage_time_is_expired($curtime)) { */
+      /*         log_only("F"); */
               
-              $S_load_stat['wR_garbage']++;
-              log_main("pre garbage_manager TRE");
-              $this->room->garbage_manager(FALSE);
-          }
-      }
+      /*         $S_load_stat['wR_garbage']++; */
+      /*         log_main("pre garbage_manager TRE"); */
+      /*         $this->room->garbage_manager(FALSE); */
+      /*     } */
+      /* } */
       
       /* Nothing changed, return. */
       if ($cur_step == $this->step) 
@@ -824,10 +826,10 @@ static function stream_fini($is_unrecoverable)
     $body = "";
     $body .= sprintf("<html>
 <head>
-<script type=\"text/javascript\" src=\"commons.js\"></script>
-<script type=\"text/javascript\" src=\"xynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%scommons.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-http-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
-var http_streaming = \"ready\";");
+var http_streaming = \"ready\";", self::base_get(), self::base_get());
     $body .= sprintf("
 window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
 </script>
@@ -859,6 +861,8 @@ function stream_init(&$header_out, &$body, $get, $post, $cookie)
 
     $curtime = time();
 
+    printf("CLASS: [%s] base: [%s]\n", get_class($this), self::base_get());
+
     $is_page_streaming = FALSE; // (webservers_exceeded() || stristr($HTTP_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; rv:5.0)") || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
     $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
@@ -877,13 +881,14 @@ function stream_init(&$header_out, &$body, $get, $post, $cookie)
         unset($step);
     
     $this->rd_data_set($curtime, $stat, $subst, $step, $from);
+    $cc = get_called_class();
 
     $body .= sprintf("<html>
 <head>
-<script type=\"text/javascript\" src=\"commons.js\"></script>
-<script type=\"text/javascript\" src=\"xynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%scommons.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-http-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
-var http_streaming = \"ready\";");
+var http_streaming = \"ready\";", self::base_get(), self::base_get());
     if ($this->rd_scristp > 0)
         $body .= sprintf("last_clean = %d;\n", ($this->rd_scristp-1));
     $body .= sprintf("
@@ -915,7 +920,7 @@ function stream_main(&$body, $get, $post, $cookie)
     $old_stat  = $this->rd_stat;
     $old_subst = $this->rd_subst;
     $old_step  = $this->rd_step;
-    if (($ret = maincheck($this, $old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate)) != FALSE) {
+    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate)) != FALSE) {
         $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");
 // -->
@@ -938,35 +943,12 @@ push(null);
     
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    static function base_get()
+    {
+        $c = get_called_class();
+        printf("CALLED_CLASS: [%s]\n", $c);
+        return $c::BASE;
+    }
 
 } // end class User
 

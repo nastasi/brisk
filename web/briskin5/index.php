@@ -41,13 +41,23 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                            );
 
 
-// Use of proxies isn't allowed.
-if (is_proxy()) {
-    return (FALSE);
-}
+function bin5_index_main(&$header_out, $addr, $get, $post, $cookie)
+{
+    GLOBAL $G_lang, $mlang_bin5_index;
+    if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
+        unset ($table_idx);
+    if (($laststate = gpcs_var('laststate', $get, $post, $cookie)) === FALSE)
+        unset ($laststate);
+    if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
+        unset ($sess);
 
+    // Use of proxies isn't allowed.
+    // if (is_proxy()) {
+    // return (FALSE);
+    // }
+    
 // header('Content-type: text/html; charset="utf-8"',true);
-?>
+    ?>
 <html>
 <head>
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
@@ -78,13 +88,13 @@ if (is_proxy()) {
 
    var gst  = new globst();
    gst.st = <?php 
-log_load("bin5/index.php");
+       log_load("bin5/index.php");
 
-if (isset($laststate) == false) {
-  $laststate = -1;
-}
-echo $laststate;
-?>;
+   if (isset($laststate) == false) {
+       $laststate = -1;
+   }
+   echo $laststate;
+   ?>;
 var g_is_spawn=1;
 // var g_table_idx=<?php echo "$table_idx";?>;
 
@@ -297,3 +307,6 @@ window.onload = function() {
 
 </body>
 </html>
+<?php
+}
+?>

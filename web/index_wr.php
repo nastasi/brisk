@@ -656,6 +656,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
                         $user_cur->step_inc();
                     }
                     log_wr("presave bri");
+                    $room->match_add($table_idx, $bri);
                     log_wr("postsave bri");
                 }
                 // change room

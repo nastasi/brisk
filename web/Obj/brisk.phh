@@ -666,14 +666,16 @@ class Room {
 
   var $user;
   var $table;
+  var $match;
   var $comm; // commands for many people
   var $step; // current step of the comm array
   // externalized var $garbage_timeout;
   var $shm_sz;
 
   function Room () {
-    $this->user = array();
+    $this->user  = array();
     $this->table = array();
+    $this->match = array();
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
         $this->user[$i] = User::create($this, $i, "", "");
@@ -718,157 +720,152 @@ class Room {
     }
       
     webservers_check();
-      // FIXME BRISK4: include for each kind of table
-      require_once("${G_base}briskin5/Obj/briskin5.phh");
-
-      // Before all align times with table timeout
-      for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+    
+    // Before all align times with table timeout
+    for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
 	$table_cur = $this->table[$table_idx];
 	// if the table is complete and exists its shared mem we get the info about users lacc
-
+        
 	if ($table_cur->player_n == PLAYERS_N) {
-	  log_main("PLAYERS == N TABLE ".$table_idx);
-	  
-	  if (($sem = Bin5::lock_data(TRUE, $table_idx)) != FALSE) { 
-	    log_main("bin5 lock data success");
-	    
-	    $no_recovery = FALSE;
-	    if (($bri = Bin5::load_data($table_idx)) != FALSE) {
-	      if ($table_cur->table_token != $bri->table_token) {
-		log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
-		log_main("ERROR: not matching table_start. Room: ".$table_cur->table_start."  Table: ".$bri->table_start);
-		$no_recovery = TRUE;
-		$bri = FALSE;
-	      }
-	    }
-	    
-	    if ($bri != FALSE) {
-	      //
-	      //  SPAWN: JOIN
-	      //
-	      log_main("garbage_manager: bri loaded successfully.");
-	      $bri->garbage_manager(TRUE);
-	      
-	      $bri_table = $bri->table[0];
+            log_main("PLAYERS == N TABLE ".$table_idx);
+            
+            
+            $no_recovery = FALSE;
+            if (isset($this->match[$table_idx])) {
+                $bri = $this->match[$table_idx];
 
-	      // is the end of the table
-	      if ($bri->the_end == TRUE) {
-                  /*
-		 *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
-		 */
-		log_main("garbage_manager: INSIDE THE END.");
-
-                $plist = "$table_cur->table_token|$table_cur->idx|$table_cur->player_n";
-                for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-                  $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+                if ($table_cur->table_token != $bri->table_token) {
+                    log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
+                    log_main("ERROR: not matching table_start. Room: ".$table_cur->table_start."  Table: ".$bri->table_start);
+                    $no_recovery = TRUE;
+                    $bri = FALSE;
                 }
 
-		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
-		  // stat must be "table" by definition
-		  $user_cur = $this->user[$table_cur->player[$i]];
-		  $bri_user = $bri->user[$i];
-		  
-		  $user_cur->subst      = $bri_user->subst;
-		  $user_cur->step       = $bri_user->step;
-		  $user_cur->lacc       = $bri_user->lacc;
-		  $user_cur->laccwr     = $bri_user->lacc;
-		  $user_cur->bantime    = $bri_user->bantime;
-		}
 
-                log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME", $plist);
-
-		$this->room_join_wakeup($user_cur, FALSE, 0); 
-		$table_cur->table_token = "";
-                $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
+                if ($bri != FALSE) {
+                    //
+                    //  SPAWN: JOIN
+                    //
+                    log_main("garbage_manager: bri loaded successfully.");
+                    $bri->garbage_manager(TRUE);
+                    
+                    $bri_table = $bri->table[0];
+                    
+                    // is the end of the table
+                    
+                    if ($bri->the_end == TRUE) {
+                        /*
+                         *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
+                         */
+                        log_main("garbage_manager: INSIDE THE END.");
                         
-                        $bri->destroy_data($table_idx);
-	      }
-	      else {
-		log_main("gm:: save_data");
-
-		for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
-		  $this->user[$table_cur->player[$i]]->lacc = $bri->user[$i]->lacc;
-		}
-	      
-		Bin5::save_data($bri);
-	      }
-	    } // else if (($bri = Bin5::load_data($table_idx)) != FALSE) {
-	    else if ($no_recovery == FALSE) {
-	      log_crit("ERROR: table ".$table_idx." unrecoverable join");
-
-	      for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-		$user_cur = $this->user[$table_cur->player[$i]];
-		$user_cur->subst = "shutdowner";
-		$user_cur->step_inc();
-		
-		$ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
-		$ret .= "gst.st = ".($user_cur->step+1)."; ";
-                // MLANG <br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>
-                $prestr = sprintf($mlang_brisk['tabincon'][$G_lang], $user_cur->table);
-		$ret .= show_notify($prestr, 2000, $mlang_brisk['btn_close'][$G_lang], 400, 110);
-		$user_cur->comm[$user_cur->step % COMM_N] = $ret;
-		$user_cur->step_inc();
-	      }
-
-              $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
-              for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-                $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
-              }
-              log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
-              
-	      $this->room_join_wakeup($user_cur, TRUE, -2); 
-	      $table_cur->table_token = "";
-	    }
-
-	    Bin5::unlock_data($sem);
-	  } // bri::lock_data
-	} //  if ($table_cur->player_n == PLAYERS_N) {
-      } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+                        $plist = "$table_cur->table_token|$table_cur->idx|$table_cur->player_n";
+                        for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                            $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+                        }
+                        
+                        for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+                            // stat must be "table" by definition
+                            $user_cur = $this->user[$table_cur->player[$i]];
+                            $bri_user = $bri->user[$i];
+                            
+                            $user_cur->subst      = $bri_user->subst;
+                            $user_cur->step       = $bri_user->step;
+                            $user_cur->lacc       = $bri_user->lacc;
+                            $user_cur->laccwr     = $bri_user->lacc;
+                            $user_cur->bantime    = $bri_user->bantime;
+                        }
+                        
+                        log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME", $plist);
+                        
+                        $this->room_join_wakeup($user_cur, FALSE, 0); 
+                        $table_cur->table_token = "";
+                        $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
+                        
+                        $this->match_del($table_idx);
+                    }
+                    else {
+                        log_main("gm:: save_data");
+                        
+                        for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+                            $this->user[$table_cur->player[$i]]->lacc = $bri->user[$i]->lacc;
+                        }
+                    }
+                } // if ($bri == FALSE
+                else if ($no_recovery == FALSE) {
+                    log_crit("ERROR: table ".$table_idx." unrecoverable join");
+                    
+                    for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                        $user_cur = $this->user[$table_cur->player[$i]];
+                        $user_cur->subst = "shutdowner";
+                        $user_cur->step_inc();
+                        
+                        $ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
+                        $ret .= "gst.st = ".($user_cur->step+1)."; ";
+                        // MLANG <br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>
+                        $prestr = sprintf($mlang_brisk['tabincon'][$G_lang], $user_cur->table);
+                        $ret .= show_notify($prestr, 2000, $mlang_brisk['btn_close'][$G_lang], 400, 110);
+                        $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+                        $user_cur->step_inc();
+                    }
+                    
+                    $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
+                    for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                        $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+                    }
+                    log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
+                    
+                    $this->room_join_wakeup($user_cur, TRUE, -2); 
+                    $table_cur->table_token = "";
+                }
+            }
+        } //  if ($table_cur->player_n == PLAYERS_N) {
+    } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
     
-      log_rd2("out new loop.");
-		
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+    log_rd2("out new loop.");
+    
+    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
 	$user_cur = $this->user[$i];
 	
 	log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
-	  
+	
 	if ($user_cur->sess == "") 
-	  continue;
+            continue;
 	
 	if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) {
-	  // Auto logout dell'utente
-	  log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime ".$curtime);
-	  
-	  if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
-	    log_auth($user_cur->sess, "Autologout session.");
+            // Auto logout dell'utente
+            log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime ".$curtime);
+            
+            if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
+                log_auth($user_cur->sess, "Autologout session.");
+                
+                $user_cur->reset();
 	    
-	    $user_cur->reset();
-	    
-	    log_rd2("AUTO LOGOUT.");
-	    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
-	      $this->room_wakeup($user_cur);
-	    else if ($user_cur->subst == 'standup')
-	      $this->room_outstandup($user_cur);
-	    else
-	      log_rd2("LOGOUT FROM WHAT ???");
-	  }
+                log_rd2("AUTO LOGOUT.");
+                if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
+                    $this->room_wakeup($user_cur);
+                else if ($user_cur->subst == 'standup')
+                    $this->room_outstandup($user_cur);
+                else
+                    log_rd2("LOGOUT FROM WHAT ???");
+            }
 	}
 
 	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < $curtime) { // lo rimettiamo in piedi
-	  if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
-	    $this->room_wakeup($user_cur);
-	    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-            /* MLANG: <br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", "torna ai tavoli" */
-	    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
-	    $user_cur->step_inc();
-	  }
+            if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
+                $this->room_wakeup($user_cur);
+                $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+                /* MLANG: <br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", "torna ai tavoli" */
+                $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
+                $user_cur->step_inc();
+            }
 	}
-      }
-      log_rd2("GARBAGE UPDATED!");
-      
-      // externalized $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
-      Room::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
-      $ismod = TRUE;
+    }
+    log_rd2("GARBAGE UPDATED!");
+    
+    // externalized $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
+    Room::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
+    $ismod = TRUE;
 
     return ($ismod);
   }
@@ -2174,8 +2171,8 @@ class Room {
       printf("NEW_SOCKET (root): %d\n", intval($new_socket));
 
       switch ($path) {
-      case SITE_PREFIX:
-      case SITE_PREFIX."index.php":
+      case "":
+      case "index.php":
           ob_start();
       index_main($this, $header_out, $addr, $get, $post, $cookie);
       $content = ob_get_contents();
@@ -2185,7 +2182,7 @@ class Room {
       return TRUE;
 
       break;
-      case SITE_PREFIX."index_wr.php":
+      case "index_wr.php":
           ob_start();
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
@@ -2195,7 +2192,7 @@ class Room {
           return TRUE;
 
           break;
-      case SITE_PREFIX."index_rd_ifra.php":
+      case "index_rd_ifra.php":
           do {
               if (!isset($cookie['sess'])
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
@@ -2239,9 +2236,40 @@ class Room {
           
           return FALSE;
           break;
+
+      default:
+          /* FAR TODO: move all into an array of registered sub-apps */
+          $subs = "briskin5/";
+          $subs_l = strlen($subs);
+          if (!strncmp($path, $subs, $subs_l)) {
+              $ret = Bin5::request_mgr(&$s_a_p, &$header_out, &$new_socket, substr($path, $subs_l) , $addr, $get, $post, $cookie);
+              return ($ret);
+          }
+          break;
       }
 
       return (FALSE);
+  }
+
+  function match_add($idx, $match)
+  {
+      $this->match[$idx] = $match;
+  }
+
+  function match_del($idx)
+  {
+      unset($this->match[$idx]);
+  }
+
+  function match_get($idx, $token)
+  {
+      if (isset($this->match[$idx])) {
+          if (   $token == NULL 
+              || $token == $this->match[$idx]->table_token) {
+              return ($this->match[$idx]);
+          }
+      }
+      return NULL;
   }
 
 } // end class Room

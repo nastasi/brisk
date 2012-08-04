@@ -24,6 +24,7 @@
  */
 
 define('SITE_PREFIX', '/brisk/');
+define('SITE_PREFIX_LEN', 7);
 
 function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cookie)
 {
@@ -326,7 +327,16 @@ class Sac_a_push {
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             $header_out = array();
 
-                            $this->app->request_mgr($this, $header_out, $new_socket, $path, $addr, $get, $post, $cookie);
+                            $subs = SITE_PREFIX."briskin5/";
+                            $subs_l = strlen($subs);
+                            $rret = FALSE;
+                            if (!strncmp($path, SITE_PREFIX, SITE_PREFIX_LEN)) {
+                                $rret = $this->app->request_mgr($this, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
+                            }
+                            if ($rret == FALSE) { 
+                                // FIXME: manage 404 !!!
+                                printf("TODO: fix unknown page\n");
+                            }
                             printf("number of sockets after %d\n", count($this->socks));
                         }
                         else {
@@ -379,6 +389,9 @@ class Sac_a_push {
                 }
             }
             
+
+            $this->app->garbage_manager(FALSE);
+
 
             /* manage unfinished pages */
             foreach ($this->pages_flush as $k => $pgflush) {

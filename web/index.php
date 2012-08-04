@@ -182,13 +182,6 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
 
 
 require_once("briskin5/Obj/briskin5.phh");
-if (DEBUGGING == "local" && $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-  echo "Debugging time!";
-  exit;
-}
-
-log_load("index.php");
-
 
 function poll_dom() {
   GLOBAL $G_with_poll, $G_poll_title, $G_poll_entries;
