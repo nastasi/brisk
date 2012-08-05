@@ -48,6 +48,7 @@ define('CHAT_ILL_TIME', 6);
 
 define('SESS_LEN', 13);
 define('STREAM_TIMEOUT', 60);
+/* FIXME: move to sac-a-push .phh */
 define('EXPIRE_TIME_RD', 180);
 define('EXPIRE_TIME_SMAMMA', 360);
 define('EXPIRE_TIME_WAG', 10);
