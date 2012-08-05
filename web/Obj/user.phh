@@ -647,22 +647,23 @@ class User {
   }
   
   // FIXME TO SUPPORT iframe
-  static function page_sync($sess, $page, $table_idx, $table_token)
+  protected function page_sync($sess, $page, $table_idx, $table_token)
   {
       GLOBAL $is_page_streaming;
       
-      log_rd2("page_sync:".var_export(debug_backtrace()));
+      // log_rd2("page_sync:".var_export(debug_backtrace()));
       
       $is_page_streaming = TRUE;
       
       log_rd2("PAGE_SYNC");
+      printf("xXx USER::PAGE_SYNC [%s]\n", get_class($this));
       return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); hstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
   }
 
 
 
 
-  function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate)
+  protected function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate, $table_idx, $table_token)
   {
       GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
       // GLOBAL $first_loop;
@@ -758,7 +759,9 @@ class User {
            ***************/
           else if ($this->stat == 'table') {
               log_load("RESYNC");
-              return (self::page_sync($this->sess, "briskin5/index.php", $this->table, $this->table_token));
+              printf("xXx USER::MAINCHECK1 [%s]\n", get_class($this));
+
+              return ($this->page_sync($this->sess, "briskin5/index.php", $this->table, $this->table_token));
           }
           log_rd2("NEWSTAT: ".$this->stat);
       } /* if ($cur_step == -1) { */
@@ -773,7 +776,8 @@ class User {
                           $to_stat = $this->stat;
                           /* Room::unlock_data($sem); */
                           log_load("RESYNC");
-                          return (self::page_sync($this->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $this->table, $this->table_token));
+                          printf("xXx USER::MAINCHECK2 [%s]\n", get_class($this));
+                          return ($this->page_sync($this->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $this->table, $this->table_token));
                       }
                       log_rd2("lost history, refresh from scratch");
                       $new_step = -1;
@@ -910,6 +914,10 @@ function stream_main(&$body, $get, $post, $cookie)
     $CO_splashdate = "CO_splashdate".$G_splash_idx;
     if (($splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)
         $splashdate = ""; 
+    if (($table_idx = gpcs_var("table_idx", $get, $post, $cookie)) === FALSE)
+        $table_idx = ""; 
+    if (($table_token = gpcs_var("table_token", $get, $post, $cookie)) === FALSE)
+        $table_token = ""; 
 
     $is_page_streaming = FALSE;
     log_rd2("FROM OUTSIDE - STAT: ".$this->rd_stat." SUBST: ".$this->rd_subst." STEP: ".$this->rd_step." FROM: ".$this->rd_from. "IS_PAGE:" . $is_page_streaming);
@@ -920,7 +928,8 @@ function stream_main(&$body, $get, $post, $cookie)
     $old_stat  = $this->rd_stat;
     $old_subst = $this->rd_subst;
     $old_step  = $this->rd_step;
-    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate)) != FALSE) {
+    printf("xXx PRE : rd_step %d\n", $this->rd_step);
+    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate, $table_idx, $table_token)) != FALSE) {
         $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");
 // -->
@@ -930,7 +939,8 @@ push(\"%s\");
         if ($is_page_streaming) 
             return TRUE;
     }
-    
+    printf("xXx POST: rd_step %d\n", $this->rd_step);
+
     return TRUE;
 }
 

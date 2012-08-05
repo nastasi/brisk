@@ -477,7 +477,7 @@ class Bin5_user extends User {
        } 
     */
     
-    function spawn($from, $table, $table_pos)
+    function spawn($from, &$bri, $table, $table_pos)
     {
         GLOBAL $CO_bin5_pref_ring_endauct;
         
@@ -488,6 +488,7 @@ class Bin5_user extends User {
         
         /* NOTE: at this moment idx and table_pos fields have the same value 
            but diffentent functions, we keep them separated for a while */
+        $thiz->room       = $bri;
         $thiz->idx        = $table_pos;
         $thiz->asta_card  = -2;
         $thiz->asta_pnt   = -1;
@@ -717,6 +718,171 @@ class Bin5_user extends User {
         return ($ret);
     }
 
+    static function blocking_error($is_unrecoverable)
+    {
+        GLOBAL $is_page_streaming;
+        
+        $is_page_streaming = TRUE;
+        log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
+        return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
+    }
+    
+    protected function page_sync($sess, $page)
+    {
+        GLOBAL $is_page_streaming;
+        
+        $is_page_streaming = TRUE;
+        log_rd2("PAGE_SYNC");
+        printf("xXx BIN5_USER::PAGE_SYNC\n");
+        return (sprintf('hstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
+    }
+
+    protected function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate, $table_idx, $table_token)
+    {
+        GLOBAL $G_lang, $mlang_indrd, $is_page_streaming;
+        GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
+        GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
+        $CO_splashdate = "CO_splashdate".$G_splash_idx;
+        $$CO_splashdate = $splashdate;
+        
+        GLOBAL $S_load_stat;
+        
+        log_rd("maincheck begin");
+        
+        $ret = FALSE;
+        $curtime = time();
+        
+        /* if ((($curtime - $this->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) { */
+        /*     $S_load_stat['lL_laccgarb']++; */
+        
+        /*     if (($curtime - $this->lacc) >=  STREAM_TIMEOUT) { */
+        /*         $S_load_stat['wU_lacc_upd']++; */
+        /*         $this->lacc = $curtime; */
+        /*     } */
+        
+        /*     if (Room::garbage_time_is_expired($curtime)) { */
+        /*         log_only("F"); */
+        
+        /*         $S_load_stat['wR_garbage']++; */
+        /*         log_main("pre garbage_manager TRE"); */
+        /*         $this->room->garbage_manager(FALSE); */
+        /*     } */
+        /* } */
+        
+      /* Nothing changed, return. */
+      if ($cur_step == $this->step) 
+          return (FALSE);
+      
+      log_rd2("do other cur_stat[".$cur_stat."] user->stat[".$this->stat."] cur_step[".$cur_step."] user_step[".$this->step."]");
+      
+      if ($cur_step == -1) {
+          /*
+           *  if $cur_step == -1 load the current state from the main struct
+           */
+          
+          $S_load_stat['wR_minusone']++;
+          
+          if ($this->the_end == TRUE) { 
+              log_rd2("main_check: the end".var_export(debug_backtrace()));
+              $is_page_streaming = TRUE;
+          }
+          
+          if ($this->trans_step != -1) {
+              log_rd2("TRANS USATO ".$this->trans_step);
+              $cur_step = $this->trans_step;
+              $this->trans_step = -1;
+          }
+          else {
+              log_rd2("TRANS NON ATTIVATO");
+          }
+      }
+      
+      
+      /* this part I suppose is read only on $this->room structure */
+      if ($cur_step == -1) {
+          log_rd2("PRE-NEWSTAT");
+              
+          /***************
+           *             *
+           *    TABLE    *
+           *             *
+           ***************/
+          if ($this->stat == 'table') {
+              log_load("RESYNC");
+              /* NOTE: $this->room is associated with the current $bri object */
+              printf("xXx CLASS NAME [%s]\n", get_class($this->room));
+              $ret = show_table(&$this->room, $this, $this->step, FALSE, FALSE);
+          }
+          log_rd2("NEWSTAT: ".$this->stat);
+
+          $new_stat =  $this->stat;
+          $new_subst = $this->subst;
+          $new_step =  $this->step;
+      } /* if ($cur_step == -1) { */
+      else {
+          /* $sem = Room::lock_data(FALSE); */
+          $S_load_stat['rU_heavy']++;
+          
+          if ($cur_step < $this->step) {
+              do {
+                  if ($cur_step + COMM_N < $this->step) {
+                      if (($cur_stat != $this->stat)) {
+                          $to_stat = $this->stat;
+                          /* Room::unlock_data($sem); */
+                          log_load("RESYNC");
+                          printf("xXx BIN5_USER::MAINCHECK\n");
+                          return ($this->page_sync($this->sess, ($to_stat == "table" ? "index.php" : "../index.php"), $this->table, $this->table_token));
+                      }
+                      log_rd2("lost history, refresh from scratch");
+                      printf("xXx LOST HISTORY!\n");
+                      $new_step = -1;
+                      break;
+                  } 
+                  for ($i = $cur_step ; $i < $this->step ; $i++) {
+                      $ii = $i % COMM_N;
+                      log_rd2("ADDED TO THE STREAM: ".$this->comm[$ii]);
+                      $ret .= $this->comm[$ii];
+                  }
+                  $new_stat =  $this->stat;
+                  $new_subst = $this->subst;
+                  $new_step =  $this->step;
+              } while (0);
+              
+              log_rd2($this->step, 'index_rd.php: after ret set');
+              
+              if ($this->the_end == TRUE) {
+                  log_rd2("LOGOUT BYE BYE!!");
+                  log_auth($this->sess, "Explicit logout.");
+                  
+                  if ($this->the_end == TRUE) {
+                      $this->reset();
+                      
+                      // FIXME !!! 
+                      /* if ($this->subst == 'sitdown') { */
+                      /*     log_load("ROOM WAKEUP"); */
+                      /*     $this->room->room_wakeup($this); */
+                      /* } */
+                      /* else if ($this->subst == 'standup') */
+                      /*     $this->room->room_outstandup($this); */
+                      /* else */
+                      /*     log_rd2("LOGOUT FROM WHAT ???"); */
+                      
+                  } /* if ($this->the_end == TRUE) { ... */
+              } /* if ($this->the_end == TRUE) { ... */
+          } /* if ($cur_step < $this->step) { */
+          
+          /* Room::unlock_data($sem); */
+      }  /* else of if ($cur_step == -1) { */
+      
+    
+      return ($ret);
+  }  //   function maincheck (...
+
+
+
+
+
+
 } // end class Bin5_user
 
 
@@ -737,27 +903,6 @@ class Bin5 {
     var $the_end;
     var $tok;
 
-    static function page_manager($room, $header_out, $path, $method, $addr, $get, $post, $cookie) 
-    {
-        switch ($path) {
-        case "":
-        case "index.php":
-            ob_start();
-            bin5_index_main($room, $header_out, $addr, $get, $post, $cookie);
-            $content = ob_get_contents();
-            ob_end_clean();
-            
-            $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
-            
-            if ($pgflush->try_flush($curtime) == FALSE) {
-                // Add $pgflush to the pgflush array
-                array_push($pages_flush, $pgflush);
-            }
-            break;
-        }
-        return TRUE;
-    }
-
     function Bin5 ($room, $table_idx, $table_token) {
         $this->user = array();
         $this->table = array();
@@ -776,7 +921,7 @@ class Bin5 {
         
         for ($i = 0 ; $i < $table->player_n ; $i++) {
             $user[$table->player[$i]]->table_token = $table_token;
-            $this->user[$i] = Bin5_user::spawn($user[$table->player[$i]], $table_idx, $i);
+            $this->user[$i] = Bin5_user::spawn($user[$table->player[$i]], $this, $table_idx, $i);
         }
         $this->table[0] = Bin5_table::spawn(&$table);
         
@@ -1286,16 +1431,14 @@ class Bin5 {
             break;
         case "index_rd_ifra.php":
             do {
-                if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL) {
-                    return (FALSE);
-                }
-                if (!isset($cookie['sess'])
+                if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL
+                    || !isset($cookie['sess'])
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
-                    $content = Bin5_user::stream_fini(TRUE);
-                    
+
+                    $content = Bin5_user::stream_fini(TRUE);                    
                     $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
-                    return TRUE;
-                    
+
+                    return TRUE;                    
                     break;
                 }
                 // close a previous opened index_read_ifra socket, if exists
@@ -1463,14 +1606,14 @@ function calculate_points(&$table)
    from table: asta cmd e tutti passano:  TRUE, TRUE
    from table: fine partita:              TRUE, TRUE
 */
-function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
+function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
 {
     $table_idx = $user->table;
-    $table     = $room->table[$table_idx];
+    $table     = $bri->table[$table_idx];
     $table_pos = $user->table_pos;
 
     $ret = "table_init();";
-    $ret .= $table->exitlock_show(&$room->user, $table_pos);
+    $ret .= $table->exitlock_show(&$bri->user, $table_pos);
     if (!$is_again) {
         /* GENERAL STATUS */
         $ret .= sprintf( 'gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
@@ -1484,24 +1627,24 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
         /* USERS INFO */
         $ret .= $user->myname_innerHTML();
         $ret .= sprintf('set_names([%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"]); ',
-                        $room->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->flags,
-                        xcape($room->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->name),
+                        $bri->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->flags,
+                        xcape($bri->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->name),
 
-                        $room->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->flags,
-                        xcape($room->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->name),
+                        $bri->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->flags,
+                        xcape($bri->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->name),
 
-                        $room->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->flags,
-                        xcape($room->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->name),
+                        $bri->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->flags,
+                        xcape($bri->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->name),
 
-                        (BIN5_PLAYERS_N == 3 ? 0 : $room->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->flags),
-                        (BIN5_PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->name)),
+                        (BIN5_PLAYERS_N == 3 ? 0 : $bri->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->flags),
+                        (BIN5_PLAYERS_N == 3 ? "" :  xcape($bri->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->name)),
 
-                        (BIN5_PLAYERS_N == 3 ? 0 : $room->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->flags),
-                        (BIN5_PLAYERS_N == 3 ? "" :  xcape($room->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->name)));
+                        (BIN5_PLAYERS_N == 3 ? 0 : $bri->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->flags),
+                        (BIN5_PLAYERS_N == 3 ? "" :  xcape($bri->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->name)));
     }
     /* NOTIFY FOR THE CARD MAKER */
     if ($is_transition) { //  && $user->subst ==  "asta" superfluo
-        $ret .= show_table_info(&$room, &$table, $table_pos);
+        $ret .= show_table_info(&$bri, &$table, $table_pos);
     }
     if (!$is_again) 
         $ret .= table_wellcome($user);
@@ -1591,7 +1734,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
         /* show users auction status */
         $showst = "";
         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-            $user_cur = &$room->user[$table->player[$i]];
+            $user_cur = &$bri->user[$table->player[$i]];
             $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "), 
                                ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
         }
@@ -1638,7 +1781,7 @@ function show_table(&$room, &$user, $sendstep, $is_transition, $is_again)
             $ret .= "remark_off();";
     
         /* WHO CALL AND WHAT */
-        $ret .= briscola_show($room, $table, $user);
+        $ret .= briscola_show($bri, $table, $user);
     
     }
     return ($ret);
@@ -1690,19 +1833,19 @@ function calculate_winner(&$table)
     return ($cur_win);
 }
 
-function show_table_info(&$room, &$table, $table_pos)
+function show_table_info(&$bri, &$table, $table_pos)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;
 
     $ret = "";
-    $user = $room->user[$table->player[$table_pos]];
+    $user = $bri->user[$table->player[$table_pos]];
 
     $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
     $noty = sprintf('<table class=\"points\"><tr><th></th>');
   
     // Names.
     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) 
-        $noty .= sprintf('<th class=\"td_points\">%s</th>', xcape($room->user[$table->player[$i]]->name));
+        $noty .= sprintf('<th class=\"td_points\">%s</th>', xcape($bri->user[$table->player[$i]]->name));
     $noty .= sprintf("</tr>");
 
     // Points.
@@ -1737,8 +1880,8 @@ function show_table_info(&$room, &$table, $table_pos)
             /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
       
             $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang], 
-                             xcape($room->user[$win]->name),
-                             xcape($room->user[$fri]->name));
+                             xcape($bri->user[$win]->name),
+                             xcape($bri->user[$fri]->name));
             if ($table->old_pnt == 120) {
                 $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang]);
             }
@@ -1751,7 +1894,7 @@ function show_table_info(&$room, &$table, $table_pos)
         }
         else {
             $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
-                             xcape($room->user[$win]->name));
+                             xcape($bri->user[$win]->name));
             if ($table->old_pnt == 120) {
                 $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang]);
             }
@@ -1773,7 +1916,7 @@ function show_table_info(&$room, &$table, $table_pos)
     if ($table->mazzo == $table_pos) 
         $noty .= $mlang_bin5_bin5['info_yshuf'][$G_lang];
     else {
-        $unam = xcape($room->user[$table->player[$table->mazzo]]->name);
+        $unam = xcape($bri->user[$table->player[$table->mazzo]]->name);
         $noty .= sprintf($mlang_bin5_bin5['info_shuf'][$G_lang], $unam);
     }
 
@@ -1792,7 +1935,7 @@ function show_table_info(&$room, &$table, $table_pos)
         $noty .= $mlang_bin5_bin5['info_yturn'][$G_lang];
     }
     else {
-        $unam = xcape($room->user[$table->player[$curplayer]]->name);
+        $unam = xcape($bri->user[$table->player[$curplayer]]->name);
         $noty .= sprintf($mlang_bin5_bin5['info_turn'][$G_lang], $unam);
     }
   
@@ -1823,7 +1966,7 @@ function table_wellcome($user)
 }
 
 
-function briscola_show($room, $table, $user)
+function briscola_show($bri, $table, $user)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;
     $ptnadd = "";
@@ -1840,7 +1983,7 @@ function briscola_show($room, $table, $user)
     else {
         $prestr = sprintf('$("callerinfo").innerHTML = "%s";', $mlang_bin5_bin5['call_call'][$G_lang]);
         $ret .= sprintf($prestr, 
-                        xcape($room->user[$table->player[$table->asta_win]]->name), $ptnadd);
+                        xcape($bri->user[$table->player[$table->asta_win]]->name), $ptnadd);
     }
     $ret .= sprintf('set_iscalling(%d);', ($table->asta_win - $user->table_pos + BIN5_PLAYERS_N) % BIN5_PLAYERS_N);
 

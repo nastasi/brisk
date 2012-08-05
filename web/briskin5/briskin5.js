@@ -266,7 +266,9 @@ function act_reload()
 {
     window.onunload = null;
     window.onbeforeunload = null;
-    document.location.reload();
+    // alert(document.location.toString());
+    document.location.assign("index.php");
+    // document.location.reload();
 }
 
 function set_names(so,ea,ne,nw,we)

@@ -31,6 +31,7 @@
  *   TEST - garbage management
  *   - log_legal address fix
  *   - setcookie (for tables only)
+ *   - 404 wrong page management
  *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
