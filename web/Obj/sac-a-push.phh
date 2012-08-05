@@ -425,7 +425,8 @@ class Sac_a_push {
                     }
                     
                     if ($response != "") {
-                        echo "SPIA: [".substr($response, 0, 60)."...]\n";
+                        // echo "SPIA: [".substr($response, 0, 60)."...]\n";
+                        echo "SPIA: [".$response."...]\n";
                         $response_l = mb_strlen($response, "ASCII");
                         $wret = @fwrite($sock, $response);
                         if ($wret < $response_l) {
