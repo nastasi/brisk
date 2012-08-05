@@ -27,29 +27,30 @@
  *   - BUG: logout failed
  *   - BUG: fast loop on stream index_rd_ifra page
  *
- *   - garbage management
- *   - log_legal address fix
- *   - from room to table
- *   - from table to room
- *   - index_wr other issues
  *   - manage and test cross forwarder between table and room
+ *   TEST - garbage management
+ *   - log_legal address fix
  *   - setcookie (for tables only)
- *   - keepalive management
  *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
+ *   DONE - app level keep-alive
+ *   DONE - index_wr other issues
+ *   DONE - from room to table
+ *   DONE - from table to room
  *   DONE - chunked
  *   DONE - bug: read from a not resource handle (already closed because a new socket substitute it)
  *   DONE - partial write for normal page management
  *   DONE - index_rd_ifra: last_clean issue
  *   DONE - fwrite failed error management (select, buffer where store unsent data, and fwrite check and retry)
- *   ABRT - index_wr.php::reload - reload is js-only function
  *   DONE - bug: after restart index_rd.php receive from prev clients a lot of req
  *   DONE - index_wr.php::chat
  *   DONE - index_wr.php::exit
  *   DONE - index_rd.php porting
  *   DONE - generic var management from internet
  *   DONE - index.php auth part
+ *   ABRT - index_wr.php::reload - reload is js-only function
+ *   ABRT - keepalive management - not interesting for our purposes
  */
 
 $G_base = "../";
