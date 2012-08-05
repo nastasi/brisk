@@ -42,6 +42,7 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
 {
     GLOBAL $G_base, $G_dbasetype;
 
+    $curtime = time();
     if ($bri == NULL) {
         return FALSE;
     }
@@ -73,7 +74,10 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
     log_wr('POSTSPLIT: '.$argz[0].'  user->stat: ['.$user->stat.']');
     log_wr($user->step, 'bin::index_wr.php: after get_user()');
     
-    if (false && $argz[0] == 'shutdown') {
+    if ($argz[0] == 'ping') {
+        $user->lacc = $curtime;
+    }
+    else if (false && $argz[0] == 'shutdown') {
         log_auth($user_cur->sess, "Shutdown session. delegate to room gc the autologout");
         
         log_rd2("bin5/index_wr.php: AUTO LOGOUT.");
@@ -481,7 +485,6 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
                         $pt_cur = calculate_points(&$table);
                         
                         $plist = "$table->table_token|$user->table_orig|$table->player_n";
-                        $curtime = time();
                         $ucodes = array();
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                             $user_cur = &$bri->user[$table->player[$i]];

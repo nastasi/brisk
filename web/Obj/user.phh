@@ -943,6 +943,15 @@ push(null);
     
 }
 
+function stream_ping()
+{
+    return (sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"act_ping();\");
+// -->
+</script>", $this->rd_scristp++));
+    
+}
+
     static function base_get()
     {
         $c = get_called_class();

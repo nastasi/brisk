@@ -199,7 +199,10 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 
     log_wr($user->step, 'index_wr.php: after get_user()');
 
-    if ($argz[0] == 'shutdown') {
+    if ($argz[0] == 'ping') {
+        $user->lacc = $curtime;
+    }
+    else if ($argz[0] == 'shutdown') {
         log_auth($user->sess, "Shutdown session.");
 
         $user->reset();

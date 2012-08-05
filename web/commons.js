@@ -329,6 +329,11 @@ function act_chatt(value)
 }
 
 /* Stat: ROOM */
+function act_ping()
+{
+    send_mesg("ping");
+}
+
 function act_sitdown(table)
 {
     send_mesg("sitdown|"+table);
