@@ -346,7 +346,6 @@ class Sac_a_push {
                     else {
                         if (($buf = fread($sock, 512)) === FALSE) {
                             printf("error read\n");
-                            exit(123);
                         }
                         else if (strlen($buf) === 0) {
                             if ($sock === $this->list) {
@@ -371,7 +370,7 @@ class Sac_a_push {
                             }
                         }
                         else {
-                            if ($debug > 1) {
+                            if ($this->debug > 1) {
                                 print_r($read);
                             }
                             if ($sock === $this->list) {
