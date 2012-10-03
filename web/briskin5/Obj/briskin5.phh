@@ -903,6 +903,29 @@ class Bin5 {
     var $the_end;
     var $tok;
 
+    static function page_manager($room, $header_out, $path, $method, $addr, $get, $post, $cookie) 
+    {
+        switch ($path) {
+        case "":
+        case "index.php":
+            ob_start();
+            bin5_index_main($room, $header_out, $addr, $get, $post, $cookie);
+            $content = ob_get_contents();
+            ob_end_clean();
+            
+            force_no_cache($header_out);
+
+            $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
+            
+            if ($pgflush->try_flush($curtime) == FALSE) {
+                // Add $pgflush to the pgflush array
+                array_push($pages_flush, $pgflush);
+            }
+            break;
+        }
+        return TRUE;
+    }
+
     function Bin5 ($room, $table_idx, $table_token) {
         $this->user = array();
         $this->table = array();
@@ -1414,6 +1437,8 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
         
+            force_no_cache($header_out);
+
             $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
             return TRUE;
         
@@ -1425,6 +1450,8 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
             
+            force_no_cache($header_out);
+
             $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
             return TRUE;
             
