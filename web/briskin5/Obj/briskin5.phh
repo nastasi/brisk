@@ -747,6 +747,8 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
             
+            force_no_cache($header_out);
+
             $pgflush = new PageFlush($new_socket, $curtime, 20, $header_out, $content);
             
             if ($pgflush->try_flush($curtime) == FALSE) {
@@ -1269,6 +1271,8 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
         
+            force_no_cache($header_out);
+
             $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
             return TRUE;
         
@@ -1280,6 +1284,8 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
             
+            force_no_cache($header_out);
+
             $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
             return TRUE;
             

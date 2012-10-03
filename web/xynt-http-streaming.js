@@ -39,7 +39,8 @@ http_streaming.prototype = {
     keepalives_equal:  0,
     keepalives_eq_max: 6,
     /* NOTE: right watch_timeout value to 100, for devel reasons use 1000 or more */
-    watchdog_timeout:  200,
+    // FIXME watchdog_timeout:  200,
+    watchdog_timeout:  2000,
     watchdog_ct:       0,
     watchdog_checktm:  20,
     watchable:         false,

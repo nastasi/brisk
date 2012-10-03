@@ -293,6 +293,13 @@ function mop_flush()
     flush();
 }
 
+function force_no_cache(&$header_out)
+{
+    $header_out['Pragma'] = 'no-cache, must-revalidate';
+    $header_out['Cache-Control'] = 'no-cache';
+    $header_out['Expires'] = '-1';
+}
+
 function file_lock($fname, $is_exclusive)
 {
     if (($res = @fopen($fname, "r+")) == FALSE) {
@@ -2179,6 +2186,8 @@ class Room {
       $content = ob_get_contents();
       ob_end_clean();
 
+      force_no_cache($header_out);
+
       $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
       return TRUE;
 
@@ -2188,6 +2197,8 @@ class Room {
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
           ob_end_clean();
+
+          force_no_cache($header_out);
 
           $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
           return TRUE;
