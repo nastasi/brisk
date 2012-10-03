@@ -637,7 +637,7 @@ class User {
 
   /* INDEX_RD_IFRA PORT */
 
-  static function blocking_error($is_unrecoverable)
+  protected function blocking_error($is_unrecoverable)
   {
       GLOBAL $is_page_streaming;
       
@@ -822,7 +822,7 @@ class User {
       return ($ret);
   }  //   function maincheck (...
 
-static function stream_fini($is_unrecoverable)
+public static function stream_fini($is_unrecoverable)
 {
     GLOBAL $G_four_rnd_string;
 

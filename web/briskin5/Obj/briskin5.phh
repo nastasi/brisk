@@ -718,7 +718,37 @@ class Bin5_user extends User {
         return ($ret);
     }
 
-    static function blocking_error($is_unrecoverable)
+public static function stream_fini($is_unrecoverable)
+{
+    GLOBAL $G_four_rnd_string;
+
+    printf("xXx user::stream_fini\n");
+
+    // IF IFRAME THEN:
+    $body = "";
+    $body .= sprintf("<html>
+<head>
+<script type=\"text/javascript\" src=\"%scommons.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\">
+var http_streaming = \"ready\";", self::base_get(), self::base_get());
+    $body .= sprintf("
+window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+</script>
+</head>
+<body>");
+    $body .= sprintf("<!-- \n%s -->\n", $G_four_rnd_string);
+    $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"%s\");
+// -->
+</script>", 0, escpush(self::blocking_error($is_unrecoverable)) );
+    // ELSE IF XHR THEN:
+    // return (self::blocking_error($is_unrecoverable));
+    return ($body);
+}
+
+
+    protected function blocking_error($is_unrecoverable)
     {
         GLOBAL $is_page_streaming;
         

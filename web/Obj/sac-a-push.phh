@@ -105,9 +105,13 @@ function gpcs_var($name, $get, $post, $cookie)
 
 function headers_render($header, $len)
 {
-    
     $s = "";
-    $s .= "HTTP/1.1 200 OK\r\n";
+    if (isset($header['Location'])) {
+        return sprintf("HTTP/1.1 302 OK\r\nLocation: %s\r\n\r\n", $header['Location']);
+    }
+    else {
+        $s .= "HTTP/1.1 200 OK\r\n";
+    }
     if (!isset($header['Date']))
         $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
     if (!isset($header['Connection']))

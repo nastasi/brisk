@@ -262,7 +262,7 @@ function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
               if ($user->stat == "table") {
                   setcookie("table_token", $user->table_token, $curtime + 31536000);
                   setcookie("table_idx", $user->table, $curtime + 31536000);
-                  $header_out['Location'] = "Location: briskin5/index.php";
+                  $header_out['Location'] = "briskin5/index.php";
                   return TRUE;
               }
               $ACTION = "room";
