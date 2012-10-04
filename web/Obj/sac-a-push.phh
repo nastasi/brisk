@@ -421,9 +421,10 @@ class Sac_a_push {
                         $content = "";
                         $user->stream_main($content, $get, $post, $cookie);
                         printf("[%s] [%d] [%d]\n", $user->name, $user->lacc, $this->curtime);
-                        if ($content == "" && $user->ping_req == FALSE 
+                        if (/* $content == "" && */ $user->ping_req == FALSE 
                             && (($this->curtime - $user->lacc) > (EXPIRE_TIME_RD / 2))) {
-                            $content = $user->stream_keepalive(TRUE);
+                            // $content = $user->stream_keepalive(TRUE);
+                            $content += $user->stream_keepalive(TRUE);
                             $user->ping_req = TRUE;
                         }
                         if ($content == "" && $user->rd_kalive_is_expired($this->curtime)) {
