@@ -2178,6 +2178,8 @@ class Room {
   {
       printf("NEW_SOCKET (root): %d\n", intval($new_socket));
 
+      force_no_cache($header_out);
+
       switch ($path) {
       case "":
       case "index.php":
@@ -2185,8 +2187,6 @@ class Room {
       index_main($this, $header_out, $addr, $get, $post, $cookie);
       $content = ob_get_contents();
       ob_end_clean();
-
-      force_no_cache($header_out);
 
       $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
       return TRUE;
@@ -2197,8 +2197,6 @@ class Room {
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
           ob_end_clean();
-
-          force_no_cache($header_out);
 
           $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
           return TRUE;

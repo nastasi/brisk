@@ -1459,6 +1459,8 @@ class Bin5 {
         if (($table_token = gpcs_var('table_token', $get, $post, $cookie)) === FALSE) 
             unset($table_token);
 
+        force_no_cache($header_out);
+
         switch ($path) {
         case "":
         case "index.php":
@@ -1467,8 +1469,6 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
         
-            force_no_cache($header_out);
-
             $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
             return TRUE;
         
@@ -1480,8 +1480,6 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
             
-            force_no_cache($header_out);
-
             $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
             return TRUE;
             
