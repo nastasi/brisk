@@ -403,6 +403,12 @@ class Sac_a_push {
                 }
             }
             
+            /*
+               $response:                        raw stream data not sent
+               $content:                         html consistent data (<script bla bla>)
+               $user->stream_keepalive($w_ping)  ping srv->cli OR srv->cli + cli->srv if $w_ping == TRUE
+            */
+
             /* manage open streaming */
             foreach ($this->socks as $k => $sock) {
                 if (isset($this->s2u[intval($sock)])) {
@@ -417,11 +423,11 @@ class Sac_a_push {
                         printf("[%s] [%d] [%d]\n", $user->name, $user->lacc, $this->curtime);
                         if ($content == "" && $user->ping_req == FALSE 
                             && (($this->curtime - $user->lacc) > (EXPIRE_TIME_RD / 2))) {
-                            $content = $user->stream_ping();
+                            $content = $user->stream_keepalive(TRUE);
                             $user->ping_req = TRUE;
                         }
                         if ($content == "" && $user->rd_kalive_is_expired($this->curtime)) {
-                            $content = $user->stream_keepalive();
+                            $content = $user->stream_keepalive(FALSE);
                         }
                         if ($content != "") {
                             $response = chunked_content($content);

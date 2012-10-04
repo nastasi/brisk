@@ -944,30 +944,21 @@ push(\"%s\");
     return TRUE;
 }
 
-function stream_keepalive()
+function stream_keepalive($with_ping)
 {
     return (sprintf("<script id='hs%d' type='text/javascript'><!--
-push(null);
+push(%s);
 // -->
-</script>", $this->rd_scristp++));
+</script>", $this->rd_scristp++, ($with_ping ? "\"act_ping();\"" : "null")));
     
 }
 
-function stream_ping()
+static function base_get()
 {
-    return (sprintf("<script id='hs%d' type='text/javascript'><!--
-push(\"act_ping();\");
-// -->
-</script>", $this->rd_scristp++));
-    
+    $c = get_called_class();
+    printf("CALLED_CLASS: [%s]\n", $c);
+    return $c::BASE;
 }
-
-    static function base_get()
-    {
-        $c = get_called_class();
-        printf("CALLED_CLASS: [%s]\n", $c);
-        return $c::BASE;
-    }
 
 } // end class User
 
