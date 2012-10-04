@@ -23,9 +23,11 @@
  *
  * TODO
  *
- *
+ *   - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
  *   - BUG: logout failed
  *   - BUG: fast loop on stream index_rd_ifra page
+ *
+ *   - centralize all '<script ...' incapsulation to allow multiple transport system.
  *
  *   - manage and test cross forwarder between table and room
  *   TEST - garbage management
