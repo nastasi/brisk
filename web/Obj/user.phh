@@ -946,11 +946,12 @@ push(\"%s\");
 
 function stream_keepalive($with_ping)
 {
-    return (sprintf("<script id='hs%d' type='text/javascript'><!--
+    $ret =  (sprintf("<script id='hs%d' type='text/javascript'><!--
 push(%s);
 // -->
 </script>", $this->rd_scristp++, ($with_ping ? "\"act_ping();\"" : "null")));
-    
+
+    return ($ret);
 }
 
 static function base_get()

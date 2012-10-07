@@ -197,9 +197,8 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 
     log_wr('POSTSPLIT: '.$argz[0]);
 
-    log_wr($user->step, 'index_wr.php: after get_user()');
-
     if ($argz[0] == 'ping') {
+        log_wr("PING RECEIVED, LACC UPDATED\n");
         $user->lacc = $curtime;
     }
     else if ($argz[0] == 'shutdown') {
