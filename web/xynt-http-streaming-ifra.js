@@ -6,6 +6,7 @@ var script_clean = -1;
 function push(s) {
     var i;
 
+    // window.parent.console.log('push('+s+');');
     for (i = last_clean ; i < script_clean ; i++) {
         if (typeof($('hs'+i)) != 'undefined' && $('hs'+i) != null) {
             document.body.removeChild($('hs'+i));

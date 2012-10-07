@@ -23,17 +23,18 @@
  *
  * TODO
  *
- *   - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
- *   - BUG: logout failed
  *   - BUG: fast loop on stream index_rd_ifra page
  *
  *   - centralize all '<script ...' incapsulation to allow multiple transport system.
  *
  *   - manage and test cross forwarder between table and room
- *   TEST - garbage management
  *   - log_legal address fix
- *   - setcookie (for tables only)
+ *   - setcookie (for tables only and persist prefs)
  *   - 404 wrong page management
+ *
+ *   TEST - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
+ *   TEST - BUG: logout failed (fixed with a garbage_collector wrapper at sac-a-push level
+ *   TEST - garbage management
  *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
