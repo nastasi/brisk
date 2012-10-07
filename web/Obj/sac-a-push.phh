@@ -262,6 +262,23 @@ class Sac_a_push {
         array_push($this->pages_flush, $pgflush);
     }
 
+    function garbage_manager($force)
+    {
+        $this->app->garbage_manager($force);
+
+        foreach ($this->socks as $k => $sock) {
+            if ($this->s2u[intval($sock)]->sess == '') {
+                if ($this->s2u[intval($sock)]->rd_socket_get() != NULL) {
+                    $this->s2u[intval($sock)]->rd_socket_set(NULL);
+                }
+                unset($this->socks[intval($sock)]);
+                unset($this->s2u[intval($sock)]);
+                fclose($sock);
+                printf("CLOSE ON GARBAGE MANAGER\n");
+            }
+        }
+    }
+
     function run()
     {
         if ($this->main_loop) {
@@ -391,10 +408,8 @@ class Sac_a_push {
                     }
                 }
             }
-            
 
-            $this->app->garbage_manager(FALSE);
-
+            $this->garbage_manager(FALSE);
 
             /* manage unfinished pages */
             foreach ($this->pages_flush as $k => $pgflush) {
