@@ -45,6 +45,7 @@ define('COMM_GEN_N', 50);
 
 define('CHAT_N', 3);
 define('CHAT_ILL_TIME', 6);
+define('CHAT_ENABLED', TRUE);
 
 define('SESS_LEN', 13);
 define('STREAM_TIMEOUT', 60);
@@ -1478,7 +1479,7 @@ class Room {
 
     else { // normal chat line
       $is_normchat = TRUE;
-      if ($curtime < ($user->chat_ban + $user->chat_dlt)) {
+      if (CHAT_ENABLED && $curtime < ($user->chat_ban + $user->chat_dlt)) {
         $only_you = TRUE;
         $user->chat_dlt = $user->chat_dlt * 2; 
         if ($user->chat_dlt > 120)
@@ -1486,7 +1487,7 @@ class Room {
       }
       else if ($user->chat_lst == $msg)
         $only_you = TRUE;
-      else if ($curtime - $user->chattime[($user->chat_cur + 1) % CHAT_N] < CHAT_ILL_TIME) {
+      else if (CHAT_ENABLED && $curtime - $user->chattime[($user->chat_cur + 1) % CHAT_N] < CHAT_ILL_TIME) {
         $user->chat_ban = $curtime;
         $user->chat_dlt = 5;
         $only_you = TRUE;
