@@ -429,15 +429,19 @@ class Sac_a_push {
                 if (isset($this->s2u[intval($sock)])) {
                     $user = $this->s2u[intval($sock)];
                     $response = $user->rd_cache_get();
-                    if (($this->curtime - $user->lacc) <= (EXPIRE_TIME_RD / 2)) {
+                    $do_ping = FALSE;
+                    if (($this->curtime - $user->lacc) > (EXPIRE_TIME_RD / 3)) {
+                        $do_ping = TRUE;
+                    }
+                    else {
                         $user->ping_req = FALSE;
                     }
+
                     if ($response == "") {
                         $content = "";
                         $user->stream_main($content, $get, $post, $cookie);
                         printf("[%s] [%d] [%d]\n", $user->name, $user->lacc, $this->curtime);
-                        if ($user->ping_req == FALSE
-                            && (($this->curtime - $user->lacc) > (EXPIRE_TIME_RD / 2))) {
+                        if ($do_ping && $user->ping_req == FALSE) {
                             $content .= $user->stream_keepalive(TRUE);
                             $user->ping_req = TRUE;
                         }
