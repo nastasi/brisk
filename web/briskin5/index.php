@@ -110,7 +110,7 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  hstm = new http_streaming(window, console, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+  hstm = new http_streaming(window, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
   hstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
