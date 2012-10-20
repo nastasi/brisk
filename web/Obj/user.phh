@@ -710,7 +710,7 @@ class User {
           $S_load_stat['wR_minusone']++;
           
           if ($this->the_end == TRUE) { 
-              log_rd2("main_check: the end".var_export(debug_backtrace()));
+              // log_rd2("main_check: the end".var_export(debug_backtrace()));
               $is_page_streaming = TRUE;
           }
           
