@@ -375,9 +375,11 @@ class Sac_a_push {
                             }
                             if ($sock === $this->list) {
                                 printf("Arrivati %d bytes da list\n", strlen($buf));
+                                exit(21);
                             }
                             else if ($sock === $this->in) {
                                 printf("Arrivati %d bytes da stdin\n", strlen($buf));
+                                exit(22);
                             }
                             else {
                                 // $user_a[$s2u[intval($sock)]]->disable();
