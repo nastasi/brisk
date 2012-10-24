@@ -324,7 +324,10 @@ class Sac_a_push {
                     }
                     if ($sock === $this->list) {
                         printf("NUOVA CONNEX\n");
-                        $new_unix = stream_socket_accept($this->list);
+                        if (($new_unix = stream_socket_accept($this->list)) == FALSE) {
+                            printf("SOCKET_ACCEPT FAILED\n");
+                            continue;
+                        }
                         $stream_info = "";
                         $method      = "";
                         $get         = array();
