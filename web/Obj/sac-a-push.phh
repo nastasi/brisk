@@ -305,7 +305,7 @@ class Sac_a_push {
             }
             $write  = NULL;
             $except = NULL;
-            $num_changed_sockets = stream_select($read, $write, $except, 0, 100000);
+            $num_changed_sockets = stream_select($read, $write, $except, 0, 500000);
         
             if ($num_changed_sockets == 0) {
                 printf(" no data in 5 secs ");
