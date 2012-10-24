@@ -368,10 +368,11 @@ class Sac_a_push {
                         }
                     }
                     else {
-                        if (($buf = fread($sock, 512)) === FALSE) {
-                            printf("error read\n");
-                        }
-                        else if (strlen($buf) === 0) {
+                        $buf = fread($sock, 512);
+                        if ($buf == FALSE || strlen($buf) == 0) {
+                            if ($buf == FALSE) {
+                                printf("ERROR READING\n");
+                            }
                             if ($sock === $this->list) {
                                 printf("Arrivati %d bytes da list\n", strlen($buf));
                             }
@@ -385,9 +386,10 @@ class Sac_a_push {
                                 }
                                 unset($this->socks[intval($sock)]);
                                 unset($this->s2u[intval($sock)]);
-                                fclose($sock);
-                                printf("CLOSE ON READ\n");
                             }
+                            fclose($sock);
+                            printf("CLOSE ON READ\n");
+
                             if ($this->debug > 1) {
                                 printf("post unset\n");
                                 print_r($this->socks);
