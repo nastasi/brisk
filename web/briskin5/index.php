@@ -117,7 +117,9 @@ window.onload = function() {
   window.onunload = onunload_cb;  
 
   hstm.start(); 
-  setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+  // FIXME: add this setTimeout(preload_images into data stream to avoid
+  // race on opened socket
+  // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct);
 }
 </SCRIPT>
 <div id="bg" class="area">
