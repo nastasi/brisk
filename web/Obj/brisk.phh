@@ -1655,9 +1655,9 @@ class Room {
    *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db)
    */
 
-  function add_user(&$sess, &$idx, $name, $pass, $ip)
+  function add_user(&$sess, &$idx, $name, $pass, $ip, $cookie)
   {
-    GLOBAL $G_base, $CO_list;
+    GLOBAL $G_base;
 
     $idx = 0;
 
@@ -1797,12 +1797,12 @@ class Room {
         $this->user[$idx]->code = $authenticate->code_get();
         $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
 
-        if (isset($CO_list)) {
-          if (strcmp($CO_list, "auth") == 0) {
+        if (isset($cookie['CO_list'])) {
+          if (strcmp($cookie['CO_list'], "auth") == 0) {
             $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
             $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
           }
-          if (strcmp($CO_list, "isolation") == 0) {
+          if (strcmp($cookie['CO_list'], "isolation") == 0) {
             $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
             $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
           }

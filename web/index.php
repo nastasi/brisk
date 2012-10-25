@@ -280,7 +280,7 @@ function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
           
           $room->garbage_manager(TRUE);
           /* try login */
-          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $addr)) != FALSE) {
+          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $addr, $cookie)) != FALSE) {
               $ACTION = "room";
               if ($idx < 0) {
                   $idx = -$idx - 1;
