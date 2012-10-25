@@ -73,9 +73,11 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
     
     log_wr('POSTSPLIT: '.$argz[0].'  user->stat: ['.$user->stat.']');
     log_wr($user->step, 'bin::index_wr.php: after get_user()');
+
+    $user->lacc = $curtime;
     
     if ($argz[0] == 'ping') {
-        $user->lacc = $curtime;
+        log_wr("PING RECEIVED");
     }
     else if (false && $argz[0] == 'shutdown') {
         log_auth($user_cur->sess, "Shutdown session. delegate to room gc the autologout");

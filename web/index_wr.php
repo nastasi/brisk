@@ -197,9 +197,11 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 
     log_wr('POSTSPLIT: '.$argz[0]);
 
+    // LACC UPDATED
+    $user->lacc = $curtime;
+
     if ($argz[0] == 'ping') {
-        log_wr("PING RECEIVED, LACC UPDATED\n");
-        $user->lacc = $curtime;
+        log_wr("PING RECEIVED");
     }
     else if ($argz[0] == 'shutdown') {
         log_auth($user->sess, "Shutdown session.");
