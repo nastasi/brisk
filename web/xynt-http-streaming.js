@@ -40,6 +40,7 @@ http_streaming.prototype = {
     keepalives_eq_max: 3,
     /* NOTE: right watch_timeout value to 100, for devel reasons use 1000 or more */
     // FIXME watchdog_timeout:  200,
+    /* restart after 200 * 20 * 3 millisec if server ping is missing => 12secs */
     watchdog_timeout:  200,
     watchdog_ct:       0,
     watchdog_checktm:  20,
