@@ -1068,7 +1068,8 @@ hstm = new http_streaming(window, null /* console*/ , gst, 'index_php', 'sess', 
      // console.log("session from main: "+sess);
      hstm.start();
      // alert("ARR LENGTH "+g_preload_img_arr.length);
-     setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
+     // FIXME: preload image will be fired by stream instead here
+     // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 
      $("txt_in").focus();
 <?php
 if ($is_login) {

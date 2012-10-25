@@ -37,7 +37,7 @@ http_streaming.prototype = {
     keepalive_old:    -1,
     keepalive_new:    -1,
     keepalives_equal:  0,
-    keepalives_eq_max: 6,
+    keepalives_eq_max: 3,
     /* NOTE: right watch_timeout value to 100, for devel reasons use 1000 or more */
     // FIXME watchdog_timeout:  200,
     watchdog_timeout:  200,
@@ -73,7 +73,7 @@ http_streaming.prototype = {
         // this.ifra.src = this.page;
         this.watchdog_ct  = 0;
         if (!this.the_end) {
-            this.watchdog_hdl = setTimeout(function(obj) { obj.log("tout1"); obj.watchdog(); }, 0, this);
+            this.watchdog_hdl = setTimeout(function(obj) { obj.log("tout1"); obj.watchdog(); }, this.watchdog_timeout, this);
         }
     },
 
@@ -101,28 +101,29 @@ http_streaming.prototype = {
 
         // WATCHDOGING THE CONNECTION
         this.log("hs::watchdog: start, cur equal times: "+this.keepalives_equal);
-        if ( (this.watchdog_ct % this.watchdog_checktm) == 0 || !this.watchable) {
-            if (!this.watchable) {
-                do {
-                    try{
-                        if (typeof(this.ifra.contentWindow.http_streaming) == 'undefined')
-                            break;
-                    }
-                    catch(b) {
-	                break;
-                    }
+        if (!this.watchable) {
+            do {
+                try{
+                    if (typeof(this.ifra.contentWindow.http_streaming) == 'undefined')
+                        break;
+                }
+                catch(b) {
+	            break;
+                }
 
-                    /*
-                      on IE7 the the window frame scope is cleaned after the href is set, so we wait 
-                      for a well know variable value before assign this object value to it (OO is a passion)
-                    */
-                    if (this.ifra.contentWindow.http_streaming == "ready") {
-                        this.ifra.contentWindow.http_streaming = this;
-                        this.watchable = true;
-                        this.log("hs::watchdog: watchable = yes");
-                    }
-                } while (false);
-            }
+                /*
+                  on IE7 the the window frame scope is cleaned after the href is set, so we wait 
+                  for a well know variable value before assign this object value to it (OO is a passion)
+                */
+                if (this.ifra.contentWindow.http_streaming == "ready") {
+                    this.ifra.contentWindow.http_streaming = this;
+                    this.watchable = true;
+                    this.watchdog_ct = 0;
+                    this.log("hs::watchdog: watchable = yes");
+                }
+            } while (false);
+        }
+        if ( (this.watchdog_ct % this.watchdog_checktm) == 0) {
             this.log("hs::watchdog: this.keepalive_old: "+this.keepalive_old+" this.keepalive_new: "+this.keepalive_new);
             if (this.keepalive_old == this.keepalive_new) {
                 this.keepalives_equal++;
