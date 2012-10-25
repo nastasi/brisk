@@ -2,7 +2,7 @@
   /*
    *  brisk - admin.php
    *
-   *  Copyright (C) 2011      Matteo Nastasi
+   *  Copyright (C) 2011-2012 Matteo Nastasi
    *                          mailto: nastasi@alternativeoutput.it 
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it

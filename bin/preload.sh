@@ -2,7 +2,10 @@
 #
 #  brisk - preload.sh
 #
-#  Copyright (C) 2006-2011 matteo.nastasi@milug.org
+#  Copyright (C) 2011-2012 Matteo Nastasi
+#                          mailto: nastasi@alternativeoutput.it
+#                                  matteo.nastasi@milug.org
+#                          web: http://www.alternativeoutput.it
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

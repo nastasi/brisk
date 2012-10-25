@@ -2,7 +2,7 @@
 /*
  *  brisk - brisk.phh
  *
- *  Copyright (C) 2006-2011 Matteo Nastasi
+ *  Copyright (C) 2006-2012 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -286,7 +286,7 @@ Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
   declaration briscola in ajax sauce <b>(Beta)</b>
 </div>
 <br><b>version '.$G_brisk_version.'</b><br><br>
-Copyright 2006-2009 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
+Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
 function mop_flush()
 {
