@@ -477,13 +477,15 @@ class Bin5_user extends User {
        } 
     */
     
-    function spawn($from, &$bri, $table, $table_pos)
+    function spawn($from, &$bri, $table, $table_pos, $get, $post, $cookie)
     {
-        GLOBAL $CO_bin5_pref_ring_endauct;
-        
         if (($thiz = new Bin5_user()) == FALSE)
             return (FALSE);
-        
+
+        if (($CO_bin5_pref_ring_endauct = gpcs_var("CO_bin5_pref_ring_endauct", $get, $post, $cookie)) === FALSE) {
+            $CO_bin5_pref_ring_endauct = "";
+        }
+
         $thiz->parentcopy($from);
         
         /* NOTE: at this moment idx and table_pos fields have the same value 
@@ -498,7 +500,7 @@ class Bin5_user extends User {
         log_wr("Bin5 constructor");
         
         $this->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
-        
+
         $thiz->table_orig = $table;
         $thiz->table      = 0;
         $thiz->table_pos  = $table_pos;
@@ -956,7 +958,7 @@ class Bin5 {
         return TRUE;
     }
 
-    function Bin5 ($room, $table_idx, $table_token) {
+    function Bin5 ($room, $table_idx, $table_token, $get, $post, $cookie) {
         $this->user = array();
         $this->table = array();
         
@@ -974,7 +976,7 @@ class Bin5 {
         
         for ($i = 0 ; $i < $table->player_n ; $i++) {
             $user[$table->player[$i]]->table_token = $table_token;
-            $this->user[$i] = Bin5_user::spawn($user[$table->player[$i]], $this, $table_idx, $i);
+            $this->user[$i] = Bin5_user::spawn($user[$table->player[$i]], $this, $table_idx, $i, $get, $post, $cookie);
         }
         $this->table[0] = Bin5_table::spawn(&$table);
         

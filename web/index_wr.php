@@ -2,7 +2,7 @@
 /*
  *  brisk - index_wr.php
  *
- *  Copyright (C) 2006-2011 Matteo Nastasi
+ *  Copyright (C) 2006-2012 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -462,12 +462,6 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
         else if ($argz[0] == 'splash') {
             GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
             GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
-            /* $CO_splashdate = "CO_splashdate".$G_splash_idx; */
-            /* if (($$CO_splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)  */
-            /*     $$CO_splashdate = ""; */
-
-            /* GLOBAL $$CO_splashdate; */
-
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
             $user->comm[$user->step % COMM_N] .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], $G_splash_w, $G_splash_h, true, 0);
@@ -609,7 +603,7 @@ function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
                     log_legal($curtime, 'xxx', $user, "STAT:CREATE_GAME", $plist);
                     
                     log_wr("pre new Bin5");
-                    if (($bri = new Bin5($room, $table_idx, $table_token)) == FALSE)
+                    if (($bri = new Bin5($room, $table_idx, $table_token, $get, $post, $cookie)) == FALSE)
                         log_wr("bri create: FALSE");
                     else
                         log_wr("bri create: ".serialize($bri));

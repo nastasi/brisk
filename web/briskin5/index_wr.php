@@ -111,8 +111,6 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
             $bri->chatt_send(&$user,$mesg);
         }
         else if ($argz[0] == 'preferences_update') {
-            GLOBAL $CO_bin5_pref_ring_endauct;
-            
             log_wr("PER DI PREFERENCES_UPDATE");
             
             if ($CO_bin5_pref_ring_endauct == "true")
