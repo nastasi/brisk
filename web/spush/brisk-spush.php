@@ -23,8 +23,8 @@
  *
  * TODO
  *
- *   - BUG: fast loop on stream index_rd_ifra page
- *
+ *   - DNS access
+ *   - unneeded garbage_time.expired access
  *   - centralize all '<script ...' incapsulation to allow multiple transport system.
  *
  *   - manage and test cross forwarder between table and room
@@ -32,6 +32,7 @@
  *   - setcookie (for tables only and persist prefs)
  *   - 404 wrong page management
  *
+ *   TEST - BUG: fast loop on stream index_rd_ifra page (js watchdog start without timeout corrupt counts)
  *   TEST - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
  *   TEST - BUG: logout failed (fixed with a garbage_collector wrapper at sac-a-push level
  *   TEST - garbage management

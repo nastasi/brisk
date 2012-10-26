@@ -54,6 +54,10 @@ class proxy_detector {
 				);
   }
 
+  /*
+    function exists_in_rbl($remote)
+    verify if an host is into a proxy black list or not
+   */
   function exists_in_rbl($remote) {
     $rbls = array('http.dnsbl.sorbs.net', 'misc.dnsbl.sorbs.net');
     //    $remote = $_SERVER['REMOTE_ADDR'];
@@ -125,7 +129,7 @@ class proxy_detector {
 
 
   /**
-   * BOOL $proxy = detect( VOID )
+   * BOOL $proxy = detect( $addr )
    *	Start detection and return TRUE if a proxy server is detected...
    */
   function detect($addr){
@@ -179,6 +183,10 @@ class proxy_detector {
 //init class
 function is_proxy($addr)
 {
+    /* FIXME: test to verify reasons of poor multitasking performances */
+    return (FALSE);
+    /* FIXME: end */
+
   $proxy = new proxy_detector();
   
   //start detect
