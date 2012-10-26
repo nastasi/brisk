@@ -680,7 +680,7 @@ class Room {
   var $match;
   var $comm; // commands for many people
   var $step; // current step of the comm array
-  // externalized var $garbage_timeout;
+  var $garbage_timeout;
   var $shm_sz;
 
   function Room () {
@@ -709,8 +709,7 @@ class Room {
       else
         $this->table[$i]->auth_only = FALSE;
     }
-    // externalized $this->garbage_timeout = 0;
-    Room::garbage_time_expire_set(0);
+    $this->garbage_timeout = 0;
     $this->shm_sz = SHM_DIMS_MIN;
   }
 
@@ -725,8 +724,7 @@ class Room {
     /* Garbage collector degli utenti in timeout */
     $curtime = time();
 
-    // externalized if ($force || $this->garbage_timeout < $curtime) {
-    if (!$force && !Room::garbage_time_is_expired($curtime)) {
+    if (!$force && !($this->garbage_timeout < $curtime)) {
         return ($ismod);
     }
       
@@ -874,8 +872,7 @@ class Room {
     }
     log_rd2("GARBAGE UPDATED!");
     
-    // externalized $this->garbage_timeout = time() + GARBAGE_TIMEOUT;
-    Room::garbage_time_expire_set($curtime + GARBAGE_TIMEOUT);
+    $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
     $ismod = TRUE;
 
     return ($ismod);
@@ -2133,48 +2130,6 @@ class Room {
     $ret .= sprintf('j_tab_cont(%d, %s);', $table_idx, $content);
     
     return ($ret);
-  }
-
-  static function garbage_time_is_expired($tm) 
-  {
-      $ret = TRUE;
-      $fp = FALSE;
-      do {
-          if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH, 0775, TRUE);
-          if (($fp = @fopen(PROXY_PATH."/garbage_time.expired", 'rb')) == FALSE)
-              break;
-          if (($s = fread($fp, 4)) == FALSE)
-              break;
-          if (mb_strlen($s, "ASCII") != 4)
-              break;
-          $arr = unpack('Le', $s);
-          if ($arr['e'] > $tm)
-              $ret = FALSE;
-      } while (0);
-      
-      if ($fp != FALSE)
-          fclose($fp);
-      
-      log_rd2("END: return ".($ret ? "TRUE" : "FALSE"));
-      
-      return ($ret);
-  }
-
-  static function garbage_time_expire_set($tm) 
-  {
-      do {
-          if (file_exists(PROXY_PATH) == FALSE)
-              mkdir(PROXY_PATH, 0775, TRUE);
-          if (($fp = @fopen(PROXY_PATH."/garbage_time.expired", 'wb')) == FALSE)
-              break;
-          fwrite($fp, pack("L",$tm));
-          fclose($fp);
-          
-          return (TRUE);
-      } while (0);
-      
-      return (FALSE);
   }
 
   function request_mgr(&$s_a_p, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)

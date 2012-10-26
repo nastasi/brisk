@@ -784,23 +784,6 @@ push(\"%s\");
         $ret = FALSE;
         $curtime = time();
         
-        /* if ((($curtime - $this->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) { */
-        /*     $S_load_stat['lL_laccgarb']++; */
-        
-        /*     if (($curtime - $this->lacc) >=  STREAM_TIMEOUT) { */
-        /*         $S_load_stat['wU_lacc_upd']++; */
-        /*         $this->lacc = $curtime; */
-        /*     } */
-        
-        /*     if (Room::garbage_time_is_expired($curtime)) { */
-        /*         log_only("F"); */
-        
-        /*         $S_load_stat['wR_garbage']++; */
-        /*         log_main("pre garbage_manager TRE"); */
-        /*         $this->room->garbage_manager(FALSE); */
-        /*     } */
-        /* } */
-        
       /* Nothing changed, return. */
       if ($cur_step == $this->step) 
           return (FALSE);
@@ -926,7 +909,7 @@ class Bin5 {
     var $table;
     var $comm; // commands for many people
     var $step; // current step of the comm array
-    // externalized var $garbage_timeout;
+    var $garbage_timeout;
     var $shm_sz;
     
     var $table_idx;
@@ -984,7 +967,7 @@ class Bin5 {
         
         $this->table_idx = $table_idx;
         $this->table_token = $table_token;
-        Bin5::garbage_time_expire_set($table_idx, 0);
+        $this->garbage_timeout = 0;
         
         log_wr("Bin5 constructor end");
     }
@@ -1022,8 +1005,7 @@ class Bin5 {
         /* Garbage collector degli utenti in timeout */
         $ismod = FALSE;
         $curtime = time();
-        // externalized if ($force || $this->garbage_timeout < $curtime) {
-        if ($force || Bin5::garbage_time_is_expired($this->table_idx, $curtime)) {
+        if ($force || $this->garbage_timeout < $curtime) {
             for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
                 $user_cur = $this->user[$i];
                 if ($user_cur->sess == "" || 
@@ -1061,8 +1043,7 @@ class Bin5 {
             }
             log_rd2($user_cur->sess." GARBAGE UPDATED!");
             
-            // externalized $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
-            Bin5::garbage_time_expire_set($this->table_idx, $curtime + GARBAGE_TIMEOUT);
+            $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
             
             $ismod = TRUE;
         }
@@ -1406,49 +1387,6 @@ class Bin5 {
         }
 
         return ($is_ab);
-    }
-
-
-    static function garbage_time_is_expired($tab_id, $tm) 
-    {
-        $ret = TRUE;
-        $fp = FALSE;
-        do {
-            if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
-                mkdir(BIN5_PROXY_PATH."/table".$tab_id, 0775, TRUE);
-            if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/garbage_time.expired", 'rb')) == FALSE)
-                break;
-            if (($s = fread($fp, 4)) == FALSE)
-                break;
-            if (mb_strlen($s, "ASCII") != 4)
-                break;
-            $arr = unpack('Le', $s);
-            if ($arr['e'] > $tm)
-                $ret = FALSE;
-        } while (0);
-      
-        if ($fp != FALSE)
-            fclose($fp);
-      
-        log_rd2("END: return ".($ret ? "TRUE" : "FALSE"));
-      
-        return ($ret);
-    }
-
-    static function garbage_time_expire_set($tab_id, $tm) 
-    {
-        do {
-            if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
-                mkdir(BIN5_PROXY_PATH."/table".$tab_id, 0775, TRUE);
-            if (($fp = @fopen(BIN5_PROXY_PATH."/table".$tab_id."/garbage_time.expired", 'wb')) == FALSE)
-                break;
-            fwrite($fp, pack("L",$tm));
-            fclose($fp);
-          
-            return (TRUE);
-        } while (0);
-      
-        return (FALSE);
     }
 
     static function request_mgr(&$s_a_p, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)

@@ -679,23 +679,6 @@ class User {
       $ret = FALSE;
       $curtime = time();
       
-      /* if ((($curtime - $this->lacc) >  STREAM_TIMEOUT) || Room::garbage_time_is_expired($curtime)) { */
-      /*     $S_load_stat['lL_laccgarb']++; */
-          
-      /*     if (($curtime - $this->lacc) >=  STREAM_TIMEOUT) { */
-      /*         $S_load_stat['wU_lacc_upd']++; */
-      /*         $this->lacc = $curtime; */
-      /*     } */
-          
-      /*     if (Room::garbage_time_is_expired($curtime)) { */
-      /*         log_only("F"); */
-              
-      /*         $S_load_stat['wR_garbage']++; */
-      /*         log_main("pre garbage_manager TRE"); */
-      /*         $this->room->garbage_manager(FALSE); */
-      /*     } */
-      /* } */
-      
       /* Nothing changed, return. */
       if ($cur_step == $this->step) 
           return (FALSE);
