@@ -166,7 +166,7 @@ class Challenges {
         {
             GLOBAL $sess;
             do {
-                if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) {
+                if (($tok = @ftok(FTOK_PATH."/challenges", "C")) == -1) {
                     log_main("ftok failed");
                     break;
                 }
@@ -212,7 +212,7 @@ class Challenges {
         $shm =   FALSE;
         $oldmod = $chals->mod;
 
-        if (($tok = @ftok(FTOK_PATH."/challenges", "B")) == -1) 
+        if (($tok = @ftok(FTOK_PATH."/challenges", "C")) == -1) 
             return (FALSE);
     
         while ($chals->shm_sz < CHAL_SHM_DIMS_MAX) {

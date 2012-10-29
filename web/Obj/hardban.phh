@@ -159,7 +159,7 @@ class Hardbans {
     GLOBAL $sess;
 
     do {
-      if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) {
+      if (($tok = @ftok(FTOK_PATH."/hardbans", "C")) == -1) {
 	log_main("ftok failed");
 	break;
       }
@@ -206,7 +206,7 @@ class Hardbans {
     $shm =   FALSE;
     $oldmod = $hban->mod;
 
-    if (($tok = @ftok(FTOK_PATH."/hardbans", "B")) == -1) 
+    if (($tok = @ftok(FTOK_PATH."/hardbans", "C")) == -1) 
       return (FALSE);
     
     while ($hban->shm_sz < HBAN_SHM_DIMS_MAX) {

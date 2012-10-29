@@ -528,7 +528,7 @@ class User {
       log_main("load_data: id [".$id."] sess [".($sess == FALSE ? "FALSE" : $sess)."] ");
       
       do {
-          if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+          if (($tok = @ftok(FTOK_PATH."/user".$id, "C")) == -1) {
               log_main("ftok failed");
               break;
           }
@@ -595,7 +595,7 @@ class User {
       
       $shm =   FALSE;
       
-      if (($tok = @ftok(FTOK_PATH."/user".$id, "B")) == -1) {
+      if (($tok = @ftok(FTOK_PATH."/user".$id, "C")) == -1) {
           return (FALSE);
       }
       while ($user->shm_sz < SHM_DIMS_U_MAX) {

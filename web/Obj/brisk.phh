@@ -1896,7 +1896,7 @@ class Room {
     GLOBAL $sess;
 
     do {
-      if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) {
+      if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) {
 	log_main("ftok failed");
 	break;
       }
@@ -1961,7 +1961,7 @@ class Room {
     
     // var_dump($room);
     
-    if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) 
+    if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) 
       return (FALSE);
     
     while ($room->shm_sz < SHM_DIMS_MAX) {
@@ -1995,7 +1995,7 @@ class Room {
       $ret =   FALSE;
       $shm =   FALSE;
     
-      if (($tok = @ftok(FTOK_PATH."/main", "B")) == -1) 
+      if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) 
           return (FALSE);
     
       // SHSPLIT: before save the $room you must save users, 
