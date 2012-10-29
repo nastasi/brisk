@@ -49,7 +49,7 @@ class DBConn
         GLOBAL $G_dbauth;
         
         if (DBConn::$dbcnnx == FALSE) {
-            if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth))) {
+            if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth, PGSQL_CONNECT_FORCE_NEW))) {
                 return (FALSE);
             }
         }
@@ -58,6 +58,22 @@ class DBConn
 
         return $out;
     }
+
+    static function destroy()
+    {
+        if (DBConn::$dbcnnx != FALSE) {
+            DBConn::$dbcnnx = FALSE;
+            return (pg_close(DBConn::$dbcnnx));
+        }
+        return TRUE;
+    }
+
+    static function recover()
+    {
+        self::destroy();
+        return (self::create());
+    }
+
     function db()
     {
         return ($this->db);
@@ -94,6 +110,18 @@ class BriskDB
         return ($ret);
     }
 
+    function query($sql)
+    {
+        if (($res = pg_query($this->dbconn->db(), $sql)) == FALSE) {
+            // try to recover the connection
+            if (($this->dbconn = DBConn::recover()) == FALSE)
+                return FALSE;
+            return (pg_query($this->dbconn->db(), $sql));
+        }
+
+        return ($res);
+    }
+
     function users_load()
     {
     }
@@ -107,7 +135,7 @@ class BriskDB
         
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",
                             $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
-        if (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) != FALSE)
+        if (($user_pg = $this->query($user_sql)) != FALSE)
             if (pg_numrows($user_pg) == 1)
                 return TRUE;
         
@@ -118,9 +146,9 @@ class BriskDB
         GLOBAL $G_dbpfx;
 
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",  $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
-        if (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) == FALSE)
+        if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
-        
+        }
         if (pg_numrows($user_pg) != 1)
             return FALSE;
         
@@ -217,7 +245,7 @@ class BriskDB
             
             // if ( ! (($user_pg = pg_exec($dbconn,$order_add_sql)) != FALSE && pg_affected_rows($order_pg) == 1) ) {
 
-            if ( ! (($user_pg  = pg_query($this->dbconn->db(), $user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+            if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
                 $cont .= sprintf("ERROR IN LINE: %s\n", eschtml($user_sql));
 
                 return FALSE;
@@ -245,7 +273,7 @@ class BriskDB
         log_main("bin5_points_save: ");
         
         do {
-            if (pg_query($this->dbconn->db(), "BEGIN") == FALSE) {
+            if ($this->query("BEGIN") == FALSE) {
                 break;
             }
             $is_trans = TRUE;
@@ -254,11 +282,11 @@ class BriskDB
              * matches management
              */
             $mtc_sql = sprintf("SELECT * FROM %sbin5_matches WHERE ttok = '%s';", $G_dbpfx, escsql($ttok));
-            if (($mtc_pg  = pg_query($this->dbconn->db(), $mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+            if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
                 // match not exists, insert it
                 $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx) VALUES ('%s', %d) RETURNING *;",
                                    $G_dbpfx, escsql($ttok), $tidx);
-                if ( ! (($mtc_pg  = pg_query($this->dbconn->db(), $mtc_sql)) != FALSE && 
+                if ( ! (($mtc_pg  = $this->query($mtc_sql)) != FALSE &&
                         pg_affected_rows($mtc_pg) == 1) ) {
                     log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
                     break;
@@ -272,7 +300,7 @@ class BriskDB
             $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp) 
                                                VALUES (%d, to_timestamp(%d)) RETURNING *;",
                                $G_dbpfx, $mtc_obj->code, $date);
-            if ( ! (($gam_pg  = pg_query($this->dbconn->db(), $gam_sql)) != FALSE && 
+            if ( ! (($gam_pg  = $this->query($gam_sql)) != FALSE &&
                     pg_affected_rows($gam_pg) == 1) ) {
                 log_crit(sprintf("bin5_points_save: failed at insert game [%s]", $gam_sql));
                 break;                        
@@ -288,7 +316,7 @@ class BriskDB
                 $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts) 
                                                VALUES (%d, %d, %d);",
                                    $G_dbpfx, $gam_obj->code, $ucodes[$i], $pts[$i]);
-                if ( ! (($pts_pg  = pg_query($this->dbconn->db(), $pts_sql)) != FALSE && 
+                if ( ! (($pts_pg  = $this->query($pts_sql)) != FALSE &&
                         pg_affected_rows($pts_pg) == 1) ) {
                     log_crit(sprintf("bin5_points_save: failed at insert point [%s]", $pts_sql));
                     break;                        
@@ -298,7 +326,7 @@ class BriskDB
             if ($i < $n)
                 break;
             
-            if (pg_query($this->dbconn->db(), "COMMIT") == FALSE) {
+            if ($this->query("COMMIT") == FALSE) {
                 break;
             }
              
@@ -308,7 +336,7 @@ class BriskDB
         } while (0);
         
         if ($is_trans)
-            pg_query($this->dbconn-db(), "ROLLBACK");
+            $this->query("ROLLBACK");
         
         return $ret;
     }
