@@ -23,7 +23,11 @@
  *
  * TODO
  *
- *   EXPR - DNS access
+ *   DISABLED_TO_FIX - DNS access (perform blocking dns requests, must be fixed)
+ *
+ *   TEST - database connection fails after a while, check close and try PGSQL_CONNECT_FORCE_NEW.
+ *   TEST - images flickering on slow windows: try to poll stream every 300 ms
+ *
  *   - configuration file management
  *   - centralize all '<script ...' incapsulation to allow multiple transport system.
  *
