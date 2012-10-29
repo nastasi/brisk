@@ -923,7 +923,8 @@ class Room {
         $ret .= sprintf('tra.rem(%d); ', $i);
     }
     $ret .= $this->standup_content($user);
-    
+    $ret .= "setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); ";
+
     return ($ret);
   }
   

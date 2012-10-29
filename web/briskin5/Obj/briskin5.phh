@@ -1640,6 +1640,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
     /* NOTIFY FOR THE CARD MAKER */
     if ($is_transition) { //  && $user->subst ==  "asta" superfluo
         $ret .= show_table_info(&$bri, &$table, $table_pos);
+        $ret .= "setTimeout(preload_images, 500, g_preload_img_arr, g_imgct);";
     }
     if (!$is_again) 
         $ret .= table_wellcome($user);
