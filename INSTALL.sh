@@ -3,7 +3,7 @@
 #
 # Defaults
 #
-CONFIG_FILE="$HOME/.brisk_install"
+CONFIG_FILE="$HOME/.brisk_spu_install"
 
 apache_path="/etc/apache2/sites-available/"
 apache_conf="default"
@@ -11,7 +11,7 @@ apache_conf="default"
 players_n=3
 tables_n=44
 tables_auth_n=12
-brisk_auth_conf="brisk_auth.conf.pho"
+brisk_auth_conf="brisk_spu_auth.conf.pho"
 brisk_debug="0x0400"
 # brisk_debug="0xffff"
 web_path="/home/nastasi/web/brisk"
@@ -19,7 +19,7 @@ ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
 proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
 legal_path="/home/nastasi/brisk-priv/brisk"
 cookie_path="/brisk/"
-brisk_conf="brisk.conf.pho"
+brisk_conf="brisk_spu.conf.pho"
 web_only="FALSE"
 
 
