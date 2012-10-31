@@ -2165,7 +2165,7 @@ class Room {
           do {
               if (!isset($cookie['sess'])
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
-                  $content = User::stream_fini(TRUE);
+                  $content = User::stream_fini($s_a_p->rndstr, TRUE);
                   
                   $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
                   return TRUE;
@@ -2181,7 +2181,7 @@ class Room {
               }
               
               $content = "";
-              $user->stream_init($header_out, $content, $get, $post, $cookie);
+              $user->stream_init($s_a_p->rndstr, $header_out, $content, $get, $post, $cookie);
               
               $response = headers_render($header_out, -1).chunked_content($content);
               $response_l = mb_strlen($response, "ASCII");

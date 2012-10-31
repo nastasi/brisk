@@ -720,10 +720,8 @@ class Bin5_user extends User {
         return ($ret);
     }
 
-public static function stream_fini($is_unrecoverable)
+    public static function stream_fini($init_string, $is_unrecoverable)
 {
-    GLOBAL $G_four_rnd_string;
-
     printf("xXx user::stream_fini\n");
 
     // IF IFRAME THEN:
@@ -739,7 +737,7 @@ window.onload = function () { if (http_streaming != \"ready\") { http_streaming.
 </script>
 </head>
 <body>");
-    $body .= sprintf("<!-- \n%s -->\n", $G_four_rnd_string);
+    $body .= sprintf("<!-- \n%s -->\n", $init_string);
     $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");
 // -->
@@ -1430,7 +1428,7 @@ class Bin5 {
                     || !isset($cookie['sess'])
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
 
-                    $content = Bin5_user::stream_fini(TRUE);                    
+                    $content = Bin5_user::stream_fini($s_a_p->rndstr, TRUE);
                     $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
 
                     return TRUE;                    
@@ -1445,7 +1443,7 @@ class Bin5 {
                 }
                 
                 $content = "";
-                $user->stream_init($header_out, $content, $get, $post, $cookie);
+                $user->stream_init($s_a_p->rndstr, $header_out, $content, $get, $post, $cookie);
                 $response = headers_render($header_out, -1).chunked_content($content);
                 $response_l = mb_strlen($response, "ASCII");
                 
