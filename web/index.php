@@ -510,7 +510,7 @@ google_color_url = "000000";
 "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
 <td align="right"><div style="padding-right: 8px;">
 '.$banner_top_right.'</div></td>
-</td></table>
+</tr></table>
 </div>';
 
 /* MLANG: ALL THE VERTICAL MENU */
