@@ -1,0 +1,148 @@
+<?php
+class ZLibStream {
+    var $s;
+    var $head;
+    var $type;
+    var $filter;
+
+    function ZLibStream($type)
+    {
+        $this->type = $type;
+        $this->s = array( FALSE, FALSE );
+        $this->filter = FALSE;
+    }
+
+    static function create($type)
+    {
+        if ($type == 'plain')
+            return (FALSE);
+
+        if (($thiz = new ZLibStream($type)) == FALSE)
+            return (FALSE);
+
+        for ($i = 0 ; $i < 2 ; $i++)
+            $thiz->s[$i] = FALSE;
+        if (($thiz->s = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, STREAM_IPPROTO_IP)) == FALSE)
+            return (FALSE);
+
+        for ($i = 0 ; $i < 2 ; $i++)
+            stream_set_blocking  ( $thiz->s[$i], 0); // 0 -> not blocking
+        
+        if ($type == 'gzip') {
+            $params = array('level' => 6, 'window' => -15, 'memory' => 9);
+            
+            if (($thiz->filter = stream_filter_append($thiz->s[1], "zlib.deflate", STREAM_FILTER_READ, $params)) == FALSE) {
+                return (FALSE);
+            }
+            $thiz->head = "\037\213\010\000\000\000\000\000\000\003";
+        }
+        else if ($type  == 'deflate') {
+            if (($thiz->filter = stream_filter_append($thiz->s[1], "zlib.deflate", STREAM_FILTER_READ)) == FALSE) {
+                return (FALSE);
+            }
+        }
+        return ($thiz);
+    }
+
+    function destroy()
+    {
+        if ($this->filter != FALSE) {
+            stream_filter_remove($this->filter);
+        }
+
+        for ($i = 0 ; $i < 2 ; $i++) {
+            if ($this->s[$i] != FALSE)
+                fclose($this->s[$i]);
+        }
+    }
+
+        /*
+          too many actors, an explanation is needed to clarify:
+
+          - fwrite: all data MUST be passed to write with success
+          - fflush: probably reduntant
+          - fread: all reads after successfull writes must go well, 
+          
+         */
+    function compress_chunk($s_in)
+    {
+        $s_in_l = mb_strlen($s_in, 'ASCII');
+
+        if ($this->head != FALSE) {
+            $s_out = $this->head;
+            $this->head = FALSE;
+        }
+        else {
+            $s_out = "";
+        }
+
+        for ($to_be_proc = $s_in_l, $max_fail = 0 ; $to_be_proc > 0 && $max_fail < 2 ; $max_fail++) {
+            if ($to_be_proc > 0) {
+                $max_fail = 0;
+                if (($ct = fwrite($this->s[0], $s_in)) == FALSE) 
+                    return FALSE;
+                
+                $to_be_proc -= $ct;
+            }
+            fflush($this->s[0]); // maybe reduntant but light so ...
+        
+            while (($ret = fread($this->s[1],  8192)) != FALSE) {
+                $s_out .= $ret;
+            }
+        }
+
+        if ($max_fail < 2)
+            return ($s_out);
+        else
+            return (FALSE);
+    }
+
+    static function compress($enc, $s)
+    {
+        // fprintf(STDERR, "compress: [%s][%s]\n", $enc, $s);
+
+        if ($enc == 'gzip') {
+            return (gzencode($s, -1, FORCE_GZIP));
+        }
+        else if ($enc == 'deflate') {
+            return (gzencode($s, -1, FORCE_DEFLATE));
+        }
+        else
+            return $s;
+    }
+} // class ZLibStream 
+
+
+
+function zlibstream_test()
+{
+    $cont = array( "pippo", "pluto", "paperino");
+
+    for ($f = 0 ; $f < 2 ; $f++) {
+        if (($zls = ZLibStream::create('gzip')) == FALSE) {
+            printf("ZLibStream Creation failed\n");
+            exit(1);
+        }
+        
+        if (($fp = fopen("../../test/zlibstream".$f.".gz", "w")) == FALSE) {
+            printf("ZLibStream test output file failed\n");
+            exit(2);
+        }   
+        
+        for ($i = 0 ; $i < 9 ; $i++) {
+            $idx = $i % 3;
+            
+            $comp = $zls->compress_chunk($cont[$idx]);
+            
+            fwrite($fp, $comp);
+            fflush($fp);
+            sleep(3);
+        }
+        fclose($fp);
+        $zls->destroy();
+    }
+}
+
+// zlibstream_test();
+
+?>

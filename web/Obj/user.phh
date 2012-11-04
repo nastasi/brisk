@@ -97,6 +97,7 @@ class User {
   var $rd_scristp; // current script step (for each session) 
   var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
   var $rd_cache;   // place where store failed fwrite data
+  var $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
 
   var $comm;       // commands array
   // var $asta_card;  // 
@@ -154,6 +155,7 @@ class User {
     $thiz->rd_scristp = -1;
     $thiz->rd_kalive  = -1;
     $thiz->rd_cache   = "";
+    $thiz->rd_zls     = FALSE;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -287,7 +289,7 @@ class User {
     return ($thiz);
   }
 
-  function rd_data_set($curtime, $stat, $subst, $step, $from)
+  function rd_data_set($curtime, $enc, $stat, $subst, $step, $from)
   {
       $this->rd_endtime = $curtime + RD_ENDTIME_DELTA;
       $this->rd_stat    = $stat;
@@ -296,6 +298,7 @@ class User {
       $this->rd_from    = $from;
       $this->rd_scristp = 0;
       $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
+      $this->rd_zls     = ZLibStream::create($enc);
   }
 
   function rd_socket_get() {
@@ -303,6 +306,12 @@ class User {
   }
 
   function rd_socket_set($sock) {
+      if ($sock == NULL) {
+          if ($this->rd_zls) {
+              $this->rd_zls->destroy();
+              $this->rd_zls = FALSE;
+          }
+      }
       $this->rd_socket = $sock;
   }
 
@@ -341,6 +350,11 @@ class User {
   function rd_cache_set($cache)
   {
       $this->rd_cache = $cache;
+  }
+
+  function rd_zls_get()
+  {
+      return ($this->rd_zls);
   }
 
   function idx_get() {
@@ -774,20 +788,22 @@ push(\"%s\");
    stat
    step
 */
-function stream_init($init_string, &$header_out, &$body, $get, $post, $cookie)
+function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $cookie)
 {
     $curtime = time();
-
+    
     printf("CLASS: [%s] base: [%s]\n", get_class($this), self::base_get());
-
+    
     $is_page_streaming = FALSE; // (webservers_exceeded() || stristr($HTTP_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; rv:5.0)") || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
+    if ($enc != 'plain')
+        $header_out['Content-Encoding'] = $enc;
     $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
     $header_out['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT'; // Date in the past
     $header_out['Content-type']  = 'text/html; charset="utf-8"';
-
+    
     log_load("index_rd_ifra_init.php");
-
+    
     if (($from  = gpcs_var('from', $get, $post, $cookie)) === FALSE)
         $from = "";
     if (($stat  = gpcs_var('stat', $get, $post, $cookie)) === FALSE) 
@@ -797,9 +813,9 @@ function stream_init($init_string, &$header_out, &$body, $get, $post, $cookie)
     if (($step  = gpcs_var('step', $get, $post, $cookie)) === FALSE) 
         unset($step);
     
-    $this->rd_data_set($curtime, $stat, $subst, $step, $from);
+    $this->rd_data_set($curtime, $enc, $stat, $subst, $step, $from);
     $cc = get_called_class();
-
+    
     $body .= sprintf("<html>
 <head>
 <script type=\"text/javascript\" src=\"%scommons.js\"></script>
@@ -814,9 +830,9 @@ window.onload = function () { if (http_streaming != \"ready\") { http_streaming.
 </head>
 <body>");
     $body .= sprintf("<!-- \n%s -->\n", $init_string);
-
+    
     return TRUE;
-}
+  }
 
 function stream_main(&$body, $get, $post, $cookie)
 {

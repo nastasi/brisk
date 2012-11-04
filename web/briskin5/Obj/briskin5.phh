@@ -1387,7 +1387,7 @@ class Bin5 {
         return ($is_ab);
     }
 
-    static function request_mgr(&$s_a_p, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
+    static function request_mgr(&$s_a_p, $enc, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
     {
         printf("NEW_SOCKET (root): %d\n", intval($new_socket));
         
@@ -1407,7 +1407,7 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
         
-            $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+            $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
             return TRUE;
         
         break;
@@ -1418,7 +1418,7 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
             
-            $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+            $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
             return TRUE;
             
             break;
@@ -1429,9 +1429,9 @@ class Bin5 {
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
 
                     $content = Bin5_user::stream_fini($s_a_p->rndstr, TRUE);
-                    $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+                    $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
 
-                    return TRUE;                    
+                    return TRUE;
                     break;
                 }
                 // close a previous opened index_read_ifra socket, if exists
@@ -1443,8 +1443,8 @@ class Bin5 {
                 }
                 
                 $content = "";
-                $user->stream_init($s_a_p->rndstr, $header_out, $content, $get, $post, $cookie);
-                $response = headers_render($header_out, -1).chunked_content($content);
+                $user->stream_init($s_a_p->rndstr, $enc, $header_out, $content, $get, $post, $cookie);
+                $response = headers_render($header_out, -1).chunked_content($user->rd_zls_get(), $content);
                 $response_l = mb_strlen($response, "ASCII");
                 
                 $wret = @fwrite($new_socket, $response, $response_l);

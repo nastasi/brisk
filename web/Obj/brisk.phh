@@ -2133,7 +2133,7 @@ class Room {
     return ($ret);
   }
 
-  function request_mgr(&$s_a_p, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
+  function request_mgr(&$s_a_p, $enc, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
       printf("NEW_SOCKET (root): %d\n", intval($new_socket));
 
@@ -2143,21 +2143,21 @@ class Room {
       case "":
       case "index.php":
           ob_start();
-      index_main($this, $header_out, $addr, $get, $post, $cookie);
-      $content = ob_get_contents();
-      ob_end_clean();
+          index_main($this, $header_out, $addr, $get, $post, $cookie);
+          $content = ob_get_contents();
+          ob_end_clean();
 
-      $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
-      return TRUE;
+          $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
+          return TRUE;
 
-      break;
+          break;
       case "index_wr.php":
           ob_start();
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
           ob_end_clean();
-
-          $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+          
+          $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
           return TRUE;
 
           break;
@@ -2167,7 +2167,7 @@ class Room {
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
                   $content = User::stream_fini($s_a_p->rndstr, TRUE);
                   
-                  $s_a_p->pgflush_try_add($new_socket, 20, $header_out, $content);
+                  $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
                   return TRUE;
 
                   break;
@@ -2179,11 +2179,11 @@ class Room {
                   printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
                   $user->rd_socket_set(NULL);
               }
-              
+
               $content = "";
-              $user->stream_init($s_a_p->rndstr, $header_out, $content, $get, $post, $cookie);
+              $user->stream_init($s_a_p->rndstr, $enc, $header_out, $content, $get, $post, $cookie);
               
-              $response = headers_render($header_out, -1).chunked_content($content);
+              $response = headers_render($header_out, -1).chunked_content($user->rd_zls_get(), $content);
               $response_l = mb_strlen($response, "ASCII");
               
               $wret = @fwrite($new_socket, $response, $response_l);
@@ -2211,7 +2211,7 @@ class Room {
           $subs = "briskin5/";
           $subs_l = strlen($subs);
           if (!strncmp($path, $subs, $subs_l)) {
-              $ret = Bin5::request_mgr(&$s_a_p, &$header_out, &$new_socket, substr($path, $subs_l) , $addr, $get, $post, $cookie);
+              $ret = Bin5::request_mgr(&$s_a_p, $enc, &$header_out, &$new_socket, substr($path, $subs_l) , $addr, $get, $post, $cookie);
               return ($ret);
           }
           break;

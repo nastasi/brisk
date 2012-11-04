@@ -121,14 +121,16 @@ function headers_render($header, $len)
     foreach($header as $key => $value) {
         $s .= sprintf("%s: %s\r\n", $key, $value);
     }
-    if ($len == -1) {
+    if ($len >= 0) {
+        $s .= sprintf("Content-Length: %d\r\n", $len);
+    }
+    else {
         $s .= "Cache-Control: no-cache, must-revalidate\r\n";
         $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
-        $s .= "Content-Encoding: chunked\r\n";
+        if (!isset($header['Content-Encoding'])) {
+            $s .= "Content-Encoding: chunked\r\n";
+        }
         $s .= "Transfer-Encoding: chunked\r\n";
-    }
-    else if ($len > 0) {
-        $s .= sprintf("Content-Length: %d\r\n", $len);
     }
     $s .= "\r\n";
 
@@ -151,17 +153,42 @@ register_shutdown_function('shutta');
  *  MAIN
  */
 
-function chunked_content($content)
+function chunked_content($zls, $content)
 {
-    $content_l = mb_strlen($content, "ASCII");
+    if ($zls) {
+        $cont_comp = $zls->compress_chunk($content);
+    }
+    else {
+        $cont_comp = $content;
+    }
+    $cont_comp_l = mb_strlen($cont_comp, "ASCII");
+    printf("CHUNK: [%s]\n", $content);
 
-    return (sprintf("%X\r\n%s\r\n", $content_l, $content));
+    return (sprintf("%X\r\n", $cont_comp_l).$cont_comp."\r\n");
 }
 
 function chunked_fini()
 {
     return sprintf("0\r\n");
 }
+
+function get_encoding($header)
+{
+    $enc = "plain";
+    if (isset($header['Accept-Encoding'])) {
+        $acc = explode(',', $header['Accept-Encoding']);
+
+        if (array_search('gzip', $acc) !== FALSE) {
+            $enc = 'gzip';
+        }
+        else if (array_search('deflate', $acc) !== FALSE) {
+            $enc = 'deflate';
+        }
+    }
+
+    return ($enc);
+}
+
 
 class Sac_a_push {
     static $fixed_fd = 2;
@@ -208,7 +235,10 @@ class Sac_a_push {
 
         $thiz->rndstr = "";
         for ($i = 0 ; $i < 4096 ; $i++) {
-            $thiz->rndstr .= chr(mt_rand(65, 90));
+            if (($i % 128) == 0)
+                $thiz->rndstr .= "\n";
+            else
+                $thiz->rndstr .= chr(mt_rand(65, 90));
         }
         
         if (file_exists($thiz->file_socket)) {
@@ -247,9 +277,9 @@ class Sac_a_push {
         unset($this->socks[$id]);
     }
 
-    function pgflush_try_add(&$new_socket, $tout, $header_out, $content)
+    function pgflush_try_add($enc, &$new_socket, $tout, $header_out, $content)
     {
-        $pgflush = new PageFlush($new_socket, $this->curtime, $tout, $header_out, $content);
+        $pgflush = new PageFlush($new_socket, $enc, $this->curtime, $tout, $header_out, $content);
 
         if ($pgflush->try_flush($this->curtime) == FALSE) {
             // Add $pgflush to the pgflush array
@@ -351,11 +381,13 @@ class Sac_a_push {
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             $header_out = array();
 
+                            $enc = get_encoding($header);
+
                             $subs = SITE_PREFIX."briskin5/";
                             $subs_l = strlen($subs);
                             $rret = FALSE;
                             if (!strncmp($path, SITE_PREFIX, SITE_PREFIX_LEN)) {
-                                $rret = $this->app->request_mgr($this, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
+                                $rret = $this->app->request_mgr($this, $enc, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
                             }
                             if ($rret == FALSE) { 
                                 // FIXME: manage 404 !!!
@@ -456,7 +488,7 @@ class Sac_a_push {
                             $content = $user->stream_keepalive(FALSE);
                         }
                         if ($content != "") {
-                            $response = chunked_content($content);
+                            $response = chunked_content($user->rd_zls_get(), $content);
                         }
                     }
                     

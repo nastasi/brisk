@@ -32,17 +32,20 @@ class PageFlush {
   var $msg;    // place where store failed fwrite data
   var $msg_sz; // size of content
 
-  function PageFlush($socket, $curtime, $kalive, $header_out, $body)
+  function PageFlush($socket, $enc, $curtime, $kalive, $header_out, $body)
   {
       printf("TRY FLUSH CREATE\n");
-      // $body_sz = mb_strlen($body, "ASCII");
-      // add length to header_out 
-      $hea = headers_render($header_out, 0);
+      $body_out = ZLibStream::compress($enc, $body);
+      if ($enc != 'plain')
+          $header_out['Content-Encoding'] = $enc;
+      $body_out_sz = mb_strlen($body_out, "ASCII");
+      $hea = headers_render($header_out, $body_out_sz);
+      $hea_sz = mb_strlen($hea, "ASCII");
 
       $this->socket = $socket;
       $this->kalive = $curtime + $kalive;
-      $this->msg    = $hea.$body;
-      $this->msg_sz = mb_strlen($this->msg, "ASCII");
+      $this->msg    = $hea.$body_out;
+      $this->msg_sz = $hea_sz + $body_out_sz;
   }
 
   /* return TRUE if is removable from it's list */
