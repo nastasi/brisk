@@ -23,6 +23,10 @@
  *
  * TODO
  *
+ *   - pari + 72 non fa 4x ma attualmente fa 3x, da correggere
+ *   - parametrization of $DOCUMENT_ROOT  var in brisk-spush.phh file
+ *   - parametrization of SITE_PREFIX(_LEN) define
+ *   - move the name of the named socket into the configuration file
  *   DISABLED_TO_FIX - DNS access (perform blocking dns requests, must be fixed)
  *
  *   TEST - database connection fails after a while, check close and try PGSQL_CONNECT_FORCE_NEW.
