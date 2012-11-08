@@ -28,10 +28,9 @@
  *   TEST - database connection fails after a while, check close and try PGSQL_CONNECT_FORCE_NEW.
  *   TEST - images flickering on slow windows: try to poll stream every 300 ms
  *
- *   - configuration file management
  *   - centralize all '<script ...' incapsulation to allow multiple transport system.
  *
- *   - manage and test cross forwarder between table and room
+ *   - WIP (half tested) manage and test cross forwarder between table and room
  *   - log_legal address fix
  *   - setcookie (for tables only and persist prefs)
  *   - 404 wrong page management
@@ -44,6 +43,7 @@
  *
  *   DONE/FROZEN - problema con getpeer (HOSTADDR)
  *
+ *   DONE - configuration file management
  *   DONE - app level keep-alive
  *   DONE - index_wr other issues
  *   DONE - from room to table

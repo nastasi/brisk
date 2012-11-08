@@ -311,6 +311,8 @@ class Sac_a_push {
 
     function run()
     {
+        GLOBAL $DOCUMENT_ROOT, $HTTP_HOST, $G_with_splash;
+
         if ($this->main_loop) {
             return (FALSE);
         }
@@ -338,7 +340,7 @@ class Sac_a_push {
             $num_changed_sockets = stream_select($read, $write, $except, 0, 500000);
         
             if ($num_changed_sockets == 0) {
-                printf(" no data in 5 secs ");
+                printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
             } 
             else if ($num_changed_sockets > 0) {
                 printf("num sock %d num_of_socket: %d\n", $num_changed_sockets, count($read));
@@ -377,7 +379,6 @@ class Sac_a_push {
                             print_r($post);
                             printf("COOKIE:\n");
                             print_r($cookie);
-
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             $header_out = array();
 
@@ -401,6 +402,7 @@ class Sac_a_push {
                     }
                     else {
                         $buf = fread($sock, 512);
+                        // if socket is closed
                         if ($buf == FALSE || strlen($buf) == 0) {
                             if ($buf == FALSE) {
                                 printf("ERROR READING\n");
@@ -438,6 +440,10 @@ class Sac_a_push {
                             }
                             else if ($sock === $this->in) {
                                 printf("Arrivati %d bytes da stdin\n", strlen($buf));
+                                $line = trim($buf);
+                                if ($line == "reload") {
+                                    require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
+                                }
                             }
                             else {
                                 $key = array_search("$sock", $this->socks);
