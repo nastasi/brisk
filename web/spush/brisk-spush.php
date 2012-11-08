@@ -21,50 +21,6 @@
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
  *
- * TODO
- *
- *   - pari + 72 non fa 4x ma attualmente fa 3x, da correggere
- *   - parametrization of $DOCUMENT_ROOT  var in brisk-spush.phh file
- *   - parametrization of SITE_PREFIX(_LEN) define
- *   - move the name of the named socket into the configuration file
- *   DISABLED_TO_FIX - DNS access (perform blocking dns requests, must be fixed)
- *
- *   TEST - database connection fails after a while, check close and try PGSQL_CONNECT_FORCE_NEW.
- *   TEST - images flickering on slow windows: try to poll stream every 300 ms
- *
- *   - centralize all '<script ...' incapsulation to allow multiple transport system.
- *
- *   - WIP (half tested) manage and test cross forwarder between table and room
- *   - log_legal address fix
- *   - setcookie (for tables only and persist prefs)
- *   - 404 wrong page management
- *
- *   TEST - unneeded garbage_time.expired access
- *   TEST - BUG: fast loop on stream index_rd_ifra page (js watchdog start without timeout corrupt counts)
- *   TEST - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
- *   TEST - BUG: logout failed (fixed with a garbage_collector wrapper at sac-a-push level
- *   TEST - garbage management
- *
- *   DONE/FROZEN - problema con getpeer (HOSTADDR)
- *
- *   DONE - configuration file management
- *   DONE - app level keep-alive
- *   DONE - index_wr other issues
- *   DONE - from room to table
- *   DONE - from table to room
- *   DONE - chunked
- *   DONE - bug: read from a not resource handle (already closed because a new socket substitute it)
- *   DONE - partial write for normal page management
- *   DONE - index_rd_ifra: last_clean issue
- *   DONE - fwrite failed error management (select, buffer where store unsent data, and fwrite check and retry)
- *   DONE - bug: after restart index_rd.php receive from prev clients a lot of req
- *   DONE - index_wr.php::chat
- *   DONE - index_wr.php::exit
- *   DONE - index_rd.php porting
- *   DONE - generic var management from internet
- *   DONE - index.php auth part
- *   ABRT - index_wr.php::reload - reload is js-only function
- *   ABRT - keepalive management - not interesting for our purposes
  */
 
 $G_base = "../";

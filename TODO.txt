@@ -1,6 +1,57 @@
-======== 
-  TODO
-========
+ TODO |
+------+
+
+  MAJOR |
+ -------+
+   - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
+   - BUG: some connection to the named socket fails
+   - WIP: (half tested) manage and test cross forwarder between table and room
+   - log_legal address fix
+   - setcookie (for tables only and persist prefs)
+
+  MINOR |
+ -------+
+   - centralize all '<script ...' incapsulation to allow multiple transport system.
+   - packetize and automatize php-ancillary and apache module
+   - parametrizations:
+     . parametrization of $DOCUMENT_ROOT  var in brisk-spush.phh file
+     . parametrization of SITE_PREFIX(_LEN) define
+     . move the name of the named socket into the configuration file
+
+   - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
+
+  DONE |
+ ------+
+
+   TEST - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
+   TEST - garbage management
+
+   DONE/FROZEN - problem with getpeer (HOSTADDR)
+
+   DONE - images flickering on slow windows: try to poll stream every 300 ms (seems to be download problem)
+   DONE - database connection fails after a while, check close and try PGSQL_CONNECT_FORCE_NEW.
+   DONE - unneeded garbage_time.expired access
+   DONE - BUG: fast loop on stream index_rd_ifra page (js watchdog start without timeout corrupt counts)
+   DONE - BUG: logout failed (fixed with a garbage_collector wrapper at sac-a-push level
+   DONE - 404 wrong page management (remove directories redirections (es. brisk/))
+   DONE - configuration file management
+   DONE - app level keep-alive
+   DONE - index_wr other issues
+   DONE - from room to table
+   DONE - from table to room
+   DONE - chunked
+   DONE - bug: read from a not resource handle (already closed because a new socket substitute it)
+   DONE - partial write for normal page management
+   DONE - index_rd_ifra: last_clean issue
+   DONE - fwrite failed error management (select, buffer where store unsent data, and fwrite check and retry)
+   DONE - bug: after restart index_rd.php receive from prev clients a lot of req
+   DONE - index_wr.php::chat
+   DONE - index_wr.php::exit
+   DONE - index_rd.php porting
+   DONE - generic var management from internet
+   DONE - index.php auth part
+   ABRT - index_wr.php::reload - reload is js-only function
+   ABRT - keepalive management - not interesting for our purposes
 
  BRISK4 (mammuth)
  ======
