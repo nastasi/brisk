@@ -46,7 +46,7 @@ function main()
         exit(1);
     }
 
-    if (($s_a_p = Sac_a_push::create($room, "/tmp/brisk.sock", 0, 0)) === FALSE) {
+    if (($s_a_p = Sac_a_push::create($room, USOCK_PATH, 0, 0)) === FALSE) {
         exit(1);
     }
 

@@ -5,9 +5,7 @@
 #
 CONFIG_FILE="$HOME/.brisk_spu_install"
 
-apache_path="/etc/apache2/sites-available/"
-apache_conf="default"
-
+apache_conf="/etc/apache2/sites-available/default"
 players_n=3
 tables_n=44
 tables_auth_n=12
@@ -17,8 +15,9 @@ brisk_debug="0x0400"
 web_path="/home/nastasi/web/brisk"
 ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
 proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
+usock_path="/home/nastasi/brisk-priv/brisk.sock"
 legal_path="/home/nastasi/brisk-priv/brisk"
-cookie_path="/brisk/"
+prefix_path="/brisk/"
 brisk_conf="brisk_spu.conf.pho"
 web_only="FALSE"
 
@@ -61,8 +60,8 @@ if [ -f "$CONFIG_FILE" ]; then
    source "$CONFIG_FILE"
 fi
 
-if [ "x$cookie_path" = "x" ]; then
-   cookie_path=$web_path
+if [ "x$prefix_path" = "x" ]; then
+   prefix_path="$web_path"
 fi
 
 function usage () {
@@ -70,11 +69,12 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-a <auth_file_name>] [-f conffile] [-p outconf] [-d TRUE|FALSE] [-w web_dir] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-c <cookie_path>]"
+    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path> [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
+    echo "  -A apache_conf                  - def. $apache_conf"
     echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
     echo "  -T number of auth-only tables   - def. $tables_auth_n"
@@ -84,8 +84,9 @@ function usage () {
     echo "  -k dir where place ftok files   - def. \"$ftok_path\""
     echo "  -l dir where save logs          - def. \"$legal_path\""
     echo "  -y dir where place proxy files  - def. \"$proxy_path\""
-    echo "  -c cookie path                  - def. \"$cookie_path\""
+    echo "  -P prefix path                  - def. \"$prefix_path\""
     echo "  -C config filename              - def. \"$brisk_conf\""
+    echo "  -U unix socket path             - def. \"$usock_path\""
     
     echo
 }
@@ -128,21 +129,23 @@ while [ $# -gt 0 ]; do
     # echo aa $1 xx $2 bb
     conffile=""
     case $1 in
-	-f*) conffile="$(get_param "-f" "$1" "$2")"; sh=$?;;
-	-p*) outconf="$(get_param "-p" "$1" "$2")"; sh=$?;;
-	-n*) players_n="$(get_param "-n" "$1" "$2")"; sh=$?;;
-	-t*) tables_n="$(get_param "-t" "$1" "$2")"; sh=$?;;
-	-T*) tables_auth_n="$(get_param "-T" "$1" "$2")"; sh=$?;;
+        -A*) apache_conf="$(get_param "-A" "$1" "$2")"; sh=$?;;
+        -f*) conffile="$(get_param "-f" "$1" "$2")"; sh=$?;;
+        -p*) outconf="$(get_param "-p" "$1" "$2")"; sh=$?;;
+        -n*) players_n="$(get_param "-n" "$1" "$2")"; sh=$?;;
+        -t*) tables_n="$(get_param "-t" "$1" "$2")"; sh=$?;;
+        -T*) tables_auth_n="$(get_param "-T" "$1" "$2")"; sh=$?;;
         -a*) brisk_auth_conf="$(get_param "-a" "$1" "$2")"; sh=$?;;
-	-d*) brisk_debug="$(get_param "-d" "$1" "$2")"; sh=$?;;
-	-w*) web_path="$(get_param "-w" "$1" "$2")"; sh=$?;;
-	-k*) ftok_path="$(get_param "-k" "$1" "$2")"; sh=$?;;
-	-y*) proxy_path="$(get_param "-y" "$1" "$2")"; sh=$?;;
-	-c*) cookie_path="$(get_param "-c" "$1" "$2")"; sh=$?;;
-	-C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
-	-l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
-	-W) web_only="TRUE";;
-	-h) usage $0; exit 0;;
+        -d*) brisk_debug="$(get_param "-d" "$1" "$2")"; sh=$?;;
+        -w*) web_path="$(get_param "-w" "$1" "$2")"; sh=$?;;
+        -k*) ftok_path="$(get_param "-k" "$1" "$2")"; sh=$?;;
+        -y*) proxy_path="$(get_param "-y" "$1" "$2")"; sh=$?;;
+        -P*) prefix_path="$(get_param "-P" "$1" "$2")"; sh=$?;;
+        -C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
+        -l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
+        -U*) usock_path="$(get_param "-U" "$1" "$2")"; sh=$?;;
+        -W) web_only="TRUE";;
+        -h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
     esac
     if [ ! -z "$conffile" ]; then
@@ -159,6 +162,7 @@ done
 #  Show parameters
 #
 echo "    outconf:    \"$outconf\""
+echo "    apache_conf:\"$apache_conf\""
 echo "    players_n:   $players_n"
 echo "    tables_n:   $tables_n"
 echo "    tables_auth_n: $tables_auth_n"
@@ -168,8 +172,9 @@ echo "    web_path:   \"$web_path\""
 echo "    ftok_path:  \"$ftok_path\""
 echo "    legal_path: \"$legal_path\""
 echo "    proxy_path: \"$proxy_path\""
-echo "    cookie_path:\"$cookie_path\""
+echo "    prefix_path:\"$prefix_path\""
 echo "    brisk_conf:\"$brisk_conf\""
+echo "    usock_path: \"$usock_path\""
 echo "    web_only:   \"$web_only\""
 
 if [ ! -z "$outconf" ]; then
@@ -177,6 +182,7 @@ if [ ! -z "$outconf" ]; then
     echo "#"
     echo "#  Produced automatically by brisk::INSTALL.sh"
     echo "#"
+    echo "apache_conf=$apache_conf"
     echo "players_n=$players_n"
     echo "tables_n=$tables_n"
     echo "tables_auth_n=$tables_auth_n"
@@ -186,8 +192,9 @@ if [ ! -z "$outconf" ]; then
     echo "ftok_path=\"$ftok_path\""
     echo "proxy_path=\"$proxy_path\""
     echo "legal_path=\"$legal_path\""
-    echo "cookie_path=\"$cookie_path\""
+    echo "prefix_path=\"$prefix_path\""
     echo "brisk_conf=\"$brisk_conf\""
+    echo "usock_path=\"$usock_path\""
     echo "web_only=\"$web_only\""
   ) > "$outconf"
 fi
@@ -285,6 +292,8 @@ for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name
 done
 chmod 755 "${web_path}__/spush/brisk-spush.php"
 
+prefix_path_len=$(echo -n "$prefix_path" | wc -c)
+
 if [ $players_n -eq 5 ]; then
    send_time=250
 else
@@ -303,6 +312,12 @@ sed -i "s/define *( *'BIN5_PLAYERS_N', *[0-9]\+ *)/define('BIN5_PLAYERS_N', $pla
 
 sed -i "s@define *( *'FTOK_PATH',[^)]*)@define('FTOK_PATH', \"$ftok_path\")@g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'FTOK_PATH',[^)]*)" {} \;)
 
+sed -i "s@define *( *'SITE_PREFIX',[^)]*)@define('SITE_PREFIX', \"$prefix_path\")@g" ${web_path}__/Obj/sac-a-push.phh
+
+sed -i "s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len)@g" ${web_path}__/Obj/sac-a-push.phh
+
+sed -i "s@define *( *'USOCK_PATH',[^)]*)@define('USOCK_PATH', \"$usock_path\")@g" ${web_path}__/spush/brisk-spush.phh
+
 sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *'TABLES_AUTH_N',[^)]*)@define('TABLES_AUTH_N', $tables_auth_n)@g" ${web_path}__/Obj/brisk.phh
@@ -317,10 +332,10 @@ sed -i "s@define *( *'BRISK_CONF',[^)]*)@define('BRISK_CONF', \"$brisk_conf\")@g
 
 sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
 
-sed -i "s@\( \+xhr_rd_cookiepath *: *\)\"[^\"]*\" *,@\1 \"$cookie_path\",@g" ${web_path}__/http_streaming.js
-sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$cookie_path\";@g" ${web_path}__/commons.js
+sed -i "s@\( \+xhr_rd_cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path}__/http_streaming.js
+sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$prefix_path\";@g" ${web_path}__/commons.js
 
-document_root="$(grep DocumentRoot "${apache_path}${apache_conf}" | awk '{ print $2 }')"
+document_root="$(grep DocumentRoot "${apache_conf}" | awk '{ print $2 }')"
 sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph*
 
 if [ -d ${web_path} ]; then

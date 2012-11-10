@@ -24,6 +24,7 @@
 
 $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
+define('USOCK_PATH', "/tmp/brisk.sock");
 
 class PageFlush {
 
