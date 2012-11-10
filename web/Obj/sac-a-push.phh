@@ -105,32 +105,39 @@ function gpcs_var($name, $get, $post, $cookie)
 
 function headers_render($header, $len)
 {
-    $s = "";
+    $cookies = "";
+
+    if (isset($header['cookies'])) {
+        $cookies = $header['cookies']->render();
+        unset($header['cookies']);
+    }
     if (isset($header['Location'])) {
-        return sprintf("HTTP/1.1 302 OK\r\nLocation: %s\r\n\r\n", $header['Location']);
+        $s = sprintf("HTTP/1.1 302 OK\r\n%sLocation: %s\r\n", $cookies, $header['Location']);
     }
     else {
-        $s .= "HTTP/1.1 200 OK\r\n";
-    }
-    if (!isset($header['Date']))
-        $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
-    if (!isset($header['Connection']))
-        $s .= "Connection: close\r\n";
-    if (!isset($header['Content-Type']))
-        $s .= "Content-Type: text/html\r\n";
-    foreach($header as $key => $value) {
-        $s .= sprintf("%s: %s\r\n", $key, $value);
-    }
-    if ($len >= 0) {
-        $s .= sprintf("Content-Length: %d\r\n", $len);
-    }
-    else {
-        $s .= "Cache-Control: no-cache, must-revalidate\r\n";
-        $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
-        if (!isset($header['Content-Encoding'])) {
-            $s .= "Content-Encoding: chunked\r\n";
+        $s = "HTTP/1.1 200 OK\r\n";
+
+        if (!isset($header['Date']))
+            $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
+        if (!isset($header['Connection']))
+            $s .= "Connection: close\r\n";
+        if (!isset($header['Content-Type']))
+            $s .= "Content-Type: text/html\r\n";
+        foreach($header as $key => $value) {
+            $s .= sprintf("%s: %s\r\n", $key, $value);
         }
-        $s .= "Transfer-Encoding: chunked\r\n";
+        if ($len >= 0) {
+            $s .= sprintf("Content-Length: %d\r\n", $len);
+        }
+        else {
+            $s .= "Cache-Control: no-cache, must-revalidate\r\n";
+            $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
+            if (!isset($header['Content-Encoding'])) {
+                $s .= "Content-Encoding: chunked\r\n";
+            }
+            $s .= "Transfer-Encoding: chunked\r\n";
+        }
+        $s .= $cookies;
     }
     $s .= "\r\n";
 
@@ -187,6 +194,104 @@ function get_encoding($header)
     }
 
     return ($enc);
+}
+
+class Cookie {
+    var $attr;
+    // Set-Cookie: reg_fb_gate=deleted; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/; Domain=.foo.com; HttpOnly
+    // string $name  [, string $value  [, int $expire = 0  [, string $path  [, string $domain  [, bool $secure = false  [, bool $httponly = false  ]]]]]] )
+    function Cookie()
+    {
+        $this->attr = array();
+    }
+
+    static function create($name)
+    {
+        $thiz = new Cookie();
+
+        $thiz->attr[$name] = "";
+
+        $argc = func_num_args();
+        for ($i = 1 ; $i < $argc ; $i++) {
+            $arg = func_get_arg($i);
+            switch ($i) {
+            case 1:
+                $thiz->attr[$name] = urlencode($arg);
+                break;
+            case 2:
+                $thiz->attr['Expires'] = gmdate('D, d M Y H:i:s \G\M\T', $arg); // RFC 1211 format
+                break;
+            case 3:
+                $thiz->attr['Path'] = $arg;
+                break;
+            case 4:
+                $thiz->attr['Domain'] = $arg;
+                break;
+            case 5:
+                if ($arg == TRUE) {
+                    $thiz->attr['Secure'] = NULL;
+                }
+                break;
+            case 6:
+                if ($arg == TRUE) {
+                    $thiz->attr['HttpOnly'] = NULL;
+                }
+                break;
+            default:
+                return FALSE;
+            }
+        }
+
+        return $thiz;
+    }
+
+    function render()
+    {
+        $r = "Set-Cookie: ";
+        $isfirst = TRUE;
+
+        foreach ($this->attr as $k => $v) {
+            if ($v == NULL) {
+                $r .= sprintf("%s%s", ($isfirst ? "" : "; "), $k);
+            }
+            else {
+                $r .= sprintf("%s%s=%s", ($isfirst ? "" : "; "), $k, $v);
+            }
+            $isfirst = FALSE;
+        }
+        $r .= "\r\n";
+
+        return $r;
+    }
+}
+
+class Cookies {
+    var $cookies;
+
+    function Cookies()
+    {
+        $this->cookies = array();
+    }
+
+    function add($name)
+    {
+        if (($cookie = call_user_func_array("Cookie::create", func_get_args())) == FALSE)
+            return (FALSE);
+
+        array_push($this->cookies, $cookie);
+
+        return (TRUE);
+    }
+
+    function render()
+    {
+        $r = "";
+        foreach ($this->cookies as $cookie) {
+            $r .= $cookie->render();
+        }
+
+        return ($r);
+    }
 }
 
 

@@ -1412,20 +1412,24 @@ class Bin5 {
         
         break;
         case "index_wr.php":
-            $bri = $s_a_p->app->match_get($table_idx, $table_token);
-            ob_start();
-            bin5_index_wr_main($bri, $addr, $get, $post, $cookie);
-            $content = ob_get_contents();
-            ob_end_clean();
-            
+            if (isset($table_idx) && isset($table_token)) {
+                if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) != FALSE) {
+                    ob_start();
+                    bin5_index_wr_main($bri, $addr, $get, $post, $cookie);
+                    $content = ob_get_contents();
+                    ob_end_clean();
+                }
+            }
             $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
             return TRUE;
             
             break;
         case "index_rd_ifra.php":
             do {
-                if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL
+                if (!isset($table_idx)
+                    || !isset($table_token)
                     || !isset($cookie['sess'])
+                    || ($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
 
                     $content = Bin5_user::stream_fini($s_a_p->rndstr, TRUE);

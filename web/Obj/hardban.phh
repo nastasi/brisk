@@ -163,7 +163,7 @@ class Hardbans {
 	log_main("ftok failed");
 	break;
       }
-    
+      fprintf(STDERR, "hardpans: %x\n", $tok);
       if (($shm_sz = sharedmem_sz($tok)) == -1) {
 	log_main("shmop_open failed");
       }

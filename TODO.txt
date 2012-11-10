@@ -5,12 +5,12 @@
  -------+
    - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
    - BUG: some connection to the named socket fails
-   - WIP: (half tested) manage and test cross forwarder between table and room
    - log_legal address fix
-   - setcookie (for tables only and persist prefs)
+
 
   MINOR |
  -------+
+   - try to be more antivirus-friendly
    - centralize all '<script ...' incapsulation to allow multiple transport system.
    - packetize and automatize php-ancillary and apache module
    - parametrizations:
@@ -20,6 +20,7 @@
 
    - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
 
+
   DONE |
  ------+
 
@@ -28,6 +29,8 @@
 
    DONE/FROZEN - problem with getpeer (HOSTADDR)
 
+   DONE - manage and test cross forwarder between table and room
+   DONE - setcookie (for tables only and persist prefs)
    DONE - images flickering on slow windows: try to poll stream every 300 ms (seems to be download problem)
    DONE - database connection fails after a while, check close and try PGSQL_CONNECT_FORCE_NEW.
    DONE - unneeded garbage_time.expired access
