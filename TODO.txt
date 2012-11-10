@@ -13,10 +13,7 @@
    - try to be more antivirus-friendly
    - centralize all '<script ...' incapsulation to allow multiple transport system.
    - packetize and automatize php-ancillary and apache module
-   - parametrizations:
-     . parametrization of $DOCUMENT_ROOT  var in brisk-spush.phh file
-     . parametrization of SITE_PREFIX(_LEN) define
-     . move the name of the named socket into the configuration file
+   - into the room local step remains -1
 
    - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
 
@@ -29,6 +26,10 @@
 
    DONE/FROZEN - problem with getpeer (HOSTADDR)
 
+   DONE - parametrizations:
+          . parametrization of $DOCUMENT_ROOT  var in brisk-spush.phh file
+          . parametrization of SITE_PREFIX(_LEN) define
+          . move the name of the named socket into the configuration file
    DONE - manage and test cross forwarder between table and room
    DONE - setcookie (for tables only and persist prefs)
    DONE - images flickering on slow windows: try to poll stream every 300 ms (seems to be download problem)
