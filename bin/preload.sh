@@ -24,7 +24,7 @@
 
 IMGPATHBASE="../brisk-img/"
 
-set -x
+# set -x
 
 # (
 # echo '<?php'
@@ -40,7 +40,8 @@ function imglist_fla () {
     rex="$3"
     wrex="$4"
     ret=""
-    for i in $(find "$pname" -maxdepth 1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort); do
+#    for i in $(find "$pname" -maxdepth 1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort); do
+    for i in $(find "$pname" -maxdepth 1 -type f -name '[0-9][0-9]*.png' -o -name 'st_*.png' | grep -v '/src_' | sort); do
         if [ "$rex" != "" ]; then
             echo "$i" | grep -q "$rex"
             rt=$?
@@ -79,11 +80,11 @@ function imglist () {
     local abspa
     abspa="${IMGPATHBASE}${1}img"
     if [ "$1" = "" ]; then
-        ls -S $( imglist_fla "$abspa" "$2" )
+        ls -Sd $( imglist_fla "$abspa" "$2" ) | grep -v '^\.$'
     elif [ "$1" = "briskin5/" ]; then
         rex='/[0-9][0-9][^/]*$'
-        ls -S $( imglist_fla "$abspa" "$2" "$rex" "y" )
-        ls -S $( imglist_fla "$abspa" "$2" "$rex" "n" )
+        ls -Sd $( imglist_fla "$abspa" "$2" "$rex" "y" ) | grep -v '^\.$'
+        ls -Sd $( imglist_fla "$abspa" "$2" "$rex" "n" ) | grep -v '^\.$'
     fi
 }
 
@@ -103,10 +104,10 @@ for lang in it en; do
             echo "var g_preload_img_arr = new Array( "
             first=1
             spa="            "
-            ltri="`echo "$IMGPATH" | wc -c`"
+            ltri="$(echo "$IMGPATH" | wc -c)"
             for i in $(imglist "$dpath" "$lang"); do
                 if [ $first -ne 1 ]; then
-                    echo -n ", "
+                    echo -n ","
                     if [ $((ct % 2)) -eq 0 ]; then
                         echo
                         echo -n "$spa"
@@ -114,8 +115,12 @@ for lang in it en; do
                 else
                     echo -n "$spa"
                 fi
-                outna="img/`echo "$i" | cut -c $((ltri + 1))-`"
-                echo -n "\"$outna\""
+                outna="img/$(echo "$i" | cut -c $((ltri + 1))-)"
+                if [ $((ct % 2)) -eq 0 ]; then
+                    echo -n "\"$outna\""
+                else
+                    echo -n " \"$outna\""
+                fi
                 ct=$((ct + 1))
                 first=0
             done
@@ -129,17 +134,17 @@ for lang in it en; do
             sum=0
             spa="            "
             tot=0
-            ltri="`echo "$IMGPATH" | wc -c`"
+            ltri="$(echo "$IMGPATH" | wc -c)"
             for i in $(imglist "$dpath" "$lang"); do
-                outna="`echo "$i" | cut -c $((ltri + 1))-`"
-                sz="`stat -c '%s' $IMGPATH/$outna`"
+                outna="$(echo "$i" | cut -c $((ltri + 1))-)"
+                sz="$(stat -c '%s' $IMGPATH/$outna)"
                 tot=$((tot + sz))
             done
             
             for i in $(imglist "$dpath" "$lang"); do
-                outna="`echo "$i" | cut -c $((ltri + 1))-`"
+                outna="$(echo "$i" | cut -c $((ltri + 1))-)"
                 if [ $first -ne 1 ]; then
-                    echo -n ", "
+                    echo -n ","
                     if [ $((ct % 8)) -eq 0 ]; then
                         echo
                         echo -n "$spa"
@@ -147,16 +152,20 @@ for lang in it en; do
                 else
                     echo -n "$spa"
                 fi
-                sz="`stat -c '%s' $IMGPATH/$outna`"
+                sz="$(stat -c '%s' $IMGPATH/$outna)"
                 sum=$((sum + sz))
-                cur="`echo "100.0 * $sum / $tot" | bc -l | sed 's/\(\.[0-9]\)[0-9]*/\1/g'`"
-                echo -n "\"$cur\""
+                cur="$(echo "100.0 * $sum / $tot" | bc -l | sed 's/\(\.[0-9]\)[0-9]*/\1/g')"
+                if [ $((ct % 8)) -eq 0 ]; then
+                    echo -n "\"$cur\""
+                else
+                    echo -n " \"$cur\""
+                fi
                 ct=$((ct + 1))
                 first=0
             done
             
             echo "CT2: $ct" >&2
-            
+
             echo ");"
         ) >> $OUTFILE
     done
