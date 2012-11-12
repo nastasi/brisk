@@ -1219,7 +1219,7 @@ class Room {
     $only_you = FALSE;
     
     // common settings
-    $msg = substr($mesg, 6, 128);
+    $msg = mb_substr($mesg, 6, 128, "UTF-8");
     $curtime = time();
     $dt = date("H:i ", $curtime);
     $target = "";
@@ -2677,7 +2677,7 @@ function validate_sess($sess)
 
 function validate_name($name) 
 {
-  $name_new = str_replace(' ', '_', substr(trim($name),0,12));
+    $name_new = str_replace(' ', '_', mb_substr(trim($name),0,12, "UTF-8"));
 
   for ($i = 0 ; $i < strlen($name_new) ; $i++) {
     $c = $name_new[$i];
