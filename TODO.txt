@@ -10,6 +10,7 @@
 
   MINOR |
  -------+
+   - slow cards distribution
    - try to be more antivirus-friendly
    - centralize all '<script ...' incapsulation to allow multiple transport system.
    - packetize and automatize php-ancillary and apache module
@@ -26,6 +27,7 @@
 
    DONE/FROZEN - problem with getpeer (HOSTADDR)
 
+   DONE - substr to mb_substr
    DONE - parametrizations:
           . parametrization of $DOCUMENT_ROOT  var in brisk-spush.phh file
           . parametrization of SITE_PREFIX(_LEN) define
