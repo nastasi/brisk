@@ -6,6 +6,7 @@
    - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
    - BUG: some connection to the named socket fails
    - log_legal address fix
+   - save/restore database
 
 
   MINOR |
