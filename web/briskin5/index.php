@@ -110,7 +110,7 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  xstm = new xynt_streaming(window, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+  xstm = new xynt_streaming(window, 'iframe', null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  

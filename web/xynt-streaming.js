@@ -1,8 +1,80 @@
 // old targetpage == page and moved into start method
 
-function xynt_streaming(win, console, gst, from, cookiename, sess, sandbox, page, cmdproc)
+function transport_iframe(doc, page)
+{
+    this.doc = doc;
+    this.ifra = doc.createElement("iframe");
+    this.ifra.style.visibility = "hidden";
+    doc.body.appendChild(this.ifra);
+    this.ifra.contentWindow.location.href = page;
+}
+
+transport_iframe.prototype = {
+    doc: null,
+    ifra: null,
+
+    destroy: function () { /* public */
+        if (this.ifra != null) {
+            this.doc.body.removeChild(this.ifra);
+            delete this.ifra;
+            this.ifra = null;
+        }
+    },
+
+    xstr_is_init: function () { /* public */
+        return (typeof(this.ifra.contentWindow.xynt_streaming) != 'undefined');
+    },
+
+    /* only after a successfull is_initialized call */
+    xstr_is_ready: function () { /* public */
+        return (this.ifra.contentWindow.xynt_streaming == "ready");
+    },
+
+    /* only after a successfull is_ready call to be sure the accessibility of the var */
+    xstr_set: function (xynt_streaming) { /* public */
+        this.ifra.contentWindow.xynt_streaming = xynt_streaming;
+    },
+
+    ctx_new_is_set: function () { /* public */
+        return (typeof(this.ifra.contentWindow.ctx_new) != 'undefined');
+    },
+
+    ctx_new_curlen_get: function () { /* public */
+        return (this.ifra.contentWindow.ctx_new.length);
+    },
+
+    ctx_new_getchar: function(idx) { /* public */
+    },
+
+    ctx_old_len_is_set: function () { /* public */
+        return (typeof(this.ifra.contentWindow.ctx_old_len) != 'undefined');
+    },
+
+    ctx_old_len_get: function () { /* public */
+        return (this.ifra.contentWindow.ctx_old_len);
+    },
+
+    ctx_old_len_set: function (len) { /* public */
+        this.ifra.contentWindow.ctx_old_len = len;
+    },
+
+    ctx_old_len_add: function (len) { /* public */
+        this.ifra.contentWindow.ctx_old_len += len;
+    },
+
+    new_part: function () { /* public */
+        return (this.ifra.contentWindow.ctx_new.substr(this.ifra.contentWindow.ctx_old_len));
+    },
+
+    scrcls_set: function (step) { /* public */
+        this.ifra.contentWindow.script_clean = step;
+    }
+}
+
+function xynt_streaming(win, transp_type, console, gst, from, cookiename, sess, sandbox, page, cmdproc)
 {
     this.win = win;
+    this.transp_type = transp_type;
     this.console = console;
     this.gst = gst;
     this.from = from;
@@ -20,6 +92,8 @@ function xynt_streaming(win, console, gst, from, cookiename, sess, sandbox, page
 
 xynt_streaming.prototype = {
     win:               null,
+    transp_type:       null,
+    transp:            null,
     console:           null,
     gst:               null,
     from:              null,
@@ -30,7 +104,6 @@ xynt_streaming.prototype = {
     cmdproc:           null,
 
     doc:               null,
-    ifra:              null,
     cookiepath: "/brisk/",
     watchdog_hdl:      null,
     hbit:              null,
@@ -59,19 +132,20 @@ xynt_streaming.prototype = {
         // alert("start");
         this.log("xynt_streaming:start restart: "+this.restart_n);
         this.keepalives_equal = 0;
-        this.ifra = this.doc.createElement("iframe");
-        this.ifra.style.visibility = "hidden";
-        this.doc.body.appendChild(this.ifra);
+
+        // page arrangement
         this.page = url_complete(this.win.location.href, this.page);
         // stat, subst, this.gst.st
 
         this.page = url_append_args(this.page, "sess", this.sess, "stat", stat, "subst", subst, "step", this.gst.st, "from", this.from);
-        // alert(this.page);
         this.log(this.page);
 
-        // this.log(this.ifra);
-        this.ifra.contentWindow.location.href = this.page;
-        // this.ifra.src = this.page;
+        // transport instantiation
+        if (this.transp_type == "iframe") {
+            this.transp = new transport_iframe(this.doc, this.page);
+        }
+
+        // watchdog setting
         this.watchdog_ct  = 0;
         if (!this.the_end) {
             this.watchdog_hdl = setTimeout(function(obj) { obj.log("tout1"); obj.watchdog(); }, this.watchdog_timeout, this);
@@ -105,7 +179,8 @@ xynt_streaming.prototype = {
         if (!this.watchable) {
             do {
                 try{
-                    if (typeof(this.ifra.contentWindow.xynt_streaming) == 'undefined')
+                    // if (typeof(this.ifra.contentWindow.xynt_streaming) == 'undefined')
+                    if (!this.transp.xstr_is_init())
                         break;
                 }
                 catch(b) {
@@ -116,8 +191,10 @@ xynt_streaming.prototype = {
                   on IE7 the the window frame scope is cleaned after the href is set, so we wait 
                   for a well know variable value before assign this object value to it (OO is a passion)
                 */
-                if (this.ifra.contentWindow.xynt_streaming == "ready") {
-                    this.ifra.contentWindow.xynt_streaming = this;
+                // if (this.ifra.contentWindow.xynt_streaming == "ready") {
+                if (this.transp.xstr_is_ready()) {
+                    // this.ifra.contentWindow.xynt_streaming = this;
+                    this.transp.xstr_set(this);
                     this.watchable = true;
                     this.watchdog_ct = 0;
                     this.log("hs::watchdog: watchable = yes");
@@ -148,23 +225,27 @@ xynt_streaming.prototype = {
 	    // CHECK: maybe again here isn't needed 
             again = 0;
             try {
-                if (typeof(this.ifra.contentWindow.ctx_new)     == 'undefined' ||
-                    typeof(this.ifra.contentWindow.ctx_old_len) == 'undefined')
+                /* if (typeof(this.ifra.contentWindow.ctx_new)     == 'undefined' ||
+                   typeof(this.ifra.contentWindow.ctx_old_len) == 'undefined') */
+                if (!this.transp.ctx_new_is_set() || !this.transp.ctx_old_len_is_set())
                     break;
             }
             catch(b) {
 	        break;
             }
             
-            ctx_new_len = this.ifra.contentWindow.ctx_new.length;
-            if (ctx_new_len <= this.ifra.contentWindow.ctx_old_len) {
+            // ctx_new_len = this.ifra.contentWindow.ctx_new.length;
+            ctx_new_len = this.transp.ctx_new_curlen_get();
+            // if (ctx_new_len <= this.ifra.contentWindow.ctx_old_len) {
+            if (ctx_new_len <= this.transp.ctx_old_len_get()) {
                 break;
             }
-            this.log("new: "+ ctx_new_len + "  old: "+this.ifra.contentWindow.ctx_old_len);
+            this.log("new: "+ ctx_new_len + "  old: "+this.transp.ctx_old_len_get());
             this.keepalive_new++;
             // alert("pre-loop 1");
-            for (i = this.ifra.contentWindow.ctx_old_len ; i < ctx_new_len ; i++) {
-		if (this.ifra.contentWindow.ctx_new.charAt(i) != '_') {
+            for (i = this.transp.ctx_old_len_get() ; i < ctx_new_len ; i++) {
+		// if (this.ifra.contentWindow.ctx_new.charAt(i) != '_') {
+		if (this.transp.ctx_new_getchar(i) != '_') {
                     // this.log("ctx_new.char(i) != '_' ["+this.ifra.contentWindow.ctx_new.charAt(i)+"]");
 		    break;
                 }
@@ -172,7 +253,8 @@ xynt_streaming.prototype = {
                 //     this.log("ctx_new.charAt(i) == '_'");
                 // }
 	    }
-	    this.ifra.contentWindow.ctx_old_len = i;
+	    // this.ifra.contentWindow.ctx_old_len = i;
+            this.transp.ctx_old_len_set(i);
 	    if (i == ctx_new_len) {
                 this.log("old_len == i");
 		break;
@@ -182,7 +264,7 @@ xynt_streaming.prototype = {
             }
             // alert("do--while middle ["+this.ifra.contentWindow.ctx_old_len+"]");
 
-            comm_newpart = this.ifra.contentWindow.ctx_new.substr(this.ifra.contentWindow.ctx_old_len);    
+            comm_newpart = this.transp.new_part();
             this.log("COM_NEWPART: ["+comm_newpart+"]");
             comm_len = 0;
 	    comm_arr = comm_newpart.match(this.comm_match);
@@ -197,8 +279,10 @@ xynt_streaming.prototype = {
 		}
 		again = 1;
 	    }
-            this.ifra.contentWindow.ctx_old_len += comm_len;
-            this.ifra.contentWindow.script_clean = this.gst.st;
+            // this.ifra.contentWindow.ctx_old_len += comm_len;
+            this.transp.ctx_old_len_add(comm_len);
+            // this.ifra.contentWindow.script_clean = this.gst.st;
+            this.transp.scrcls_set(this.gst.st);
             // alert("do--while end ["+again+"]");
         } while (again);
 
@@ -260,10 +344,10 @@ xynt_streaming.prototype = {
         this.restart_n++;
         this.log("hs::reload");
         this.watchable = false;
-        if (this.ifra != null) {
-            this.doc.body.removeChild(this.ifra);
-            delete this.ifra;
-            this.ifra = null;
+        if (this.transp != null) {
+            this.transp.destroy();
+            delete this.transp;
+            this.transp = null;
         }
     },
 

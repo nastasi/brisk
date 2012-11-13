@@ -1412,6 +1412,7 @@ class Bin5 {
         
         break;
         case "index_wr.php":
+            // FIXME $content can be unset
             if (isset($table_idx) && isset($table_token)) {
                 if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) != FALSE) {
                     ob_start();
