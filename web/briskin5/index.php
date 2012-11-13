@@ -64,7 +64,7 @@ function bin5_index_main(&$header_out, $addr, $get, $post, $cookie)
 <link rel="shortcut icon" href="../img/brisk_ico.png">
 <script type="text/javascript" src="../commons.js"></script> 
 <script type="text/javascript" src="../heartbit.js"></script>
-<script type="text/javascript" src="../xynt-http-streaming.js"></script>
+<script type="text/javascript" src="../xynt-streaming.js"></script>
 <script type="text/javascript" src="dnd.js"></script>
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
@@ -76,7 +76,7 @@ function bin5_index_main(&$header_out, $addr, $get, $post, $cookie)
 <body>
 <SCRIPT type="text/javascript">
    var sess = "not_connected";
-   var hstm = null;
+   var xstm = null;
    var g_lang = "<?php echo "$G_lang"; ?>";
    var stat = "table";
    var subst = "none";
@@ -110,13 +110,13 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  hstm = new http_streaming(window, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
-  hstm.hbit_set(heartbit);
+  xstm = new xynt_streaming(window, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+  xstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
   window.onunload = onunload_cb;  
 
-  hstm.start(); 
+  xstm.start();
   // FIXME: add this setTimeout(preload_images into data stream to avoid
   // race on opened socket
   // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct);

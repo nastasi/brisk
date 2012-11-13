@@ -865,7 +865,7 @@ supported by:<br>
 <!--<script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
-<script type="text/javascript" src="xynt-http-streaming.js"></script>
+<script type="text/javascript" src="xynt-streaming.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
@@ -886,7 +886,7 @@ supported by:<br>
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
    var g_brow = null;
-   var hstm = null;
+   var xstm = null;
    var sess = "not_connected";
    var spo_slide, sup_slide;
 
@@ -1001,7 +1001,7 @@ echo "$body"; ?>
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
-<script type="text/javascript" src="xynt-http-streaming.js"></script>
+<script type="text/javascript" src="xynt-streaming.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
@@ -1057,8 +1057,8 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-hstm = new http_streaming(window, null /* console*/ , gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
-     hstm.hbit_set(heartbit);
+xstm = new xynt_streaming(window, null /* console*/ , gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+     xstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
      window.onbeforeunload = onbeforeunload_cb;
@@ -1070,7 +1070,7 @@ hstm = new http_streaming(window, null /* console*/ , gst, 'index_php', 'sess', 
        $("proflashext").innerHTML = "";
 
      // console.log("session from main: "+sess);
-     hstm.start();
+     xstm.start();
      // alert("ARR LENGTH "+g_preload_img_arr.length);
      // FIXME: preload image will be fired by stream instead here
      // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); 

@@ -70,7 +70,7 @@ function blocking_error($is_unrecoverable)
 
   $is_page_streaming = TRUE;
   log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
-  return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
+  return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
 }
 
 function page_sync($sess, $page, $table_idx, $table_token)
@@ -82,7 +82,7 @@ function page_sync($sess, $page, $table_idx, $table_token)
   $is_page_streaming = TRUE;
 
   log_rd2("PAGE_SYNC");
-  return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); hstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
+  return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
 }
 
 
@@ -123,7 +123,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if (($sem = Room::lock_data(FALSE)) == FALSE) { 
         // wait 20 secs, then restart the xhr 
         ignore_user_abort(FALSE);
-        return ("sleep(gst,20000);|hstm.xhr_abort();");
+        return ("sleep(gst,20000);|xstm.xhr_abort();");
     }
     
     // Verifica l'expire time lato server
@@ -140,7 +140,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($sem = Room::lock_data(TRUE)) == FALSE) { 
             // wait 20 secs, then restart the xhr 
             ignore_user_abort(FALSE);
-            return ("sleep(gst,20000);|hstm.xhr_abort();");
+            return ("sleep(gst,20000);|xstm.xhr_abort();");
         }
         $S_load_stat['lL_laccgarb']++;
 
@@ -216,7 +216,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 //             // wait 20 secs, then restart the xhr 
 //             ignore_user_abort(FALSE);
             
-//             return ("sleep(gst,20000);|hstm.xhr_abort();");
+//             return ("sleep(gst,20000);|xstm.xhr_abort();");
 //         }
 //         $first_loop = FALSE;
 //     } // if  ($first_loop == TRUE) {

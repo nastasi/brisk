@@ -591,7 +591,7 @@ class User {
       
       $is_page_streaming = TRUE;
       log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
-      return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
+      return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
   }
   
   // FIXME TO SUPPORT iframe
@@ -605,7 +605,7 @@ class User {
       
       log_rd2("PAGE_SYNC");
       printf("xXx USER::PAGE_SYNC [%s]\n", get_class($this));
-      return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); hstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
+      return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
   }
 
 
@@ -760,11 +760,11 @@ class User {
     $body .= sprintf("<html>
 <head>
 <script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
-var http_streaming = \"ready\";", self::base_get(), self::base_get());
+var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
     $body .= sprintf("
-window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
 </script>
 </head>
 <body>");
@@ -819,13 +819,13 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
     $body .= sprintf("<html>
 <head>
 <script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
-var http_streaming = \"ready\";", self::base_get(), self::base_get());
+var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
     if ($this->rd_scristp > 0)
         $body .= sprintf("last_clean = %d;\n", ($this->rd_scristp-1));
     $body .= sprintf("
-window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
 </script> 
 </head>
 <body>");

@@ -64,7 +64,7 @@ function blocking_error($is_unrecoverable)
 
   $is_page_streaming = TRUE;
   log_rd2("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
-  return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
+  return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
 }
 
 function page_sync($sess, $page)
@@ -73,7 +73,7 @@ function page_sync($sess, $page)
 
   $is_page_streaming = TRUE;
   log_rd2("PAGE_SYNC");
-  return (sprintf('hstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
+  return (sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
 }
 
 function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $table_idx, $table_token)
@@ -100,7 +100,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
     if (($sem = Bin5::lock_data(FALSE, $table_idx)) == FALSE) { 
         // wait 20 secs, then restart the xhr 
         ignore_user_abort(FALSE);
-        return ("sleep(gst,20000);|hstm.xhr_abort();");
+        return ("sleep(gst,20000);|xstm.xhr_abort();");
     }
 
     if (($user = Bin5_user::load_data($table_idx, $proxy_step['i'], $sess)) == FALSE) {
@@ -119,7 +119,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
         if (($sem = Bin5::lock_data(TRUE, $table_idx)) == FALSE) { 
             // wait 20 secs, then restart the xhr 
             ignore_user_abort(FALSE);
-            return ("sleep(gst,20000);|hstm.xhr_abort();");
+            return ("sleep(gst,20000);|xstm.xhr_abort();");
         }
         $S_load_stat['lL_laccgarb']++;
 
@@ -196,7 +196,7 @@ function maincheck($sess, $cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_su
 //         else {
 //             ignore_user_abort(FALSE);
             
-//             return ("sleep(gst,20000);|hstm.xhr_abort();");
+//             return ("sleep(gst,20000);|xstm.xhr_abort();");
 //         }
         
 //         $first_loop = FALSE;

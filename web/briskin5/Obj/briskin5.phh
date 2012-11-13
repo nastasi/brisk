@@ -729,11 +729,11 @@ class Bin5_user extends User {
     $body .= sprintf("<html>
 <head>
 <script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-http-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
-var http_streaming = \"ready\";", self::base_get(), self::base_get());
+var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
     $body .= sprintf("
-window.onload = function () { if (http_streaming != \"ready\") { http_streaming.reload(); } };
+window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
 </script>
 </head>
 <body>");
@@ -754,7 +754,7 @@ push(\"%s\");
         
         $is_page_streaming = TRUE;
         log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
-        return (sprintf(($is_unrecoverable ? 'hstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
+        return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
     }
     
     protected function page_sync($sess, $page)
@@ -764,7 +764,7 @@ push(\"%s\");
         $is_page_streaming = TRUE;
         log_rd2("PAGE_SYNC");
         printf("xXx BIN5_USER::PAGE_SYNC\n");
-        return (sprintf('hstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
+        return (sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
     }
 
     protected function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate, $table_idx, $table_token)
@@ -1355,7 +1355,7 @@ class Bin5 {
             $user_cur->laccwr = $curtime;
 
             $ret = "gst.st = ".($user_cur->step+1)."; ";
-            $ret .= 'gst.st_loc++; hstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");|';
+            $ret .= 'gst.st_loc++; xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");|';
 
             log_wr($user_cur->sess." BIN5_WAKEUP: ".$ret);
             $user_cur->comm[$user_cur->step % COMM_N] = $ret;

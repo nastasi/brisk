@@ -1,6 +1,6 @@
 // old targetpage == page and moved into start method
 
-function http_streaming(win, console, gst, from, cookiename, sess, sandbox, page, cmdproc)
+function xynt_streaming(win, console, gst, from, cookiename, sess, sandbox, page, cmdproc)
 {
     this.win = win;
     this.console = console;
@@ -18,7 +18,7 @@ function http_streaming(win, console, gst, from, cookiename, sess, sandbox, page
     this.keepalive_new = -1;
 }
 
-http_streaming.prototype = {
+xynt_streaming.prototype = {
     win:               null,
     console:           null,
     gst:               null,
@@ -57,7 +57,7 @@ http_streaming.prototype = {
 
         createCookie(this.cookiename, sess, 24*365, this.cookiepath);
         // alert("start");
-        this.log("http_streaming:start restart: "+this.restart_n);
+        this.log("xynt_streaming:start restart: "+this.restart_n);
         this.keepalives_equal = 0;
         this.ifra = this.doc.createElement("iframe");
         this.ifra.style.visibility = "hidden";
@@ -105,7 +105,7 @@ http_streaming.prototype = {
         if (!this.watchable) {
             do {
                 try{
-                    if (typeof(this.ifra.contentWindow.http_streaming) == 'undefined')
+                    if (typeof(this.ifra.contentWindow.xynt_streaming) == 'undefined')
                         break;
                 }
                 catch(b) {
@@ -116,8 +116,8 @@ http_streaming.prototype = {
                   on IE7 the the window frame scope is cleaned after the href is set, so we wait 
                   for a well know variable value before assign this object value to it (OO is a passion)
                 */
-                if (this.ifra.contentWindow.http_streaming == "ready") {
-                    this.ifra.contentWindow.http_streaming = this;
+                if (this.ifra.contentWindow.xynt_streaming == "ready") {
+                    this.ifra.contentWindow.xynt_streaming = this;
                     this.watchable = true;
                     this.watchdog_ct = 0;
                     this.log("hs::watchdog: watchable = yes");
@@ -234,7 +234,7 @@ http_streaming.prototype = {
     },
 
     //
-    // moved to xynt-http-streaming-ifra as push()
+    // moved to xynt-streaming-ifra as push()
     //
     // keepalive: function (s) {
     //     this.log("hs::keepalive");
