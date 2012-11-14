@@ -1387,10 +1387,12 @@ class Bin5 {
         return ($is_ab);
     }
 
-    static function request_mgr(&$s_a_p, $enc, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
+    static function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
     {
         printf("NEW_SOCKET (root): %d\n", intval($new_socket));
         
+        $enc = get_encoding($header);
+
         if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE) 
             unset($table_idx);
         
