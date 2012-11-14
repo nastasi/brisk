@@ -1392,6 +1392,13 @@ class Bin5 {
         printf("NEW_SOCKET (root): %d\n", intval($new_socket));
         
         $enc = get_encoding($header);
+        if (isset($header['User-Agent']) && strstr($header['User-Agent'], "MSIE")) {
+            $transp_type = "htmlfile";
+        }
+        else {
+            $transp_type = "iframe";
+        }
+        force_no_cache($header_out);
 
         if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE) 
             unset($table_idx);
@@ -1399,13 +1406,12 @@ class Bin5 {
         if (($table_token = gpcs_var('table_token', $get, $post, $cookie)) === FALSE) 
             unset($table_token);
 
-        force_no_cache($header_out);
 
         switch ($path) {
         case "":
         case "index.php":
             ob_start();
-            bin5_index_main($header_out, $addr, $get, $post, $cookie);
+            bin5_index_main($transp_type, $header_out, $addr, $get, $post, $cookie);
             $content = ob_get_contents();
             ob_end_clean();
         

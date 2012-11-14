@@ -487,13 +487,11 @@ class Sac_a_push {
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             $header_out = array();
 
-                            $enc = get_encoding($header);
-
                             $subs = SITE_PREFIX."briskin5/";
                             $subs_l = strlen($subs);
                             $rret = FALSE;
                             if (!strncmp($path, SITE_PREFIX, SITE_PREFIX_LEN)) {
-                                $rret = $this->app->request_mgr($this, $enc, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
+                                $rret = $this->app->request_mgr($this, $header, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
                             }
                             if ($rret == FALSE) { 
                                 // FIXME: manage 404 !!!

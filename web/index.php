@@ -213,7 +213,7 @@ function carousel_top()
     return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" src="img/briskshop%d.gif"></a>', $rn));
 }
 
-function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
+function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -233,8 +233,7 @@ function index_main(&$room, &$header_out, $addr, $get, $post, $cookie)
         unset ($table_idx);
     if (($table_token = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
         unset ($table_token);
-    
-    
+
     // Use of proxies isn't allowed.
     if (!$G_is_local && is_proxy($addr)) {
         return FALSE;
@@ -862,7 +861,7 @@ supported by:<br>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script> 
-<!--<script type="text/javascript" src="myconsole.js"></script> -->
+<!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
 <script type="text/javascript" src="xynt-streaming.js"></script>
@@ -997,7 +996,7 @@ echo "$body"; ?>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script>
-     <!-- <script type="text/javascript" src="myconsole.js"></script> -->
+<!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
@@ -1057,7 +1056,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-xstm = new xynt_streaming(window, 'iframe', null /* console*/ , gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;

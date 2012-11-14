@@ -1,5 +1,96 @@
 // old targetpage == page and moved into start method
 
+//
+// CLASS transport_htmlfile
+//
+function transport_htmlfile(doc, page)
+{
+    this.doc = doc;
+    this.transfdoc = new ActiveXObject("htmlfile");
+    this.transfdoc.open();
+    /*this.transfdoc.write("<html><head><script>");
+    this.transfdoc.write("document.domain=\""+(doc.domain)+"\";");
+    this.transfdoc.write("</"+"script></"+"head>"); */
+    this.transfdoc.write("<html><body><iframe id='iframe'></iframe></body></html>");
+    this.transfdoc.close();
+
+    this.ifra = this.transfdoc.getElementById("iframe");
+    this.ifra.contentWindow.location.href = page;
+}
+
+transport_htmlfile.prototype = {
+    doc: null,
+    ifra: null,
+    tradoc: null,
+
+    destroy: function () { /* public */
+        if (this.ifra != null) {
+        //     this.doc.body.removeChild(this.ifra);
+        //     delete this.ifra;
+             this.ifra = null;
+        }
+
+        if (this.transfdoc) {
+            delete this.transfdoc;
+            this.transfdoc = null;
+        }
+    },
+
+    xstr_is_init: function () { /* public */
+        return (typeof(this.ifra.contentWindow.xynt_streaming) != 'undefined');
+    },
+
+    /* only after a successfull is_initialized call */
+    xstr_is_ready: function () { /* public */
+        return (this.ifra.contentWindow.xynt_streaming == "ready");
+    },
+
+    /* only after a successfull is_ready call to be sure the accessibility of the var */
+    xstr_set: function (xynt_streaming) { /* public */
+        this.ifra.contentWindow.xynt_streaming = xynt_streaming;
+    },
+
+    ctx_new_is_set: function () { /* public */
+        return (typeof(this.ifra.contentWindow.ctx_new) != 'undefined');
+    },
+
+    ctx_new_curlen_get: function () { /* public */
+        return (this.ifra.contentWindow.ctx_new.length);
+    },
+
+    ctx_new_getchar: function(idx) { /* public */
+    },
+
+    ctx_old_len_is_set: function () { /* public */
+        return (typeof(this.ifra.contentWindow.ctx_old_len) != 'undefined');
+    },
+
+    ctx_old_len_get: function () { /* public */
+        return (this.ifra.contentWindow.ctx_old_len);
+    },
+
+    ctx_old_len_set: function (len) { /* public */
+        this.ifra.contentWindow.ctx_old_len = len;
+    },
+
+    ctx_old_len_add: function (len) { /* public */
+        this.ifra.contentWindow.ctx_old_len += len;
+    },
+
+    new_part: function () { /* public */
+        return (this.ifra.contentWindow.ctx_new.substr(this.ifra.contentWindow.ctx_old_len));
+    },
+
+    scrcls_set: function (step) { /* public */
+        this.ifra.contentWindow.script_clean = step;
+    }
+}
+
+
+
+//
+// CLASS transport_iframe
+//
 function transport_iframe(doc, page)
 {
     this.doc = doc;
@@ -144,6 +235,11 @@ xynt_streaming.prototype = {
         if (this.transp_type == "iframe") {
             this.transp = new transport_iframe(this.doc, this.page);
         }
+        else if (this.transp_type == "htmlfile") {
+            this.transp = new transport_htmlfile(this.doc, this.page);
+        }
+        else
+            return;
 
         // watchdog setting
         this.watchdog_ct  = 0;
@@ -180,10 +276,13 @@ xynt_streaming.prototype = {
             do {
                 try{
                     // if (typeof(this.ifra.contentWindow.xynt_streaming) == 'undefined')
-                    if (!this.transp.xstr_is_init())
+                    if (!this.transp.xstr_is_init()) {
+                        this.log("hs::watchdog: xstr_is_init = false");
                         break;
+                    }
                 }
                 catch(b) {
+                    this.log("hs::watchdog: exception");
 	            break;
                 }
 

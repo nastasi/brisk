@@ -41,7 +41,7 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                            );
 
 
-function bin5_index_main(&$header_out, $addr, $get, $post, $cookie)
+function bin5_index_main($transp_type, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_lang, $mlang_bin5_index;
     if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
@@ -110,7 +110,7 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  xstm = new xynt_streaming(window, 'iframe', null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+  xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  
