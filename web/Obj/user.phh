@@ -755,6 +755,8 @@ class User {
 
   public static function stream_fini($init_string, $is_unrecoverable)
 {
+    printf("xXx user::stream_fini\n");
+
     // IF IFRAME THEN:
     $body = "";
     $body .= sprintf("<html>
