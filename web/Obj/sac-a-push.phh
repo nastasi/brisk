@@ -1,5 +1,4 @@
 <?php
-
 /*
  *  brisk - spush/sac-a-push.phh
  *
@@ -311,7 +310,6 @@ class Sac_a_push {
     var $blocking_mode;
 
     var $app;
-    var $bin5;
 
     var $curtime;
 
