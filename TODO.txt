@@ -11,7 +11,6 @@
 
   MINOR |
  -------+
-   - BUG: access with password from 2 diff browsers the second go in strange "page not found" 
      in the first tentative, the second works
    - try to be more antivirus-friendly
    - centralize all '<script ...' incapsulation to allow multiple transport system.
@@ -23,7 +22,7 @@
 
   DONE |
  ------+
-
+   DONE - BUG: access with password from 2 diff browsers the second go in strange "page not found" 
    DONE - BUG: access with password from 2 diff browsers place the first in a strict loop (the 
           problem was a call to a static parent method instead of the overrided child method,
           substitute self:: with the dynamically get class::)
