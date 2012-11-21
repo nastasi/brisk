@@ -545,6 +545,14 @@ class Sac_a_push {
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
                                 }
+                                else if ($line == "shutdown") {
+                                    if ($this->app->dump_data()) {
+                                        exit(0);
+                                    }
+                                    else {
+                                        exit(1);
+                                    }
+                                }
                             }
                             else {
                                 $key = array_search("$sock", $this->socks);

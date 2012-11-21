@@ -6,23 +6,23 @@
    - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
    - BUG: some connection to the named socket fails
    - log_legal address fix
-   - save/restore database
 
 
   MINOR |
  -------+
-     in the first tentative, the second works
    - try to be more antivirus-friendly
-   - centralize all '<script ...' incapsulation to allow multiple transport system.
    - packetize and automatize php-ancillary and apache module
    - into the room local step remains -1
-
+   - add xhr as transport layer and manage different streams better
    - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
 
 
   DONE |
  ------+
+   DONE - save/restore database
+   DONE - centralize all '<script ...' incapsulation to allow multiple transport system.
    DONE - BUG: access with password from 2 diff browsers the second go in strange "page not found" 
+          in the first tentative, the second works
    DONE - BUG: access with password from 2 diff browsers place the first in a strict loop (the 
           problem was a call to a static parent method instead of the overrided child method,
           substitute self:: with the dynamically get class::)

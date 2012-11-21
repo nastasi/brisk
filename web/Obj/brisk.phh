@@ -140,10 +140,10 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.1.1";
+$G_brisk_version = "4.2.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: adottato sac-a-push come motore per l\'invio dei dati in tempo reale, nuovo trasporto httpfile per explorer, tanti bug fixati.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: adottato sac-a-push come motore per l\'invio dei dati in tempo reale, nuovo trasporto httpfile per explorer, tanti bug fixati, freeze su disco.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: usage of reader/writer locking instead of generic exclusive locking.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
@@ -672,46 +672,49 @@ class Table {
 
 
 
-class Room {
+class Room
+{
     static $delta_t;
-
-  var $user;
-  var $table;
-  var $match;
-  var $comm; // commands for many people
-  var $step; // current step of the comm array
-  var $garbage_timeout;
-  var $shm_sz;
-
-  function Room () {
-    $this->user  = array();
-    $this->table = array();
-    $this->match = array();
-
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        $this->user[$i] = User::create($this, $i, "", "");
+    
+    var $crystal_filename;
+    var $user;
+    var $table;
+    var $match;
+    var $comm; // commands for many people
+    var $step; // current step of the comm array
+    var $garbage_timeout;
+    var $shm_sz;
+    
+    function Room ($crystal_filename) {
+        $this->crystal_filename = $crystal_filename;
+        $this->user  = array();
+        $this->table = array();
+        $this->match = array();
+        
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $this->user[$i] = User::create($this, $i, "", "");
+        }
+        
+        for ($i = 0 ; $i < TABLES_N ; $i++) {
+            $this->table[$i] = Table::create($i);
+            /* OLD METHOD
+               if ($i < 12) {
+               $row = ( (((int)($i / 4)) % 2) == 0 );
+               $col = ($i % 2 == 0);
+               $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
+               }
+               else {
+               $this->table[$i]->auth_only = FALSE;
+               }
+            */
+            if ($i < TABLES_AUTH_N) 
+                $this->table[$i]->auth_only = TRUE;
+            else
+                $this->table[$i]->auth_only = FALSE;
+        }
+        $this->garbage_timeout = 0;
+        $this->shm_sz = SHM_DIMS_MIN;
     }
-
-    for ($i = 0 ; $i < TABLES_N ; $i++) {
-      $this->table[$i] = Table::create($i);
-      /* OLD METHOD
-      if ($i < 12) {
-        $row = ( (((int)($i / 4)) % 2) == 0 );
-        $col = ($i % 2 == 0);
-        $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
-      }
-      else {
-        $this->table[$i]->auth_only = FALSE;
-      }
-      */
-      if ($i < TABLES_AUTH_N) 
-        $this->table[$i]->auth_only = TRUE;
-      else
-        $this->table[$i]->auth_only = FALSE;
-    }
-    $this->garbage_timeout = 0;
-    $this->shm_sz = SHM_DIMS_MIN;
-  }
 
   function garbage_manager($force)
   {
@@ -1863,10 +1866,17 @@ class Room {
   }
 
   // Static functions
-  static function create()
+  static function create($crystal_filename)
   {
-    $room = new Room();
-    
+      if (($room_ser = @file_get_contents($crystal_filename)) == FALSE ||
+          ($room = unserialize($room_ser)) == FALSE) {
+          fprintf(STDERR, "NEW ROOM\n");
+          $room = new Room($crystal_filename);
+      }
+      else {
+          fprintf(STDERR, "ROOM FROM FILE\n");
+      }
+
     return $room;
   }
   
@@ -1966,7 +1976,16 @@ class Room {
     
     return (FALSE);
   }
-
+  function dump_data()
+  {
+      $room_ser = serialize($this);
+      $room_ser_len = mb_strlen($room_ser, "ASCII");
+      if (file_put_contents($this->crystal_filename, $room_ser) == $room_ser_len) {
+          return (TRUE);
+      }
+      
+      return (FALSE);
+  }
 
   function save_data($room) 
   {

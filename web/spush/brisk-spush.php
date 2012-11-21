@@ -41,7 +41,7 @@ require_once($G_base."briskin5/index_wr.php");
 
 function main()
 {
-    if (($room = Room::create()) == FALSE) {
+    if (($room = Room::create(LEGAL_PATH."/brisk-crystal.data")) == FALSE) {
         log_crit("room::create failed");
         exit(1);
     }
