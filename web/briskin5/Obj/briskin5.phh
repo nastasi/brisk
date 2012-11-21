@@ -614,7 +614,7 @@ class Bin5_user extends User {
         return ($ret);
     }
 
-    protected function blocking_error($is_unrecoverable)
+    static function blocking_error($is_unrecoverable)
     {
         log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
         return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));

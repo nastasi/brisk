@@ -481,7 +481,7 @@ class User {
 
   /* INDEX_RD_IFRA PORT */
 
-  protected function blocking_error($is_unrecoverable)
+  static function blocking_error($is_unrecoverable)
   {
       log_crit("BLOCKING_ERROR UNREC: ".($is_unrecoverable ? "TRUE" : "FALSE"));
       return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");'));
@@ -663,9 +663,9 @@ window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.
     $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");
 // -->
-</script>", 0, escpush($cla::blocking_error($is_unrecoverable)) );
+</script>", 0, escpush(static::blocking_error($is_unrecoverable)) );
     // ELSE IF XHR THEN:
-    // return (self::blocking_error($is_unrecoverable));
+    // return (static::blocking_error($is_unrecoverable));
     return ($body);
 }
 
