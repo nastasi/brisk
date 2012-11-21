@@ -3,7 +3,6 @@
 
   MAJOR |
  -------+
-   - BUG: access with password from 2 diff browsers place the first in a strict loop
    - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
    - BUG: some connection to the named socket fails
    - log_legal address fix
@@ -12,6 +11,8 @@
 
   MINOR |
  -------+
+   - BUG: access with password from 2 diff browsers the second go in strange "page not found" 
+     in the first tentative, the second works
    - try to be more antivirus-friendly
    - centralize all '<script ...' incapsulation to allow multiple transport system.
    - packetize and automatize php-ancillary and apache module
@@ -23,6 +24,9 @@
   DONE |
  ------+
 
+   DONE - BUG: access with password from 2 diff browsers place the first in a strict loop (the 
+          problem was a call to a static parent method instead of the overrided child method,
+          substitute self:: with the dynamically get class::)
    TEST - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
    TEST - garbage management
 

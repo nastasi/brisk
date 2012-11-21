@@ -643,6 +643,7 @@ class User {
 
   public static function stream_fini($init_string, $is_unrecoverable)
 {
+    $cla = get_called_class();
     printf("xXx user::stream_fini\n");
 
     // IF IFRAME THEN:
@@ -662,7 +663,7 @@ window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.
     $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");
 // -->
-</script>", 0, escpush(self::blocking_error($is_unrecoverable)) );
+</script>", 0, escpush($cla::blocking_error($is_unrecoverable)) );
     // ELSE IF XHR THEN:
     // return (self::blocking_error($is_unrecoverable));
     return ($body);
