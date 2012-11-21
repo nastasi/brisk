@@ -296,7 +296,7 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
                   $cookies->add("table_token", $user->table_token, $curtime + 31536000);
                   $cookies->add("table_idx", $user->table, $curtime + 31536000);
                   $header_out['cookies'] = $cookies;
-                  $header_out['Location'] = "Location: briskin5/index.php";
+                  $header_out['Location'] = "briskin5/index.php";
                   return TRUE;
               }
               
