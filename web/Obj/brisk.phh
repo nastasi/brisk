@@ -1717,6 +1717,7 @@ class Room {
 
       $ghost_user = $this->user[$ghost];
       $curtime = time();
+      $ghost_user->comm[$ghost_user->step % COMM_N] = "";
       $ghost_user->step_inc();
       if ($sess == "") {
         $sess = uniqid(""); 
@@ -1734,6 +1735,7 @@ class Room {
               $bri = $this->match[$table_idx];
 
               if ($bri->the_end != TRUE) {
+                  $bri->user[$ghost_user->table_pos]->comm[$bri->user[$ghost_user->table_pos]->step % COMM_N] = "";
                   $bri->user[$ghost_user->table_pos]->step_inc();
                   $bri->user[$ghost_user->table_pos]->sess = $sess;
               }

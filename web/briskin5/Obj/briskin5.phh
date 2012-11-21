@@ -1181,6 +1181,12 @@ class Bin5 {
                     $content = ob_get_contents();
                     ob_end_clean();
                 }
+                else {
+                    $content = "Bin5 Load data error";
+                }
+            }
+            else {
+                $content = "Bin5 Load data error";
             }
             $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
             return TRUE;
