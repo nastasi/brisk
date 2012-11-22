@@ -177,7 +177,8 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
                 $table->mult += 1; 
                 $table->old_reason = sprintf("Ha lasciato %s perché aveva al massimo 2 punti.", xcape($user->name));
                 
-                $table->game_next();
+                // Non si cambia mazzo se si abbandona la partita
+                // $table->game_next();
                 $table->game_init(&$bri->user);
                 
                 for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {	

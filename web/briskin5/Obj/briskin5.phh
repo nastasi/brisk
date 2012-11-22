@@ -183,7 +183,7 @@ class Bin5_table extends Table {
        $thiz->asta_pla_n=  -1;
        $thiz->asta_card =  -1;
        $thiz->asta_pnt  =  -1;
-       $thiz->mult      =   1;
+       $thiz->mult      =   0;
     
        $thiz->points    =   array( );
        $thiz->points_n  =   0;
@@ -260,7 +260,7 @@ class Bin5_table extends Table {
         $thiz->bunch_create();
         $thiz->mazzo    = rand(0,PLAYERS_N-1);
         $thiz->points_n = 0;
-        $thiz->mult     = 1;
+        $thiz->mult     = 0;
         $thiz->old_win    = -1;
         $thiz->old_reason = "";
 
@@ -272,6 +272,32 @@ class Bin5_table extends Table {
         log_main("TABLE_OLD_WIN - spawn:".$thiz->old_win);
 
         return ($thiz);
+    }
+
+    function asta2mult($asta_pnt)
+    {
+        if ($asta_pnt > 110)
+            return (5);
+        else if ($asta_pnt > 100)
+            return (4);
+        else if ($asta_pnt > 90)
+            return (3);
+        else if ($asta_pnt > 80)
+            return (2);
+        else if ($asta_pnt > 70)
+            return (1);
+        else
+            return (0);
+    }
+
+    function multer($is_new)
+    {
+        if ($is_new) {
+            return (pow(2, $this->mult) * $this->asta2mult($this->asta_pnt));
+        }
+        else {
+            return (pow(2, $this->old_mult) * $this->asta2mult($this->old_asta_pnt));
+        }
     }
 
 
@@ -329,7 +355,7 @@ class Bin5_table extends Table {
         /* MOVED INTO SPAWN
            $this->mazzo    =  rand(0,PLAYERS_N-1);
            $this->points_n =  0;
-           $this->mult     =  1;
+           $this->mult     =  0;
            $this->old_win  = -1;
            $this->old_reason = "";
         */
@@ -1269,21 +1295,6 @@ function locshm_exists($tok)
     
 }
 
-function asta2mult($asta_pnt)
-{ 
-    if ($asta_pnt > 110) 
-        return (5);
-    else if ($asta_pnt > 100) 
-        return (4);
-    else if ($asta_pnt > 90) 
-        return (3);
-    else if ($asta_pnt > 80) 
-        return (2);
-    else if ($asta_pnt > 70) 
-        return (1);
-    else
-        return (0);
-}
 
 // rendiamo qui l'elenco dei punti come return della func
 function calculate_points(&$table)
@@ -1302,6 +1313,7 @@ function calculate_points(&$table)
     $table->old_asta_pnt = $table->asta_pnt;
     $table->old_mult = $table->mult;
 
+    // count points for the temporary 2 teams
     for ($i = 0 ; $i < (BIN5_PLAYERS_N == 5 ? 40 : 24) ; $i++) {
         // for ($i = 0 ; $i < 40 ; $i++) {
         $ctt = $table->card[$i]->value % 10;
@@ -1312,8 +1324,8 @@ function calculate_points(&$table)
 
     log_wr(sprintf("PRO: [%d]", $pro));
 
-  
-    if ($table->asta_pnt == 61 && $pro == 60) { // PATTA !
+    // PATTA case !
+    if ($table->asta_pnt == 61 && $pro == 60) {
         $table->points[$table->points_n % MAX_POINTS] = array();
         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
             $table->points[$table->points_n % MAX_POINTS][$i] = 0;
@@ -1331,8 +1343,6 @@ function calculate_points(&$table)
     else
         $sig = -1;
 
-    $gamult = asta2mult($table->asta_pnt);
-  
     $table->points[$table->points_n % MAX_POINTS] = array();
     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
         if ($i == $table->asta_win) 
@@ -1346,9 +1356,9 @@ function calculate_points(&$table)
 
         log_wr(sprintf("PRO: pt[%d][%d] = %d", $table->points_n % MAX_POINTS, $i, $pt));
 
-        $pt = $pt * $sig * ($gamult + $table->mult) * ($pro == 120 ? 2 : 1);
+        $pt = $pt * $sig * $table->multer(TRUE) * ($pro == 120 ? 2 : 1);
 
-        log_wr(sprintf("PRO:[%d][%d][%d]", $sig, $table->mult, ($pro == 120 ? 2 : 1)));
+        log_wr(sprintf("PRO:[%d][%d][%d]", $sig, $table->multer(TRUE), ($pro == 120 ? 2 : 1)));
     
         $table->points[$table->points_n % MAX_POINTS][$i] = $pt;
         $table->total[$i] += $pt;
@@ -1356,7 +1366,7 @@ function calculate_points(&$table)
     }
     $table->points_n++;
     $table->old_pnt = $pro;
-    $table->mult = 1;
+    $table->mult = 0;
   
     return($ret);
 }
@@ -1673,8 +1683,9 @@ function show_table_info(&$bri, &$table, $table_pos)
                                  ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
             }
         }
-        if (($table->old_mult + asta2mult($table->old_asta_pnt)) > 1) {
-            $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], multoval($table->old_mult + asta2mult($table->old_asta_pnt)));
+        $old_multer = $table->multer(FALSE);
+        if ($old_multer > 1) {
+            $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], $old_multer);
         }
         $noty .= "<hr><br>";
     }
@@ -1705,8 +1716,9 @@ function show_table_info(&$bri, &$table, $table_pos)
         $noty .= sprintf($mlang_bin5_bin5['info_turn'][$G_lang], $unam);
     }
   
-    if (($table->mult + asta2mult($table->asta_pnt)) > 1) {
-        $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($table->mult + asta2mult($table->asta_pnt)));
+    $multer = $table->multer(TRUE);
+    if ($multer > 1) {
+        $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], $multer );
     }
     $noty .= "<hr><br>";
     $ret .= show_notify($noty, 3000, $mlang_bin5_bin5['btn_bkgame'][$G_lang], 500, 400);
