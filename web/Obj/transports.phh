@@ -1,0 +1,128 @@
+<?php
+/*
+ *  sac-a-push - Obj/transports.phh
+ *
+ *  Copyright (C) 2012 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it 
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+class Transport_template {
+
+    function Transport_template() {
+    }
+
+    function init($enc, &$header_out, $init_string, $base, $step)
+    {
+    }
+
+    static function fini($init_string, $blockerr)
+    {
+    }
+
+    function chunk($step, $cont)
+    {
+    }
+}
+
+class Transport_xhr {
+
+    function Transport_xhr() {
+    }
+
+    function init($enc, &$header_out, $init_string, $base, $step)
+    {
+    }
+
+    static function fini($init_string, $blockerr)
+    {
+    }
+
+    function chunk($step, $cont)
+    {
+    }
+}
+
+class Transport_iframe {
+
+    function Transport_iframe() {
+    }
+
+    function init($enc, &$header_out, $init_string, $base, $step)
+    {
+        $ret = "";
+
+        if ($enc != 'plain')
+            $header_out['Content-Encoding'] = $enc;
+        $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
+        $header_out['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT'; // Date in the past
+        $header_out['Content-type']  = 'text/html; charset="utf-8"';
+        
+        $ret .= sprintf("<html>
+<head>
+<script type=\"text/javascript\" src=\"%scommons.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
+<script type=\"text/javascript\">
+var xynt_streaming = \"ready\";", $base, $base);
+        if ($step > 0)
+            $ret .= sprintf("last_clean = %d;\n", ($step-1));
+        $ret .= sprintf("
+window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
+</script> 
+</head>
+<body>");
+        $ret .= sprintf("<!-- \n%s -->\n", $init_string);
+
+        return ($ret);
+    }
+
+    static function fini($init_string, $blockerr)
+    {
+        $ret = "";
+        $ret .= sprintf("<html>
+<head>
+<script type=\"text/javascript\" src=\"%scommons.js\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
+<script type=\"text/javascript\">
+var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
+        $ret .= sprintf("
+window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
+</script>
+</head>
+<body>");
+        $ret .= sprintf("<!-- \n%s -->\n", $init_string);
+        $ret .= sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"%s\");
+// -->
+</script>", 0, escpush($blockerr) );
+        return ($ret);
+    }
+
+    function chunk($step, $cont)
+    {
+        if ($cont == NULL) {
+            return sprintf("<script id='hs%d' type='text/javascript'><!--
+push(null);\n// -->\n</script>", $step);
+        }
+        else {
+            return sprintf("<script id='hs%d' type='text/javascript'><!--
+push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
+        }
+    }
+}
+?>

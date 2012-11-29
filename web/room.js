@@ -419,7 +419,7 @@ function esco_cb() {
     window.onbeforeunload = null; 
     window.onunload = null; 
     // nonunload = true; 
-    act_logout();
+    act_logout(0);
  };
 
 

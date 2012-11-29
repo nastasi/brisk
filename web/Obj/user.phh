@@ -21,6 +21,9 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  */
 
+require_once("${G_base}Obj/transports.phh");
+
+
 // User flags
 define('USER_FLAG_AUTH',     0x02);
 
@@ -98,6 +101,7 @@ class User {
   var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
   var $rd_cache;   // place where store failed fwrite data
   var $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
+  var $rd_transp;  // class that define stream encapsulation type (iframe, xhr, ...)
 
   var $comm;       // commands array
   // var $asta_card;  // 
@@ -156,6 +160,7 @@ class User {
     $thiz->rd_kalive  = -1;
     $thiz->rd_cache   = "";
     $thiz->rd_zls     = FALSE;
+    $thiz->rd_transp  = NULL;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -299,6 +304,7 @@ class User {
       $this->rd_scristp = 0;
       $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
       $this->rd_zls     = ZLibStream::create($enc);
+      $this->rd_transp  = new Transport_iframe();
   }
 
   function rd_socket_get() {
@@ -643,27 +649,12 @@ class User {
 
   public static function stream_fini($init_string, $is_unrecoverable)
 {
-    $cla = get_called_class();
     printf("xXx user::stream_fini\n");
 
-    // IF IFRAME THEN:
-    $body = "";
-    $body .= sprintf("<html>
-<head>
-<script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
-<script type=\"text/javascript\">
-var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
-    $body .= sprintf("
-window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
-</script>
-</head>
-<body>");
-    $body .= sprintf("<!-- \n%s -->\n", $init_string);
-    $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
-push(\"%s\");
-// -->
-</script>", 0, escpush(static::blocking_error($is_unrecoverable)) );
+    // FIXME: dynamic "Transport_" type
+    $tans_class = "Transport_iframe";
+    $body = $tansclass::fini($init_string, static::blocking_error($is_unrecoverable));
+
     // ELSE IF XHR THEN:
     // return (static::blocking_error($is_unrecoverable));
     return ($body);
@@ -687,12 +678,6 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
     
     // (webservers_exceeded() || stristr($HTTP_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; rv:5.0)") || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
-    if ($enc != 'plain')
-        $header_out['Content-Encoding'] = $enc;
-    $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
-    $header_out['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT'; // Date in the past
-    $header_out['Content-type']  = 'text/html; charset="utf-8"';
-    
     log_load("index_rd_ifra_init.php");
     
     if (($from  = gpcs_var('from', $get, $post, $cookie)) === FALSE)
@@ -705,23 +690,9 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
         unset($step);
     
     $this->rd_data_set($curtime, $enc, $stat, $subst, $step, $from);
-    $cc = get_called_class();
     
-    $body .= sprintf("<html>
-<head>
-<script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
-<script type=\"text/javascript\">
-var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
-    if ($this->rd_scristp > 0)
-        $body .= sprintf("last_clean = %d;\n", ($this->rd_scristp-1));
-    $body .= sprintf("
-window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
-</script> 
-</head>
-<body>");
-    $body .= sprintf("<!-- \n%s -->\n", $init_string);
-    
+    $body .= $this->rd_transp->init($enc, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
+
     return TRUE;
   }
 
@@ -747,11 +718,7 @@ function stream_main(&$body, $get, $post, $cookie)
     $old_step  = $this->rd_step;
     printf("xXx PRE : rd_step %d\n", $this->rd_step);
     if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate, $table_idx, $table_token)) != FALSE) {
-        $body .= sprintf("<script id='hs%d' type='text/javascript'><!--
-push(\"%s\");
-// -->
-</script>", $this->rd_scristp++, escpush($ret) );
-        
+        $body .= $this->rd_transp->chunk( $this->rd_scristp++, $ret);
         log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     }
     printf("xXx POST: rd_step %d\n", $this->rd_step);
@@ -761,12 +728,7 @@ push(\"%s\");
 
 function stream_keepalive($with_ping)
 {
-    $ret =  (sprintf("<script id='hs%d' type='text/javascript'><!--
-push(%s);
-// -->
-</script>", $this->rd_scristp++, ($with_ping ? "\"act_ping();\"" : "null")));
-
-    return ($ret);
+    return ($this->rd_transp->chunk( $this->rd_scristp++, ($with_ping ? "act_ping();" : NULL)));
 }
 
 static function base_get()
