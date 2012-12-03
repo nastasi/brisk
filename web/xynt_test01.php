@@ -25,7 +25,8 @@ if ($isstream == "true") {
     // TODO: what stream ? 
     //       iframe, htmlfile, xhr
 
-    $transp = new Transport_iframe();
+    // $transp = new Transport_iframe();
+    $transp = new Transport_xhr();
 
     $header_out = array();
 
@@ -79,7 +80,7 @@ if ($isstream == "true") {
      var subst = "";
      var gst = new globst();
      window.onload = function() {
-     xstm = new xynt_streaming(window, "iframe", null /* console */, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true', function(com){eval(com);});
+     xstm = new xynt_streaming(window, "xhr", null /* console */, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true', function(com){eval(com);});
      /*     xstm.hbit_set(heartbit); */
      xstm.start();
  }

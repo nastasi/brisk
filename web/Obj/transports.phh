@@ -47,14 +47,24 @@ class Transport_xhr {
 
     function init($enc, &$header_out, $init_string, $base, $step)
     {
+        $ret = $init_string;
+        if ($enc != 'plain')
+            $header_out['Content-Encoding'] = $enc;
+        $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
+        $header_out['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT'; // Date in the past
+        $header_out['Content-type']  = 'application/xml; charset="utf-8"';
+
+        return ($ret);
     }
 
     static function fini($init_string, $blockerr)
     {
+        return ("");
     }
 
     function chunk($step, $cont)
     {
+        return ("@BEGIN@".$cont."@END@");
     }
 }
 
