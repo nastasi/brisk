@@ -135,4 +135,8 @@ push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
         }
     }
 }
+
+class Transport_htmlfile extends Transport_iframe {
+}
+
 ?>

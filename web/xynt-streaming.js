@@ -390,12 +390,15 @@ xynt_streaming.prototype = {
 
         // transport instantiation
         if (this.transp_type == "xhr") {
+            this.page = url_append_args(this.page, "transp", "xhr");
             this.transp = new transport_xhr(this.doc, this, this.page);
         }
         else if (this.transp_type == "iframe") {
+            this.page = url_append_args(this.page, "transp", "iframe");
             this.transp = new transport_iframe(this.doc, this, this.page);
         }
         else if (this.transp_type == "htmlfile") {
+            this.page = url_append_args(this.page, "transp", "htmlfile");
             this.transp = new transport_htmlfile(this.doc, this, this.page);
         }
         else
