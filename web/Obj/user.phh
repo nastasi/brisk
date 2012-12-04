@@ -653,7 +653,7 @@ class User {
 
     // FIXME: dynamic "Transport_" type
     $tans_class = "Transport_iframe";
-    $body = $tansclass::fini($init_string, static::blocking_error($is_unrecoverable));
+    $body = $tans_class::fini($init_string, static::blocking_error($is_unrecoverable));
 
     // ELSE IF XHR THEN:
     // return (static::blocking_error($is_unrecoverable));
