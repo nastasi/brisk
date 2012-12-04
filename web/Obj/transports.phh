@@ -31,7 +31,7 @@ class Transport_template {
     {
     }
 
-    static function fini($init_string, $blockerr)
+    static function fini($init_string, $base, $blockerr)
     {
     }
 
@@ -57,7 +57,7 @@ class Transport_xhr {
         return ($ret);
     }
 
-    static function fini($init_string, $blockerr)
+    static function fini($init_string, $base, $blockerr)
     {
         return ("");
     }
@@ -101,7 +101,7 @@ window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.
         return ($ret);
     }
 
-    static function fini($init_string, $blockerr)
+    static function fini($init_string, $base, $blockerr)
     {
         $ret = "";
         $ret .= sprintf("<html>
@@ -109,7 +109,7 @@ window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.
 <script type=\"text/javascript\" src=\"%scommons.js\"></script>
 <script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
 <script type=\"text/javascript\">
-var xynt_streaming = \"ready\";", self::base_get(), self::base_get());
+var xynt_streaming = \"ready\";", $base, $base);
         $ret .= sprintf("
 window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
 </script>
