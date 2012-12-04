@@ -244,10 +244,16 @@ transport_iframe.prototype = {
     ifra: null,
 
     destroy: function () { /* public */
-        if (this.ifra != null) {
-            this.doc.body.removeChild(this.ifra);
-            delete this.ifra;
-            this.ifra = null;
+        try {
+            if (this.ifra != null) {
+                // FIXME: with opera on win this remove child crash js so is
+                //        commented
+                // this.doc.body.removeChild(this.ifra);
+                delete this.ifra;
+                this.ifra = null;
+            }
+        } catch (b) {
+            alert("catched");
         }
     },
 
