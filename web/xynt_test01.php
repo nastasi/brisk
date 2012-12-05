@@ -61,7 +61,7 @@ if ($isstream == "true") {
     case 1:
         // from 1 to 9 into the innerHTML and than close
         for ($i = 1 ; $i < 10 ; $i++) {
-            $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = 'xx%d';", $i));
+            $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';", $i));
             print($chunk);
             mop_flush();
             sleep(1);
@@ -70,12 +70,26 @@ if ($isstream == "true") {
     case 2:
         // from 1 to 9 with 60 secs after 8, the client js api must restart stream after 12 secs
         for ($i = 1 ; $i < 10 ; $i++) {
-            $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = 'yy%d';", $i));
+            $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';", $i));
             print($chunk);
             mop_flush();
             sleep(1);
             if ($i == 8)
                 sleep(60);
+        }
+        break;
+    case 3:
+        // from 1 to 9 into the innerHTML and than close
+        for ($i = 1 ; $i < 10 ; $i++) {
+            if ($i != 5) {
+                $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';", $i));
+            }
+            else {
+                $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';|sleep(gst,3000);", $i));
+            }
+            print($chunk);
+            mop_flush();
+            sleep(1);
         }
         break;
     }
@@ -109,8 +123,13 @@ if ($isstream == "true") {
 <div>
 <?php
 
+$desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia.",
+               "Restart: da 1 a 8 ogni secondo, pausa 16 secondi, poi ricomincia.",
+               "Pausa: da 1 a 5 ogni secondo, pausa 3 secondi, e poi 8 e 9 ogni secondo, e poi ricomincia.");
+
+
 printf("<table>");
-for ($test = 1 ; $test <= 2 ; $test++) {
+for ($test = 1 ; $test <= 3 ; $test++) {
     printf("<tr>");
     foreach ($transs as $trans) {
         printf("<td style=\"padding: 8px; border: 1px solid black;\"><a href=\"?f_trans=%s&f_test=%d\">Test %s %02d</a></td>", $trans, $test, $trans, $test);
@@ -121,8 +140,13 @@ printf("</table>");
 printf("<br>[%s]<br>Test: %d<br>", $f_trans, $f_test);
 ?>
 </div>
-<div id="container">
+<div>
+<b>Descrizione</b>: <?php echo $desc[$f_test - 1]; ?>
+</div>
+<div>
+<b>Counter</b>: <span id="container">
 BEGIN
+</span>
 </div>
 </body>
 </html>
