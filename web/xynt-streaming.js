@@ -247,8 +247,9 @@ transport_iframe.prototype = {
     destroy: function () { /* public */
         try {
             if (this.ifra != null) {
-                // FIXME: with opera on win this remove child crash js so is
-                //        commented AND NOWWW ????
+                // FIXME: on Opera on Windows this remove child crash js so is commented
+                //        on IE on Windows without it stream abort fails
+                //        so we need to decide how can run it
                 this.doc.body.removeChild(this.ifra);
                 delete this.ifra;
                 this.ifra = null;
