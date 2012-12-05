@@ -47,7 +47,7 @@ class Transport_xhr {
 
     function init($enc, &$header_out, $init_string, $base, $step)
     {
-        $ret = $init_string;
+        $ret = sprintf("@BEGIN@ /* %s */ @END@", $init_string);
         if ($enc != 'plain')
             $header_out['Content-Encoding'] = $enc;
         $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1

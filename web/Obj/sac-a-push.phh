@@ -339,7 +339,7 @@ class Sac_a_push {
         $thiz->rndstr = "";
         for ($i = 0 ; $i < 4096 ; $i++) {
             if (($i % 128) == 0)
-                $thiz->rndstr .= "\n";
+                $thiz->rndstr .= " ";
             else
                 $thiz->rndstr .= chr(mt_rand(65, 90));
         }

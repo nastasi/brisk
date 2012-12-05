@@ -95,6 +95,7 @@ transport_xhr.prototype = {
     },
 
     ctx_new_getchar: function(idx) { /* public */
+        return (this.ctx_new[idx]);
     },
 
     ctx_old_len_is_set: function () { /* public */
@@ -247,13 +248,13 @@ transport_iframe.prototype = {
         try {
             if (this.ifra != null) {
                 // FIXME: with opera on win this remove child crash js so is
-                //        commented
-                // this.doc.body.removeChild(this.ifra);
+                //        commented AND NOWWW ????
+                this.doc.body.removeChild(this.ifra);
                 delete this.ifra;
                 this.ifra = null;
             }
         } catch (b) {
-            alert("catched");
+            alert("destroy exception catched");
         }
     },
 

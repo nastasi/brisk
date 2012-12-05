@@ -44,7 +44,7 @@ if ($isstream == "true") {
     $init_string = "";
     for ($i = 0 ; $i < 4096 ; $i++) {
         if (($i % 128) == 0)
-            $init_string .= "\n";
+            $init_string .= " ";
         else
             $init_string .= chr(mt_rand(65, 90));
     }
@@ -57,13 +57,27 @@ if ($isstream == "true") {
     print($body);
     mop_flush();
 
-    for ($i = 1 ; $i < 10 ; $i++) {
-        $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';", $i));
-        print($chunk);
-        mop_flush();
-        
-        // exit(123);
-        sleep(1);
+    switch ($f_test) {
+    case 1:
+        // from 1 to 9 into the innerHTML and than close
+        for ($i = 1 ; $i < 10 ; $i++) {
+            $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = 'xx%d';", $i));
+            print($chunk);
+            mop_flush();
+            sleep(1);
+        }
+        break;
+    case 2:
+        // from 1 to 9 with 60 secs after 8, the client js api must restart stream after 12 secs
+        for ($i = 1 ; $i < 10 ; $i++) {
+            $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = 'yy%d';", $i));
+            print($chunk);
+            mop_flush();
+            sleep(1);
+            if ($i == 8)
+                sleep(60);
+        }
+        break;
     }
     exit;
 }
@@ -83,7 +97,8 @@ if ($isstream == "true") {
      var subst = "";
      var gst = new globst();
      window.onload = function() {
-     xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", null /* console */, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true', function(com){eval(com);});
+
+     xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", null /* console */, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
      /*     xstm.hbit_set(heartbit); */
      xstm.start();
  }
