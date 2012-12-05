@@ -365,8 +365,8 @@ xynt_streaming.prototype = {
     keepalive_new:    -1,
     keepalives_equal:  0,
     /* NOTE: right watch_timeout value to 100, for devel reasons use 1000 or more */
-    /* restart after  3 * 40 * 100 millisec if server ping is missing => 12secs */
-    keepalives_eq_max: 3,
+    /* restart after  4 * 40 * 100 millisec if server ping is missing => 16secs */
+    keepalives_eq_max: 4,
     watchdog_checktm:  40,
     // FIXME watchdog_timeout:  100,
     watchdog_timeout:  100,
@@ -478,7 +478,7 @@ xynt_streaming.prototype = {
                 this.keepalives_equal = 0;
             }
             
-            if (this.keepalives_equal > this.keepalives_eq_max) {
+            if (this.keepalives_equal >= this.keepalives_eq_max) {
                 this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
                 this.reload();
                 // alert("watchdog return reload");
