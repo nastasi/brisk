@@ -92,7 +92,7 @@ var xynt_streaming = \"ready\";", $base, $base);
         if ($step > 0)
             $ret .= sprintf("last_clean = %d;\n", ($step-1));
         $ret .= sprintf("
-window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } };
+window.onload = function () { if (xynt_streaming != \"ready\") { xynt_streaming.transp.stopped = true; } };
 </script> 
 </head>
 <body>");

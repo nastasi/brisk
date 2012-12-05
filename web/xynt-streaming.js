@@ -146,11 +146,13 @@ function transport_htmlfile(doc, xynt_streaming, page)
 
     this.ifra = this.transfdoc.getElementById("iframe");
     this.ifra.contentWindow.location.href = page;
+    this.stopped = false;
 }
 
 transport_htmlfile.prototype = {
     doc: null,
     xynt_streaming: null,
+    stopped: true,
     ifra: null,
     tradoc: null,
 
@@ -220,7 +222,10 @@ transport_htmlfile.prototype = {
         this.ifra.contentWindow.script_clean = step;
     },
 
-    postproc: function () {
+    postproc: function () { /* public */
+        if (this.stopped && !this.xstr_is_ready()) {
+            this.xynt_streaming.reload();
+        }
     }
 }
 
@@ -237,19 +242,24 @@ function transport_iframe(doc, xynt_streaming, page)
     this.ifra.style.visibility = "hidden";
     doc.body.appendChild(this.ifra);
     this.ifra.contentWindow.location.href = page;
+    this.stopped = false;
 }
 
 transport_iframe.prototype = {
     doc: null,
     xynt_streaming: null,
+    stopped: true,
     ifra: null,
 
     destroy: function () { /* public */
         try {
             if (this.ifra != null) {
-                // FIXME: on Opera on Windows this remove child crash js so is commented
-                //        on IE on Windows without it stream abort fails
-                //        so we need to decide how can run it
+                // NOTE:  on Opera this remove child crash js if called from
+                //        inside of the iframe, on IE on Windows without
+                //        it stream abort fails.
+                //        the problem is fixed setting into the iframe's onload
+                //        function the stopped attribute to true and delegate
+                //        postproc() fired by xynt_streaming watchdog()
                 this.doc.body.removeChild(this.ifra);
                 delete this.ifra;
                 this.ifra = null;
@@ -323,7 +333,10 @@ transport_iframe.prototype = {
         this.ifra.contentWindow.script_clean = step;
     },
 
-    postproc: function () {
+    postproc: function () { /* public */
+        if (this.stopped && !this.xstr_is_ready()) {
+            this.xynt_streaming.reload();
+        }
     }
 }
 
