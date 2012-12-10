@@ -235,8 +235,10 @@ function safestatus(a)
 }
 
 function createXMLHttpRequest() {
-    try { return new ActiveXObject("Msxml2.XMLHTTP");    } catch(e) {}
-    try { return new ActiveXObject("Microsoft.XMLHTTP"); } catch(e) {}
+    if (typeof(ActiveXObject) != 'undefined') { // Konqueror complain as unknown object
+        try { return new ActiveXObject("Msxml2.XMLHTTP");    } catch(e) {}
+        try { return new ActiveXObject("Microsoft.XMLHTTP"); } catch(e) {}
+    }
     try { return new XMLHttpRequest();                   } catch(e) {}
     alert("XMLHttpRequest not supported");
     return null;

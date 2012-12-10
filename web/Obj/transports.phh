@@ -22,6 +22,37 @@
  *
  */
 
+/*
+ *  test: SO x Browser
+ *  Values: Y: works, N: not works, @: continuous download,
+ *          D: continuous download after first reload
+ *
+ *  Stream IFRAME:
+ *
+ * Iframe| IW | FF | Ch | Op | Ko | IE
+ * ------+----+----+----+----+----+----
+ *   Lnx | D  |    | @  |    | @  | x
+ *   Win | x  | D  | @  | @  |    | D
+ *   Mac | x  |    |    |    |    |
+ *
+ *
+ *   XHR | IW | FF | Ch | Op | Ko | IE
+ * ------+----+----+----+----+----+----
+ *   Lnx | Y  |    | ^D |    | Y  | x
+ *   Win | x  | Y  | Y  |    |    | N
+ *   Mac | x  |    |    |    |    |
+ *
+ *
+ * HtmlFl| IW | FF | Ch | Op | Ko | IE
+ * ------+----+----+----+----+----+----
+ *   Lnx | N  |    |    |    | N  |
+ *   Win | x  | N  | N  |    |    | Y* (* seems delay between click and load of a new page)
+ *   Mac | x  |    |    |    |    |
+ *
+ *
+ */
+
+
 class Transport_template {
 
     function Transport_template() {
@@ -139,4 +170,22 @@ push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
 class Transport_htmlfile extends Transport_iframe {
 }
 
+class Transport {
+    function Transport()
+    {
+    }
+
+    static function create($transp)
+    {
+        if ($transp == 'xhr') {
+            return new Transport_xhr();
+        }
+        else if ($transp == 'htmlfile') {
+            return new Transport_htmlfile();
+        }
+        else  {
+            return new Transport_iframe();
+        }
+    }
+}
 ?>

@@ -1,5 +1,13 @@
 <?php
 
+$desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia.",
+               "Continuo: da 1 a N ogni secondo, ricomincia ogni 9.",
+               "Restart: da 1 a 8 ogni secondo, pausa 16 secondi, poi ricomincia.",
+               "Pausa: da 1 a 5 ogni secondo, pausa 3 secondi, e poi 8 e 9 ogni secondo, e poi ricomincia.",
+               "Keyword: da 1 a 5 ogni secondo, @BEGIN@, @END@, @BEGIN@ xxx yyy @END@, 9",
+               "Reload limiter: da 1 a 8 ogni secondo e chiude, 9 setta e chiude subito,<br>il client aspetta 3 secondi, e poi da 10 a N ogni secondo");
+
+
 $transs = array( "iframe", "xhr", "htmlfile" );
 if (!isset($f_trans))
     $f_trans = $transs[0];
@@ -23,6 +31,14 @@ function escpush($s)
     GLOBAL $escpush_from, $escpush_to;
 
     return str_replace($escpush_from, $escpush_to, $s);
+}
+
+function xcape($s)
+{
+  $from = array (   '\\',     '@',        '|' );
+  $to   = array ( '\\\\', '&#64;', '&brvbar;' );
+
+  return (str_replace($from, $to, htmlentities($s,ENT_COMPAT,"UTF-8")));
 }
 
 if ($isstream == "true") {
@@ -68,6 +84,15 @@ if ($isstream == "true") {
         }
         break;
     case 2:
+        // from 1 to 9 into the innerHTML and than close
+        for ($i = 1 ; $i < 10 ; $i++) {
+            $chunk = $transp->chunk($i, sprintf("gst.st++; \$('container').innerHTML = gst.st;"));
+            print($chunk);
+            mop_flush();
+            sleep(1);
+        }
+        break;
+    case 3:
         // from 1 to 9 with 60 secs after 8, the client js api must restart stream after 12 secs
         for ($i = 1 ; $i < 10 ; $i++) {
             $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';", $i));
@@ -78,7 +103,7 @@ if ($isstream == "true") {
                 sleep(60);
         }
         break;
-    case 3:
+    case 4:
         // from 1 to 9 into the innerHTML and than close
         for ($i = 1 ; $i < 10 ; $i++) {
             if ($i != 5) {
@@ -90,6 +115,46 @@ if ($isstream == "true") {
             print($chunk);
             mop_flush();
             sleep(1);
+        }
+        break;
+    case 5:
+        // from 1 to 9 into the innerHTML and than close
+        $cont = array('@BEGIN@', '@END@', '@BEGIN@ sleep(1); @END@');
+        for ($i = 1 ; $i < 10 ; $i++) {
+            switch($i) {
+            case 6:
+            case 7:
+            case 8:
+                $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%s';", xcape($cont[$i - 6])));
+                break;
+            default:
+                $chunk = $transp->chunk($i, sprintf("\$('container').innerHTML = '%d';", $i));
+                break;
+            }
+            print($chunk);
+            mop_flush();
+            if ($i < 9)
+                sleep(1);
+        }
+        break;
+    case 6:
+        // from 1 to 9 into the innerHTML and than close
+        if ($step == 8) {
+            $chunk = $transp->chunk(1, sprintf("gst.st++; \$('container').innerHTML = gst.st+\" x_x \"+(%d)", $step));
+            print($chunk);
+            // without this usleep the delay is doubled in iframe stream because 
+            // no transp.xynt_streaming back-set is performed
+            usleep(250000);
+            mop_flush();
+        }
+        else {
+            for ($i = 1 ; $i < 10 ; $i++) {
+                $chunk = $transp->chunk($i, sprintf("gst.st++; \$('container').innerHTML = gst.st+\" _ \"+(%d)", $step));
+                print($chunk);
+                mop_flush();
+                if ($i < 9)
+                    sleep(1);
+            }
         }
         break;
     }
@@ -123,13 +188,10 @@ if ($isstream == "true") {
 <div>
 <?php
 
-$desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia.",
-               "Restart: da 1 a 8 ogni secondo, pausa 16 secondi, poi ricomincia.",
-               "Pausa: da 1 a 5 ogni secondo, pausa 3 secondi, e poi 8 e 9 ogni secondo, e poi ricomincia.");
 
 
 printf("<table>");
-for ($test = 1 ; $test <= 3 ; $test++) {
+for ($test = 1 ; $test <= count($desc) ; $test++) {
     printf("<tr>");
     foreach ($transs as $trans) {
         printf("<td style=\"padding: 8px; border: 1px solid black;\"><a href=\"?f_trans=%s&f_test=%d\">Test %s %02d</a></td>", $trans, $test, $trans, $test);

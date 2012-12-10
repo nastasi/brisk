@@ -138,9 +138,6 @@ function transport_htmlfile(doc, xynt_streaming, page)
     this.xynt_streaming = xynt_streaming;
     this.transfdoc = new ActiveXObject("htmlfile");
     this.transfdoc.open();
-    /*this.transfdoc.write("<html><head><script>");
-    this.transfdoc.write("document.domain=\""+(doc.domain)+"\";");
-    this.transfdoc.write("</"+"script></"+"head>"); */
     this.transfdoc.write("<html><body><iframe id='iframe'></iframe></body></html>");
     this.transfdoc.close();
 
@@ -171,6 +168,11 @@ transport_htmlfile.prototype = {
 
     xstr_is_init: function () { /* public */
         return (typeof(this.ifra.contentWindow.xynt_streaming) != 'undefined');
+    },
+
+    /* only after a successfull is_initialized call */
+    xstr_is_ready: function () { /* public */
+        return (this.ifra.contentWindow.xynt_streaming == "ready");
     },
 
     /* only after a successfull is_initialized call */
@@ -353,7 +355,6 @@ function xynt_streaming(win, transp_type, console, gst, from, cookiename, sess, 
     this.page = page;
     this.cmdproc = cmdproc;
     // this.cmdproc = function(com){/* console.log("COM: "+com); */ eval(com);}
-
     this.doc = win.document;
     this.keepalive_old = -1;
     this.keepalive_new = -1;
@@ -372,6 +373,9 @@ xynt_streaming.prototype = {
     page:              null,
     cmdproc:           null,
 
+    start_time:        0,
+    restart_wait:      5000, // wait restart_wait millisec before begin to check if restart is needed
+
     doc:               null,
     cookiepath: "/brisk/",
     watchdog_hdl:      null,
@@ -383,7 +387,6 @@ xynt_streaming.prototype = {
     /* restart after  4 * 40 * 100 millisec if server ping is missing => 16secs */
     keepalives_eq_max: 4,
     watchdog_checktm:  40,
-    // FIXME watchdog_timeout:  100,
     watchdog_timeout:  100,
     watchdog_ct:       0,
     watchable:         false,
@@ -430,6 +433,9 @@ xynt_streaming.prototype = {
         if (!this.the_end) {
             this.watchdog_hdl = setTimeout(function(obj) { obj.log("tout1"); obj.watchdog(); }, this.watchdog_timeout, this);
         }
+
+        var date = new Date();
+        this.start_time = date.getTime();
     },
 
     stop: function() {
@@ -592,7 +598,10 @@ xynt_streaming.prototype = {
         } while (again);
         this.watchdog_ct++;
         if (!this.the_end) {
-            this.transp.postproc();
+            var date = new Date();
+            if (date.getTime() > (this.start_time + this.restart_wait)) {
+                this.transp.postproc();
+            }
             this.watchdog_hdl = setTimeout(function(obj) { /* obj.log("tout2"); */ obj.watchdog(); }, this.watchdog_timeout, this);
         }
         // alert("watchdog return normal");

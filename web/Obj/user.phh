@@ -294,7 +294,7 @@ class User {
     return ($thiz);
   }
 
-  function rd_data_set($curtime, $enc, $stat, $subst, $step, $from)
+  function rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from)
   {
       $this->rd_endtime = $curtime + RD_ENDTIME_DELTA;
       $this->rd_stat    = $stat;
@@ -304,7 +304,7 @@ class User {
       $this->rd_scristp = 0;
       $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
       $this->rd_zls     = ZLibStream::create($enc);
-      $this->rd_transp  = new Transport_iframe();
+      $this->rd_transp  = Transport::create($transp);
   }
 
   function rd_socket_get() {
@@ -688,8 +688,10 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
         $subst = "";
     if (($step  = gpcs_var('step', $get, $post, $cookie)) === FALSE) 
         unset($step);
+    if (($transp  = gpcs_var('transp', $get, $post, $cookie)) === FALSE)
+        $transp = "iframe";
     
-    $this->rd_data_set($curtime, $enc, $stat, $subst, $step, $from);
+    $this->rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from);
     
     $body .= $this->rd_transp->init($enc, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
 

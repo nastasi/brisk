@@ -1171,8 +1171,13 @@ class Bin5 {
         printf("NEW_SOCKET (root): %d\n", intval($new_socket));
         
         $enc = get_encoding($header);
-        if (isset($header['User-Agent']) && strstr($header['User-Agent'], "MSIE")) {
-            $transp_type = "htmlfile";
+        if (isset($header['User-Agent'])) {
+            if (strstr($header['User-Agent'], "MSIE")) {
+                $transp_type = "htmlfile";
+            }
+            else {
+                $transp_type = "xhr";
+            }
         }
         else {
             $transp_type = "iframe";
