@@ -1690,7 +1690,7 @@ function show_table_info(&$bri, &$table, $table_pos)
         }
         $old_multer = $table->multer(FALSE);
         if ($old_multer > 1) {
-            $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], $old_multer);
+            $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], multoval($old_multer));
         }
         $noty .= "<hr><br>";
     }
@@ -1723,7 +1723,7 @@ function show_table_info(&$bri, &$table, $table_pos)
   
     $multer = $table->multer(TRUE);
     if ($multer > 1) {
-        $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], $multer );
+        $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($multer) );
     }
     $noty .= "<hr><br>";
     $ret .= show_notify($noty, 3000, $mlang_bin5_bin5['btn_bkgame'][$G_lang], 500, 400);
