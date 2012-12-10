@@ -140,7 +140,7 @@ if ($isstream == "true") {
     case 6:
         // from 1 to 9 into the innerHTML and than close
         if ($step == 8) {
-            $chunk = $transp->chunk(1, sprintf("gst.st++; \$('container').innerHTML = gst.st+\" x_x \"+(%d)", $step));
+            $chunk = $transp->chunk(1, sprintf("gst.st++; \$('container').innerHTML = gst.st;"));
             print($chunk);
             // without this usleep the delay is doubled in iframe stream because 
             // no transp.xynt_streaming back-set is performed
@@ -149,7 +149,7 @@ if ($isstream == "true") {
         }
         else {
             for ($i = 1 ; $i < 10 ; $i++) {
-                $chunk = $transp->chunk($i, sprintf("gst.st++; \$('container').innerHTML = gst.st+\" _ \"+(%d)", $step));
+                $chunk = $transp->chunk($i, sprintf("gst.st++; \$('container').innerHTML = gst.st;"));
                 print($chunk);
                 mop_flush();
                 if ($i < 9)
