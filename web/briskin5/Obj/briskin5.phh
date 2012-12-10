@@ -277,17 +277,17 @@ class Bin5_table extends Table {
     function asta2mult($asta_pnt)
     {
         if ($asta_pnt > 110)
-            return (5);
+            return (6);
         else if ($asta_pnt > 100)
-            return (4);
+            return (5);
         else if ($asta_pnt > 90)
-            return (3);
+            return (4);
         else if ($asta_pnt > 80)
-            return (2);
+            return (3);
         else if ($asta_pnt > 70)
-            return (1);
+            return (2);
         else
-            return (0);
+            return (1);
     }
 
     function multer($is_new)
