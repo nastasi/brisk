@@ -414,7 +414,7 @@ class Sac_a_push {
 
     function run()
     {
-        GLOBAL $DOCUMENT_ROOT, $HTTP_HOST, $G_with_splash;
+        GLOBAL $DOCUMENT_ROOT, $HTTP_HOST, $G_with_splash, $G_black_list;
 
         if ($this->main_loop) {
             return (FALSE);
