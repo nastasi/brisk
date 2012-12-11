@@ -81,7 +81,7 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 
 function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
 {
-    GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $mlang_indwr;
+    GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $G_room_passwdhowto, $mlang_indwr;
 
     log_load("index_wr.php");
 
