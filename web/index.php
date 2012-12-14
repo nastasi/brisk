@@ -20,13 +20,7 @@
  * not, write to the Free Software Foundation, Inc, 59 Temple Place -
  * Suite 330, Boston, MA 02111-1307, USA.
  *
-
-
-TODO:
-  - header
-  - setcookie
-  - gestire per intero la var globale di output
-*/
+ */
 
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
@@ -849,7 +843,8 @@ supported by:<br>
 </div><br><br></div>
 %s
 %s
-<br></div>';
+<br>
+<img id="stm_stat" class="nobo" src="img/line-status_cb.png"></div>';
     
   /* Templates. */
   if ($ACTION == 'login') {

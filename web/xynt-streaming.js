@@ -198,6 +198,8 @@ transport_htmlfile.prototype = {
     },
 
     ctx_new_getchar: function(idx) { /* public */
+	return (this.ifra.contentWindow.ctx_new.charAt(idx));
+
     },
 
     ctx_old_len_is_set: function () { /* public */
@@ -309,6 +311,7 @@ transport_iframe.prototype = {
     },
 
     ctx_new_getchar: function(idx) { /* public */
+	return (this.ifra.contentWindow.ctx_new.charAt(idx));
     },
 
     ctx_old_len_is_set: function () { /* public */
@@ -379,7 +382,7 @@ xynt_streaming.prototype = {
     doc:               null,
     cookiepath: "/brisk/",
     watchdog_hdl:      null,
-    hbit:              null,
+    hbit:              function () {},
     keepalive_old:    -1,
     keepalive_new:    -1,
     keepalives_equal:  0,
@@ -395,6 +398,9 @@ xynt_streaming.prototype = {
     comm_clean:        /_*@BEGIN@(.*?)@END@/,
     stream:            "",
     the_end:           false,
+
+    w_stat_old:        "",
+    s_stat_old:        "",
 
     start: function() { /* public */
         if (this.the_end) 
@@ -447,12 +453,44 @@ xynt_streaming.prototype = {
         this.hbit = hbit;
     },
 
+    hbit_status: function () {
+        if (this.watchdog_hdl)
+            w_stat = "g";
+        else
+            w_stat = "r";
+
+        if (this.transp.ctx_new_is_set() &&
+            this.transp.ctx_new_curlen_get() > 0) {
+            if (this.keepalives_equal == 0) {
+                s_stat = "g";
+            }
+            else if (this.keepalives_equal < this.keepalives_eq_max) {
+                s_stat = "y";
+            }
+            else {
+                s_stat = "r";
+            }
+        }
+        else {
+            s_stat = "r";
+        }
+
+        if (this.s_stat_old != s_stat ||
+            this.w_stat_old != w_stat)
+            this.hbit(s_stat, w_stat);
+        this.s_stat_old = s_stat;
+        this.w_stat_old = w_stat;
+    },
+
     watchdog: function () {
         // alert("watchdog");
         var i, again;
         var comm_newpart, comm_len, comm_arr;
         var ctx_new_len;
 
+        this.watchdog_hdl = null;
+
+        this.hbit_status();
         if (this.sandbox != null) {
             // from old: var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new+" STOP: "+this.stopped;
             var zug = "WATCHDOG  sess = ["+this.sess+"]  step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new;          
@@ -491,6 +529,8 @@ xynt_streaming.prototype = {
         }
         if ( (this.watchdog_ct % this.watchdog_checktm) == 0) {
             this.log("hs::watchdog: this.keepalive_old: "+this.keepalive_old+" this.keepalive_new: "+this.keepalive_new);
+
+            // alert("qui "+this.transp.ctx_new_curlen_get()+" "+this.transp.ctx_old_len_get();
             if (this.keepalive_old == this.keepalive_new) {
                 this.keepalives_equal++;
             }
@@ -521,9 +561,9 @@ xynt_streaming.prototype = {
             catch(b) {
 	        break;
             }
-
             // ctx_new_len = this.ifra.contentWindow.ctx_new.length;
             ctx_new_len = this.transp.ctx_new_curlen_get();
+            this.log("new_len: "+ ctx_new_len);
             // if (ctx_new_len <= this.ifra.contentWindow.ctx_old_len) {
             if (ctx_new_len <= this.transp.ctx_old_len_get()) {
                 break;
@@ -532,7 +572,8 @@ xynt_streaming.prototype = {
             this.keepalive_new++;
             // alert("pre-loop 1");
             for (i = this.transp.ctx_old_len_get() ; i < ctx_new_len ; i++) {
-		// if (this.ifra.contentWindow.ctx_new.charAt(i) != '_') {
+                // alert("ctx_new_getchar: "+this.transp.ctx_new_getchar(i));
+
 		if (this.transp.ctx_new_getchar(i) != '_') {
                     // this.log("ctx_new.char(i) != '_' ["+this.ifra.contentWindow.ctx_new.charAt(i)+"]");
 		    break;
@@ -603,6 +644,7 @@ xynt_streaming.prototype = {
                 this.transp.postproc();
             }
             this.watchdog_hdl = setTimeout(function(obj) { /* obj.log("tout2"); */ obj.watchdog(); }, this.watchdog_timeout, this);
+            this.hbit_status();
         }
         // alert("watchdog return normal");
 
