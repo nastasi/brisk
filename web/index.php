@@ -405,14 +405,18 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
                                array ( 'id' => 'btn_foroli',
                                        'url' => 'http://www.forumolimpia.it',
                                        'content' => 'img/forumolimpia.gif',
-                                       'content_big' => 'img/forumolimpia_big.png' ) );
+                                       'content_big' => 'img/forumolimpia_big.png' ),
+                               array ( 'id'=> 'btn_niini',
+                                       'url' => 'http://www.niinivirta.it',
+                                       'content' => 'img/niinivirta.png',
+                                       'content_big' => 'img/niinivirta_big.png') );
   
   
   
   $altout_support = "";
   $altout_support_big = "";
-  for ($i = 0 ; $i < 3 ; $i++) {
-      $ii = ($i < 2 ? $i : 0);
+  for ($i = 0 ; $i < 4 ; $i++) {
+      $ii = ($i < 3 ? $i : 0);
       
       $altout_support .= sprintf('<a style="position: absolute; top: %dpx; left: 7px;" target="_blank" href="%s"><img class="nobo" id="%s" src="%s" onMouseOver="show_bigpict(this, \'over\',100,10);" onMouseOut="show_bigpict(this, \'out\',0,0);"></a><br>',
                                  $i * 20, $altout_support_arr[$ii]['url'],
@@ -893,7 +897,7 @@ supported by:<br>
      // alert(window.onbeforeunload);
      g_brow = get_browser_agent();
      spo_slide  = new sideslide($('spon_caro'), 80, 20);
-     sup_slide  = new sideslide($('supp_caro'), 60, 20);
+     sup_slide  = new sideslide($('supp_caro'), 80, 20);
 
      login_init();
 <?php
@@ -1031,7 +1035,7 @@ echo "$body"; ?>
    window.onload = function() {
      g_brow = get_browser_agent();
      spo_slide  = new sideslide($('spon_caro'), 80, 20);
-     sup_slide  = new sideslide($('supp_caro'), 60, 20);
+     sup_slide  = new sideslide($('supp_caro'), 80, 20);
 
 <?php
 if ($BRISK_SHOWHTML == "debugtable") {
