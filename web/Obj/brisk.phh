@@ -1466,6 +1466,18 @@ class Room
         else if (strcasecmp($st_str, "pulizie") == 0) {
           $st = USER_FLAG_S_MOP;
         }
+        else if (strcasecmp($st_str, "babbo") == 0) {
+          $st = USER_FLAG_S_BABBO;
+        }
+        else if (strcasecmp($st_str, "renna") == 0) {
+          $st = USER_FLAG_S_RENNA;
+        }
+        else if (strcasecmp($st_str, "pupazzo") == 0) {
+          $st = USER_FLAG_S_PUPAZ;
+        }
+        else if (strcasecmp($st_str, "vischio") == 0) {
+          $st = USER_FLAG_S_VISCH;
+        }
         else {
           /* MLANG: "Questo stato non esiste." */
           $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);

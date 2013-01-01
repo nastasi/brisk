@@ -88,6 +88,14 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'baby'),
                      'st_mop_desc'  => array('it' => 'pulizie',
                                              'en' => 'mop'),
+                     'st_babbo_desc'  => array('it' => 'babbo',
+                                             'en' => 'mop'),
+                     'st_renna_desc'  => array('it' => 'renna',
+                                             'en' => 'mop'),
+                     'st_pupaz_desc'  => array('it' => 'pupazzo',
+                                             'en' => 'mop'),
+                     'st_visch_desc'  => array('it' => 'vischio',
+                                             'en' => 'mop'),
                      
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
@@ -564,7 +572,7 @@ google_color_url = "000000";
 <a target="_blank" href="http://www.alternativeoutput.it/briskhome.php#prop" 
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_pro'][$G_lang].'">'.$mlang_room['itm_pro'][$G_lang].'</a><br>
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,1);"
    title="credits" onclick="act_about();">about</a><br>
 
@@ -575,15 +583,15 @@ google_color_url = "000000";
 <hr>
 
 <!--
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,1);"
    title="perché supportare brisk?" onclick="act_whysupport();">supportare?</a><br>
 -->
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_placing();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_rmap'][$G_lang].'" onclick="act_roadmap();">'.$mlang_room['itm_rmap'][$G_lang].'</a><br>
 
@@ -641,92 +649,120 @@ google_color_url = "000000";
           .$mlang_room['stat_desc'][$G_lang].
 '</a><br>
 <div id="menu_state" class="webstart">
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st normale\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_norm_desc'][$G_lang].
 '</a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st pausa\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_paus_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_pau.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st fuori\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_out_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_out.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st cane\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_dog_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_dog.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st cibo\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_food_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_eat.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st lavoro\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_work_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_wrk.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st sigaretta\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_smok_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_smk.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st presente\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_pres_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_eye.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st coniglio\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_rabb_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_rabbit.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st calcio\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_socc_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_soccer.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st pupo\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_baby_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_baby.png"></a><br>
 
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st pulizie\'); menu_over(-1,this);">'
           // MLANG
           .$mlang_room['st_mop_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_mop.png"></a><br>
 
+<a href="#"
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st babbo\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_babbo_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_babbo.png"></a><br>
+
+<a href="#"
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st renna\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_renna_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_renna.png"></a><br>
+
+<a href="#"
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st pupazzo\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_pupaz_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_pupaz.png"></a><br>
+
+<a href="#"
+   onmouseover="menu_hide(0,2);"
+   title="" onclick="act_chatt(\'/st vischio\'); menu_over(-1,this);">'
+          // MLANG
+          .$mlang_room['st_visch_desc'][$G_lang].
+'&nbsp;<img class="unbo" src="img/st_visch.png"></a><br>
+
 <!--
-<a href="#" 
+<a href="#"
    onmouseover="menu_hide(0,2);"
    title="" onclick="act_chatt(\'/st coniglio\'); menu_over(-1,this);">'
           // MLANG

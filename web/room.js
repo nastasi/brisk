@@ -86,6 +86,22 @@ function state_add(flags)
             name = "st_mop.png";
             tit = (g_lang == 'en' ? "Mop time" : "sto rassettando");
             break;
+        case 0xc00:
+            name = "st_babbo.png";
+            tit = (g_lang == 'en' ? "Sto dando i regali" : "sto dando i regali");
+            break;
+        case 0xd00:
+            name = "st_renna.png";
+            tit = (g_lang == 'en' ? "in giro per regali" : "in giro per regali");
+            break;
+        case 0xe00:
+            name = "st_pupaz.png";
+            tit = (g_lang == 'en' ? "Neve a gogò" : "neve a gogò");
+            break;
+        case 0xf00:
+            name = "st_visch.png";
+            tit = (g_lang == 'en' ? "aspettando sotto al vischio" : "aspettando sotto al vischio");
+            break;
         default:
             break;
         }

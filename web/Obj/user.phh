@@ -46,6 +46,10 @@ define('USER_FLAG_S_RABB',  0x800); // done
 define('USER_FLAG_S_SOCC',  0x900); // done
 define('USER_FLAG_S_BABY',  0xa00); // done
 define('USER_FLAG_S_MOP',   0xb00); // done
+define('USER_FLAG_S_BABBO',   0xc00); // done
+define('USER_FLAG_S_RENNA',   0xd00); // done
+define('USER_FLAG_S_PUPAZ',   0xe00); // done
+define('USER_FLAG_S_VISCH',   0xf00); // done
 
 define('USER_FLAG_S_ALL',   0xf00); // done
 
