@@ -32,8 +32,14 @@ require_once("Obj/briskin5.phh");
 
 $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Scegli il seme:',
                                               'en' => 'You win the auction.<br> Choose the seed:' ),
-                           'tit_pref'=>array( 'it' => 'Preferenze.',
-                                              'en' => 'Preferences.'),
+                           'tit_info'    => array( 'it' => 'Info',
+                                                   'en' => 'Info'),
+                           'tit_relo'    => array( 'it' => 'Reload',
+                                                   'en' => 'Reload'),
+                           'tit_out'     => array( 'it' => 'Fuori',
+                                                   'en' => 'Out'),
+                           'tit_pref'    => array( 'it' => 'Prefs',
+                                                   'en' => 'Prefs'),
                            'itm_ringauc' => array('it' => 'riproduci un suono di notifica alla fine dell\' asta',
                                                   'en' => 'play a sound at the end of the auction'),
                            'btn_update'  => array('it' => 'Aggiorna.',
@@ -247,11 +253,13 @@ window.onload = function() {
 <div class="table_commands">
 <table>
 <tr>
-<td style="text-align: center;"><input type="button" class="button" name="xinfo"  value="Info." onclick="act_tableinfo();"></td>
-<td style="text-align: center;"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reload();"></td>
-<td style="text-align: center;"><input type="button" class="button" name="xout"  value="Out." onclick="safelogout();"></td>
+<td style="text-align: center;"><input type="button" class="button" name="xinfo"  value="<?php echo $mlang_bin5_index['tit_info'][$G_lang]; ?>" onclick="act_tableinfo();"></td>
+<td style="text-align: center;"><input type="button" class="button" name="xreload"  value="<?php echo $mlang_bin5_index['tit_relo'][$G_lang]; ?>" onclick="act_reload();"></td>
+<td style="text-align: center;"><input type="button" class="button" name="xout"  value="<?php echo $mlang_bin5_index['tit_out'][$G_lang]; ?>" onclick="safelogout();"></td>
 </tr><tr>
-<td style="text-align: center;" colspan="2"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
+<td style="text-align: center;"><img id="stm_stat" class="nobo" src="img/line-status_cb.png"></td>
+<td style="text-align: center;"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
+</td>
 <td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>
 </tr>
 </table>
