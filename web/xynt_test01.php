@@ -1,11 +1,11 @@
 <?php
 
-$desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia.",
-               "Continuo: da 1 a N ogni secondo, ricomincia ogni 9.",
-               "Restart: da 1 a 8 ogni secondo, pausa 16 secondi, poi ricomincia.",
-               "Pausa: da 1 a 5 ogni secondo, pausa 3 secondi, e poi 8 e 9 ogni secondo, e poi ricomincia.",
-               "Keyword: da 1 a 5 ogni secondo, @BEGIN@, @END@, @BEGIN@ xxx yyy @END@, 9",
-               "Reload limiter: da 1 a 8 ogni secondo e chiude, 9 setta e chiude subito,<br>il client aspetta 3 secondi, e poi da 10 a N ogni secondo");
+$desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia (status sempre verde).",
+               "Continuo: da 1 a N ogni secondo, ricomincia ogni 9 (status sempre verde).",
+               "Restart: da 1 a 8 ogni secondo, pausa 16 secondi (status passa ad arancione e poi a rosso), poi ricomincia (e status torna a verde).",
+               "Pausa: da 1 a 5 ogni secondo, pausa 3 secondi, e poi 8 e 9 ogni secondo, e poi ricomincia (status sempre verde).",
+               "Keyword: da 1 a 5 ogni secondo, @BEGIN@, @END@, @BEGIN@ xxx yyy @END@, 9, (status sempre verde).",
+               "Reload limiter: da 1 a 8 ogni secondo e chiude, 9 setta e chiude subito,<br>il client aspetta 3 secondi, e poi da 10 a N ogni secondo, (status sempre verde).");
 
 
 $transs = array( "iframe", "xhr", "htmlfile" );
@@ -167,6 +167,7 @@ if ($isstream == "true") {
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <script type="text/javascript" src="xynt-streaming.js"></script>
 <script type="text/javascript" src="commons.js"></script>
+<script type="text/javascript" src="heartbit.js"></script>
 
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 
@@ -178,7 +179,7 @@ if ($isstream == "true") {
      window.onload = function() {
 
      xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", null /* console */, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
-     /*     xstm.hbit_set(heartbit); */
+     xstm.hbit_set(heartbit);
      xstm.start();
  }
  //-->
@@ -204,6 +205,11 @@ printf("<br>[%s]<br>Test: %d<br>", $f_trans, $f_test);
 </div>
 <div>
 <b>Descrizione</b>: <?php echo $desc[$f_test - 1]; ?>
+</div>
+
+<div>
+<b>Status</b>: <img id="stm_stat" class="nobo" style="vertical-align: bottom;" src="img/line-status_b.png"></div>
+
 </div>
 <div>
 <b>Counter</b>: <span id="container">
