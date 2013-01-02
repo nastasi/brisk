@@ -257,7 +257,7 @@ window.onload = function() {
 <td style="text-align: center;"><input type="button" class="button" name="xreload"  value="<?php echo $mlang_bin5_index['tit_relo'][$G_lang]; ?>" onclick="act_reload();"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xout"  value="<?php echo $mlang_bin5_index['tit_out'][$G_lang]; ?>" onclick="safelogout();"></td>
 </tr><tr>
-<td style="text-align: center;"><img id="stm_stat" class="nobo" src="img/line-status_cb.png"></td>
+<td style="text-align: center;"><img id="stm_stat" class="nobo" src="img/line-status_b.png"></td>
 <td style="text-align: center;"><input type="button" class="button" name="xpref"  value="<?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?>" onclick="preferences_showhide();"></td>
 </td>
 <td style="text-align: center;"><img id="exitlock" class="button" style="visibility: hidden; border: 0px; display: inline; position: relative;" onclick="act_exitlock();"></td>

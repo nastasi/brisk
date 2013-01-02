@@ -884,7 +884,7 @@ supported by:<br>
 %s
 %s
 <br>
-<img id="stm_stat" class="nobo" src="img/line-status_cb.png"></div>';
+<img id="stm_stat" class="nobo" src="img/line-status_b.png"></div>';
     
   /* Templates. */
   if ($ACTION == 'login') {

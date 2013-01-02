@@ -9,13 +9,9 @@ function heartbit_old(symb)
     }
 }
 
-function heartbit(s_stat, w_stat)
+function heartbit(stat)
 {
-    if (w_stat == "r") {
-        $("stm_stat").src = "img/line-status_cb.png";
-    }
-    else {
-        $("stm_stat").src = "img/line-status_o"+s_stat+".png";
-    }
+    // console.log("hbit here: "+"img/line-status_"+stat+".png");
+    $("stm_stat").src = "img/line-status_"+stat+".png";
 }
 
