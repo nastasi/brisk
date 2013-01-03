@@ -38,7 +38,7 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'Standing players'),
                      'headline'     => array('it' => 'briscola chiamata in salsa ajax',
                                              'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
-                     'wellcome'     => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola',
+                     'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola',
                                              'en' => 'Enter your nickname to access to the tables of briscola'),
                      'btn_enter'    => array('it' => 'entra',
                                              'en' => 'enter'),
@@ -994,7 +994,7 @@ echo "$body"; ?>
 <br>
 <div style="text-align: center;">
    <br><br><br>
-<?php echo $mlang_room['wellcome'][$G_lang];?>
+<?php echo $mlang_room['welcome'][$G_lang];?>
 <br><br>
 <form accept-charset="utf-8" method="post" action="" onsubmit="return j_login_manager(this);">
 <input id="passid_private" name="pass_private" type="hidden" value="">

@@ -905,7 +905,7 @@ class Room
 
     $ret .= sprintf('stat = "%s";',  $user->stat);
     
-    $ret .= root_wellcome($user);
+    $ret .= root_welcome($user);
     if ($user->flags & USER_FLAG_DBFAILED) {
         $ret .= "gst.st = ".($user->step+1)."; ";
         $ret .= show_notify($mlang_brisk['db_failed'][$G_lang], 0, $mlang_brisk['btn_close'][$G_lang], 400, 140);
@@ -2674,7 +2674,7 @@ function show_notify_ex($text, $tout, $butt, $w, $h, $is_opaque, $block_time)
 }
 
 
-function root_wellcome($user)
+function root_welcome($user)
 {
   GLOBAL $root_wellarr, $G_lang;
   $ret = "";

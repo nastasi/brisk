@@ -1428,7 +1428,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
         $ret .= "setTimeout(preload_images, 500, g_preload_img_arr, g_imgct);";
     }
     if (!$is_again) 
-        $ret .= table_wellcome($user);
+        $ret .= table_welcome($user);
 
     if ($is_transition && !$is_again) { // appena seduti al tavolo, play della mucca
         $ret .= playsound("cow.mp3");
@@ -1737,7 +1737,7 @@ function show_table_info(&$bri, &$table, $table_pos)
     return ($ret);
 }
 
-function table_wellcome($user)
+function table_welcome($user)
 {
     GLOBAL $table_wellarr, $G_lang;
     $ret = "";

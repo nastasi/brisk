@@ -4,7 +4,7 @@
   MAJOR |
  -------+
    - BUG: some connection to the named socket fails
-
+   - Page still opened after the server restart
 
   MINOR |
  -------+
@@ -385,8 +385,8 @@ sparirà dalla classifica settimanale e rimarrà in quelle mensili e trimestrali.
    DONE - standup centrati
    DONE - current player - in info
    DONE - HELP butt con ABOUT, REGOLE, VERSIONE
-   DONE - wellcome lines in the chats (room and table)
-   DONE - wellcome lines in the chats (room and table)
+   DONE - welcome lines in the chats (room and table)
+   DONE - welcome lines in the chats (room and table)
    DONE - nomi in primo piano se vai sul quadrato   
    DONE - to pass explicit config file to INSTALL.sh
    DONE - flag to create a config file
