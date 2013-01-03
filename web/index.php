@@ -283,14 +283,21 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
           
           $room->garbage_manager(TRUE);
           /* try login */
-          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $addr, $cookie)) != FALSE) {
+          $ipv4addr_arr = explode(':' , $addr);
+          if (isset($ipv4addr_arr[3])) {
+              $ipv4addr = $ipv4addr_arr[3];
+          }
+          else {
+              $ipv4addr = $addr;
+          }
+          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $ipv4addr, $cookie)) != FALSE) {
               $ACTION = "room";
               if ($idx < 0) {
                   $idx = -$idx - 1;
                   $is_login = TRUE;
               }
               
-              log_legal($curtime, $addr, $user, "STAT:LOGIN", '');
+              log_legal($curtime, $ipv4addr, $user, "STAT:LOGIN", '');
               
               // recovery lost game
               if ($user->stat == "table") {

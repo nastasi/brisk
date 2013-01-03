@@ -495,7 +495,7 @@ function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                             $plist .= '|'.xcapelt($ucodes[$i]);
                         }
-                        log_legal($curtime, 'xxx', $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
+                        log_legal($curtime, $user->ip, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
                         if ($user->table_orig < TABLES_AUTH_N) {
                             require_once("../Obj/dbase_".$G_dbasetype.".phh");
                             

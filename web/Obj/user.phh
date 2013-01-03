@@ -465,7 +465,7 @@ class User {
 
   function reset() {
     $curtime = time();
-    log_legal($curtime, 'xxx', $this, "STAT:LOGOUT", '');
+    log_legal($curtime, $this->ip, $this, "STAT:LOGOUT", '');
 
     $tmp_sess = $this->sess;
     $this->sess = "";

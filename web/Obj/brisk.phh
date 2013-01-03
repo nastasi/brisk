@@ -140,10 +140,10 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.5.1";
+$G_brisk_version = "4.5.2";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuova visualizzazione dello stato della connessione dati.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuova visualizzazione dello stato della connessione dati, indirizzo IP sorgente memorizzato correttamente nei log.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: usage of reader/writer locking instead of generic exclusive locking.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
@@ -788,7 +788,7 @@ class Room
                             $user_cur->bantime    = $bri_user->bantime;
                         }
                         
-                        log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME", $plist);
+                        log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
                         
                         $this->room_join_wakeup($user_cur, FALSE, 0); 
                         $table_cur->table_token = "";
@@ -825,7 +825,7 @@ class Room
                     for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
                         $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
                     }
-                    log_legal($curtime, 'xxx', $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
+                    log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
                     
                     $this->room_join_wakeup($user_cur, TRUE, -2); 
                     $table_cur->table_token = "";
@@ -1522,7 +1522,7 @@ class Room
         $to_room = $to_user;
       }
 
-      log_legal($curtime, 'xxx', $user, 
+      log_legal($curtime, $user->ip, $user,
 		($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
       
       $user->chat_lst = "$msg";
@@ -2623,8 +2623,8 @@ function log_shme($log)
 
 
 
-// function log_legal($curtime, $sess, $name, $where, $mesg) 
-function log_legal($curtime, $addr, $user, $where, $mesg) 
+// function log_legal($curtime, $sess, $name, $where, $mesg)
+function log_legal($curtime, $addr, $user, $where, $mesg)
 {
 
   if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {

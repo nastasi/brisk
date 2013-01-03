@@ -4,12 +4,11 @@
   MAJOR |
  -------+
    - BUG: some connection to the named socket fails
-   - log_legal address fix
 
 
   MINOR |
  -------+
-   - try to be more antivirus-friendly
+   WIP - try to be more antivirus-friendly
    - packetize and automatize php-ancillary and apache module
    - into the room local step remains -1
    - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
@@ -17,6 +16,7 @@
 
   DONE |
  ------+
+   DONE - log_legal address fix
    DONE - manage too fast reload in xynt-streaming
    DONE - add xhr as transport layer and manage different streams better
    TEST - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
