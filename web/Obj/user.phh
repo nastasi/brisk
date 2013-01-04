@@ -679,8 +679,6 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
     $curtime = time();
     
     printf("CLASS: [%s] base: [%s]\n", get_class($this), self::base_get());
-    
-    // (webservers_exceeded() || stristr($HTTP_USER_AGENT, "Mozilla/5.0 (Windows NT 6.1; rv:5.0)") || stristr($HTTP_USER_AGENT, "MSIE") || stristr($HTTP_USER_AGENT, "CHROME") ? TRUE : FALSE);
 
     log_load("index_rd_ifra_init.php");
     

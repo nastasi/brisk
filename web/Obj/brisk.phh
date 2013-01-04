@@ -337,42 +337,6 @@ function file_unlock($res)
     }
 }
 
-function webservers_exceeded()
-{
-    return(file_exists(PROXY_PATH."/webservers_exceded.flag"));
-}
-
-function webservers_check()
-{
-    GLOBAL $G_webserver_max;
-
-    /* FIXME: check all procs expirations */
-    return (10);
-
-    $ct = 0;
-
-    $dh = opendir('/proc');
-    while (($file = readdir($dh)) !== false) {
-        if (preg_match('/[0-9]+/', $file)) {
-            $cmdline = explode("\0", file_get_contents('/proc/'.$file.'/cmdline'));
-            // echo "xxx".$cmdline[0].$n;
-            if (strstr('/usr/sbin/apache2', $cmdline[0]) != FALSE) {
-                // echo "yyy".$cmdline[0].$n;
-                $ct++;
-            }
-        }
-    }
-    closedir($dh);
-
-    if ($ct >= $G_webserver_max) {
-        touch(PROXY_PATH."/webservers_exceded.flag");
-    }
-    else {
-        unlink(PROXY_PATH."/webservers_exceded.flag");
-    }
-    return ($ct);
-}
-
 $escpush_from = array("\\", "\"");
 $escpush_to   = array("\\\\", "\\\"");
 function escpush($s)
@@ -743,8 +707,6 @@ class Room
         return ($ismod);
     }
       
-    webservers_check();
-    
     // Before all align times with table timeout
     for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
 	$table_cur = $this->table[$table_idx];
