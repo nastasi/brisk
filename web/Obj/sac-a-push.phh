@@ -25,6 +25,53 @@
 define('SITE_PREFIX', '/brisk/');
 define('SITE_PREFIX_LEN', 7);
 
+
+function global_dump()
+{
+    GLOBAL $G_alarm_passwd, $G_black_list, $G_btrace_pref_sub, $G_dbauth;
+    GLOBAL $G_dbpfx, $G_donors_all, $G_donors_cur, $G_is_local, $G_lang;
+    GLOBAL $G_poll_entries, $G_poll_name, $G_poll_title, $G_proxy_white_list;
+    GLOBAL $G_room_roadmap, $G_shutdown, $G_sidebanner, $G_sidebanner2;
+    GLOBAL $G_splash_content, $G_splash_contents, $G_splash_cont_idx;
+    GLOBAL $G_splash_h, $G_splash_idx, $G_splash_interval, $G_splash_timeout;
+    GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
+    GLOBAL $G_with_sidebanner, $G_with_sidebanner2, $G_with_splash;
+    GLOBAL $G_with_topbanner;
+
+    fprintf(STDERR, "G_alarm_passwd = [%s]\n", print_r($G_alarm_passwd, TRUE));
+    fprintf(STDERR, "G_black_list = [%s]\n", print_r($G_black_list, TRUE));
+    fprintf(STDERR, "G_btrace_pref_sub = [%s]\n", print_r($G_btrace_pref_sub, TRUE));
+    fprintf(STDERR, "G_dbauth = [%s]\n", print_r($G_dbauth, TRUE));
+    fprintf(STDERR, "G_dbpfx = [%s]\n", print_r($G_dbpfx, TRUE));
+    fprintf(STDERR, "G_donors_all = [%s]\n", print_r($G_donors_all, TRUE));
+    fprintf(STDERR, "G_donors_cur = [%s]\n", print_r($G_donors_cur, TRUE));
+    fprintf(STDERR, "G_is_local = [%s]\n", print_r($G_is_local, TRUE));
+    fprintf(STDERR, "G_lang = [%s]\n", print_r($G_lang, TRUE));
+    fprintf(STDERR, "G_poll_entries = [%s]\n", print_r($G_poll_entries, TRUE));
+    fprintf(STDERR, "G_poll_name = [%s]\n", print_r($G_poll_name, TRUE));
+    fprintf(STDERR, "G_poll_title = [%s]\n", print_r($G_poll_title, TRUE));
+    fprintf(STDERR, "G_proxy_white_list = [%s]\n", print_r($G_proxy_white_list, TRUE));
+    fprintf(STDERR, "G_room_roadmap = [%s]\n", print_r($G_room_roadmap, TRUE));
+    fprintf(STDERR, "G_shutdown = [%s]\n", print_r($G_shutdown, TRUE));
+    fprintf(STDERR, "G_sidebanner = [%s]\n", print_r($G_sidebanner, TRUE));
+    fprintf(STDERR, "G_sidebanner2 = [%s]\n", print_r($G_sidebanner2, TRUE));
+    fprintf(STDERR, "G_splash_content = [%s]\n", print_r($G_splash_content, TRUE));
+    fprintf(STDERR, "G_splash_contents = [%s]\n", print_r($G_splash_contents, TRUE));
+    fprintf(STDERR, "G_splash_cont_idx = [%s]\n", print_r($G_splash_cont_idx, TRUE));
+    fprintf(STDERR, "G_splash_h = [%s]\n", print_r($G_splash_h, TRUE));
+    fprintf(STDERR, "G_splash_idx = [%s]\n", print_r($G_splash_idx, TRUE));
+    fprintf(STDERR, "G_splash_interval = [%s]\n", print_r($G_splash_interval, TRUE));
+    fprintf(STDERR, "G_splash_timeout = [%s]\n", print_r($G_splash_timeout, TRUE));
+    fprintf(STDERR, "G_splash_w = [%s]\n", print_r($G_splash_w, TRUE));
+    fprintf(STDERR, "G_topbanner = [%s]\n", print_r($G_topbanner, TRUE));
+    fprintf(STDERR, "G_with_donors = [%s]\n", print_r($G_with_donors, TRUE));
+    fprintf(STDERR, "G_with_poll = [%s]\n", print_r($G_with_poll, TRUE));
+    fprintf(STDERR, "G_with_sidebanner = [%s]\n", print_r($G_with_sidebanner, TRUE));
+    fprintf(STDERR, "G_with_sidebanner2 = [%s]\n", print_r($G_with_sidebanner2, TRUE));
+    fprintf(STDERR, "G_with_splash = [%s]\n", print_r($G_with_splash, TRUE));
+    fprintf(STDERR, "G_with_topbanner = [%s]\n", print_r($G_with_topbanner, TRUE));
+}
+
 function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cookie)
 {
     $check_post = FALSE;
@@ -414,7 +461,17 @@ class Sac_a_push {
 
     function run()
     {
-        GLOBAL $DOCUMENT_ROOT, $HTTP_HOST, $G_with_splash, $G_shutdown, $G_black_list;
+        GLOBAL $DOCUMENT_ROOT, $HTTP_HOST;
+
+        GLOBAL $G_alarm_passwd, $G_black_list, $G_btrace_pref_sub, $G_dbauth;
+        GLOBAL $G_dbpfx, $G_donors_all, $G_donors_cur, $G_is_local, $G_lang;
+        GLOBAL $G_poll_entries, $G_poll_name, $G_poll_title, $G_proxy_white_list;
+        GLOBAL $G_room_roadmap, $G_shutdown, $G_sidebanner, $G_sidebanner2;
+        GLOBAL $G_splash_content, $G_splash_contents, $G_splash_cont_idx;
+        GLOBAL $G_splash_h, $G_splash_idx, $G_splash_interval, $G_splash_timeout;
+        GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
+        GLOBAL $G_with_sidebanner, $G_with_sidebanner2, $G_with_splash;
+        GLOBAL $G_with_topbanner;
 
         if ($this->main_loop) {
             return (FALSE);
@@ -544,6 +601,8 @@ class Sac_a_push {
                                 $line = trim($buf);
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
+
+                                    global_dump();
                                 }
                                 else if ($line == "shutdown") {
                                     if ($this->app->dump_data()) {
