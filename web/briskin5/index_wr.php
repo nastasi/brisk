@@ -38,9 +38,11 @@ require_once("Obj/briskin5.phh");
 /*
  *  MAIN
  */
-function bin5_index_wr_main(&$bri, $remote_addr, $get, $post, $cookie)
+function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_base, $G_dbasetype;
+
+    $remote_addr = addrtoipv4($remote_addr_full);
 
     $curtime = time();
     if ($bri == NULL) {

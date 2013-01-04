@@ -79,9 +79,11 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 
                       );
 
-function index_wr_main(&$room, $remote_addr, $get, $post, $cookie)
+function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $G_room_passwdhowto, $mlang_indwr;
+
+    $remote_addr = addrtoipv4($remote_addr_full);
 
     log_load("index_wr.php");
 

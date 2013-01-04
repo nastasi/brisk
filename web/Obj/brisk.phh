@@ -288,6 +288,18 @@ Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+function addrtoipv4($addr)
+{
+    $ipv4addr_arr = explode(':' , $addr);
+    if (isset($ipv4addr_arr[3])) {
+        $ipv4addr = $ipv4addr_arr[3];
+    }
+    else {
+        $ipv4addr = $addr;
+    }
+    return $ipv4addr;
+}
+
 function mop_flush()
 {
     for ($i = 0; $i < ob_get_level(); $i++)

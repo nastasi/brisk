@@ -283,13 +283,8 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
           
           $room->garbage_manager(TRUE);
           /* try login */
-          $ipv4addr_arr = explode(':' , $addr);
-          if (isset($ipv4addr_arr[3])) {
-              $ipv4addr = $ipv4addr_arr[3];
-          }
-          else {
-              $ipv4addr = $addr;
-          }
+
+          $ipv4addr = addrtoipv4($addr);
           if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $ipv4addr, $cookie)) != FALSE) {
               $ACTION = "room";
               if ($idx < 0) {
