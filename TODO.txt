@@ -4,11 +4,12 @@
   MAJOR |
  -------+
    - BUG: some connection to the named socket fails
-   - Page still opened after the server restart
+   - Not simultaneous more then one stream
 
   MINOR |
  -------+
    WIP - try to be more antivirus-friendly
+   - multiple rows between games
    - packetize and automatize php-ancillary and apache module
    - into the room local step remains -1
    - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
@@ -16,6 +17,7 @@
 
   DONE |
  ------+
+   DONE - Page still opened after the server restart
    DONE - log_legal address fix
    DONE - manage too fast reload in xynt-streaming
    DONE - add xhr as transport layer and manage different streams better

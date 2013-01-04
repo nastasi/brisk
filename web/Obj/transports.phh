@@ -90,6 +90,7 @@ class Transport_xhr {
 
     static function fini($init_string, $base, $blockerr)
     {
+        return (sprintf('@BEGIN@ %s window.onbeforeunload = null; window.onunload = null; document.location.assign("%sindex.php"); @END@',  ($blockerr ? 'xstm.stop(); ' : ''), $base));
         return ("");
     }
 
@@ -185,6 +186,15 @@ class Transport {
         }
         else  {
             return new Transport_iframe();
+        }
+    }
+    static function gettype($transp)
+    {
+        if ($transp == 'xhr' || $transp == 'htmlfile') {
+            return "Transport_".$transp;
+        }
+        else {
+            return 'Transport_iframe';
         }
     }
 }

@@ -651,13 +651,13 @@ class User {
       return ($ret);
   }  //   function maincheck (...
 
-  public static function stream_fini($init_string, $is_unrecoverable)
+  public static function stream_fini($transp, $init_string, $is_unrecoverable)
 {
     printf("xXx user::stream_fini\n");
 
     // FIXME: dynamic "Transport_" type
-    $tans_class = "Transport_iframe";
-    $body = $tans_class::fini($init_string, self::base_get(), static::blocking_error($is_unrecoverable));
+    $trans_class = Transport::gettype($transp);
+    $body = $trans_class::fini($init_string, self::base_get(), static::blocking_error($is_unrecoverable));
 
     // ELSE IF XHR THEN:
     // return (static::blocking_error($is_unrecoverable));
