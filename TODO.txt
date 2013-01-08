@@ -6,6 +6,7 @@
    - BUG: some connection to the named socket fails
    - Not simultaneous more then one stream
 
+
   MINOR |
  -------+
    WIP - try to be more antivirus-friendly
@@ -17,6 +18,7 @@
 
   DONE |
  ------+
+   DONE - Timeouted users are still be able to sit down (only the first at the table is banned)
    DONE - Page still opened after the server restart
    DONE - log_legal address fix
    DONE - manage too fast reload in xynt-streaming
