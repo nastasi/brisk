@@ -1231,7 +1231,7 @@ class Bin5 {
                     || ($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
 
-                    $content = Bin5_user::stream_fini($s_a_p->rndstr, TRUE);
+                    $content = Bin5_user::stream_fini($transp_type, $s_a_p->rndstr, TRUE);
                     $s_a_p->pgflush_try_add($enc, $new_socket, 20, $header_out, $content);
 
                     return TRUE;
