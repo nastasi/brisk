@@ -12,20 +12,21 @@
    WIP - try to be more antivirus-friendly
    - multiple rows between games
    - packetize and automatize php-ancillary and apache module
-   - into the room local step remains -1
    - DISABLED_TO_FIX: DNS access (perform blocking dns requests, must be fixed)
 
 
   DONE |
  ------+
-   DONE - Timeouted users are still be able to sit down (only the first at the table is banned)
-   DONE - Page still opened after the server restart
+   DONE - temporarly server hung not reflected on user timeouts
+   DONE - timeouted users are still be able to sit down (only the first at the table is banned)
+   DONE - page still opened after the server restart
    DONE - log_legal address fix
    DONE - manage too fast reload in xynt-streaming
    DONE - add xhr as transport layer and manage different streams better
    TEST - BUG: pari + 72 non fa 4x ma attualmente fa 3x, da correggere
    TEST - BUG: lurker are logged out (and remain a pending socket opened (look the spush log)
    DONE - save/restore database
+   DONE - into the room local step remains -1
    DONE - centralize all '<script ...' incapsulation to allow multiple transport system.
    DONE - BUG: access with password from 2 diff browsers the second go in strange "page not found" 
           in the first tentative, the second works
