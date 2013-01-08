@@ -801,6 +801,8 @@ class Bin5 {
     var $the_end;
     var $tok;
 
+    var $delay_mgr;
+
     static function page_manager($room, $header_out, $path, $method, $addr, $get, $post, $cookie) 
     {
         switch ($path) {
@@ -852,6 +854,8 @@ class Bin5 {
         $this->table_token = $table_token;
         $this->garbage_timeout = 0;
         
+        $this->delay_mgr = new Delay_Manager((GARBAGE_TIMEOUT *3.0) / 2.0);
+
         log_wr("Bin5 constructor end");
     }
     
@@ -888,6 +892,9 @@ class Bin5 {
         /* Garbage collector degli utenti in timeout */
         $ismod = FALSE;
         $curtime = time();
+
+        $delta = $this->delay_mgr->delta_get($curtime);
+
         if ($force || $this->garbage_timeout < $curtime) {
             for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
                 $user_cur = $this->user[$i];
@@ -895,7 +902,7 @@ class Bin5 {
                     ($user_cur->stat == 'table' && ($user_cur->subst == 'shutdowned' || $user_cur->subst == 'shutdowner')))
                     continue;
                 
-                if ($user_cur->lacc + EXPIRE_TIME_RD < $curtime) { // Auto logout dell'utente
+                if ($user_cur->lacc + EXPIRE_TIME_RD < ($curtime - $delta)) { // Auto logout dell'utente
                     log_rd2($user_cur->sess." bin5 AUTO LOGOUT.");
                     
                     if ($user_cur->stat == 'table') {
@@ -931,6 +938,7 @@ class Bin5 {
             $ismod = TRUE;
         }
         
+        $this->delay_mgr->lastcheck_set($curtime);
         return ($ismod);
     }
     
