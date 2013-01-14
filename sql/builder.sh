@@ -90,7 +90,7 @@ elif [ "$1" = "dumpall" ]; then
         pg_dump -h $DBHOST -U $DBUSER $DBBASE > $2
     fi
 elif [ "$1" = "add" ]; then
-    cat "$2" | psql $pg_args
+    cat "$2" | sqlexe $sht
 else
     echo " USAGE"
     echo "   ./builder create"
