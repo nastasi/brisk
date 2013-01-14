@@ -157,7 +157,21 @@ class BriskDB
         return ($user_obj);
     }
 
+    function user_update_login_time($id, $lintm)
+    {
+        GLOBAL $G_dbpfx;
 
+        $user_sql = sprintf("UPDATE %susers SET (lintm) = (date 'epoch' + %d * INTERVAL '1 second') WHERE code = %d;", $G_dbpfx, $lintm, $id);
+
+        // $user_pg = $this->query($user_sql);
+        // $row_n = pg_affected_rows($user_pg);
+        // fprintf(STDERR, "query: %s   NUM: %d\n", ($user_pg == FALSE ? "FALSE" : "TRUE"), $row_n);
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+
+        return TRUE;
+    }
     
     function login_verify($login, $pass)
     {
@@ -190,6 +204,7 @@ class BriskDB
                             log_main("login_verify SUCCESS for ".$login);
                             
                             $chals->rem($login);
+                            $this->user_update_login_time($user_obj->code, time());
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
                             break;
                         }
@@ -242,8 +257,6 @@ class BriskDB
             $user_sql = sprintf("INSERT INTO %susers ( login, pass, email, type) VALUES ('%s', '%s', '%s', %d);",
                                 $G_dbpfx, escsql(strtolower($olddb->item[$i]->login)), escsql($olddb->item[$i]->pass),
                                 escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL); 
-            
-            // if ( ! (($user_pg = pg_exec($dbconn,$order_add_sql)) != FALSE && pg_affected_rows($order_pg) == 1) ) {
 
             if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
                 $cont .= sprintf("ERROR IN LINE: %s\n", eschtml($user_sql));
