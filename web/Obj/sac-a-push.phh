@@ -25,6 +25,7 @@
 define('SITE_PREFIX', '/brisk/');
 define('SITE_PREFIX_LEN', 7);
 
+declare(ticks = 1);
 
 function global_dump()
 {
@@ -362,7 +363,10 @@ class Cookies {
 
 
 class Sac_a_push {
-    static $fixed_fd = 2;
+    // maybe fixed_fd is unuseful
+    static $fixed_fd = 3;
+    static $cnt_master = NULL;
+    static $cnt_slave  = NULL;
     
     var $file_socket;
     var $unix_socket;
@@ -387,7 +391,29 @@ class Sac_a_push {
     {
     }
 
-    // Sac_a_push::create("/tmp/brisk.sock", 0, 0
+    function sig_handler($sig)
+    {
+        switch ($sig) {
+        case SIGINT:
+            exit(1);
+            break;
+        case SIGTERM:
+            if (static::$cnt_master != NULL) {
+                    fwrite(static::$cnt_master, "\nshutdown\n");
+                    fflush(static::$cnt_master);
+            }
+            else {
+                exit(1);
+            }
+            break;
+        case SIGHUP: 
+            if (static::$cnt_master != NULL) {
+                fwrite(static::$cnt_master, "\nreload\n");
+                fflush(static::$cnt_master);
+            }
+            break;
+        }
+    }
 
     static function create(&$app, $sockname, $debug, $blocking_mode)
     {        
@@ -400,6 +426,18 @@ class Sac_a_push {
         $thiz->socks = array();
         $thiz->s2u  = array();
         $thiz->pages_flush = array();
+
+        // create a couple of sockets for control management
+        if (($sockpair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM,
+                                            STREAM_IPPROTO_IP)) == FALSE) {
+            return FALSE;
+        }
+        static::$cnt_master = $sockpair[0];
+        static::$cnt_slave  = $sockpair[1];
+
+        pcntl_signal(SIGTERM, array("Sac_a_push", "sig_handler"));
+        pcntl_signal(SIGINT, array("Sac_a_push", "sig_handler"));
+        pcntl_signal(SIGHUP, array("Sac_a_push", "sig_handler"));
 
         $thiz->blocking_mode = 0; // 0 for non-blocking
 
@@ -508,7 +546,8 @@ class Sac_a_push {
             /* if ($shutdown)  */
             /*     $read   = array_merge(array("$in" => $in), $socks); */
             /* else */
-            $read   = array_merge(array(intval($this->list) => $this->list, intval($this->in) => $this->in),
+            $read   = array_merge(array(intval($this->list) => $this->list, intval($this->in) => $this->in,
+                                        intval(static::$cnt_slave) => static::$cnt_slave),
                                   $this->socks);
             
             if ($this->debug > 1) {
@@ -517,7 +556,7 @@ class Sac_a_push {
             }
             $write  = NULL;
             $except = NULL;
-            $num_changed_sockets = stream_select($read, $write, $except, 0, 500000);
+            $num_changed_sockets = @stream_select($read, $write, $except, 0, 500000);
         
             if ($num_changed_sockets == 0) {
                 printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
@@ -589,7 +628,7 @@ class Sac_a_push {
                                 printf("Arrivati %d bytes da list\n", strlen($buf));
                                 return(21);
                             }
-                            else if ($sock === $this->in) {
+                            else if ($sock === $this->in || $sock === static::$cnt_slave) {
                                 printf("Arrivati %d bytes da stdin\n", strlen($buf));
                                 return(22);
                             }
@@ -616,7 +655,7 @@ class Sac_a_push {
                             if ($sock === $this->list) {
                                 printf("Arrivati %d bytes da list\n", strlen($buf));
                             }
-                            else if ($sock === $this->in) {
+                            else if ($sock === $this->in || $sock === static::$cnt_slave) {
                                 printf("Arrivati %d bytes da stdin\n", strlen($buf));
                                 $line = trim($buf);
                                 if ($line == "reload") {
