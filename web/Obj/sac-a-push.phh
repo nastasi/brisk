@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - spush/sac-a-push.phh
+ *  brisk - Obj/sac-a-push.phh
  *
  *  Copyright (C) 2012 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
@@ -70,6 +70,26 @@ function global_dump()
     fprintf(STDERR, "G_with_sidebanner2 = [%s]\n", print_r($G_with_sidebanner2, TRUE));
     fprintf(STDERR, "G_with_splash = [%s]\n", print_r($G_with_splash, TRUE));
     fprintf(STDERR, "G_with_topbanner = [%s]\n", print_r($G_with_topbanner, TRUE));
+}
+
+function pid_save()
+{
+    $pid = getmypid();
+    $fname = LEGAL_PATH."/brisk.pid";
+
+    if (file_exists($fname)) {
+        log_crit("WARN: brisk.pid already exists");
+    }
+    file_put_contents($fname, sprintf("%d\n", $pid));
+}
+
+function pid_remove()
+{
+    $fname = LEGAL_PATH."/brisk.pid";
+
+    if (file_exists($fname)) {
+        unlink($fname);
+    }
 }
 
 function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cookie)
@@ -567,11 +587,11 @@ class Sac_a_push {
                             }
                             if ($sock === $this->list) {
                                 printf("Arrivati %d bytes da list\n", strlen($buf));
-                                exit(21);
+                                return(21);
                             }
                             else if ($sock === $this->in) {
                                 printf("Arrivati %d bytes da stdin\n", strlen($buf));
-                                exit(22);
+                                return(22);
                             }
                             else {
                                 // $user_a[$s2u[intval($sock)]]->disable();
@@ -606,10 +626,10 @@ class Sac_a_push {
                                 }
                                 else if ($line == "shutdown") {
                                     if ($this->app->dump_data()) {
-                                        exit(0);
+                                        return(0);
                                     }
                                     else {
-                                        exit(1);
+                                        return(1);
                                     }
                                 }
                             }

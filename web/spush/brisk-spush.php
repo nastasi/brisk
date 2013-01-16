@@ -41,18 +41,24 @@ require_once($G_base."briskin5/index_wr.php");
 
 function main()
 {
-    if (($room = Room::create(LEGAL_PATH."/brisk-crystal.data")) == FALSE) {
-        log_crit("room::create failed");
-        exit(1);
-    }
+    pid_save();
+    do {
+        if (($room = Room::create(LEGAL_PATH."/brisk-crystal.data")) == FALSE) {
+            log_crit("room::create failed");
+            $ret = 1;
+            break;
+        }
 
-    if (($s_a_p = Sac_a_push::create($room, USOCK_PATH, 0, 0)) === FALSE) {
-        exit(1);
-    }
+        if (($s_a_p = Sac_a_push::create($room, USOCK_PATH, 0, 0)) === FALSE) {
+            $ret = 2;
+            break;
+        }
 
-    $s_a_p->run();
+        $ret = $s_a_p->run();
+    } while (0);
 
-    exit(0);
+    pid_remove();
+    exit($ret);
 }
 
 main();
