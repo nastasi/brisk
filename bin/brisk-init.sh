@@ -30,24 +30,25 @@ case "$1" in
         #
         #  if .pid file exists try to shutdown the process
         if [ -f "${PPATH}/brisk.pid" ]; then
-            pid_old="$(cat "${PPATH}/brisk.pid")"
-            kill -TERM $pid_old
             killed=0
+            pid_old="$(cat "${PPATH}/brisk.pid")"
+            sig="TERM"
             for i in $(seq 1 $WAITLOOP_MAX); do
                 sleep 1
-                if ! kill -0 $pid_old 2>/dev/null ; then
+                if ! kill -$sig $pid_old 2>/dev/null ; then
                     killed=1
                     break
                 fi
+                sig=0
             done
             if [ $killed -eq 0 ]; then
-                kill -KILL $pid_old 2>/dev/null
+                kill -KILL $pid_old 2>/dev/null || true
             fi
         fi
         ;;
 
     start)
-        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
+        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
         ;;
     restart)
         $0 stop
