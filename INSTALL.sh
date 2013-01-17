@@ -16,60 +16,20 @@ web_path="/home/nastasi/web/brisk"
 ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
 proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
 usock_path="/home/nastasi/brisk-priv/brisk.sock"
+sys_user="www-data"
 legal_path="/home/nastasi/brisk-priv/brisk"
 prefix_path="/brisk/"
 brisk_conf="brisk_spu.conf.pho"
 web_only="FALSE"
 
-
-if [ "$1" = "chk" ]; then
-    set -e
-    oldifs="$IFS"
-    IFS='
-'
-    for i in $(find -name '*.pho' -o -name '*.phh' -o -name '*.php'); do
-        php5 -l $i
-    done
-    exit 0
-fi
-
-# before all check errors on the sources
-$0 chk || exit 3
-
-if [ "$1" = "pkg" ]; then
-    if [ "$2" != "" ]; then
-        tag="$2"
-    else
-        tag="$(git describe)"
-    fi
-    nam1="brisk_${tag}.tgz"
-    nam2="brisk-img_${tag}.tgz"
-    echo "Build packages ${nam1} and ${nam2}."
-    read -p "Proceed [y/n]: " a
-    if [ "$a" != "y" -a  "$a" != "Y" ]; then
-        exit 1
-    fi
-    git archive --format=tar --prefix=brisk-${tag}/brisk/ $tag | gzip > ../$nam1
-    cd ../brisk-img
-    git archive --format=tar --prefix=brisk-${tag}/brisk-img/ $tag | gzip > ../$nam2
-    cd -
-    exit 0
-fi
-    
-if [ -f "$CONFIG_FILE" ]; then
-   source "$CONFIG_FILE"
-fi
-
-if [ "x$prefix_path" = "x" ]; then
-   prefix_path="$web_path"
-fi
-
+#
+# functions
 function usage () {
     echo
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path> [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>]"
+    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -87,7 +47,7 @@ function usage () {
     echo "  -P prefix path                  - def. \"$prefix_path\""
     echo "  -C config filename              - def. \"$brisk_conf\""
     echo "  -U unix socket path             - def. \"$usock_path\""
-    
+    echo "  -u system user to run brisk dae - def. \"$sys_user\""
     echo
 }
 
@@ -125,6 +85,49 @@ function searchetc() {
 #
 #  MAIN
 #
+if [ "$1" = "chk" ]; then
+    set -e
+    oldifs="$IFS"
+    IFS='
+'
+    for i in $(find -name '*.pho' -o -name '*.phh' -o -name '*.php'); do
+        php5 -l $i
+    done
+    exit 0
+fi
+
+# before all check errors on the sources
+$0 chk || exit 3
+
+if [ "$1" = "pkg" ]; then
+    if [ "$2" != "" ]; then
+        tag="$2"
+    else
+        tag="$(git describe)"
+    fi
+    nam1="brisk_${tag}.tgz"
+    nam2="brisk-img_${tag}.tgz"
+    echo "Build packages ${nam1} and ${nam2}."
+    read -p "Proceed [y/n]: " a
+    if [ "$a" != "y" -a  "$a" != "Y" ]; then
+        exit 1
+    fi
+    git archive --format=tar --prefix=brisk-${tag}/brisk/ $tag | gzip > ../$nam1
+    cd ../brisk-img
+    git archive --format=tar --prefix=brisk-${tag}/brisk-img/ $tag | gzip > ../$nam2
+    cd -
+    exit 0
+fi
+
+if [ -f "$CONFIG_FILE" ]; then
+   source "$CONFIG_FILE"
+fi
+
+if [ "x$prefix_path" = "x" ]; then
+   prefix_path="$web_path"
+fi
+
+action=""
 while [ $# -gt 0 ]; do
     # echo aa $1 xx $2 bb
     conffile=""
@@ -144,6 +147,8 @@ while [ $# -gt 0 ]; do
         -C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
         -l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
         -U*) usock_path="$(get_param "-U" "$1" "$2")"; sh=$?;;
+        -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
+        system) action=system;;
         -W) web_only="TRUE";;
         -h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
@@ -173,8 +178,9 @@ echo "    ftok_path:  \"$ftok_path\""
 echo "    legal_path: \"$legal_path\""
 echo "    proxy_path: \"$proxy_path\""
 echo "    prefix_path:\"$prefix_path\""
-echo "    brisk_conf:\"$brisk_conf\""
+echo "    brisk_conf: \"$brisk_conf\""
 echo "    usock_path: \"$usock_path\""
+echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
 
 if [ ! -z "$outconf" ]; then
@@ -195,11 +201,36 @@ if [ ! -z "$outconf" ]; then
     echo "prefix_path=\"$prefix_path\""
     echo "brisk_conf=\"$brisk_conf\""
     echo "usock_path=\"$usock_path\""
+    echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
   ) > "$outconf"
 fi
 
 max_players=$((40 + players_n * tables_n))
+
+if [ "$action" = "system" ]; then
+    scrname="$(echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;')"
+    echo
+    echo "script name:  [$scrname]"
+    echo "brisk path:   [$web_path]"
+    echo "private path: [$legal_path]"
+    echo "system user:  [$sys_user]"
+    echo
+    read -p "press enter to continue" sure
+    cp bin/brisk-init.sh brisk-init.sh.wrk
+    sed -i "s@^BPATH=.*@BPATH=\"${web_path}\"@g;s@^PPATH=.*@PPATH=\"${legal_path}\"@g;s@^SSUFF=.*@SSUFF=\"${scrname}\"@g;s@^BUSER=.*@BUSER=\"${sys_user}\"@g" brisk-init.sh.wrk
+
+    su -c "cp brisk-init.sh.wrk /etc/init.d/${scrname}"
+
+    rm brisk-init.sh.wrk
+    echo
+    echo "... DONE."
+    echo "DON'T FORGET: after the first installation you MUST configure your run-levels accordingly"
+    echo
+    echo "Example: su -c 'update-rc.d $scrname defaults'"
+    echo
+    exit 0
+fi
 #
 #  Pre-check
 #

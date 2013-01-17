@@ -140,10 +140,10 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.5.5";
+$G_brisk_version = "4.6.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuova visualizzazione dello stato della connessione dati, ... , migliorata la gestione dei tavoli in caso di piccoli blocchi del server, gestione data di login.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunti script di avvio automatico, gestione dei segnali e logging dell\' ultima connessione.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: usage of reader/writer locking instead of generic exclusive locking.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
