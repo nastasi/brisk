@@ -694,7 +694,16 @@ function j_pollbox(form)
     return (false);
 }
 
+function prefs_load(content)
+{
+    var prefs_new;
+    var s;
 
+    s = "prefs_new = " + content;
+    eval(s);
+
+    return (prefs_new);
+}
 
 
 function list_set(what, is_update, info)

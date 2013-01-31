@@ -1,6 +1,22 @@
  TODO |
 ------+
 
+  FEATURES |
+ ----------+
+   - prefs API:
+     . prefs_save (save to the server the new prefs)
+     . prefs_load (load prefs structure with a json)
+     . prefs_apply (from server, and after prefs_save if success)
+
+   - preferences (listen into preferences)
+     . update values
+     . database change
+
+   - preferences (with "modifiable S")
+     . Mod. S: new flag into database
+     . graph infrastructure
+     . new box to edit color
+
   MAJOR |
  -------+
    - BUG: some connection to the named socket fails

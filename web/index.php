@@ -52,6 +52,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'back to tables'),
                      'btn_exit'     => array('it' => 'Esco.',
                                              'en' => 'Exit.'),
+                     'btn_prefs_update' => array('it' => 'Salva.',
+                                             'en' => 'Save.'),
+                     'btn_prefs_close' => array('it' => 'Chiudi.',
+                                             'en' => 'Close.'),
                      'tit_tabl'     => array('it' => 'Tavolo ',
                                              'en' => 'Table '),
                      'tit_stat'     => array('it' => 'imposta lo stato del tuo utente',
@@ -119,6 +123,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'splash'),
                      'splash_desc'  => array('it' => 'attiva la finestra di splash',
                                              'en' => 'show the splash window'),
+                     'tit_prefs'   => array('it' => 'preferenze',
+                                             'en' => 'preferences'),
+                     'prefs_desc'  => array('it' => 'preferenze dell\' utente',
+                                             'en' => 'user\'s preferences'),
                      'tit_help'     => array('it' => 'informazioni utili su Brisk',
                                              'en' => 'usefull information about Brisk'),
                      'itm_help'     => array('it' => 'aiuto',
@@ -757,14 +765,6 @@ google_color_url = "000000";
           .$mlang_room['st_visch_desc'][$G_lang].
 '&nbsp;<img class="unbo" src="img/st_visch.png"></a><br>
 
-<!--
-<a href="#"
-   onmouseover="menu_hide(0,2);"
-   title="" onclick="act_chatt(\'/st coniglio\'); menu_over(-1,this);">'
-          // MLANG
-          .$mlang_room['st_rabb_desc'][$G_lang].
-'&nbsp;<img class="unbo" src="img/st_rabbit.png"></a><br>
--->
 </div>
 
 <a href="#" title="avvia un ticker pubblicitario per il tuo tavolo" 
@@ -780,64 +780,7 @@ google_color_url = "000000";
           '</a><br>
 
 
-<a href="#" title="'
-          // MLANG imposta le regole di ascolto
-          .$mlang_room['list_desc'][$G_lang].
-'"   onmouseover="menu_hide(0,1); menu_show(\'menu_listen\');">'
-          // MLANG ascolta
-          .$mlang_room['itm_list'][$G_lang].
-'</a><br>
-<div id="menu_listen" style="width: 120px;" class="webstart">
-<!--
 
--->
-<input id="ra_listen_all" type="radio" name="listen" value="all" onclick="act_chatt(\'/listen all\');" title="'
-.$mlang_room['listall_desc'][$G_lang].
-'"><span id="list_all">'
-.$mlang_room['tit_listall'][$G_lang].
-'</span><br>  
-<input id="ra_listen_auth" type="radio" name="listen" value="auth" onclick="act_chatt(\'/listen auth\');" title="'
-.$mlang_room['listaut_desc'][$G_lang].
-'"><span id="list_auth">'
-.$mlang_room['tit_listaut'][$G_lang].
-'</span><br>  
-<input id="ra_listen_isol" type="radio" name="listen" value="isolation" onclick="act_chatt(\'/listen isolation\');" title="'
-.$mlang_room['listisol_desc'][$G_lang].
-'"><span id="list_isol">'
-.$mlang_room['tit_listisol'][$G_lang].
-'</span><br>
-<!--
-<hr>
-<a href="#" 
-   onmouseover="menu_hide(0,2);"
-   title="'
-          // MLANG leggo i messaggi di tutti gli utenti collegati
-          .$mlang_room['listall_desc'][$G_lang].
-'" onclick="act_chatt(\'/listen all\'); menu_over(-1,this);"><span id="list_all">'
-          // MLANG tutti
-          .$mlang_room['tit_listall'][$G_lang].
-'</span></a><br>
-<a href="#" 
-   onmouseover="menu_hide(0,2);"
-   title="'
-          // MLANG leggo soltanto i messaggi degli utenti con password
-          .$mlang_room['listaut_desc'][$G_lang].
-          '" onclick="act_chatt(\'/listen auth\'); menu_over(-1,this);"><span id="list_auth">'
-          // MLANG solo autenticati
-          .$mlang_room['tit_listaut'][$G_lang].
-'</span></a><br>
-
-<a href="#" 
-   onmouseover="menu_hide(0,2);"
-   title="'
-          // MLANG leggo soltanto i messaggi degli utenti con password
-          .$mlang_room['listisol_desc'][$G_lang].
-          '" onclick="act_chatt(\'/listen isolation\'); menu_over(-1,this);"><span id="list_isol">'
-          // MLANG solo autenticati
-          .$mlang_room['tit_listisol'][$G_lang].
-'</span></a><br>
--->
-</div>
 <a href="#" title="'
           // MLANG garantisci per un tuo conoscente
           .$mlang_room['splash_desc'][$G_lang].
@@ -846,6 +789,13 @@ google_color_url = "000000";
           // MLANG garantisci
           .$mlang_room['tit_splash'][$G_lang].
           '</a><br>
+'.($user->flags & USER_FLAG_AUTH ? '
+<a href="#" title="'
+          // MLANG garantisci per un tuo conoscente
+          .$mlang_room['prefs_desc'][$G_lang].'"
+   onmouseover="menu_hide(0,1);" onclick="$(\'preferences\').style.visibility = \'visible\'; menu_over(-1,this);">'
+          // MLANG garantisci
+   .$mlang_room['tit_prefs'][$G_lang].'</a><br>' : '').'
 
 </div>'.($G_with_poll ? '' : '<div style="padding: 0px; margin: 0px; witdh: 50px; height: 8px; font-size: 1px;"></div>
 <img style="cursor: pointer;" class="nobo" src="img/brisk_help'.langtolng($G_lang).'.png" title="'.$mlang_room['tit_help'][$G_lang].'" onmouseover="menu_hide(0,0);" onclick="act_help();">').'
@@ -1208,7 +1158,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
     </div>
     <div id="mesgtoadmbox" class="notify_opaque" style="text-align: center;">
        <br>
-<!--MLANG: Invia un messaggio o una segnalazione all'amministratore: -->
+<!--MLANG: Invia un messaggio o una segnalazione all\'amministratore: -->
        <b><?php echo $mlang_room['mesgtoadm_tit'][$G_lang];?></b>
        <br><br>
        <form id="mesgtoadm_form" accept-charset="utf-8" method="post" action="" onsubmit="return j_mesgtoadmbox(this);">
@@ -1236,6 +1186,47 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrstart"></div>
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
+</div>
+<div id="preferences" class="notify" style="z-index: 200; width: 600px; margin-left: -300px; height: 400px; top: 126px; visibility: hidden;">
+<div id="preferences_child" style="border-bottom: 1px solid gray; overflow: auto; height: 370px;">
+
+<h2><?php echo $mlang_room['tit_prefs'][$G_lang]; ?></h2>
+<!--#
+    #  LISTEN
+    #-->
+<table style="border: 1px solid gray;"><tr><th style="background-color: #cccccc;">
+<?php echo $mlang_room['itm_list'][$G_lang];?>
+</th></tr>
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="all" onclick="act_chatt(\'/listen all\');" title="'
+<?php echo $mlang_room['listall_desc'][$G_lang];?>
+'"><span id="list_all">
+<?php echo $mlang_room['tit_listall'][$G_lang];?>
+</span></td></tr>
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="auth" onclick="act_chatt(\'/listen auth\');" title="'
+<?php echo $mlang_room['listaut_desc'][$G_lang];?>
+'"><span id="list_auth">
+<?php echo $mlang_room['tit_listaut'][$G_lang];?>
+</span></td></tr>
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="isolation" onclick="act_chatt(\'/listen isolation\');" title="'
+<?php echo $mlang_room['listisol_desc'][$G_lang];?>
+'"><span id="list_isol">
+<?php echo $mlang_room['tit_listisol'][$G_lang];?>
+</span></td></tr>
+</table>
+
+
+<hr style="color: red;">
+
+
+
+<div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
+<br><br>
+<input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php echo $mlang_room['itm_ringauc'][$G_lang] ?>
+</div>
+
+
+</div>
+<div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('preferences').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang]; ?>"/> <input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_room['btn_prefs_update'][$G_lang]; ?>"/></div>
 </div>
 </body>
 </html>

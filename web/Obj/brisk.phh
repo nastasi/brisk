@@ -695,6 +695,16 @@ class Delay_Manager
     }
 }
 
+class Client_prefs {
+    var $listen;
+
+    function Client_prefs($listen)
+    {
+        $this->listen = $listen;
+    }
+}
+
+
 class Room
 {
     static $delta_t;
@@ -915,6 +925,9 @@ class Room
     log_main("show_room: username: ".$user->name);
     
     $ret = sprintf('gst.st = %d; ',  $user_step);
+
+    $prefs = new Client_prefs(($user->flags & USER_FLAG_MAP_AUTH) >> 2);
+    $ret .= sprintf('var prefs_new = prefs_load(\'%s\'); console.log(prefs_new);', json_encode($prefs));
 
     if ($user->flags & USER_FLAG_ISOLAUTH) {
       $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';

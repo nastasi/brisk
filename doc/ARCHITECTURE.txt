@@ -2,6 +2,16 @@ Sparse documentation about Brisk.
 
 Many things aren't documented at all, but I start with authentication workflow.
 
+==== MODIFY USERS TABLE ====
+
+=== PHP CODE ===
+
+web/Obj/dbase_base.phh
+  function LoginDBItem -> args & body
+  function LoginDBItemFromRecord -> args & body
+
+=== SQL CODE ===
+sql/sql.d/nnn-name-patch.sql
 
 
 AUTHENTICATION WORKFLOW
