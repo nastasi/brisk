@@ -866,6 +866,7 @@ supported by:<br>
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
+   var g_prefs, g_prefs_new = null;
    var g_listen;
    var g_withflash = false;
    var g_is_spawn = 0;
@@ -879,6 +880,9 @@ supported by:<br>
    window.onload = function() {
      // alert(window.onbeforeunload);
      g_brow = get_browser_agent();
+
+     g_prefs = new client_prefs();
+
      spo_slide  = new sideslide($('spon_caro'), 80, 20);
      sup_slide  = new sideslide($('supp_caro'), 80, 20);
 
@@ -1001,6 +1005,7 @@ echo "$body"; ?>
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
+   var g_prefs, g_prefs_new = null;
    var g_listen;
    var tra = null;
    var stat = "";
@@ -1010,13 +1015,16 @@ echo "$body"; ?>
    var topbanner_sfx, topbanner_dx;
    // var nonunload = false;
    var g_withflash = false;
-   var g_imgct= 0;
+   var g_imgct = 0;
    var g_imgtot = g_preload_img_arr.length;
    var g_brow = null;
    var spo_slide, sup_slide;
 
    window.onload = function() {
      g_brow = get_browser_agent();
+
+     g_prefs = new client_prefs();
+
      spo_slide  = new sideslide($('spon_caro'), 80, 20);
      sup_slide  = new sideslide($('supp_caro'), 80, 20);
 
@@ -1197,17 +1205,17 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <table style="border: 1px solid gray;"><tr><th style="background-color: #cccccc;">
 <?php echo $mlang_room['itm_list'][$G_lang];?>
 </th></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="all" onclick="act_chatt(\'/listen all\');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="0" onclick="act_chatt(\'/listen all\');" title="'
 <?php echo $mlang_room['listall_desc'][$G_lang];?>
 '"><span id="list_all">
 <?php echo $mlang_room['tit_listall'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="auth" onclick="act_chatt(\'/listen auth\');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="1" onclick="act_chatt(\'/listen auth\');" title="'
 <?php echo $mlang_room['listaut_desc'][$G_lang];?>
 '"><span id="list_auth">
 <?php echo $mlang_room['tit_listaut'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="isolation" onclick="act_chatt(\'/listen isolation\');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="act_chatt(\'/listen isolation\');" title="'
 <?php echo $mlang_room['listisol_desc'][$G_lang];?>
 '"><span id="list_isol">
 <?php echo $mlang_room['tit_listisol'][$G_lang];?>

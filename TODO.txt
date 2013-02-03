@@ -4,9 +4,11 @@
   FEATURES |
  ----------+
    - prefs API:
+     . prefs_assign(content): assign json content as output var
+     . prefs_apply(prefs_new): apply new content to g_prefs and system
+     . prefs_load(content): load json content and apply to g_prefs and system
+
      . prefs_save (save to the server the new prefs)
-     . prefs_load (load prefs structure with a json)
-     . prefs_apply (from server, and after prefs_save if success)
 
    - preferences (listen into preferences)
      . update values

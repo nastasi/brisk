@@ -926,17 +926,20 @@ class Room
     
     $ret = sprintf('gst.st = %d; ',  $user_step);
 
+    // for test: $prefs = new Client_prefs(USER_FLAG_LISTAUTH >> 2);
     $prefs = new Client_prefs(($user->flags & USER_FLAG_MAP_AUTH) >> 2);
-    $ret .= sprintf('var prefs_new = prefs_load(\'%s\'); console.log(prefs_new);', json_encode($prefs));
+    $ret .= sprintf('prefs_load(\'%s\');', json_encode($prefs));
 
-    if ($user->flags & USER_FLAG_ISOLAUTH) {
-      $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';
-    }
-    else if ($user->flags & USER_FLAG_LISTAUTH) {
-      $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
-    }
-    else {
-      $ret .= 'list_set(\'all\', false, \'\' ); ';
+    if(false) {
+        if ($user->flags & USER_FLAG_ISOLAUTH) {
+            $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';
+        }
+        else if ($user->flags & USER_FLAG_LISTAUTH) {
+            $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
+        }
+        else {
+            $ret .= 'list_set(\'all\', false, \'\' ); ';
+        }
     }
 
     if ($user->subst == 'standup')

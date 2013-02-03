@@ -23,13 +23,23 @@
 
 
 /* 
+
    data = [ [ flags, name ],  ... ]
    
 */
 
+
 var l_list_all = 0x00;
 var l_list_auth = 0x01;
 var l_list_isol = 0x02;
+
+function client_prefs()
+{
+}
+
+client_prefs.prototype = {
+    listen: -1
+}
 
 function state_add(flags)
 {
@@ -694,7 +704,7 @@ function j_pollbox(form)
     return (false);
 }
 
-function prefs_load(content)
+function prefs_assign(content)
 {
     var prefs_new;
     var s;
@@ -705,10 +715,44 @@ function prefs_load(content)
     return (prefs_new);
 }
 
+var prefs_list_idx  = new Array( 0x00, 0x01, 0x02 );
+var prefs_list_id   = new Array( "all", "auth", "isol" );
+
+function prefs_apply(prefs_new)
+{
+    if (typeof(g_prefs) == 'undefined')
+        return false;
+
+    /* listen management */
+    if (g_prefs.listen != prefs_new.listen) {
+        for (i = 0 ; i < prefs_list_idx.length ; i++) {
+            set_checked_value($('ra_listen_'+prefs_list_id[i]), prefs_new.listen);
+            if (prefs_new.listen == prefs_list_idx[i]) {
+                $('list_'+prefs_list_id[i]).style.color = 'red';
+                $('list_info').innerHTML = mlang_commons['tit_list'][i][g_lang];
+            }
+            else {
+                $('list_'+prefs_list_id[i]).style.color = 'black';
+            }
+        }
+
+        g_prefs.listen = prefs_new.listen;
+        relo = true;
+    }
+}
+
+function prefs_load(content)
+{
+    var prefs_new;
+
+    if ((prefs_new = prefs_assign(content)) == null)
+        return false;
+
+    return prefs_apply(prefs_new);
+}
 
 function list_set(what, is_update, info)
 {
-    // console.log(what);
     var i;
     var relo = false;
     var old_st = readCookie("CO_list");

@@ -38,9 +38,14 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ',
                       'btn_sit'   : { 'it' : 'Mi siedo.',
                                       'en' : 'Sit down.' },
                       'btn_exit'  : { 'it' : 'Esco.',
-                                      'en' : 'Exit.' }
-                      
-                      };
+                                      'en' : 'Exit.' },
+                      'tit_list'  : { '0'  : { 'it' : '',
+                                               'en' : '' },
+                                      '1'  : { 'it' : '(solo aut.)',
+                                               'en' : '(only aut.)' },
+                                      '2'  : { 'it' : '(isolam.to)',
+                                               'en' : '(isolation)' } }
+                    };
 
 function $(id) { return document.getElementById(id); }
 
