@@ -857,6 +857,7 @@ supported by:<br>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="md5.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
+<script type="text/javascript" src="json2.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 
@@ -996,6 +997,7 @@ echo "$body"; ?>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
+<script type="text/javascript" src="json2.js"></script>
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 <SCRIPT type="text/javascript"><!--
