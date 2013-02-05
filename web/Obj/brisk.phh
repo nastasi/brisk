@@ -928,7 +928,7 @@ class Room
 
     // for test: $prefs = new Client_prefs(USER_FLAG_LISTAUTH >> 2);
     $prefs = new Client_prefs(($user->flags & USER_FLAG_MAP_AUTH) >> 2);
-    $ret .= sprintf('prefs_load(\'%s\');', json_encode($prefs));
+    $ret .= sprintf('prefs_load(\'%s\', false, false);', json_encode($prefs));
 
     if(false) {
         if ($user->flags & USER_FLAG_ISOLAUTH) {

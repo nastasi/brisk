@@ -273,17 +273,28 @@ function send_mesg(mesg)
 }
 
 /*
-  request to server
+  sync request to server
   server_request([arg0=arg1[, arg2=arg3[, ...]]])
+  if var name == '__POST__' than all other vars will be managed as POST content
+                                 and the call will be a POST
  */
 function server_request()
 {
     var xhr_wr = createXMLHttpRequest();
-    var i, collect = "";
+    var i, collect = "", post_collect = null, is_post = false;
 
     if (arguments.length > 0) {
         for (i = 0 ; i < arguments.length ; i+= 2) {
-            collect += (i == 0 ? "" : "&") + arguments[i] + "=" + encodeURIComponent(arguments[i+1]);
+            if (arguments[i] == "__POST__") {
+                is_post = true;
+                post_collect = "";
+                i -= 1;
+                continue;
+            }
+            if (is_post)
+                post_collect += (post_collect == "" ? "" : "&") + arguments[i] + "=" + encodeURIComponent(arguments[i+1]);
+            else
+                collect += (i == 0 ? "" : "&") + arguments[i] + "=" + encodeURIComponent(arguments[i+1]);
         }
     }
     // alert("Args: "+arguments.length);
@@ -292,9 +303,15 @@ function server_request()
     
     // console.log("server_request:preresp: "+xhr_wr.responseText);
 
-    xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+collect, false);
+    if (is_post) {
+        xhr_wr.open('POST', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+collect, false);
+        xhr_wr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    }
+    else {
+        xhr_wr.open('GET', 'index_wr.php?'+(is_conn ? 'sess='+sess+'&' : '')+collect, false);
+    }
     xhr_wr.onreadystatechange = function() { return; };
-    xhr_wr.send(null);
+    xhr_wr.send(post_collect);
     
     if (xhr_wr.responseText != null) {
         // console.log("server_request:resp: "+xhr_wr.responseText);

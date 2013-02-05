@@ -52,7 +52,7 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'back to tables'),
                      'btn_exit'     => array('it' => 'Esco.',
                                              'en' => 'Exit.'),
-                     'btn_prefs_update' => array('it' => 'Salva.',
+                     'btn_prefs_save' => array('it' => 'Salva.',
                                              'en' => 'Save.'),
                      'btn_prefs_close' => array('it' => 'Chiudi.',
                                              'en' => 'Close.'),
@@ -1207,17 +1207,17 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <table style="border: 1px solid gray;"><tr><th style="background-color: #cccccc;">
 <?php echo $mlang_room['itm_list'][$G_lang];?>
 </th></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="0" onclick="act_chatt(\'/listen all\');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="0" onclick="prefs_update();" title="'
 <?php echo $mlang_room['listall_desc'][$G_lang];?>
 '"><span id="list_all">
 <?php echo $mlang_room['tit_listall'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="1" onclick="act_chatt(\'/listen auth\');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="1" onclick="prefs_update();" title="'
 <?php echo $mlang_room['listaut_desc'][$G_lang];?>
 '"><span id="list_auth">
 <?php echo $mlang_room['tit_listaut'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="act_chatt(\'/listen isolation\');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="prefs_update();" title="'
 <?php echo $mlang_room['listisol_desc'][$G_lang];?>
 '"><span id="list_isol">
 <?php echo $mlang_room['tit_listisol'][$G_lang];?>
@@ -1236,7 +1236,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 
 
 </div>
-<div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('preferences').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang]; ?>"/> <input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_room['btn_prefs_update'][$G_lang]; ?>"/></div>
+<div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('preferences').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang]; ?>"/> <input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_prefs_save'][$G_lang]; ?>"/></div>
 </div>
 </body>
 </html>

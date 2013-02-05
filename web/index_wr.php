@@ -184,7 +184,9 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'whysupport') {
             echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
         }
-        
+        else if ($argz[0] == 'prefs') {
+            fprintf(STDERR, "\n\n PREFS \n\n");
+        }
         else { 
             log_wr("Get User Error");
             echo "Get User Error:" + $argz[0];

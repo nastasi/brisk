@@ -718,8 +718,11 @@ function prefs_assign(content)
 var prefs_list_idx  = new Array( 0x00, 0x01, 0x02 );
 var prefs_list_id   = new Array( "all", "auth", "isol" );
 
-function prefs_apply(prefs_new)
+function prefs_apply(prefs_new, is_update, is_volat)
 {
+    var i;
+    var relo = false;
+
     if (typeof(g_prefs) == 'undefined')
         return false;
 
@@ -728,27 +731,96 @@ function prefs_apply(prefs_new)
         for (i = 0 ; i < prefs_list_idx.length ; i++) {
             set_checked_value($('ra_listen_'+prefs_list_id[i]), prefs_new.listen);
             if (prefs_new.listen == prefs_list_idx[i]) {
-                $('list_'+prefs_list_id[i]).style.color = 'red';
+                if (!is_volat)
+                    $('list_'+prefs_list_id[i]).style.color = 'red';
                 $('list_info').innerHTML = mlang_commons['tit_list'][i][g_lang];
             }
             else {
-                $('list_'+prefs_list_id[i]).style.color = 'black';
+                if (!is_volat)
+                    $('list_'+prefs_list_id[i]).style.color = 'black';
             }
         }
 
-        g_prefs.listen = prefs_new.listen;
         relo = true;
     }
+
+
+    // TO BE ANALYZED !!!
+    // if (is_update) {
+    //     createCookie("CO_list", what, 24*365, cookiepath);
+    // }
+
+
+    if (relo || !is_update) {
+        for (i = g_tables_auth_n ; i < g_tables_n ; i++) {
+            if (i % 4 == 0) {
+                $('tr_noauth'+i).style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
+            }
+
+            $('td_noauth'+i).style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
+        }
+        if (prefs_new.listen == l_list_isol) {
+            tra.hide_noauth();
+        }
+        else {
+            tra.show_noauth();
+        }
+
+        if (false) {
+            // ricalculation of standup area
+            if (standup_data_old != null) {
+                standup_data = standup_data_old;
+                standup_data_old = null;
+                j_stand_cont(standup_data);
+            }
+        }
+    }
+
+    g_prefs.listen = prefs_new.listen;
 }
 
-function prefs_load(content)
+function prefs_load(content, is_update, is_volat)
 {
     var prefs_new;
 
     if ((prefs_new = prefs_assign(content)) == null)
         return false;
 
-    return prefs_apply(prefs_new);
+    return prefs_apply(prefs_new, is_update, is_volat);
+}
+
+function prefs_save()
+{
+    if (typeof(g_prefs) == 'undefined')
+        return false;
+
+    console.log(server_request('mesg', 'prefs', '__POST__', 'prefs', JSON.stringify(g_prefs)));
+    // close the win:
+    // $('preferences').style.visibility = 'hidden';
+}
+
+function prefs_update()
+{
+    var i;
+    var prefs_new;
+    var relo = false;
+
+    if (typeof(g_prefs) == 'undefined')
+        return false;
+
+    prefs_new = new client_prefs();
+
+    /* listen management */
+    for (i = 0 ; i < prefs_list_idx.length ; i++) {
+        prefs_new.listen = get_checked_value($('ra_listen_'+prefs_list_id[i]));
+        if (prefs_new.listen != '')
+            break;
+    }
+
+    /* TODO SAVE TEMPORARY */
+    /* from form to struct */
+    console.log("Prefs_update");
+    prefs_apply(prefs_new, true, true);
 }
 
 function list_set(what, is_update, info)
