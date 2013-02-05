@@ -8,11 +8,19 @@
      . prefs_apply(prefs_new): apply new content to g_prefs and system
      . prefs_load(content): load json content and apply to g_prefs and system
 
-     . prefs_save (save to the server the new prefs)
+     . prefs_update: update preferences temporarly
+     . prefs_save: save to the server the new prefs
 
    - preferences (listen into preferences)
+        // js var, volatile server, (db server || cookie)
+        temporary: js var, volatile server
+        permanent: js var, volatile server, (db server || cookie)
+
+     . data from db OR, if missing, from cookies
+
      . update values
      . database change
+     . MANAGE NOT AUTH USERS
 
    - preferences (with "modifiable S")
      . Mod. S: new flag into database
