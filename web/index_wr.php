@@ -93,7 +93,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         $sess = "";
 
-    
+
     if (DEBUGGING == "local" && $remote_addr != '127.0.0.1') {
         echo "Debugging time!";
         return (FALSE);
