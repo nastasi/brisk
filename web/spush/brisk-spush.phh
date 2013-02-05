@@ -26,14 +26,48 @@ $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH', "/tmp/brisk.sock");
 
-class PageFlush {
+define('PENDINGPAGE_WAITDATA', 0);
+define('PENDINGPAGE_FLUSHING', 1);
+
+class PendingPage {
 
   var $socket; // socket handler of page stream
+  var $status; // status can be 0: waiting for data, 1: flush phase
+
   var $kalive; // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
   var $msg;    // place where store failed fwrite data
   var $msg_sz; // size of content
 
-  function PageFlush($socket, $enc, $curtime, $kalive, $header_out, $body)
+  
+
+  function PendingPage($socket)
+  {
+      $this->socket = $socket;
+  }
+
+  static function pendingpage_waiting($socket, $method, $header, $get, $post, $cookie, $path, $addr)
+  {
+      $thiz = new PendingPage($socket);
+
+      // TODO
+  }
+
+  function try_wait($curtime)
+  {
+      // if completed return TRUE to allow data to be processed, 
+      // if timeout or max content dimension is exceeded move to flushing
+  }
+
+  static function pendingpage_flushing($socket, $enc, $curtime, $kalive, $header_out, $body)
+  {
+      $thiz = new PendingPage($socket);
+
+      $thiz->to_flushing($enc, $curtime, $kalive, $header_out, $body);
+
+      return ($thiz);
+  }
+
+  function to_flushing($enc, $curtime, $kalive, $header_out, $body)
   {
       printf("TRY FLUSH CREATE\n");
       $body_out = ZLibStream::compress($enc, $body);
@@ -43,7 +77,7 @@ class PageFlush {
       $hea = headers_render($header_out, $body_out_sz);
       $hea_sz = mb_strlen($hea, "ASCII");
 
-      $this->socket = $socket;
+      $this->status = PENDINGPAGE_FLUSHING;
       $this->kalive = $curtime + $kalive;
       $this->msg    = $hea.$body_out;
       $this->msg_sz = $hea_sz + $body_out_sz;
@@ -52,6 +86,9 @@ class PageFlush {
   /* return TRUE if is removable from it's list */
   function try_flush($curtime)
   {
+      if ($this->status != PENDINGPAGE_FLUSHING)
+          return (FALSE);
+
       printf("TRY FLUSH IN\n");
       if ($this->kalive < $curtime) {
           printf("TRY FLUSH CLOSE 1\n");
@@ -61,7 +98,7 @@ class PageFlush {
 
       $wret = @fwrite($this->socket, $this->msg);
       if ($wret == FALSE && $wret !== FALSE) {
-          printf("TRY FLUSH PageFlush::try_flush: wret 0 but not FALSE\n");
+          printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE\n");
       }
       if ($wret == $this->msg_sz) {
           printf("TRY FLUSH CLOSE 2\n");

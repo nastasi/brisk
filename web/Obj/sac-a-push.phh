@@ -121,7 +121,7 @@ function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cook
             }
             // GET params management
             $get_vars = explode('?', $req[1], 2);
-            $path =   $get_vars[0];
+            $path = $get_vars[0];
             if (count($get_vars) > 1) {
                 $a = explode('&', $get_vars[1]);
                 printf("A COUNT: [%s] %d\n", $a[0], count($a));
@@ -372,7 +372,7 @@ class Sac_a_push {
     var $unix_socket;
     var $socks;
     var $s2u;
-    var $pages_flush;
+    var $pending_pages;
 
     var $list;
     var $in;
@@ -425,7 +425,7 @@ class Sac_a_push {
         $thiz->debug = $debug;
         $thiz->socks = array();
         $thiz->s2u  = array();
-        $thiz->pages_flush = array();
+        $thiz->pending_pages = array();
 
         // create a couple of sockets for control management
         if (($sockpair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM,
@@ -485,9 +485,9 @@ class Sac_a_push {
         unset($this->socks[$id]);
     }
 
-    function pgflush_try_add($enc, &$new_socket, $tout, $header_out, $content)
+    function pendpage_try_addflush($enc, &$new_socket, $tout, $header_out, $content)
     {
-        $pgflush = new PageFlush($new_socket, $enc, $this->curtime, $tout, $header_out, $content);
+        $pgflush = PendingPage::pendingpage_flushing($new_socket, $enc, $this->curtime, $tout, $header_out, $content);
 
         if ($pgflush->try_flush($this->curtime) == FALSE) {
             // Add $pgflush to the pgflush array
@@ -497,7 +497,7 @@ class Sac_a_push {
 
     function pgflush_add($pgflush)
     {
-        array_push($this->pages_flush, $pgflush);
+        array_push($this->pending_pages, $pgflush);
     }
 
     function garbage_manager($force)
@@ -539,7 +539,7 @@ class Sac_a_push {
         
         while ($this->main_loop) {
             $this->curtime = time();
-            printf("IN LOOP: Current opened: %d  pages_flush: %d - ", count($this->socks), count($this->pages_flush));
+            printf("IN LOOP: Current opened: %d  pending_pages: %d - ", count($this->socks), count($this->pending_pages));
             
             /* Prepare the read array */
             /* // when we manage it ... */
@@ -684,9 +684,10 @@ class Sac_a_push {
             $this->garbage_manager(FALSE);
 
             /* manage unfinished pages */
-            foreach ($this->pages_flush as $k => $pgflush) {
+            foreach ($this->pending_pages as $k => $pgflush) {
+                // TODO: try_flush if exists in the class
                 if ($pgflush->try_flush($this->curtime) == TRUE) {
-                    unset($this->pages_flush[$k]);
+                    unset($this->pending_pages[$k]);
                 }
             }
             
