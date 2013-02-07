@@ -2215,17 +2215,24 @@ class Room
           $content = ob_get_contents();
           ob_end_clean();
 
-          $s_a_p->pendpage_try_addflush($enc, $new_socket, 20, $header_out, $content);
+          fprintf(STDERR, "\n\nCONTENT [%s]\n\n", $content);
+          $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
           return TRUE;
 
           break;
       case "index_wr.php":
+          //
+          // Enhance required: in the POST case, after the header you must get content
+          //                   from the socket, waiting if necessary
+          //
+
+          fprintf(STDERR, "\n\nDENTRO QUI\n\n");
           ob_start();
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
           ob_end_clean();
           
-          $s_a_p->pendpage_try_addflush($enc, $new_socket, 20, $header_out, $content);
+          $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
           return TRUE;
 
           break;
@@ -2238,7 +2245,7 @@ class Room
                   
                   $content = User::stream_fini($transp, $s_a_p->rndstr, TRUE);
 
-                  $s_a_p->pendpage_try_addflush($enc, $new_socket, 20, $header_out, $content);
+                  $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
                   return TRUE;
 
                   break;

@@ -1184,7 +1184,7 @@ class Bin5 {
             $content = ob_get_contents();
             ob_end_clean();
         
-            $s_a_p->pendpage_try_addflush($enc, $new_socket, 20, $header_out, $content);
+            $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
             return TRUE;
         
         break;
@@ -1204,7 +1204,7 @@ class Bin5 {
             else {
                 $content = "Bin5 Load data error";
             }
-            $s_a_p->pendpage_try_addflush($enc, $new_socket, 20, $header_out, $content);
+            $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
             return TRUE;
             
             break;
@@ -1217,7 +1217,7 @@ class Bin5 {
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
 
                     $content = Bin5_user::stream_fini($transp_type, $s_a_p->rndstr, TRUE);
-                    $s_a_p->pendpage_try_addflush($enc, $new_socket, 20, $header_out, $content);
+                    $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
 
                     return TRUE;
                     break;

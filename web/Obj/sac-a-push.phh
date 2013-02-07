@@ -489,19 +489,19 @@ class Sac_a_push {
         unset($this->socks[$id]);
     }
 
-    function pendpage_try_addflush($enc, &$new_socket, $tout, $header_out, $content)
+    function pendpage_try_addflush(&$new_socket, $tout, $enc, $header_out, $content)
     {
-        $pgflush = PendingPage::pendingpage_flushing($new_socket, $enc, $this->curtime, $tout, $header_out, $content);
+        $pendpage = PendingPage::pendingpage_flushing($new_socket, $this->curtime, $tout, $enc, $header_out, $content);
 
-        if ($pgflush->try_flush($this->curtime) == FALSE) {
-            // Add $pgflush to the pgflush array
-            $this->pgflush_add($pgflush);
+        if ($pendpage->try_flush($this->curtime) == FALSE) {
+            // Add $pendpage to the pendpage array
+            $this->pendpage_add($pendpage);
         }
     }
 
-    function pgflush_add($pgflush)
+    function pendpage_add($pendpage)
     {
-        array_push($this->pending_pages, $pgflush);
+        array_push($this->pending_pages, $pendpage);
     }
 
     function garbage_manager($force)
@@ -560,7 +560,7 @@ class Sac_a_push {
             }
             $write  = NULL;
             $except = NULL;
-            $num_changed_sockets = @stream_select($read, $write, $except, 0, 500000);
+            $num_changed_sockets = @stream_select($read, $write, $except, 5, 500000);
         
             if ($num_changed_sockets == 0) {
                 printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);

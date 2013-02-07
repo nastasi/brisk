@@ -58,7 +58,7 @@ class PendingPage {
       // if timeout or max content dimension is exceeded move to flushing
   }
 
-  static function pendingpage_flushing($socket, $enc, $curtime, $kalive, $header_out, $body)
+  static function pendingpage_flushing($socket, $curtime, $kalive, $enc, $header_out, $body)
   {
       $thiz = new PendingPage($socket);
 
