@@ -1246,7 +1246,7 @@ class Bin5 {
                 fflush($new_socket);
                 
                 
-                $s_a_p->socks_set($new_socket, $user);
+                $s_a_p->socks_set($new_socket, $user, NULL);
                 $user->rd_socket_set($new_socket);
                 printf(" - qui ci siamo - ");
                 return TRUE;

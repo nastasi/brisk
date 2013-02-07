@@ -2191,7 +2191,7 @@ class Room
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
-      printf("NEW_SOCKET (root): %d\n", intval($new_socket));
+      printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
 
       $enc = get_encoding($header);
       if (isset($header['User-Agent'])) {
@@ -2275,7 +2275,7 @@ class Room
               fflush($new_socket);
               
               
-              $s_a_p->socks_set($new_socket, $user);
+              $s_a_p->socks_set($new_socket, $user, NULL);
               $user->rd_socket_set($new_socket);
               printf(" - qui ci siamo - ");
               return TRUE;

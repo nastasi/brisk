@@ -375,7 +375,8 @@ class Sac_a_push {
     var $file_socket;
     var $unix_socket;
     var $socks;
-    var $s2u;
+    var $s2u;             // user associated with input socket
+    var $s2p;             // pending page associated with input socket
     var $pending_pages;
 
     var $list;
@@ -429,6 +430,7 @@ class Sac_a_push {
         $thiz->debug = $debug;
         $thiz->socks = array();
         $thiz->s2u  = array();
+        $thiz->s2p  = array();
         $thiz->pending_pages = array();
 
         // create a couple of sockets for control management
@@ -473,19 +475,25 @@ class Sac_a_push {
         return ($thiz);
     }
 
-    function socks_set($sock, $user)
+    function socks_set($sock, $user, $pendpage)
     {
         $id = intval($sock);
 
-        $this->s2u[$id]   = $user;
         $this->socks[$id] = $sock;
+        if ($user != NULL)
+            $this->s2u[$id]   = $user;
+        if ($pendpage != NULL)
+            $this->s2p[$id]   = $pendpage;
     }
 
     function socks_unset($sock)
     {
         $id = intval($sock);
 
-        unset($this->s2u[$id]);
+        if (isset($this->s2u[$id]))
+            unset($this->s2u[$id]);
+        if (isset($this->s2p[$id]))
+            unset($this->s2p[$id]);
         unset($this->socks[$id]);
     }
 
@@ -509,14 +517,17 @@ class Sac_a_push {
         $this->app->garbage_manager($force);
 
         foreach ($this->socks as $k => $sock) {
-            if ($this->s2u[intval($sock)]->sess == '') {
-                if ($this->s2u[intval($sock)]->rd_socket_get() != NULL) {
-                    $this->s2u[intval($sock)]->rd_socket_set(NULL);
+            $id = intval($sock);
+            if (isset($this->s2u[$id])) {
+                if ($this->s2u[$id]->sess == '') {
+                    if ($this->s2u[$id]->rd_socket_get() != NULL) {
+                        $this->s2u[$id]->rd_socket_set(NULL);
+                    }
+                    unset($this->socks[$id]);
+                    unset($this->s2u[$id]);
+                    fclose($sock);
+                    printf("CLOSE ON GARBAGE MANAGER\n");
                 }
-                unset($this->socks[intval($sock)]);
-                unset($this->s2u[intval($sock)]);
-                fclose($sock);
-                printf("CLOSE ON GARBAGE MANAGER\n");
             }
         }
     }
@@ -572,6 +583,8 @@ class Sac_a_push {
                 }
                 /* At least at one of the sockets something interesting happened */
                 foreach ($read as $i => $sock) {
+                    $id = intval($sock);
+                    $manage_page = FALSE;
                     /* is_resource check is required because there is the possibility that
                        during new request an old connection is closed */
                     if (!is_resource($sock)) {
@@ -604,6 +617,9 @@ class Sac_a_push {
                                 // $method, $header, $get, $post, $cookie
                                 // $s_a_p (this), $new_socket, substr($path, SITE_PREFIX_LEN),
                                 // $addr
+                            }
+                            else {
+                                $manage_page = TRUE;
                             }
                             print_r($header);
                             printf("GET:\n");
@@ -646,12 +662,14 @@ class Sac_a_push {
                                 return(22);
                             }
                             else {
-                                // $user_a[$s2u[intval($sock)]]->disable();
-                                if ($this->s2u[intval($sock)]->rd_socket_get() != NULL) {
-                                    $this->s2u[intval($sock)]->rd_socket_set(NULL);
+                                unset($this->socks[$id]);
+                                if (isset($this->s2u[$id])) {
+                                    // $user_a[$s2u[$id]]->disable();
+                                    if ($this->s2u[$id]->rd_socket_get() != NULL) {
+                                        $this->s2u[$id]->rd_socket_set(NULL);
+                                    }
+                                    unset($this->s2u[$id]);
                                 }
-                                unset($this->socks[intval($sock)]);
-                                unset($this->s2u[intval($sock)]);
                             }
                             fclose($sock);
                             printf("CLOSE ON READ\n");
@@ -714,8 +732,9 @@ class Sac_a_push {
 
             /* manage open streaming */
             foreach ($this->socks as $k => $sock) {
-                if (isset($this->s2u[intval($sock)])) {
-                    $user = $this->s2u[intval($sock)];
+                $id = intval($sock);
+                if (isset($this->s2u[$id])) {
+                    $user = $this->s2u[$id];
                     $response = $user->rd_cache_get();
                     $do_ping = FALSE;
                     if (($this->curtime - $user->lacc) > (EXPIRE_TIME_RD / 3)) {
@@ -759,11 +778,11 @@ class Sac_a_push {
                     
                     // close socket after a while to prevent client memory consumption
                     if ($user->rd_endtime_is_expired($this->curtime)) {
-                        if ($this->s2u[intval($sock)]->rd_socket_get() != NULL) {
-                            $this->s2u[intval($sock)]->rd_socket_set(NULL);
+                        if ($this->s2u[$id]->rd_socket_get() != NULL) {
+                            $this->s2u[$id]->rd_socket_set(NULL);
                         }
-                        unset($this->socks[intval($sock)]);
-                        unset($this->s2u[intval($sock)]);
+                        unset($this->socks[$id]);
+                        unset($this->s2u[$id]);
                         fclose($sock);
                         printf("CLOSE ON LOOP\n");
                     }
