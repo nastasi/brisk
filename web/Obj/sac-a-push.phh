@@ -93,14 +93,15 @@ function pid_remove()
     }
 }
 
-function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cookie)
+function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$cookie, &$rest)
 {
     $check_post = FALSE;
     $header = array();
     $get = array();
     $post = array();
+    $rest = 0;
     foreach(preg_split("/(\r?\n)/", $stream_info) as $line) {
-        // printf("LINE: [%s]\n", $line);
+        printf("LINE: [%s]\n", $line);
         if ($check_post) {
             if (!isset($header['The-Request'])) {
                 return FALSE;
@@ -147,6 +148,7 @@ function spu_process_info($stream_info, $method, &$header, &$get, &$post, &$cook
                     $post[$b[0]] = urldecode($b[1]);
                 }
                 printf("INFO: postlen: %d\n", $post_len);
+                $rest = (int)($header['Content-Length']) - $post_len;
             }
             break;
         }
@@ -512,6 +514,19 @@ class Sac_a_push {
         array_push($this->pending_pages, $pendpage);
     }
 
+    function pendpage_try_addwait(&$new_socket, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest)
+    {
+        $pendpage = PendingPage::pendingpage_waiting($new_socket, $this->curtime, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest);
+        /*
+        if ($pendpage->try_flush($this->curtime) == FALSE) {
+            // Add $pendpage to the pendpage array
+            */
+        $this->pendpage_add($pendpage);
+        /*
+        }
+        */
+    }
+
     function garbage_manager($force)
     {
         $this->app->garbage_manager($force);
@@ -601,15 +616,24 @@ class Sac_a_push {
                         $get         = array();
                         $post        = array();
                         $cookie      = array();
+                        $rest        = 0;
                         if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
                             printf("NEW_SOCKET: %d\n", intval($new_socket));
                             stream_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
                             printf("RECEIVED HEADER:\n%s", $stream_info);
-                            $path = spu_process_info($stream_info, $method, $header, $get, $post, $cookie);
+                            if (($path = spu_process_info($stream_info, $method, $header, $get, $post, $cookie, $rest))
+                                == FALSE) {
+                                fprintf(STDERR, "TODO: fix wrong header management\n");
+                            }
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             printf("PATH: [%s]\n", $path);
                             printf("M: %s\nHEADER:\n", $method);
-                            if ($method == "POST") {
+                            if ($method == "POST" && $rest > 0) {
+                                fprintf(STDERR, "\nPOSTA DE CHE\n\n");
+                                $this->pendpage_try_addwait($new_socket, 20,
+                                                            $method, $header, $get, $post, $cookie,
+                                                            substr($path, SITE_PREFIX_LEN), $addr, $rest);
+
                                 // ADD PUSH INTO FD ARRAY AS WAITING DATA
                                 // Passing all infos from spu_process_info as arguments:
                                 //
@@ -628,17 +652,9 @@ class Sac_a_push {
                             print_r($post);
                             printf("COOKIE:\n");
                             print_r($cookie);
-                            $header_out = array();
 
-                            // TODO: MOVE DOWN request_mgr to factorize new_sockets and POST closed
-                            $rret = FALSE;
-                            if (!strncmp($path, SITE_PREFIX, SITE_PREFIX_LEN)) {
-                                $rret = $this->app->request_mgr($this, $header, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
-                            }
-                            if ($rret == FALSE) { 
-                                // FIXME: manage 404 !!!
-                                printf("TODO: fix unknown page\n");
-                            }
+
+
                             printf("number of sockets after %d\n", count($this->socks));
                         }
                         else {
@@ -709,17 +725,31 @@ class Sac_a_push {
                             }
                         }
                     }
+
                     // TODO: MOVE HERE request_mgr to factorize new_sockets and POST closed
                     // $rret = $this->app->request_mgr
+                    if ($manage_page == TRUE) {
+                        $header_out = array();
+                        // TODO: MOVE DOWN request_mgr to factorize new_sockets and POST closed
+                        $rret = FALSE;
+                        if (!strncmp($path, SITE_PREFIX, SITE_PREFIX_LEN)) {
+                            $rret = $this->app->request_mgr($this, $header, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
+                        }
+                        fprintf(STDERR, "\n\n DI QUI PASSA [%s]\n\n", $rret);
+                        if ($rret == FALSE) {
+                            // FIXME: manage 404 !!!
+                            printf("TODO: fix unknown page\n");
+                        }
+                    }
                 }
             }
 
             $this->garbage_manager(FALSE);
 
             /* manage unfinished pages */
-            foreach ($this->pending_pages as $k => $pgflush) {
+            foreach ($this->pending_pages as $k => $pendpage) {
                 // TODO: try_flush if exists in the class
-                if ($pgflush->try_flush($this->curtime) == TRUE) {
+                if ($pendpage->try_flush($this->curtime) == TRUE) {
                     unset($this->pending_pages[$k]);
                 }
             }

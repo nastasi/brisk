@@ -27,7 +27,7 @@ $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH', "/tmp/brisk.sock");
 
 define('PENDINGPAGE_WAITDATA', 0);
-define('PENDINGPAGE_FLUSHING', 1);
+define('PENDINGPAGE_FLUSH', 1);
 
 class PendingPage {
 
@@ -38,18 +38,39 @@ class PendingPage {
   var $msg;    // place where store failed fwrite data
   var $msg_sz; // size of content
 
-  
+  var $method; // method used to request the page
+  var $header; // array of header fields
+  var $get;    // array of get args
+  var $post;   // array of post args
+  var $cookie; // array of cookie args
+  var $path;   // requested path
+  var $addr;   // source address
+  var $contsz; // expected content size
+  var $rest;   // number of missing bytest
 
-  function PendingPage($socket)
+  function PendingPage($socket, $curtime, $kalive)
   {
       $this->socket = $socket;
+      $this->kalive = $curtime + $kalive;
   }
 
-  static function pendingpage_waiting($socket, $method, $header, $get, $post, $cookie, $path, $addr)
+  static function pendingpage_waiting($socket, $curtime, $kalive, $method, $header,
+                                      $get, $post, $cookie, $path, $addr, $rest)
   {
-      $thiz = new PendingPage($socket);
+      $thiz = new PendingPage($socket, $curtime, $kalive);
+      $thiz->status = PENDINGPAGE_WAITDATA;
 
-      // TODO
+      $thiz->method = $method;
+      $thiz->header = $header;
+      $thiz->get    = $get;
+      $thiz->post   = $post;
+      $thiz->cookie = $cookie;
+      $thiz->path   = $path;
+      $thiz->addr   = $addr;
+      $thiz->contsz = $header['Content-Length'];
+      $thiz->rest   = $rest;
+
+      return ($thiz);
   }
 
   function try_wait($curtime)
@@ -60,14 +81,14 @@ class PendingPage {
 
   static function pendingpage_flushing($socket, $curtime, $kalive, $enc, $header_out, $body)
   {
-      $thiz = new PendingPage($socket);
+      $thiz = new PendingPage($socket, $curtime, $kalive);
 
-      $thiz->to_flushing($enc, $curtime, $kalive, $header_out, $body);
+      $thiz->to_flushing($enc, $header_out, $body);
 
       return ($thiz);
   }
 
-  function to_flushing($enc, $curtime, $kalive, $header_out, $body)
+  function to_flushing($enc, &$header_out, $body)
   {
       printf("TRY FLUSH CREATE\n");
       $body_out = ZLibStream::compress($enc, $body);
@@ -77,8 +98,7 @@ class PendingPage {
       $hea = headers_render($header_out, $body_out_sz);
       $hea_sz = mb_strlen($hea, "ASCII");
 
-      $this->status = PENDINGPAGE_FLUSHING;
-      $this->kalive = $curtime + $kalive;
+      $this->status = PENDINGPAGE_FLUSH;
       $this->msg    = $hea.$body_out;
       $this->msg_sz = $hea_sz + $body_out_sz;
   }
@@ -86,7 +106,7 @@ class PendingPage {
   /* return TRUE if is removable from it's list */
   function try_flush($curtime)
   {
-      if ($this->status != PENDINGPAGE_FLUSHING)
+      if ($this->status != PENDINGPAGE_FLUSH)
           return (FALSE);
 
       printf("TRY FLUSH IN\n");
