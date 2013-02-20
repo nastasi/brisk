@@ -93,7 +93,23 @@ function pid_remove()
     }
 }
 
-function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$cookie, &$rest)
+function post_manage(&$post, $line)
+{
+    $a = explode('&', $line);
+    for ($i = 0 ; $i < count($a) ; $i++) {
+        $b = explode('=', $a[$i]);
+        if (isset($b[0])) {
+            if (isset($b[1])) {
+                $post[$b[0]] = urldecode($b[1]);
+            }
+            else {
+                $post[$b[0]] = "";
+            }
+        }
+    }
+}
+
+function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$cookie, &$rest, &$cont)
 {
     $check_post = FALSE;
     $header = array();
@@ -137,18 +153,23 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
                 $header['Content-Type'] = $conttype_all[0];
                 // $path_all[1-] other things like charset and so on
 
+                // if (content-type is wrong || content-length isn't set)
+                //     return false
+
                 if ($header['Content-Type'] != 'application/x-www-form-urlencoded' 
                     || !isset($header['Content-Length'])) {
                     return FALSE;
                 }
                 $post_len = mb_strlen($line, "ASCII");
-                $a = explode('&', $line);
-                for ($i = 0 ; $i < count($a) ; $i++) {
-                    $b = explode('=', $a[$i]);
-                    $post[$b[0]] = urldecode($b[1]);
-                }
                 printf("INFO: postlen: %d\n", $post_len);
                 $rest = (int)($header['Content-Length']) - $post_len;
+
+                if ($rest == 0) {
+                    post_manage($post, $line);
+                }
+                else {
+                    $cont = $line;
+                }
             }
             break;
         }
@@ -186,6 +207,9 @@ function headers_render($header, $len)
     }
     if (isset($header['Location'])) {
         $s = sprintf("HTTP/1.1 302 OK\r\n%sLocation: %s\r\n", $cookies, $header['Location']);
+    }
+    else if (isset($header['HTTP-Response'])) {
+        $s = sprintf("HTTP/1.1 %s\r\n", $header['HTTP-Response']);
     }
     else {
         $s = "HTTP/1.1 200 OK\r\n";
@@ -499,6 +523,18 @@ class Sac_a_push {
         unset($this->socks[$id]);
     }
 
+    function pendpage_try_addcont(&$new_socket, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest, $cont)
+    {
+        $pendpage = PendingPage::pendingpage_continue(&$new_socket, $this->curtime, $tout, $method,
+                                                           $header,           $get, $post, $cookie,
+                                                             $path,          $addr, $rest, $cont);
+
+        $pendpage->try_flush($this->curtime);
+        // Add $pendpage to the pendpage array (in any case)
+        fprintf(STDERR, "IMPORTANT: Pendadd: %d\n", $pendpage->status);
+        $this->pendpage_add($pendpage);
+    }
+
     function pendpage_try_addflush(&$new_socket, $tout, $enc, $header_out, $content)
     {
         $pendpage = PendingPage::pendingpage_flushing($new_socket, $this->curtime, $tout, $enc, $header_out, $content);
@@ -512,11 +548,26 @@ class Sac_a_push {
     function pendpage_add($pendpage)
     {
         array_push($this->pending_pages, $pendpage);
+        $this->socks_set($pendpage->socket_get(), NULL, $pendpage);
     }
 
-    function pendpage_try_addwait(&$new_socket, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest)
+    function pendpage_rem($pendpage)
     {
-        $pendpage = PendingPage::pendingpage_waiting($new_socket, $this->curtime, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest);
+        $sock = $pendpage->socket_get();
+        if (($key = array_search($pendpage, $this->pending_pages)) !== FALSE) {
+            unset($this->pending_pages[$key]);
+        }
+        else {
+            fprintf(STDERR, "WARNING: pendpage not found\n");
+        }
+        $this->socks_unset($sock);
+        fprintf(STDERR, "PP_REM: %d\n", intval($sock));
+    }
+
+
+    function pendpage_try_addwait(&$new_socket, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest, $cont)
+    {
+        $pendpage = PendingPage::pendingpage_waiting($new_socket, $this->curtime, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest, $cont);
         /*
         if ($pendpage->try_flush($this->curtime) == FALSE) {
             // Add $pendpage to the pendpage array
@@ -569,7 +620,7 @@ class Sac_a_push {
         
         while ($this->main_loop) {
             $this->curtime = time();
-            printf("IN LOOP: Current opened: %d  pending_pages: %d - ", count($this->socks), count($this->pending_pages));
+            fprintf(STDERR, "IN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
             
             /* Prepare the read array */
             /* // when we manage it ... */
@@ -617,43 +668,34 @@ class Sac_a_push {
                         $post        = array();
                         $cookie      = array();
                         $rest        = 0;
+                        $cont        = "";
                         if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
                             printf("NEW_SOCKET: %d\n", intval($new_socket));
                             stream_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
                             printf("RECEIVED HEADER:\n%s", $stream_info);
-                            if (($path = spu_process_info($stream_info, $method, $header, $get, $post, $cookie, $rest))
+                            if (($path = spu_process_info($stream_info, $method, $header,
+                                                          $get, $post, $cookie, $rest, $cont))
                                 == FALSE) {
                                 fprintf(STDERR, "TODO: fix wrong header management\n");
                             }
                             $addr = stream_socket_get_name($new_socket, TRUE);
                             printf("PATH: [%s]\n", $path);
-                            printf("M: %s\nHEADER:\n", $method);
                             if ($method == "POST" && $rest > 0) {
-                                fprintf(STDERR, "\nPOSTA DE CHE\n\n");
-                                $this->pendpage_try_addwait($new_socket, 20,
-                                                            $method, $header, $get, $post, $cookie,
-                                                            substr($path, SITE_PREFIX_LEN), $addr, $rest);
-
-                                // ADD PUSH INTO FD ARRAY AS WAITING DATA
-                                // Passing all infos from spu_process_info as arguments:
-                                //
-                                // MAYBE: $stream_info,
-                                // $method, $header, $get, $post, $cookie
-                                // $s_a_p (this), $new_socket, substr($path, SITE_PREFIX_LEN),
-                                // $addr
+                                if (isset($header['Expect']) && $header['Expect'] == '100-continue') {
+                                    fprintf(STDERR, "\nPOSTA DE CHE\n\n");
+                                    $this->pendpage_try_addcont($new_socket, 20,
+                                                                $method, $header, $get, $post, $cookie,
+                                                                $path, $addr, $rest, $cont);
+                                }
+                                else {
+                                    $this->pendpage_try_addwait($new_socket, 20,
+                                                                $method, $header, $get, $post, $cookie,
+                                                                $path, $addr, $rest, $cont);
+                                }
                             }
                             else {
                                 $manage_page = TRUE;
                             }
-                            print_r($header);
-                            printf("GET:\n");
-                            print_r($get);
-                            printf("POST:\n");
-                            print_r($post);
-                            printf("COOKIE:\n");
-                            print_r($cookie);
-
-
 
                             printf("number of sockets after %d\n", count($this->socks));
                         }
@@ -662,19 +704,19 @@ class Sac_a_push {
                         }
                     }
                     else {
-                        $buf = fread($sock, 512);
+                        $buf = fread($sock, 4096);
                         // if socket is closed
-                        if ($buf == FALSE || strlen($buf) == 0) {
+                        if ($buf == FALSE || mb_strlen($buf, "ASCII") == 0) {
                             // close socket case
                             if ($buf == FALSE) {
                                 printf("ERROR READING\n");
                             }
                             if ($sock === $this->list) {
-                                printf("Arrivati %d bytes da list\n", strlen($buf));
+                                printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
                                 return(21);
                             }
                             else if ($sock === $this->in || $sock === static::$cnt_slave) {
-                                printf("Arrivati %d bytes da stdin\n", strlen($buf));
+                                printf("Arrivati %d bytes da stdin\n", mb_strlen($buf, "ASCII"));
                                 return(22);
                             }
                             else {
@@ -700,10 +742,10 @@ class Sac_a_push {
                                 print_r($read);
                             }
                             if ($sock === $this->list) {
-                                printf("Arrivati %d bytes da list\n", strlen($buf));
+                                printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
                             }
                             else if ($sock === $this->in || $sock === static::$cnt_slave) {
-                                printf("Arrivati %d bytes da stdin\n", strlen($buf));
+                                printf("Arrivati %d bytes da stdin\n", mb_strlen($buf, "ASCII"));
                                 $line = trim($buf);
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
@@ -721,14 +763,35 @@ class Sac_a_push {
                             }
                             else {
                                 $key = array_search("$sock", $this->socks);
-                                printf("Arrivati %d bytes dalla socket n. %d\n", strlen($buf), $key);
+                                fprintf(STDERR, "Arrivati %d bytes dalla socket n. %d\n", mb_strlen($buf, "ASCII"), $key);
+                                if (isset($this->s2p[$id])) {
+                                    $this->s2p[$id]->rest -= mb_strlen($buf, "ASCII");
+                                    $this->s2p[$id]->cont .= $buf;
+                                    if ($this->s2p[$id]->rest <= 0) {
+                                        $header = $new_socket = $path = $addr = $get = $cookie = 0;
+                                        $post = array();
+
+                                        $this->s2p[$id]->context_get($header, $new_socket, $path, $addr, $get, $post, $cookie);
+                                        $this->pendpage_rem($this->s2p[$id]);
+                                        fprintf(STDERR, "SOCKET RUN: %s\n", $new_socket);
+
+                                        $manage_page = TRUE;
+                                    }
+                                }
                             }
                         }
                     }
 
-                    // TODO: MOVE HERE request_mgr to factorize new_sockets and POST closed
-                    // $rret = $this->app->request_mgr
                     if ($manage_page == TRUE) {
+                        printf("M: %s\nHEADER:\n", $method);
+                        print_r($header);
+                        printf("GET:\n");
+                        print_r($get);
+                        printf("POST:\n");
+                        print_r($post);
+                        printf("COOKIE:\n");
+                        print_r($cookie);
+
                         $header_out = array();
                         // TODO: MOVE DOWN request_mgr to factorize new_sockets and POST closed
                         $rret = FALSE;

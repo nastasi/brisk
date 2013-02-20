@@ -26,11 +26,11 @@ $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH', "/tmp/brisk.sock");
 
-define('PENDINGPAGE_WAITDATA', 0);
-define('PENDINGPAGE_FLUSH', 1);
+define('PENDINGPAGE_CONTINUE', 0);
+define('PENDINGPAGE_WAITDATA', 1);
+define('PENDINGPAGE_FLUSH',    2);
 
 class PendingPage {
-
   var $socket; // socket handler of page stream
   var $status; // status can be 0: waiting for data, 1: flush phase
 
@@ -46,19 +46,64 @@ class PendingPage {
   var $path;   // requested path
   var $addr;   // source address
   var $contsz; // expected content size
-  var $rest;   // number of missing bytest
+  var $rest;   // number of missing bytes
+  var $cont;   // content of unfinished POST
 
   function PendingPage($socket, $curtime, $kalive)
   {
       $this->socket = $socket;
+      fprintf(STDERR, "SOCKET ADD: %s\n", $this->socket);
       $this->kalive = $curtime + $kalive;
   }
 
+  static function pendingpage_continue($socket, $curtime, $kalive, $method,
+                                       $header,     $get,   $post, $cookie,
+                                         $path,    $addr,   $rest, $cont)
+  {
+      $thiz = static::pendingpage_staminal($socket, PENDINGPAGE_CONTINUE, $curtime, $kalive, $method,
+                                           $header, $get, $post, $cookie, $path, $addr, $rest, $cont);
+      $thiz->to_continuing();
+
+      return $thiz;
+  }
+
+  function context_get(&$header, &$socket, &$path, &$addr, &$get, &$post, &$cookie)
+  {
+      $header = $this->header;
+      $socket = $this->socket;
+      $path   = $this->path;
+      $addr   = $this->addr;
+      $get    = $this->get;
+      post_manage($post, $this->cont);
+      $cookie = $this->cookie;
+      fprintf(STDERR, "SOCKET GET: %s\n", $this->socket);
+  }
+
+  function to_continuing()
+  {
+      printf("TRY FLUSH CREATE\n");
+      $header = array();
+      $header['HTTP-Response'] = "100 Continue";
+      $hea = headers_render($header, 0);
+      $hea_sz = mb_strlen($hea, "ASCII");
+
+      $this->status = PENDINGPAGE_CONTINUE;
+      $this->msg    = $hea;
+      $this->msg_sz = $hea_sz;
+  }
+
   static function pendingpage_waiting($socket, $curtime, $kalive, $method, $header,
-                                      $get, $post, $cookie, $path, $addr, $rest)
+                                      $get, $post, $cookie, $path, $addr, $rest, $cont)
+  {
+      return (static::pendingpage_staminal($socket, PENDINGPAGE_WAITDATA, $curtime, $kalive, $method,
+                                           $header, $get, $post, $cookie, $path, $addr, $rest, $cont));
+  }
+
+  static function pendingpage_staminal($socket, $status, $curtime, $kalive, $method, $header,
+                                       $get, $post, $cookie, $path, $addr, $rest, $cont)
   {
       $thiz = new PendingPage($socket, $curtime, $kalive);
-      $thiz->status = PENDINGPAGE_WAITDATA;
+      $thiz->status = $status;
 
       $thiz->method = $method;
       $thiz->header = $header;
@@ -69,6 +114,7 @@ class PendingPage {
       $thiz->addr   = $addr;
       $thiz->contsz = $header['Content-Length'];
       $thiz->rest   = $rest;
+      $thiz->cont   = $cont;
 
       return ($thiz);
   }
@@ -90,7 +136,7 @@ class PendingPage {
 
   function to_flushing($enc, &$header_out, $body)
   {
-      printf("TRY FLUSH CREATE\n");
+      printf("TRY FLUSH CREATE: enc[%s]\n", $enc);
       $body_out = ZLibStream::compress($enc, $body);
       if ($enc != 'plain')
           $header_out['Content-Encoding'] = $enc;
@@ -101,29 +147,37 @@ class PendingPage {
       $this->status = PENDINGPAGE_FLUSH;
       $this->msg    = $hea.$body_out;
       $this->msg_sz = $hea_sz + $body_out_sz;
+      printf("TRY FLUSH CREATE: enc[%s]\n", $enc);
   }
 
   /* return TRUE if is removable from it's list */
   function try_flush($curtime)
   {
-      if ($this->status != PENDINGPAGE_FLUSH)
+      fprintf(STDERR, "IMPORTANT: TRY_FLUSH: start %d\n", $this->status);
+      if ($this->status != PENDINGPAGE_FLUSH &&
+          $this->status != PENDINGPAGE_CONTINUE)
           return (FALSE);
 
-      printf("TRY FLUSH IN\n");
       if ($this->kalive < $curtime) {
           printf("TRY FLUSH CLOSE 1\n");
           fclose($this->socket);
           return TRUE;
       }   
 
-      $wret = @fwrite($this->socket, $this->msg);
+      $wret = fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
       if ($wret == FALSE && $wret !== FALSE) {
-          printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE\n");
+          printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
       }
       if ($wret == $this->msg_sz) {
-          printf("TRY FLUSH CLOSE 2\n");
-          fclose($this->socket);
-          return TRUE;
+          if ($this->status == PENDINGPAGE_CONTINUE) {
+              $this->status = PENDINGPAGE_WAITDATA;
+              return FALSE;
+          }
+          else {
+              printf("TRY FLUSH CLOSE 2\n");
+              fclose($this->socket);
+              return TRUE;
+          }
       }
       $this->msg_sz -= $wret;
       $this->msg    = mb_substr($this->msg, $wret, $this->msg_sz, "ASCII");
@@ -133,6 +187,11 @@ class PendingPage {
       return FALSE;
   }
 
-}
+  function socket_get()
+  {
+      return ($this->socket);
+  }
+
+} // class PendingPage {
 
 ?>
