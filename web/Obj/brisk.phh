@@ -2288,7 +2288,13 @@ class Room
           if (!(BRISK_DEBUG & DBG_ENGI))
               return (FALSE);
           fprintf(STDERR, "TEST.PHP running\n");
-          $content = "<html><body>OK</body></html>";
+          if (isset($post['data'])) {
+              $content = $post['data'];
+          }
+          else {
+              $content = "NO DATA AVAILABLE";
+          }
+          $header_out['Content-Type'] = 'text/plain';
           $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
           return TRUE;
           break;
