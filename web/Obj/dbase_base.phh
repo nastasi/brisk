@@ -36,6 +36,7 @@ class LoginDBItem {
         $this->login = $login;
         $this->pass  = $pass;
         $this->email = $email;
+        fprintf(STDERR, "QQ: %s: %x\n", __FUNCTION__, $type);
         $this->type  = $type;
     }
 
@@ -69,6 +70,7 @@ class LoginDBItem {
 
     function type_get()
     {
+        fprintf(STDERR, "TYPE GET: %d\n", $this->type);
         return $this->type;
     }
 

@@ -266,7 +266,7 @@ function chunked_content($zls, $content)
         $cont_comp = $content;
     }
     $cont_comp_l = mb_strlen($cont_comp, "ASCII");
-    printf("CHUNK: [%s]\n", $content);
+    // printf("CHUNK: [%s]\n", $content);
 
     return (sprintf("%X\r\n", $cont_comp_l).$cont_comp."\r\n");
 }
@@ -637,7 +637,7 @@ class Sac_a_push {
             }
             $write  = NULL;
             $except = NULL;
-            $num_changed_sockets = @stream_select($read, $write, $except, 5, 500000);
+            $num_changed_sockets = @stream_select($read, $write, $except, 0, 500000);
         
             if ($num_changed_sockets == 0) {
                 printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
@@ -855,7 +855,7 @@ class Sac_a_push {
                     
                     if ($response != "") {
                         // echo "SPIA: [".substr($response, 0, 60)."...]\n";
-                        echo "SPIA: [".$response."]\n";
+                        // echo "SPIA: [".$response."]\n";
                         $response_l = mb_strlen($response, "ASCII");
                         $wret = @fwrite($sock, $response);
                         if ($wret < $response_l) {

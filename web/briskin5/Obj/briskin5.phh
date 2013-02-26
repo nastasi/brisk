@@ -503,7 +503,7 @@ class Bin5_user extends User {
        } 
     */
     
-    function spawn($from, &$bri, $table, $table_pos, $get, $post, $cookie)
+    static function spawn($from, &$bri, $table, $table_pos, $get, $post, $cookie)
     {
         if (($thiz = new Bin5_user()) == FALSE)
             return (FALSE);

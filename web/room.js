@@ -725,9 +725,8 @@ function prefs_apply(prefs_new, is_update, is_volat)
 
     if (typeof(g_prefs) == 'undefined')
         return false;
-
     /* listen management */
-    if (g_prefs.listen != prefs_new.listen) {
+    if (g_prefs.listen != prefs_new.listen || is_update) {
         for (i = 0 ; i < prefs_list_idx.length ; i++) {
             set_checked_value($('ra_listen_'+prefs_list_id[i]), prefs_new.listen);
             if (prefs_new.listen == prefs_list_idx[i]) {
@@ -791,12 +790,15 @@ function prefs_load(content, is_update, is_volat)
 
 function prefs_save()
 {
+    var ret;
+
     if (typeof(g_prefs) == 'undefined')
         return false;
 
-    console.log(server_request('mesg', 'prefs', '__POST__', 'prefs', JSON.stringify(g_prefs)));
-    // close the win:
-    // $('preferences').style.visibility = 'hidden';
+    ret = server_request('mesg', 'prefs','__POST__', 'prefs', JSON.stringify(g_prefs));
+
+    if (ret == 1)
+        $('preferences').style.visibility = 'hidden';
 }
 
 function prefs_update()
@@ -817,9 +819,7 @@ function prefs_update()
             break;
     }
 
-    /* TODO SAVE TEMPORARY */
     /* from form to struct */
-    console.log("Prefs_update");
     prefs_apply(prefs_new, true, true);
 }
 

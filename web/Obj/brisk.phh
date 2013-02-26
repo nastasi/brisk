@@ -699,9 +699,60 @@ class Delay_Manager
 class Client_prefs {
     var $listen;
 
-    function Client_prefs($listen)
+    function Client_prefs()
     {
-        $this->listen = $listen;
+    }
+
+    static function from_user($user)
+    {
+        $thiz = new Client_prefs();
+        $thiz->user_load($user);
+
+        return ($thiz);
+    }
+
+    static function from_json($json)
+    {
+        $thiz = new Client_prefs();
+        if ($thiz->json_load($json) == FALSE) {
+            return (FALSE);
+        }
+
+        return ($thiz);
+    }
+
+    function user_load($user)
+    {
+        fprintf(STDERR, "QQ %s: %x\n", __FUNCTION__, $user->flags);
+        $this->listen = ($user->flags & USER_FLAG_MAP_AUTH) >> 2;
+
+        fprintf(STDERR, "QQ %s: LISTEN: %d\n", __FUNCTION__, $this->listen);
+    }
+
+    function json_load($json_s)
+    {
+        if (gettype($json_s) == "string") {
+            if (($json = json_decode($json_s)) == FALSE)
+                return FALSE;
+        }
+        else {
+            $json = $json_s;
+        }
+        $this->listen = $json->listen;
+
+        return TRUE;
+    }
+
+    function store($user, $is_save)
+    {
+        // save into DB
+        fprintf(STDERR, "QQ %s::%s PRE: %x\n", __CLASS__, __FUNCTION__,
+                $user->flags & (~USER_FLAG_S_ALL & ~USER_FLAG_AUTH));
+        $user->flags_set(($this->listen << 2), USER_FLAG_MAP_AUTH);
+        fprintf(STDERR, "QQ %s::%s %x\n", __CLASS__, __FUNCTION__,
+                $user->flags);
+        if ($is_save)
+            $user->store_set();
     }
 }
 
@@ -927,8 +978,7 @@ class Room
     
     $ret = sprintf('gst.st = %d; ',  $user_step);
 
-    // for test: $prefs = new Client_prefs(USER_FLAG_LISTAUTH >> 2);
-    $prefs = new Client_prefs(($user->flags & USER_FLAG_MAP_AUTH) >> 2);
+    $prefs = Client_prefs::from_user($user);
     $ret .= sprintf('prefs_load(\'%s\', false, false);', json_encode($prefs));
 
     if(false) {
@@ -1829,27 +1879,33 @@ class Room
       $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
       $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
       log_auth("XXX", sprintf("FLAGS: [%x]", $this->user[$idx]->flags));
-
       
       if ($authenticate != FALSE) {
-        $this->user[$idx]->code = $authenticate->code_get();
-        $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
+          $this->user[$idx]->code = $authenticate->code_get();
+          if (0 == 1) {
+              // all this part is included in the db server
+              $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
 
-        if (isset($cookie['CO_list'])) {
-          if (strcmp($cookie['CO_list'], "auth") == 0) {
-            $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-            $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
-          }
-          if (strcmp($cookie['CO_list'], "isolation") == 0) {
-            $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-            $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
+              if (isset($cookie['CO_list'])) {
+                  fprintf(STDERR, "QQ: %s CO_list: [%s]\n", __FUNCTION__, $cookie['CO_list']);
+                  if (strcmp($cookie['CO_list'], "auth") == 0) {
+                      $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+                      $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
+                  }
+                  if (strcmp($cookie['CO_list'], "isolation") == 0) {
+                      $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+                      $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
+                  }
+                  else {
+                      $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+                  }
+              }
           }
           else {
-            $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+              fprintf(STDERR, "QQ: CO_list not set flags: %x\n", __FUNCTION__, $this->user[$idx]->flags);
           }
-        }
       }
-      
+      fprintf(STDERR, "QQ %s: flag %x\n", __FUNCTION__, $this->user[$idx]->flags);
       if ($ghost > -1) {
         log_main("ghost: rename!");
         $ghost_user = $this->user[$ghost];
@@ -2216,7 +2272,7 @@ class Room
           $content = ob_get_contents();
           ob_end_clean();
 
-          fprintf(STDERR, "\n\nCONTENT [%s]\n\n", $content);
+          // fprintf(STDERR, "\n\nCONTENT [%s]\n\n", $content);
           $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
           return TRUE;
 

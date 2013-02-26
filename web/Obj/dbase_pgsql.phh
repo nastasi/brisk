@@ -157,11 +157,11 @@ class BriskDB
         return ($user_obj);
     }
 
-    function user_update_login_time($id, $lintm)
+    function user_update_login_time($code, $lintm)
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (lintm) = (date 'epoch' + %d * INTERVAL '1 second') WHERE code = %d;", $G_dbpfx, $lintm, $id);
+        $user_sql = sprintf("UPDATE %susers SET (lintm) = (date 'epoch' + %d * INTERVAL '1 second') WHERE code = %d;", $G_dbpfx, $lintm, $code);
 
         // $user_pg = $this->query($user_sql);
         // $row_n = pg_affected_rows($user_pg);
@@ -169,6 +169,20 @@ class BriskDB
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
+
+        return TRUE;
+    }
+
+    function user_update_flags($code, $flags)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("UPDATE %susers SET (type) = (%d) WHERE code = %d;", $G_dbpfx, $flags, $code);
+        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }

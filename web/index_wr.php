@@ -110,13 +110,13 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
     }
 
     $is_spawn = FALSE;
-    
+
     log_wr(0, 'index_wr.php: COMM: '.xcapemesg($mesg));
     log_wr('COMM: '.xcapemesg($mesg));
-    
+
     $curtime = time();
     $dt = date("H:i ", $curtime);
-    
+
     if (($user = $room->get_user($sess, &$idx)) == FALSE) {
         $argz = explode('|', xcapemesg($mesg));
 
@@ -184,9 +184,6 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'whysupport') {
             echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
         }
-        else if ($argz[0] == 'prefs') {
-            fprintf(STDERR, "\n\n PREFS \n\n");
-        }
         else { 
             log_wr("Get User Error");
             echo "Get User Error:" + $argz[0];
@@ -194,8 +191,6 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         }
         return TRUE;
     }
-
-
 
     $argz = explode('|', xcapemesg($mesg));
 
@@ -206,6 +201,24 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
     if ($argz[0] == 'ping') {
         log_wr("PING RECEIVED");
+    }
+    else if ($argz[0] == 'prefs') {
+        fprintf(STDERR, "\n\n PREFS pre\n\n");
+        if (!isset($post['prefs'])) {
+            return FALSE;
+        }
+
+        $prefs = Client_prefs::from_json($post['prefs']);
+        fprintf(STDERR, "\n\n PREFS [%s]\n\n", print_r($prefs, TRUE));
+
+        $prefs->store($user, TRUE);
+
+        $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+        $user->comm[$user->step % COMM_N] .=  sprintf('prefs_load(\'%s\', true, %s);', json_encode($prefs),
+                                                      'false');
+        $user->step_inc();
+        echo "1";
+        return TRUE;
     }
     else if ($argz[0] == 'shutdown') {
         log_auth($user->sess, "Shutdown session.");

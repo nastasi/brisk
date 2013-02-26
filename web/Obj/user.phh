@@ -135,7 +135,7 @@ class User {
   function User() {
   }
 
-  function create(&$room, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+  static function create(&$room, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     if (($thiz = new User()) == FALSE)
       return (FALSE);
 
@@ -237,7 +237,7 @@ class User {
   }
 
 
-  function myclone($from)
+  static function myclone($from)
   {
     if (($thiz = new User()) == FALSE)
       return (FALSE);
@@ -247,7 +247,7 @@ class User {
     return ($thiz);
   }
   
-  function spawn($from, $table, $table_pos)
+  static function spawn($from, $table, $table_pos)
   {
     if (($thiz = new User()) == FALSE)
       return (FALSE);
@@ -297,6 +297,20 @@ class User {
     $thiz->shm_sz      = $from->shm_sz;
 
     return ($thiz);
+  }
+
+  function flags_set($flags, $mask)
+  {
+      $flags_old = $this->flags & (~$mask);
+      $this->flags = ($flags_old | ($flags & $mask));
+  }
+
+  function store_set()
+  {
+      if (($bdb = BriskDB::create()) == FALSE) {
+          return FALSE;
+      }
+      return ($bdb->user_update_flags($this->code, ($this->flags & (USER_FLAG_TY_ALL | USER_FLAG_MAP_AUTH))));
   }
 
   function rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from)

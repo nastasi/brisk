@@ -1225,13 +1225,10 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
 
 
-<hr style="color: red;">
-
-
 
 <div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
 <br><br>
-<input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php echo $mlang_room['itm_ringauc'][$G_lang] ?>
+                                                          <!-- <input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php /* echo $mlang_room['itm_ringauc'][$G_lang]; */ ?> -->
 </div>
 
 
