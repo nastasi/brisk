@@ -29,21 +29,25 @@ class LoginDBItem {
     var $pass;
     var $email;
     var $type;
+    var $last_dona;
+    var $supp_comp;
 
-    function LoginDBItem($code, $login, $pass, $email, $type)
+    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp)
     {
-        $this->code  = $code;
-        $this->login = $login;
-        $this->pass  = $pass;
-        $this->email = $email;
-        fprintf(STDERR, "QQ: %s: %x\n", __FUNCTION__, $type);
-        $this->type  = $type;
+        $this->code      = $code;
+        $this->login     = $login;
+        $this->pass      = $pass;
+        $this->email     = $email;
+        $this->type      = $type;
+        $this->last_dona = $last_dona;
+        $this->supp_comp = $supp_comp;
     }
 
     static function LoginDBItemFromRecord($rec)
     {
         $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
-                                 $rec->email, $rec->type);
+                               $rec->email, $rec->type, $rec->last_dona,
+                               $rec->supp_comp);
 
         return ($ret);
     }
@@ -70,8 +74,17 @@ class LoginDBItem {
 
     function type_get()
     {
-        fprintf(STDERR, "TYPE GET: %d\n", $this->type);
         return $this->type;
+    }
+
+    function last_dona_get()
+    {
+        return $this->last_dona;
+    }
+
+    function supp_comp_get()
+    {
+        return $this->supp_comp;
     }
 
 }

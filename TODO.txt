@@ -3,6 +3,12 @@
 
   FEATURES |
  ----------+
+
+   - improved S
+     . db update (add components, maybe single string)
+     . filter in index.php
+     . filter in index_wr.php
+
    - prefs API:
      . prefs_assign(content): assign json content as output var
      . prefs_apply(prefs_new): apply new content to g_prefs and system

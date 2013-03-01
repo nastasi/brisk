@@ -49,6 +49,18 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ',
 
 function $(id) { return document.getElementById(id); }
 
+function dec2hex(d, padding)
+{
+    var hex = Number(d).toString(16);
+    padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+    while (hex.length < padding) {
+        hex = "0" + hex;
+    }
+
+    return hex;
+}
+
 function getStyle(x,IEstyleProp, MozStyleProp) 
 {
     if (x.currentStyle) {

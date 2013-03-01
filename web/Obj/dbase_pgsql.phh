@@ -173,11 +173,12 @@ class BriskDB
         return TRUE;
     }
 
-    function user_update_flags($code, $flags)
+    function user_prefs_update($code, $flags, $supp_comp)
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (type) = (%d) WHERE code = %d;", $G_dbpfx, $flags, $code);
+        $user_sql = sprintf("UPDATE %susers SET (type, supp_comp) = (%d, '%s') WHERE code = %d;",
+                            $G_dbpfx, $flags, $supp_comp, $code);
         fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

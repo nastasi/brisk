@@ -848,6 +848,7 @@ supported by:<br>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script> 
+<script type="text/javascript" src="prefs.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
@@ -882,7 +883,7 @@ supported by:<br>
      // alert(window.onbeforeunload);
      g_brow = get_browser_agent();
 
-     g_prefs = new client_prefs();
+     g_prefs = new client_prefs(null);
 
      spo_slide  = new sideslide($('spon_caro'), 80, 20);
      sup_slide  = new sideslide($('supp_caro'), 80, 20);
@@ -988,6 +989,7 @@ echo "$body"; ?>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script>
+<script type="text/javascript" src="prefs.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
@@ -1025,7 +1027,7 @@ echo "$body"; ?>
    window.onload = function() {
      g_brow = get_browser_agent();
 
-     g_prefs = new client_prefs();
+     g_prefs = new client_prefs(null);
 
      spo_slide  = new sideslide($('spon_caro'), 80, 20);
      sup_slide  = new sideslide($('supp_caro'), 80, 20);
@@ -1204,26 +1206,68 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <!--#
     #  LISTEN
     #-->
+<div style="float: left; padding: 8px;">
 <table style="border: 1px solid gray;"><tr><th style="background-color: #cccccc;">
 <?php echo $mlang_room['itm_list'][$G_lang];?>
 </th></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="0" onclick="prefs_update();" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_all" type="radio" name="listen" value="0" onclick="prefs_update('listen');" title="'
 <?php echo $mlang_room['listall_desc'][$G_lang];?>
 '"><span id="list_all">
 <?php echo $mlang_room['tit_listall'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="1" onclick="prefs_update();" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="1" onclick="prefs_update('listen');" title="'
 <?php echo $mlang_room['listaut_desc'][$G_lang];?>
 '"><span id="list_auth">
 <?php echo $mlang_room['tit_listaut'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="prefs_update();" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="prefs_update('listen');" title="'
 <?php echo $mlang_room['listisol_desc'][$G_lang];?>
 '"><span id="list_isol">
 <?php echo $mlang_room['tit_listisol'][$G_lang];?>
 </span></td></tr>
 </table>
+</div>
 
+<!--#
+    #  SUPPORTER ONLY
+    #-->
+<div style="float: left; padding: 8px;">
+<table style="border: 1px solid gray;"><tr><th colspan="3" style="background-color: #cccccc;">
+xx<?php echo $mlang_room['itm_list'][$G_lang];?>
+</th></tr>
+<tr>
+<td><input style="width: 3em;" id="s_fg_r" type="text" maxlength="3" size="3" name="s_fg_r"
+ onchange="prefs_update('supp');" value="255"
+ title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
+   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+<td><input style="width: 3em;" id="s_fg_g" type="text" maxlength="3" size="3" name="s_fg_g"
+ onchange="prefs_update('supp');" value="255"
+ title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
+   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+<td><input style="width: 3em;" id="s_fg_b" type="text" maxlength="3" size="3" name="s_fg_b"
+ onchange="prefs_update('supp');" value="255"
+ title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
+   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+</tr>
+<tr>
+<td><input style="width: 3em;" id="s_bg_r" type="text" maxlength="3" size="3" name="s_bg_r"
+ onchange="prefs_update('supp');" value="255"
+ title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
+   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+<td><input style="width: 3em;" id="s_bg_g" type="text" maxlength="3" size="3" name="s_bg_g"
+ onchange="prefs_update('supp');" value="255"
+ title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
+   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+<td><input style="width: 3em;" id="s_bg_b" type="text" maxlength="3" size="3" name="s_bg_b"
+ onchange="prefs_update('supp');" value="255"
+ title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
+   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+</tr>
+<tr><td colspan="3">
+<img id="s_img" class="nobo" src="img/noimg.png">
+</td></tr>
+</table>
+</div>
 
 
 <div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
