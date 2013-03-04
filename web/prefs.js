@@ -1,6 +1,10 @@
-var l_list_all = 0x00;
+var l_list_all  = 0x00;
 var l_list_auth = 0x01;
 var l_list_isol = 0x02;
+var prefs_list_idx  = new Array( 0x00, 0x01, 0x02 );
+var prefs_list_id   = new Array( "all", "auth", "isol" );
+var comps_name = new Array('s_fg_r', 's_fg_g', 's_fg_b', 's_bg_r',  's_bg_g',  's_bg_b');
+
 
 function client_prefs(old)
 {
@@ -25,9 +29,6 @@ function prefs_assign(content)
 
     return (prefs_new);
 }
-
-var prefs_list_idx  = new Array( 0x00, 0x01, 0x02 );
-var prefs_list_id   = new Array( "all", "auth", "isol" );
 
 function prefs_apply(prefs_new, is_update, is_volat)
 {
@@ -56,6 +57,10 @@ function prefs_apply(prefs_new, is_update, is_volat)
 
     // supporter component management
     if (g_prefs.supp_comp != prefs_new.supp_comp || is_update) {
+
+        for (i = 0 ; i < 6 ; i++) {
+            $(comps_name[i]).value = parseInt(prefs_new.supp_comp.substr(i*2,2), 16);
+        }
         $('s_img').src = 'suprend.php?comp='+prefs_new.supp_comp;
     }
 
@@ -118,7 +123,6 @@ function prefs_update(field)
     var i;
     var prefs_new;
     var relo = false;
-
     // console.log("prefs_update("+field+")");
 
     if (typeof(g_prefs) == 'undefined')
@@ -135,7 +139,25 @@ function prefs_update(field)
         }
     }
     else if (field == 'supp') {
-        prefs_new.supp_comp = "" + dec2hex($('s_fg_r').value, 2) + dec2hex($('s_fg_g').value, 2) + dec2hex($('s_fg_b').value, 2) + dec2hex($('s_bg_r').value, 2) + dec2hex($('s_bg_g').value, 2) + dec2hex($('s_bg_b').value, 2);
+        for (i = 0 ; i < 6 ; i++) {
+            if (parseInt($(comps_name[i]).value) < 0 || parseInt($(comps_name[i]).value) > 255 ||
+                isNaN(parseInt($(comps_name[i]).value))) {
+                break;
+            }
+        }
+
+        if (i == 6) {
+            prefs_new.supp_comp = "";
+            for (i = 0 ; i < 6 ; i++) {
+                prefs_new.supp_comp += dec2hex(parseInt($(comps_name[i]).value), 2);
+            }
+        }
+
+        // console.log("prefs_update:: i break "+i+" ["+prefs_new.supp_comp+"]");
+
+        for (i = 0 ; i < 6 ; i++) {
+            $(comps_name[i]).value = parseInt(prefs_new.supp_comp.substr(i*2, 2), 16);
+        }
     }
 
     /* from form to struct */

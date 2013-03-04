@@ -118,7 +118,21 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                      'listaut_desc' => array('it' => 'leggi soltanto i messaggi degli utenti con password',
                                              'en' => 'listen messages only from authenticated users'),
                      'listisol_desc'=> array('it' => 'visualizza Brisk come se fosse solo per utenti con password',
-                                             'en' => 'show Brisk like an authenticated user only site'),
+                                            'en' => 'show Brisk like an authenticated user only site'),
+                     'suppcomp_tit' =>  array('it' => 'personalizza la tua S',
+                                            'en' => 'customize your S'),
+                     'suppcomp_r' =>  array('it' => 'rosso',
+                                            'en' => 'red'),
+                     'suppcomp_g' =>  array('it' => 'verde',
+                                            'en' => 'green'),
+                     'suppcomp_b' =>  array('it' => 'blu',
+                                            'en' => 'blue'),
+                     'suppcomp_fg' =>  array('it' => 'colore',
+                                            'en' => 'color'),
+                     'suppcomp_bg' =>  array('it' => 'sfondo',
+                                            'en' => 'background'),
+                     'suppcomp_range' =>  array('it' => '(0-255)',
+                                            'en' => '(0-255)'),
                      'tit_splash'   => array('it' => 'splash',
                                              'en' => 'splash'),
                      'splash_desc'  => array('it' => 'attiva la finestra di splash',
@@ -1228,48 +1242,68 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
 </div>
 
+<?php
+if ($user->rec != FALSE && $user->rec->last_dona > 1356994800) {
+?>
 <!--#
     #  SUPPORTER ONLY
     #-->
 <div style="float: left; padding: 8px;">
-<table style="border: 1px solid gray;"><tr><th colspan="3" style="background-color: #cccccc;">
-xx<?php echo $mlang_room['itm_list'][$G_lang];?>
+<table style="border: 1px solid gray;"><tr><th colspan="4" style="background-color: #cccccc;">
+<?php echo $mlang_room['suppcomp_tit'][$G_lang];?>
 </th></tr>
 <tr>
-<td><input style="width: 3em;" id="s_fg_r" type="text" maxlength="3" size="3" name="s_fg_r"
+<th>
+<?php echo $mlang_room['suppcomp_fg'][$G_lang];?>
+</th><td><input style="width: 3em;" id="s_fg_r" type="text" maxlength="3" size="3" name="s_fg_r"
  onchange="prefs_update('supp');" value="255"
- title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
-   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+ title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
+   <span id="list_all"><?php echo $mlang_room['suppcomp_r'][$G_lang];?></span></td>
 <td><input style="width: 3em;" id="s_fg_g" type="text" maxlength="3" size="3" name="s_fg_g"
  onchange="prefs_update('supp');" value="255"
- title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
-   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+ title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
+   <span id="list_all"><?php echo $mlang_room['suppcomp_g'][$G_lang];?></span></td>
 <td><input style="width: 3em;" id="s_fg_b" type="text" maxlength="3" size="3" name="s_fg_b"
  onchange="prefs_update('supp');" value="255"
- title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
-   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+ title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
+   <span id="list_all"><?php echo $mlang_room['suppcomp_b'][$G_lang];?></span></td>
 </tr>
 <tr>
+<th>
+<?php echo $mlang_room['suppcomp_bg'][$G_lang];?>
+</th>
 <td><input style="width: 3em;" id="s_bg_r" type="text" maxlength="3" size="3" name="s_bg_r"
  onchange="prefs_update('supp');" value="255"
- title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
-   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+ title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
+   <span id="list_all"><?php echo $mlang_room['suppcomp_r'][$G_lang];?></span></td>
 <td><input style="width: 3em;" id="s_bg_g" type="text" maxlength="3" size="3" name="s_bg_g"
  onchange="prefs_update('supp');" value="255"
- title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
-   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+ title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
+   <span id="list_all"><?php echo $mlang_room['suppcomp_g'][$G_lang];?></span></td>
 <td><input style="width: 3em;" id="s_bg_b" type="text" maxlength="3" size="3" name="s_bg_b"
  onchange="prefs_update('supp');" value="255"
- title="'<?php echo $mlang_room['listall_desc'][$G_lang];?>'">
-   <span id="list_all">xx<?php echo $mlang_room['tit_listall'][$G_lang];?></span></td>
+ title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
+   <span id="list_all"><?php echo $mlang_room['suppcomp_b'][$G_lang];?></span></td>
 </tr>
-<tr><td colspan="3">
+<tr><td colspan="4">
 <img id="s_img" class="nobo" src="img/noimg.png">
 </td></tr>
 </table>
 </div>
-
-
+<?php
+}
+else {
+?>
+<input id="s_fg_r" type="hidden" name="s_fg_r">
+<input id="s_fg_g" type="hidden" name="s_fg_g">
+<input id="s_fg_b" type="hidden" name="s_fg_b">
+<input id="s_bg_r" type="hidden" name="s_bg_r">
+<input id="s_bg_g" type="hidden" name="s_bg_g">
+<input id="s_bg_b" type="hidden" name="s_bg_b">
+<input id="s_img"  type="hidden" name="s_bg_b">
+<?php
+}
+?>
 <div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
 <br><br>
                                                           <!-- <input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php /* echo $mlang_room['itm_ringauc'][$G_lang]; */ ?> -->

@@ -847,7 +847,7 @@ function user_dec_and_state(el)
     var val_el;
 
     content = user_decorator(el);
-    content += state_add(el[0]);
+    content += state_add(el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
     
     return (content);
 }

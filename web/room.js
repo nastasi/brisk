@@ -29,7 +29,7 @@
 */
 
 
-function state_add(flags)
+function state_add(flags, comp)
 {
     var content = "", supercont = "";
     var st, superst, name = "", supername = "", supersfx = "";
@@ -113,14 +113,19 @@ function state_add(flags)
 
         switch (superst) {
         case 0x20000:
-            supername = "superuser"+supersfx+".png";
+            if (comp != null) {
+                supername = "suprend.php?comp="+comp+"&sfx="+supersfx;
+            }
+            else {
+                supername = "img/superuser"+supersfx+".png";
+            }
             supertit = (g_lang == 'en' ? "Brisk Supporter" : "Brisk Supporter");
             break;
         }
     }
 
     if (supername != "") {
-        content += '&nbsp;<img title="'+supertit+'" class="inline" src="img/'+supername+'">';
+        content += '&nbsp;<img title="'+supertit+'" class="inline" src="'+supername+'">';
     }
     
     if (name != "") {
