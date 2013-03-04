@@ -1,9 +1,9 @@
 var l_list_all  = 0x00;
 var l_list_auth = 0x01;
 var l_list_isol = 0x02;
-var prefs_list_idx  = new Array( 0x00, 0x01, 0x02 );
-var prefs_list_id   = new Array( "all", "auth", "isol" );
-var comps_name = new Array('s_fg_r', 's_fg_g', 's_fg_b', 's_bg_r',  's_bg_g',  's_bg_b');
+var l_prefs_list_idx = new Array( 0x00, 0x01, 0x02 );
+var l_prefs_list_id  = new Array( "all", "auth", "isol" );
+var l_comps_name     = new Array('s_fg_r', 's_fg_g', 's_fg_b', 's_bg_r',  's_bg_g',  's_bg_b');
 
 
 function client_prefs(old)
@@ -39,16 +39,16 @@ function prefs_apply(prefs_new, is_update, is_volat)
         return false;
     /* listen management */
     if (g_prefs.listen != prefs_new.listen || is_update) {
-        for (i = 0 ; i < prefs_list_idx.length ; i++) {
-            set_checked_value($('ra_listen_'+prefs_list_id[i]), prefs_new.listen);
-            if (prefs_new.listen == prefs_list_idx[i]) {
+        for (i = 0 ; i < l_prefs_list_idx.length ; i++) {
+            set_checked_value($('ra_listen_'+l_prefs_list_id[i]), prefs_new.listen);
+            if (prefs_new.listen == l_prefs_list_idx[i]) {
                 if (!is_volat)
-                    $('list_'+prefs_list_id[i]).style.color = 'red';
+                    $('list_'+l_prefs_list_id[i]).style.color = 'red';
                 $('list_info').innerHTML = mlang_commons['tit_list'][i][g_lang];
             }
             else {
                 if (!is_volat)
-                    $('list_'+prefs_list_id[i]).style.color = 'black';
+                    $('list_'+l_prefs_list_id[i]).style.color = 'black';
             }
         }
 
@@ -59,7 +59,7 @@ function prefs_apply(prefs_new, is_update, is_volat)
     if (g_prefs.supp_comp != prefs_new.supp_comp || is_update) {
 
         for (i = 0 ; i < 6 ; i++) {
-            $(comps_name[i]).value = parseInt(prefs_new.supp_comp.substr(i*2,2), 16);
+            $(l_comps_name[i]).value = parseInt(prefs_new.supp_comp.substr(i*2,2), 16);
         }
         $('s_img').src = 'suprend.php?comp='+prefs_new.supp_comp;
     }
@@ -132,16 +132,16 @@ function prefs_update(field)
 
     if (field == 'listen') {
         /* listen management */
-        for (i = 0 ; i < prefs_list_idx.length ; i++) {
-            prefs_new.listen = get_checked_value($('ra_listen_'+prefs_list_id[i]));
+        for (i = 0 ; i < l_prefs_list_idx.length ; i++) {
+            prefs_new.listen = get_checked_value($('ra_listen_'+l_prefs_list_id[i]));
             if (prefs_new.listen != '')
                 break;
         }
     }
     else if (field == 'supp') {
         for (i = 0 ; i < 6 ; i++) {
-            if (parseInt($(comps_name[i]).value) < 0 || parseInt($(comps_name[i]).value) > 255 ||
-                isNaN(parseInt($(comps_name[i]).value))) {
+            if (parseInt($(l_comps_name[i]).value) < 0 || parseInt($(l_comps_name[i]).value) > 255 ||
+                isNaN(parseInt($(l_comps_name[i]).value))) {
                 break;
             }
         }
@@ -149,14 +149,14 @@ function prefs_update(field)
         if (i == 6) {
             prefs_new.supp_comp = "";
             for (i = 0 ; i < 6 ; i++) {
-                prefs_new.supp_comp += dec2hex(parseInt($(comps_name[i]).value), 2);
+                prefs_new.supp_comp += dec2hex(parseInt($(l_comps_name[i]).value), 2);
             }
         }
 
         // console.log("prefs_update:: i break "+i+" ["+prefs_new.supp_comp+"]");
 
         for (i = 0 ; i < 6 ; i++) {
-            $(comps_name[i]).value = parseInt(prefs_new.supp_comp.substr(i*2, 2), 16);
+            $(l_comps_name[i]).value = parseInt(prefs_new.supp_comp.substr(i*2, 2), 16);
         }
     }
 
