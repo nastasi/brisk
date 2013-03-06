@@ -112,10 +112,17 @@ function prefs_save()
     if (typeof(g_prefs) == 'undefined')
         return false;
 
-    ret = server_request('mesg', 'prefs','__POST__', 'prefs', JSON.stringify(g_prefs));
+    ret = server_request('mesg', 'prefs|save','__POST__', 'prefs', JSON.stringify(g_prefs));
 
     if (ret == 1)
         $('preferences').style.visibility = 'hidden';
+}
+
+function prefs_reset()
+{
+    var ret;
+
+    ret = server_request('mesg', 'prefs|reset');
 }
 
 function prefs_update(field)

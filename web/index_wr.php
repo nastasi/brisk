@@ -203,32 +203,34 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         log_wr("PING RECEIVED");
     }
     else if ($argz[0] == 'prefs') {
-        fprintf(STDERR, "\n\n PREFS pre\n\n");
-        if (!isset($post['prefs'])) {
-            return FALSE;
-        }
+        if ($argz[1] == 'save') {
+            if (!isset($post['prefs'])) {
+                return FALSE;
+            }
 
-        if (($prefs = Client_prefs::from_json($post['prefs'])) == FALSE) {
+            if (($prefs = Client_prefs::from_json($post['prefs'])) == FALSE) {
+                $prefs = Client_prefs::from_user($user);
+            }
+            $prefs->store($user, TRUE);
+        }
+        else { // reset case as default
             $prefs = Client_prefs::from_user($user);
         }
-        fprintf(STDERR, "\n\n PREFS [%s]\n\n", print_r($prefs, TRUE));
-
-        $prefs->store($user, TRUE);
-
         $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
         $user->comm[$user->step % COMM_N] .=  sprintf('prefs_load(\'%s\', true, %s);', json_encode($prefs),
                                                       'false');
         $user->step_inc();
 
-        if ($user->stat == 'room' && $user->subst == 'standup') {
-            $room->standup_update($user);
+        if ($argz[1] == 'save') {
+            if ($user->stat == 'room' && $user->subst == 'standup') {
+                $room->standup_update($user);
+            }
+            else if ($user->stat == 'room' && $user->subst == 'sitdown') {
+                log_main("chatt_send pre table update");
+                $room->table_update($user);
+                log_main("chatt_send post table update");
+            }
         }
-        else if ($user->stat == 'room' && $user->subst == 'sitdown') {
-            log_main("chatt_send pre table update");
-            $room->table_update($user);
-            log_main("chatt_send post table update");
-        }
-
         echo "1";
         return TRUE;
     }

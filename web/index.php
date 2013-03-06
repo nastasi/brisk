@@ -54,6 +54,8 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'Exit.'),
                      'btn_prefs_save' => array('it' => 'Salva.',
                                              'en' => 'Save.'),
+                     'btn_prefs_reset' => array('it' => 'Annulla.',
+                                             'en' => 'Reset.'),
                      'btn_prefs_close' => array('it' => 'Chiudi.',
                                              'en' => 'Close.'),
                      'tit_tabl'     => array('it' => 'Tavolo ',
@@ -1311,7 +1313,11 @@ else {
 
 
 </div>
-<div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('preferences').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang]; ?>"/> <input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_prefs_save'][$G_lang]; ?>"/></div>
+<div class="notify_clo">
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('preferences').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang]; ?>"/> 
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_reset();" value="<?php echo $mlang_room['btn_prefs_reset'][$G_lang]; ?>"/>
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_prefs_save'][$G_lang]; ?>"/>
+</div>
 </div>
 </body>
 </html>
