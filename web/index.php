@@ -1215,10 +1215,11 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
 </div>
-<div id="preferences" class="notify" style="z-index: 200; width: 600px; margin-left: -300px; height: 400px; top: 126px; visibility: hidden;">
+<div id="preferences" class="notify" style="z-index: 200; width: 600px; margin-left: -300px; height: 240px; top: 150px; visibility: hidden;">
 <div id="preferences_child" style="border-bottom: 1px solid gray; overflow: auto; height: 370px;">
 
 <h2><?php echo $mlang_room['tit_prefs'][$G_lang]; ?></h2>
+<table style="margin: auto;"><tr><td style="vertical-align: top;">
 <!--#
     #  LISTEN
     #-->
@@ -1243,10 +1244,11 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </span></td></tr>
 </table>
 </div>
-
 <?php
 if ($user->rec != FALSE && $user->rec->last_dona > 1356994800) {
 ?>
+</td>
+<td style="vertical-align: top;">
 <!--#
     #  SUPPORTER ONLY
     #-->
@@ -1287,11 +1289,13 @@ if ($user->rec != FALSE && $user->rec->last_dona > 1356994800) {
  title="'<?php echo $mlang_room['suppcomp_range'][$G_lang];?>'">
    <span id="list_all"><?php echo $mlang_room['suppcomp_b'][$G_lang];?></span></td>
 </tr>
-<tr><td colspan="4">
+<tr><td colspan="4" style="text-align: center;">
 <img id="s_img" class="nobo" src="img/noimg.png">
 </td></tr>
 </table>
 </div>
+</td>
+<td>
 <?php
 }
 else {
@@ -1306,6 +1310,7 @@ else {
 <?php
 }
 ?>
+</td></tr></table>
 <div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
 <br><br>
                                                           <!-- <input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php /* echo $mlang_room['itm_ringauc'][$G_lang]; */ ?> -->
