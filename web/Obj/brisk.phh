@@ -727,7 +727,12 @@ class Client_prefs {
     {
         fprintf(STDERR, "QQ %s: %x\n", __FUNCTION__, $user->flags);
         $this->listen = ($user->flags & USER_FLAG_MAP_AUTH) >> 2;
-        $this->supp_comp = $user->rec->supp_comp;
+        if ($user->rec != FALSE) {
+            $this->supp_comp = $user->rec->supp_comp;
+        }
+        else {
+            $this->supp_comp = "000000000000";
+        }
 
         fprintf(STDERR, "QQ %s: LISTEN: %d\n", __FUNCTION__, $this->listen);
     }
