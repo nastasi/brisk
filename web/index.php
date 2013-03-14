@@ -1245,7 +1245,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
 </div>
 <?php
-if ($user->rec != FALSE && $user->rec->last_dona > 1356994800) {
+if ($user->is_supp_custom()) {
 ?>
 </td>
 <td style="vertical-align: top;">

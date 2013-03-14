@@ -525,7 +525,7 @@ class Bin5_user extends User {
         
         log_wr("Bin5 constructor");
         
-        $this->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
+        $thiz->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
 
         $thiz->table_orig = $table;
         $thiz->table      = 0;
