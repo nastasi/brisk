@@ -126,14 +126,24 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
             $method = $req[0];
 
             if (isset($header['Cookie'])) {
-                $cookies = explode(";", $header['Cookie']);
+
+                // LINE: [Cookie:sess=50e053a9511ef; CO_splashdate4=1356420646; CO_list=all; table_idx=7; table_token=510d494986925; lang=it; CO_bin5_pref_ring_endauct=false; CO_splashdate5=1358372822; CO_splashdate1=1363203374; CO_splashdate2=1363374826; __utma=43654517.209888411.1356605271.1356605271.1356605271.1; __utmz=43654517.1356605271.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)]
+
+                $cookies = explode("; ", $header['Cookie']);
                 for ($i = 0 ; $i < count($cookies) ; $i++) {
-                    $nameval = explode("=", trim($cookies[$i]));
-                    if (count($nameval) != 2) {
-                        printf("WARNING: malformat cookie element [%s]\n", $cookies[$i]);
+                    $name = mb_strstr($cookies[$i], "=", TRUE, 'UTF-8');
+                    if ($name == FALSE) {
+                        if (mb_strlen($cookies[$i]) > 0) {
+                            $cookie[$cookies[$i]] = "";
+                        }
+                        else {
+                            printf("WARNING: malformat cookie element [%s]\n", $cookies[$i]);
+                        }
                         continue;
                     }
-                    $cookie[$nameval[0]] = urldecode($nameval[1]);
+
+                    $value = mb_substr($cookies[$i], mb_strlen($name)+1, 10140, 'UTF-8');
+                    $cookie[$name] = urldecode($value);
                 }
             }
             // GET params management
