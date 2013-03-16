@@ -588,7 +588,8 @@ class User {
                   $is_super = $this->flags & USER_FLAG_TY_SUPER;
                   $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 
                                           ($is_super ? 0 : $G_splash_timeout), 
-                                          $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], 
+                                          // $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], 
+                                          $mlang_indrd['btn_backtotab'][$G_lang], 
                                           $G_splash_w, $G_splash_h, true, 
                                           ($is_super ? 0 : $G_splash_timeout));
                   $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
