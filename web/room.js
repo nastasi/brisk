@@ -263,6 +263,9 @@ function j_stand_tdcont(el)
     return (user_dec_and_state(el));
 }
 
+/*
+  ddata = [ [ <flags-int>, <nick-str>, <color-str> ], ... ]
+ */
 function j_stand_cont(ddata)
 {
     var i, ii;
@@ -285,9 +288,11 @@ function j_stand_cont(ddata)
     else
         data = ddata;
 
+    // WARNING:
+    //
+    //   managing update needs this branch (for few users and the else!!)
+    //
     if (standup_data_old == null || data.length < 4) {
-    // if (standup_data_old == null) {
-        
         content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
         for (i = 0 ; i < data.length ; i++) {
             if ((i % 4) == 0)
@@ -304,18 +309,6 @@ function j_stand_cont(ddata)
         content += '</table>';
         
         $("standup").innerHTML = content;
-
-        // console.log("inizio");
-        // for (i = 0 , curtag = table_walk($("standup")) ; curtag != null ;  curtag = table_walk(curtag), i++ ) {
-        //     console.log("inloop["+i+"]: "+curtag.tagName+"  ID: "+curtag.id);
-        // }
-        // console.log("fine "+i);
-
-        // walktable($("standup"), nextag);
-        // console.log($("standup").firstChild);
-        // console.log($("standup").firstChild.firstChild.firstChild.firstChild);
-
-        // log_walk($("standup"));
 
         standup_data_old = data;
     }
@@ -346,7 +339,9 @@ function j_stand_cont(ddata)
             }
             else {
                 /* modified entries */
-                if (standup_data_old[i][0] != data[e][0]) {
+                if (standup_data_old[i][0] != data[e][0] ||
+                    standup_data_old[i].length != data[e].length ||
+                    (data[e].length == 3 && standup_data_old[i][2] != data[e][2])) {
                     arr_mod[idx_mod_n] = data[e];
                     idx_mod[idx_mod_n++] = i;
                 }
