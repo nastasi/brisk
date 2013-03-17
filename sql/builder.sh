@@ -3,8 +3,8 @@
 #
 #  all this part is from mopshop and we will use it to construct the brisk database
 #
-if [ -f $HOME/.brisk-spu-db.conf ]; then
-    source $HOME/.brisk-spu-db.conf
+if [ -f $HOME/.brisk-db.conf ]; then
+    source $HOME/.brisk-db.conf
 elif [ -f $HOME/.db.conf ]; then
     source $HOME/.db.conf
 else
