@@ -16,8 +16,8 @@ else
     PFX="bsk_"
 fi
 
-if [ -f $HOME/.brisk_spu_install ]; then
-    source $HOME/.brisk_spu_install
+if [ -f $HOME/.brisk_install ]; then
+    source $HOME/.brisk_install
 fi
 
 pg_args=""
