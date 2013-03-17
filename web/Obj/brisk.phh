@@ -141,7 +141,7 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.7.4";
+$G_brisk_version = "4.8.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: prova il nuovo azioni->preferenze.',
@@ -2297,6 +2297,8 @@ class Room
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
+      GLOBAL $G_black_list;
+
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
 
       $enc = get_encoding($header);

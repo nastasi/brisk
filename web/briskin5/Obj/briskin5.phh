@@ -1153,6 +1153,8 @@ class Bin5 {
 
     static function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
     {
+        GLOBAL $G_black_list;
+
         printf("NEW_SOCKET (root): %d\n", intval($new_socket));
         
         $enc = get_encoding($header);

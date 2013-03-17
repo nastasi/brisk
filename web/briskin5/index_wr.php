@@ -40,9 +40,14 @@ require_once("Obj/briskin5.phh");
  */
 function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_base, $G_dbasetype;
+    GLOBAL $G_base, $G_dbasetype, $G_black_list;
 
     $remote_addr = addrtoipv4($remote_addr_full);
+
+    if (array_search($remote_addr, $G_black_list) !== FALSE) {
+        // TODO: waiting async 5 sec before close
+        return (FALSE);
+    }
 
     $curtime = time();
     if ($bri == NULL) {
@@ -71,6 +76,12 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
         log_wr("Get User Error");
         return FALSE;
     }
+
+    if (array_search($user->ip, $G_black_list) !== FALSE) {
+        // TODO: waiting async 5 sec before close
+        return (FALSE);
+    }
+
     $argz = explode('|', $mesg);
     
     log_wr('POSTSPLIT: '.$argz[0].'  user->stat: ['.$user->stat.']');

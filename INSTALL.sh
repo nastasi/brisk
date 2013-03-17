@@ -3,7 +3,7 @@
 #
 # Defaults
 #
-CONFIG_FILE="$HOME/.brisk_spu_install"
+CONFIG_FILE="$HOME/.brisk_install"
 
 apache_conf="/etc/apache2/sites-available/default"
 players_n=3

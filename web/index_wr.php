@@ -105,7 +105,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
     /* if the IP is banned, exit without do nothing */
     if (array_search($remote_addr, $G_black_list) !== FALSE) {
-        sleep(5);
+        // TODO: find a way to add a nonblocking sleep(5) here
         return (FALSE);
     }
 
@@ -198,6 +198,11 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
     // LACC UPDATED
     $user->lacc = $curtime;
+
+    if (array_search($user->ip, $G_black_list) !== FALSE) {
+        // TODO: find a way to add a nonblocking sleep(5) here
+        return (FALSE);
+    }
 
     if ($argz[0] == 'ping') {
         log_wr("PING RECEIVED");
