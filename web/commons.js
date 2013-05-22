@@ -25,6 +25,11 @@ var PLAYERS_N = 3;
 var EXIT_BAN_TIME = 3600;
 var cookiepath = "/brisk/";
 
+var BSK_USER_FLAGS = 0;
+var BSK_USER_FLGVL = 1;
+var BSK_USER_NICK  = 2;
+var BSK_USER_SCOL  = 3;
+
 var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ', 
                                       'en' : 'Loaded images ' },
                       'imgload_b' : { 'it' : '%.', 
@@ -832,11 +837,12 @@ var CHATT_MAXLINES = 40;
 function user_decorator(user)
 {
     var name;
-    var flags = user[0];
+    var flags = user[BSK_USER_FLAGS];
+    var flags_vlt = user[BSK_USER_FLGVL];
     if ((flags & 0x03) != 0)
-        name = "<span class='au" + (flags & 0x03) + "'>"+user[1]+"</span>";
+        name = "<span class='au" + (flags & 0x03) + "'>"+user[BSK_USER_NICK]+"</span>";
     else
-        name = user[1];
+        name = user[BSK_USER_NICK];
 
     return (name);
 }
@@ -847,7 +853,8 @@ function user_dec_and_state(el)
     var val_el;
 
     content = user_decorator(el);
-    content += state_add(el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
+    content += state_add(el[BSK_USER_FLAGS], el[BSK_USER_FLGVL],
+                         (typeof(el[BSK_USER_SCOL]) != 'undefined' ? el[BSK_USER_SCOL] : null));
     
     return (content);
 }
@@ -860,7 +867,7 @@ function chatt_sub(dt,data,str)
     var name;
     var flags;
     var isauth;
-    var bolder = [ (data[0] | 1), data[1] ];
+    var bolder = [ (data[BSK_USER_FLAGS] | 1), data[BSK_USER_FLGVL], data[BSK_USER_NICK] ];
     name = user_decorator(bolder);
 
     if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)

@@ -1002,7 +1002,7 @@ class Bin5 {
 
             if (($name_new = validate_name(substr($user_mesg, 6))) == FALSE) {
                 $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
+                $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
                 $user->step_inc();
 
                 return;
@@ -1021,7 +1021,7 @@ class Bin5 {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
 
                     $premsg = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
-                    $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $premsg);
+                    $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $premsg);
                     $user->step_inc();
                     break;
                 }
@@ -1030,7 +1030,7 @@ class Bin5 {
                 if ($user->flags & USER_FLAG_AUTH && strcasecmp($user->name,$name_new) != 0) {
                     if ($this->table[$user->table]->auth_only == TRUE) {
                         $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"<b>%s</b>");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
+                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"<b>%s</b>");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
                         $user->step_inc();
                         return;
                     }
@@ -1090,8 +1090,8 @@ class Bin5 {
                 }
 	
                 $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s", [%d, "%s"],"%s");',
-                                                                     $dt, $user->flags, xcape($user->name), xcape($user_mesg));
+                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s", [%d, %d, "%s"],"%s");',
+                                                                     $dt, $user->flags, $user->flags_vlt, xcape($user->name), xcape($user_mesg));
                 $user_cur->step_inc();
             }
             log_legal($curtime, $user->ip, $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table_orig),$user_mesg);
@@ -1730,7 +1730,7 @@ function table_welcome($user)
     $ret = "";
 
     for ($i = 0 ; $i < count($table_wellarr[$G_lang]) ; $i++)
-        $ret .= sprintf('chatt_sub("%s", [2, "ChanServ: "],"%s");', "", str_replace('"', '\"', $table_wellarr[$G_lang][$i]));
+        $ret .= sprintf('chatt_sub("%s", [2, 0, "ChanServ: "],"%s");', "", str_replace('"', '\"', $table_wellarr[$G_lang][$i]));
 
     return ($ret);
 }

@@ -280,13 +280,13 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             }
             else {
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
             }
             
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-            $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['warrmust'][$G_lang]);
+            $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['warrmust'][$G_lang]);
         }
         
         if ($mesg_to_user != "") {
@@ -333,19 +333,19 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                 }
                 else {
                     /* MLANG: "<b>Il database è temporaneamente irraggiungibile, riprova più tardi o contatta l\'amministratore.</b>" */
-                    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['coerrdb'][$G_lang]);
+                    $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['coerrdb'][$G_lang]);
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                 }
             }
             else {
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
             }
             
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-            $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mesgmust'][$G_lang]);
+            $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mesgmust'][$G_lang]);
         }
         
         if ($mesg_to_user != "") {
@@ -389,7 +389,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             log_wr("INFO:SKIP:argz == poll name: [".$cli_poll_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
             if (($user->flags & USER_FLAG_AUTH) != USER_FLAG_AUTH) {
                 // MLANG: <b>Per partecipare al sondaggio devi essere autenticato.</b>
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['pollmust'][$G_lang]);
+                $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['pollmust'][$G_lang]);
                 log_wr("break1");
                 break;
             }
@@ -408,7 +408,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
     
             if (($poll_lock = Poll::lock_data(TRUE)) == FALSE) {
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
                 log_wr("break3");
                 break;
             }
@@ -417,7 +417,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                 $fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'w+');
             
             if ($fp == FALSE) {
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
                 log_wr("break4");
                 break;
             }
@@ -573,13 +573,13 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
                     /* MLANG: "<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>", "<b>Il tavolo a cui volevi sederti richiede autentifica.</b>", "<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>" */
                     if ($G_shutdown) {
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
+                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
                     }
                     else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
+                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
                     }
                     else {
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s%d%s");', $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang], $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
+                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s%d%s");', $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang], $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
                     }
                     $user->step_inc();
                     return TRUE;

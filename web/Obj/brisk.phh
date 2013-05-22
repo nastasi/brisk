@@ -601,11 +601,6 @@ class Table {
     }
   }
 
-
-
-  //      $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
-  //                              ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
-
   // function act_content($isstanding, $sitted, $table, $cur_table, $allowed)
   function act_content($user)
   {
@@ -775,7 +770,7 @@ class Client_prefs {
     {
         // save into DB
         fprintf(STDERR, "QQ %s::%s PRE: %x\n", __CLASS__, __FUNCTION__,
-                $user->flags & (~USER_FLAG_S_ALL & ~USER_FLAG_AUTH));
+                $user->flags & (~USER_FLAG_AUTH));
         $user->flags_set(($this->listen << 2), USER_FLAG_MAP_AUTH);
         fprintf(STDERR, "QQ %s::%s %x\n", __CLASS__, __FUNCTION__,
                 $user->flags);
@@ -963,7 +958,7 @@ class Room
 	
 	if ($user_cur->sess == "") 
             continue;
-	
+
 	if ($user_cur->lacc + EXPIRE_TIME_RD < ($curtime - $delta)) {
             // Auto logout dell'utente
             log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
@@ -1043,8 +1038,6 @@ class Room
     for ($i = 0 ; $i < TABLES_N ; $i++) {
 
       $ret .= $this->table_content($user, $i);
-      // $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
-      //                          ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
       $ret .=  $this->table[$i]->act_content($user);
       if ($this->table[$i]->wag_own != -1) 
         $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
@@ -1108,7 +1101,7 @@ class Room
       $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
 	continue;
-      
+
       // log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
@@ -1132,15 +1125,11 @@ class Room
 	  // clean the action buttons in other tables
 	  for ($e = 0 ; $e < TABLES_N ; $e++) {
 	    if ($this->table[$e]->player_n < PLAYERS_N) {
-	      // $ret .= table_act_content(TRUE, 0, $e, $user->table, 
-              //                           ($this->table[$e]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
               $ret .= $this->table[$e]->act_content($user);
             }
 	  }
 	}
 	else {
-	  // $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table,
-          //                           ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
           $ret .= $table->act_content($user_cur);
 	}
       }
@@ -1215,8 +1204,6 @@ class Room
 	$ret .= $this->table_content($user_cur, $table_idx);
 	$ret .= $this->standup_content($user_cur);
 	
-	// $ret .= table_act_content(FALSE, 0, $table_idx, $user_cur->table,
-        //                           ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
         $ret .= $table->act_content($user_cur);
 
 
@@ -1244,8 +1231,6 @@ class Room
 	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
 	log_main("JOIN_WAKEUP more");
-	// $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table,
-        //                           ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
         $ret .= $table->act_content($user_cur);
 
 	log_main("JOIN_WAKEUP end more");
@@ -1275,7 +1260,7 @@ class Room
       $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
       continue;
-      
+
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($table_idx > -1)
 	$ret .= $this->table_content($user_cur, $table_idx);
@@ -1332,8 +1317,6 @@ class Room
       }
       else if ($table_idx > -1) {
 	if ($table->player_n == PLAYERS_N) {
-	  // $ret .= table_act_content(($user_cur->subst == 'standup'), PLAYERS_N, $table_idx, $user_cur->table,
-          ///                      ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
           $ret .= $table->act_content($user_cur);
 	}
       }
@@ -1427,8 +1410,7 @@ class Room
         /* MLANG: "Alarm <b>%s</b> inviato a <b>%s</b>." */
         $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))), 
                            ($target == "" ? $mlang_brisk['tit_all'][$G_lang] : xcape($target)) );
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],%s);', 
-                           $dt, NICKSERV, $prestr);
+        $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],%s);', $dt, NICKSERV, $prestr);
 
         $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
                        $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
@@ -1443,7 +1425,7 @@ class Room
         $flags_old = 0;
         if ($user->stat == 'room' && $user->subst == 'sitdown' &&
             $user->table >= TABLES_AUTH_N) {
-          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
+          $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
           
         }
         else {
@@ -1476,7 +1458,7 @@ class Room
       }
       else {
         /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
+        $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
       }
     }
     else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
@@ -1485,7 +1467,7 @@ class Room
       }
       else {
         /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['mesgmust'][$G_lang]);
+        $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['mesgmust'][$G_lang]);
       }
     }
     else if (strncmp($msg, "/nick ", 6) == 0) {
@@ -1493,7 +1475,7 @@ class Room
 
       do {
         if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
-          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
+          $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
           break;
         }
 
@@ -1508,7 +1490,7 @@ class Room
           }
         if ($i <  MAX_PLAYERS) {
           $prestr = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
-          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
+          $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $prestr);
           break;
         }
         
@@ -1526,7 +1508,7 @@ class Room
               }
             }
             else {
-              $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
+              $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
               break;
             }
           }
@@ -1539,7 +1521,7 @@ class Room
                 /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
                 if ($bdb->login_exists($name_new)) {
                     $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
-                    $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
+                    $to_user .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $prestr);
                 }
             }
         }
@@ -1606,14 +1588,13 @@ class Room
         }
         else {
           /* MLANG: "Questo stato non esiste." */
-          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
+          $to_user = sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
           break;
         }
 
         log_main("chatt_send start set");
-        if (($user->flags & USER_FLAG_S_ALL) != $st) {
-          $update_room = TRUE;
-          $user->flags = ($user->flags & ~USER_FLAG_S_ALL) | $st;
+        if ($user->flags_vlt_set($st, USER_FLAG_S_ALL)) {
+            $update_room = TRUE;
         }
       } while (0);
     } // nick chat command
@@ -1639,10 +1620,10 @@ class Room
       }
 
       if ($only_you) {
-        $to_user = sprintf('chatt_sub("%s", [%d, "%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
+          $to_user = sprintf('chatt_sub("%s", [%d, %d, "%s"],"%s");', $dt, $user->flags, $user->flags_vlt, xcape($user->name), xcape("== chat ban =="));
       }
       else {
-        $to_user = sprintf('chatt_sub("%s", [%d, "%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
+          $to_user = sprintf('chatt_sub("%s", [%d, %d, "%s"],"%s");', $dt, $user->flags, $user->flags_vlt, xcape($user->name), xcape($msg));
 	// temporary silentiation for troll (will became array check)
 	// if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
         $to_room = $to_user;
@@ -2225,28 +2206,29 @@ class Room
 
     $user_cur_id = $user->idx_get();
     for ($i = 0 , $ct = 0 ; $i < MAX_PLAYERS ; $i++) {
-      if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
-        continue;
-      
-      $flags = $this->user[$i]->flags;
+        if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
+            continue;
 
-      // sql record exists AND last donate > 2013-01-01
-      if ($this->user[$i]->is_supp_custom()) {
-          $supp_comp_s = sprintf(', "%s"', $this->user[$i]->rec->supp_comp);
-      }
-      else {
-          $supp_comp_s = '';
-      }
+        $flags = $this->user[$i]->flags;
+        $flags_vlt = $this->user[$i]->flags_vlt;
 
-      if ($this->user[$i]->subst == "standup") {
-          if ($user_cur_id == $i) {
-              $flags |= 1;
-          }
-          
-          $content .= sprintf('%s[ %d, "%s"%s ]',($ct > 0 ? ', ' : ''), $flags,
-                              xcape($this->user[$i]->name), $supp_comp_s);
-          $ct++;
-      }
+        // sql record exists AND last donate > 2013-01-01
+        if ($this->user[$i]->is_supp_custom()) {
+            $supp_comp_s = sprintf(', "%s"', $this->user[$i]->rec->supp_comp);
+        }
+        else {
+            $supp_comp_s = '';
+        }
+
+        if ($this->user[$i]->subst == "standup") {
+            if ($user_cur_id == $i) {
+                $flags |= 1;
+            }
+            $content .= sprintf('%s[ %d, %d, "%s"%s ]',($ct > 0 ? ', ' : ''),
+                                $flags, $flags_vlt,
+                                xcape($this->user[$i]->name), $supp_comp_s);
+            $ct++;
+        }
     }
     $content .= ' ]);';
     
@@ -2274,7 +2256,8 @@ class Room
         $user_cur = $this->user[$table->player[$i]];
         
         $flags = $user_cur->flags;
-        
+        $flags_vlt = $user_cur->flags_vlt;
+
         if ($user_cur_id == $table->player[$i])
             $flags |= 1;
         
@@ -2284,7 +2267,8 @@ class Room
         else
             $supp_comp_s = '';
 
-        $content .= sprintf('%s[ %d, "%s"%s ]',($i == 0 ? '' : ', '), $flags,
+        $content .= sprintf('%s[ %d, %d, "%s"%s ]',($i == 0 ? '' : ', '),
+                            $flags, $flags_vlt,
                             xcape($user_cur->name), $supp_comp_s);
     }
 
@@ -2859,7 +2843,7 @@ function root_welcome($user)
   $dt = date("H:i ", $curtime);
     
   for ($i = 0 ; $i < count($root_wellarr[$G_lang]) ; $i++)
-    $ret .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
+    $ret .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
 
   return ($ret);
 }

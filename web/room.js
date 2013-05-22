@@ -24,20 +24,20 @@
 
 /* 
 
-   data = [ [ flags, name ],  ... ]
+   data = [ [ flags, flags_vlt, name ],  ... ]
    
 */
 
 
-function state_add(flags, comp)
+function state_add(flags, flags_vlt, comp)
 {
     var content = "", supercont = "";
     var st, superst, name = "", supername = "", supersfx = "";
     var tit = "", supertit = "";
 
 
-    if ((flags & 0xf00) != 0) {
-        st = flags & 0xf00;
+    if ((flags_vlt & 0xf00) != 0) {
+        st = flags_vlt & 0xf00;
         // MLANG 4,12,16,20,24,28
         switch (st) {
         case 0x100:
@@ -264,7 +264,7 @@ function j_stand_tdcont(el)
 }
 
 /*
-  ddata = [ [ <flags-int>, <nick-str>, <color-str> ], ... ]
+  ddata = [ [ <flags-int>, <flags-vlt-int>, <nick-str>, <color-str> ], ... ]
  */
 function j_stand_cont(ddata)
 {
@@ -279,7 +279,7 @@ function j_stand_cont(ddata)
         data = new Array();
 
         for (i = 0, ii = 0 ; ii < ddata.length ; ii++) {
-            if ((ddata[ii][0] & 0x02) == 0) {
+            if ((ddata[ii][BSK_USER_FLAGS] & 0x02) == 0) {
                 continue;
             }
             data[i++] = ddata[ii];
@@ -329,7 +329,7 @@ function j_stand_cont(ddata)
         // find removed entries
         for (i = 0 ; i < standup_data_old.length ; i++) {
             for (e = 0 ; e < data.length ; e++) {
-                if (standup_data_old[i][1] == data[e][1]) {
+                if (standup_data_old[i][BSK_USER_NICK] == data[e][BSK_USER_NICK]) {
                     break;
                 }
             }
@@ -339,9 +339,10 @@ function j_stand_cont(ddata)
             }
             else {
                 /* modified entries */
-                if (standup_data_old[i][0] != data[e][0] ||
+                if (standup_data_old[i][BSK_USER_FLAGS] != data[e][BSK_USER_FLAGS] ||
+                    standup_data_old[i][BSK_USER_FLGVL] != data[e][BSK_USER_FLGVL] ||
                     standup_data_old[i].length != data[e].length ||
-                    (data[e].length == 3 && standup_data_old[i][2] != data[e][2])) {
+                    (data[e].length == 4 && standup_data_old[i][BSK_USER_SCOL] != data[e][BSK_USER_SCOL])) {
                     arr_mod[idx_mod_n] = data[e];
                     idx_mod[idx_mod_n++] = i;
                 }
@@ -352,12 +353,12 @@ function j_stand_cont(ddata)
         // find new entries
         for (e = 0 ; e < data.length ; e++) {
             for (i = 0 ; i < standup_data_old.length ; i++) {
-                if (data[e][1] == standup_data_old[i][1] ) {
+                if (data[e][BSK_USER_NICK] == standup_data_old[i][BSK_USER_NICK] ) {
                     break;
                 }
             }
             if (i == standup_data_old.length) {
-                // console.log("ADD: "+data[e][1]);
+                // console.log("ADD: "+data[e][BSK_USER_NICK]);
                 arr_add[idx_add_n]   = data[e];
                 map_add[idx_add_n++] = e;
             }
@@ -414,7 +415,7 @@ function j_stand_cont(ddata)
         // console.log("fineloop");
 
         for (i ; i_add < idx_add_n ; i_add++, i++) {
-            // console.log("ADD: "+i+" arr_add: "+ arr_add[i_add][1]);
+            // console.log("ADD: "+i+" arr_add: "+ arr_add[i_add][BSK_USER_NICK]);
             td = document.createElement("td");
             td.className = "room_standup";
             td.id = map_add[i_add];
@@ -444,8 +445,6 @@ function j_tab_cont(table_idx, data)
     var content = '';
 
     for (i = 0 ; i < data.length ; i++) {
-        // content += user_decorator(data[i]);
-        // content += state_add(data[i][0]);
         content += j_stand_tdcont(data[i]);
 
         content += '<br>';

@@ -121,6 +121,7 @@ class User {
   var $table_pos;  // idx on the table
   var $table_token;// token that identify a game on a table
   var $flags;      // Bitfield with: AUTHENTICATE: 0x02 
+  var $flags_vlt;  // Volatile flags valid for this session only
   var $rec;        // field with user db record or FALSE
   var $the_end;    // Flag to change the end of the session
 
@@ -174,6 +175,7 @@ class User {
     $thiz->exitislock = TRUE;
 
     $thiz->flags      = 0x00;
+    $thiz->flags_vlt  = 0x00;
     $thiz->rec        = FALSE;
 
     $thiz->chattime   = array_fill(0, CHAT_N, 0);
@@ -220,6 +222,7 @@ class User {
     $this->exitislock = $from->exitislock;
 
     $this->flags      = $from->flags;
+    $this->flags_vlt  = $from->flags_vlt;
     $this->rec        = $from->rec;
 
     $this->chattime   = array();
@@ -285,6 +288,7 @@ class User {
     $thiz->the_end    = $from->the_end;
 
     $thiz->flags      = $from->flags;
+    $thiz->flags_vlt  = $from->flags_vlt;
     $thiz->rec        = $from->rec;
 
     $thiz->chattime   = array_fill(0, CHAT_N, 0);
@@ -305,8 +309,18 @@ class User {
 
   function flags_set($flags, $mask)
   {
-      $flags_old = $this->flags & (~$mask);
-      $this->flags = ($flags_old | ($flags & $mask));
+      $flags_old = $this->flags;
+      $this->flags = (($flags_old & (~$mask)) | ($flags & $mask));
+
+      return ($flags_old != $this->flags);
+  }
+
+  function flags_vlt_set($flags_vlt, $mask)
+  {
+      $flags_vlt_old = $this->flags_vlt;
+      $this->flags_vlt = (($flags_vlt_old & (~$mask)) | ($flags_vlt & $mask));
+
+      return ($flags_vlt_old != $this->flags_vlt);
   }
 
   function store_set()
