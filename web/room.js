@@ -36,67 +36,67 @@ function state_add(flags, flags_vlt, comp)
     var tit = "", supertit = "";
 
 
-    if ((flags_vlt & 0xf00) != 0) {
-        st = flags_vlt & 0xf00;
+    if ((flags_vlt & 0xff) != 0) {
+        st = flags_vlt & 0xff;
         // MLANG 4,12,16,20,24,28
         switch (st) {
-        case 0x100:
+        case 0x01:
             name = "st_pau.png";
             tit = (g_lang == 'en' ? "I'm doing a break" : "sono in pausa");
             break;
-        case 0x200:
+        case 0x02:
             name = "st_out.png";
             tit = (g_lang == 'en' ? "I'm away" : "sono fuori");
             break;
-        case 0x300:
+        case 0x03:
             name = "st_dog.png";
             tit = (g_lang == 'en' ? "Dog time" : "sono a spasso col cane");
             break;
-        case 0x400:
+        case 0x04:
             name = "st_eat.png";
             tit = (g_lang == 'en' ? "I'm eating" : "sto mangiando");
             break;
-        case 0x500:
+        case 0x05:
             name = "st_wrk.png";
             tit = (g_lang == 'en' ? "I'm working" : "sono a lavoro");
             break;
-        case 0x600:
+        case 0x06:
             name = "st_smk.png";
             tit = (g_lang == 'en' ? "I'm smoking a sigarett (and keeping a cancer)" : "sto fumando una sigaretta (e facendomi venire il cancro)");
             break;
-        case 0x700:
+        case 0x07:
             name = "st_eye.png";
             tit = (g_lang == 'en' ? "I'm here!" : "sono presente!");
             break;
-        case 0x800:
+        case 0x08:
             name = "st_rabbit.png";
             tit = (g_lang == 'en' ? "Rabbit time" : "sono a spasso col coniglio");
             break;
-        case 0x900:
+        case 0x09:
             name = "st_soccer.png";
             tit = (g_lang == 'en' ? "Soccer time" : "c'è la partita!!");
             break;
-        case 0xa00:
+        case 0x0a:
             name = "st_baby.png";
             tit = (g_lang == 'en' ? "Children time" : "ho il pupo da accudire");
             break;
-        case 0xb00:
+        case 0x0b:
             name = "st_mop.png";
             tit = (g_lang == 'en' ? "Mop time" : "sto rassettando");
             break;
-        case 0xc00:
+        case 0x0c:
             name = "st_babbo.png";
             tit = (g_lang == 'en' ? "Sto dando i regali" : "sto dando i regali");
             break;
-        case 0xd00:
+        case 0x0d:
             name = "st_renna.png";
             tit = (g_lang == 'en' ? "in giro per regali" : "in giro per regali");
             break;
-        case 0xe00:
+        case 0x0e:
             name = "st_pupaz.png";
             tit = (g_lang == 'en' ? "Neve a gogò" : "neve a gogò");
             break;
-        case 0xf00:
+        case 0x0f:
             name = "st_visch.png";
             tit = (g_lang == 'en' ? "aspettando sotto al vischio" : "aspettando sotto al vischio");
             break;

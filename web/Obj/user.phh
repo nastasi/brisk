@@ -34,24 +34,24 @@ define('USER_FLAG_ISOLAUTH', 0x08);
 define('USER_FLAG_DBFAILED', 0x10);
 
 //   user status
-define('USER_FLAG_S_NORM',  0x000); // done
-define('USER_FLAG_S_PAU',   0x100); // done
-define('USER_FLAG_S_OUT',   0x200); // done
-define('USER_FLAG_S_DOG',   0x300); // done
-define('USER_FLAG_S_EAT',   0x400); // done
-define('USER_FLAG_S_WRK',   0x500); // done
-define('USER_FLAG_S_SMK',   0x600); // done
-define('USER_FLAG_S_EYE',   0x700); // done
-define('USER_FLAG_S_RABB',  0x800); // done
-define('USER_FLAG_S_SOCC',  0x900); // done
-define('USER_FLAG_S_BABY',  0xa00); // done
-define('USER_FLAG_S_MOP',   0xb00); // done
-define('USER_FLAG_S_BABBO',   0xc00); // done
-define('USER_FLAG_S_RENNA',   0xd00); // done
-define('USER_FLAG_S_PUPAZ',   0xe00); // done
-define('USER_FLAG_S_VISCH',   0xf00); // done
+define('USER_FLAG_S_NORM',  0x00); // done
+define('USER_FLAG_S_PAU',   0x01); // done
+define('USER_FLAG_S_OUT',   0x02); // done
+define('USER_FLAG_S_DOG',   0x03); // done
+define('USER_FLAG_S_EAT',   0x04); // done
+define('USER_FLAG_S_WRK',   0x05); // done
+define('USER_FLAG_S_SMK',   0x06); // done
+define('USER_FLAG_S_EYE',   0x07); // done
+define('USER_FLAG_S_RABB',  0x08); // done
+define('USER_FLAG_S_SOCC',  0x09); // done
+define('USER_FLAG_S_BABY',  0x0a); // done
+define('USER_FLAG_S_MOP',   0x0b); // done
+define('USER_FLAG_S_BABBO',   0x0c); // done
+define('USER_FLAG_S_RENNA',   0x0d); // done
+define('USER_FLAG_S_PUPAZ',   0x0e); // done
+define('USER_FLAG_S_VISCH',   0x0f); // done
 
-define('USER_FLAG_S_ALL',   0xf00); // done
+define('USER_FLAG_S_ALL',   0xff); // done
 
 /* type of user normal, supporter etc ... */
 define('USER_FLAG_TY_ALL',     0xff0000); // done
