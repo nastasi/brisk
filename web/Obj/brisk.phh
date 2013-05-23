@@ -782,6 +782,34 @@ class Client_prefs {
     }
 }
 
+class ModerationItem
+{
+    var $table;
+    var $date;
+    var $content;
+ 
+    function ModerationItem($where, $date, $content)
+    {
+        $this->where   = $where;
+        $this->time    = $time;
+        $this->content = $content;
+    }
+}
+
+class Moderation
+{
+    var $row;
+
+    function Moderation()
+    {
+        $this->item = Array();
+    }
+
+    function get_all()
+    {
+        return json_encode($this->item);
+    }
+}
 
 class Room
 {
@@ -1653,33 +1681,38 @@ class Room
     }
 
     if ($to_room != FALSE) {
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        $user_cur = $this->user[$i];
-        if ($target != "" && $user_cur->name != $target)
-          continue;
-        if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user->idx_get() == $i)
-          continue;
-        
-        if ($is_normchat == TRUE) {
-          // use MAP_AUTH to check if auth or isolation
-          if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
-            if (($user->flags & USER_FLAG_AUTH) == 0) {
-              continue;
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+            if ($target != "" && $user_cur->name != $target)
+                continue;
+            if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user->idx_get() == $i)
+                continue;
+            
+            if ($is_normchat == TRUE) {
+                // use MAP_AUTH to check if auth or isolation
+                if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
+                    if (($user->flags & USER_FLAG_AUTH) == 0) {
+                        continue;
+                    }
+                }
             }
-          }
-        }
-        /*
-        else if ($is_ticker) {
-          if (($user_cur->flags & USER_FLAG_MAP_AUTH) == USER_FLAG_ISOLAUTH) {
-            if ($user->table >= TABLES_AUTH_N)
+            /*
+              else if ($is_ticker) {
+              if (($user_cur->flags & USER_FLAG_MAP_AUTH) == USER_FLAG_ISOLAUTH) {
+              if ($user->table >= TABLES_AUTH_N)
               continue;
-          }
+              }
+              }
+            */
+            $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
+            $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
+            
+            if ($user_cur->flags_vlt_get(USER_FLAG_MODER)) {
+                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$$(moder_win, "mainbody").innerHTML += "%s<br>";' ,
+                                                                     xcape($to_room) );
+            }
+            $user_cur->step_inc();
         }
-        */
-        $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
-        $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
-        $user_cur->step_inc();
-      }
     }
     
     if ($to_tabl) {

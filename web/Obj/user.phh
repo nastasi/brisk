@@ -53,6 +53,9 @@ define('USER_FLAG_S_VISCH',   0x0f); // done
 
 define('USER_FLAG_S_ALL',   0xff); // done
 
+/* does is user moderationg brisk ? */
+define('USER_FLAG_MODER',  0x0100); // done
+
 /* type of user normal, supporter etc ... */
 define('USER_FLAG_TY_ALL',     0xff0000); // done
 define('USER_FLAG_TY_NORM',    0x010000); // done
@@ -120,6 +123,8 @@ class User {
   var $table_orig; // id of the current table when you aren't in game
   var $table_pos;  // idx on the table
   var $table_token;// token that identify a game on a table
+
+  var $flags_volat;// Bitfield of volatile flags
   var $flags;      // Bitfield with: AUTHENTICATE: 0x02 
   var $flags_vlt;  // Volatile flags valid for this session only
   var $rec;        // field with user db record or FALSE
@@ -307,12 +312,22 @@ class User {
     return ($thiz);
   }
 
+  function flags_get($mask)
+  {
+      return ($this->flags & $mask);
+  }
+
   function flags_set($flags, $mask)
   {
       $flags_old = $this->flags;
       $this->flags = (($flags_old & (~$mask)) | ($flags & $mask));
 
       return ($flags_old != $this->flags);
+  }
+
+  function flags_vlt_get($mask)
+  {
+      return ($this->flags_vlt & $mask);
   }
 
   function flags_vlt_set($flags_vlt, $mask)

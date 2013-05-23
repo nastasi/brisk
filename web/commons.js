@@ -54,6 +54,8 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ',
 
 function $(id) { return document.getElementById(id); }
 
+function $$(win, id) { return win.document.getElementById(id); }
+
 function dec2hex(d, padding)
 {
     var hex = Number(d).toString(16);
@@ -451,12 +453,34 @@ function act_logout(exitlock)
     send_mesg("logout|"+exitlock);
 }
 
+var moder_win = null;
+var moder_cur = -1;
+function act_moderate()
+{
+    send_mesg("moderate");
+}
+
+function moderate(enable)
+{
+    if (enable) {
+        moder_win = window.open("moderation.php", "moderation", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
+    }
+    else {
+        if (moder_win != null) {
+            moder_win.close();
+            moder_win = null;
+            moder_cur = -1;
+        }
+    }
+}
+
 function act_reloadroom()
 {
     window.onunload = null;
     window.onbeforeunload = null;
     document.location.assign("index.php");
 }
+
 
 function act_shutdown()
 {

@@ -50,6 +50,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => '<br>The nickname you are using it\'s already registered, <br><br>if its proprietary authenticates<br><br>you will named ghost<i>N</i>.'),
                      'btn_rettabs'  => array('it' => 'torna ai tavoli',
                                              'en' => 'back to tables'),
+                     'btn_moder'     => array('it' => 'Modera.',
+                                             'en' => 'Moderate.'),
+                     'btn_reload'     => array('it' => 'Reload.',
+                                             'en' => 'Reload.'),
                      'btn_exit'     => array('it' => 'Esco.',
                                              'en' => 'Exit.'),
                      'btn_prefs_save' => array('it' => 'Salva.',
@@ -407,8 +411,15 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
       $standup .= '<div id="room_tit"><span class="room_titin"><b>'.$mlang_room['standing'][$G_lang].'</b></span></div>';
       
       $standup .= sprintf('<div id="standup" class="room_standup"></div>');
-      // MLANG Esco.
-      $standup .= '<div id="esco" class="esco"><input type="button" class="button" name="xreload"  value="Reload." onclick="act_reloadroom();"><input class="button" name="logout" value="'.$mlang_room['btn_exit'][$G_lang].'" onclick="esco_cb();" type="button"></div>';
+      // MLANG (Modera) Reload Esco.
+      // TODO: moderation button if moderator only
+      if (1 == 1) {
+          $moder_button = '<input type="button" class="button" name="xmoder"  value="'.$mlang_room['btn_moder'][$G_lang].'" onclick="act_moderate();">';
+      }
+      else {
+          $moder_button = '';
+      }
+      $standup .= '<div id="esco" class="esco">'.$moder_button.'<input type="button" class="button" name="xreload"  value="'.$mlang_room['btn_reload'][$G_lang].'" onclick="act_reloadroom();"><input class="button" name="logout" value="'.$mlang_room['btn_exit'][$G_lang].'" onclick="esco_cb();" type="button"></div>';
       $standup .= '</div></td></tr></table>';
   }
   
@@ -888,6 +899,7 @@ supported by:<br>
    var g_listen;
    var g_withflash = false;
    var g_is_spawn = 0;
+   var g_moder = -1;
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
    var g_brow = null;

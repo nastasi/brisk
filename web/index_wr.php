@@ -355,9 +355,6 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             $user->step_inc();
         }
     }
-
-
-
     else if ($argz[0] == 'poll') {
         GLOBAL $G_with_poll, $G_poll_name;
         if (($cli_choose = gpcs_var('cli_choose', $get, $post, $cookie)) === FALSE) 
@@ -470,7 +467,24 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
         echo "$echont";
     }
-
+    else if ($argz[0] == 'moderate') {
+        // TODO: add certification check
+        if (1 == 1) {
+            if ($user->flags_vlt_get(USER_FLAG_MODER) == 0) {
+                /* enable moderation */
+                $moder_enable = 'true';
+                $user->flags_vlt_set(USER_FLAG_MODER, USER_FLAG_MODER);
+            }
+            else {
+                /* disable moderation */
+                $moder_enable = 'false';
+                $user->flags_vlt_set(0, USER_FLAG_MODER);
+            }
+            $user->comm[$user->step % COMM_N] = sprintf("gst.st = %d; moderate(%s);", 
+                                                        $user->step+1, $moder_enable);
+            $user->step_inc();
+        }
+    }
     /******************
      *                *
      *   STAT: room   *
