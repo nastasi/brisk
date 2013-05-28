@@ -1,5 +1,17 @@
  TODO |
 ------+
+Moderation features:
+* Lista righe di chat
+* Richiesta di verifica
+* Ban per nick/sessione/IP
+* Filtra per tavolo e/o room
+
+
+   - moderation
+     . turn off moderation when moder win is closed or if window creation fails
+     . enable moderation for certified users only
+     . create a mockup of the moder win
+     . create js to manage moderation
 
   FEATURES |
  ----------+

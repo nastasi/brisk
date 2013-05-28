@@ -456,26 +456,135 @@ function act_logout(exitlock)
     send_mesg("logout|"+exitlock);
 }
 
-var moder_win = null;
-var moder_cur = -1;
-function act_moderate()
+function ModerateItem(item_ar)
 {
-    send_mesg("moderate");
+    this.time  = item_ar[0];
+    this.usrid = item_ar[1];
+    this.where = item_ar[2];
+    this.name  = item_ar[3];
+    this.cont  = item_ar[4];
+}
+
+ModerateItem.prototype = {
+    time: 0,
+    usrid: 0,
+    where: -1,
+    name: "",
+    cont: ""
+}
+
+function Moderate()
+{
+}
+
+Moderate.prototype = {
+    win:  null,
+    table: null,
+    enabled: false,
+    item: null,
+
+    cur: -1,
+
+    disable: function () {
+        if (this.tout) {
+            clearTimeout(this.tout);
+            this.tout = 0;
+        }
+        if (this.win) {
+            this.win.close();
+            this.win = null;
+        }
+    },
+
+    activate: function (enable) {
+        if (this.enabled == enable) {
+            return true;
+        }
+        if (enable) {
+            this.disable();
+
+            this.win = window.open("moderation.php", "Moderazione", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
+            if (this.win == null) {
+                this.disable();
+                return false;
+            }
+            // to finish initialization we wait for popup page onload event ...
+            this.win_waitonload();
+        }
+        else {
+            this.disable();
+            this.enabled = false;
+        }
+
+    },
+
+    win_waitonload: function () {
+        if (typeof(this.win.is_loaded)  == 'undefined' || this.win.is_loaded != true) {
+            console.log("not ready");
+            this.tout = setTimeout(function (obj) { obj.win_waitonload(); }, 250, this);
+        }
+        else {
+            console.log("ready now!");
+            this.post_onload();
+        }
+    },
+
+    post_onload: function() {
+        $(this.win, 'mainbody').innerHTML = "GHE SEMU";
+        this.enabled = true;
+    },
+
+    is_enabled: function() {
+        return (this.enabled);
+    }// ,
+
+    //add: function(item) {
+    //    this.item.append(new ModerateItem(item));
+    //}
+    // send_mesg("moderate|"+(enable ? "true" | "false"));
+
 }
 
 function moderate(enable)
 {
-    if (enable) {
-        moder_win = window.open("moderation.php", "moderation", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
-    }
-    else {
-        if (moder_win != null) {
-            moder_win.close();
-            moder_win = null;
-            moder_cur = -1;
-        }
-    }
+    return (g_moder.activate(enable));
 }
+
+var g_moder = new Moderate();
+
+function act_moderate()
+{
+    send_mesg("moderate|"+(g_moder.is_enabled() ? "true" : "false"));
+}
+
+
+
+//             send_mesg("moderate|false");
+//             return false;
+//         }
+        
+//         // build table with js
+        
+//         g_moder.item = new Array;
+//         g_moder.table = xxx;
+//     }
+//     else {
+//         if (g_moder == null)
+//             return true;
+
+//         if (g_moder.win != null) {
+//             g_moder.win.close();
+//             g_moder.win = null;
+//         }
+
+//         if (g_moder.item != null) {
+//             // TODO CLEANUP
+//             ;
+//         }
+//         g_moder.cur = -1;
+//     }
+// }
+
 
 function act_reloadroom()
 {
@@ -760,12 +869,6 @@ function notify(st, text, tout, butt, w, h)
 {
     notify_ex.call(this, st, text, tout, butt, w, h, false, 0);
 }
-	
-
-function $(id) { 
-    return document.getElementById(id); 
-}
-
 
 function globst() {
     this.st = -1;
