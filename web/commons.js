@@ -52,9 +52,12 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ',
                                                'en' : '(isolation)' } }
                     };
 
-function $(id) { return document.getElementById(id); }
-
-function $$(win, id) { return win.document.getElementById(id); }
+function $() {
+    if (arguments.length == 1)
+        return document.getElementById(arguments[0]);
+    else
+        return (arguments[0]).document.getElementById((arguments[1]));
+}
 
 function dec2hex(d, padding)
 {
