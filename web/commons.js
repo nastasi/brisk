@@ -491,6 +491,7 @@ Moderate.prototype = {
             this.tout = 0;
         }
         if (this.win) {
+            this.win.onbeforeunload = null;
             this.win.close();
             this.win = null;
         }
@@ -531,7 +532,12 @@ Moderate.prototype = {
 
     post_onload: function() {
         $(this.win, 'mainbody').innerHTML = "GHE SEMU";
+        this.win.anc = this;
         this.enabled = true;
+    },
+
+    onunload: function() {
+        act_moderate();
     },
 
     is_enabled: function() {
@@ -541,7 +547,7 @@ Moderate.prototype = {
     //add: function(item) {
     //    this.item.append(new ModerateItem(item));
     //}
-    // send_mesg("moderate|"+(enable ? "true" | "false"));
+    // send_mesg("moderate|"+(enable ? "false" | "true"));
 
 }
 
@@ -554,15 +560,11 @@ var g_moder = new Moderate();
 
 function act_moderate()
 {
-    send_mesg("moderate|"+(g_moder.is_enabled() ? "true" : "false"));
+    send_mesg("moderate|"+(g_moder.is_enabled() ? "false" : "true"));
 }
 
 
 
-//             send_mesg("moderate|false");
-//             return false;
-//         }
-        
 //         // build table with js
         
 //         g_moder.item = new Array;

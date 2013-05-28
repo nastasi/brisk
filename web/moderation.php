@@ -6,6 +6,12 @@ window.is_loaded = false;
 window.onload = function() {
     window.is_loaded = true;     
 }
+
+window.onbeforeunload = function() {
+    if (typeof(window.anc) != 'undefined') {
+        window.anc.onunload();
+    }
+}
 // -->
 </script>
 </head>

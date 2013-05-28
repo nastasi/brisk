@@ -470,7 +470,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
     else if ($argz[0] == 'moderate') {
         // TODO: add certification check
         if (1 == 1) {
-            if ($user->flags_vlt_get(USER_FLAG_MODER) == 0) {
+            if ($user->flags_vlt_get(USER_FLAG_MODER) == 0 && $argz[1] == 'true') {
                 /* enable moderation */
                 $moder_enable = 'true';
                 $user->flags_vlt_set(USER_FLAG_MODER, USER_FLAG_MODER);
