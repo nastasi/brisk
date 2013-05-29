@@ -14,11 +14,16 @@ window.onbeforeunload = function() {
 }
 // -->
 </script>
+<link rel="stylesheet" type="text/css" href="moderation.css">
 </head>
 <body>
 <?php
   // sleep(10);
 ?>
-<div id="mainbody"/>
+<div id="mainbody">
+    <div class="moder_tabanc">
+        <table id="moder_tab"></table>
+    </div>
+</div>
 </body>
 </html>

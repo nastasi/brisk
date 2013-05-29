@@ -531,8 +531,23 @@ Moderate.prototype = {
     },
 
     post_onload: function() {
-        $(this.win, 'mainbody').innerHTML = "GHE SEMU";
+        var tr, td, remtr;
+
         this.win.anc = this;
+        this.table = $(this.win, 'moder_tab');
+
+        for (i = 0 ; i < 3 ; i++) {
+            tr = document.createElement("tr");
+            for (e = 0 ; e < 2 ; e++) {
+                td = document.createElement("td");
+                td.innerHTML = "Content "+((i * 2)+e);
+                tr.appendChild(td);
+            }
+            this.table.appendChild(tr);
+            if (i == 0) 
+                remtr = tr;
+        }
+        this.table.removeChild(remtr);
         this.enabled = true;
     },
 
