@@ -1708,8 +1708,8 @@ class Room
             $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
             
             if ($user_cur->flags_vlt_get(USER_FLAG_MODER)) {
-                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('$$(moder_win, "mainbody").innerHTML += "%s<br>";' ,
-                                                                     xcape($to_room) );
+                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('g_moder.add([111, 222, "table N", "%s", "%s"]);' ,
+                                                                     xcape($user->name), xcape($to_room) );
             }
             $user_cur->step_inc();
         }

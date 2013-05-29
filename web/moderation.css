@@ -1,3 +1,9 @@
+div.moder_tabanc {
+    height: 100px;
+    background-color: #ffaaaa;
+    overflow: auto;
+}
+
 div.moder_tabanc table {
     width: 100%;
     border: 1px solid red; 

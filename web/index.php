@@ -899,7 +899,6 @@ supported by:<br>
    var g_listen;
    var g_withflash = false;
    var g_is_spawn = 0;
-   var g_moder = -1;
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
    var g_brow = null;

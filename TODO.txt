@@ -9,6 +9,7 @@ Moderation features:
 
    - moderation
      . turn off moderation when moder win is closed or if window creation fails
+     . turn off moder when logout
      . enable moderation for certified users only
      . create a mockup of the moder win
      . create js to manage moderation

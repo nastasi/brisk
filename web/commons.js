@@ -458,11 +458,22 @@ function act_logout(exitlock)
 
 function ModerateItem(item_ar)
 {
+    var tr, td;
     this.time  = item_ar[0];
     this.usrid = item_ar[1];
     this.where = item_ar[2];
     this.name  = item_ar[3];
     this.cont  = item_ar[4];
+
+    tr = document.createElement("tr");
+    td = document.createElement("td");
+    td.innerHTML = this.name;
+    tr.appendChild(td);
+    td = document.createElement("td");
+    td.innerHTML = this.cont;
+    tr.appendChild(td);
+
+    this.tr = tr;
 }
 
 ModerateItem.prototype = {
@@ -470,11 +481,18 @@ ModerateItem.prototype = {
     usrid: 0,
     where: -1,
     name: "",
-    cont: ""
+    cont: "",
+
+    tr: null,
+
+    tr_get: function () {
+        return this.tr;
+    }
 }
 
 function Moderate()
 {
+    this.item = new Array();
 }
 
 Moderate.prototype = {
@@ -536,18 +554,19 @@ Moderate.prototype = {
         this.win.anc = this;
         this.table = $(this.win, 'moder_tab');
 
-        for (i = 0 ; i < 3 ; i++) {
-            tr = document.createElement("tr");
-            for (e = 0 ; e < 2 ; e++) {
-                td = document.createElement("td");
-                td.innerHTML = "Content "+((i * 2)+e);
-                tr.appendChild(td);
-            }
-            this.table.appendChild(tr);
-            if (i == 0) 
-                remtr = tr;
-        }
-        this.table.removeChild(remtr);
+        // for (i = 0 ; i < 3 ; i++) {
+        //     tr = document.createElement("tr");
+        //     for (e = 0 ; e < 2 ; e++) {
+        //         td = document.createElement("td");
+        //         td.innerHTML = "Content "+((i * 2)+e);
+        //         tr.appendChild(td);
+        //     }
+        //     this.table.appendChild(tr);
+        //     if (i == 0) 
+        //         remtr = tr;
+        // }
+        // this.table.removeChild(remtr);
+
         this.enabled = true;
     },
 
@@ -557,11 +576,17 @@ Moderate.prototype = {
 
     is_enabled: function() {
         return (this.enabled);
-    }// ,
+    },
+    add: function(item) {
+        var mi;
 
-    //add: function(item) {
-    //    this.item.append(new ModerateItem(item));
-    //}
+        console.log(typeof(this.item));
+        mi = new ModerateItem(item);
+        this.item.push(mi);
+
+        this.table.appendChild(mi.tr_get());
+
+    }
     // send_mesg("moderate|"+(enable ? "false" | "true"));
 
 }
