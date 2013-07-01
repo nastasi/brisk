@@ -1685,9 +1685,20 @@ class Room
             $user_cur = $this->user[$i];
             if ($target != "" && $user_cur->name != $target)
                 continue;
-            if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user->idx_get() == $i)
+            if ($user_cur->sess == '')
                 continue;
+
+            if ($user_cur->flags_vlt_get(USER_FLAG_MODER)) {
+                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('g_moder.add([%d, "%s", %d, "%s", "%s"]);' ,
+                                                                     $curtime, "userid",
+                                                                     ($user->stat == 'table' ? $user->table : -1),
+                                                                     xcape($user->name), xcape($msg) );
+                $user_cur->step_inc();
+            }
             
+            if ($user_cur->stat == 'table' || $user->idx_get() == $i)
+                continue;
+
             if ($is_normchat == TRUE) {
                 // use MAP_AUTH to check if auth or isolation
                 if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
@@ -1706,11 +1717,6 @@ class Room
             */
             $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
             $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
-            
-            if ($user_cur->flags_vlt_get(USER_FLAG_MODER)) {
-                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('g_moder.add([111, 222, "table N", "%s", "%s"]);' ,
-                                                                     xcape($user->name), xcape($to_room) );
-            }
             $user_cur->step_inc();
         }
     }
