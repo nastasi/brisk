@@ -648,6 +648,11 @@ function act_shutdown()
 function postact_logout()
 {
     // alert("postact_logout");
+
+    if (g_moder.is_enabled()) {
+        g_moder.disable();
+    }
+
     try { 
 	hstm.abort();
     } catch (e) {}
