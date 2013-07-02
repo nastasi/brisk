@@ -607,14 +607,17 @@ class User {
       if ($cur_step == -1) {
           log_rd2("PRE-NEWSTAT: ".$this->stat);
           
+          if ($this->flags_vlt_get(USER_FLAG_MODER)) {
+              $ret .= sprintf('moderate(true);');
+          }
           if ($this->stat == 'room') {
               log_rd("roomma ".$this->step);
               $curtime = time();
-              
+
               if ($G_with_splash &&
                   ($$CO_splashdate < $curtime - $G_splash_interval ||
                    $$CO_splashdate > $curtime)) {
-                  $is_super = $this->flags & USER_FLAG_TY_SUPER;
+                  $is_super = $this->flags_get(USER_FLAG_TY_SUPER);
                   $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 
                                           ($is_super ? 0 : $G_splash_timeout), 
                                           // $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], 

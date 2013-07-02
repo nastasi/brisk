@@ -458,17 +458,35 @@ function act_logout(exitlock)
 
 function ModerateItem(item_ar)
 {
-    var tr, td;
+    var tr, td, date;
     this.time  = item_ar[0];
     this.usrid = item_ar[1];
     this.where = item_ar[2];
     this.name  = item_ar[3];
     this.cont  = item_ar[4];
 
+    date = new Date();
+    date.setTime(this.time * 1000);
+
     tr = document.createElement("tr");
+    td = document.createElement("td");
+    // FIXME a more readable date here
+    // td.innerHTML = date.xxxx;
+    td.innerHTML = this.time % 100000;
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.innerHTML = this.where;
+    tr.appendChild(td);
+
+    td = document.createElement("td");
+    td.innerHTML = this.usrid;
+    tr.appendChild(td);
+
     td = document.createElement("td");
     td.innerHTML = this.name;
     tr.appendChild(td);
+
     td = document.createElement("td");
     td.innerHTML = this.cont;
     tr.appendChild(td);
@@ -522,7 +540,7 @@ Moderate.prototype = {
         if (enable) {
             this.disable();
 
-            this.win = window.open("moderation.php", "Moderazione", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
+            this.win = window.open("moderation.php", "_blank", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
             if (this.win == null) {
                 this.disable();
                 return false;
@@ -539,11 +557,9 @@ Moderate.prototype = {
 
     win_waitonload: function () {
         if (typeof(this.win.is_loaded)  == 'undefined' || this.win.is_loaded != true) {
-            console.log("not ready");
             this.tout = setTimeout(function (obj) { obj.win_waitonload(); }, 250, this);
         }
         else {
-            console.log("ready now!");
             this.post_onload();
         }
     },
@@ -580,12 +596,10 @@ Moderate.prototype = {
     add: function(item) {
         var mi;
 
-        console.log(typeof(this.item));
         mi = new ModerateItem(item);
         this.item.push(mi);
 
         this.table.appendChild(mi.tr_get());
-
     }
     // send_mesg("moderate|"+(enable ? "false" | "true"));
 
@@ -630,6 +644,9 @@ function act_moderate()
 
 function act_reloadroom()
 {
+    if (g_moder.is_enabled()) {
+        g_moder.disable();
+    }
     window.onunload = null;
     window.onbeforeunload = null;
     document.location.assign("index.php");
