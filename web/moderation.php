@@ -6,6 +6,7 @@ require_once($G_base."Obj/brisk.phh");
 <html>
 <head>
 <title>Moderation</title>
+<link rel="stylesheet" type="text/css" href="moderation.css">
 <script type="text/javascript"><!--
 window.is_loaded = false;
 
@@ -40,19 +41,17 @@ window.onbeforeunload = function() {
     </div>
     <div>
     <table>
-    <tr><th>Room</th><th>Tavolo</th></tr>
-    <tr>
-    <td><input type="checkbox" name="showroom" onclick="showroom_update(this);">Show room<td>
-    <td><select name="onlytable" onchange="onlytable_update(this);">
-    <option selected>Tutti</option>
+    <tr><td>mostra room <input type="checkbox" name="showroom" onclick="showroom_update(this);"></td>
+    <td>tavolo: <select name="onlytable" onchange="onlytable_update(this);">
+    <option selected>tutti</option>
     <?php
 
     for ($i = 0 ; $i < TABLES_N ; $i++) {
         printf("<option>%d</option>", $i);
     }
     ?>
-    </select></td>
-    </tr>
+    </select>
+    </td></tr>
     </table>
     </div>
     </div>

@@ -459,6 +459,7 @@ function act_logout(exitlock)
 function ModerateItem(item_ar)
 {
     var tr, td, date;
+
     this.time  = item_ar[0];
     this.usrid = item_ar[1];
     this.where = item_ar[2];
@@ -502,9 +503,21 @@ ModerateItem.prototype = {
     cont: "",
 
     tr: null,
+    sel: false,
 
     tr_get: function () {
         return this.tr;
+    },
+
+    sel_get: function () {
+        return this.sel;
+    },
+
+    sel_set: function (v) {
+        if (this.sel != v) {
+            this.sel = v;
+            this.tr.className = (v ? 'selected' : 'normal');
+        }
     }
 }
 
@@ -593,16 +606,32 @@ Moderate.prototype = {
     is_enabled: function() {
         return (this.enabled);
     },
+
     add: function(item) {
         var mi;
 
         mi = new ModerateItem(item);
+        mi.tr.className = 'normal';
+
+        var self;
+        self = this;
+        mi.tr.onclick = function () { self.row_select(mi); };
+
         this.item.push(mi);
-
         this.table.appendChild(mi.tr_get());
-    }
-    // send_mesg("moderate|"+(enable ? "false" | "true"));
+    },
 
+    row_select: function(mi) {
+        for (idx in this.item) {
+            if (this.item[idx] == mi) {
+                this.item[idx].sel_set(!this.item[idx].sel_get());
+            }
+            else {
+                this.item[idx].sel_set(false);
+            }
+        }
+        // mi.tr.className = "selected";
+    }
 }
 
 function moderate(enable)

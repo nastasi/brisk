@@ -1,10 +1,12 @@
  TODO |
 ------+
 Moderation features:
-* Lista righe di chat
-* Richiesta di verifica
-* Ban per nick/sessione/IP
-* Filtra per tavolo e/o room
+  * Select row
+  * Lista righe di chat
+  * Richiesta di verifica
+  * Ban per nick/sessione/IP
+  * Filtra per tavolo e/o room
+  * Silent cancer behaviour management
 
 
    - moderation

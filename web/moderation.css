@@ -1,17 +1,9 @@
-div.moder_tabanc {
-    height: 100px;
-    background-color: #ffaaaa;
-    overflow: auto;
+tr.normal {
+    background-color: white;
+    cursor: pointer;
 }
 
-div.moder_tabanc table {
-    width: 100%;
-    border: 1px solid red; 
-    border-collapse: collapse;
-    border-spacing: 0px;
-    padding: 0px;
-}
-
-div.moder_tabanc td {
-    border: 1px solid green; 
+tr.selected {
+    background-color: orange;
+    cursor: pointer;
 }
