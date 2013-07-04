@@ -462,7 +462,7 @@ function ModerateItem(item_ar)
 
     this.time  = item_ar[0];
     this.usrid = item_ar[1];
-    this.where = item_ar[2];
+    this.table = item_ar[2];
     this.name  = item_ar[3];
     this.cont  = item_ar[4];
 
@@ -477,7 +477,7 @@ function ModerateItem(item_ar)
     tr.appendChild(td);
 
     td = document.createElement("td");
-    td.innerHTML = this.where;
+    td.innerHTML = this.table;
     tr.appendChild(td);
 
     td = document.createElement("td");
@@ -498,7 +498,7 @@ function ModerateItem(item_ar)
 ModerateItem.prototype = {
     time: 0,
     usrid: 0,
-    where: -1,
+    table: -1,
     name: "",
     cont: "",
 

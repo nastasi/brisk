@@ -23,7 +23,6 @@
 
 require_once("${G_base}Obj/transports.phh");
 
-
 // User flags
 define('USER_FLAG_AUTH',     0x02);
 

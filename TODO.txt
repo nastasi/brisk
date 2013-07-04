@@ -1,13 +1,13 @@
  TODO |
 ------+
 Moderation features:
-  * Select row
   * Lista righe di chat
   * Richiesta di verifica
   * Ban per nick/sessione/IP
   * Filtra per tavolo e/o room
   * Silent cancer behaviour management
 
+DONE  * Select row
 
    - moderation
      . turn off moderation when moder win is closed or if window creation fails
