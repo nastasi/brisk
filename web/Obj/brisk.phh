@@ -1689,9 +1689,12 @@ class Room
                 continue;
 
             if ($user_cur->flags_vlt_get(USER_FLAG_MODER)) {
-                $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('g_moder.add([%d, "%s", %d, "%s", "%s"]);' ,
-                                                                     $curtime, "userid",
-                                                                     ($user->stat == 'table' ? $user->table : -1),
+                $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st = %d; g_moder.add([%d, "%s", %d, "%s", "%s"]);',
+                                                                     $user_cur->step+1, $curtime, "userid",
+                                                                     // FIXME: FOR DEVEL REASON WE SUBSTITUTE THIS:
+                                                                     // ($user->stat == 'table' ? $user->table : -1),
+                                                                     // with
+                                                                     ($user->subst == 'sitdown' ? $user->table : -1),
                                                                      xcape($user->name), xcape($msg) );
                 $user_cur->step_inc();
             }

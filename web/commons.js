@@ -553,7 +553,9 @@ Moderate.prototype = {
         if (enable) {
             this.disable();
 
-            this.win = window.open("moderation.php", "_blank", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
+            // FIXME: remove scrollbars, only for devel reason
+            // this.win = window.open("moderation.php", "_blank", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no");
+            this.win = window.open("moderation.php", "_blank", "width=800,height=600,toolbar=no,location=no,menubar=no,status=no,scrollbars=yes");
             if (this.win == null) {
                 this.disable();
                 return false;
