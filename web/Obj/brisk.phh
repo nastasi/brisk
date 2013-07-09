@@ -1332,7 +1332,7 @@ class Room
       
       $ret = "gst.st = ".($user_cur->step+1)."; ".$train_app;
       if ($table_idx > -1)
-      $ret .= $this->table_content($user_cur, $table_idx);
+          $ret .= $this->table_content($user_cur, $table_idx);
       $ret .= $this->standup_content($user_cur);
       
       if ($user->idx_get() == $i) {
@@ -1524,7 +1524,7 @@ class Room
         
         /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
         if ($user->flags & USER_FLAG_AUTH) {
-          if (strcasecmp($user->name,$name_new) != 0) {
+          if (strcasecmp($user->name, $name_new) != 0) {
              if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
                 ($user->subst == 'standup' || 
                  ($user->subst != 'standup' && $this->table[$user->table]->auth_only == FALSE)
@@ -1696,8 +1696,10 @@ class Room
                 $user_cur->step_inc();
             }
             
-            if ($user_cur->stat == 'table' || $user->idx_get() == $i)
+
+            if ($user_cur->stat == 'table' || $user->idx_get() == $i) {
                 continue;
+            }
 
             if ($is_normchat == TRUE) {
                 // use MAP_AUTH to check if auth or isolation
