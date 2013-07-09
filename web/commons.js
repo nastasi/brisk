@@ -589,18 +589,10 @@ Moderate.prototype = {
         this.win.anc = this;
         this.table = $(this.win, 'moder_tab');
 
-        // for (i = 0 ; i < 3 ; i++) {
-        //     tr = document.createElement("tr");
-        //     for (e = 0 ; e < 2 ; e++) {
-        //         td = document.createElement("td");
-        //         td.innerHTML = "Content "+((i * 2)+e);
-        //         tr.appendChild(td);
-        //     }
-        //     this.table.appendChild(tr);
-        //     if (i == 0) 
-        //         remtr = tr;
-        // }
-        // this.table.removeChild(remtr);
+        for (i = 0 ; i < this.item.length ; i++) {
+	    this.table.appendChild(this.item[i].tr_get());
+            this.item[i].hide = false;
+        }
 
         this.enabled = true;
     },
