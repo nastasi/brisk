@@ -4,10 +4,11 @@ Moderation features:
   * Lista righe di chat
   * Richiesta di verifica
   * Ban per nick/sessione/IP
-  * Filtra per tavolo e/o room
   * Silent cancer behaviour management
 
 DONE  * Select row
+DONE  * Filtra per tavolo e/o room
+DONE  * BUG: after disable/enable moderation filters stop to work
 
    - moderation
      . turn off moderation when moder win is closed or if window creation fails
