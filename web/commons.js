@@ -503,6 +503,7 @@ ModerateItem.prototype = {
     cont: "",
 
     tr: null,
+    hide: false,
     sel: false,
 
     tr_get: function () {
@@ -531,6 +532,9 @@ Moderate.prototype = {
     table: null,
     enabled: false,
     item: null,
+
+    room_show: true,
+    table_show: -1,
 
     cur: -1,
 
@@ -624,17 +628,81 @@ Moderate.prototype = {
     },
 
     row_select: function(mi) {
-        for (idx in this.item) {
-            if (this.item[idx] == mi) {
-                this.item[idx].sel_set(!this.item[idx].sel_get());
+        for (i = 0 ; i < this.item.length ; i++) {
+            if (this.item[i] == mi) {
+                this.item[i].sel_set(!this.item[i].sel_get());
             }
             else {
-                this.item[idx].sel_set(false);
+                this.item[i].sel_set(false);
             }
         }
         // mi.tr.className = "selected";
+    },
+
+    room_show_update: function(obj) {
+        this.tab_update(obj.checked, this.table_show);
+    },
+
+    //
+    table_show_update: function(obj) {
+        this.tab_update(this.room_show, obj.options[obj.selectedIndex].value );
+    },
+
+    tab_update: function(room_new, table_new)
+    {
+        // remove all and add all valid
+        for (i = 0 ; i < this.item.length ; i++) {
+            if (this.item[i].hide)
+                continue;
+	    this.table.removeChild(this.item[i].tr_get());
+            this.item[i].hide = true;
+        }
+
+        for (i = 0 ; i < this.item.length ; i++) {
+            var app = false;
+
+            if (room_new && table_new == -1) {
+                app = true;
+            }
+            else if (room_new && table_new != -1) {
+                if (this.item[i].table == table_new || this.item[i].table == -1) {
+                    app = true;
+                }
+            }
+            else if (!room_new && table_new == -1) {
+                if (this.item[i].table != -1) {
+                    app = true;
+                }
+            }
+            else if (!room_new && table_new != -1) {
+                if (this.item[i].table == table_new) {
+                    app = true;
+                }
+            }
+            if (app) {
+	        this.table.appendChild(this.item[i].tr_get());
+                this.item[i].hide = false;
+            }
+        }
+        this.room_show  = room_new;
+        this.table_show = table_new;
     }
 }
+
+// function AddBefore(rowId){
+//     var target = document.getElementById(rowId);
+//     var newElement = document.createElement('tr');
+//     target.parentNode.insertBefore(newElement, target);
+//     return newElement;
+// }
+
+// function AddAfter(rowId){
+//     var target = document.getElementById(rowId);
+//     var newElement = document.createElement('tr');
+
+//     target.parentNode.insertBefore(newElement, target.nextSibling );
+//     return newElement;
+// }
 
 function moderate(enable)
 {

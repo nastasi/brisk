@@ -1,3 +1,29 @@
+div.moder_tabanc {
+    height: 400px;
+    background-color: #ffaaaa;
+    overflow: auto;
+    vertical-align: text-bottom;
+}
+
+div.moder_tabanc table {
+    width: 100%;
+    border: 1px solid red;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    padding: 0px;
+}
+
+div.moder_tabanc td {
+    border: 1px solid green;
+    vertical-align: text-bottom;
+}
+
+div.moder_cmdanc td {
+    border: 1px solid green;
+    vertical-align: text-bottom;
+}
+
+
 tr.normal {
     background-color: white;
     cursor: pointer;

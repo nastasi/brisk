@@ -10,15 +10,18 @@ require_once($G_base."Obj/brisk.phh");
 <script type="text/javascript"><!--
 window.is_loaded = false;
 
-function showroom_update(obj)
+function room_show_update(obj)
 {
-    //    if (typeof(window.anc) != 'undefined') {
-    //    window.anc.showroom_update();
-    //}
+    if (typeof(window.anc) != 'undefined') {
+        window.anc.room_show_update(obj);
+    }
 }
 
-function onlytable_update(obj)
+function table_show_update(obj)
 {
+    if (typeof(window.anc) != 'undefined') {
+        window.anc.table_show_update(obj);
+    }
 }
 
 window.onload = function() {
@@ -35,19 +38,20 @@ window.onbeforeunload = function() {
 <link rel="stylesheet" type="text/css" href="moderation.css">
 </head>
 <body>
+    <div><?php /* phpinfo(); */ ?></div>
 <div id="mainbody">
     <div class="moder_tabanc">
     <table id="moder_tab"></table>
     </div>
-    <div>
+    <div class="moder_cmdanc">
     <table>
-    <tr><td>mostra room <input type="checkbox" name="showroom" onclick="showroom_update(this);"></td>
-    <td>tavolo: <select name="onlytable" onchange="onlytable_update(this);">
-    <option selected>tutti</option>
+    <tr><td> mostra room <input type="checkbox" name="room_show" CHECKED onclick="room_show_update(this);"></td>
+    <td> tavolo: <select name="table_show" onchange="table_show_update(this);">
+    <option selected value="-1">tutti</option>
     <?php
 
     for ($i = 0 ; $i < TABLES_N ; $i++) {
-        printf("<option>%d</option>", $i);
+        printf('<option value="%d">%d</option>', $i, $i);
     }
     ?>
     </select>
