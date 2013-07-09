@@ -114,7 +114,7 @@ function log_walk(curtag)
     var ind = 0;
     var ancestor = curtag;
     do {
-        console.log(spcs("_", "+", ind)+" ["+curtag.tagName+"]  nodeType: "+curtag.nodeType+" inner: ["+curtag.innerHTML+"]");
+        console.log(spcs("_", "+", ind)+" ["+curtag.tagName+"]  nodeType: "+curtag.nodeType+" inner: ["+curtag.innerHTML+"]"); // OK
         if (curtag.firstChild != null && curtag.tagName != "TD") {
             ind += 2;
             curtag = curtag.firstChild;

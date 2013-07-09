@@ -281,9 +281,9 @@ function send_mesg(mesg)
     xhr_wr.setRequestHeader("If-Modified-Since", new Date().toUTCString());
     xhr_wr.onreadystatechange = function() { return; };
     if (typeof(g_debug) == 'number' && g_debug > 0
-        && typeof(console) == 'object' && typeof(console.log) == 'function') {
+        && typeof(console) == 'object' && typeof(console.log) == 'function') { // OK
             var ldate = new Date();
-            console.log(ldate.getTime()+':MESG:'+mesg);
+            console.log(ldate.getTime()+':MESG:'+mesg); // OK
     }
     xhr_wr.send(null);
 

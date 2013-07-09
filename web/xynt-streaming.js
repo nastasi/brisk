@@ -730,7 +730,7 @@ xynt_streaming.prototype = {
 
     log: function (s) {
         if (this.console != null) {
-            return (this.console.log(s));
+            return (this.console.log(s)); // OK
         }
     }
 }
