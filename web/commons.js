@@ -460,13 +460,16 @@ function ModerateItem(item_ar)
 {
     var tr, td, date;
 
+    date = new Date();
+
     this.time  = item_ar[0];
     this.usrid = item_ar[1];
     this.table = item_ar[2];
     this.name  = item_ar[3];
     this.cont  = item_ar[4];
 
-    date = new Date();
+    this.loctm = date.getTime();
+
     date.setTime(this.time * 1000);
 
     tr = document.createElement("tr");
@@ -496,7 +499,8 @@ function ModerateItem(item_ar)
 }
 
 ModerateItem.prototype = {
-    time: 0,
+    time: 0,  // (sec)
+    loctm: 0, // (msec)
     usrid: 0,
     table: -1,
     name: "",
@@ -535,6 +539,9 @@ Moderate.prototype = {
 
     room_show: true,
     table_show: -1,
+
+    // max_dt: 1800000, // (msec) maximum delta between current and line time
+    max_dt: 15000, // (msec) FIXME: DEV VERSION maximum delta between current and line time
 
     cur: -1,
 
@@ -608,6 +615,8 @@ Moderate.prototype = {
     add: function(item) {
         var mi;
 
+        this.item_gc();
+
         mi = new ModerateItem(item);
         mi.tr.className = 'normal';
 
@@ -617,6 +626,32 @@ Moderate.prototype = {
 
         this.item.push(mi);
         this.table.appendChild(mi.tr_get());
+    },
+
+    item_remove: function(idx) {
+        var old;
+
+        old = this.item.splice(idx,1);
+
+        if (!old[0].hide)
+	    this.table.removeChild(old[0].tr_get());
+
+        delete old;
+    }
+
+    // moderation items garbage collector: after this.max_dt a line is removed
+    item_gc: function() {
+        var date, time;
+
+        date = new Date();
+        time = date.getTime();
+
+        for (i = 0 ; i < this.item.length ; i++) {
+            if (time - this.item[i].loctm > this.max_dt) {
+                this.item_remove(i);
+                i--;
+            }
+        }
     },
 
     row_select: function(mi) {
