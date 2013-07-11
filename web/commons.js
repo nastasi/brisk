@@ -637,7 +637,7 @@ Moderate.prototype = {
 	    this.table.removeChild(old[0].tr_get());
 
         delete old;
-    }
+    },
 
     // moderation items garbage collector: after this.max_dt a line is removed
     item_gc: function() {
