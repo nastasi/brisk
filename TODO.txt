@@ -1,11 +1,16 @@
  TODO |
 ------+
 Moderation features:
-  * First and incremental list population
-  * Ban per nick/sessione/IP & calculation
+  * WIP - Privacy with pseudo-sessions and pseudo-IP
 
+  * Ban by session/IP & calculations
+  * Filter by selection sessione/IP
   * Richiesta di verifica
+  * First and incremental list population
+  * Center vertically table on hi-lighted message
+  * Avoid erroneous ban for notify messages
   * Silent cancer behaviour management
+  * Style window
 
 DONE  * Manage list update (remove too old lines)
 DONE  * Select row
