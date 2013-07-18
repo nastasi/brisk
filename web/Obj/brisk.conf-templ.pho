@@ -7,6 +7,9 @@ $G_dbpfx = "bsk_";
 
 $G_lang = "it";
 
+// cryptographic key to hide user ip and session
+$G_crypt_key = "8char_key";
+
 $G_shutdown = FALSE;
 
 // list of allowed proxies IP address (strings)

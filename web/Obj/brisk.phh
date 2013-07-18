@@ -1355,7 +1355,7 @@ class Room
 
   function chatt_send($user, $mesg)
   {
-    GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
+    GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang, $G_crypt_key;
     $only_you = FALSE;
     
     // common settings
@@ -1689,16 +1689,18 @@ class Room
                 continue;
 
             if ($user_cur->flags_vlt_get(USER_FLAG_MODER)) {
-                $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st = %d; g_moder.add([%d, "%s", %d, "%s", "%s"]);',
-                                                                     $user_cur->step+1, $curtime, "userid",
-                                                                     // FIXME: FOR DEVEL REASON WE SUBSTITUTE THIS:
-                                                                     // ($user->stat == 'table' ? $user->table : -1),
-                                                                     // with
-                                                                     ($user->subst == 'sitdown' ? $user->table : -1),
-                                                                     xcape($user->name), xcape($msg) );
+                $user_cur->comm[$user_cur->step % COMM_N] =
+                    sprintf('gst.st = %d; g_moder.add([%d, "%s", "%s", "%s", "%s", "%s"]);',
+                            $user_cur->step+1, $curtime,
+                            $user->sess_crypt,
+                            $user->ip_crypt,
+                            // FIXME: FOR DEVEL REASON WE SUBSTITUTE THIS:
+                            // ($user->stat == 'table' ? $user->table : -1),
+                            // with:
+                            ($user->subst == 'sitdown' ? $user->table : -1),
+                            xcape($user->name), xcape($msg) );
                 $user_cur->step_inc();
             }
-            
 
             if ($user_cur->stat == 'table' || $user->idx_get() == $i) {
                 continue;
@@ -1802,7 +1804,7 @@ class Room
 
   function add_user(&$sess, &$idx, $name, $pass, $ip, $cookie)
   {
-    GLOBAL $G_base;
+    GLOBAL $G_base, $G_crypt_key;
 
     $idx = 0;
 
@@ -1930,6 +1932,7 @@ class Room
       $this->user[$idx]->laccwr = $curtime;
       $this->user[$idx]->bantime = 0;
       $this->user[$idx]->ip = $ip;
+      $this->user[$idx]->ip_crypt = bin2hex( mcrypt_ecb (MCRYPT_DES, $G_crypt_key, $ip, MCRYPT_ENCRYPT));
 
       $this->user[$idx]->rec = $authenticate;
       fprintf(STDERR, "MOP: [%s]\n", $authenticate->supp_comp);

@@ -458,15 +458,16 @@ function act_logout(exitlock)
 
 function ModerateItem(item_ar)
 {
-    var tr, td, date;
+    var tr, td, date, sz;
 
     date = new Date();
 
     this.time  = item_ar[0];
     this.usrid = item_ar[1];
-    this.table = item_ar[2];
-    this.name  = item_ar[3];
-    this.cont  = item_ar[4];
+    this.usrip = item_ar[2];
+    this.table = item_ar[3];
+    this.name  = item_ar[4];
+    this.cont  = item_ar[5];
 
     this.loctm = date.getTime();
 
@@ -483,8 +484,14 @@ function ModerateItem(item_ar)
     td.innerHTML = this.table;
     tr.appendChild(td);
 
+    sz = parseInt(this.usrid.length/2);
     td = document.createElement("td");
-    td.innerHTML = this.usrid;
+    td.innerHTML = this.usrid.substring(0, sz) + "<br>" + this.usrid.substring(sz);
+    tr.appendChild(td);
+
+    sz = parseInt(this.usrip.length/2);
+    td = document.createElement("td");
+    td.innerHTML = this.usrip.substring(0, sz) + "<br>" + this.usrip.substring(sz);
     tr.appendChild(td);
 
     td = document.createElement("td");
@@ -501,7 +508,8 @@ function ModerateItem(item_ar)
 ModerateItem.prototype = {
     time: 0,  // (sec)
     loctm: 0, // (msec)
-    usrid: 0,
+    usrid: "",
+    usrip: "",
     table: -1,
     name: "",
     cont: "",

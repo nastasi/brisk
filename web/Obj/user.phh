@@ -89,7 +89,9 @@ class User {
   var $code;       // authentication code
   var $name;       // name of the user
   var $sess;       // session of the user
+  var $sess_crypt; // encrypted version of user's session
   var $ip;         // ip of the user
+  var $ip_crypt;   // encrypted version of user's ip
   var $lacc;       // last access (for the cleanup)
   var $laccwr;     // last access (for the cleanup)
   var $bantime;    // timeout to temporary ban
@@ -141,6 +143,8 @@ class User {
   }
 
   static function create(&$room, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+    GLOBAL $G_crypt_key;
+
     if (($thiz = new User()) == FALSE)
       return (FALSE);
 
@@ -150,7 +154,9 @@ class User {
     $thiz->code       = -1;
     $thiz->name       = $name;
     $thiz->sess       = $sess;
+    $thiz->sess_crypt = bin2hex( mcrypt_ecb (MCRYPT_DES, $G_crypt_key, $sess, MCRYPT_ENCRYPT));
     $thiz->ip         = $ip;
+    $thiz->ip_crypt   = bin2hex( mcrypt_ecb (MCRYPT_DES, $G_crypt_key, $ip, MCRYPT_ENCRYPT));
     $thiz->lacc       = time();
     $thiz->laccwr     = time();
     $thiz->bantime    = 0;
@@ -202,7 +208,9 @@ class User {
     $this->code       = $from->code;
     $this->name       = $from->name;
     $this->sess       = $from->sess;
+    $this->sess_crypt = $from->sess_crypt;
     $this->ip         = $from->ip;
+    $this->ip_crypt   = $from->ip_crypt;
     $this->lacc       = $from->lacc;
     $this->laccwr     = $from->laccwr;
     $this->bantime    = $from->bantime;
@@ -266,7 +274,9 @@ class User {
     $thiz->code       = $from->code;
     $thiz->name       = $from->name;
     $thiz->sess       = $from->sess;
+    $thiz->sess_crypt = $from->sess_crypt;
     $thiz->ip         = $from->ip;
+    $thiz->ip_crypt   = $from->ip_crypt;
     $thiz->lacc       = $from->lacc;
     $thiz->laccwr     = $from->laccwr;
     $thiz->bantime    = $from->bantime;
@@ -516,6 +526,7 @@ class User {
 
     $tmp_sess = $this->sess;
     $this->sess = "";
+    $this->sess_crypt = "";
     self::unproxy_step($tmp_sess);
     $this->name = "";  // OK here
     while (array_pop($this->comm) != NULL);
