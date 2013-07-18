@@ -35,7 +35,6 @@ window.onbeforeunload = function() {
 }
 // -->
 </script>
-<link rel="stylesheet" type="text/css" href="moderation.css">
 </head>
 <body>
     <div><?php /* phpinfo(); */ ?></div>

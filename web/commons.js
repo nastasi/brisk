@@ -52,7 +52,8 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ',
                                                'en' : '(isolation)' } }
                     };
 
-function $() {
+function $()
+{
     if (arguments.length == 1)
         return document.getElementById(arguments[0]);
     else
