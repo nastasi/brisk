@@ -13,6 +13,10 @@ div.moder_tabanc table {
     padding: 0px;
 }
 
+div.moder_tabanc table tr td {
+    padding: 4px;
+}
+
 div.moder_tabanc td {
     border: 1px solid green;
     vertical-align: text-bottom;
@@ -32,4 +36,12 @@ tr.normal {
 tr.selected {
     background-color: orange;
     cursor: pointer;
+}
+
+td.enlarge {
+    width: 100%;
+}
+
+td.righty {
+    text-align: right;
 }

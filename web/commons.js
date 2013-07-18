@@ -60,6 +60,23 @@ function $()
         return (arguments[0]).document.getElementById((arguments[1]));
 }
 
+function class_del(el, cl)
+{
+    var i, arr = el.className.split(' ');
+    for (i = 0 ; i < arr.length ; i++) {
+        if (arr[i] == cl) {
+            arr.splice(i, 1);
+            i--;
+        }
+    }
+    el.className = arr.join(" ");
+}
+
+function class_add(el, cl)
+{
+    el.className += (el.className == "" ? "" : " ") + cl;
+}
+
 function dec2hex(d, padding)
 {
     var hex = Number(d).toString(16);
@@ -479,10 +496,12 @@ function ModerateItem(item_ar)
     // FIXME a more readable date here
     // td.innerHTML = date.xxxx;
     td.innerHTML = this.time % 100000;
+    class_add(td, "righty");
     tr.appendChild(td);
 
     td = document.createElement("td");
     td.innerHTML = this.table;
+    class_add(td, "righty");
     tr.appendChild(td);
 
     sz = parseInt(this.usrid.length/2);
@@ -501,6 +520,7 @@ function ModerateItem(item_ar)
 
     td = document.createElement("td");
     td.innerHTML = this.cont;
+    class_add(td, "enlarge");
     tr.appendChild(td);
 
     this.tr = tr;
