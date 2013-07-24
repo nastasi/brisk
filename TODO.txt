@@ -1,29 +1,32 @@
  TODO |
 ------+
 Moderation features:
-  * WIP - Privacy with pseudo-sessions and pseudo-IP
 
   * Ban by session/IP & calculations
-  * Filter by selection sessione/IP
+    - web buttons
+    - index_wr.php mgmt
+    - confirmation
+    - disable when no lines are selected
+
+  * Filter by selection sessione/IP/Table
   * Richiesta di verifica
+    - Avoid erroneous ban for notify messages
   * First and incremental list population
   * Center vertically table on hi-lighted message
-  * Avoid erroneous ban for notify messages
   * Silent cancer behaviour management
-  * Style window
+  * (slow WIP) Style window
 
+DONE  * Privacy with pseudo-sessions and pseudo-IP
 DONE  * Manage list update (remove too old lines)
 DONE  * Select row
 DONE  * Filtra per tavolo e/o room
 DONE  * BUG: after disable/enable moderation filters stop to work
 DONE  * Lista righe di chat
+DONE  * turn off moderation when moder win is closed or if window creation fails
+DONE  * create js to manage moderation
 
-   - moderation
-     . turn off moderation when moder win is closed or if window creation fails
-     . turn off moder when logout
-     . enable moderation for certified users only
-     . create a mockup of the moder win
-     . create js to manage moderation
+  * turn off moder when logout
+  * enable moderation for moderator users only
 
   FEATURES |
  ----------+

@@ -77,6 +77,16 @@ function class_add(el, cl)
     el.className += (el.className == "" ? "" : " ") + cl;
 }
 
+function class_is_set(el, cl)
+{
+    var i, arr = el.className.split(' ');
+    for (i = 0 ; i < arr.length ; i++) {
+        if (arr[i] == cl) {
+            return true;
+        }
+    }
+}
+
 function dec2hex(d, padding)
 {
     var hex = Number(d).toString(16);
@@ -550,8 +560,14 @@ ModerateItem.prototype = {
     sel_set: function (v) {
         if (this.sel != v) {
             this.sel = v;
-            this.tr.className = (v ? 'selected' : 'normal');
+            if (v) {
+                class_add(this.tr, 'selected');
+            }
+            else {
+                class_del(this.tr, 'selected');
+            }
         }
+        return v;
     }
 }
 
@@ -620,7 +636,7 @@ Moderate.prototype = {
     },
 
     post_onload: function() {
-        var tr, td, remtr;
+        var tr, td, remtr, selected_item = false;
 
         this.win.anc = this;
         this.table = $(this.win, 'moder_tab');
@@ -628,8 +644,11 @@ Moderate.prototype = {
         for (i = 0 ; i < this.item.length ; i++) {
 	    this.table.appendChild(this.item[i].tr_get());
             this.item[i].hide = false;
+            if (!selected_item) {
+                selected_item = this.item[i].sel_get();
+            }
         }
-
+        this.btn_ban_enable(selected_item);
         this.enabled = true;
     },
 
@@ -670,7 +689,7 @@ Moderate.prototype = {
 
     // moderation items garbage collector: after this.max_dt a line is removed
     item_gc: function() {
-        var date, time;
+        var date, time, selected_item = false;
 
         date = new Date();
         time = date.getTime();
@@ -679,14 +698,25 @@ Moderate.prototype = {
             if (time - this.item[i].loctm > this.max_dt) {
                 this.item_remove(i);
                 i--;
+                continue;
+            }
+            if (!selected_item) {
+                selected_item = this.item[i].sel_get();
             }
         }
+        this.btn_ban_enable(selected_item);
+    },
+
+    btn_ban_enable: function(ena) {
+        $(this.win, 'ban_by_sess').disabled = !ena;
+        $(this.win, 'ban_by_ip').disabled = !ena;
     },
 
     row_select: function(mi) {
         for (i = 0 ; i < this.item.length ; i++) {
             if (this.item[i] == mi) {
-                this.item[i].sel_set(!this.item[i].sel_get());
+                var ena = this.item[i].sel_set(!this.item[i].sel_get());
+                this.btn_ban_enable(ena);
             }
             else {
                 this.item[i].sel_set(false);
@@ -702,6 +732,12 @@ Moderate.prototype = {
     //
     table_show_update: function(obj) {
         this.tab_update(this.room_show, obj.options[obj.selectedIndex].value );
+    },
+
+    ban_by_sess: function(obj) {
+    },
+
+    ban_by_ip: function(obj) {
     },
 
     tab_update: function(room_new, table_new)

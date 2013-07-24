@@ -24,6 +24,16 @@ function table_show_update(obj)
     }
 }
 
+function ban_by_sess(obj)
+{
+    window.anc.ban("sess");
+}
+
+function ban_by_ip(obj)
+{
+    window.anc.ban("ip");
+}
+
 window.onload = function() {
     window.is_loaded = true;     
 }
@@ -54,7 +64,8 @@ window.onbeforeunload = function() {
     }
     ?>
     </select>
-    </td></tr>
+    </td><td><input id="ban_by_sess" onclick="ban_by_sess(this);" type="button" value="Ban by session"/></td>
+         <td><input id="ban_by_ip" onclick="ban_by_ip(this);" type="button" value="Ban by IP"/></td></tr>
     </table>
     </div>
     </div>
