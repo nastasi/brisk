@@ -584,6 +584,7 @@ Moderate.prototype = {
 
     room_show: true,
     table_show: -1,
+    selected_rows: 0,
 
     // max_dt: 1800000, // (msec) maximum delta between current and line time
     max_dt: 15000, // (msec) FIXME: DEV VERSION maximum delta between current and line time
@@ -644,11 +645,8 @@ Moderate.prototype = {
         for (i = 0 ; i < this.item.length ; i++) {
 	    this.table.appendChild(this.item[i].tr_get());
             this.item[i].hide = false;
-            if (!selected_item) {
-                selected_item = this.item[i].sel_get();
-            }
         }
-        this.btn_ban_enable(selected_item);
+        this.btn_ban_enable(this.selected_rows > 0);
         this.enabled = true;
     },
 
@@ -696,15 +694,15 @@ Moderate.prototype = {
 
         for (i = 0 ; i < this.item.length ; i++) {
             if (time - this.item[i].loctm > this.max_dt) {
+                if (this.item[i].sel_get()) {
+                    this.selected_rows--;
+                }
                 this.item_remove(i);
                 i--;
                 continue;
             }
-            if (!selected_item) {
-                selected_item = this.item[i].sel_get();
-            }
         }
-        this.btn_ban_enable(selected_item);
+        this.btn_ban_enable(this.selected_rows > 0);
     },
 
     btn_ban_enable: function(ena) {
@@ -715,13 +713,18 @@ Moderate.prototype = {
     row_select: function(mi) {
         for (i = 0 ; i < this.item.length ; i++) {
             if (this.item[i] == mi) {
-                var ena = this.item[i].sel_set(!this.item[i].sel_get());
-                this.btn_ban_enable(ena);
+                var ena;
+
+                ena = this.item[i].sel_set(!this.item[i].sel_get());
+                this.selected_rows += (ena ? 1 : -1);
             }
             else {
+                if (this.item[i].sel_get())
+                    this.selected_rows += -1;
                 this.item[i].sel_set(false);
             }
         }
+        this.btn_ban_enable(this.selected_rows > 0);
         // mi.tr.className = "selected";
     },
 
