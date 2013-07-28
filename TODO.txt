@@ -3,10 +3,13 @@
 Moderation features:
 
   * Ban by session/IP & calculations
-    - web buttons
+    DONE - web buttons
+    DONE - disable when no lines are selected
+    WIP  - server-side state
     - index_wr.php mgmt
     - confirmation
-    - disable when no lines are selected
+
+  * Add certification check (must be moderation check with a spearate moderation flag, see code)
 
   * Filter by selection sessione/IP/Table
   * Richiesta di verifica

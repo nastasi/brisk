@@ -474,11 +474,13 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                 /* enable moderation */
                 $moder_enable = 'true';
                 $user->flags_vlt_set(USER_FLAG_MODER, USER_FLAG_MODER);
+                $room->moder_n++;
             }
             else {
                 /* disable moderation */
                 $moder_enable = 'false';
                 $user->flags_vlt_set(0, USER_FLAG_MODER);
+                $room->moder_n--;
             }
             $user->comm[$user->step % COMM_N] = sprintf("gst.st = %d; moderate(%s);", 
                                                         $user->step+1, $moder_enable);
