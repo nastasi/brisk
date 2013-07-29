@@ -1482,52 +1482,52 @@ class Room
 
   function room_sitdown($user, $table_idx)
   {
-    log_main("room_sitdown ".($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
-
-    $train_app = "";
-
-    if ($table_idx > -1 && $table_idx < TABLES_N) { 
-      $table = $this->table[$table_idx];
-
-      // wagon shutdown 
-      if ($table->wag_own != -1 && $table->player_n == PLAYERS_N) {        
-        for ($i = 0 ; $i < TABLES_N ; $i++) {
-            if ($table->wag_own == $table->player[$i]) {
-                $train_app = sprintf("tra.rem(%d); ", $table_idx); 
-                $table->wag_reset(time());
-                break;
-            }
-	}
-      }
-    }
-
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $ret = "";
-      $user_cur = $this->user[$i];
-      if ($user_cur->sess == '' || $user_cur->stat != 'room')
-      continue;
+      log_main("room_sitdown ".($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
       
-      $ret = "gst.st = ".($user_cur->step+1)."; ".$train_app;
-      if ($table_idx > -1)
-          $ret .= $this->table_content($user_cur, $table_idx);
-      $ret .= $this->standup_content($user_cur);
+      $train_app = "";
       
-      if ($user->idx_get() == $i) {
-	$ret .=  'subst = "sitdown"; tra.hide(); ';
-	// clean the action buttons in other tables
-	for ($e = 0 ; $e < TABLES_N ; $e++) {
-	  // $ret .= table_act_content(FALSE, 0, $e, $user_cur->table, FALSE);
-          $ret .= $this->table[$e]->act_content($user_cur);
-	}
+      if ($table_idx > -1 && $table_idx < TABLES_N) { 
+          $table = $this->table[$table_idx];
+          
+          // wagon shutdown 
+          if ($table->wag_own != -1 && $table->player_n == PLAYERS_N) {        
+              for ($i = 0 ; $i < TABLES_N ; $i++) {
+                  if ($table->wag_own == $table->player[$i]) {
+                      $train_app = sprintf("tra.rem(%d); ", $table_idx); 
+                      $table->wag_reset(time());
+                      break;
+                  }
+              }
+          }
       }
-      else if ($table_idx > -1) {
-	if ($table->player_n == PLAYERS_N) {
-          $ret .= $table->act_content($user_cur);
-	}
+      
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          $ret = "";
+          $user_cur = $this->user[$i];
+          if ($user_cur->sess == '' || $user_cur->stat != 'room')
+              continue;
+          
+          $ret = "gst.st = ".($user_cur->step+1)."; ".$train_app;
+          if ($table_idx > -1)
+              $ret .= $this->table_content($user_cur, $table_idx);
+          $ret .= $this->standup_content($user_cur);
+          
+          if ($user->idx_get() == $i) {
+              $ret .=  'subst = "sitdown"; tra.hide(); ';
+              // clean the action buttons in other tables
+              for ($e = 0 ; $e < TABLES_N ; $e++) {
+                  // $ret .= table_act_content(FALSE, 0, $e, $user_cur->table, FALSE);
+                  $ret .= $this->table[$e]->act_content($user_cur);
+              }
+          }
+          else if ($table_idx > -1) {
+              if ($table->player_n == PLAYERS_N) {
+                  $ret .= $table->act_content($user_cur);
+              }
+          }
+          $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+          $user_cur->step_inc();
       }
-      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
-    }
   }
 
   function chatt_send($user, $mesg)
