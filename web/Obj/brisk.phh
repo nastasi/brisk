@@ -143,10 +143,10 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.8.0";
+$G_brisk_version = "4.8.1";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: prova il nuovo azioni->preferenze.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: prova il nuovo azioni->preferenze, aggiunto stato utente ONLYFIRST.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: server-side infrastructure to manage user preferences added and S customization added.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
@@ -1516,7 +1516,6 @@ class Room
               $ret .=  'subst = "sitdown"; tra.hide(); ';
               // clean the action buttons in other tables
               for ($e = 0 ; $e < TABLES_N ; $e++) {
-                  // $ret .= table_act_content(FALSE, 0, $e, $user_cur->table, FALSE);
                   $ret .= $this->table[$e]->act_content($user_cur);
               }
           }

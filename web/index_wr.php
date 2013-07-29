@@ -56,6 +56,8 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                            'en' => '<b>The table is only just opened, you will sit down in '), // FIXME
                       'tabwait_b'=> array( 'it' => ' secondi.</b>',
                                            'en' => ' seconds.</b>'),
+                      'mustfirst'=> array( 'it' => '<b>Il tuo utente può sedersi al tavolo solo per primo.</b>',
+                                           'en' => '<b>Your can sit down as first user only.' ),
                       'pollmust' => array( 'it' => '<b>Per partecipare al sondaggio devi essere autenticato.</b>',
                                            'en' => '<b>To vote for the poll you have to be authenticated</b>'),
                       'pollnone' => array( 'it' => '<br><br>Al momento non è attivo alcun sondaggio.',
@@ -583,20 +585,26 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                 $table_idx = (int)$argz[1];
                 $table = &$room->table[$table_idx];
     
-                if ($G_shutdown || $table->wakeup_time > $curtime ||
-                    ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) ) {
-                    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-
-                    /* MLANG: "<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>", "<b>Il tavolo a cui volevi sederti richiede autentifica.</b>", "<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.</b>" */
-                    if ($G_shutdown) {
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
-                    }
-                    else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
-                    }
-                    else {
-                        $user->comm[$user->step % COMM_N] .= sprintf('chatt_sub("%s", [2, 0, "%s"],"%s%d%s");', $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang], $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
-                    }
+                $not_allowed_msg = "";
+                if ($G_shutdown) {
+                        $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                                                   $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
+                }
+                else if ($table->wakeup_time > $curtime) {
+                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s%d%s");',
+                                               $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang],
+                                               $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
+                }
+                else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
+                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                                               $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
+                }
+                else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {
+                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"], "%s");',
+                                               $dt, NICKSERV, $mlang_indwr['mustfirst'][$G_lang]);
+                }
+                if ($not_allowed_msg != "") {
+                    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$not_allowed_msg;
                     $user->step_inc();
                     return TRUE;
                 }
