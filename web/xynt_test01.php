@@ -8,7 +8,7 @@ $desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia (status sempre v
                "Reload limiter: da 1 a 8 ogni secondo e chiude, 9 setta e chiude subito,<br>il client aspetta 3 secondi, e poi da 10 a N ogni secondo, (status sempre verde).");
 
 
-$transs = array( "iframe", "xhr", "htmlfile" );
+$transs = array( "iframe", "websocket", "xhr", "htmlfile" );
 if (!isset($f_trans))
     $f_trans = $transs[0];
 
@@ -46,7 +46,10 @@ if ($isstream == "true") {
     require_once("Obj/transports.phh");
 
 
-    if (isset($transp) && $transp == "xhr") {
+    if (isset($transp) && $transp == "websocket") {
+        $transp = new Transport_websocket();
+    }
+    else if (isset($transp) && $transp == "xhr") {
         $transp = new Transport_xhr();
     }
     else if (isset($transp) && $transp == "htmlfile") {
