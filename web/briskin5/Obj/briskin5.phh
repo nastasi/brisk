@@ -23,6 +23,7 @@
  */
 define('BIN5_PLAYERS_N', 3);
 define('BIN5_MAX_PLAYERS', BIN5_PLAYERS_N);
+define('MAX_POINTS', 5);
 // define(BIN5_SHM_MIN', (50000 * BIN5_MAX_PLAYERS));
 define('BIN5_SHM_MIN', 32768);
 define('BIN5_SHM_MAX', (BIN5_SHM_MIN + 1048576));
@@ -454,6 +455,7 @@ class Bin5_user extends User {
     var $handpt;     // Total card points at the beginning of the current hand.
     var $exitislock; // Player can exit from the table ?
     var $privflags;  // Flags for briskin5 only 
+    var $resume_id;  // Number of match to resume
 
     const BASE = "../";
     
@@ -522,7 +524,8 @@ class Bin5_user extends User {
         $thiz->asta_pnt   = -1;
         $thiz->handpt     = -1;
         $thiz->exitislock = TRUE;
-        
+        $thiz->resume_id  = -1;
+
         log_wr("Bin5 constructor");
         
         $thiz->privflags  = ($CO_bin5_pref_ring_endauct == "true" ? BIN5_USER_FLAG_RING_ENDAUCT : 0) | 0;
@@ -1076,6 +1079,32 @@ class Bin5 {
                         $user_cur->step_inc();
                     }
                 }
+            }
+        }
+        else if ($user->stat == 'table' && strncmp($user_mesg, "/resume ", 8) == 0) { // resume
+            $id = (int)substr($user_mesg, 8);
+            if ($id < 0) {
+                // error case
+                return;
+            }
+            $user->resume_id = $id;
+
+            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                $user_cur = &$this->user[$i];
+
+                if ($user_cur->resume_id < 0 || $user_cur->resume_id != $user->resume_id) {
+                    break;
+                }
+            }
+            if ($i == BIN5_PLAYERS_N) {
+                // here resume
+                // find the match
+                // check all things
+
+                // load $table-> <fields>
+                // table_id matching problem
+                // problem about who start (complex algo to understand by points)
+                // reload for all
             }
         }
         else {

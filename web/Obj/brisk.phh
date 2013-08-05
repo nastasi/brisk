@@ -30,7 +30,6 @@ define('PROXY_PATH', "/var/lib/brisk_proxy");
 define('TABLES_N', 36);
 define('TABLES_AUTH_N', 4);
 define('PLAYERS_N', 3);
-define('MAX_POINTS', 5);
 define('MAX_PLAYERS', (20 + (PLAYERS_N * TABLES_N)));
 define('SHM_DIMS_MIN', (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
 define('SHM_DIMS_MAX', SHM_DIMS_MIN + 1048576);
