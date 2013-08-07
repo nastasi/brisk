@@ -3,6 +3,13 @@
 
   FEATURES |
  ----------+
+   - WEBSOCKET TRANSPORT
+     . client (xynt_streaming.js)
+     . server (transport.phh)
+
+     M1: xynt_test01.php working
+
+     . manage headers correctly in sac-a-push
 
    - improved S
      . db update (add components, maybe single string)
