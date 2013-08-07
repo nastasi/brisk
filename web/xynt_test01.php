@@ -67,8 +67,9 @@ if ($isstream == "true") {
         else
             $init_string .= chr(mt_rand(65, 90));
     }
+    $header = array();
 
-    $body = $transp->init("plain", $header_out, $init_string, "", "0");
+    $body = $transp->init("plain", $header, $header_out, $init_string, "", "0");
 
     foreach ($header_out as $key => $value) {
         header(sprintf("%s: %s", $key, $value));

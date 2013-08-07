@@ -696,7 +696,7 @@ class User {
    stat
    step
 */
-function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $cookie)
+function stream_init($init_string, $enc, $header, &$header_out, &$body, $get, $post, $cookie)
 {
     $curtime = time();
     
@@ -717,7 +717,7 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
     
     $this->rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from);
     
-    $body .= $this->rd_transp->init($enc, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
+    $body .= $this->rd_transp->init($enc, $header, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
 
     return TRUE;
   }

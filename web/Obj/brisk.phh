@@ -2366,7 +2366,7 @@ class Room
               }
 
               $content = "";
-              $user->stream_init($s_a_p->rndstr, $enc, $header_out, $content, $get, $post, $cookie);
+              $user->stream_init($s_a_p->rndstr, $enc, $header, $header_out, $content, $get, $post, $cookie);
               
               $response = headers_render($header_out, -1).chunked_content($user->rd_zls_get(), $content);
               $response_l = mb_strlen($response, "ASCII");
