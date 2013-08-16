@@ -69,6 +69,10 @@ class Transport_template {
     function chunk($step, $cont)
     {
     }
+
+    function is_chunked()
+    {
+    }
 }
 
 class Transport_xhr {
@@ -97,6 +101,11 @@ class Transport_xhr {
     function chunk($step, $cont)
     {
         return ("@BEGIN@".$cont."@END@");
+    }
+
+    function is_chunked()
+    {
+        return TRUE;
     }
 }
 
@@ -165,6 +174,11 @@ push(null);\n// -->\n</script>", $step);
             return sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
         }
+    }
+
+    function is_chunked()
+    {
+        return TRUE;
     }
 }
 

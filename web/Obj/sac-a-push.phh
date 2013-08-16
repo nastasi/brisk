@@ -268,25 +268,6 @@ register_shutdown_function('shutta');
  *  MAIN
  */
 
-function chunked_content($zls, $content)
-{
-    if ($zls) {
-        $cont_comp = $zls->compress_chunk($content);
-    }
-    else {
-        $cont_comp = $content;
-    }
-    $cont_comp_l = mb_strlen($cont_comp, "ASCII");
-    // printf("CHUNK: [%s]\n", $content);
-
-    return (sprintf("%X\r\n", $cont_comp_l).$cont_comp."\r\n");
-}
-
-function chunked_fini()
-{
-    return sprintf("0\r\n");
-}
-
 function get_encoding($header)
 {
     $enc = "plain";
@@ -860,7 +841,7 @@ class Sac_a_push {
                             $content = $user->stream_keepalive(FALSE);
                         }
                         if ($content != "") {
-                            $response = chunked_content($user->rd_zls_get(), $content);
+                            $response = $user->chunked_content($content);
                         }
                     }
                     
