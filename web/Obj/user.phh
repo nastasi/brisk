@@ -108,6 +108,7 @@ class User {
   var $rd_cache;   // place where store failed fwrite data
   var $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
   var $rd_transp;  // class that define stream encapsulation type (iframe, xhr, ...)
+  var $rd_is_chunked; // is the transport chunked or not ?
 
   var $comm;       // commands array
   // var $asta_card;  // 
@@ -168,6 +169,7 @@ class User {
     $thiz->rd_cache   = "";
     $thiz->rd_zls     = FALSE;
     $thiz->rd_transp  = NULL;
+    $thiz->rd_is_chunked = FALSE;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -330,6 +332,7 @@ class User {
       $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
       $this->rd_zls     = ZLibStream::create($enc);
       $this->rd_transp  = Transport::create($transp);
+      $this->rd_is_chunked = $this->rd_transp->is_chunked();
   }
 
   function rd_socket_get() {
@@ -778,6 +781,37 @@ function is_supp_custom()
     }
     return (FALSE);
 }
+
+function is_chunked()
+{
+    return $this->rd_is_chunked;
+}
+
+
+function chunked_content($content)
+{
+    if ($this->rd_zls) {
+        $cont_comp = $this->rd_zls->compress_chunk($content);
+    }
+    else {
+        $cont_comp = $content;
+    }
+    $cont_comp_l = mb_strlen($cont_comp, "ASCII");
+    // printf("CHUNK: [%s]\n", $content);
+
+    if ($this->is_chunked()) {
+        return (sprintf("%X\r\n", $cont_comp_l).$cont_comp."\r\n");
+    }
+    else {
+        return $content;
+    }
+}
+
+function chunked_fini()
+{
+    return sprintf("0\r\n");
+}
+
 
 } // end class User
 

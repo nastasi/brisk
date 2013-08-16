@@ -70,6 +70,10 @@ class Transport_template {
     function chunk($step, $cont)
     {
     }
+
+    function is_chunked()
+    {
+    }
 }
 
 class Transport_websocket {
@@ -207,6 +211,11 @@ class Transport_xhr {
     {
         return ("@BEGIN@".$cont."@END@");
     }
+
+    function is_chunked()
+    {
+        return TRUE;
+    }
 }
 
 class Transport_iframe {
@@ -274,6 +283,11 @@ push(null);\n// -->\n</script>", $step);
             return sprintf("<script id='hs%d' type='text/javascript'><!--
 push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
         }
+    }
+
+    function is_chunked()
+    {
+        return TRUE;
     }
 }
 

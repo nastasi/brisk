@@ -2368,7 +2368,7 @@ class Room
               $content = "";
               $user->stream_init($s_a_p->rndstr, $enc, $header, $header_out, $content, $get, $post, $cookie);
               
-              $response = headers_render($header_out, -1).chunked_content($user->rd_zls_get(), $content);
+              $response = headers_render($header_out, -1).$user->chunked_content($content);
               $response_l = mb_strlen($response, "ASCII");
               
               $wret = @fwrite($new_socket, $response, $response_l);
