@@ -1195,7 +1195,7 @@ function url_complete(parent, url)
     }
 
     // alert("host: ["+host+"]  path: ["+path+"]");
-    if (url.substring(0,6) == 'http:/' || url.substring(0,7) == 'https:/') {
+    if (url.substring(0,6) == 'http:/' || url.substring(0,7) == 'https:/' || url.substring(0,4) == 'ws:/') {
         return (url);
     }
     else if (url.substring(0,1) == '/') {

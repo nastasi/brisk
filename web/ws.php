@@ -1,5 +1,5 @@
 <?php
-   
+
 ?>
 <html>
 <head>
@@ -16,13 +16,13 @@
 
      window.onload = function() {
         var host = "ws://dodo.birds.van/brisk/xynt_test01.php?isstream=true&transp=websocket&f_test=1"; // SET THIS TO YOUR SERVER
-     
+
         console.log("QUI");
         try
         {
             socket = new WebSocket(host);
             console.log('WebSocket - status ' + socket.readyState);
-             
+
             socket.onopen = function(msg)
             {
                 if(this.readyState == 1)
@@ -30,30 +30,30 @@
                     console.log("We are now connected to websocket server. readyState = " + this.readyState);
                 }
             };
-             
+
             //Message received from websocket server
             socket.onmessage = function(msg)
             {
                 console.log(" [ + ] Received: " + msg.data);
             };
-             
+
             //Connection closed
             socket.onclose = function(msg)
             {
                 console.log("Disconnected - status " + this.readyState);
             };
-             
+
             socket.onerror = function()
             {
                 console.log("Some error");
             }
         }
-         
+
         catch(ex)
         {
             console.log('Some exception : '  + ex);
         }
-         
+
      };
  //-->
 </script>

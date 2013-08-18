@@ -720,7 +720,13 @@ function stream_init($init_string, $enc, $header, &$header_out, &$body, $get, $p
     
     $this->rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from);
     
-    $body .= $this->rd_transp->init($enc, $header, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
+    $ret = $this->rd_transp->init($enc, $header, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
+
+    if ($ret === FALSE) {
+        return FALSE;
+    }
+
+    $body .= $ret;
 
     return TRUE;
   }
@@ -758,6 +764,11 @@ function stream_main(&$body, $get, $post, $cookie)
 function stream_keepalive($with_ping)
 {
     return ($this->rd_transp->chunk( $this->rd_scristp++, ($with_ping ? "act_ping();" : NULL)));
+}
+
+function stream_close()
+{
+    return ($this->rd_transp->close());
 }
 
 static function base_get()
@@ -803,7 +814,7 @@ function chunked_content($content)
         return (sprintf("%X\r\n", $cont_comp_l).$cont_comp."\r\n");
     }
     else {
-        return $content;
+        return $cont_comp;
     }
 }
 

@@ -2344,6 +2344,7 @@ class Room
 
           break;
       case "index_rd_ifra.php":
+          // $enc = 'plain';
           do {
               if (!isset($cookie['sess'])
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
@@ -2367,7 +2368,6 @@ class Room
 
               $content = "";
               $user->stream_init($s_a_p->rndstr, $enc, $header, $header_out, $content, $get, $post, $cookie);
-              
               $response = headers_render($header_out, -1).$user->chunked_content($content);
               $response_l = mb_strlen($response, "ASCII");
               

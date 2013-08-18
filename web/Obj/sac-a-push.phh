@@ -221,6 +221,14 @@ function headers_render($header, $len)
     }
     else if (isset($header['HTTP-Response'])) {
         $s = sprintf("HTTP/1.1 %s\r\n", $header['HTTP-Response']);
+        foreach($header as $key => $value) {
+            if (strtolower($key) == "http-response")
+                continue;
+            $s .= sprintf("%s: %s\r\n", $key, $value);
+        }
+        if ($len >= 0) {
+            $s .= sprintf("Content-Length: %ld\r\n", $len);
+        }
     }
     else {
         $s = "HTTP/1.1 200 OK\r\n";
@@ -716,6 +724,10 @@ class Sac_a_push {
                                 if (isset($this->s2u[$id])) {
                                     // $user_a[$s2u[$id]]->disable();
                                     if ($this->s2u[$id]->rd_socket_get() != NULL) {
+                                        // try to send close frame (for websocket)
+                                        $clo = $this->s2u[$id]->stream_close();
+                                        $clo_l = mb_strlen($clo, "ASCII");
+                                        @fwrite($sock, $clo, $clo_l);
                                         $this->s2u[$id]->rd_socket_set(NULL);
                                     }
                                     unset($this->s2u[$id]);
@@ -849,7 +861,7 @@ class Sac_a_push {
                         // echo "SPIA: [".substr($response, 0, 60)."...]\n";
                         // echo "SPIA: [".$response."]\n";
                         $response_l = mb_strlen($response, "ASCII");
-                        $wret = @fwrite($sock, $response);
+                        $wret = @fwrite($sock, $response, $response_l);
                         if ($wret < $response_l) {
                             printf("TROUBLE WITH FWRITE: %d\n", $wret);
                             $user->rd_cache_set(mb_substr($response, $wret, $response_l - $wret, "ASCII"));
@@ -868,6 +880,9 @@ class Sac_a_push {
                         }
                         unset($this->socks[$id]);
                         unset($this->s2u[$id]);
+                        $clo = $user->stream_close();
+                        $clo_l = mb_strlen($clo, "ASCII");
+                        @fwrite($sock, $clo, $clo_l);
                         fclose($sock);
                         printf("CLOSE ON LOOP\n");
                     }
