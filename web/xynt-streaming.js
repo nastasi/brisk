@@ -18,6 +18,7 @@ function transport_ws(doc, xynt_streaming, page)
             if (this.readyState == 1) {
                 // connected
                 self.ws_cb("open");
+                self.init_steps = 1;
             }
         };
         this.ws.onmessage = function (msg) {
@@ -26,8 +27,11 @@ function transport_ws(doc, xynt_streaming, page)
             self.ctx_new += msg.data;
         };
         this.ws.onclose = function (msg) {
-            self.xynt_streaming.log("onclose");
-            self.ws_cb("close");
+            self.xynt_streaming.log("onclose"+self.init_steps);
+            if (self.init_steps == 0)
+                self.ws_cb("error");
+            else
+                self.ws_cb("close");
         };
         this.ws.onerror = function () {
             // on error
@@ -48,6 +52,8 @@ transport_ws.prototype = {
     ws: null,
     stopped: true,
     failed: false,
+
+    init_steps: 0,
 
     ctx_old: "",
     ctx_old_len: 0,
