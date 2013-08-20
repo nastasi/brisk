@@ -4,6 +4,9 @@
   FEATURES |
  ----------+
    - WEBSOCKET TRANSPORT
+     . refactoring $enc attribute management
+     DONE . reintroduced $enc = 'plain' for websocket
+     DONE . fallback for not correct WS version
      DONE . fini of ws stream
      DONE . reactivate compression
      DONE . fix xynt_test01
