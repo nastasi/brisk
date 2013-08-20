@@ -1211,6 +1211,11 @@ class Bin5 {
             
             break;
         case "index_rd_ifra.php":
+            if (($transp  = gpcs_var('transp', $get, $post, $cookie)) === FALSE)
+                $transp = "iframe";
+            if ($transp == 'websocket')
+                $enc = 'plain';
+
             do {
                 if (!isset($table_idx)
                     || !isset($table_token)
