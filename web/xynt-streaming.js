@@ -12,6 +12,7 @@ function transport_ws(doc, xynt_streaming, page)
     this.failed = false;
     this.xynt_streaming = xynt_streaming;
     try {
+this.xynt_streaming.log("PAGE: "+page);
         this.ws = new WebSocket(page);
         this.ws.onopen = function () {
             self.xynt_streaming.log("onopen");
@@ -27,6 +28,9 @@ function transport_ws(doc, xynt_streaming, page)
             self.ctx_new += msg.data;
         };
         this.ws.onclose = function (msg) {
+            this.onopen  = null;
+            this.onclose = null;
+            this.onerror = null;
             self.xynt_streaming.log("onclose"+self.init_steps);
             if (self.init_steps == 0)
                 self.ws_cb("error");
@@ -35,6 +39,9 @@ function transport_ws(doc, xynt_streaming, page)
         };
         this.ws.onerror = function () {
             // on error
+            this.onopen  = null;
+            this.onclose = null;
+            this.onerror = null;
             self.xynt_streaming.log("onerror");
             self.ws_cb("error");
         };
@@ -74,6 +81,7 @@ transport_ws.prototype = {
         if (from == "error") {
             if (this.xynt_streaming != "ready") {
                 if (this.xynt_streaming.transp_fback > 0) {
+this.xynt_streaming.log("DEC: "+this.xynt_streaming.transp_fback);
                     this.xynt_streaming.transp_fback--;
 	            this.stopped = true;
                     this.xynt_streaming.reload();
@@ -87,6 +95,7 @@ transport_ws.prototype = {
 
     ws_abort: function() {
         if (this.ws != null) {
+this.xynt_streaming.log("WSCLOSE");
             this.ws.close();
         }
     },
