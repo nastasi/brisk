@@ -68,6 +68,12 @@ if (!isset($f_trans))
 if (!isset($f_test))
     $f_test = 1;
 
+if (!isset($f_port))
+    $f_port = 80;
+
+if (!isset($f_fback))
+    $f_fback = 0;
+
 
 function mop_flush()
 {
@@ -272,7 +278,7 @@ if (isset($isstream) && $isstream == "true") {
      var gst = new globst();
      window.onload = function() {
 
-         xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", 80, 0, null /* console */, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
+         xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", <?php echo "$f_port";?>, <?php echo "$f_fback";?>, console, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      xstm.start();
  }
@@ -289,10 +295,11 @@ printf("<table>");
 for ($test = 1 ; $test <= count($desc) ; $test++) {
     printf("<tr>");
     foreach ($transs as $trans) {
-        printf("<td style=\"padding: 8px; border: 1px solid black;\"><a href=\"?f_trans=%s&f_test=%d\">Test %s %02d</a></td>", $trans, $test, $trans, $test);
+        printf("<td style=\"padding: 8px; border: 1px solid black;\"><a href=\"?f_trans=%s&f_test=%d&f_port=%d&f_fback=%d\">Test %s %02d (port %d (fb %d))</a></td>", $trans, $test, $f_port, $f_fback, $trans, $test, $f_port, $f_fback);
     }
     printf("</tr>\n");
 }
+printf("<tr><td style=\"padding: 8px; border: 1px solid black; text-align: center;\" colspan='%d'><a href='#' onclick=\"xstm.abort(); \">STOP</a></td></tr>", count($transs));
 printf("</table>");
 printf("<br>[%s]<br>Test: %d<br>", $f_trans, $f_test);
 ?>
