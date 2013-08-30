@@ -1211,6 +1211,11 @@ class Bin5 {
             
             break;
         case "index_rd_ifra.php":
+            if (($transp  = gpcs_var('transp', $get, $post, $cookie)) === FALSE)
+                $transp = "iframe";
+            if ($transp == 'websocket')
+                $enc = 'plain';
+
             do {
                 if (!isset($table_idx)
                     || !isset($table_token)
@@ -1233,8 +1238,9 @@ class Bin5 {
                 }
                 
                 $content = "";
-                $user->stream_init($s_a_p->rndstr, $enc, $header_out, $content, $get, $post, $cookie);
-                $response = headers_render($header_out, -1).chunked_content($user->rd_zls_get(), $content);
+                $user->stream_init($s_a_p->rndstr, $enc, $header, $header_out, $content, $get, $post, $cookie);
+
+                $response = headers_render($header_out, -1).$user->chunked_content($content);
                 $response_l = mb_strlen($response, "ASCII");
                 
                 $wret = @fwrite($new_socket, $response, $response_l);

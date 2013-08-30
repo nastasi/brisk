@@ -1,6 +1,162 @@
 // old targetpage == page and moved into start method
 
 //
+// CLASS transport_ws
+//
+function transport_ws(doc, xynt_streaming, page)
+{
+    this.ctx_new = "";
+    var self = this;
+
+    this.doc = doc;
+    this.failed = false;
+    this.xynt_streaming = xynt_streaming;
+    try {
+this.xynt_streaming.log("PAGE: "+page);
+        this.ws = new WebSocket(page);
+        this.ws.onopen = function () {
+            self.xynt_streaming.log("onopen");
+            if (this.readyState == 1) {
+                // connected
+                self.ws_cb("open");
+                self.init_steps = 1;
+            }
+        };
+        this.ws.onmessage = function (msg) {
+            self.xynt_streaming.log("onmessage");
+            // new data in msg.data
+            self.ctx_new += msg.data;
+        };
+        this.ws.onclose = function (msg) {
+            this.onopen  = null;
+            this.onclose = null;
+            this.onerror = null;
+            self.xynt_streaming.log("onclose"+self.init_steps);
+            if (self.init_steps == 0)
+                self.ws_cb("error");
+            else
+                self.ws_cb("close");
+        };
+        this.ws.onerror = function () {
+            // on error
+            this.onopen  = null;
+            this.onclose = null;
+            this.onerror = null;
+            self.xynt_streaming.log("onerror");
+            self.ws_cb("error");
+        };
+    }
+    catch (ex) {
+        throw "websocket creation failed";
+    }
+
+    this.stopped = false;
+}
+
+transport_ws.prototype = {
+    doc: null,
+    xynt_streaming: "ready",
+    ws: null,
+    stopped: true,
+    failed: false,
+
+    init_steps: 0,
+
+    ctx_old: "",
+    ctx_old_len: 0,
+    ctx_new: "",
+
+    // script_clean: 0,
+
+    destroy: function () { /* public */
+        if (this.ws != null) {
+            this.ws_abort();
+        }
+        delete this.ws;
+    },
+
+    ws_cb: function (from) {
+        var ret;
+
+        if (from == "error") {
+            if (this.xynt_streaming != "ready") {
+                if (this.xynt_streaming.transp_fback > 0) {
+this.xynt_streaming.log("DEC: "+this.xynt_streaming.transp_fback);
+                    this.xynt_streaming.transp_fback--;
+	            this.stopped = true;
+                    this.xynt_streaming.reload();
+                }
+            }
+        }
+        if (this.ws != null && this.ws.readyState > 1) {
+	    this.stopped = true;
+        }
+    },
+
+    ws_abort: function() {
+        if (this.ws != null) {
+this.xynt_streaming.log("WSCLOSE");
+            this.ws.close();
+        }
+    },
+
+    xstr_is_init: function () { /* public */
+        return (true);
+    },
+
+    /* only after a successfull is_initialized call */
+    xstr_is_ready: function () { /* public */
+        return (this.ws.readyState == 1);
+    },
+
+    xstr_set: function () { /* public */
+        // already set
+    },
+
+    ctx_new_is_set: function () { /* public */
+        return (this.ctx_new != null);
+    },
+
+    ctx_new_curlen_get: function () { /* public */
+        return (this.ctx_new.length);
+    },
+
+    ctx_new_getchar: function(idx) { /* public */
+        return (this.ctx_new[idx]);
+    },
+
+    ctx_old_len_is_set: function () { /* public */
+        return (true);
+    },
+
+    ctx_old_len_get: function () { /* public */
+        return (this.ctx_old_len);
+    },
+
+    ctx_old_len_set: function (len) { /* public */
+        this.ctx_old_len = len;
+    },
+
+    ctx_old_len_add: function (len) { /* public */
+        this.ctx_old_len += len;
+    },
+
+    new_part: function () { /* public */
+        return (this.ctx_new.substr(this.ctx_old_len));
+    },
+
+    scrcls_set: function (step) { /* public */
+        // this.script_clean = step;
+    },
+
+    postproc: function () {
+        if (this.stopped && !this.xstr_is_ready()) {
+            this.xynt_streaming.reload();
+        }
+    }
+}
+
+//
 // CLASS transport_xhr
 //
 function transport_xhr(doc, xynt_streaming, page)
@@ -232,8 +388,6 @@ transport_htmlfile.prototype = {
     }
 }
 
-
-
 //
 // CLASS transport_iframe
 //
@@ -344,10 +498,12 @@ transport_iframe.prototype = {
     }
 }
 
-function xynt_streaming(win, transp_type, console, gst, from, cookiename, sess, sandbox, page, cmdproc)
+function xynt_streaming(win, transp_type, transp_port, transp_fback, console, gst, from, cookiename, sess, sandbox, page, cmdproc)
 {
     this.win = win;
     this.transp_type = transp_type;
+    this.transp_port = transp_port;
+    this.transp_fback = transp_fback;
     this.console = console;
     this.gst = gst;
     this.from = from;
@@ -365,12 +521,13 @@ function xynt_streaming(win, transp_type, console, gst, from, cookiename, sess, 
     this.mon_wrntime = this.mon_errtime / 2;
 
     this.mon_update();
-
 }
 
 xynt_streaming.prototype = {
     win:               null,
     transp_type:       null,
+    transp_port:         80,
+    transp_fback:         0,
     transp:            null,
     console:           null,
     gst:               null,
@@ -399,7 +556,7 @@ xynt_streaming.prototype = {
     watchdog_ct:       0,
     watchable:         false,
     restart_n:         0,
-    comm_match:        /_*@BEGIN@(.*?)@END@/g, 
+    comm_match:        /_*@BEGIN@(.*?)@END@/g,
     comm_clean:        /_*@BEGIN@(.*?)@END@/,
     stream:            "",
     the_end:           false,
@@ -442,7 +599,11 @@ xynt_streaming.prototype = {
     },
 
     start: function() { /* public */
-        if (this.the_end) 
+        var transp_type;
+        var page;
+
+        // this.log("start "+this.transp_type+" "+this.transp_fback);
+        if (this.the_end)
             return;
 
         createCookie(this.cookiename, sess, 24*365, this.cookiepath);
@@ -452,26 +613,63 @@ xynt_streaming.prototype = {
 
         // page arrangement
         this.page = url_complete(this.win.location.href, this.page);
+
+        if (this.transp_fback > 0) {
+            transp_type = "websocket";
+            transp_port = (this.transp_fback == 2 ? 80 : 8080);
+        }
+        else {
+            transp_type = this.transp_type;
+            transp_port = this.transp_port;
+        }
+
+        if (transp_type == "websocket") {
+            var end_proto, first_slash;
+
+            // change protocol
+            this.log("precha ["+this.page+"]");
+            end_proto = this.page.indexOf("://");
+            first_slash = this.page.substring(end_proto+3).indexOf("/");
+
+            page = "ws://" + this.page.substring(end_proto+3, end_proto+3+first_slash) + ":" + transp_port + this.page.substring(end_proto+3 + first_slash);
+        }
+        else {
+            page = this.page;
+        }
         // stat, subst, this.gst.st
 
-        this.page = url_append_args(this.page, "sess", this.sess, "stat", stat, "subst", subst, "step", this.gst.st, "from", this.from);
-        this.log(this.page);
+        page = url_append_args(page, "sess", this.sess, "stat", stat, "subst", subst, "step", this.gst.st, "from", this.from);
+        // this.log("the page:");
+        // this.log(page);
 
-        // transport instantiation
-        if (this.transp_type == "xhr") {
-            this.page = url_append_args(this.page, "transp", "xhr");
-            this.transp = new transport_xhr(this.doc, this, this.page);
+        try {
+            // transport instantiation
+            if (transp_type == "websocket") {
+                page = url_append_args(page, "transp", "websocket");
+                this.transp = new transport_ws(this.doc, this, page);
+            }
+            else if (transp_type == "xhr") {
+                page = url_append_args(page, "transp", "xhr");
+                this.transp = new transport_xhr(this.doc, this, page);
+            }
+            else if (transp_type == "iframe") {
+                page = url_append_args(page, "transp", "iframe");
+                this.transp = new transport_iframe(this.doc, this, page);
+            }
+            else if (transp_type == "htmlfile") {
+                page = url_append_args(page, "transp", "htmlfile");
+                this.transp = new transport_htmlfile(this.doc, this, page);
+            }
+            else
+                return;
         }
-        else if (this.transp_type == "iframe") {
-            this.page = url_append_args(this.page, "transp", "iframe");
-            this.transp = new transport_iframe(this.doc, this, this.page);
+        catch (err) {
+            if (this.transp_fback > 0) {
+                this.transp_fback--;
+                this.start();
+                return;
+            }
         }
-        else if (this.transp_type == "htmlfile") {
-            this.page = url_append_args(this.page, "transp", "htmlfile");
-            this.transp = new transport_htmlfile(this.doc, this, this.page);
-        }
-        else
-            return;
 
         // watchdog setting
         this.watchdog_ct  = 0;
@@ -528,7 +726,7 @@ xynt_streaming.prototype = {
 
         if (this.sandbox != null) {
             // from old: var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new+" STOP: "+this.stopped;
-            var zug = "WATCHDOG  sess = ["+this.sess+"]  step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new;          
+            var zug = "WATCHDOG  sess = ["+this.sess+"]  step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new;
             if (zug != this.sandbox.innerHTML)
 	        this.sandbox.innerHTML = zug;
         }
@@ -550,7 +748,7 @@ xynt_streaming.prototype = {
                 }
 
                 /*
-                  on IE7 the the window frame scope is cleaned after the href is set, so we wait 
+                  on IE7 the the window frame scope is cleaned after the href is set, so we wait
                   for a well know variable value before assign this object value to it (OO is a passion)
                 */
                 // if (this.ifra.contentWindow.xynt_streaming == "ready") {
@@ -571,7 +769,7 @@ xynt_streaming.prototype = {
                 this.keepalive_old = this.keepalive_new;
                 this.keepalives_equal = 0;
             }
-            
+
             if (this.keepalives_equal >= this.keepalives_eq_max) {
                 this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
                 this.reload();
@@ -584,7 +782,7 @@ xynt_streaming.prototype = {
         // PICK COMMANDS FROM STREAM
         do {
             // alert("do--while begin ["+again+"]");
-	    // CHECK: maybe again here isn't needed 
+	    // CHECK: maybe again here isn't needed
             again = 0;
             try {
                 /* if (typeof(this.ifra.contentWindow.ctx_new)     == 'undefined' ||
@@ -664,7 +862,7 @@ xynt_streaming.prototype = {
 	    }
 	    else if (this.gst.comms.length > 0) {
 	        var singlecomm;
-                
+
 	        singlecomm = this.gst.comms.shift();
 	        // alert("EXE"+gugu);
 	        // $("xhrdeltalog").innerHTML = "EVALL: "+singlecomm.replace("<", "&lt;", "g"); +"<br>";

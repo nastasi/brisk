@@ -3,7 +3,7 @@
  *  sac-a-push - Obj/transports.phh
  *
  *  Copyright (C) 2012 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -36,6 +36,13 @@
  *   Mac | x  |    |    |    |    |
  *
  *
+ *   WS  | IW | FF | Ch | Op | Ko | IE
+ * ------+----+----+----+----+----+----
+ *   Lnx |    |    |    |    |    |
+ *   Win |    |    |    |    |    |
+ *   Mac |    |    |    |    |    |
+ *
+ *
  *   XHR | IW | FF | Ch | Op | Ko | IE
  * ------+----+----+----+----+----+----
  *   Lnx | Y  |    | ^D |    | Y  | x
@@ -52,23 +59,418 @@
  *
  */
 
-
 class Transport_template {
 
     function Transport_template() {
     }
 
-    function init($enc, &$header_out, $init_string, $base, $step)
+    // return string value is appended to the content of the returned page
+    // return FALSE if fails
+    // check with '===' operator to disambiguation between "" and FALSE return value
+    function init($enc, $header, &$header_out, $init_string, $base, $step)
     {
     }
 
-    static function fini($init_string, $base, $blockerr)
+    function close()
     {
     }
 
     function chunk($step, $cont)
     {
     }
+
+    function is_chunked()
+    {
+    }
+
+    // return string to add to the stream to perform something to the engine
+    static function fini($init_string, $base, $blockerr)
+    {
+        return "";
+    }
+}
+
+class Transport_websocket {
+    protected $magicGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+    function Transport_websocket() {
+        $this->headerOriginRequired                 = false;
+        $this->headerSecWebSocketProtocolRequired   = false;
+        $this->headerSecWebSocketExtensionsRequired = false;
+
+        $this->sendingContinuous = false;
+	$this->sendingContinuous = false;
+	$this->partialMessage = "";
+
+	$this->hasSentClose = false;
+    }
+
+    protected function extractHeaders($message) {
+        $header = array('fin'     => $message[0] & chr(128),
+                        'rsv1'    => $message[0] & chr(64),
+                        'rsv2'    => $message[0] & chr(32),
+                        'rsv3'    => $message[0] & chr(16),
+                        'opcode'  => ord($message[0]) & 15,
+                        'hasmask' => $message[1] & chr(128),
+                        'length'  => 0,
+                        'mask'    => "");
+        $header['length'] = (ord($message[1]) >= 128) ? ord($message[1]) - 128 : ord($message[1]);
+
+        if ($header['length'] == 126) {
+            if ($header['hasmask']) {
+                $header['mask'] = $message[4] . $message[5] . $message[6] . $message[7];
+            }
+            $header['length'] = ord($message[2]) * 256
+                + ord($message[3]);
+        } elseif ($header['length'] == 127) {
+            if ($header['hasmask']) {
+                $header['mask'] = $message[10] . $message[11] . $message[12] . $message[13];
+            }
+            $header['length'] = ord($message[2]) * 65536 * 65536 * 65536 * 256
+                + ord($message[3]) * 65536 * 65536 * 65536
+                + ord($message[4]) * 65536 * 65536 * 256
+                + ord($message[5]) * 65536 * 65536
+                + ord($message[6]) * 65536 * 256
+                + ord($message[7]) * 65536
+                + ord($message[8]) * 256
+                + ord($message[9]);
+        } elseif ($header['hasmask']) {
+            $header['mask'] = $message[2] . $message[3] . $message[4] . $message[5];
+        }
+        //echo $this->strtohex($message);
+        //$this->printHeaders($header);
+        return $header;
+    }
+
+    protected function extractPayload($message,$headers) {
+        $offset = 2;
+        if ($headers['hasmask']) {
+            $offset += 4;
+        }
+        if ($headers['length'] > 65535) {
+            $offset += 8;
+        } elseif ($headers['length'] > 125) {
+            $offset += 2;
+        }
+        return substr($message,$offset);
+    }
+
+    protected function applyMask($headers,$payload) {
+        $effectiveMask = "";
+        if ($headers['hasmask']) {
+            $mask = $headers['mask'];
+        } else {
+            return $payload;
+        }
+
+        while (mb_strlen($effectiveMask, "ASCII") < mb_strlen($payload, "ASCII")) {
+            $effectiveMask .= $mask;
+        }
+        while (mb_strlen($effectiveMask, "ASCII") > mb_strlen($payload, "ASCII")) {
+            $effectiveMask = substr($effectiveMask,0,-1);
+        }
+        return $effectiveMask ^ $payload;
+    }
+
+    protected function checkRSVBits($headers,$user) { // override this method if you are using an extension where the RSV bits are used.
+        if (ord($headers['rsv1']) + ord($headers['rsv2']) + ord($headers['rsv3']) > 0) {
+            //$this->disconnect($user); // todo: fail connection
+            return true;
+        }
+        return false;
+    }
+
+    protected function strtohex($str) {
+        $strout = "";
+        for ($i = 0; $i < mb_strlen($str, "ASCII"); $i++) {
+            $strout .= (ord($str[$i])<16) ? "0" . dechex(ord($str[$i])) : dechex(ord($str[$i]));
+            $strout .= " ";
+            if ($i%32 == 7) {
+                $strout .= ": ";
+            }
+            if ($i%32 == 15) {
+                $strout .= ": ";
+            }
+            if ($i%32 == 23) {
+                $strout .= ": ";
+            }
+            if ($i%32 == 31) {
+                $strout .= "\n";
+            }
+        }
+        return $strout . "\n";
+    }
+
+    function chunk($step, $cont)
+    {
+        return $this->frame('@BEGIN@'.$cont.'@END@'); // , 'text', TRUE);
+    }
+
+    protected function frame($message, $messageType='text', $messageContinues=false) {
+        switch ($messageType) {
+        case 'continuous':
+            $b1 = 0;
+            break;
+        case 'text':
+            $b1 = ($this->sendingContinuous) ? 0 : 1;
+            break;
+        case 'binary':
+            $b1 = ($this->sendingContinuous) ? 0 : 2;
+            break;
+        case 'close':
+            $b1 = 8;
+            break;
+        case 'ping':
+            $b1 = 9;
+            break;
+        case 'pong':
+            $b1 = 10;
+            break;
+        }
+        if ($messageContinues) {
+            $this->sendingContinuous = true;
+        } else {
+            $b1 += 128;
+            $this->sendingContinuous = false;
+        }
+
+        $length = mb_strlen($message, "ASCII");
+        $lengthField = "";
+        if ($length < 126) {
+            $b2 = $length;
+        } elseif ($length <= 65536) {
+            $b2 = 126;
+            $hexLength = dechex($length);
+            //$this->stdout("Hex Length: $hexLength");
+            if (mb_strlen($hexLength, "ASCII")%2 == 1) {
+                $hexLength = '0' . $hexLength;
+            }
+            $n = mb_strlen($hexLength, "ASCII") - 2;
+
+            for ($i = $n; $i >= 0; $i=$i-2) {
+                $lengthField = chr(hexdec(substr($hexLength, $i, 2))) . $lengthField;
+            }
+            while (mb_strlen($lengthField, "ASCII") < 2) {
+                $lengthField = chr(0) . $lengthField;
+            }
+        } else {
+            $b2 = 127;
+            $hexLength = dechex($length);
+            if (mb_strlen($hexLength, "ASCII")%2 == 1) {
+                $hexLength = '0' . $hexLength;
+            }
+            $n = mb_strlen($hexLength, "ASCII") - 2;
+
+            for ($i = $n; $i >= 0; $i=$i-2) {
+                $lengthField = chr(hexdec(substr($hexLength, $i, 2))) . $lengthField;
+            }
+            while (mb_strlen($lengthField, "ASCII") < 8) {
+                $lengthField = chr(0) . $lengthField;
+            }
+        }
+
+        return chr($b1) . chr($b2) . $lengthField . $message;
+    }
+
+    protected function deframe($message) {
+        //echo $this->strtohex($message);
+        $headers = $this->extractHeaders($message);
+        $pongReply = false;
+        $willClose = false;
+        switch($headers['opcode']) {
+        case 0:
+        case 1:
+        case 2:
+            break;
+        case 8:
+            // todo: close the connection
+            $this->hasSentClose = true;
+            return "";
+        case 9:
+            $pongReply = true;
+        case 10:
+            break;
+        default:
+            //$this->disconnect($user); // todo: fail connection
+            $willClose = true;
+            break;
+        }
+
+        if ($this->handlingPartialPacket) {
+            $message = $this->partialBuffer . $message;
+            $this->handlingPartialPacket = false;
+            return $this->deframe($message);
+        }
+
+        if ($this->checkRSVBits($headers,$this)) {
+            return false;
+        }
+
+        if ($willClose) {
+            // todo: fail the connection
+            return false;
+        }
+
+        $payload = $this->partialMessage . $this->extractPayload($message,$headers);
+
+        if ($pongReply) {
+            $reply = $this->frame($payload,$this,'pong');
+            // TODO FIXME ALL socket_write management
+            socket_write($user->socket,$reply,mb_strlen($reply, "ASCII"));
+            return false;
+        }
+        if (extension_loaded('mbstring')) {
+            if ($headers['length'] > mb_strlen($payload, "ASCII")) {
+                $this->handlingPartialPacket = true;
+                $this->partialBuffer = $message;
+                return false;
+            }
+        } else {
+            if ($headers['length'] > mb_strlen($payload, "ASCII")) {
+                $this->handlingPartialPacket = true;
+                $this->partialBuffer = $message;
+                return false;
+            }
+        }
+
+        $payload = $this->applyMask($headers,$payload);
+
+        if ($headers['fin']) {
+            $this->partialMessage = "";
+            return $payload;
+        }
+        $this->partialMessage = $payload;
+        return false;
+    }
+
+
+    protected function checkHost($hostName) {
+        return true; // Override and return false if the host is not one that you would expect.
+        // Ex: You only want to accept hosts from the my-domain.com domain,
+        // but you receive a host from malicious-site.com instead.
+    }
+
+    protected function checkOrigin($origin) {
+        return true; // Override and return false if the origin is not one that you would expect.
+    }
+
+    protected function checkWebsocProtocol($protocol) {
+        return true; // Override and return false if a protocol is not found that you would expect.
+    }
+
+    protected function checkWebsocExtensions($extensions) {
+        return true; // Override and return false if an extension is not found that you would expect.
+    }
+
+    protected function processProtocol($protocol) {
+        return ""; // return either "Sec-WebSocket-Protocol: SelectedProtocolFromClientList\r\n" or return an empty string.
+        // The carriage return/newline combo must appear at the end of a non-empty string, and must not
+        // appear at the beginning of the string nor in an otherwise empty string, or it will be considered part of
+        // the response body, which will trigger an error in the client as it will not be formatted correctly.
+    }
+
+    protected function processExtensions($extensions) {
+        return ""; // return either "Sec-WebSocket-Extensions: SelectedExtensions\r\n" or return an empty string.
+    }
+
+    function init($enc, $headers, &$headers_out, $init_string, $base, $step)
+    {
+        if (0) { // TODO: what is ?
+            if (isset($headers['get'])) {
+                $this->requestedResource = $headers['get'];
+            } else {
+                // todo: fail the connection
+                $headers_out['HTTP-Response'] = "405 Method Not Allowed";
+            }
+        }
+
+        if (!isset($headers['Host']) || !$this->checkHost($headers['Host'])) {
+            $headers_out['HTTP-Response'] = "400 Bad Request";
+        }
+        if (!isset($headers['Upgrade']) || strtolower($headers['Upgrade']) != 'websocket') {
+            $headers_out['HTTP-Response'] = "400 Bad Request";
+        }
+        if (!isset($headers['Connection']) || strpos(strtolower($headers['Connection']), 'upgrade') === FALSE) {
+            $headers_out['HTTP-Response'] = "400 Bad Request";
+        }
+        if (!isset($headers['Sec-Websocket-Key'])) {
+            $headers_out['HTTP-Response'] = "400 Bad Request";
+        } else {
+        }
+
+        if (!isset($headers['Sec-Websocket-Version']) || strtolower($headers['Sec-Websocket-Version']) != 13) {
+            $headers_out['HTTP-Response'] = "426 Upgrade Required";
+            $headers_out['Sec-WebSocketVersion'] = "13";
+        }
+        if ( ($this->headerOriginRequired && !isset($headers['Origin']) )
+             || ($this->headerOriginRequired && !$this->checkOrigin($headers['Origin'])) ) {
+            $headers_out['HTTP-Response'] = "403 Forbidden";
+        }
+        if ( ($this->headerSecWebSocketProtocolRequired && !isset($headers['Sec-Websocket-Protocol']))
+             || ($this->headerSecWebSocketProtocolRequired &&
+                 !$this->checkWebsocProtocol($headers['Sec-Websocket-Protocol']))) {
+            $headers_out['HTTP-Response'] = "400 Bad Request";
+        }
+        if ( ($this->headerSecWebSocketExtensionsRequired  && !isset($headers['Sec-Websocket-Extensions']))
+             || ($this->headerSecWebSocketExtensionsRequired &&
+                 !$this->checkWebsocExtensions($headers['Sec-Websocket-Extensions'])) ) {
+            $headers_out['HTTP-Response'] = "400 Bad Request";
+        }
+
+        if (isset($headers_out['HTTP-Response'])) {
+            // TODO: check return management
+            return (FALSE);
+        }
+
+        // TODO: verify both variables
+        // here there is a change of the socket status from start to handshaked
+        // th headers are saved too but without any further access so we skip it
+
+
+
+        $inno = 'x3JJHMbDL1EzLkh9GBhXDw==';
+        $outo = sha1($inno . $this->magicGUID);
+        $rawToken = "";
+        for ($i = 0; $i < 20; $i++) {
+            $rawToken .= chr(hexdec(substr($outo,$i*2, 2)));
+        }
+
+        $outo = base64_encode($rawToken);
+
+        $webSocketKeyHash = sha1($headers['Sec-Websocket-Key'] . $this->magicGUID);
+        $rawToken = "";
+        for ($i = 0; $i < 20; $i++) {
+            $rawToken .= chr(hexdec(substr($webSocketKeyHash,$i*2, 2)));
+        }
+        $handshakeToken = base64_encode($rawToken);
+        $subProtocol = (isset($headers['Sec-Websocket-Protocol'])) ?
+            $this->processProtocol($headers['Sec-Websocket-Protocol']) : "";
+        $extensions = (isset($headers['Sec-Websocket-Extensions'])) ?
+            $this->processExtensions($headers['Sec-Websocket-Extensions']) : "";
+
+        $headers_out['HTTP-Response'] = "101 Switching Protocols";
+        $headers_out['Upgrade']       = 'websocket';
+        $headers_out['Connection']    = 'Upgrade';
+        $headers_out['Sec-WebSocket-Accept'] = "$handshakeToken$subProtocol$extensions";
+
+        return ("");
+    }
+
+    static function close()
+    {
+        return(chr(0x88).chr(0x02).chr(0xe8).chr(0x03));
+    }
+
+    static function fini($init_string, $base, $blockerr)
+    {
+        return (sprintf('@BEGIN@ %s window.onbeforeunload = null; window.onunload = null; document.location.assign("%sindex.php"); @END@',  ($blockerr ? 'xstm.stop(); ' : ''), $base).self::close());
+    }
+
+    function is_chunked()
+    {
+        return FALSE;
+    }
+
 }
 
 class Transport_xhr {
@@ -76,7 +478,7 @@ class Transport_xhr {
     function Transport_xhr() {
     }
 
-    function init($enc, &$header_out, $init_string, $base, $step)
+    function init($enc, $header, &$header_out, $init_string, $base, $step)
     {
         $ret = sprintf("@BEGIN@ /* %s */ @END@", $init_string);
         if ($enc != 'plain')
@@ -86,6 +488,11 @@ class Transport_xhr {
         $header_out['Content-type']  = 'application/xml; charset="utf-8"';
 
         return ($ret);
+    }
+
+    function close()
+    {
+        return "";
     }
 
     static function fini($init_string, $base, $blockerr)
@@ -98,6 +505,11 @@ class Transport_xhr {
     {
         return ("@BEGIN@".$cont."@END@");
     }
+
+    function is_chunked()
+    {
+        return TRUE;
+    }
 }
 
 class Transport_iframe {
@@ -105,7 +517,7 @@ class Transport_iframe {
     function Transport_iframe() {
     }
 
-    function init($enc, &$header_out, $init_string, $base, $step)
+    function init($enc, $header, &$header_out, $init_string, $base, $step)
     {
         $ret = "";
 
@@ -114,7 +526,7 @@ class Transport_iframe {
         $header_out['Cache-Control'] = 'no-cache, must-revalidate';     // HTTP/1.1
         $header_out['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT'; // Date in the past
         $header_out['Content-type']  = 'text/html; charset="utf-8"';
-        
+
         $ret .= sprintf("<html>
 <head>
 <script type=\"text/javascript\" src=\"%scommons.js\"></script>
@@ -125,12 +537,17 @@ var xynt_streaming = \"ready\";", $base, $base);
             $ret .= sprintf("last_clean = %d;\n", ($step-1));
         $ret .= sprintf("
 window.onload = function () { try { if (xynt_streaming != \"ready\") { xynt_streaming.transp.stopped = true; } } catch(e) { /* console.log(\"catcha\"); */ } };
-</script> 
+</script>
 </head>
 <body>");
         $ret .= sprintf("<!-- \n%s -->\n", $init_string);
 
         return ($ret);
+    }
+
+    function close()
+    {
+        return "";
     }
 
     static function fini($init_string, $base, $blockerr)
@@ -166,6 +583,11 @@ push(null);\n// -->\n</script>", $step);
 push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
         }
     }
+
+    function is_chunked()
+    {
+        return TRUE;
+    }
 }
 
 class Transport_htmlfile extends Transport_iframe {
@@ -178,7 +600,10 @@ class Transport {
 
     static function create($transp)
     {
-        if ($transp == 'xhr') {
+        if ($transp == 'websocket') {
+            return new Transport_websocket();
+        }
+        else if ($transp == 'xhr') {
             return new Transport_xhr();
         }
         else if ($transp == 'htmlfile') {
@@ -190,7 +615,7 @@ class Transport {
     }
     static function gettype($transp)
     {
-        if ($transp == 'xhr' || $transp == 'htmlfile') {
+        if ($transp == 'websocket' || $transp == 'xhr' || $transp == 'htmlfile') {
             return "Transport_".$transp;
         }
         else {

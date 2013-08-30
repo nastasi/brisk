@@ -143,12 +143,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.8.1";
+$G_brisk_version = "4.9.3";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: prova il nuovo azioni->preferenze, aggiunto stato utente ONLYFIRST.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunto WebSocket come sistema preferenziale di comunicazione e corretto qualche bug.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: server-side infrastructure to manage user preferences added and S customization added.',
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: added WebSocket as preferential communication system and fixed some bug.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
 
 $G_room_help = array( 'it' => '
@@ -2552,11 +2552,14 @@ class Room
 
           break;
       case "index_rd_ifra.php":
+          if (($transp  = gpcs_var('transp', $get, $post, $cookie)) === FALSE)
+              $transp = "iframe";
+          if ($transp == 'websocket')
+              $enc = 'plain';
+
           do {
               if (!isset($cookie['sess'])
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
-                  if (($transp  = gpcs_var('transp', $get, $post, $cookie)) === FALSE)
-                      $transp = "iframe";
                   
                   $content = User::stream_fini($transp, $s_a_p->rndstr, TRUE);
 
@@ -2574,9 +2577,8 @@ class Room
               }
 
               $content = "";
-              $user->stream_init($s_a_p->rndstr, $enc, $header_out, $content, $get, $post, $cookie);
-              
-              $response = headers_render($header_out, -1).chunked_content($user->rd_zls_get(), $content);
+              $user->stream_init($s_a_p->rndstr, $enc, $header, $header_out, $content, $get, $post, $cookie);
+              $response = headers_render($header_out, -1).$user->chunked_content($content);
               $response_l = mb_strlen($response, "ASCII");
               
               $wret = @fwrite($new_socket, $response, $response_l);

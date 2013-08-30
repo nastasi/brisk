@@ -113,6 +113,7 @@ class User {
   var $rd_cache;   // place where store failed fwrite data
   var $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
   var $rd_transp;  // class that define stream encapsulation type (iframe, xhr, ...)
+  var $rd_is_chunked; // is the transport chunked or not ?
 
   var $comm;       // commands array
   // var $asta_card;  // 
@@ -179,6 +180,7 @@ class User {
     $thiz->rd_cache   = "";
     $thiz->rd_zls     = FALSE;
     $thiz->rd_transp  = NULL;
+    $thiz->rd_is_chunked = FALSE;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -368,6 +370,7 @@ class User {
       $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
       $this->rd_zls     = ZLibStream::create($enc);
       $this->rd_transp  = Transport::create($transp);
+      $this->rd_is_chunked = $this->rd_transp->is_chunked();
   }
 
   function rd_socket_get() {
@@ -739,7 +742,7 @@ class User {
    stat
    step
 */
-function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $cookie)
+function stream_init($init_string, $enc, $header, &$header_out, &$body, $get, $post, $cookie)
 {
     $curtime = time();
     
@@ -760,7 +763,13 @@ function stream_init($init_string, $enc, &$header_out, &$body, $get, $post, $coo
     
     $this->rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from);
     
-    $body .= $this->rd_transp->init($enc, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
+    $ret = $this->rd_transp->init($enc, $header, &$header_out, $init_string, self::base_get(), $this->rd_scristp);
+
+    if ($ret === FALSE) {
+        return FALSE;
+    }
+
+    $body .= $ret;
 
     return TRUE;
   }
@@ -800,6 +809,11 @@ function stream_keepalive($with_ping)
     return ($this->rd_transp->chunk( $this->rd_scristp++, ($with_ping ? "act_ping();" : NULL)));
 }
 
+function stream_close()
+{
+    return ($this->rd_transp->close());
+}
+
 static function base_get()
 {
     $c = get_called_class();
@@ -821,6 +835,37 @@ function is_supp_custom()
     }
     return (FALSE);
 }
+
+function is_chunked()
+{
+    return $this->rd_is_chunked;
+}
+
+
+function chunked_content($content)
+{
+    if ($this->rd_zls) {
+        $cont_comp = $this->rd_zls->compress_chunk($content);
+    }
+    else {
+        $cont_comp = $content;
+    }
+    $cont_comp_l = mb_strlen($cont_comp, "ASCII");
+    // printf("CHUNK: [%s]\n", $content);
+
+    if ($this->is_chunked()) {
+        return (sprintf("%X\r\n", $cont_comp_l).$cont_comp."\r\n");
+    }
+    else {
+        return $cont_comp;
+    }
+}
+
+function chunked_fini()
+{
+    return sprintf("0\r\n");
+}
+
 
 } // end class User
 

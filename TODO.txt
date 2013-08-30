@@ -33,6 +33,27 @@ DONE  * create js to manage moderation
 
   FEATURES |
  ----------+
+   - WEBSOCKET TRANSPORT
+     . refactoring $enc attribute management
+     DONE . reintroduced $enc = 'plain' for websocket
+     DONE . fallback for not correct WS version
+     DONE . fini of ws stream
+     DONE . reactivate compression
+     DONE . fix xynt_test01
+     DONE M2: brisk working
+     DONE . manage multiport apache config
+     DONE . manage headers correctly in sac-a-push
+     DONE . manage transport.close method where required
+     DONE . xynt_stream: manage fallback to multiple ports
+     DONE . manage fini for ws
+     POST . server: manage input data from clients
+     POST . manage ping/pong (seems not required)
+
+     DONE . client (xynt_streaming.js)
+     DONE . server (transport.phh)
+
+     DONE M1: xynt_test01.php working
+
 
    - improved S
      . db update (add components, maybe single string)

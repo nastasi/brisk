@@ -3,7 +3,7 @@
  *  brisk - index.php
  *
  *  Copyright (C) 2006-2012 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -100,7 +100,7 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'mop'),
                      'st_visch_desc'  => array('it' => 'vischio',
                                              'en' => 'mop'),
-                     
+
                      'tit_ticker'   => array('it' => 'scrivi un invito al tavolo e clicca',
                                              'en' => 'write an invitation at the table and click'),
                      'itm_warr'     => array('it' => 'garantisci',
@@ -239,21 +239,27 @@ function poll_dom() {
 
 function carousel_top()
 {
-    $rn = rand(1, 3);
-    return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" src="img/briskshop%d.gif"></a>', $rn));
+    $what = rand(1,2);
+    if ($what == 1) {
+        $rn = rand(1, 3);
+        return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" alt="il negozio virtuale di Brisk" title="il negozio virtuale di Brisk" src="img/briskshop%d.gif"></a>', $rn));
+        }
+    else {
+        return (sprintf('<a target="_blank" href="http://www.alternativeoutput.it/briskblog"><img class="nobo" alt="il nuovo blog di Brisk" title="il nuovo blog di Brisk" style="display: inline; border: 1px solid #808080;" src="img/briskblog_bannersmall.png"></a>'));
+    }
 }
 
 function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
-    GLOBAL $G_with_sidebanner, $G_sidebanner; 
-    GLOBAL $G_with_sidebanner2, $G_sidebanner2; 
+    GLOBAL $G_with_sidebanner, $G_sidebanner;
+    GLOBAL $G_with_sidebanner2, $G_sidebanner2;
     GLOBAL $G_with_poll;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
 
-    if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE) 
+    if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         $sess = "";
     if (($name = gpcs_var('name', $get, $post, $cookie)) === FALSE)
         unset($name);
@@ -274,14 +280,14 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
   $tables = "";
   $standup = "";
   $ACTION = "login";
-  
+
   if (isset($BRISK_SHOWHTML) == FALSE) {
       $is_table = FALSE;
       log_main("lock Room");
       $curtime = time();
-      
+
       /* Actions */
-      
+
       if (validate_sess($sess)) {
           log_main("pre garbage_manager UNO");
           $room->garbage_manager(TRUE);
@@ -298,17 +304,15 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
               }
               $ACTION = "room";
           }
-          
       }
-      
+
       if ($ACTION == "login" && isset($name)) {
-          
           log_main("pre garbage_manager DUE");
-          
+
           if (isset($pass_private) == FALSE) {
               $pass_private = FALSE;
           }
-          
+
           $room->garbage_manager(TRUE);
           /* try login */
 
@@ -319,9 +323,9 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
                   $idx = -$idx - 1;
                   $is_login = TRUE;
               }
-              
+
               log_legal($curtime, $ipv4addr, $user, "STAT:LOGIN", '');
-              
+
               // recovery lost game
               if ($user->stat == "table") {
                   $cookies = new Cookies();
@@ -331,38 +335,36 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
                   $header_out['Location'] = "briskin5/index.php";
                   return TRUE;
               }
-              
-              
+
               // setcookie ("sess", "", time() + 180);      
               $room->standup_update(&$user);
-              
           }
           else {
               /* Login Rendering */
               /* MLANG: "Utente e/o password errati.", "Il nickname deve contenere almeno una lettera o una cifra.", "Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.", "Il tuo nickname &egrave; gi&agrave; in uso." */
               /*
-               if ($idx == -3) 
+               if ($idx == -3)
                $body .= '<div class="urgmsg"><b>'.$mlang_room['userpasserr'][$G_lang].'</b></div>';
                else if ($idx == -2)
                // $body .= '<div class="urgmsg"><b>Il nickname deve contenere almeno una lettera o una cifra.</b></div>';
                $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassmust'][$G_lang].'</b></div>';
-               else if ($idx == -1) 
+               else if ($idx == -1)
                // $body .= '<div class="urgmsg"><b>Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.</b></div>';
                $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassend'][$G_lang].'</b></div>';
                else
                // $body .= '<div class="urgmsg"><b>Il tuo nickname &egrave; gi&agrave; in uso.</b></div>';
                $body .= '<div class="urgmsg"><b>'.$mlang_room['userpassuse'][$G_lang].'</b></div>';
               */
-              
-              if ($idx == -3) 
+
+              if ($idx == -3)
                   $sfx = 'err';
               else if ($idx == -2)
                   $sfx = 'must';
-              else if ($idx == -1) 
+              else if ($idx == -1)
                   $sfx = 'end';
               else
                   $sfx = 'use';
-              
+
               $body .= '<div class="urgmsg"><b>'.$mlang_room['userpass'.$sfx][$G_lang].'</b></div>';
           }
       }
@@ -384,13 +386,13 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
         $i = $ii;
           else
               $i = TABLES_N - $ii - 1;
-          
+
           if ($ii % 4 == 0) {
               $tables .= '<tr id = "tr_noauth'.$ii.'">';
           }
           if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $ii < TABLES_AUTH_N) {
               $tables .= '<td id = "td_noauth'.$ii.'">';
-              
+
               $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
               $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
               $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
@@ -402,14 +404,13 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
           }
       }
       $tables .= '</table></div>';
-      
-      
+
       $standup .= '<table class="room_standup"><tr><td><div class="room_standup_orig" id="room_standup_orig"></div>';
       $standup .= '<div class="room_ex_standup">';
       /* MLANG: "Giocatori in piedi" */
       // $standup .= '<div id="room_tit"><span class="room_titin"><b>Giocatori in piedi</b> - <a target="_blank" href="weboftrust.php">Come ottenere user e password</a> - </span></div>';
       $standup .= '<div id="room_tit"><span class="room_titin"><b>'.$mlang_room['standing'][$G_lang].'</b></span></div>';
-      
+
       $standup .= sprintf('<div id="standup" class="room_standup"></div>');
       // MLANG (Modera) Reload Esco.
       // TODO: moderation button if moderator only
@@ -1082,7 +1083,7 @@ else {
 
 ?>
      sess = "<?php echo "$sess"; ?>";
-xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
+xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", 80, 2, null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd_ifra.php', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
@@ -1143,7 +1144,7 @@ if ($is_login) {
    }
 
    printf("</td><td>");
-?> 
+?>
 <!--  =========== tables ===========  -->
 <input name="sess" type="hidden" value="<?php echo "$user->sess"; ?>">
 <table class="macro"><tr><td>
