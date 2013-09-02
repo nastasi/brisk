@@ -1,6 +1,7 @@
 #!/bin/bash
 # set -x
-
+NL="
+"
 #
 #  functions
 usage () {
@@ -23,11 +24,24 @@ if [ ! -f "$finname" ]; then
 fi
 source "$finname"
 
+tai=""
+cat <<EOF
+// <graphviz center dpi=52>
+digraph G {
+fillcolor="#f0f0f0";
+// bgcolor="transparent";
+bgcolor="#fafafa";
+newrank=true;
+rankdir="LR";
+ranksep=1.5;
+compound=true;
+EOF
 for gen_id in $(seq 0 $((${#gens_prefix[@]} - 1))); do
     echo "// GENERATION ${gens_prefix[$gen_id]}" 
     names_n="$(echo "${gens_names[$gen_id]}" | sed 's/|/\n/g' | wc -l)" 
     for name_id in $(seq 0 $((names_n - 1))); do
         hue="$(echo "($name_id * 255 ) / $names_n" | bc -l)"
+        # hue=180.0
         col100="$(./rgb_hsv.php -toxrgb 255 $hue 255.0 255.0)"
         col33="$(./rgb_hsv.php -toxrgb 255 $hue 85.0 255.0)"
         col17="$(./rgb_hsv.php -toxrgb 255 $hue 42.0 255.0)"
@@ -39,7 +53,7 @@ for gen_id in $(seq 0 $((${#gens_prefix[@]} - 1))); do
             name="${gens_prefix[$gen_id]}"
         fi
         echo "// [${name}][$col100][$col33][$col17]"
-cat <<EOF
+        cat <<EOF
   subgraph cluster_${name} {
     fontsize=18;
     label="${name}";
@@ -50,6 +64,7 @@ cat <<EOF
     ${name} [label="<1>aaa aaa|<2>bbb bbb|<3>ccc ccc|<4>ddd ddd|<5>eee eee"];
   }
 EOF
+        tai="${tai}${NL}subgraph cluster_${name} { label=\"new name\";${NL}    ${name} [label=\"<1>aaa|<2>bbb|<3>ccc|<4>ddd|<5>eee\"];}${NL}"
     done
 done
 
@@ -94,5 +109,10 @@ for gen_id in $(seq 0 $((${#gens_prefix[@]} - 1))); do
     done
 done
 
+cat <<EOF
+$tai
+}
+// </graphviz>
+EOF
 exit 0
 
