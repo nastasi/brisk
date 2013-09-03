@@ -15,4 +15,4 @@ INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (2, 'due',
 INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (3, 'tre', md5('thr'), 'tre@pluto.com', CAST (X'00010000' as integer), 0);
 INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (4, 'qua', md5('for'), 'qua@pluto.com', CAST (X'00210000' as integer), 0);
 INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (5, 'cin', md5('fiv'), 'cin@pluto.com', CAST (X'00010000' as integer), 0);
-
+ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 6;
