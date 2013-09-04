@@ -289,9 +289,10 @@ class BriskDB
 
     //   ttok   text UNIQUE,      
     //   tidx   
-    function bin5_points_save($date, $ttok, $tidx, $ucodes, $pts)
+    function bin5_points_save($date, $table, $tidx, $ucodes, $pts)
     {
         GLOBAL $G_dbpfx;
+        $sql_ttok = escsql($table->table_token);
 
         $is_trans = FALSE;
         $ret = FALSE;
@@ -309,16 +310,26 @@ class BriskDB
             /*
              * matches management
              */
-            $mtc_sql = sprintf("SELECT * FROM %sbin5_matches WHERE ttok = '%s';", $G_dbpfx, escsql($ttok));
+            $mtc_sql = sprintf("UPDATE %sbin5_matches SET (mazzo_next, mult_next) = (%d, %d) WHERE ttok = '%s' RETURNING *;",
+                               $G_dbpfx, $table->mazzo, $table->mult, $sql_ttok);
             if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
                 // match not exists, insert it
-                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx) VALUES ('%s', %d) RETURNING *;",
-                                   $G_dbpfx, escsql($ttok), $tidx);
-                if ( ! (($mtc_pg  = $this->query($mtc_sql)) != FALSE &&
-                        pg_affected_rows($mtc_pg) == 1) ) {
+                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next) VALUES ('%s', %d, %d, %d) RETURNING *;",
+                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult);
+                if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_affected_rows($mtc_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
                     break;
                 }
+                for ($i = 0 ; $i < $n ; $i++) {
+                    $ord_sql = sprintf("INSERT INTO %sbin5_table_order (mcode, ucode, pos) VALUES (%d, %d, %d);",
+                                       $G_dbpfx, $G_dbpfx, $sql_ttok, $ucode[$i], $i);
+                    if (($ord_pg = $this->query($ord_sql)) == FALSE || pg_affected_rows($ord_pg) != 1 ) {
+                        log_crit(sprintf("bin5_points_save: failed at insert table order [%s]", $ord_sql));
+                        break;
+                    }
+                }
+                if ($i < $n)
+                    break;
             }
             $mtc_obj = pg_fetch_object($mtc_pg,0);
 
@@ -328,10 +339,9 @@ class BriskDB
             $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp) 
                                                VALUES (%d, to_timestamp(%d)) RETURNING *;",
                                $G_dbpfx, $mtc_obj->code, $date);
-            if ( ! (($gam_pg  = $this->query($gam_sql)) != FALSE &&
-                    pg_affected_rows($gam_pg) == 1) ) {
+            if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_affected_rows($gam_pg) != 1) {
                 log_crit(sprintf("bin5_points_save: failed at insert game [%s]", $gam_sql));
-                break;                        
+                break;
             }
         
             $gam_obj = pg_fetch_object($gam_pg,0);
@@ -344,13 +354,11 @@ class BriskDB
                 $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts) 
                                                VALUES (%d, %d, %d);",
                                    $G_dbpfx, $gam_obj->code, $ucodes[$i], $pts[$i]);
-                if ( ! (($pts_pg  = $this->query($pts_sql)) != FALSE &&
-                        pg_affected_rows($pts_pg) == 1) ) {
+                if (($pts_pg  = $this->query($pts_sql)) == FALSE || pg_affected_rows($pts_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert point [%s]", $pts_sql));
-                    break;                        
+                    break;
                 }
             }
-
             if ($i < $n)
                 break;
             

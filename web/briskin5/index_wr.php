@@ -509,11 +509,12 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                             $plist .= '|'.xcapelt($ucodes[$i]);
                         }
                         log_legal($curtime, $user->ip, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
+                        $table->game_next();
                         if ($user->table_orig < TABLES_AUTH_N) {
                             require_once("../Obj/dbase_".$G_dbasetype.".phh");
                             
                             if (($bdb = BriskDB::create()) != FALSE) {
-                                $bdb->bin5_points_save($curtime, $table->table_token, $user->table_orig, $ucodes, $pt_cur);
+                                $bdb->bin5_points_save($curtime, $table, $user->table_orig, $ucodes, $pt_cur);
                                 unset($bdb);
                             }
                             else {
@@ -522,7 +523,6 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                             log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
                         }
                         
-                        $table->game_next();
                         $table->game_init(&$bri->user);
                         
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {

@@ -178,7 +178,7 @@ class BriskDB {
         return ($ret);
     }
 
-    function bin5_points_save($date, $ttok, $tidx, $codes, $pts)
+    function bin5_points_save($date, $table, $tidx, $codes, $pts)
     {
         return TRUE;
     }

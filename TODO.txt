@@ -3,6 +3,12 @@
 
   FEATURES |
  ----------+
+   - CONTINUE FEATURE
+     . save points every game
+     . modify points calculation to include order and mazzo
+
+     . add command to continue
+
    - WEBSOCKET TRANSPORT
      . refactoring $enc attribute management
      DONE . reintroduced $enc = 'plain' for websocket
