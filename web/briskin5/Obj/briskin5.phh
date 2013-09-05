@@ -162,7 +162,7 @@ class Bin5_table extends Table {
     var $old_asta_pnt;
     var $old_mult;
     var $old_pnt;
-    var $old_win;
+    var $old_asta_win;
     var $old_friend;
 
     function Bin5_table() 
@@ -197,7 +197,7 @@ class Bin5_table extends Table {
        $thiz->old_asta_pnt = -1;
        $thiz->old_mult     = -1;
        $thiz->old_pnt      = -1;
-       $thiz->old_win      = -1;
+       $thiz->old_asta_win = -1;
        $thiz->old_friend   = -1;
 
        return ($thiz);
@@ -235,7 +235,7 @@ class Bin5_table extends Table {
        $thiz->old_asta_pnt = $from->old_asta_pnt;
        $thiz->old_mult = $from->mult;
        $thiz->old_pnt = $from->old_pnt;
-       $thiz->old_win = $from->old_win;
+       $thiz->old_asta_win = $from->old_asta_win;
        $thiz->old_friend = $from->old_friend;
 
        return ($thiz);
@@ -261,7 +261,7 @@ class Bin5_table extends Table {
         $thiz->mazzo    = rand(0,PLAYERS_N-1);
         $thiz->points_n = 0;
         $thiz->mult     = 0;
-        $thiz->old_win    = -1;
+        $thiz->old_asta_win = -1;
         $thiz->old_reason = "";
 
         // players are rearranged in an dedicated array
@@ -269,7 +269,7 @@ class Bin5_table extends Table {
         for ($i = 0 ; $i < $from->player_n ; $i++)
             $thiz->player[$i] = $i;
 
-        log_main("TABLE_OLD_WIN - spawn:".$thiz->old_win);
+        log_main("TABLE_OLD_WIN - spawn:".$thiz->old_asta_win);
 
         return ($thiz);
     }
@@ -356,7 +356,7 @@ class Bin5_table extends Table {
            $this->mazzo    =  rand(0,PLAYERS_N-1);
            $this->points_n =  0;
            $this->mult     =  0;
-           $this->old_win  = -1;
+           $this->old_asta_win  = -1;
            $this->old_reason = "";
         */
         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
@@ -825,7 +825,7 @@ class Bin5 {
         }
         $this->table[0] = Bin5_table::spawn(&$table);
         
-        log_main("TABLE_OLD_WIN - Bin5:".$this->table[0]->old_win);
+        log_main("TABLE_OLD_WIN - Bin5:".$this->table[0]->old_asta_win);
         
         $this->table_idx = $table_idx;
         $this->table_token = $table_token;
@@ -1306,7 +1306,7 @@ function calculate_points(&$table)
         $table->asta_pnt = 61;
 
     $table->old_reason = "";
-    $table->old_win = $table->asta_win;
+    $table->old_asta_win = $table->asta_win;
     $table->old_friend = $table->friend;
     $table->old_asta_pnt = $table->asta_pnt;
     $table->old_mult = $table->mult;
@@ -1642,9 +1642,9 @@ function show_table_info(&$bri, &$table, $table_pos)
         $noty .= sprintf("<hr><b>%s</b><br>", xcape($table->old_reason));
     }
 
-    if ($table->old_win != -1) {
-        log_main("TABLE_OLD_WIN:".$table->old_win);
-        $win = $table->player[$table->old_win];
+    if ($table->old_asta_win != -1) {
+        log_main("TABLE_OLD_WIN:".$table->old_asta_win);
+        $win = $table->player[$table->old_asta_win];
         log_main("TABLE_OLD_FRIEND:".$table->old_friend);
         $fri = $table->player[$table->old_friend];
 
