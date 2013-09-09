@@ -438,7 +438,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                 log_wr("CIC".$loggo);
 
                 /* se era il suo turno e la carta era sua ed era in mano */
-                if ($a_play >=0 && $a_play < (BIN5_PLAYERS_N == 5 ? 40 : 24) &&
+                if ($a_play >=0 && $a_play < (BIN5_CARD_HAND * BIN5_PLAYERS_N) &&
                     ($user->table_pos == (($table->gstart + $table->turn) % BIN5_PLAYERS_N)) &&
                     $table->card[$a_play]->stat == 'hand' &&
                     $table->card[$a_play]->owner == $user->table_pos) {
@@ -462,7 +462,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         $player_nex = $card_play . "is_my_time = true; remark_on();";
                         $player_oth = $card_play;
                     }
-                    else if ($table->turn <= (BIN5_PLAYERS_N * 8)) { /* manche finished */
+                    else if ($table->turn <= (BIN5_PLAYERS_N * BIN5_CARD_HAND)) { /* manche finished */
                         $winner = calculate_winner($table);
                         log_wr("GSTART 3");
                         $table->gstart = $winner;
@@ -475,7 +475,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                             $player_nex = $card_play . $card_take;
                         else
                             $player_nex = "";
-                        if ($table->turn < (BIN5_PLAYERS_N * 8))  /* game NOT finished */
+                        if ($table->turn < (BIN5_PLAYERS_N * BIN5_CARD_HAND))  /* game NOT finished */
                             $player_nex .= "is_my_time = true; remark_on();";
                         $player_oth = $card_play . $card_take;
                     }
@@ -500,7 +500,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         $retar[$i] = $ret;
                     }
 
-                    if ($table->turn == (BIN5_PLAYERS_N * 8)) { /* game finished */
+                    if ($table->turn == (BIN5_PLAYERS_N * BIN5_CARD_HAND)) { /* game finished */
                         log_wr(sprintf("GIOCO FINITO !!!"));
 
 

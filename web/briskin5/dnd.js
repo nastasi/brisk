@@ -20,8 +20,10 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  */
-
+/* number of players */
 var PLAYERS_N = 3;
+/* initial number of cards in hand */
+var CARD_HAND = 3;
 /* current manche */
 var manche = 1;
 /* cards on hands */
@@ -65,16 +67,16 @@ var G_take_time = 500;
 /* suffix to add to images name */
 var sux = new Array( "", "_ea", "", "", "_we");
 
-var cards_pos = new Array (8);
-var cards_ea_pos = new Array (8);
-var cards_ne_pos = new Array (8);
-var cards_nw_pos = new Array (8);
-var cards_we_pos = new Array (8);
+var cards_pos = new Array (CARD_HAND);
+var cards_ea_pos = new Array (CARD_HAND);
+var cards_ne_pos = new Array (CARD_HAND);
+var cards_nw_pos = new Array (CARD_HAND);
+var cards_we_pos = new Array (CARD_HAND);
 
 var take_x = new Array(562, 745, 452, 30, 52);
 var take_y = new Array(545, 177,  70, 62,155);
 
-for (i = 0 ; i < 8 ; i++) {
+for (i = 0 ; i < CARD_HAND ; i++) {
     cards_pos[i] = i;
     cards_ea_pos[i] = i;
     cards_ne_pos[i] = i;
@@ -110,7 +112,7 @@ function cards_dispose_so(car_n, tak_n)
     for (i = 0 ; i < car_n ; i++) {
 	$("card" + cards_pos[i]).style.left = start + (i * inter);
 	$("card" + cards_pos[i]).style.top  = 475 + (125 - cards_height)/2;
-	$("card" + cards_pos[i]).style.zIndex = 8 - i;
+	$("card" + cards_pos[i]).style.zIndex = CARD_HAND - i;
 	$("card" + cards_pos[i]).style.visibility = "visible";
     }
 
@@ -227,7 +229,7 @@ function cards_dispose_ea(car_n, tak_n) {
     for (i = 0 ; i < car_n ; i++) {
 	$("card_ea" + cards_ea_pos[i]).style.left = 675 + (125 - cards_height)/2;
 	$("card_ea" + cards_ea_pos[i]).style.top  = start + (i * inter);
-	$("card_ea" + cards_ea_pos[i]).style.zIndex = 8 - i;
+	$("card_ea" + cards_ea_pos[i]).style.zIndex = CARD_HAND - i;
 	$("card_ea" + cards_ea_pos[i]).style.visibility = "visible";
 	// alert("xx "+ (675 + (125 - cards_height)/2) +" yy " + start + (i * inter));
     }
@@ -273,7 +275,7 @@ function cards_dispose_we(car_n, tak_n)
     for (i = 0 ; i < car_n ; i++) {
 	$("card_we" + cards_we_pos[i]).style.left = (125 - cards_height)/2;
 	$("card_we" + cards_we_pos[i]).style.top  = start - (i * inter);
-	$("card_we" + cards_we_pos[i]).style.zIndex = 8 - i;
+	$("card_we" + cards_we_pos[i]).style.zIndex = CARD_HAND - i;
 	$("card_we" + cards_we_pos[i]).style.visibility = "visible";
     }
 	
@@ -510,7 +512,7 @@ function card_setours(zer,uno,due,tre,qua,cin,sei,set)
     var i;
     var arg = new Array(zer,uno,due,tre,qua,cin,sei,set);
 
-    for (i = 0 ; i < 8 ; i++) {
+    for (i = 0 ; i < CARD_HAND ; i++) {
 	$("card"+i).src = getcard(arg[i], 0);
 	$("card"+i).briskid = arg[i];
     }

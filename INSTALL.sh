@@ -6,6 +6,7 @@
 CONFIG_FILE="$HOME/.brisk_install"
 
 apache_conf="/etc/apache2/sites-available/default"
+card_hand=3
 players_n=3
 tables_n=44
 tables_auth_n=12
@@ -29,12 +30,13 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>]"
+    echo "$1 [-W] [-n 3|5] [-c 3|8] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
     echo "  -A apache_conf                  - def. $apache_conf"
+    echo "  -c number cards in hand         - def. $card_hand"
     echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
     echo "  -T number of auth-only tables   - def. $tables_auth_n"
@@ -135,6 +137,7 @@ while [ $# -gt 0 ]; do
         -A*) apache_conf="$(get_param "-A" "$1" "$2")"; sh=$?;;
         -f*) conffile="$(get_param "-f" "$1" "$2")"; sh=$?;;
         -p*) outconf="$(get_param "-p" "$1" "$2")"; sh=$?;;
+        -c*) card_hand="$(get_param "-c" "$1" "$2")"; sh=$?;;
         -n*) players_n="$(get_param "-n" "$1" "$2")"; sh=$?;;
         -t*) tables_n="$(get_param "-t" "$1" "$2")"; sh=$?;;
         -T*) tables_auth_n="$(get_param "-T" "$1" "$2")"; sh=$?;;
@@ -168,8 +171,9 @@ done
 #
 echo "    outconf:    \"$outconf\""
 echo "    apache_conf:\"$apache_conf\""
+echo "    card_hand:   $card_hand"
 echo "    players_n:   $players_n"
-echo "    tables_n:   $tables_n"
+echo "    tables_n:    $tables_n"
 echo "    tables_auth_n: $tables_auth_n"
 echo "    brisk_auth_conf: \"$brisk_auth_conf\""
 echo "    brisk_debug:\"$brisk_debug\""
@@ -189,6 +193,7 @@ if [ ! -z "$outconf" ]; then
     echo "#  Produced automatically by brisk::INSTALL.sh"
     echo "#"
     echo "apache_conf=$apache_conf"
+    echo "card_hand=$card_hand"
     echo "players_n=$players_n"
     echo "tables_n=$tables_n"
     echo "tables_auth_n=$tables_auth_n"
@@ -248,6 +253,11 @@ IFS='
 #  Installation
 #
 ftokk_path="${ftok_path}k"
+
+if [ $card_hand -lt 3 -o $card_hand -gt 8 ]; then
+    echo "card_hand ($card_hand) out of range (3 <= c <= 8)"
+    exit 1
+fi
 
 if [ $players_n -ne 3 -a $players_n -ne 5 ]; then
     echo "players_n ($players_n) out of range (3|5)"
@@ -332,12 +342,15 @@ else
 fi
 
 # .js substitutions
+sed -i "s/CARD_HAND *= *[0-9]\+/CARD_HAND = $card_hand/g" $(find ${web_path}__ -type f -name '*.js' -exec grep -l 'CARD_HAND *= *[0-9]\+' {} \;)
 sed -i "s/PLAYERS_N *= *[0-9]\+/PLAYERS_N = $players_n/g" $(find ${web_path}__ -type f -name '*.js' -exec grep -l 'PLAYERS_N *= *[0-9]\+' {} \;)
 
 sed -i "s/^var G_send_time *= *[0-9]\+/var G_send_time = $send_time/g" $(find ${web_path}__ -type f -name '*.js' -exec grep -l '^var G_send_time *= *[0-9]\+' {} \;)
 
 # .ph[pho] substitutions
 sed -i "s/define *( *'PLAYERS_N', *[0-9]\+ *)/define('PLAYERS_N', $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'PLAYERS_N', *[0-9]\+ *)" {} \;)
+
+sed -i "s/define *( *'BIN5_CARD_HAND', *[0-9]\+ *)/define('BIN5_CARD_HAND', $card_hand)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'BIN5_CARD_HAND', *[0-9]\+ *)" {} \;)
 
 sed -i "s/define *( *'BIN5_PLAYERS_N', *[0-9]\+ *)/define('BIN5_PLAYERS_N', $players_n)/g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'BIN5_PLAYERS_N', *[0-9]\+ *)" {} \;)
 
