@@ -6,6 +6,7 @@
    - CONTINUE FEATURE
      . save points every game
      . modify points calculation to include order and mazzo
+     . exclude not standard types from statistics
 
      . add command to continue
 

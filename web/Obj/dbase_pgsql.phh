@@ -3,7 +3,7 @@
    *  brisk - dbase_pgsql.phh
    *
    *  Copyright (C) 2006-2012 Matteo Nastasi
-   *                          mailto: nastasi@alternativeoutput.it 
+   *                          mailto: nastasi@alternativeoutput.it
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
    *
@@ -34,20 +34,20 @@ function escsql($s)
     return str_replace($escsql_from, $escsql_to, $s);
 }
 
-class DBConn 
+class DBConn
 {
     static $dbcnnx = FALSE;
     var $db = FALSE;
-    
+
     function DBConn()
     {
-        $this->db = DBConn::$dbcnnx;        
+        $this->db = DBConn::$dbcnnx;
     }
 
     static function create()
     {
         GLOBAL $G_dbauth;
-        
+
         if (DBConn::$dbcnnx == FALSE) {
             if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth, PGSQL_CONNECT_FORCE_NEW))) {
                 return (FALSE);
@@ -85,7 +85,7 @@ class BriskDB
     var $dbconn;
     var $item;
     var $item_n;
-    
+
     function BriskDB($dbconn)
     {
         $this->dbconn = $dbconn;
@@ -98,15 +98,15 @@ class BriskDB
         $ret = FALSE;
 
         log_main("BriskDB create:start");
-        
+
         do {
             if (($dbconn = DBConn::create()) == FALSE) {
                 break;
             }
-            
+
             $ret = new BriskDB($dbconn);
         } while (0);
-        
+
         return ($ret);
     }
 
@@ -125,20 +125,20 @@ class BriskDB
     function users_load()
     {
     }
-    
+
     function login_exists($login)
     {
         GLOBAL $G_dbpfx;
 
         /* check the existence of the nick in the BriskDB */
         log_main("login_exists: ".$login);
-        
+
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",
                             $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg = $this->query($user_sql)) != FALSE)
             if (pg_numrows($user_pg) == 1)
                 return TRUE;
-        
+
         return FALSE;
     }
 
@@ -151,7 +151,7 @@ class BriskDB
         }
         if (pg_numrows($user_pg) != 1)
             return FALSE;
-        
+
         $user_obj = pg_fetch_object($user_pg, 0);
 
         return ($user_obj);
@@ -187,37 +187,39 @@ class BriskDB
 
         return TRUE;
     }
-    
+
+    /*
+      if success return a LoginDBItem object
+     */
     function login_verify($login, $pass)
     {
         GLOBAL $G_dbpfx;
-        
+
         $ret = FALSE;
-        
+
         log_main("login_verify: ".$login);
-        
-        
+
         //O /* check the existence of the nick in the BriskDB */
         //O for ($i = 0 ; $i < $this->item_n ; $i++) {
         //O log_main("login_verify: BEGIN");
-        
+
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE) {
             return FALSE;
         }
 
         log_main("login[".$user_obj->code."]: ".$user_obj->login);
-        
+
         /* if it exists check for a valid challenge */
-        if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) { 
+        if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
             if (($chals = &Challenges::load_data()) != FALSE) {
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
                         log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$user_obj->pass)."]");
-                        
+
                         if (strcmp($pass, md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
                             log_main("login_verify SUCCESS for ".$login);
-                            
+
                             $chals->rem($login);
                             $this->user_update_login_time($user_obj->code, time());
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
@@ -226,33 +228,33 @@ class BriskDB
                     }
                 } // end for ($e = 0 ...
             }
-            
+
             if ($chals->ismod()) {
                 Challenges::save_data(&$chals);
             }
-            
+
             Challenges::unlock_data($a_sem);
         }
         //O break;
         // O } //  if (strcasecmp($this->item[$i]->login, ...
         //O }
-    
+
         return ($ret);
     }
 
     function getitem_bylogin($login, &$id) {
         $ret = FALSE;
         $id = -1;
-        
+
         log_main("getitem_bylogin: ".$login);
-        
+
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE)
             return $ret;
 
         $id = $user_obj->code;
         return (LoginDBItem::LoginDBItemFromRecord($user_obj));
     }
-    
+
     // TODO FOR DB
     function getmail($login)
     {
@@ -260,7 +262,7 @@ class BriskDB
 
         if (($ret = $this->getrecord_bylogin($login)) == FALSE)
             return FALSE;
-        
+
         return ($ret->email);
     }
 
@@ -271,7 +273,7 @@ class BriskDB
         for ($i = 0 ; $i < $olddb->count() ; $i++) {
             $user_sql = sprintf("INSERT INTO %susers ( login, pass, email, type) VALUES ('%s', '%s', '%s', %d);",
                                 $G_dbpfx, escsql(strtolower($olddb->item[$i]->login)), escsql($olddb->item[$i]->pass),
-                                escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL); 
+                                escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL);
 
             if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
                 $cont .= sprintf("ERROR IN LINE: %s\n", eschtml($user_sql));
@@ -287,8 +289,8 @@ class BriskDB
         return ($this->dbconn);
     }
 
-    //   ttok   text UNIQUE,      
-    //   tidx   
+    //   ttok   text UNIQUE,
+    //   tidx
     function bin5_points_save($date, $table, $tidx, $ucodes, $pts)
     {
         GLOBAL $G_dbpfx;
@@ -300,7 +302,7 @@ class BriskDB
         $n = count($ucodes);
         /* check the existence of the nick in the BriskDB */
         log_main("bin5_points_save: ");
-        
+
         do {
             if ($this->query("BEGIN") == FALSE) {
                 break;
@@ -336,14 +338,17 @@ class BriskDB
             /*
              * games management
              */
-            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp) 
-                                               VALUES (%d, to_timestamp(%d)) RETURNING *;",
-                               $G_dbpfx, $mtc_obj->code, $date);
+            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp, asta_pnt, pnt, asta_win, friend, mazzo, mult)
+                                               VALUES (%d, to_timestamp(%d), %d, %d, %d, %d, %d, %d) RETURNING *;",
+                               $G_dbpfx, $mtc_obj->code, $date,
+                               ($table->old_asta_win == -1 ? -1 : $ucodes[$table->old_asta_win]),
+                               ($table->old_friend == -1 ? -1 : $ucodes[$table->old_friend]),
+                               $table->old_asta_pnt, $table->old_mult, $table->old_pnt);
             if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_affected_rows($gam_pg) != 1) {
                 log_crit(sprintf("bin5_points_save: failed at insert game [%s]", $gam_sql));
                 break;
             }
-        
+
             $gam_obj = pg_fetch_object($gam_pg,0);
 
             /*
@@ -351,7 +356,7 @@ class BriskDB
              */
             for ($i = 0 ; $i < $n ; $i++) {
                 /* put points */
-                $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts) 
+                $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts)
                                                VALUES (%d, %d, %d);",
                                    $G_dbpfx, $gam_obj->code, $ucodes[$i], $pts[$i]);
                 if (($pts_pg  = $this->query($pts_sql)) == FALSE || pg_affected_rows($pts_pg) != 1) {
@@ -361,25 +366,25 @@ class BriskDB
             }
             if ($i < $n)
                 break;
-            
+
             if ($this->query("COMMIT") == FALSE) {
                 break;
             }
-             
+
             $is_trans = FALSE;
 
             $ret =  TRUE;
         } while (0);
-        
+
         if ($is_trans)
             $this->query("ROLLBACK");
-        
+
         return $ret;
     }
 
 } // End class BriskDB
 
-class LoginDBOld 
+class LoginDBOld
 {
     var $item;
     var $item_n;
