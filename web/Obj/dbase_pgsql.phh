@@ -323,7 +323,7 @@ class BriskDB
                     break;
                 }
                 for ($i = 0 ; $i < $n ; $i++) {
-                    $ord_sql = sprintf("INSERT INTO %sbin5_table_order (mcode, ucode, pos) VALUES (%d, %d, %d);",
+                    $ord_sql = sprintf("INSERT INTO %sbin5_table_orders (mcode, ucode, pos) VALUES (%d, %d, %d);",
                                        $G_dbpfx, $G_dbpfx, $sql_ttok, $ucode[$i], $i);
                     if (($ord_pg = $this->query($ord_sql)) == FALSE || pg_affected_rows($ord_pg) != 1 ) {
                         log_crit(sprintf("bin5_points_save: failed at insert table order [%s]", $ord_sql));

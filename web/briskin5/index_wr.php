@@ -209,7 +209,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
                 /* $table->game_init(&$bri->user); */
 
-                if ($table->rules_engine(&$bri, BIN5_RULES_ABANDON, $user)) {
+                if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_ABANDON, $user)) {
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $user_cur = &$bri->user[$table->player[$i]];
 
@@ -315,7 +315,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         else if ($table->asta_pla_n == 0) {
                             log_wr("PASSANO TUTTI!");
 
-                            if ($table->rules_engine(&$bri, BIN5_RULES_ALLPASS, $user)) {
+                            if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_ALLPASS, $user)) {
                                 for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                                     $user_cur = &$bri->user[$table->player[$i]];
 
@@ -536,7 +536,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
                         /* $table->game_init(&$bri->user); */
 
-                        if ($table->rules_engine(&$bri, BIN5_RULES_FINISH, $user)) {
+                        if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_FINISH, $user)) {
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                                 $user_cur = &$bri->user[$table->player[$i]];
                                 $retar[$i] .= show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, TRUE);
