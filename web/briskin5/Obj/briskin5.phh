@@ -446,9 +446,9 @@ class Bin5_table extends Table {
         return ($ct);
     }
 
-    function rules_engine($bri, $action, $user)
+    function rules_engine($bri, $curtime, $action, $user)
     {
-        GLOBAL $G_all_points;
+        GLOBAL $G_all_points, $G_dbasetype;
 
         $pts = array();
 

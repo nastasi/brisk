@@ -3,6 +3,16 @@
 #
 #  all this part is from mopshop and we will use it to construct the brisk database
 #
+
+if [ "$1" = "-d" -o "$1" = "--dryrun" ]; then
+    shift
+    DRY_RUN=y
+    psql () {
+        echo "MOCKPSQL params: $@"
+        cat
+    }
+fi
+
 if [ -f $HOME/.brisk-db.conf ]; then
     source $HOME/.brisk-db.conf
 elif [ -f $HOME/.db.conf ]; then
@@ -51,6 +61,7 @@ one_or_all() {
 # MAIN
 #
 sht=0
+MATCH_DROP='^drop|^alter table.* drop '
 
 if [ "$1" = "-s" ]; then
     shift
@@ -64,12 +75,12 @@ elif [ "$1" = "destroy" ]; then
     echo "su root" 
     su root -c "su postgres -c \"dropdb $DBBASE && dropuser $DBUSER\"" 
 elif [ "$1" = "clean" ]; then
-    ( echo "-- MESG: clean start" ; one_or_all $2 | grep -i '^drop' | tac ; echo "-- MESG: clean end" ;   ) | sqlexe $sht
+    ( echo "-- MESG: clean start" ; one_or_all $2 | egrep -i "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ;   ) | sqlexe $sht
 elif [ "$1" = "build" ]; then
-    ( echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) | sqlexe $sht
+    ( echo "-- MESG: build start" ; one_or_all $2 | egrep -iv "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) | sqlexe $sht
 elif [ "$1" = "rebuild" ]; then
-    ( echo "-- MESG: clean start" ; one_or_all $2 | grep -i '^drop' | tac ; echo "-- MESG: clean end" ; \
-        echo "-- MESG: build start" ; one_or_all $2 | grep -iv '^drop' ; echo "-- MESG: build end" ;   ) \
+    ( echo "-- MESG: clean start" ; one_or_all $2 | egrep -i "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ; \
+        echo "-- MESG: build start" ; one_or_all $2 | egrep -iv "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) \
         | sqlexe $sht
 elif [ "$1" = "psql" ]; then
    shift
@@ -93,16 +104,18 @@ elif [ "$1" = "add" ]; then
     cat "$2" | sqlexe $sht
 else
     echo " USAGE"
-    echo "   ./builder create"
-    echo "   ./builder destroy"
-    echo "   ./builder clean"
-    echo "   ./builder build"
-    echo "   ./builder rebuild"
-    echo "   ./builder psql"
-    echo "   ./builder piped"
-    echo "   ./builder add <filesql>"
-    echo "   ./builder dump [dumpfile]"
-    echo "   ./builder dumpall [dumpfile]"
-    echo "   ./builder all"
-    echo "   ./builder help"
+    echo "   ./builder [-d|--dry-run] <command> ..."
+    echo "   commands are:"
+    echo "       create"
+    echo "       destroy"
+    echo "       clean"
+    echo "       build"
+    echo "       rebuild"
+    echo "       psql"
+    echo "       piped"
+    echo "       add <filesql>"
+    echo "       dump [dumpfile]"
+    echo "       dumpall [dumpfile]"
+    echo "       all"
+    echo "       help"
 fi
