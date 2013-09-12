@@ -405,6 +405,17 @@ class Bin5_table extends Table {
         $this->mazzo  = ($this->mazzo + $delta) % BIN5_PLAYERS_N;
     }
 
+    function mult_inc($val)
+    {
+        $this->old_mult = $this->mult;
+        $this->mult += $val;
+    }
+
+    function mult_set($val)
+    {
+        $this->old_mult = $this->mult;
+        $this->mult = $val;
+    }
 
     function hand_points($idx)
     {
@@ -454,8 +465,9 @@ class Bin5_table extends Table {
 
         if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
             $this->old_reason = "Hanno passato tutti.";
+            $this->old_asta_win = -1;
             $this->old_pnt = 0;
-            $this->mult += 1;
+            $this->mult_inc(1);
             for ($i = 0 ; $i < PLAYERS_N ; $i++) {
                 $pts[$i] = 0;
             }
@@ -468,8 +480,9 @@ class Bin5_table extends Table {
             log_wr(sprintf("GIOCO FINITO !!!"));
 
             $this->old_reason = sprintf("Ha lasciato %s perché aveva al massimo 2 punti.", xcape($user->name));
+            $this->old_asta_win = $user->table_pos;
             $this->old_pnt = 0;
-            $this->mult += 1;
+            $this->mult_inc(1);
 
             for ($i = 0 ; $i < PLAYERS_N ; $i++) {
                 $pts[$i] = 0;
@@ -508,7 +521,7 @@ class Bin5_table extends Table {
                     }
                     $this->points_n++;
                     $this->old_pnt = $pro;
-                    $this->mult += 1;
+                    $this->mult_inc(1);
 
                     // return($pts);
                     break;
@@ -540,7 +553,8 @@ class Bin5_table extends Table {
                 }
                 $this->points_n++;
                 $this->old_pnt = $pro;
-                $this->mult = 0;
+                $this->old_asta_win = $this->asta_win;
+                $this->mult_set(0);
 
                 // return($pts);
             } while (0);
@@ -567,11 +581,10 @@ class Bin5_table extends Table {
         $plist .= $codes;
         log_legal($curtime, $user->ip, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
 
-        $this->old_mazzo = $this->mazzo;
         $this->old_asta_pnt = $this->asta_pnt;
-        $this->old_mult = $this->mult;
-        // $this->old_pnt and $this->old_reason are specific
-        $this->old_asta_win = $this->asta_win;
+        // $this->old_mazzo is managed by ->game_next();
+        // $this->old_mult, $this->old_pnt, $this->old_reason and $this->old_asta_win are specific
+
         $this->old_friend = $this->friend;
 
         if ($user->table_orig < TABLES_AUTH_N) {
