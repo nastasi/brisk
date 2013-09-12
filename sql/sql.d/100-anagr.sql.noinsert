@@ -10,9 +10,9 @@
 -- define(USER_FLAG_TY_SUSPEND, 0x00400000); // done
 -- define(USER_FLAG_TY_DISABLE, 0x00800000); // done
 
-INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (1, 'uno', md5('one'), 'uno@pluto.com', CAST (X'00020000' as integer), 0);
-INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (2, 'due', md5('two'), 'due@pluto.com', CAST (X'00010000' as integer), 0);
-INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (3, 'tre', md5('thr'), 'tre@pluto.com', CAST (X'00010000' as integer), 0);
-INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (4, 'qua', md5('for'), 'qua@pluto.com', CAST (X'00210000' as integer), 0);
-INSERT INTO #PFX#users (code, login, pass, email, type, flags) VALUES (5, 'cin', md5('fiv'), 'cin@pluto.com', CAST (X'00010000' as integer), 0);
-ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 6;
+INSERT INTO #PFX#users (code, login, pass, email, type) VALUES (101, 'uno', md5('one'), 'uno@pluto.com', CAST (X'00020000' as integer));
+INSERT INTO #PFX#users (code, login, pass, email, type) VALUES (102, 'due', md5('two'), 'due@pluto.com', CAST (X'00010000' as integer));
+INSERT INTO #PFX#users (code, login, pass, email, type) VALUES (103, 'tre', md5('thr'), 'tre@pluto.com', CAST (X'00010000' as integer));
+INSERT INTO #PFX#users (code, login, pass, email, type) VALUES (104, 'qua', md5('for'), 'qua@pluto.com', CAST (X'00210000' as integer));
+INSERT INTO #PFX#users (code, login, pass, email, type) VALUES (105, 'cin', md5('fiv'), 'cin@pluto.com', CAST (X'00010000' as integer));
+ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 106;
