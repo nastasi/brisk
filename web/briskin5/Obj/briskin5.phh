@@ -35,32 +35,49 @@ define('BIN5_RULES_ABANDON', 1);
 define('BIN5_RULES_ALLPASS', 2);
 
 $mlang_bin5_bin5 = array(
-                         'info_part' => array( 'it' => '<hr>Nell\'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>',
-                                               'en' => '<hr>In the last hand the declarer was <b>%s</b>, the partner was <b>%s</b>,<br>'),
-                         'info_capp' => array( 'it' => 'hanno fatto <b>cappotto</b> EBBRAVI!.<br>',
-                                               'en' => 'and they made <b>capot</b> WELL DONE!.<br>'),
-                         'info_pnt'  => array( 'it' => 'dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno %s.<br>',
-                                               'en' => 'they had to do <b>%s</b> points and they had made <b>%d</b>: they have %s.<br>'),
-                         'info_alea' => array( 'it' => 'almeno ',
-                                               'en' => 'at least '),
-                         'info_more' => array( 'it' => 'pi&ugrave; di 60',
-                                               'en' => 'over 60'),
-                         'info_win'  => array( 'it' => '<b>vinto</b>',
-                                               'en' => '<b>win</b>'),
-                         'info_peer' => array( 'it' => '<b>pareggiato</b>',
-                                               'en' => '<b>drew</b>'),
-                         'info_lost' => array( 'it' => '<b>perso</b>',
-                                               'en' => '<b>lost</b>'),
+                         // br, hr, b, /b, win, fri
+                         'info_part' => array( 'it' => '%2$sNell\'ultima mano ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
+                                               'en' => '%2$sIn the last hand the declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
+                         // br, hr, b, /b
+                         'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
+                                               'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
 
-                         'info_alon' => array( 'it' => '<hr>Nell\'ultima partita <b>%s</b> si &egrave; chiamato in mano,<br>',
-                                               'en' => '<hr>In the last hand <b>%s</b> play alone against each other,<br>'),
-                         'info_apnt' => array( 'it' => 'doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha %s.<br>',
-                                               'en' => 'he/she had to do <b>%s</b> points and they had made <b>%d</b>: he/she had %s.<br>'),
-                         'info_acap' => array( 'it' => 'ha fatto <b>cappotto</b> EBBRAVO!.<hr>',
-                                               'en' => 'and he/she made <b>capot</b> WELL DONE!.<hr>'),
+                         // br, hr, b, /b, asta_pnt, pnt, winornot
+                         'info_pnt'  => array( 'it' => 'dovevano fare %3$s%5$d%4$s punti e ne hanno fatti %3$s%6$d%4$s: hanno %7$s.%1$s',
+                                               'en' => 'they had to do %3$s%5$d%4$s points and they had made %3$s%6$d%4$s: they have %7$s.%1$s'),
+                         // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
+                         'info_alea' => array( 'it' => 'dovevano fare %3$salmeno %5$d%4$s punti e ne hanno fatti %3$s%6$d%4$s: hanno %7$s.%1$s',
+                                               'en' => 'they had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: they have %7$s.%1$s'),
+                         // br, hr, b, /b, old_pnt, winornot
+                         'info_more' => array( 'it' => 'dovevano fare %3$spiù di 60%4$s punti e ne hanno fatti %3$s%5$d%4$s: hanno %6$s.%1$s',
+                                               'en' => 'they had to do %3$sover 60%4$s points and they had made %3$s%5$d%4$s: they have %3$s%6$s%4$s.%1$s'),
+                         'info_win'  => array( 'it' => 'vinto',
+                                               'en' => 'win'),
+                         'info_peer' => array( 'it' => 'pareggiato',
+                                               'en' => 'drew'),
+                         'info_lost' => array( 'it' => 'perso',
+                                               'en' => 'lost'),
 
-                         'info_omul' => array( 'it' => ' La partita valeva <b>%s</b>.',
-                                               'en' => ' EN: The game was worth <b>%s</b>.' ),
+                         // br, hr, b, /b, win_name
+                         'info_alon' => array( 'it' => '%2$sNell\'ultima partita %3$s%5$s%4$s si &egrave; chiamato in mano,%1$s',
+                                               'en' => '%2$sIn the last hand %3$s%5$s%4$s play alone against each other,%1$s'),
+                         // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
+                         'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %6$s.%1$s',
+                                               'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
+                         // br, hr, b, /b, old_pnt, winornot
+                         'info_morea' => array( 'it' => 'doveva fare %3$spiù di 60%4$s punti e ne ha fatti %3$s%5$d%4$s: ha %3$s%6$s%4$s.%1$s',
+                                                'en' => 'he/she had to do %3$smore than 60%4$s points and they had made %3$s%5$d%4$s: he/she had %3$s%6$s%4$s.%1$s'),
+                         // br, hr, b, /b
+                         'info_acap' => array( 'it' => 'ha fatto %3$scappotto%4$s EBBRAVO!.%2$s',
+                                               'en' => 'and he/she made %3$scapot%4$s WELL DONE!.%2$s'),
+
+                         // br, hr, b, /b
+                         'info_omul' => array( 'it' => ' La partita valeva %3$s%5$s%3$s.',
+                                               'en' => ' EN: The game was worth %3$s%5$s%3$s.' ),
+
+
+
+
 
                          'info_yturn'=> array( 'it' => ' tocca a <b>te</b> giocare.',
                                                'en' => ' it\'s <b>your</b> turn.'),
@@ -1815,37 +1832,42 @@ function show_table_info(&$bri, &$table, $table_pos)
 
         $wol = game_result($table->old_asta_pnt, $table->old_pnt);
 
-        if ($win != $fri) {
-            /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
+        if (0 == 1) {
+            if ($win != $fri) {
+                /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
 
-            $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
-                             xcape($bri->user[$win]->name),
-                             xcape($bri->user[$fri]->name));
-            if ($table->old_pnt == 120) {
-                $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang]);
+                $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
+                                 xcape($bri->user[$win]->name),
+                                 xcape($bri->user[$fri]->name));
+                if ($table->old_pnt == 120) {
+                    $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang]);
+                }
+                else {
+                    $noty .= sprintf($mlang_bin5_bin5['info_pnt'][$G_lang],
+                                     ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
+                                      $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
+                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
+                }
             }
             else {
-                $noty .= sprintf($mlang_bin5_bin5['info_pnt'][$G_lang],
-                                 ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
-                                  $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
-                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
-            }
-        }
-        else {
-            $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
-                             xcape($bri->user[$win]->name));
-            if ($table->old_pnt == 120) {
-                $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang]);
-            }
-            else {
-                $noty .= sprintf($mlang_bin5_bin5['info_apnt'][$G_lang],
+                $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
+                                 xcape($bri->user[$win]->name));
+                if ($table->old_pnt == 120) {
+                    $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang]);
+                }
+                else {
+                    $noty .= sprintf($mlang_bin5_bin5['info_apnt'][$G_lang],
 
-                                 ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
-                                  $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
+                                     ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
+                                      $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
 
-                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
+                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
+                }
             }
-        }
+        } // OLD VERSION
+        $noty = game_description(BIN5_RULES_FINISH, 'html', $win, $bri->user[$win]->name, $fri, $bri->user[$fri]->name,
+                                 $wol, $table->old_pnt, $table->old_asta_pnt);
+
         $old_multer = $table->multer(FALSE);
         if ($old_multer > 1) {
             $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], multoval($old_multer));
@@ -1968,6 +1990,89 @@ function log_points($remote_addr, $curtime, $user, $where, $mesg)
                             $user->name, $remote_addr, $where , $mesg));
         fclose($fp);
     }
+}
+
+function game_description($act, $form, $win, $win_name, $fri, $fri_name,
+                          $wol, $old_pnt, $old_asta_pnt)
+{
+    GLOBAL $G_lang, $mlang_bin5_bin5;
+
+    if ($form == 'html') {
+        $tg_br = "<br>";
+        $tg_hr = "<hr>";
+        $tg_bo = "<b>";
+        $tg_bc = "</b>";
+        $win_name = xcape($win_name);
+        $fri_name = xcape($fri_name);
+    }
+    else {
+        $tg_br = "";
+        $tg_hr = "";
+        $tg_bo = "";
+        $tg_bc = "";
+    }
+
+    $noty = "";
+
+    if ($win != $fri) { // not alone case
+
+        /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
+
+        $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
+                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                         $win_name,
+                         $fri_name);
+        if ($old_pnt == 120) {
+            $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang],
+                             $tg_br, $tg_hr, $tg_bo, $tg_bc );
+        }
+        else {
+            if ($old_asta_pnt > 61) {
+                $noty .= sprintf($mlang_bin5_bin5['info_alea'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                 $old_asta_pnt, $old_pnt,
+                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
+            }
+            else {
+                $noty .= sprintf($mlang_bin5_bin5['info_more'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                 $old_pnt,
+                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
+            } // else of if ($old_asta_pnt > 61) {
+        } // else of if ($old_pnt == 120) {
+    } // if ($win != $fri) { // not alone case
+    else {
+        $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
+                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                         $win_name);
+        if ($old_pnt == 120) {
+            $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang],
+                             $tg_br, $tg_hr, $tg_bo, $tg_bc);
+        }
+        else {
+            if ($old_asta_pnt > 61) {
+                $noty .= sprintf($mlang_bin5_bin5['info_aleaa'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                 $old_asta_pnt, $old_pnt,
+                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
+            }
+            else {
+                $noty .= sprintf($mlang_bin5_bin5['info_morea'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                 $old_pnt,
+                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
+            }
+        }
+    }
+    return ($noty);
 }
 
 ?>
