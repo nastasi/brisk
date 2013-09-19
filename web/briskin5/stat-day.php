@@ -229,59 +229,97 @@ function main_file($curtime)
 
 function main_pgsql($from, $to)
 {
-    GLOBAL $G_dbpfx;
+    GLOBAL $G_lang, $G_dbpfx, $mlang_stat_day;
 
-  if (($fpexp = @fopen(LEGAL_PATH."/explain.log", 'w')) == FALSE) {
-    echo "Open explain failed<br>";
-    exit;
-  }
-    fprintf($fpexp, "<h2>Minuta delle partite dal (%s) al (%s)</h2>",
-	$from, $to);
+    $ret = FALSE;
+    $fpexp = FALSE;
 
-    if (($bdb = BriskDB::create()) == FALSE) {
-        echo "database connection failed";
-        exit;
-    }
     do {
-        if (pg_query($bdb->dbconn->db(), "BEGIN") == FALSE) {
-            log_crit("statadm: begin failed");
+        if (($fpexp = @fopen(LEGAL_PATH."/explain.log", 'w')) == FALSE) {
+            log_crit("stat-day: open explain failed");
             break;
         }
-        
-        $tmt_sql = sprintf("select m.code as code from %sbin5_matches as m, %sbin5_games as g WHERE m.code = g.mcode AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code;", $G_dbpfx, $G_dbpfx, $from, $to);
+        fprintf($fpexp, "<h2>Minuta delle partite dal (%s) al (%s)</h2>",
+                $from, $to);
 
-        // if deletable old matches exists then ...
-        if (($tmt_pg = pg_query($bdb->dbconn->db(), $tmt_sql)) != FALSE) {
+        if (($bdb = BriskDB::create()) == FALSE) {
+            log_crit("stat-day: database connection failed");
+            break;
+        }
+
+        if (pg_query($bdb->dbconn->db(), "BEGIN") == FALSE) {
+            log_crit("stat-day: begin failed");
+            break;
+        }
+
+        // retrieve list of active tournaments
+        $trn_sql = sprintf("SELECT * FROM %sbin5_tournaments WHERE active = 1;", $G_dbpfx);
+        if (($trn_pg = pg_query($bdb->dbconn->db(), $trn_sql)) == FALSE) {
+            log_crit("stat-day: select from tournaments failed");
+            break;
+        }
+
+        $trn_n = pg_numrows($trn_pg);
+
+        for ($t = 0 ; $t < $trn_n ; $t++) {
+            $trn_obj = pg_fetch_object($trn_pg, $t);
+
+            $tmt_sql = sprintf("SELECT m.code AS code FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code;",
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $from, $to);
+
+            // if deletable old matches exists then ...
+            if (($tmt_pg = pg_query($bdb->dbconn->db(), $tmt_sql)) == FALSE) {
+                log_crit("stat-day: select from matches failed");
+                break;
+            }
+
             //
             // store matches before clean them
             //
             $tmt_n = pg_numrows($tmt_pg);
             // get matches
+            if ($tmt_n == 0)
+                continue;
+
+            if (!isset($mlang_stat_day[$trn_obj->name][$G_lang])) {
+                log_crit("stat-day: tournament name not found in array");
+                break;
+            }
+            fprintf($fpexp, "<h3>%s</h3>", $mlang_stat_day[$trn_obj->name][$G_lang]);
+
             for ($m = 0 ; $m < $tmt_n ; $m++) {
                 fprintf($fpexp, "<br>");
                 $tmt_obj = pg_fetch_object($tmt_pg, $m);
-                
+
                 $usr_sql = sprintf("
-SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d GROUP BY u.code, u.login, m.tidx;", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
-                
-               if (($usr_pg  = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE ) {
+SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u, %sbin5_table_orders AS o WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND m.code = o.mcode AND u.code = o.ucode GROUP BY u.code, u.login, m.tidx, o.pos ORDER BY o.pos;", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
+
+                if (($usr_pg  = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE ) {
                     break;
                 }
                 $usr_n = pg_numrows($usr_pg);
-                if ($usr_n != 5) {
+                if ($usr_n != BIN5_PLAYERS_N) {
                     break;
-		}
-                for ($u = 0 ; $u < $usr_n ; $u++) {
-                    $usr_obj = pg_fetch_object($usr_pg, $u);
-                    if ($u == 0) {
-                        fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $usr_obj->first, $usr_obj->last, $usr_obj->tidx);
-                        fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
-                        }
-                    fprintf($fpexp, "<th>%s</th>", $usr_obj->login);
-                    $pts_sql = sprintf("
-select p.pts as pts from %sbin5_matches as m, %sbin5_games as g, %sbin5_points as p, %susers as u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND u.code = %d ORDER BY g.code", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
-                                   $tmt_obj->code, $usr_obj->code);
+                }
 
+                $gam_sql = sprintf("SELECT g.* FROM %sbin5_games AS g, %sbin5_matches AS m WHERE g.mcode = m.code AND m.code = %d ORDER BY g.tstamp;",
+                                   $G_dbpfx, $G_dbpfx, $tmt_obj->code);
+                if (($gam_pg = pg_query($bdb->dbconn->db(), $gam_sql)) == FALSE ) {
+                    break;
+                }
+
+                $usr_obj = array();
+                for ($u = 0 ; $u < $usr_n ; $u++) {
+                    $usr_obj[$u] = pg_fetch_object($usr_pg, $u);
+                    if ($u == 0) {
+                        fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $usr_obj[$u]->first, $usr_obj[$u]->last, $usr_obj[$u]->tidx);
+                        fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
+                    }
+                    fprintf($fpexp, "<th>%s</th>", $usr_obj[$u]->login);
+                    $pts_sql = sprintf("SELECT p.pts as pts from %sbin5_matches as m, %sbin5_games as g, %sbin5_points as p, %susers as u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND u.code = %d ORDER BY g.code", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
+                                       $tmt_obj->code, $usr_obj[$u]->code);
+
+                    // points of the match for each user
                     if (($pts_pg[$u]  = pg_query($bdb->dbconn->db(), $pts_sql)) == FALSE) {
                         break;
                     }
@@ -294,28 +332,34 @@ select p.pts as pts from %sbin5_matches as m, %sbin5_games as g, %sbin5_points a
                         }
                     }
                 }
-                if ($u != 5) {
+                if ($u != BIN5_PLAYERS_N) {
                     break;
-                } 
-                fprintf($fpexp, "</tr>\n");
+                }
+                fprintf($fpexp, "<th>mazzo</th><th>descrizione</th></tr>\n");
 
                 // LISTA DELLE VARIE PARTITE
                 for ($g = 0 ; $g < $num_games ; $g++) {
+                    $gam_obj = pg_fetch_object($gam_pg, $g);
                     fprintf($fpexp, "<tr>");
-                    for ($u = 0 ; $u < 5 ; $u++) {
+                    for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
                         $pts_obj = pg_fetch_object($pts_pg[$u], $g);
-                        fprintf($fpexp, "<td>%d</td>", $pts_obj->pts);
+                        fprintf($fpexp, "<th>%d</th>", $pts_obj->pts);
                     }
+                    fprintf($fpexp, "<td>%s</td><td>%s</td>", $usr_obj[$gam_obj->mazzo]->login,
+                            xcape( game_description($gam_obj->act, 'plain',
+                                                    $gam_obj->asta_win, $usr_obj[$gam_obj->asta_win]->login,
+                                                    $gam_obj->friend, $usr_obj[$gam_obj->friend]->login,
+                                                    $gam_obj->pnt, $gam_obj->asta_pnt) )
+                            );
                     fprintf($fpexp, "</tr>\n");
                 }
 
                 // LISTA DEI TOTALI
                 fprintf($fpexp, "<tr>");
-                for ($u = 0 ; $u < 5 ; $u++) {
-                    $usr_obj = pg_fetch_object($usr_pg, $u);
+                for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
                     $tot_sql = sprintf("
 SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND u.code = %d", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
-                                   $tmt_obj->code, $usr_obj->code);
+                                       $tmt_obj->code, $usr_obj[$u]->code);
                     if (($tot_pg  = pg_query($bdb->dbconn->db(), $tot_sql)) == FALSE ) {
                         break;
                     }
@@ -327,37 +371,41 @@ SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_poi
             }
             if ($m < $tmt_n)
                 break;
-        } // if (($tmt_pg = pg_query($bdb->dbco...
-
-        fclose($fpexp);
-        return (TRUE);
+        }
+        if ($t < $trn_n)
+            break;
+        $ret = (TRUE);
     } while (0);
 
-    pg_query($bdb->dbconn->db(), "ROLLBACK");
-    fclose($fpexp);
+    if ($ret == FALSE) {
+        pg_query($bdb->dbconn->db(), "ROLLBACK");
+    }
+    if ($fpexp != FALSE) {
+        fclose($fpexp);
+    }
 
-    return (FALSE);
+    return ($ret);
 }
 
 // echo "QUIr\n";
 // exit(123);
 function main()
 {
-    GLOBAL $G_dbasetype, $G_alarm_passwd, $pazz, $from, $to;
-    
+    GLOBAL $G_lang, $G_dbasetype, $G_alarm_passwd, $pazz, $from, $to;
+
     if ($pazz != $G_alarm_passwd) {
         echo "Wrong password<br>";
         mop_flush();
         exit;
     }
-    
+
     $fun_name = "main_${G_dbasetype}";
-    
+
     if ($ret = $fun_name($from, $to))
         echo "Success.<br>\n";
     else
         echo "Failed.<br>\n";
-    
+
     echo "Fine.\n";
     mop_flush();
 }

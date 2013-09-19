@@ -609,7 +609,7 @@ class Bin5_table extends Table {
             require_once("../Obj/dbase_".$G_dbasetype.".phh");
 
             if (($bdb = BriskDB::create()) != FALSE) {
-                $bdb->bin5_points_save($curtime, $this, $user->table_orig, $ucodes, $pts);
+                $bdb->bin5_points_save($curtime, $this, $user->table_orig, $action, $ucodes, $pts);
                 unset($bdb);
             }
             else {
@@ -1958,7 +1958,7 @@ function log_points($remote_addr, $curtime, $user, $where, $mesg)
     }
 }
 
-function game_description($act, $form, $win = -1, $win_name = "?1?", $fri = -1, $fri_name "?2?",
+function game_description($act, $form, $win = -1, $win_name = "?1?", $fri = -1, $fri_name = "?2?",
                           $old_pnt = -1, $old_asta_pnt = -1)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;

@@ -1,8 +1,8 @@
 DROP TABLE #PFX#bin5_table_orders;
 CREATE TABLE #PFX#bin5_table_orders (
        mcode  integer REFERENCES #PFX#bin5_matches (code) ON DELETE cascade ON UPDATE cascade,
-       ucode  integer REFERENCES #PFX#users (code) ON DELETE cascade ON UPDATE cascade, 
-       pos    integer
+       pos    integer,
+       ucode  integer REFERENCES #PFX#users (code) ON DELETE cascade ON UPDATE cascade
        );
 
 ALTER TABLE #PFX#bin5_matches DROP COLUMN mult_next;

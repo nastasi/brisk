@@ -291,7 +291,7 @@ class BriskDB
 
     //   ttok   text UNIQUE,
     //   tidx
-    function bin5_points_save($date, $table, $tidx, $ucodes, $pts)
+    function bin5_points_save($date, $table, $tidx, $action, $ucodes, $pts)
     {
         GLOBAL $G_dbpfx;
         $sql_ttok = escsql($table->table_token);
@@ -343,9 +343,9 @@ class BriskDB
             /*
              * games management
              */
-            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp, asta_pnt, pnt, asta_win, friend, mazzo, mult)
-                                               VALUES (%d, to_timestamp(%d), %d, %d, %d, %d, %d, %d) RETURNING *;",
-                               $G_dbpfx, $mtc_obj->code, $date,
+            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp, act, asta_pnt, pnt, asta_win, friend, mazzo, mult)
+                                               VALUES (%d, to_timestamp(%d), %d, %d, %d, %d, %d, %d, %d) RETURNING *;",
+                               $G_dbpfx, $mtc_obj->code, $date, $action,
                                $table->old_asta_pnt, $table->old_pnt,
                                $table->old_asta_win,
                                $table->old_friend,
