@@ -42,9 +42,6 @@ $mlang_bin5_bin5 = array(
                          'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
                                                'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
 
-                         // br, hr, b, /b, asta_pnt, pnt, winornot
-                         'info_pnt'  => array( 'it' => 'dovevano fare %3$s%5$d%4$s punti e ne hanno fatti %3$s%6$d%4$s: hanno %7$s.%1$s',
-                                               'en' => 'they had to do %3$s%5$d%4$s points and they had made %3$s%6$d%4$s: they have %7$s.%1$s'),
                          // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
                          'info_alea' => array( 'it' => 'dovevano fare %3$salmeno %5$d%4$s punti e ne hanno fatti %3$s%6$d%4$s: hanno %7$s.%1$s',
                                                'en' => 'they had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: they have %7$s.%1$s'),
@@ -72,12 +69,16 @@ $mlang_bin5_bin5 = array(
                                                'en' => 'and he/she made %3$scapot%4$s WELL DONE!.%2$s'),
 
                          // br, hr, b, /b
-                         'info_omul' => array( 'it' => ' La partita valeva %3$s%5$s%3$s.',
-                                               'en' => ' EN: The game was worth %3$s%5$s%3$s.' ),
+                         'info_omul' => array( 'it' => ' La partita valeva %3$s%5$s%4$s.',
+                                               'en' => ' EN: The game was worth %3$s%5$s%4$s.' ),
 
+                         // br, hr, b, /b
+                         'info_alpa' => array( 'it' => ' Hanno passato %3$stutti%4$s.',
+                                               'en' => ' EN: Hanno passato %3$stutti%4$s.' ),
 
-
-
+                         // br, hr, b, /b, aband-name
+                         'info_aban' => array( 'it' => ' Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.',
+                                               'en' => ' EN: Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.'),
 
                          'info_yturn'=> array( 'it' => ' tocca a <b>te</b> giocare.',
                                                'en' => ' it\'s <b>your</b> turn.'),
@@ -481,7 +482,7 @@ class Bin5_table extends Table {
         $pts = array();
 
         if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
-            $this->old_reason = "Hanno passato tutti.";
+            $this->old_reason = game_description(BIN5_RULES_ALLPASS, 'html');
             $this->old_asta_win = -1;
             $this->old_pnt = 0;
             $this->mult_inc(1);
@@ -496,7 +497,7 @@ class Bin5_table extends Table {
         else if ($action == BIN5_RULES_ABANDON) { // return TRUE if all correct
             log_wr(sprintf("GIOCO FINITO !!!"));
 
-            $this->old_reason = sprintf("Ha lasciato %s perché aveva al massimo 2 punti.", xcape($user->name));
+            $this->old_reason = game_description(BIN5_RULES_ABANDON, 'html', $user->table_pos, $user->name);
             $this->old_asta_win = $user->table_pos;
             $this->old_pnt = 0;
             $this->mult_inc(1);
@@ -1830,43 +1831,8 @@ function show_table_info(&$bri, &$table, $table_pos)
         log_main("TABLE_OLD_FRIEND:".$table->old_friend);
         $fri = $table->player[$table->old_friend];
 
-        $wol = game_result($table->old_asta_pnt, $table->old_pnt);
-
-        if (0 == 1) {
-            if ($win != $fri) {
-                /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
-
-                $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
-                                 xcape($bri->user[$win]->name),
-                                 xcape($bri->user[$fri]->name));
-                if ($table->old_pnt == 120) {
-                    $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang]);
-                }
-                else {
-                    $noty .= sprintf($mlang_bin5_bin5['info_pnt'][$G_lang],
-                                     ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
-                                      $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
-                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
-                }
-            }
-            else {
-                $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
-                                 xcape($bri->user[$win]->name));
-                if ($table->old_pnt == 120) {
-                    $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang]);
-                }
-                else {
-                    $noty .= sprintf($mlang_bin5_bin5['info_apnt'][$G_lang],
-
-                                     ($table->old_asta_pnt > 61 ? $mlang_bin5_bin5['info_alea'][$G_lang].$table->old_asta_pnt :
-                                      $mlang_bin5_bin5['info_more'][$G_lang]), $table->old_pnt,
-
-                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] : ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] : $mlang_bin5_bin5['info_lost'][$G_lang])));
-                }
-            }
-        } // OLD VERSION
         $noty = game_description(BIN5_RULES_FINISH, 'html', $win, $bri->user[$win]->name, $fri, $bri->user[$fri]->name,
-                                 $wol, $table->old_pnt, $table->old_asta_pnt);
+                                 $table->old_pnt, $table->old_asta_pnt);
 
         $old_multer = $table->multer(FALSE);
         if ($old_multer > 1) {
@@ -1992,8 +1958,8 @@ function log_points($remote_addr, $curtime, $user, $where, $mesg)
     }
 }
 
-function game_description($act, $form, $win, $win_name, $fri, $fri_name,
-                          $wol, $old_pnt, $old_asta_pnt)
+function game_description($act, $form, $win = -1, $win_name = "?1?", $fri = -1, $fri_name "?2?",
+                          $old_pnt = -1, $old_asta_pnt = -1)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;
 
@@ -2011,6 +1977,18 @@ function game_description($act, $form, $win, $win_name, $fri, $fri_name,
         $tg_bo = "";
         $tg_bc = "";
     }
+
+    if ($act == BIN5_RULES_ALLPASS) {
+        return (sprintf($mlang_bin5_bin5['info_alpa'][$G_lang],
+                        $tg_br, $tg_hr, $tg_bo, $tg_bc));
+    }
+    else if ($act == BIN5_RULES_ABANDON) {
+        return (sprintf($mlang_bin5_bin5['info_alpa'][$G_lang],
+                        $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                        $win_name));
+    }
+    // implicit else bin5_rules_finish
+    $wol = game_result($old_asta_pnt, $old_pnt);
 
     $noty = "";
 
