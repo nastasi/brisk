@@ -36,8 +36,8 @@ define('BIN5_RULES_ALLPASS', 2);
 
 $mlang_bin5_bin5 = array(
                          // br, hr, b, /b, win, fri
-                         'info_part' => array( 'it' => '%2$sNell\'ultima mano ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
-                                               'en' => '%2$sIn the last hand the declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
+                         'info_part' => array( 'it' => 'Nell\'ultima mano ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
+                                               'en' => 'In the last hand the declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
                          // br, hr, b, /b
                          'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
                                                'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
@@ -56,8 +56,8 @@ $mlang_bin5_bin5 = array(
                                                'en' => 'lost'),
 
                          // br, hr, b, /b, win_name
-                         'info_alon' => array( 'it' => '%2$sNell\'ultima partita %3$s%5$s%4$s si &egrave; chiamato in mano,%1$s',
-                                               'en' => '%2$sIn the last hand %3$s%5$s%4$s play alone against each other,%1$s'),
+                         'info_alon' => array( 'it' => 'Nell\'ultima partita %3$s%5$s%4$s si &egrave; chiamato in mano,%1$s',
+                                               'en' => 'In the last hand %3$s%5$s%4$s play alone against each other,%1$s'),
                          // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
                          'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %6$s.%1$s',
                                                'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
@@ -65,21 +65,23 @@ $mlang_bin5_bin5 = array(
                          'info_morea' => array( 'it' => 'doveva fare %3$spiù di 60%4$s punti e ne ha fatti %3$s%5$d%4$s: ha %3$s%6$s%4$s.%1$s',
                                                 'en' => 'he/she had to do %3$smore than 60%4$s points and they had made %3$s%5$d%4$s: he/she had %3$s%6$s%4$s.%1$s'),
                          // br, hr, b, /b
-                         'info_acap' => array( 'it' => 'ha fatto %3$scappotto%4$s EBBRAVO!.%2$s',
-                                               'en' => 'and he/she made %3$scapot%4$s WELL DONE!.%2$s'),
+                         'info_acap' => array( 'it' => 'ha fatto %3$scappotto%4$s EBBRAVO!.%1$s',
+                                               'en' => 'and he/she made %3$scapot%4$s WELL DONE!.%1$s'),
 
                          // br, hr, b, /b
-                         'info_omul' => array( 'it' => ' La partita valeva %3$s%5$s%4$s.',
-                                               'en' => ' EN: The game was worth %3$s%5$s%4$s.' ),
+                         'info_omul' => array( 'it' => '%1$sLa partita valeva %3$s%5$s%4$s.%1$s',
+                                               'en' => '%1$sEN: The game was worth %3$s%5$s%4$s.%1$s' ),
 
                          // br, hr, b, /b
-                         'info_alpa' => array( 'it' => ' Hanno passato %3$stutti%4$s.',
-                                               'en' => ' EN: Hanno passato %3$stutti%4$s.' ),
+                         'info_alpa' => array( 'it' => '%1$sHanno passato %3$stutti%4$s.%1$s',
+                                               'en' => '%1$sEN: Hanno passato %3$stutti%4$s.%1$s' ),
 
                          // br, hr, b, /b, aband-name
                          'info_aban' => array( 'it' => ' Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.',
                                                'en' => ' EN: Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.'),
 
+                         'info_shuf' => array( 'it' => 'Il mazzo a <b>%s</b>, ',
+                                               'en' => '<b>%s</b> shuffled the cards, '),
                          'info_yturn'=> array( 'it' => ' tocca a <b>te</b> giocare.',
                                                'en' => ' it\'s <b>your</b> turn.'),
                          'info_turn' => array( 'it' => 'tocca a <b>%s</b> giocare.',
@@ -88,8 +90,6 @@ $mlang_bin5_bin5 = array(
                                                'en' => ' The game worth <b>%s</b>.' ),
                          'info_yshuf'=> array( 'it' => 'Fai <b>tu</b> il mazzo, ',
                                                'en' => 'It\'s <b>your</b> shuffled the cards, '),
-                         'info_shuf' => array( 'it' => 'Il mazzo a <b>%s</b>, ',
-                                               'en' => '<b>%s</b> shuffled the cards, '),
                          'btn_bkgame'=> array( 'it' => 'torna alla partita',
                                                'en' => 'back to the game'),
                          'call_wptn' => array( 'it' => '<br>con %d punti',
@@ -179,6 +179,7 @@ class Bin5_table extends Table {
     var $briscola;
     var $friend;            // the callee idx position at table
 
+    var $old_act;           // last action that trigs the end of the game
     var $old_mazzo;
     var $old_reason;
     var $old_asta_pnt;
@@ -215,6 +216,8 @@ class Bin5_table extends Table {
        $thiz->friend    =  -1;
        $thiz->turn      =   0;
 
+       $thiz->old_act      = -1;
+       $thiz->old_mazzo    = -1;
        $thiz->old_reason   = "";
        $thiz->old_asta_pnt = -1;
        $thiz->old_mult     = -1;
@@ -234,31 +237,33 @@ class Bin5_table extends Table {
 
        parent::copy($from);
 
-       $thiz->card = $from->card;
-       $thiz->mazzo = $from->mazzo; // REVIEW
-       $thiz->gstart = $from->gstart;
-       $thiz->turn = $from->turn;
+       $thiz->card         = $from->card;
+       $thiz->mazzo        = $from->mazzo; // REVIEW
+       $thiz->gstart       = $from->gstart;
+       $thiz->turn         = $from->turn;
 
-       $thiz->asta_pla = $from->asta_pla;
-       $thiz->asta_pla_n = $from->asta_pla_n;
-       $thiz->asta_card = $from->asta_card;
-       $thiz->asta_pnt = $from->asta_pnt;
+       $thiz->asta_pla     = $from->asta_pla;
+       $thiz->asta_pla_n   = $from->asta_pla_n;
+       $thiz->asta_card    = $from->asta_card;
+       $thiz->asta_pnt     = $from->asta_pnt;
 
-       $thiz->mult = $from->mult;
-       $thiz->points = $from->points;
-       $thiz->points_n = $from->points_n;
-       $thiz->total = $from->total;
+       $thiz->mult         = $from->mult;
+       $thiz->points       = $from->points;
+       $thiz->points_n     = $from->points_n;
+       $thiz->total        = $from->total;
 
-       $thiz->asta_win = $from->asta_win;
-       $thiz->briscola = $from->briscola;
-       $thiz->friend = $from->friend;
+       $thiz->asta_win     = $from->asta_win;
+       $thiz->briscola     = $from->briscola;
+       $thiz->friend       = $from->friend;
 
-       $thiz->old_reason = $from->old_reason;
+       $thiz->old_act      = $from->old_act;
+       $thiz->old_mazzo    = $from->old_mazzo;
+       $thiz->old_reason   = $from->old_reason;
        $thiz->old_asta_pnt = $from->old_asta_pnt;
-       $thiz->old_mult = $from->mult;
-       $thiz->old_pnt = $from->old_pnt;
+       $thiz->old_mult     = $from->mult;
+       $thiz->old_pnt      = $from->old_pnt;
        $thiz->old_asta_win = $from->old_asta_win;
-       $thiz->old_friend = $from->old_friend;
+       $thiz->old_friend   = $from->old_friend;
 
        return ($thiz);
        }
@@ -296,7 +301,7 @@ class Bin5_table extends Table {
         return ($thiz);
     }
 
-    function asta2mult($asta_pnt)
+    static function asta2mult($asta_pnt)
     {
         if ($asta_pnt > 110)
             return (6);
@@ -315,13 +320,19 @@ class Bin5_table extends Table {
     function multer($is_new)
     {
         if ($is_new) {
-            return (pow(2, $this->mult) * $this->asta2mult($this->asta_pnt));
+            // return (pow(2, $this->mult) * $this->asta2mult($this->asta_pnt));
+            return (static::s_multer($this->mult, $this->asta_pnt));
         }
         else {
-            return (pow(2, $this->old_mult) * $this->asta2mult($this->old_asta_pnt));
+            // return (pow(2, $this->old_mult) * $this->asta2mult($this->old_asta_pnt));
+            return (static::s_multer($this->old_mult, $this->old_asta_pnt));
         }
     }
 
+    static function s_multer($mult, $pnt)
+    {
+        return (pow(2, $mult) * static::asta2mult($pnt));
+    }
 
     //   function bunch_create_old() function AND
     //   {
@@ -412,7 +423,6 @@ class Bin5_table extends Table {
             $user_cur->asta_card = -2;
             $user_cur->asta_pnt  = -1;
             $user_cur->handpt = $this->hand_points($i);
-            // SEE function calculate_points(&$table)
         }
         log_rd2("GEND 4");
     }
@@ -481,8 +491,8 @@ class Bin5_table extends Table {
 
         $pts = array();
 
+        $this->old_act = $action;
         if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
-            $this->old_reason = game_description(BIN5_RULES_ALLPASS, 'html');
             $this->old_asta_win = -1;
             $this->old_pnt = 0;
             $this->mult_inc(1);
@@ -496,8 +506,6 @@ class Bin5_table extends Table {
         }
         else if ($action == BIN5_RULES_ABANDON) { // return TRUE if all correct
             log_wr(sprintf("GIOCO FINITO !!!"));
-
-            $this->old_reason = game_description(BIN5_RULES_ABANDON, 'html', $user->table_pos, $user->name);
             $this->old_asta_win = $user->table_pos;
             $this->old_pnt = 0;
             $this->mult_inc(1);
@@ -544,7 +552,7 @@ class Bin5_table extends Table {
                     // return($pts);
                     break;
                 }
-
+            
                 if ($pro >= $this->asta_pnt)
                     $sig = 1;
                 else
@@ -604,6 +612,11 @@ class Bin5_table extends Table {
         // $this->old_mult, $this->old_pnt, $this->old_reason and $this->old_asta_win are specific
 
         $this->old_friend = $this->friend;
+        $this->old_reason = game_description($action, 'html', $this->old_mult,
+                                             $this->old_asta_win, $bri->user[$this->player[$this->old_asta_win]]->name,
+                                             $this->old_friend, $bri->user[$this->player[$this->old_friend]]->name,
+                                             $this->old_pnt, $this->old_asta_pnt);
+
 
         if ($user->table_orig < TABLES_AUTH_N) {
             require_once("../Obj/dbase_".$G_dbasetype.".phh");
@@ -1476,82 +1489,6 @@ function locshm_exists($tok)
 }
 
 
-// if success an array with points of each player is returned
-function calculate_points_old(&$table)
-{
-    GLOBAL $G_all_points;
-
-    $ret = array();
-    $pro = 0;
-
-    if ($table->asta_pnt == 60)
-        $table->asta_pnt = 61;
-
-    $table->old_reason = "";
-    $table->old_asta_win = $table->asta_win;
-    $table->old_friend = $table->friend;
-    $table->old_asta_pnt = $table->asta_pnt;
-    $table->old_mult = $table->mult;
-
-    // count points for the temporary 2 teams
-    for ($i = 0 ; $i < (BIN5_CARD_HAND * BIN5_PLAYERS_N) ; $i++) {
-        // for ($i = 0 ; $i < 40 ; $i++) {
-        $ctt = $table->card[$i]->value % 10;
-        $own = $table->card[$i]->owner;
-        if ($own == $table->asta_win || $own == $table->friend)
-            $pro += $G_all_points[$ctt];
-    }
-
-    log_wr(sprintf("PRO: [%d]", $pro));
-
-    // PATTA case !
-    if ($table->asta_pnt == 61 && $pro == 60) {
-        $table->points[$table->points_n % MAX_POINTS] = array();
-        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-            $table->points[$table->points_n % MAX_POINTS][$i] = 0;
-            $ret[$i] = 0;
-        }
-        $table->points_n++;
-        $table->old_pnt = $pro;
-        $table->mult += 1;
-
-        return($ret);
-    }
-
-    if ($pro >= $table->asta_pnt)
-        $sig = 1;
-    else
-        $sig = -1;
-
-    $table->points[$table->points_n % MAX_POINTS] = array();
-    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-        if ($i == $table->asta_win)
-            $pt = ($i == $table->friend ? 4 : 2);
-        else if ($i == $table->friend)
-            $pt = 1;
-        else
-            $pt = -1;
-
-
-
-        log_wr(sprintf("PRO: pt[%d][%d] = %d", $table->points_n % MAX_POINTS, $i, $pt));
-
-        $pt = $pt * $sig * $table->multer(TRUE) * ($pro == 120 ? 2 : 1);
-
-        log_wr(sprintf("PRO:[%d][%d][%d]", $sig, $table->multer(TRUE), ($pro == 120 ? 2 : 1)));
-
-        $table->points[$table->points_n % MAX_POINTS][$i] = $pt;
-        $table->total[$i] += $pt;
-        $ret[$i] = $pt;
-    }
-    $table->points_n++;
-    $table->old_pnt = $pro;
-    $table->mult = 0;
-
-    return($ret);
-}
-
-
 /* show table
    is_transition (is from room to table ?)
    is_again      (is another game)
@@ -1820,26 +1757,11 @@ function show_table_info(&$bri, &$table, $table_pos)
     for ($e = 0 ; $e < BIN5_PLAYERS_N ; $e++)
         $noty .= sprintf('<td class=\"td_points\">%d</td>', $table->total[$e]);
     $noty .= "</tr></table>";
-
+    $noty .= "<hr>";
     if ($table->old_reason != "") {
-        $noty .= sprintf("<hr><b>%s</b><br>", xcape($table->old_reason));
+        $noty .= $table->old_reason;
     }
 
-    if ($table->old_asta_win != -1) {
-        log_main("TABLE_OLD_WIN:".$table->old_asta_win);
-        $win = $table->player[$table->old_asta_win];
-        log_main("TABLE_OLD_FRIEND:".$table->old_friend);
-        $fri = $table->player[$table->old_friend];
-
-        $noty = game_description(BIN5_RULES_FINISH, 'html', $win, $bri->user[$win]->name, $fri, $bri->user[$fri]->name,
-                                 $table->old_pnt, $table->old_asta_pnt);
-
-        $old_multer = $table->multer(FALSE);
-        if ($old_multer > 1) {
-            $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang], multoval($old_multer));
-        }
-        $noty .= "<hr><br>";
-    }
     /* MLANG: "Fai <b>tu</b> il mazzo,", "Il mazzo a <b>$unam</b>," */
     if ($table->mazzo == $table_pos)
         $noty .= $mlang_bin5_bin5['info_yshuf'][$G_lang];
@@ -1958,7 +1880,7 @@ function log_points($remote_addr, $curtime, $user, $where, $mesg)
     }
 }
 
-function game_description($act, $form, $win = -1, $win_name = "?1?", $fri = -1, $fri_name = "?2?",
+function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", $fri = -1, $fri_name = "?2?",
                           $old_pnt = -1, $old_asta_pnt = -1)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;
@@ -1972,8 +1894,8 @@ function game_description($act, $form, $win = -1, $win_name = "?1?", $fri = -1, 
         $fri_name = xcape($fri_name);
     }
     else {
-        $tg_br = "";
-        $tg_hr = "";
+        $tg_br = " ";
+        $tg_hr = " ";
         $tg_bo = "";
         $tg_bc = "";
     }
@@ -1983,73 +1905,83 @@ function game_description($act, $form, $win = -1, $win_name = "?1?", $fri = -1, 
                         $tg_br, $tg_hr, $tg_bo, $tg_bc));
     }
     else if ($act == BIN5_RULES_ABANDON) {
-        return (sprintf($mlang_bin5_bin5['info_alpa'][$G_lang],
+        return (sprintf($mlang_bin5_bin5['info_aban'][$G_lang],
                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
                         $win_name));
     }
-    // implicit else bin5_rules_finish
-    $wol = game_result($old_asta_pnt, $old_pnt);
-
-    $noty = "";
-
-    if ($win != $fri) { // not alone case
-
-        /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
-
-        $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
-                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                         $win_name,
-                         $fri_name);
-        if ($old_pnt == 120) {
-            $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang],
-                             $tg_br, $tg_hr, $tg_bo, $tg_bc );
-        }
-        else {
-            if ($old_asta_pnt > 61) {
-                $noty .= sprintf($mlang_bin5_bin5['info_alea'][$G_lang],
-                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                                 $old_asta_pnt, $old_pnt,
-                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
-            }
-            else {
-                $noty .= sprintf($mlang_bin5_bin5['info_more'][$G_lang],
-                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                                 $old_pnt,
-                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
-            } // else of if ($old_asta_pnt > 61) {
-        } // else of if ($old_pnt == 120) {
-    } // if ($win != $fri) { // not alone case
     else {
-        $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
-                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                         $win_name);
-        if ($old_pnt == 120) {
-            $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang],
-                             $tg_br, $tg_hr, $tg_bo, $tg_bc);
-        }
-        else {
-            if ($old_asta_pnt > 61) {
-                $noty .= sprintf($mlang_bin5_bin5['info_aleaa'][$G_lang],
-                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                                 $old_asta_pnt, $old_pnt,
-                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
+        $wol = game_result($old_asta_pnt, $old_pnt);
+        
+        $noty = "";
+        
+        if ($win != $fri) { // not alone case
+            
+            /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
+            
+            $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
+                             $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                             $win_name,
+                             $fri_name);
+            if ($old_pnt == 120) {
+                $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc );
             }
             else {
-                $noty .= sprintf($mlang_bin5_bin5['info_morea'][$G_lang],
-                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                                 $old_pnt,
-                                 ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                  ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                   $mlang_bin5_bin5['info_lost'][$G_lang])));
+                if ($old_asta_pnt > 61) {
+                    $noty .= sprintf($mlang_bin5_bin5['info_alea'][$G_lang],
+                                     $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                     $old_asta_pnt, $old_pnt,
+                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                      ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                       $mlang_bin5_bin5['info_lost'][$G_lang])));
+                }
+                else {
+                    $noty .= sprintf($mlang_bin5_bin5['info_more'][$G_lang],
+                                     $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                     $old_pnt,
+                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                      ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                       $mlang_bin5_bin5['info_lost'][$G_lang])));
+                } // else of if ($old_asta_pnt > 61) {
+            } // else of if ($old_pnt == 120) {
+        } // if ($win != $fri) { // not alone case
+        else {
+            $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
+                             $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                             $win_name);
+            if ($old_pnt == 120) {
+                $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc);
+            }
+            else {
+                if ($old_asta_pnt > 61) {
+                    $noty .= sprintf($mlang_bin5_bin5['info_aleaa'][$G_lang],
+                                     $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                     $old_asta_pnt, $old_pnt,
+                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                      ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                       $mlang_bin5_bin5['info_lost'][$G_lang])));
+                }
+                else {
+                    $noty .= sprintf($mlang_bin5_bin5['info_morea'][$G_lang],
+                                     $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                     $old_pnt,
+                                     ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
+                                      ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
+                                       $mlang_bin5_bin5['info_lost'][$G_lang])));
+                }
             }
         }
     }
+
+    $old_multer = Bin5_table::s_multer($old_mult, $old_asta_pnt);
+    if ($old_multer > 1) {
+        $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang],
+                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                         multoval($old_multer));
+    }
+    $noty .= sprintf('%2$s%1$s', $tg_br, $tg_hr);
+
     return ($noty);
 }
 

@@ -503,39 +503,6 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                     if ($table->turn == (BIN5_PLAYERS_N * BIN5_CARD_HAND)) { /* game finished */
                         log_wr(sprintf("GIOCO FINITO !!!"));
 
-
-                        /* ************************************************ */
-                        /*    PRIMA LA PARTE PER LO SHOW DI CHI HA VINTO    */
-                        /* ************************************************ */
-                        /* $pt_cur = calculate_points(&$table); */
-                        /* $table->game_next(1); */
-
-                        /* $plist = "$table->table_token|$user->table_orig|$table->player_n"; */
-                        /* $ucodes = array(); */
-                        /* for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) { */
-                        /*     $user_cur = &$bri->user[$table->player[$i]]; */
-                        /*     $plist .= '|'.xcapelt($user_cur->name).'|'.$pt_cur[$i]; */
-                        /*     $ucodes[$i] = $user_cur->code_get(); */
-                        /* } */
-                        /* for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) { */
-                        /*     $plist .= '|'.xcapelt($ucodes[$i]); */
-                        /* } */
-                        /* log_legal($curtime, $user->ip, $user, "STAT:BRISKIN5:FINISH_GAME", $plist); */
-                        /* if ($user->table_orig < TABLES_AUTH_N) { */
-                        /*     require_once("../Obj/dbase_".$G_dbasetype.".phh"); */
-
-                        /*     if (($bdb = BriskDB::create()) != FALSE) { */
-                        /*         $bdb->bin5_points_save($curtime, $table, $user->table_orig, $ucodes, $pt_cur); */
-                        /*         unset($bdb); */
-                        /*     } */
-                        /*     else { */
-                        /*         log_points($remote_addr, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", "DATABASE CONNECTION FAILED"); */
-                        /*     } */
-                        /*     log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist); */
-                        /* } */
-
-                        /* $table->game_init(&$bri->user); */
-
                         if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_FINISH, $user)) {
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                                 $user_cur = &$bri->user[$table->player[$i]];
@@ -543,7 +510,6 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                             }
                         }
                     }
-
 
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $user_cur = &$bri->user[$table->player[$i]];
