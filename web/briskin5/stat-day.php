@@ -261,12 +261,13 @@ function main_pgsql($from, $to)
         }
 
         $trn_n = pg_numrows($trn_pg);
+        printf("Number of tournaments: %d\n", $trn_n);
 
         for ($t = 0 ; $t < $trn_n ; $t++) {
             $trn_obj = pg_fetch_object($trn_pg, $t);
 
-            $tmt_sql = sprintf("SELECT m.code AS code FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code;",
-                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $from, $to);
+            $tmt_sql = sprintf("SELECT m.code AS code FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code;",
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $trn_obj->code, $from, $to);
 
             // if deletable old matches exists then ...
             if (($tmt_pg = pg_query($bdb->dbconn->db(), $tmt_sql)) == FALSE) {
@@ -286,6 +287,7 @@ function main_pgsql($from, $to)
                 log_crit("stat-day: tournament name not found in array");
                 break;
             }
+            printf("[Tournament [%s]], number of matches: %d\n", $mlang_stat_day[$trn_obj->name][$G_lang], $tmt_n);
             fprintf($fpexp, "<h3>%s</h3>", $mlang_stat_day[$trn_obj->name][$G_lang]);
 
             for ($m = 0 ; $m < $tmt_n ; $m++) {
@@ -303,8 +305,8 @@ SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) A
                     break;
                 }
 
-                $gam_sql = sprintf("SELECT g.* FROM %sbin5_games AS g, %sbin5_matches AS m WHERE g.mcode = m.code AND m.code = %d ORDER BY g.tstamp;",
-                                   $G_dbpfx, $G_dbpfx, $tmt_obj->code);
+                $gam_sql = sprintf("SELECT g.* FROM %sbin5_tournaments as t, %sbin5_matches AS m, %sbin5_games AS g WHERE t.code = m.tcode AND m.code = g.mcode AND m.code = %d ORDER BY g.tstamp;",
+                                   $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
                 if (($gam_pg = pg_query($bdb->dbconn->db(), $gam_sql)) == FALSE ) {
                     break;
                 }
