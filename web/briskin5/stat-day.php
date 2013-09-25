@@ -347,7 +347,7 @@ SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) A
                         fprintf($fpexp, "<th>%d</th>", $pts_obj->pts);
                     }
                     fprintf($fpexp, "<td>%s</td><td>%s</td>", $usr_obj[$gam_obj->mazzo]->login,
-                            xcape( game_description($gam_obj->act, 'plain',
+                            xcape( game_description($gam_obj->act, 'plain', $gam_obj->mult,
                                                     $gam_obj->asta_win, $usr_obj[$gam_obj->asta_win]->login,
                                                     $gam_obj->friend, $usr_obj[$gam_obj->friend]->login,
                                                     $gam_obj->pnt, $gam_obj->asta_pnt) )
