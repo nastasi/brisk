@@ -29,12 +29,12 @@ wget -O daily.txt dodo.birds.van/brisk/briskin5/stat-day.php?pazz=yourpasswd&fro
 now="$(date +%s)"
 
 # from 100 days ago to 1 day after
-to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now + 86400" | bc))"
-from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now - 8640000" | bc))"
+to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$(date +%s) + 86400" | bc))"
+from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$(date +%s) - 8640000" | bc))"
 # to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now + 7200 " | bc))"
 # from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now - 9200 " | bc))"
 
-curl -d "pazz=$BRISK_PASS" "http://$BRISK_SITE/briskin5/stat-day.php?from=$from&to=$to"
+curl -d "pazz=$BRISK_PASS" "http://$BRISK_SITE/briskin5/stat-day.php?from=$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$(date +%s) - 8640000" | bc))&to=$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$(date +%s) + 86400" | bc))"
 
 */
 
