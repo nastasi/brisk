@@ -43,7 +43,10 @@ $G_base = "../";
 $mlang_stat_day = array( 'normal match'=> array( 'it' => 'Partite normali',
                                                  'en' => 'Normal matches' ),
                          'special match' => array( 'it' => 'Partite speciali',
-                                                   'en' => 'Special matches')
+                                                   'en' => 'Special matches'),
+
+                         'info_total'=> array( 'it' => 'totali',
+                                               'en' => 'En totali')
                          );
 
 
@@ -369,7 +372,7 @@ SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_poi
                     $tot_obj = pg_fetch_object($tot_pg, 0);
                     fprintf($fpexp, "<th>%d</th>", $tot_obj->pts);
                 }
-                fprintf($fpexp, "</tr>\n");
+                fprintf($fpexp, "<th colspan='2'>%s</th></tr>\n", $mlang_stat_day['info_total'][$G_lang]);
                 fprintf($fpexp, "</table>\n");
             }
             if ($m < $tmt_n)
