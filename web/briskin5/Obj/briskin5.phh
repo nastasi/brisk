@@ -56,10 +56,10 @@ $mlang_bin5_bin5 = array(
                                                'en' => 'lost'),
 
                          // br, hr, b, /b, win_name
-                         'info_alon' => array( 'it' => 'Nell\'ultima partita %3$s%5$s%4$s si &egrave; chiamato in mano,%1$s',
+                         'info_alon' => array( 'it' => 'Nell\'ultima partita %3$s%5$s%4$s si è chiamato in mano,%1$s',
                                                'en' => 'In the last hand %3$s%5$s%4$s play alone against each other,%1$s'),
                          // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
-                         'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %6$s.%1$s',
+                         'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %3$s%7$s%4$s.%1$s',
                                                'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
                          // br, hr, b, /b, old_pnt, winornot
                          'info_morea' => array( 'it' => 'doveva fare %3$spiù di 60%4$s punti e ne ha fatti %3$s%5$d%4$s: ha %3$s%6$s%4$s.%1$s',
