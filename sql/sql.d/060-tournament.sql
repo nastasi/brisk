@@ -17,4 +17,4 @@ ALTER TABLE #PFX#bin5_matches DROP CONSTRAINT #PFX#bin5_matches_tcode_fkey;
 ALTER TABLE #PFX#bin5_matches ADD FOREIGN KEY (tcode) REFERENCES #PFX#bin5_tournaments(code) ON UPDATE cascade ON DELETE cascade;
 
 ALTER TABLE #PFX#bin5_games DROP COLUMN act;
-ALTER TABLE #PFX#bin5_games ADD COLUMN act    integer;  -- end reason of the game
+ALTER TABLE #PFX#bin5_games ADD COLUMN act integer DEFAULT -1;  -- end reason of the game

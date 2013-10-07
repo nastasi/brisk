@@ -12,6 +12,7 @@
 
      . add command to continue
      . investigate user reordering
+     . manage old games
 
    - WEBSOCKET TRANSPORT
      . refactoring $enc attribute management

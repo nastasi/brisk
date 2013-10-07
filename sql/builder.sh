@@ -14,7 +14,8 @@ usage () {
     echo "       rebuild"
     echo "       psql"
     echo "       piped"
-    echo "       add <filesql>"
+    echo "       add <filesql> [<filesql2> [..]]"
+    echo "       del <filesql> [<filesql2> [..]]"
     echo "       dump [dumpfile]"
     echo "       dumpall [dumpfile]"
     echo "       all"
@@ -145,7 +146,10 @@ case $CMD in
         fi
         ;;
     "add")
-        cat "$1" | sqlexe
+        ( echo "-- MESG: add start" ; cat "$@" | egrep -iv "$MATCH_DROP" ; echo "-- MESG: add end" ;   ) | sqlexe
+        ;;
+    "del")
+        ( echo "-- MESG: del start" ; cat "$@" | egrep -i  "$MATCH_DROP" | tac ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "help"|"-h"|"--help")
         usage 0
