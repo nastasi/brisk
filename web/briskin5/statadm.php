@@ -30,6 +30,8 @@
 
 $G_base = "../";
 
+define('BIN5_TOURNAMENT_NORMAL', 1);
+
 ini_set("max_execution_time",  "240");
 
 require_once("../Obj/brisk.phh");
@@ -232,8 +234,8 @@ function main_pgsql($curtime)
         
         $mtc_sql = sprintf("CREATE TEMPORARY TABLE %sbin5_temp_matches ON COMMIT DROP AS SELECT m.code, max(g.tstamp) AS tstamp 
                             FROM %sbin5_matches as m, %sbin5_games as g 
-                            WHERE g.mcode = m.code GROUP BY m.code, m.ttok",
-                           $G_dbpfx, $G_dbpfx, $G_dbpfx);
+                            WHERE m.tcode = %d AND m.code = g.mcode GROUP BY m.code, m.ttok",
+                           $G_dbpfx, $G_dbpfx, $G_dbpfx, BIN5_TOURNAMENT_NORMAL);
         if (pg_query($bdb->dbconn->db(), $mtc_sql) == FALSE) {
             log_crit("statadm: temporary matches table creation [$mtc_sql] failed");
             break;
@@ -336,12 +338,14 @@ function main_pgsql($curtime)
             
             $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.login as login
                                 FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers as u 
-                                WHERE p.ucode = u.code AND p.gcode = g.code AND g.mcode = m.code AND 
-                                      g.tstamp > to_timestamp(%d) AND g.tstamp <= to_timestamp(%d)
+                                WHERE m.tcode = %d AND m.code = g.mcode AND
+                                      g.tstamp > to_timestamp(%d) AND g.tstamp <= to_timestamp(%d) AND
+                                      p.ucode = u.code AND p.gcode = g.code
                                 GROUP BY u.code, u.login
                                 ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) DESC, 
                                          count(p.pts) DESC",
-                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $curtime - $limi[$dtime], $curtime);
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, BIN5_TOURNAMENT_NORMAL,
+                               $curtime - $limi[$dtime], $curtime);
 
             // log_crit("statadm: INFO: [$pla_sql]");
 

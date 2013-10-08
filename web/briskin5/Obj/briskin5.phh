@@ -30,9 +30,10 @@ define('BIN5_SHM_MAX', (BIN5_SHM_MIN + 1048576));
 define('BIN5_SHM_DLT', 32768);
 define('BIN5_PROXY_PATH', PROXY_PATH."/bin5");
 
-define('BIN5_RULES_FINISH',  0);
-define('BIN5_RULES_ABANDON', 1);
-define('BIN5_RULES_ALLPASS', 2);
+define('BIN5_RULES_OLDSCHEMA', -1);
+define('BIN5_RULES_FINISH',     0);
+define('BIN5_RULES_ABANDON',    1);
+define('BIN5_RULES_ALLPASS',    2);
 
 $mlang_bin5_bin5 = array(
                          // br, hr, b, /b, win, fri
@@ -1900,7 +1901,10 @@ function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", 
         $tg_bc = "";
     }
 
-    if ($act == BIN5_RULES_ALLPASS) {
+    if ($act == BIN5_RULES_OLDSCHEMA) {
+        return ("");
+    }
+    else if ($act == BIN5_RULES_ALLPASS) {
         return (sprintf($mlang_bin5_bin5['info_alpa'][$G_lang],
                         $tg_br, $tg_hr, $tg_bo, $tg_bc));
     }

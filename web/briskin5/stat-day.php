@@ -269,7 +269,7 @@ function main_pgsql($from, $to)
         for ($t = 0 ; $t < $trn_n ; $t++) {
             $trn_obj = pg_fetch_object($trn_pg, $t);
 
-            $tmt_sql = sprintf("SELECT m.code AS code FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code;",
+            $tmt_sql = sprintf("SELECT m.code AS code, m.mazzo_next as minus_one_is_old FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code, minus_one_is_old ORDER BY m.code, minus_one_is_old DESC;",
                                $G_dbpfx, $G_dbpfx, $G_dbpfx, $trn_obj->code, $from, $to);
 
             // if deletable old matches exists then ...
@@ -297,14 +297,22 @@ function main_pgsql($from, $to)
                 fprintf($fpexp, "<br>");
                 $tmt_obj = pg_fetch_object($tmt_pg, $m);
 
-                $usr_sql = sprintf("
+                if ($tmt_obj->minus_one_is_old > -1) { // is new
+                    $usr_sql = sprintf("
 SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u, %sbin5_table_orders AS o WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND m.code = o.mcode AND u.code = o.ucode GROUP BY u.code, u.login, m.tidx, o.pos ORDER BY o.pos;", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
+                }
+                else { // is old
+                    $usr_sql = sprintf("
+SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d GROUP BY u.code, u.login, m.tidx;", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
+                }
 
                 if (($usr_pg  = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE ) {
+                    log_crit("stat-day: pg_query usr_sql failed");
                     break;
                 }
                 $usr_n = pg_numrows($usr_pg);
                 if ($usr_n != BIN5_PLAYERS_N) {
+                    log_crit("stat-day: wrong number of players");
                     break;
                 }
 
@@ -341,22 +349,29 @@ SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) A
                 if ($u != BIN5_PLAYERS_N) {
                     break;
                 }
-                fprintf($fpexp, "<th>mazzo</th><th>descrizione</th></tr>\n");
 
+                if ($tmt_obj->minus_one_is_old != -1) {
+                    fprintf($fpexp, "<th>mazzo</th><th>descrizione</th></tr>\n");
+                }
                 // LISTA DELLE VARIE PARTITE
                 for ($g = 0 ; $g < $num_games ; $g++) {
                     $gam_obj = pg_fetch_object($gam_pg, $g);
                     fprintf($fpexp, "<tr>");
                     for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
                         $pts_obj = pg_fetch_object($pts_pg[$u], $g);
-                        fprintf($fpexp, "<th>%d</th>", $pts_obj->pts);
+                        fprintf($fpexp, "<%s>%d</%s>",
+                                ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"),
+                                $pts_obj->pts,
+                                ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
-                    fprintf($fpexp, "<td>%s</td><td>%s</td>", $usr_obj[$gam_obj->mazzo]->login,
-                            xcape( game_description($gam_obj->act, 'plain', $gam_obj->mult,
-                                                    $gam_obj->asta_win, $usr_obj[$gam_obj->asta_win]->login,
-                                                    $gam_obj->friend, $usr_obj[$gam_obj->friend]->login,
-                                                    $gam_obj->pnt, $gam_obj->asta_pnt) )
-                            );
+                    if ($tmt_obj->minus_one_is_old != -1) {
+                        fprintf($fpexp, "<td>%s</td><td>%s</td>", $usr_obj[$gam_obj->mazzo]->login,
+                                xcape( game_description($gam_obj->act, 'plain', $gam_obj->mult,
+                                                        $gam_obj->asta_win, $usr_obj[$gam_obj->asta_win]->login,
+                                                        $gam_obj->friend, $usr_obj[$gam_obj->friend]->login,
+                                                        $gam_obj->pnt, $gam_obj->asta_pnt) )
+                                );
+                    }
                     fprintf($fpexp, "</tr>\n");
                 }
 
@@ -372,7 +387,9 @@ SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_poi
                     $tot_obj = pg_fetch_object($tot_pg, 0);
                     fprintf($fpexp, "<th>%d</th>", $tot_obj->pts);
                 }
-                fprintf($fpexp, "<th colspan='2'>%s</th></tr>\n", $mlang_stat_day['info_total'][$G_lang]);
+                if ($tmt_obj->minus_one_is_old != -1) {
+                    fprintf($fpexp, "<th colspan='2'>%s</th></tr>\n", $mlang_stat_day['info_total'][$G_lang]);
+                }
                 fprintf($fpexp, "</table>\n");
             }
             if ($m < $tmt_n)
