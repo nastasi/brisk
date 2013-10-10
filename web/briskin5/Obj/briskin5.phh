@@ -91,6 +91,8 @@ $mlang_bin5_bin5 = array(
                                                'en' => ' The game worth <b>%s</b>.' ),
                          'info_yshuf'=> array( 'it' => 'Fai <b>tu</b> il mazzo, ',
                                                'en' => 'It\'s <b>your</b> shuffled the cards, '),
+                         'info_match'=> array( 'it' => 'Il codice della partita è <b>%d</b>.',
+                                               'en' => 'Match code is <b>%d</b>.'),
                          'btn_bkgame'=> array( 'it' => 'torna alla partita',
                                                'en' => 'back to the game'),
                          'call_wptn' => array( 'it' => '<br>con %d punti',
@@ -180,6 +182,8 @@ class Bin5_table extends Table {
     var $briscola;
     var $friend;            // the callee idx position at table
 
+    var $match_id;          // the id of the match on the database (-1 == just not saved)
+
     var $old_act;           // last action that trigs the end of the game
     var $old_mazzo;
     var $old_reason;
@@ -216,6 +220,8 @@ class Bin5_table extends Table {
        $thiz->briscola  =  -1;
        $thiz->friend    =  -1;
        $thiz->turn      =   0;
+
+       $thiz->match_id     = -1;
 
        $thiz->old_act      = -1;
        $thiz->old_mazzo    = -1;
@@ -257,6 +263,8 @@ class Bin5_table extends Table {
        $thiz->briscola     = $from->briscola;
        $thiz->friend       = $from->friend;
 
+       $thiz->match_id     = $from->match_id;
+
        $thiz->old_act      = $from->old_act;
        $thiz->old_mazzo    = $from->old_mazzo;
        $thiz->old_reason   = $from->old_reason;
@@ -289,6 +297,9 @@ class Bin5_table extends Table {
         $thiz->mazzo    = rand(0,PLAYERS_N-1);
         $thiz->points_n = 0;
         $thiz->mult     = 0;
+
+        $thiz->match_id     = -1;
+
         $thiz->old_asta_win = -1;
         $thiz->old_reason = "";
 
@@ -553,7 +564,7 @@ class Bin5_table extends Table {
                     // return($pts);
                     break;
                 }
-            
+
                 if ($pro >= $this->asta_pnt)
                     $sig = 1;
                 else
@@ -1795,6 +1806,10 @@ function show_table_info(&$bri, &$table, $table_pos)
         $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($multer) );
     }
     $noty .= "<hr><br>";
+    if ($table->match_id != -1) {
+        $noty .= sprintf($mlang_bin5_bin5['info_match'][$G_lang], $table->match_id);
+        $noty .= "<hr><br>";
+    }
     $ret .= show_notify($noty, 3000, $mlang_bin5_bin5['btn_bkgame'][$G_lang], 500, 400);
     /* NOTE: show_notify($noty, 3000, "torna alla partita", 500,
      *                   130 + ($table->points_n > 0 ? 50 : 0) +
@@ -1915,13 +1930,12 @@ function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", 
     }
     else {
         $wol = game_result($old_asta_pnt, $old_pnt);
-        
+
         $noty = "";
-        
+
         if ($win != $fri) { // not alone case
-            
             /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
-            
+
             $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
                              $tg_br, $tg_hr, $tg_bo, $tg_bc,
                              $win_name,

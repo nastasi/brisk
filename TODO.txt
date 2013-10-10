@@ -6,13 +6,16 @@
    - CONTINUE FEATURE
      DONE . save points every game
      DONE . modify points calculation to include order and mazzo
-     HALF . exclude not standard types from statistics
-         DONE . daily reports
-         . monthly stats
+     DONE . exclude not standard types from statistics
+         DONE . daily reports (1 for each active tournament)
+         DONE . monthly stats (for normal match only)
 
+     DONE . show current match ID when created
      . add command to continue
-     . investigate user reordering
-     . manage old games
+       . check consistency of the request
+     . rearrange users and game status to continue the selected match
+
+     . investigate user reordering ??
 
    - WEBSOCKET TRANSPORT
      . refactoring $enc attribute management
