@@ -3,7 +3,9 @@
 
   FEATURES |
  ----------+
-   DONE - CONTINUE FEATURE
+   WIP - CONTINUE FEATURE
+     . replace explicit strings with multilanguage array
+
      DONE . save points every game
      DONE . modify points calculation to include order and mazzo
      DONE . exclude not standard types from statistics
