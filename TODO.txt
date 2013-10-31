@@ -3,7 +3,7 @@
 
   FEATURES |
  ----------+
-   - CONTINUE FEATURE
+   DONE - CONTINUE FEATURE
      DONE . save points every game
      DONE . modify points calculation to include order and mazzo
      DONE . exclude not standard types from statistics
@@ -11,11 +11,12 @@
          DONE . monthly stats (for normal match only)
 
      DONE . show current match ID when created
-     . add command to continue
-       . check consistency of the request
-     . rearrange users and game status to continue the selected match
+     DONE . add info about continue to the info page
+     DONE . add command to continue
+       DONE . check consistency of the request
+     DONE . rearrange users and game status to continue the selected match
 
-     . investigate user reordering ??
+     DONE . investigate user reordering ??
 
    - WEBSOCKET TRANSPORT
      . refactoring $enc attribute management
