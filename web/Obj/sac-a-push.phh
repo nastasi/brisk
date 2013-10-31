@@ -756,7 +756,7 @@ class Sac_a_push {
 
                                     global_dump();
                                 }
-                                else if ($line == "shutdown") {
+                                else if ($line == "shutdown" || $line == "sd") {
                                     if ($this->app->dump_data()) {
                                         return(0);
                                     }
