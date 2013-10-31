@@ -945,6 +945,12 @@ class Bin5_user extends User {
                   }
                   for ($i = $cur_step ; $i < $this->step ; $i++) {
                       $ii = $i % COMM_N;
+                      if ($this->comm[$ii] == "") {
+                          if ($i == $cur_step)
+                              continue;
+                          else
+                              break;
+                      }
                       log_rd2("ADDED TO THE STREAM: ".$this->comm[$ii]);
                       $ret .= $this->comm[$ii];
                   }
