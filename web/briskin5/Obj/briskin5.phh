@@ -655,13 +655,16 @@ class Bin5_table extends Table {
 
 
 define('BIN5_USER_FLAG_RING_ENDAUCT', 0x01);
-
+define('BIN5_USER_CONTINUE_INIT', -1);
+define('BIN5_USER_CONTINUE_ALREADY', -2);
 class Bin5_user extends User {
     var $asta_card;  //
     var $asta_pnt;   //
     var $handpt;     // Total card points at the beginning of the current hand.
     var $exitislock; // Player can exit from the table ?
     var $privflags;  // Flags for briskin5 only
+
+    var $continue;   // Id of the match that the user would continue
 
     const BASE = "../";
 
@@ -678,6 +681,7 @@ class Bin5_user extends User {
        $thiz->handpt = -1;
        $thiz->exitislock = TRUE;
        $thiz->privflags = 0;
+       $thiz->continue = BIN5_USER_CONTINUE_INIT;
 
        return ($thiz);
        }
@@ -697,6 +701,7 @@ class Bin5_user extends User {
         $this->handpt     = $from->handpt;
         $this->exitislock = $from->exitislock;
         $this->privflags  = $from->privflags;
+        $this->continue   = $from->continue;
     }
 
     /* CLONE NOT USED
@@ -725,11 +730,13 @@ class Bin5_user extends User {
         /* NOTE: at this moment idx and table_pos fields have the same value
            but diffentent functions, we keep them separated for a while */
         $thiz->room       = $bri;
-        $thiz->idx        = $table_pos;
+        $thiz->idx        = $table_pos; // it is the position in the mini-room,
+                                        // not related to table pos (see below)
         $thiz->asta_card  = -2;
         $thiz->asta_pnt   = -1;
         $thiz->handpt     = -1;
         $thiz->exitislock = TRUE;
+        $thiz->continue   = BIN5_USER_CONTINUE_INIT;
 
         log_wr("Bin5 constructor");
 
@@ -988,15 +995,18 @@ class Bin5_user extends User {
 
 
       return ($ret);
-  }  //   function maincheck (...
+    }  //   function maincheck (...
 
+    function continue_set($match_code)
+    {
+        $this->continue = $match_code;
+    }
 
-
-
-
+    function continue_get() {
+        return ($this->continue);
+    }
 
 } // end class Bin5_user
-
 
 
 class Bin5 {
