@@ -257,8 +257,6 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         }
                     }
 
-
-
                     if ($again) { // Qualcosa non andato bene, rifare
                         $ret = sprintf('gst.st = %d; asta_pnt_set(%d);', $user->step+1,
                                        ($table->asta_pnt > 60 ? $table->asta_pnt + 1 : 61) );

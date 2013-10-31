@@ -407,6 +407,7 @@ class Bin5_table extends Table {
         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
             $this->total[$i] = 0;
             $user_cur = $userarr[$this->player[$i]];
+            $user_cur->stat_set('table');
             $user_cur->exitislock = TRUE;
         }
 
@@ -497,7 +498,7 @@ class Bin5_table extends Table {
         return ($ct);
     }
 
-    function rules_engine($bri, $curtime, $action, $user)
+    function rules_engine(&$bri, $curtime, $action, $user)
     {
         GLOBAL $G_all_points, $G_dbasetype;
 

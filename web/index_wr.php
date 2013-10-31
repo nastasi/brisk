@@ -667,10 +667,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                         $bri_user_cur = $bri->user[$i];
                         $user_cur = $room->user[$table->player[$i]];
                         
-                        $bri_user_cur->stat_set('table');
-                        $bri_user_cur->subst = 'asta';
                         $bri_user_cur->laccwr = $curtime;
-                        
                         $bri_user_cur->trans_step = $user_cur->step + 1;
                         $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
                         $bri_user_cur->step_inc();
