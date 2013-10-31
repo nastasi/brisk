@@ -25,7 +25,7 @@ var PLAYERS_N = 3;
 var EXIT_BAN_TIME = 3600;
 var cookiepath = "/brisk/";
 
-var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ', 
+var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                       'en' : 'Loaded images ' },
                       'imgload_b' : { 'it' : '%.', 
                                       'en' : '%.' },

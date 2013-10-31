@@ -1630,6 +1630,9 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
         $ret .= show_table_info(&$bri, &$table, $table_pos);
         $ret .= "setTimeout(preload_images, 500, g_preload_img_arr, g_imgct);";
     }
+    else {
+        $ret .= "\$('imgct').innerHTML = \$('imgct').innerHTML = mlang_commons['imgload_a'][g_lang]+\"100%.\";";
+    }
     if (!$is_again)
         $ret .= table_welcome($user);
 
