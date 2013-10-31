@@ -203,6 +203,7 @@ class Transport_websocket {
 
     function chunk($step, $cont)
     {
+        // fprintf(STDERR, "CHUNK: [%s]\n", $cont);
         return $this->frame('@BEGIN@'.$cont.'@END@'); // , 'text', TRUE);
     }
 
@@ -503,6 +504,7 @@ class Transport_xhr {
 
     function chunk($step, $cont)
     {
+        // fprintf(STDERR, "CHUNK: [%s]\n", $cont);
         return ("@BEGIN@".$cont."@END@");
     }
 
@@ -574,6 +576,7 @@ push(\"%s\");
 
     function chunk($step, $cont)
     {
+        // fprintf(STDERR, "CHUNK: [%s]\n", $cont);
         if ($cont == NULL) {
             return sprintf("<script id='hs%d' type='text/javascript'><!--
 push(null);\n// -->\n</script>", $step);
