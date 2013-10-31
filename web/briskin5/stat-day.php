@@ -297,22 +297,8 @@ function main_pgsql($from, $to)
                 fprintf($fpexp, "<br>");
                 $tmt_obj = pg_fetch_object($tmt_pg, $m);
 
-                if ($tmt_obj->minus_one_is_old > -1) { // is new
-                    $usr_sql = sprintf("
-SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u, %sbin5_table_orders AS o WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND m.code = o.mcode AND u.code = o.ucode GROUP BY u.code, u.login, m.tidx, o.pos ORDER BY o.pos;", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
-                }
-                else { // is old
-                    $usr_sql = sprintf("
-SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d GROUP BY u.code, u.login, m.tidx;", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
-                }
-
-                if (($usr_pg  = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE ) {
-                    log_crit("stat-day: pg_query usr_sql failed");
-                    break;
-                }
-                $usr_n = pg_numrows($usr_pg);
-                if ($usr_n != BIN5_PLAYERS_N) {
-                    log_crit("stat-day: wrong number of players");
+                if (($users = $bdb->users_get($tmt_obj->code, TRUE, ($tmt_obj->minus_one_is_old > -1))) == FALSE) {
+                    log_crit("%s: users_get failed", __FUNCTION__);
                     break;
                 }
 
@@ -322,19 +308,19 @@ SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) A
                     break;
                 }
 
-                $usr_obj = array();
                 for ($u = 0 ; $u < $usr_n ; $u++) {
-                    $usr_obj[$u] = pg_fetch_object($usr_pg, $u);
                     if ($u == 0) {
-                        fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $usr_obj[$u]->first, $usr_obj[$u]->last, $usr_obj[$u]->tidx);
+                        fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $users[$u]['first'], $users[$u]['last'], $users[$u]['tidx']);
                         fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
                     }
-                    fprintf($fpexp, "<th>%s</th>", $usr_obj[$u]->login);
-                    $pts_sql = sprintf("SELECT p.pts as pts from %sbin5_matches as m, %sbin5_games as g, %sbin5_points as p, %susers as u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND u.code = %d ORDER BY g.code", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
-                                       $tmt_obj->code, $usr_obj[$u]->code);
+                    fprintf($fpexp, "<th>%s</th>", $users[$u]['login']);
+                    // note: we are looping on users, order on them not needed
+                    $pts_sql = sprintf("SELECT p.pts as pts from %sbin5_games as g, %sbin5_points as p WHERE g.code = p.gcode AND g.mcode = %d AND p.ucode = %d ORDER BY g.code",
+                                       $G_dbpfx, $G_dbpfx, $G_dbpfx,
+                                       $tmt_obj->code, $users[$u]['code']);
 
                     // points of the match for each user
-                    if (($pts_pg[$u]  = pg_query($bdb->dbconn->db(), $pts_sql)) == FALSE) {
+                    if (($pts_pg[$u] = pg_query($bdb->dbconn->db(), $pts_sql)) == FALSE) {
                         break;
                     }
                     if ($u == 0) {
@@ -365,10 +351,10 @@ SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) A
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
-                        fprintf($fpexp, "<td>%s</td><td>%s</td>", $usr_obj[$gam_obj->mazzo]->login,
+                        fprintf($fpexp, "<td>%s</td><td>%s</td>", $users[$gam_obj->mazzo]['login'],
                                 xcape( game_description($gam_obj->act, 'plain', $gam_obj->mult,
-                                                        $gam_obj->asta_win, $usr_obj[$gam_obj->asta_win]->login,
-                                                        $gam_obj->friend, $usr_obj[$gam_obj->friend]->login,
+                                                        $gam_obj->asta_win, $users[$gam_obj->asta_win]['login'],
+                                                        $gam_obj->friend, $users[$gam_obj->friend]['login'],
                                                         $gam_obj->pnt, $gam_obj->asta_pnt) )
                                 );
                     }
@@ -380,7 +366,7 @@ SELECT u.code AS code, u.login AS login, min(g.tstamp) AS first, max(g.tstamp) A
                 for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
                     $tot_sql = sprintf("
 SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d AND u.code = %d", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
-                                       $tmt_obj->code, $usr_obj[$u]->code);
+                                       $tmt_obj->code, $users[$u]['code']);
                     if (($tot_pg  = pg_query($bdb->dbconn->db(), $tot_sql)) == FALSE ) {
                         break;
                     }
