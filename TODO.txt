@@ -3,6 +3,23 @@
 
   FEATURES |
  ----------+
+   WIP - CONTINUE FEATURE
+     . replace explicit strings with multilanguage array
+
+     DONE . save points every game
+     DONE . modify points calculation to include order and mazzo
+     DONE . exclude not standard types from statistics
+         DONE . daily reports (1 for each active tournament)
+         DONE . monthly stats (for normal match only)
+
+     DONE . show current match ID when created
+     DONE . add info about continue to the info page
+     DONE . add command to continue
+       DONE . check consistency of the request
+     DONE . rearrange users and game status to continue the selected match
+
+     DONE . investigate user reordering ??
+
    - WEBSOCKET TRANSPORT
      . refactoring $enc attribute management
      DONE . reintroduced $enc = 'plain' for websocket

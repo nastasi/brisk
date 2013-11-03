@@ -96,13 +96,13 @@ function ptsgam_cmp($a, $b)
 }
 
 /* types of placing based on delta time */
-define(TY_DTIME_TRI, 0);
-define(TY_DTIME_MON, 1);
-define(TY_DTIME_WEE, 2);
+define('TY_DTIME_TRI', 0);
+define('TY_DTIME_MON', 1);
+define('TY_DTIME_WEE', 2);
 
 /* subtypes of placing based on number of played games */
-define(SUBTY_FREQ_LO, 0);
-define(SUBTY_FREQ_HI, 1);
+define('SUBTY_FREQ_LO', 0);
+define('SUBTY_FREQ_HI', 1);
 
 
 function placings_show($user) 

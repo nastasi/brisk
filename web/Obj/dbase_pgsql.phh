@@ -3,7 +3,7 @@
    *  brisk - dbase_pgsql.phh
    *
    *  Copyright (C) 2006-2012 Matteo Nastasi
-   *                          mailto: nastasi@alternativeoutput.it 
+   *                          mailto: nastasi@alternativeoutput.it
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
    *
@@ -34,20 +34,20 @@ function escsql($s)
     return str_replace($escsql_from, $escsql_to, $s);
 }
 
-class DBConn 
+class DBConn
 {
     static $dbcnnx = FALSE;
     var $db = FALSE;
-    
+
     function DBConn()
     {
-        $this->db = DBConn::$dbcnnx;        
+        $this->db = DBConn::$dbcnnx;
     }
 
     static function create()
     {
         GLOBAL $G_dbauth;
-        
+
         if (DBConn::$dbcnnx == FALSE) {
             if (!(DBConn::$dbcnnx = @pg_connect ($G_dbauth, PGSQL_CONNECT_FORCE_NEW))) {
                 return (FALSE);
@@ -85,7 +85,7 @@ class BriskDB
     var $dbconn;
     var $item;
     var $item_n;
-    
+
     function BriskDB($dbconn)
     {
         $this->dbconn = $dbconn;
@@ -98,15 +98,15 @@ class BriskDB
         $ret = FALSE;
 
         log_main("BriskDB create:start");
-        
+
         do {
             if (($dbconn = DBConn::create()) == FALSE) {
                 break;
             }
-            
+
             $ret = new BriskDB($dbconn);
         } while (0);
-        
+
         return ($ret);
     }
 
@@ -125,20 +125,20 @@ class BriskDB
     function users_load()
     {
     }
-    
+
     function login_exists($login)
     {
         GLOBAL $G_dbpfx;
 
         /* check the existence of the nick in the BriskDB */
         log_main("login_exists: ".$login);
-        
+
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",
                             $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg = $this->query($user_sql)) != FALSE)
             if (pg_numrows($user_pg) == 1)
                 return TRUE;
-        
+
         return FALSE;
     }
 
@@ -151,7 +151,7 @@ class BriskDB
         }
         if (pg_numrows($user_pg) != 1)
             return FALSE;
-        
+
         $user_obj = pg_fetch_object($user_pg, 0);
 
         return ($user_obj);
@@ -187,37 +187,39 @@ class BriskDB
 
         return TRUE;
     }
-    
+
+    /*
+      if success return a LoginDBItem object
+     */
     function login_verify($login, $pass)
     {
         GLOBAL $G_dbpfx;
-        
+
         $ret = FALSE;
-        
+
         log_main("login_verify: ".$login);
-        
-        
+
         //O /* check the existence of the nick in the BriskDB */
         //O for ($i = 0 ; $i < $this->item_n ; $i++) {
         //O log_main("login_verify: BEGIN");
-        
+
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE) {
             return FALSE;
         }
 
         log_main("login[".$user_obj->code."]: ".$user_obj->login);
-        
+
         /* if it exists check for a valid challenge */
-        if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) { 
+        if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
             if (($chals = &Challenges::load_data()) != FALSE) {
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
                         log_main("login_verify [".$pass."] with [".md5($chals->item[$e]->token.$user_obj->pass)."]");
-                        
+
                         if (strcmp($pass, md5($chals->item[$e]->token.$user_obj->pass)) == 0) {
                             log_main("login_verify SUCCESS for ".$login);
-                            
+
                             $chals->rem($login);
                             $this->user_update_login_time($user_obj->code, time());
                             $ret = LoginDBItem::LoginDBItemFromRecord($user_obj);
@@ -226,33 +228,33 @@ class BriskDB
                     }
                 } // end for ($e = 0 ...
             }
-            
+
             if ($chals->ismod()) {
                 Challenges::save_data(&$chals);
             }
-            
+
             Challenges::unlock_data($a_sem);
         }
         //O break;
         // O } //  if (strcasecmp($this->item[$i]->login, ...
         //O }
-    
+
         return ($ret);
     }
 
     function getitem_bylogin($login, &$id) {
         $ret = FALSE;
         $id = -1;
-        
+
         log_main("getitem_bylogin: ".$login);
-        
+
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE)
             return $ret;
 
         $id = $user_obj->code;
         return (LoginDBItem::LoginDBItemFromRecord($user_obj));
     }
-    
+
     // TODO FOR DB
     function getmail($login)
     {
@@ -260,7 +262,7 @@ class BriskDB
 
         if (($ret = $this->getrecord_bylogin($login)) == FALSE)
             return FALSE;
-        
+
         return ($ret->email);
     }
 
@@ -271,7 +273,7 @@ class BriskDB
         for ($i = 0 ; $i < $olddb->count() ; $i++) {
             $user_sql = sprintf("INSERT INTO %susers ( login, pass, email, type) VALUES ('%s', '%s', '%s', %d);",
                                 $G_dbpfx, escsql(strtolower($olddb->item[$i]->login)), escsql($olddb->item[$i]->pass),
-                                escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL); 
+                                escsql($olddb->item[$i]->email), $olddb->item[$i]->type & USER_FLAG_TY_ALL);
 
             if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
                 $cont .= sprintf("ERROR IN LINE: %s\n", eschtml($user_sql));
@@ -287,11 +289,181 @@ class BriskDB
         return ($this->dbconn);
     }
 
-    //   ttok   text UNIQUE,      
-    //   tidx   
-    function bin5_points_save($date, $ttok, $tidx, $ucodes, $pts)
+    // return array of array('code', 'login' [, 'first', 'last', 'tidx']) ordered by table position
+    function users_get($match_code, $with_minmaxtidx, $is_newmatch)
     {
         GLOBAL $G_dbpfx;
+
+        if ($is_newmatch) { // is new
+            $usr_sql = sprintf("SELECT u.code AS code, u.login AS login%s
+                                  FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p,
+                                       %susers AS u, %sbin5_table_orders AS o
+                                  WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode
+                                       AND m.code = o.mcode AND u.code = o.ucode AND m.code = %d
+                                  GROUP BY u.code, u.login%s, o.pos
+                                  ORDER BY o.pos;",
+                               ($with_minmaxtidx ? ", min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx" : ""),
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $match_code,
+                               ($with_minmaxtidx ? ", m.tidx" : ""));
+        }
+        else { // is old
+            $usr_sql = sprintf("SELECT u.code AS code, u.login AS login%s
+                                  FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u
+                                  WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d
+                                  GROUP BY u.code, u.login%s;",
+                               ($with_minmaxtidx ? ", min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx" : ""),
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $match_code,
+                               ($with_minmaxtidx ? ", m.tidx" : ""));
+        }
+
+        if (($usr_pg  = pg_query($this->dbconn->db(), $usr_sql)) == FALSE ) {
+            log_crit(sprintf("%s::%s: pg_query usr_sql failed [%s]", __CLASS__, __FUNCTION__, $usr_sql));
+            return (FALSE);
+        }
+        $usr_n = pg_numrows($usr_pg);
+        if ($usr_n != BIN5_PLAYERS_N) {
+            log_crit(sprintf("%s::%s: wrong number of players [%s] %d", __CLASS__, __FUNCTION__, $usr_sql, $usr_n));
+            return (FALSE);
+        }
+        $users = array();
+
+        if ($with_minmaxtidx)
+            $fields = array('code', 'login', 'first', 'last', 'tidx');
+        else
+            $fields = array('code', 'login');
+
+        for ($u = 0 ; $u < $usr_n ; $u++) {
+            $usr_obj = pg_fetch_object($usr_pg, $u);
+            $users[$u] = array();
+            foreach($fields as $field) {
+                $users[$u][$field] = $usr_obj->$field;
+            }
+        }
+        return ($users);
+    }
+
+    // out: tab->{points,points_n,old_reason}, in: tab->ttok
+    function match_continue($match_code, $table, $tidx)
+    {
+        GLOBAL $G_dbpfx;
+
+        if (($users = $this->users_get($match_code, FALSE /*without minmaxidx*/, TRUE /*new game*/)) == FALSE) {
+            log_crit(sprintf("%s::%s: retrieve users fails", __CLASS__, __FUNCTION__));
+            return (FALSE);
+        }
+
+        $num_sql = sprintf("SELECT count(*) AS points_n FROM %sbin5_games WHERE mcode = %d;", $G_dbpfx, $match_code);
+        if (($num_pg  = $this->query($num_sql)) == FALSE || pg_numrows($num_pg) != 1) {
+            log_crit(sprintf("%s::%s: get games number fails", __CLASS__, __FUNCTION__));
+            return (FALSE);
+        }
+        $num_obj = pg_fetch_object($num_pg, 0);
+        $table->points_n = $num_obj->points_n;
+
+        $tot_sql = sprintf("SELECT sum(p.pts) AS pts
+                            FROM %sbin5_games AS g, %sbin5_points AS p, %susers AS u,
+                                 %sbin5_table_orders AS o
+                            WHERE g.mcode = %d AND g.code = p.gcode AND p.ucode = u.code
+                                  AND p.ucode = o.ucode AND g.mcode = o.mcode
+                            GROUP BY p.ucode, o.pos
+                            ORDER BY o.pos;",
+                           $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $match_code);
+        if (($tot_pg  = pg_query($this->dbconn->db(), $tot_sql)) == FALSE
+            || pg_numrows($tot_pg) != BIN5_PLAYERS_N) {
+            log_crit(sprintf("%s::%s: get games totals fails", __CLASS__, __FUNCTION__));
+            return(FALSE);
+        }
+
+        $u = 0;
+        foreach ($users as $user) {
+            $pts_sql = sprintf("SELECT p.pts AS pts
+                                    FROM %sbin5_points as p, %sbin5_games as g
+                                    WHERE p.gcode = g.code AND g.mcode = %d AND p.ucode = %d
+                                    ORDER BY g.code ASC
+                                    LIMIT %d OFFSET %d;",
+                               $G_dbpfx, $G_dbpfx, $match_code, $user['code'],
+                               MAX_POINTS,
+                               ($num_obj->points_n < MAX_POINTS ? 0 : $num_obj->points_n - MAX_POINTS));
+
+            // points of the match for each user
+            if (($pts_pg  = $this->query($pts_sql)) == FALSE) {
+                log_crit(sprintf("%s::%s: get points fails", __CLASS__, __FUNCTION__));
+                return (FALSE);
+            }
+            $pts_n = pg_numrows($pts_pg);
+            if ($pts_n > $table->points_n) {
+                // inconsistent scenario number of points great than number of games
+                log_crit(sprintf("%s::%s: number of points great than number of games", __CLASS__, __FUNCTION__));
+                return (FALSE);
+            }
+            for ($i = 0 , $ct = $table->points_n - $pts_n; $ct < $table->points_n ; $ct++, $i++) {
+                $pts_obj = pg_fetch_object($pts_pg, $i);
+                $table->points[$ct % MAX_POINTS][$u] = $pts_obj->pts;
+            }
+            $tot_obj = pg_fetch_object($tot_pg, $u);
+            $table->total[$u] = $tot_obj->pts;
+
+            $u++;
+        }
+
+        $gam_sql = sprintf("SELECT * FROM %sbin5_games WHERE mcode = %d ORDER BY code DESC LIMIT 1;", $G_dbpfx, $match_code);
+        if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_numrows($gam_pg) != 1) {
+            log_crit(sprintf("%s::%s: get last game fails", __CLASS__, __FUNCTION__));
+            return (FALSE);
+        }
+        $gam_obj = pg_fetch_object($gam_pg, 0);
+
+        $table->old_reason = game_description($gam_obj->act, 'html', $gam_obj->mult,
+                                              $gam_obj->asta_win, $users[$gam_obj->asta_win]['login'],
+                                              $gam_obj->friend, $users[$gam_obj->friend]['login'],
+                                              $gam_obj->pnt, $gam_obj->asta_pnt);
+
+        return (TRUE);
+    }
+
+    function match_order_get(&$match_data, $match_code, $exp_num)
+    {
+        GLOBAL $G_dbpfx;
+
+        $ord_sql = sprintf("SELECT ucode FROM %sbin5_table_orders WHERE mcode = %d ORDER BY pos ASC;",
+                           $G_dbpfx, $match_code);
+
+        if (($ord_pg  = $this->query($ord_sql)) == FALSE || pg_numrows($ord_pg) != $exp_num) {
+            log_crit(sprintf("%s: fails for id or users number", __FUNCTION__));
+            return (FALSE);
+        }
+
+        $ucodes = array();
+        for ($i = 0 ; $i < $exp_num ; $i++) {
+            $ord_obj = pg_fetch_object($ord_pg, $i);
+            $ucodes[$i] = $ord_obj->ucode;
+        }
+
+        if ($match_data !== NULL) {
+            $mtdt_sql = sprintf("SELECT * FROM %sbin5_matches WHERE code = %d;",
+                                $G_dbpfx, $match_code);
+
+            if (($mtdt_pg  = $this->query($mtdt_sql)) == FALSE || pg_numrows($mtdt_pg) != 1) {
+                log_crit(sprintf("%s: fails retrieve match_data values [%d]", __FUNCTION__, $match_code));
+                return (FALSE);
+            }
+
+            $mtdt_obj = pg_fetch_object($mtdt_pg, 0);
+
+            foreach (array('ttok', 'tidx', 'mult_next', 'mazzo_next', 'tcode') as $match_name) {
+                $match_data[$match_name] = $mtdt_obj->$match_name;
+            }
+        }
+
+        return ($ucodes);
+    }
+
+    //   ttok   text UNIQUE,
+    //   tidx
+    function bin5_points_save($date, $table, $tidx, $action, $ucodes, $pts)
+    {
+        GLOBAL $G_dbpfx;
+        $sql_ttok = escsql($table->table_token);
 
         $is_trans = FALSE;
         $ret = FALSE;
@@ -299,7 +471,7 @@ class BriskDB
         $n = count($ucodes);
         /* check the existence of the nick in the BriskDB */
         log_main("bin5_points_save: ");
-        
+
         do {
             if ($this->query("BEGIN") == FALSE) {
                 break;
@@ -309,31 +481,49 @@ class BriskDB
             /*
              * matches management
              */
-            $mtc_sql = sprintf("SELECT * FROM %sbin5_matches WHERE ttok = '%s';", $G_dbpfx, escsql($ttok));
+            $mtc_sql = sprintf("UPDATE %sbin5_matches SET (mazzo_next, mult_next) = (%d, %d) WHERE ttok = '%s' RETURNING *;",
+                               $G_dbpfx, $table->mazzo, $table->mult, $sql_ttok);
             if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+
                 // match not exists, insert it
-                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx) VALUES ('%s', %d) RETURNING *;",
-                                   $G_dbpfx, escsql($ttok), $tidx);
-                if ( ! (($mtc_pg  = $this->query($mtc_sql)) != FALSE &&
-                        pg_affected_rows($mtc_pg) == 1) ) {
+                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next) VALUES ('%s', %d, %d, %d) RETURNING *;",
+                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult);
+                if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_affected_rows($mtc_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
                     break;
                 }
+                $mtc_obj = pg_fetch_object($mtc_pg, 0);
+
+                for ($i = 0 ; $i < $n ; $i++) {
+                    $ord_sql = sprintf("INSERT INTO %sbin5_table_orders (mcode, ucode, pos) VALUES (%d, %d, %d);",
+                                       $G_dbpfx, $mtc_obj->code, $ucodes[$i], $i);
+                    if (($ord_pg = $this->query($ord_sql)) == FALSE || pg_affected_rows($ord_pg) != 1 ) {
+                        log_crit(sprintf("bin5_points_save: failed at insert table order [%s]", $ord_sql));
+                        break;
+                    }
+                }
+                if ($i < $n)
+                    break;
             }
-            $mtc_obj = pg_fetch_object($mtc_pg,0);
+            else {
+                $mtc_obj = pg_fetch_object($mtc_pg,0);
+            }
 
             /*
              * games management
              */
-            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp) 
-                                               VALUES (%d, to_timestamp(%d)) RETURNING *;",
-                               $G_dbpfx, $mtc_obj->code, $date);
-            if ( ! (($gam_pg  = $this->query($gam_sql)) != FALSE &&
-                    pg_affected_rows($gam_pg) == 1) ) {
+            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp, act, asta_pnt, pnt, asta_win, friend, mazzo, mult)
+                                               VALUES (%d, to_timestamp(%d), %d, %d, %d, %d, %d, %d, %d) RETURNING *;",
+                               $G_dbpfx, $mtc_obj->code, $date, $action,
+                               $table->old_asta_pnt, $table->old_pnt,
+                               $table->old_asta_win,
+                               $table->old_friend,
+                               $table->old_mazzo, $table->old_mult);
+            if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_affected_rows($gam_pg) != 1) {
                 log_crit(sprintf("bin5_points_save: failed at insert game [%s]", $gam_sql));
-                break;                        
+                break;
             }
-        
+
             $gam_obj = pg_fetch_object($gam_pg,0);
 
             /*
@@ -341,37 +531,36 @@ class BriskDB
              */
             for ($i = 0 ; $i < $n ; $i++) {
                 /* put points */
-                $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts) 
+                $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts)
                                                VALUES (%d, %d, %d);",
                                    $G_dbpfx, $gam_obj->code, $ucodes[$i], $pts[$i]);
-                if ( ! (($pts_pg  = $this->query($pts_sql)) != FALSE &&
-                        pg_affected_rows($pts_pg) == 1) ) {
+                if (($pts_pg  = $this->query($pts_sql)) == FALSE || pg_affected_rows($pts_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert point [%s]", $pts_sql));
-                    break;                        
+                    break;
                 }
             }
-
             if ($i < $n)
                 break;
-            
+
             if ($this->query("COMMIT") == FALSE) {
                 break;
             }
-             
+
             $is_trans = FALSE;
 
-            $ret =  TRUE;
+            $table->match_id = $mtc_obj->code;
+            $ret = TRUE;
         } while (0);
-        
+
         if ($is_trans)
             $this->query("ROLLBACK");
-        
+
         return $ret;
     }
 
 } // End class BriskDB
 
-class LoginDBOld 
+class LoginDBOld
 {
     var $item;
     var $item_n;

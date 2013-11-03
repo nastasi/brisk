@@ -83,8 +83,8 @@ $mlang_indrd = array(
 
 class User {
   var $room;       // reference to the room where the user is registered
-  var $idx;        // index in the users array when you are in game
-  var $idx_orig;   // index in the users array when you aren't in game
+  var $idx;        // index in the room users array when you are in game
+  var $idx_orig;   // index in the room table users array when you aren't in game
   var $code;       // authentication code
   var $name;       // name of the user
   var $sess;       // session of the user
@@ -640,6 +640,12 @@ class User {
                   for ($i = $cur_step ; $i < $this->step ; $i++) {
                       $ii = $i % COMM_N;
                       log_rd2("ADDED TO THE STREAM: ".$this->comm[$ii]);
+                      if ($this->comm[$ii] == "") {
+                          if ($i == $cur_step)
+                              continue;
+                          else
+                              break;
+                      }
                       $ret .= $this->comm[$ii];
                   }
                   $new_stat =  $this->stat;

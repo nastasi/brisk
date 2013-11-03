@@ -210,7 +210,7 @@ function table_init() {
     show_astat(-2,-2,-2,-2,-2);
     set_iscalling(-1);
 
-    for (i=0 ; i < 8 ; i++) {
+    for (i=0 ; i < CARD_HAND ; i++) {
 	Drag.init($("card" + i), card_mouseup_cb);
 	for (e = 0 ; e < PLAYERS_N ; e++)
 	    $("card"+sux[e]+i).style.visibility = "hidden";
@@ -220,7 +220,7 @@ function table_init() {
 	$("takes"+sux[i]).style.visibility = "hidden";
 	}
 
-    for (i = 0 ; i < 8 ; i++) {
+    for (i=0 ; i < CARD_HAND ; i++) {
 	cards_pos[i] = i;
 	cards_ea_pos[i] = i;
 	cards_ne_pos[i] = i;

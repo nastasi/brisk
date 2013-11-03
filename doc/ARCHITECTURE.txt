@@ -1,5 +1,25 @@
 Sparse documentation about Brisk.
 
+==== brisk/table/user relationships ====
+
+=== in the room ===
+
+// when standup
+bri->user[user_idx] = user
+user->idx      = user_idx
+user->idx_orig = user_idx
+
+// when sitdown
+table->player[player_idx] = user_idx
+user->table_pos = player_idx
+
+=== in the game ===
+
+bin5->user[user_idx] = user
+table->player[player_idx] = user_idx
+user->table_pos = player_idx
+
+
 Many things aren't documented at all, but I start with authentication workflow.
 
 ==== MODIFY USERS TABLE ====
@@ -44,4 +64,11 @@ index.php:
   - garbage_manager(TRUE)
     - align many status var with briskin5 user values
     - room_join_wakeup()
+
+==== Chunk flow ====
+
+
+$ret = $user->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step,
+                        $splashdate, $table_idx, $table_token))
+$user->rd_transp->chunk($this->rd_scristp++, $ret);
 

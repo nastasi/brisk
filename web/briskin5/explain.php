@@ -40,11 +40,11 @@ require_once("Obj/briskin5.phh");
 require_once("Obj/placing.phh");
 
 function main() {
-
- if (file_exists(LEGAL_PATH."/explain.log")) {
-      $ret .= file_get_contents(LEGAL_PATH."/explain.log");
-  }
-  echo "$ret";
+    $ret = "";
+    if (file_exists(LEGAL_PATH."/explain.log")) {
+        $ret .= file_get_contents(LEGAL_PATH."/explain.log");
+    }
+    echo "$ret";
 }
 ?>
 <html>
