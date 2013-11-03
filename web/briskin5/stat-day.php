@@ -305,10 +305,11 @@ function main_pgsql($from, $to)
                 $gam_sql = sprintf("SELECT g.* FROM %sbin5_tournaments as t, %sbin5_matches AS m, %sbin5_games AS g WHERE t.code = m.tcode AND m.code = g.mcode AND m.code = %d ORDER BY g.tstamp;",
                                    $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
                 if (($gam_pg = pg_query($bdb->dbconn->db(), $gam_sql)) == FALSE ) {
+                    log_crit("stat-day: gam_sql failed");
                     break;
                 }
 
-                for ($u = 0 ; $u < $usr_n ; $u++) {
+                for ($u = 0 ; $u < count($users) ; $u++) {
                     if ($u == 0) {
                         fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $users[$u]['first'], $users[$u]['last'], $users[$u]['tidx']);
                         fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
@@ -321,6 +322,7 @@ function main_pgsql($from, $to)
 
                     // points of the match for each user
                     if (($pts_pg[$u] = pg_query($bdb->dbconn->db(), $pts_sql)) == FALSE) {
+                        log_crit("stat-day: pts_sql failed");
                         break;
                     }
                     if ($u == 0) {
@@ -328,11 +330,13 @@ function main_pgsql($from, $to)
                     }
                     else {
                         if ($num_games != pg_numrows($pts_pg[$u])) {
+                            log_crit("stat-day: num_games != pg_numrows");
                             break;
                         }
                     }
                 }
                 if ($u != BIN5_PLAYERS_N) {
+                    log_crit("stat-day: u != BIN5_PLAYERS_N");
                     break;
                 }
 

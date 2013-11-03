@@ -334,7 +334,6 @@ class BriskDB
 
         for ($u = 0 ; $u < $usr_n ; $u++) {
             $usr_obj = pg_fetch_object($usr_pg, $u);
-            fprintf(STDERR, "GOGORO [%s]\n", print_r($usr_obj, TRUE));
             $users[$u] = array();
             foreach($fields as $field) {
                 $users[$u][$field] = $usr_obj->$field;
