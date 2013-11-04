@@ -37,8 +37,13 @@ define('BIN5_RULES_ALLPASS',    2);
 
 $mlang_bin5_bin5 = array(
                          // br, hr, b, /b, win, fri
-                         'info_part' => array( 'it' => 'Nell\'ultima mano ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
-                                               'en' => 'In the last hand the declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
+                         'info_last' => array( 'it' => '%3$sUltima mano%4$s',
+                                               'en' => '%3$sLast hand%4$s'),
+                         'info_curr' => array( 'it' => '%3$sMano corrente%4$s',
+                                               'en' => '%3$sCurrent hand%4$s'),
+                         // br, hr, b, /b, win, fri
+                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
+                                               'en' => 'The declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
                          // br, hr, b, /b
                          'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
                                                'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
@@ -57,8 +62,8 @@ $mlang_bin5_bin5 = array(
                                                'en' => 'lost'),
 
                          // br, hr, b, /b, win_name
-                         'info_alon' => array( 'it' => 'Nell\'ultima partita %3$s%5$s%4$s si è chiamato in mano,%1$s',
-                                               'en' => 'In the last hand %3$s%5$s%4$s play alone against each other,%1$s'),
+                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano,%1$s',
+                                               'en' => '%3$s%5$s%4$s play alone against each other,%1$s'),
                          // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
                          'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %3$s%7$s%4$s.%1$s',
                                                'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
@@ -1824,6 +1829,11 @@ function show_table_info(&$bri, &$table, $table_pos)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;
 
+    $tg_br = "<br>";
+    $tg_hr = "<hr>";
+    $tg_bo = "<b>";
+    $tg_bc = "</b>";
+
     $ret = "";
     $user = $bri->user[$table->player[$table_pos]];
 
@@ -1852,9 +1862,15 @@ function show_table_info(&$bri, &$table, $table_pos)
     $noty .= "</tr></table>";
     $noty .= "<hr>";
     if ($table->old_reason != "") {
+        $noty .= sprintf($mlang_bin5_bin5['info_last'][$G_lang],
+                         $tg_br, $tg_hr, $tg_bo, $tg_bc);
+        $noty .= '<br>';
         $noty .= $table->old_reason;
     }
 
+    $noty .= sprintf($mlang_bin5_bin5['info_curr'][$G_lang],
+                     $tg_br, $tg_hr, $tg_bo, $tg_bc);
+    $noty .= '<br>';
     /* MLANG: "Fai <b>tu</b> il mazzo,", "Il mazzo a <b>$unam</b>," */
     if ($table->mazzo == $table_pos)
         $noty .= $mlang_bin5_bin5['info_yshuf'][$G_lang];
