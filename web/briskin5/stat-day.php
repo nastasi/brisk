@@ -317,7 +317,7 @@ function main_pgsql($from, $to)
                     fprintf($fpexp, "<th>%s</th>", $users[$u]['login']);
                     // note: we are looping on users, order on them not needed
                     $pts_sql = sprintf("SELECT p.pts as pts from %sbin5_games as g, %sbin5_points as p WHERE g.code = p.gcode AND g.mcode = %d AND p.ucode = %d ORDER BY g.code",
-                                       $G_dbpfx, $G_dbpfx, $G_dbpfx,
+                                       $G_dbpfx, $G_dbpfx,
                                        $tmt_obj->code, $users[$u]['code']);
 
                     // points of the match for each user
