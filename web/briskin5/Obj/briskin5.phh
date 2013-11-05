@@ -633,8 +633,12 @@ class Bin5_table extends Table {
 
         $this->old_friend = $this->friend;
         $this->old_reason = game_description($action, 'html', $this->old_mult,
-                                             $this->old_asta_win, $bri->user[$this->player[$this->old_asta_win]]->name,
-                                             $this->old_friend, $bri->user[$this->player[$this->old_friend]]->name,
+                                             $this->old_asta_win,
+                                             ($this->old_asta_win != -1 ?
+                                              $bri->user[$this->player[$this->old_asta_win]]->name : ""),
+                                             $this->old_friend,
+                                             ($this->old_friend != -1 ?
+                                              $bri->user[$this->player[$this->old_friend]]->name : ""),
                                              $this->old_pnt, $this->old_asta_pnt);
 
 

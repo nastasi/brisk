@@ -414,8 +414,10 @@ class BriskDB
         $gam_obj = pg_fetch_object($gam_pg, 0);
 
         $table->old_reason = game_description($gam_obj->act, 'html', $gam_obj->mult,
-                                              $gam_obj->asta_win, $users[$gam_obj->asta_win]['login'],
-                                              $gam_obj->friend, $users[$gam_obj->friend]['login'],
+                                              $gam_obj->asta_win, ($gam_obj->asta_win != -1 ?
+                                                                   $users[$gam_obj->asta_win]['login'] : ""),
+                                              $gam_obj->friend, ($gam_obj->friend != -1 ?
+                                                                 $users[$gam_obj->friend]['login'] : ""),
                                               $gam_obj->pnt, $gam_obj->asta_pnt);
 
         return (TRUE);

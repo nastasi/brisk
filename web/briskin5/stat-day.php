@@ -357,8 +357,12 @@ function main_pgsql($from, $to)
                     if ($tmt_obj->minus_one_is_old != -1) {
                         fprintf($fpexp, "<td>%s</td><td>%s</td>", $users[$gam_obj->mazzo]['login'],
                                 xcape( game_description($gam_obj->act, 'plain', $gam_obj->mult,
-                                                        $gam_obj->asta_win, $users[$gam_obj->asta_win]['login'],
-                                                        $gam_obj->friend, $users[$gam_obj->friend]['login'],
+                                                        $gam_obj->asta_win,
+                                                        ($gam_obj->asta_win != -1 ?
+                                                         $users[$gam_obj->asta_win]['login'] : ""),
+                                                        $gam_obj->friend,
+                                                        ($gam_obj->friend != -1 ?
+                                                         $users[$gam_obj->friend]['login'] : ""),
                                                         $gam_obj->pnt, $gam_obj->asta_pnt) )
                                 );
                     }
