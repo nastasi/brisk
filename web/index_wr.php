@@ -683,10 +683,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                         $bri_user_cur = $bri->user[$i];
                         $user_cur = $room->user[$table->player[$i]];
                         
-                        $bri_user_cur->stat_set('table');
-                        $bri_user_cur->subst = 'asta';
                         $bri_user_cur->laccwr = $curtime;
-                        
                         $bri_user_cur->trans_step = $user_cur->step + 1;
                         $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
                         $bri_user_cur->step_inc();
@@ -701,11 +698,8 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                         // 	    // CHECK
                         while (array_pop($user_cur->comm) != NULL);
           
-                        $ret = "";
-                        $ret .= sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
-                        
-                        $user_cur->comm[$user_cur->step % COMM_N] = $ret;
                         $user_cur->trans_step = $user_cur->step + 1;
+                        $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
                         log_wr("TRANS ATTIVATO");
                         
                         $user_cur->stat_set('table');

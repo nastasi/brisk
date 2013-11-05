@@ -30,7 +30,7 @@ var BSK_USER_FLGVL = 1;
 var BSK_USER_NICK  = 2;
 var BSK_USER_SCOL  = 3;
 
-var mlang_commons = { 'imgload_a' : { 'it' : 'Immagine caricate ', 
+var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                       'en' : 'Loaded images ' },
                       'imgload_b' : { 'it' : '%.', 
                                       'en' : '%.' },

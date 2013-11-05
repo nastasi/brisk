@@ -709,7 +709,7 @@ class Sac_a_push {
                         if ($buf == FALSE || mb_strlen($buf, "ASCII") == 0) {
                             // close socket case
                             if ($buf == FALSE) {
-                                printf("ERROR READING\n");
+                                printf("INFO: read return false\n");
                             }
                             if ($sock === $this->list) {
                                 printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
@@ -756,7 +756,7 @@ class Sac_a_push {
 
                                     global_dump();
                                 }
-                                else if ($line == "shutdown") {
+                                else if ($line == "shutdown" || $line == "sd") {
                                     if ($this->app->dump_data()) {
                                         return(0);
                                     }

@@ -189,6 +189,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'user\'s placings'),
                      'itm_cla'      => array('it' => 'classifiche',
                                              'en' => 'placings'),
+                     'tit_mnu'      => array('it' => 'minuta giornaliera',
+                                             'en' => 'daily report'),
+                     'itm_mnu'      => array('it' => 'minuta',
+                                             'en' => 'daily deport'),
                      'tit_rmap'     => array('it' => 'prossime funzionalità implementate',
                                              'en' => 'roadmap of next functionalities'),
                      'itm_rmap'     => array('it' => 'roadmap',
@@ -622,6 +626,10 @@ google_color_url = "000000";
 <a href="#"
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_placing();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>
+
+<a target="_blank" href="briskin5/explain.php"
+   onmouseover="menu_hide(0,1);"
+   title="'.$mlang_room['tit_mnu'][$G_lang].'">'.$mlang_room['itm_mnu'][$G_lang].'</a><br>
 
 <a href="#"
    onmouseover="menu_hide(0,1);"

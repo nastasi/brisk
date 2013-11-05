@@ -869,6 +869,7 @@ xynt_streaming.prototype = {
 	        //xx this.hbit("+");
 
                 // alert("SINGLE: ["+singlecomm+"]");
+                // window.console.log("["+singlecomm+"]");
 	        this.cmdproc(singlecomm);
 	        again = 1;
 	    }

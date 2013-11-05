@@ -143,12 +143,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.9.3";
+$G_brisk_version = "4.10.1";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunto WebSocket come sistema preferenziale di comunicazione e corretto qualche bug.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunto il comando /cont per proseguire le partite.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: added WebSocket as preferential communication system and fixed some bug.',
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: added /cont command to continue matches.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
 
 $G_room_help = array( 'it' => '
@@ -175,6 +175,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
 <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)

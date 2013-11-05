@@ -5,7 +5,8 @@ $desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia (status sempre v
                "Restart: da 1 a 8 ogni secondo, pausa 16 secondi (status passa ad arancione e poi a rosso), poi ricomincia (e status torna a verde).",
                "Pausa: da 1 a 5 ogni secondo, pausa 3 secondi, e poi 8 e 9 ogni secondo, e poi ricomincia (status sempre verde).",
                "Keyword: da 1 a 5 ogni secondo, @BEGIN@, @END@, @BEGIN@ xxx yyy @END@, 9, (status sempre verde).",
-               "Reload limiter: da 1 a 8 ogni secondo e chiude, 9 setta e chiude subito,<br>il client aspetta 3 secondi, e poi da 10 a N ogni secondo, (status sempre verde).");
+               "Reload limiter: da 1 a 8 ogni secondo e chiude, 9 setta e chiude subito,<br>il client aspetta 3 secondi, e poi da 10 a N ogni secondo, (status sempre verde).",
+               "Esegue un comando, manda loc_new a un valore irraggiungibile, stoppa il processore di comandi e poi dà un comando teoricamente irraggiungibile.");
 
 
 // trim(mb_convert_case($split[0], MB_CASE_TITLE, 'UTF-8'))
@@ -252,6 +253,17 @@ if (isset($isstream) && $isstream == "true") {
                     sleep(1);
             }
         }
+        break;
+    case 7:
+        $chunk = $trobj->chunk(1, sprintf("gst.st++; \$('container').innerHTML = 'prima';"));
+        print($chunk);
+
+        $chunk = $trobj->chunk(2, sprintf("gst.st++; gst.st_loc_new++; xstm.stop();"));
+        print($chunk);
+
+        $chunk = $trobj->chunk(3, sprintf("gst.st++; \$('container').innerHTML = 'dopo';"));
+        print($chunk);
+
         break;
     }
 
