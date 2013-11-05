@@ -238,6 +238,7 @@ function main_pgsql($from, $to)
     $ret = FALSE;
     $fpexp = FALSE;
 
+    // log_crit("stat-day: BEGIN");
     do {
         if (($fpexp = @fopen(LEGAL_PATH."/explain.log", 'w')) == FALSE) {
             log_crit("stat-day: open explain failed");
@@ -267,6 +268,7 @@ function main_pgsql($from, $to)
         printf("Number of tournaments: %d\n", $trn_n);
 
         for ($t = 0 ; $t < $trn_n ; $t++) {
+            // log_crit("stat-day: LOOP t");
             $trn_obj = pg_fetch_object($trn_pg, $t);
 
             $tmt_sql = sprintf("SELECT m.code AS code, m.mazzo_next as minus_one_is_old FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code, minus_one_is_old ORDER BY m.code, minus_one_is_old DESC;",
@@ -294,11 +296,12 @@ function main_pgsql($from, $to)
             fprintf($fpexp, "<h3>%s</h3>", $mlang_stat_day[$trn_obj->name][$G_lang]);
 
             for ($m = 0 ; $m < $tmt_n ; $m++) {
+                // log_crit("stat-day: LOOP m");
                 fprintf($fpexp, "<br>");
                 $tmt_obj = pg_fetch_object($tmt_pg, $m);
 
                 if (($users = $bdb->users_get($tmt_obj->code, TRUE, ($tmt_obj->minus_one_is_old > -1))) == FALSE) {
-                    log_crit("%s: users_get failed", __FUNCTION__);
+                    log_crit(sprintf("stat_day: users_get failed %d", $tmt_obj->code));
                     break;
                 }
 
@@ -310,6 +313,7 @@ function main_pgsql($from, $to)
                 }
 
                 for ($u = 0 ; $u < count($users) ; $u++) {
+                    // log_crit("stat-day: LOOP u");
                     if ($u == 0) {
                         fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $users[$u]['first'], $users[$u]['last'], $users[$u]['tidx']);
                         fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
@@ -436,11 +440,15 @@ SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_poi
                 }
                 fprintf($fpexp, "</table>\n");
             }
-            if ($m < $tmt_n)
+            if ($m < $tmt_n) {
+                log_crit("stat-day: m < tmt_n");
                 break;
+            }
         }
-        if ($t < $trn_n)
+        if ($t < $trn_n) {
+            log_crit("stat-day: t < trn_n");
             break;
+        }
         $ret = (TRUE);
     } while (0);
 
