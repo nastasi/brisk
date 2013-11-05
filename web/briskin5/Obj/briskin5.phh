@@ -37,10 +37,10 @@ define('BIN5_RULES_ALLPASS',    2);
 
 $mlang_bin5_bin5 = array(
                          // br, hr, b, /b, win, fri
-                         'info_last' => array( 'it' => '%3$sUltima mano%4$s',
-                                               'en' => '%3$sLast hand%4$s'),
-                         'info_curr' => array( 'it' => '%3$sMano corrente%4$s',
-                                               'en' => '%3$sCurrent hand%4$s'),
+                         'info_last' => array( 'it' => '%3$sultima mano%4$s',
+                                               'en' => '%3$slast hand%4$s'),
+                         'info_curr' => array( 'it' => '%3$smano corrente%4$s',
+                                               'en' => '%3$scurrent hand%4$s'),
                          // br, hr, b, /b, win, fri
                          'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
                                                'en' => 'The declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
@@ -1906,10 +1906,10 @@ function show_table_info(&$bri, &$table, $table_pos)
     if ($multer > 1) {
         $noty .= sprintf($mlang_bin5_bin5['info_mult'][$G_lang], multoval($multer) );
     }
-    $noty .= "<hr><br>";
+    $noty .= "<hr>";
     if ($table->match_id != -1) {
         $noty .= sprintf($mlang_bin5_bin5['info_match'][$G_lang], $table->match_id);
-        $noty .= "<hr><br>";
+        $noty .= "<hr>";
     }
     $ret .= show_notify($noty, 3000, $mlang_bin5_bin5['btn_bkgame'][$G_lang], 500, 400);
     /* NOTE: show_notify($noty, 3000, "torna alla partita", 500,
@@ -2099,7 +2099,7 @@ function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", 
                          $tg_br, $tg_hr, $tg_bo, $tg_bc,
                          multoval($old_multer));
     }
-    $noty .= sprintf('%2$s%1$s', $tg_br, $tg_hr);
+    $noty .= sprintf('%2$s', $tg_br, $tg_hr);
 
     return ($noty);
 }
