@@ -73,6 +73,26 @@ img.nobohide {
     z-index: 12;
 }
 
+.bg_white {
+    background-color: #ffffff;
+}
+
+.bg_green {
+    background-color: #aaffaa;
+}
+
+.bg_ligre {
+    background-color: #ddffdd;
+}
+
+.bg_red {
+    background-color: #ffaaaa;
+}
+
+.bg_lired {
+    background-color: #ffdddd;
+}
+
 .notify {
 /*    top: 10%; */
     top: 0;

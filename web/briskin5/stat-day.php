@@ -344,14 +344,64 @@ function main_pgsql($from, $to)
                     fprintf($fpexp, "<th>mazzo</th><th>descrizione</th></tr>\n");
                 }
                 // LISTA DELLE VARIE PARTITE
+                $pts_obj = array();
                 for ($g = 0 ; $g < $num_games ; $g++) {
                     $gam_obj = pg_fetch_object($gam_pg, $g);
                     fprintf($fpexp, "<tr>");
+                    $pt_min   = 1000;
+                    $pt_min_n = 0;
+                    $pt_max   = -1000;
+                    $pt_max_n = 0;
                     for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
-                        $pts_obj = pg_fetch_object($pts_pg[$u], $g);
-                        fprintf($fpexp, "<%s>%d</%s>",
+                        $pts_obj[$u] = pg_fetch_object($pts_pg[$u], $g);
+
+                        if ($pt_min > $pts_obj[$u]->pts) {
+                            $pt_min = $pts_obj[$u]->pts;
+                            $pt_min_n = 1;
+                        }
+                        else if ($pt_min == $pts_obj[$u]->pts) {
+                            $pt_min_n++;
+                        }
+
+                        if ($pt_max < $pts_obj[$u]->pts) {
+                            $pt_max = $pts_obj[$u]->pts;
+                            $pt_max_n = 1;
+                        }
+                        else if ($pt_max == $pts_obj[$u]->pts) {
+                            $pt_max_n++;
+                        }
+                    }
+                    if ($pt_min_n > 1) {
+                        $pt_min =  1000;
+                    }
+                    if ($pt_max_n > 1) {
+                        $pt_max = -1000;
+                    }
+
+                    /* cases:
+                       pts = 0       -> white
+                       pts == pt_min -> red
+                       pts == pt_max -> green
+                       pts < 0       -> light red
+                       pts > 0       -> light green
+                     */
+                    for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
+                        $pts = $pts_obj[$u]->pts;
+
+                        if ($pts == 0)
+                            $cla_nam = 'bg_white';
+                        else if ($pts == $pt_min)
+                            $cla_nam = 'bg_red';
+                        else if ($pts == $pt_max)
+                            $cla_nam = 'bg_green';
+                        else if ($pts < 0)
+                            $cla_nam = 'bg_lired';
+                        else if ($pts > 0)
+                            $cla_nam = 'bg_ligre';
+
+                        fprintf($fpexp, "<%s class='%s'>%d</%s>",
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"),
-                                $pts_obj->pts,
+                                $cla_nam, $pts,
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
