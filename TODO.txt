@@ -8,6 +8,7 @@ Moderation features:
     WIP  - server-side state
     - index_wr.php mgmt
     - confirmation
+    - wakeup for all matching users from tables and messages to other users
 
   * Add certification check (must be moderation check with a spearate moderation flag, see code)
 
