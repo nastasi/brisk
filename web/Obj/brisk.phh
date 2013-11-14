@@ -290,6 +290,36 @@ Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+//  return values
+// -1 v1 < v2
+//  0 equal
+//  1 v1 > v2
+function versions_cmp($v1, $v2)
+{
+    // printf("V1: [%s]\nV2: [%s]\n", $v1, $v2);
+    if ($v1 == $v2)
+        return 0;
+
+    $v1_ar = split('\.', $v1);
+    $v2_ar = split('\.', $v2);
+
+    $v2_ct = count($v2_ar);
+
+    for ($i = 0 ; $i < count($v1_ar) ; $i++) {
+        if (($v2_ct - 1) < $i) {
+            break;
+        }
+        // printf("here [%s] [%s]\n", $v1_ar[$i], $v2_ar[$i]);
+        if ($v1_ar[$i] != $v2_ar[$i]) {
+            if (strval($v1_ar[$i]) < strval($v2_ar[$i]))
+                return -1;
+            else
+                return  1;
+        }
+    }
+    return 0;
+}
+
 function addrtoipv4($addr)
 {
     $ipv4addr_arr = explode(':' , $addr);

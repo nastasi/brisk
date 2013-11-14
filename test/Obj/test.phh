@@ -1,0 +1,5 @@
+<?php
+
+$DOCUMENT_ROOT = 'test';
+
+?>
