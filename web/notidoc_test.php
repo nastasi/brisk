@@ -12,6 +12,7 @@
      var subst = "";
      var gst = new globst();
      var nd;
+     var tva;
 
      window.onload = function() {
          var i, sss = "";
@@ -20,7 +21,9 @@
              sss += "solo una prova<br>";
          }
 
-         nd = new notify_document(gst, sss, 4000, "pippo", 200, 200, true, 2000);
+         nd = new notify_document(gst, sss, 4000, [ "pippo", "pluto", "paperino" ], 200, 200, true, 2000);
+
+         tva = setInterval(function(ndd){ console.log("nd.ret = "+ndd.ret_get()); }, 3000, nd);
      }
  //-->
 </script>
