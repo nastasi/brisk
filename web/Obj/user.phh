@@ -513,7 +513,7 @@ class User {
                       xcape($this->name,ENT_COMPAT,"UTF-8")));
   }
 
-  /* INDEX_RD_IFRA PORT */
+  /* INDEX_RD PORT */
 
   static function blocking_error($is_unrecoverable)
   {
@@ -711,7 +711,7 @@ function stream_init($init_string, $enc, $header, &$header_out, &$body, $get, $p
     
     printf("CLASS: [%s] base: [%s]\n", get_class($this), self::base_get());
 
-    log_load("index_rd_ifra_init.php");
+    log_load("index_rd_init.php");
     
     if (($from  = gpcs_var('from', $get, $post, $cookie)) === FALSE)
         $from = "";
