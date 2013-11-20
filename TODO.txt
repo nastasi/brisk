@@ -10,7 +10,8 @@
        . show licence ([show me later, yes, no]/[yes, no])
        . switch-off date
        . opt - button on when arrived to the bottom of the licence
-
+       . opt - download licence
+       . min - check licence version between config file and licence file
      . show guaranteer
 
      . email validation

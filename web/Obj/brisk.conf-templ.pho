@@ -7,6 +7,8 @@ $G_dbpfx = "bsk_";
 
 $G_lang = "it";
 
+$G_crypt_key = "cryptkey";
+
 $G_shutdown = FALSE;
 
 // list of allowed proxies IP address (strings)
