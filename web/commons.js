@@ -613,6 +613,17 @@ function div_show(div)
     div.style.visibility = "visible";
 }
 
+/*
+  st
+  text
+  tout: if < 0 => infinite
+  butt: [ strings ]
+  w:
+  h:
+  is_opa:
+  block_time:
+  */
+
 function notify_document(st, text, tout, butt, w, h, is_opa, block_time)
 {
     var i, clo, clodiv_ctx, clodiv_wai, box;
@@ -671,7 +682,9 @@ function notify_document(st, text, tout, butt, w, h, is_opa, block_time)
 
     this.ancestor.appendChild(box);
 
-    this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
+    if (tout > 0) {
+        this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
+    }
 
     if (block_time != 0) {
         this.tblkid = setTimeout(function(obj){ obj.notitag.removeChild(obj.clodiv); obj.clodiv = obj.clodiv_pkg; obj.clodiv.style.display = '';  obj.notitag.appendChild(obj.clodiv); }, block_time, this);

@@ -21,7 +21,7 @@
              noti_content += "solo una prova<br>";
          }
 
-         nd = new notify_document(gst, noti_content, 10000, [ "pippo", "pluto", "paperino" ], 200, 200, true, 5000);
+         nd = new notify_document(gst, noti_content, -1, [ "pippo", "pluto", "paperino" ], 200, 200, true, 0);
 
          tva = setInterval(function(nd){ console.log("nd.ret = "+nd.ret_get()+"  gst.st_loc: "+gst.st_loc+"  gst.st_loc_new: "+gst.st_loc_new  ); }, 1000, nd);
      }
