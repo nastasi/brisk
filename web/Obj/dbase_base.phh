@@ -31,8 +31,9 @@ class LoginDBItem {
     var $type;
     var $last_dona;
     var $supp_comp;
+    var $lice_vers;
 
-    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp)
+    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $lice_vers)
     {
         $this->code      = $code;
         $this->login     = $login;
@@ -41,13 +42,14 @@ class LoginDBItem {
         $this->type      = $type;
         $this->last_dona = $last_dona;
         $this->supp_comp = $supp_comp;
+        $this->lice_vers = $lice_vers;
     }
 
     static function LoginDBItemFromRecord($rec)
     {
         $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
                                $rec->email, $rec->type, $rec->last_dona,
-                               $rec->supp_comp);
+                               $rec->supp_comp, $ret->lice_vers);
 
         return ($ret);
     }
@@ -85,6 +87,11 @@ class LoginDBItem {
     function supp_comp_get()
     {
         return $this->supp_comp;
+    }
+
+    function lice_vers_get()
+    {
+        return $this->lice_vers;
     }
 
 }

@@ -6,9 +6,10 @@
    - AUTO-MAINTENANCE
      . policy acceptance
        . policy version
-       . user policy acceptance (db field)
+       WIP . user policy acceptance (db field)
        . show licence ([show me later, yes, no]/[yes, no])
        . switch-off date
+       . opt - button on when arrived to the bottom of the licence
 
      . show guaranteer
 
