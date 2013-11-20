@@ -15,15 +15,15 @@
      var tva;
 
      window.onload = function() {
-         var i, sss = "";
+         var i, noti_content = "";
 
          for (i = 0 ; i < 20 ; i++) {
-             sss += "solo una prova<br>";
+             noti_content += "solo una prova<br>";
          }
 
-         nd = new notify_document(gst, sss, 4000, [ "pippo", "pluto", "paperino" ], 200, 200, true, 2000);
+         nd = new notify_document(gst, noti_content, 10000, [ "pippo", "pluto", "paperino" ], 200, 200, true, 5000);
 
-         tva = setInterval(function(ndd){ console.log("nd.ret = "+ndd.ret_get()); }, 3000, nd);
+         tva = setInterval(function(nd){ console.log("nd.ret = "+nd.ret_get()+"  gst.st_loc: "+gst.st_loc+"  gst.st_loc_new: "+gst.st_loc_new  ); }, 1000, nd);
      }
  //-->
 </script>

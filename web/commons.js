@@ -615,8 +615,7 @@ function div_show(div)
 
 function notify_document(st, text, tout, butt, w, h, is_opa, block_time)
 {
-    var clo, clodiv_ctx, clodiv_wai, box;
-    var i, t = this;
+    var i, clo, clodiv_ctx, clodiv_wai, box;
 
     this.st = st;
 
@@ -628,34 +627,21 @@ function notify_document(st, text, tout, butt, w, h, is_opa, block_time)
     clodiv_ctx.className = "notify_clo";
 
     for (i = 0 ; i < butt.length ; i++) {
-        clo = document.createElement("input");
-        clo.type = "submit";
-        clo.className = "button";
-        clo.style.bottom = "4px";
-        clo.obj = this;
-        clo.value = butt[i];
-        clo.onclick = function () { this.obj.hide() };
-        formsub_hilite(clo);
-        clodiv_ctx.appendChild(clo);
+        this.input_add(butt[i], i, this.hide, clodiv_ctx);
     }
 
+    if (block_time > 0) {
+        clodiv_wai = document.createElement("div");
+        clodiv_wai.className = "notify_clo";
 
-    // if (block_time > 0) {
-    //     clo.value = "leggere, prego.";
-    //     this.butt = butt;
-    // }
-    // else {
-    //     this.clodiv = clodiv_ctx;
-    //     // this.clo = clo;
-    // }
-
-
-
-
-
-    // this.clo = clo;
-    this.clodiv = clodiv_ctx;
-
+        this.input_add("leggere, prego.", 0, null, clodiv_wai);
+        this.clodiv = clodiv_wai;
+        this.clodiv_pkg = clodiv_ctx;
+        clodiv_ctx.style.display = 'none';
+    }
+    else {
+        this.clodiv = clodiv_ctx;
+    }
 
     cont = document.createElement("div");
 
@@ -687,87 +673,9 @@ function notify_document(st, text, tout, butt, w, h, is_opa, block_time)
 
     this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
 
-    // if (block_time != 0) {
-    //     this.tblkid = setTimeout(function(obj){ obj.clo.value = obj.butt; obj.clo.onclick = obj.input_hide; formsub_hilite(obj.clo); obj.clo.focus(); }, block_time, this);
-    // }
-    // else {
-    // formsub_hilite(clo);
-    // clo.focus();
-    // }
-
-}
-
-
-function notify_document_old(st, text, tout, butt, w, h, is_opa, block_time)
-{
-    var clo, clodiv, box;
-    var t = this;
-
-    this.st = st;
-
-    this.ancestor = document.body;
-
-    this.st.st_loc_new++;
-
-    clo = document.createElement("input");
-    clo.type = "submit";
-    clo.className = "button";
-    clo.style.bottom = "4px";
-    clo.obj = this;
-    if (block_time > 0) {
-        clo.value = "leggere, prego.";
-        this.butt = butt;
-    }
-    else {
-        clo.value = butt;
-        clo.onclick = this.input_hide;
-    }
-
-    clodiv = document.createElement("div");
-    clodiv.className = "notify_clo";
-    this.clo = clo;
-    this.clodiv = clodiv;
-
-    clodiv.appendChild(clo);
-
-    cont = document.createElement("div");
-
-    cont.style.borderBottomStyle = "solid";
-    cont.style.borderBottomWidth = "1px";
-    cont.style.borderBottomColor = "gray";
-    cont.style.height = (h - 30)+"px";
-    cont.style.overflow = "auto";
-    cont.innerHTML = text;
-
-    box =  document.createElement("div");
-    if (is_opa)
-        box.className = "notify_opaque";
-    else
-        box.className = "notify";
-
-    box.style.zIndex = 200;
-    box.style.width  = w+"px";
-    box.style.marginLeft  = -parseInt(w/2)+"px";
-    box.style.height = h+"px";
-    box.style.top = parseInt((document.body.clientHeight - h) / 2) + document.body.scrollTop;
-    box.appendChild(cont);
-    box.appendChild(clodiv);
-    box.style.visibility = "visible";
-
-    this.notitag = box;
-
-    this.ancestor.appendChild(box);
-
-    this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
-
     if (block_time != 0) {
-        this.tblkid = setTimeout(function(obj){ obj.clo.value = obj.butt; obj.clo.onclick = obj.input_hide; formsub_hilite(obj.clo); obj.clo.focus(); }, block_time, this);
+        this.tblkid = setTimeout(function(obj){ obj.notitag.removeChild(obj.clodiv); obj.clodiv = obj.clodiv_pkg; obj.clodiv.style.display = '';  obj.notitag.appendChild(obj.clodiv); }, block_time, this);
     }
-    else {
-        formsub_hilite(clo);
-        clo.focus();
-    }
-
 }
 
 notify_document.prototype = {
@@ -776,11 +684,43 @@ notify_document.prototype = {
     notitag: null,
     toutid: null,
     clo: null,
+
     clodiv: null,
+    clodiv_pkg: null,
+
     butt: null,
     tblkid: null,
 
     ret: -1,
+
+    /*
+      s:          button string
+      idx:        button index
+      onclick_cb: name of the onclick callback (with signature f(idx) ) or null
+      anc:        parent dom object
+
+      return new button dom object
+      */
+    input_add: function(s, idx, onclick_cb, anc)
+    {
+        var clo;
+
+        clo = document.createElement("input");
+        clo.type    = "submit";
+        clo.className = "button";
+        clo.style.bottom = "4px";
+        clo.style.margin = "2px";
+        clo.obj     = this;
+        clo.obj_idx = idx;
+        clo.value   = s;
+        if (onclick_cb)
+            clo.onclick = function () { onclick_cb.call(this.obj, this.obj_idx); };
+
+        formsub_hilite(clo);
+        anc.appendChild(clo);
+
+        return (clo);
+    },
 
     ret_get: function()
     {
@@ -795,9 +735,9 @@ notify_document.prototype = {
 	}
     },
 
-    hide: function()
+    hide: function(val)
     {
-        this.ret = 1;
+        this.ret = val;
 	clearTimeout(this.toutid);
 	this.ancestor.removeChild(this.notitag);
 	this.unblock();
@@ -829,7 +769,7 @@ function notify_ex(st, text, tout, butt, w, h, is_opa, block_time)
     }
     else {
         clo.value = butt;
-        clo.onclick = this.input_hide;
+        clo.onclick = function () { this.obj.hide() };
     }
 
     clodiv = document.createElement("div");
@@ -870,7 +810,7 @@ function notify_ex(st, text, tout, butt, w, h, is_opa, block_time)
     this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
 
     if (block_time != 0) {
-        this.tblkid = setTimeout(function(obj){ obj.clo.value = obj.butt; obj.clo.onclick = obj.input_hide; formsub_hilite(obj.clo); obj.clo.focus(); }, block_time, this);
+        this.tblkid = setTimeout(function(obj){ obj.clo.value = obj.butt; obj.clo.onclick = function () { this.obj.hide() }; formsub_hilite(obj.clo); obj.clo.focus(); }, block_time, this);
     }
     else {
         formsub_hilite(clo);
@@ -902,13 +842,6 @@ notify_ex.prototype = {
 	clearTimeout(this.toutid);
 	this.ancestor.removeChild(this.notitag);
 	this.unblock();
-    },
-
-    input_hide: function()
-    {
-	clearTimeout(this.obj.toutid);
-	this.obj.ancestor.removeChild(this.obj.notitag);
-	this.obj.unblock();
     }
 }
 
