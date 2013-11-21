@@ -532,9 +532,7 @@ class User {
   }
 
 
-
-
-  protected function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate, $table_idx, $table_token)
+  protected function maincheck($cur_stat, $cur_subst, $cur_step, $splashdate, $table_idx, $table_token)
   {
       GLOBAL $G_lang, $mlang_indrd;
       // GLOBAL $first_loop;
@@ -602,9 +600,9 @@ class User {
               
               // TODO uncomment and test
               /* NOTE the sets went common */
-              $new_stat =  $this->stat;
-              $new_subst = $this->subst;
-              $new_step =  $this->step;
+              $this->rd_stat =  $this->stat;
+              $this->rd_subst = $this->subst;
+              $this->rd_step =  $this->step;
           }
           /***************
            *             *
@@ -634,7 +632,7 @@ class User {
                           return ($this->page_sync($this->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $this->table, $this->table_token));
                       }
                       log_rd2("lost history, refresh from scratch");
-                      $new_step = -1;
+                      $this->rd_step = -1;
                       break;
                   } 
                   for ($i = $cur_step ; $i < $this->step ; $i++) {
@@ -648,9 +646,9 @@ class User {
                       }
                       $ret .= $this->comm[$ii];
                   }
-                  $new_stat =  $this->stat;
-                  $new_subst = $this->subst;
-                  $new_step =  $this->step;
+                  $this->rd_stat =  $this->stat;
+                  $this->rd_subst = $this->subst;
+                  $this->rd_step =  $this->step;
               } while (0);
               
               log_rd2($this->step, 'index_rd.php: after ret set');
@@ -758,7 +756,7 @@ function stream_main(&$body, $get, $post, $cookie)
     $old_subst = $this->rd_subst;
     $old_step  = $this->rd_step;
     printf("xXx PRE : rd_step %d\n", $this->rd_step);
-    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step, $splashdate, $table_idx, $table_token)) != FALSE) {
+    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $splashdate, $table_idx, $table_token)) != FALSE) {
         $body .= $this->rd_transp->chunk( $this->rd_scristp++, $ret);
         log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     }

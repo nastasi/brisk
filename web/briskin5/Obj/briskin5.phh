@@ -1010,7 +1010,7 @@ class Bin5_user extends User {
         return (sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
     }
 
-    protected function maincheck($cur_stat, $cur_subst, $cur_step, &$new_stat, &$new_subst, &$new_step, $splashdate, $table_idx, $table_token)
+    protected function maincheck($cur_stat, $cur_subst, $cur_step, $splashdate, $table_idx, $table_token)
     {
         GLOBAL $G_lang, $mlang_indrd;
         GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
@@ -1070,9 +1070,9 @@ class Bin5_user extends User {
           }
           log_rd2("NEWSTAT: ".$this->stat);
 
-          $new_stat =  $this->stat;
-          $new_subst = $this->subst;
-          $new_step =  $this->step;
+          $this->rd_stat  = $this->stat;
+          $this->rd_subst = $this->subst;
+          $this->rd_step  = $this->step;
       } /* if ($cur_step == -1) { */
       else {
           /* $sem = Room::lock_data(FALSE); */
@@ -1090,7 +1090,7 @@ class Bin5_user extends User {
                       }
                       log_rd2("lost history, refresh from scratch");
                       printf("xXx LOST HISTORY!\n");
-                      $new_step = -1;
+                      $this->rd_step = -1;
                       break;
                   }
                   for ($i = $cur_step ; $i < $this->step ; $i++) {
@@ -1104,9 +1104,9 @@ class Bin5_user extends User {
                       log_rd2("ADDED TO THE STREAM: ".$this->comm[$ii]);
                       $ret .= $this->comm[$ii];
                   }
-                  $new_stat =  $this->stat;
-                  $new_subst = $this->subst;
-                  $new_step =  $this->step;
+                  $this->rd_stat  = $this->stat;
+                  $this->rd_subst = $this->subst;
+                  $this->rd_step  = $this->step;
               } while (0);
 
               log_rd2($this->step, 'index_rd.php: after ret set');
