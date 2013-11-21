@@ -531,18 +531,21 @@ class User {
       return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
   }
 
-
-  protected function maincheck($cur_stat, $cur_subst, $cur_step, $splashdate, $table_idx, $table_token)
+  protected function maincheck($cur_stat, $cur_subst, $cur_step, $get, $post, $cookie)
   {
       GLOBAL $G_lang, $mlang_indrd;
       // GLOBAL $first_loop;
       GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
       GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
-      $CO_splashdate = "CO_splashdate".$G_splash_idx;
-      $$CO_splashdate = $splashdate;
-      
+      GLOBAL $G_lice_vers, $G_lice_fname, $G_lice_dthard, $G_lice_dtsoft, $G_lice_idx;
+
       GLOBAL $S_load_stat;
       
+      $CO_splashdate = "CO_splashdate".$G_splash_idx;
+
+      if (($splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)
+          $splashdate = "";
+
       log_rd("maincheck begin");
       
       $ret = FALSE;
@@ -585,8 +588,8 @@ class User {
               $curtime = time();
               
               if ($G_with_splash &&
-                  ($$CO_splashdate < $curtime - $G_splash_interval ||
-                   $$CO_splashdate > $curtime)) {
+                  ($splashdate < $curtime - $G_splash_interval ||
+                   $splashdate > $curtime)) {
                   $is_super = $this->flags & USER_FLAG_TY_SUPER;
                   $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 
                                           ($is_super ? 0 : $G_splash_timeout), 
@@ -737,16 +740,6 @@ function stream_init($init_string, $enc, $header, &$header_out, &$body, $get, $p
 
 function stream_main(&$body, $get, $post, $cookie)
 {
-    GLOBAL $G_splash_idx;
-
-    $CO_splashdate = "CO_splashdate".$G_splash_idx;
-    if (($splashdate = gpcs_var("$CO_splashdate", $get, $post, $cookie)) === FALSE)
-        $splashdate = ""; 
-    if (($table_idx = gpcs_var("table_idx", $get, $post, $cookie)) === FALSE)
-        $table_idx = ""; 
-    if (($table_token = gpcs_var("table_token", $get, $post, $cookie)) === FALSE)
-        $table_token = ""; 
-
     log_rd2("FROM OUTSIDE - STAT: ".$this->rd_stat." SUBST: ".$this->rd_subst." STEP: ".$this->rd_step." FROM: ".$this->rd_from);
     
     
@@ -756,7 +749,7 @@ function stream_main(&$body, $get, $post, $cookie)
     $old_subst = $this->rd_subst;
     $old_step  = $this->rd_step;
     printf("xXx PRE : rd_step %d\n", $this->rd_step);
-    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $splashdate, $table_idx, $table_token)) != FALSE) {
+    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $get, $post, $cookie)) != FALSE) {
         $body .= $this->rd_transp->chunk( $this->rd_scristp++, $ret);
         log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     }

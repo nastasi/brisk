@@ -1010,13 +1010,11 @@ class Bin5_user extends User {
         return (sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
     }
 
-    protected function maincheck($cur_stat, $cur_subst, $cur_step, $splashdate, $table_idx, $table_token)
+    protected function maincheck($cur_stat, $cur_subst, $cur_step, $get, $post, $cookie)
     {
         GLOBAL $G_lang, $mlang_indrd;
         GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
         GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
-        $CO_splashdate = "CO_splashdate".$G_splash_idx;
-        $$CO_splashdate = $splashdate;
 
         GLOBAL $S_load_stat;
 
