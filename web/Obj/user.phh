@@ -531,7 +531,7 @@ class User {
       return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
   }
 
-  protected function maincheck($cur_stat, $cur_subst, $cur_step, $get, $post, $cookie)
+  protected function maincheck($get, $post, $cookie)
   {
       GLOBAL $G_lang, $mlang_indrd;
       // GLOBAL $first_loop;
@@ -552,14 +552,14 @@ class User {
       $curtime = time();
       
       /* Nothing changed, return. */
-      if ($cur_step == $this->step) 
+      if ($this->rd_step == $this->step)
           return (FALSE);
       
-      log_rd2("do other cur_stat[".$cur_stat."] user->stat[".$this->stat."] cur_step[".$cur_step."] user_step[".$this->step."]");
+      log_rd2("do other cur_stat[".$this->rd_stat."] user->stat[".$this->stat."] cur_step[".$this->rd_step."] user_step[".$this->step."]");
       
-      if ($cur_step == -1) {
+      if ($this->rd_step == -1) {
           /*
-           *  if $cur_step == -1 load the current state from the main struct
+           *  if $this->rd_step == -1 load the current state from the main struct
            */
           
           $S_load_stat['wR_minusone']++;
@@ -570,7 +570,7 @@ class User {
           
           if ($this->trans_step != -1) {
               log_rd2("TRANS USATO ".$this->trans_step);
-              $cur_step = $this->trans_step;
+              $this->rd_step = $this->trans_step;
               $this->trans_step = -1;
           }
           else {
@@ -580,7 +580,7 @@ class User {
       
       
       /* this part I suppose is read only on $this->room structure */
-      if ($cur_step == -1) {
+      if ($this->rd_step == -1) {
           log_rd2("PRE-NEWSTAT: ".$this->stat);
           
           if ($this->stat == 'room') {
@@ -619,15 +619,15 @@ class User {
               return ($this->page_sync($this->sess, "briskin5/index.php", $this->table, $this->table_token));
           }
           log_rd2("NEWSTAT: ".$this->stat);
-      } /* if ($cur_step == -1) { */
+      } /* if ($this->rd_step == -1) { */
       else {
           /* $sem = Room::lock_data(FALSE); */
           $S_load_stat['rU_heavy']++;
           
-          if ($cur_step < $this->step) {
+          if ($this->rd_step < $this->step) {
               do {
-                  if ($cur_step + COMM_N < $this->step) {
-                      if (($cur_stat != $this->stat)) {
+                  if ($this->rd_step + COMM_N < $this->step) {
+                      if (($this->rd_stat != $this->stat)) {
                           $to_stat = $this->stat;
                           /* Room::unlock_data($sem); */
                           log_load("RESYNC");
@@ -638,11 +638,11 @@ class User {
                       $this->rd_step = -1;
                       break;
                   } 
-                  for ($i = $cur_step ; $i < $this->step ; $i++) {
+                  for ($i = $this->rd_step ; $i < $this->step ; $i++) {
                       $ii = $i % COMM_N;
                       log_rd2("ADDED TO THE STREAM: ".$this->comm[$ii]);
                       if ($this->comm[$ii] == "") {
-                          if ($i == $cur_step)
+                          if ($i == $this->rd_step)
                               continue;
                           else
                               break;
@@ -674,10 +674,10 @@ class User {
                       
                   } /* if ($this->the_end == TRUE) { ... */
               } /* if ($this->the_end == TRUE) { ... */
-          } /* if ($cur_step < $this->step) { */
+          } /* if ($this->rd_step < $this->step) { */
           
           /* Room::unlock_data($sem); */
-      }  /* else of if ($cur_step == -1) { */
+      }  /* else of if ($this->rd_step == -1) { */
       
     
       return ($ret);

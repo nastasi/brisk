@@ -1010,7 +1010,7 @@ class Bin5_user extends User {
         return (sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%s");', $page));
     }
 
-    protected function maincheck($cur_stat, $cur_subst, $cur_step, $get, $post, $cookie)
+    protected function maincheck($get, $post, $cookie)
     {
         GLOBAL $G_lang, $mlang_indrd;
         GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
@@ -1024,14 +1024,14 @@ class Bin5_user extends User {
         $curtime = time();
 
       /* Nothing changed, return. */
-      if ($cur_step == $this->step)
+      if ($this->rd_step == $this->step)
           return (FALSE);
 
-      log_rd2("do other cur_stat[".$cur_stat."] user->stat[".$this->stat."] cur_step[".$cur_step."] user_step[".$this->step."]");
+      log_rd2("do other cur_stat[".$this->rd_stat."] user->stat[".$this->stat."] cur_step[".$this->rd_step."] user_step[".$this->step."]");
 
-      if ($cur_step == -1) {
+      if ($this->rd_step == -1) {
           /*
-           *  if $cur_step == -1 load the current state from the main struct
+           *  if $this->rd_step == -1 load the current state from the main struct
            */
 
           $S_load_stat['wR_minusone']++;
@@ -1042,7 +1042,7 @@ class Bin5_user extends User {
 
           if ($this->trans_step != -1) {
               log_rd2("TRANS USATO ".$this->trans_step);
-              $cur_step = $this->trans_step;
+              $this->rd_step = $this->trans_step;
               $this->trans_step = -1;
           }
           else {
@@ -1052,7 +1052,7 @@ class Bin5_user extends User {
 
 
       /* this part I suppose is read only on $this->room structure */
-      if ($cur_step == -1) {
+      if ($this->rd_step == -1) {
           log_rd2("PRE-NEWSTAT");
 
           /***************
@@ -1071,15 +1071,15 @@ class Bin5_user extends User {
           $this->rd_stat  = $this->stat;
           $this->rd_subst = $this->subst;
           $this->rd_step  = $this->step;
-      } /* if ($cur_step == -1) { */
+      } /* if ($this->rd_step == -1) { */
       else {
           /* $sem = Room::lock_data(FALSE); */
           $S_load_stat['rU_heavy']++;
 
-          if ($cur_step < $this->step) {
+          if ($this->rd_step < $this->step) {
               do {
-                  if ($cur_step + COMM_N < $this->step) {
-                      if (($cur_stat != $this->stat)) {
+                  if ($this->rd_step + COMM_N < $this->step) {
+                      if ($this->rd_stat != $this->stat) {
                           $to_stat = $this->stat;
                           /* Room::unlock_data($sem); */
                           log_load("RESYNC");
@@ -1091,10 +1091,10 @@ class Bin5_user extends User {
                       $this->rd_step = -1;
                       break;
                   }
-                  for ($i = $cur_step ; $i < $this->step ; $i++) {
+                  for ($i = $this->rd_step ; $i < $this->step ; $i++) {
                       $ii = $i % COMM_N;
                       if ($this->comm[$ii] == "") {
-                          if ($i == $cur_step)
+                          if ($i == $this->rd_step)
                               continue;
                           else
                               break;
@@ -1128,10 +1128,10 @@ class Bin5_user extends User {
 
                   } /* if ($this->the_end == TRUE) { ... */
               } /* if ($this->the_end == TRUE) { ... */
-          } /* if ($cur_step < $this->step) { */
+          } /* if ($this->rd_step < $this->step) { */
 
           /* Room::unlock_data($sem); */
-      }  /* else of if ($cur_step == -1) { */
+      }  /* else of if ($this->rd_step == -1) { */
 
 
       return ($ret);
