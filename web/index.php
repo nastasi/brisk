@@ -897,9 +897,10 @@ supported by:<br>
    var g_listen;
    var g_withflash = false;
    var g_is_spawn = 0;
+   var g_nd = null;
+   var g_brow = null;
    var gst  = new globst();
    var topbanner_sfx, topbanner_dx;
-   var g_brow = null;
    var xstm = null;
    var sess = "not_connected";
    var spo_slide, sup_slide;
@@ -1036,17 +1037,18 @@ echo "$body"; ?>
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
    var g_prefs, g_prefs_new = null;
    var g_listen;
-   var tra = null;
-   var stat = "";
-   var subst = "";
-   var gst  = new globst();
-   var g_is_spawn = 0; 
-   var topbanner_sfx, topbanner_dx;
-   // var nonunload = false;
+   var g_is_spawn = 0;
    var g_withflash = false;
    var g_imgct = 0;
    var g_imgtot = g_preload_img_arr.length;
    var g_brow = null;
+   var g_nd = null;
+   var tra = null;
+   var stat = "";
+   var subst = "";
+   var gst  = new globst();
+   var topbanner_sfx, topbanner_dx;
+   // var nonunload = false;
    var spo_slide, sup_slide;
 
    window.onload = function() {

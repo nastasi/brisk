@@ -586,7 +586,34 @@ class User {
           if ($this->stat == 'room') {
               log_rd("roomma ".$this->step);
               $curtime = time();
-              
+              if ($this->rec !== FALSE) {
+                  if ($curtime > $G_lice_dtsoft || $curtime > $G_lice_dthard) {
+                      if (versions_cmp($this->rec->lice_vers_get(), $G_lice_vers) < 0) { // comparison between user version and current version
+                          if ($curtime > $G_lice_dtsoft) {
+                              // call notify soft
+                              $ret .=  show_notify_document("Versione corrente: [".$this->rec->lice_vers_get()."] Versione sito: ".$G_lice_vers,
+                               0, array($mlang_indrd['btn_backtotab'][$G_lang],"pippo", "pluto"),
+                               400, 600, TRUE, 0);
+                              $ret .= "alert('RESULT: ' + g_nd.ret_get());";
+                          }
+                          else if ($curtime > $G_lice_dthard) {
+                              // call notify hard
+                              ;
+                          }
+
+
+                          /* $ret .=  show_notify_ex(str_replace("\n", " ", "Versione corrente: [".$this->rec->lice_vers_get()."] Versione sito: ".$G_lice_vers), */
+                          /*     ($is_super ? 0 : $G_splash_timeout), */
+                          /*     // $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], */
+                          /*     $mlang_indrd['btn_backtotab'][$G_lang], */
+                          /*     $G_splash_w, $G_splash_h, true, */
+                          /*     ($is_super ? 0 : $G_splash_timeout)); */
+                          /* $ret .= sprintf('|createCookie("CO_lice_date%d", %d, 24*365, cookiepath);', $G_lice_idx, $curtime); */
+
+
+                      }
+                  }
+              }
               if ($G_with_splash &&
                   ($splashdate < $curtime - $G_splash_interval ||
                    $splashdate > $curtime)) {

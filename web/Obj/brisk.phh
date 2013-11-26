@@ -2881,6 +2881,19 @@ function show_notify_ex($text, $tout, $butt, $w, $h, $is_opaque, $block_time)
   return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, %s, %d);', $text, $tout, $butt, $w, $h, ($is_opaque ? "true" : "false"), $block_time);
 }
 
+function show_notify_document($text, $tout, $butt_arr, $w, $h, $is_opaque, $block_time)
+{
+  log_main("SHOW_NOTIFY OPAQUE: ".$text);
+
+  $butts = "";
+  for ($i = 0 ; $i < count($butt_arr) ; $i++) {
+      $butts .= sprintf("%s'%s'", ($i == 0 ? "" : ","), $butt_arr[$i]);
+  }
+
+  return sprintf('g_nd = new notify_document(gst, "%s", %d, [ %s ], %d, %d, %s, %d);|',
+                 escpush($text), $tout, $butts, $w, $h, ($is_opaque ? "true" : "false"), $block_time);
+}
+
 
 function root_welcome($user)
 {
