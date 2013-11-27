@@ -322,7 +322,7 @@ class User {
           return FALSE;
       }
       return ($bdb->user_prefs_update($this->code, ($this->flags & (USER_FLAG_TY_ALL | USER_FLAG_MAP_AUTH)),
-                                      $this->rec->supp_comp));
+                                      $this->rec->supp_comp_get()));
   }
 
   function rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from)
@@ -818,7 +818,7 @@ function is_supp_custom()
             return (TRUE);
         }
         /*
-          if ($this->rec->last_dona > 1356994800) {
+          if ($this->rec->last_dona_get() > 1356994800) {
               return (TRUE);
           }
         */

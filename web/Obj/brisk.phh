@@ -759,7 +759,7 @@ class Client_prefs {
         fprintf(STDERR, "QQ %s: %x\n", __FUNCTION__, $user->flags);
         $this->listen = ($user->flags & USER_FLAG_MAP_AUTH) >> 2;
         if ($user->rec != FALSE) {
-            $this->supp_comp = $user->rec->supp_comp;
+            $this->supp_comp = $user->rec->supp_comp_get();
         }
         else {
             $this->supp_comp = "000000000000";
@@ -811,7 +811,7 @@ class Client_prefs {
         fprintf(STDERR, "QQ %s::%s %x\n", __CLASS__, __FUNCTION__,
                 $user->flags);
         if ($user->is_supp_custom()) {
-            $user->rec->supp_comp = $this->supp_comp;
+            $user->rec->supp_comp_set($this->supp_comp);
         }
         if ($is_save)
             $user->store_set();
@@ -2262,7 +2262,7 @@ class Room
 
       // sql record exists AND last donate > 2013-01-01
       if ($this->user[$i]->is_supp_custom()) {
-          $supp_comp_s = sprintf(', "%s"', $this->user[$i]->rec->supp_comp);
+          $supp_comp_s = sprintf(', "%s"', $this->user[$i]->rec->supp_comp_get());
       }
       else {
           $supp_comp_s = '';
@@ -2310,7 +2310,7 @@ class Room
         
         log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
         if ($user_cur->is_supp_custom())
-            $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp);
+            $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
         else
             $supp_comp_s = '';
 

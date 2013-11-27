@@ -90,6 +90,10 @@ class LoginDBItem {
     {
         return $this->supp_comp;
     }
+    function supp_comp_set($supp_comp)
+    {
+        $this->supp_comp = $supp_comp;
+    }
 
     function lice_vers_get()
     {
