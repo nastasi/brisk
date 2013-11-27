@@ -10,7 +10,7 @@
        DONE . show licence ([show me later, yes, no]/[yes, no])
        DONE . switch-off date
        . checkbox for anonimous users with message when not checked
-       . disable user reason field
+       . disable user reason integer field and remove SUSPEND state (db, php)
        . opt - button on when arrived to the bottom of the licence
        . opt - download licence
        . min - check licence version between config file and licence file
