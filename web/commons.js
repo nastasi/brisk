@@ -474,6 +474,28 @@ function postact_logout()
 }
 
 /*
+  type - 'hard' or 'soft'
+  code - if soft: accept (0), deny (1), after (2)
+         if hard: accept (0), deny (1)
+ */
+function act_licencemgr(type, code, lice_curr, lice_vers)
+{
+    if (type != "soft" && type != "hard") {
+        return false;
+    }
+    switch (code) {
+    case 0:
+    case 1:
+        send_mesg("licencemgr|"+type+"|"+code+"|"+lice_curr+"|"+lice_vers);
+        break;
+    case 2:
+        break;
+    default:
+        break;
+    }
+}
+
+/*
   function slowimg(img,x1,y1,deltat,free,action,srcend)
   img    - image to move
   x1,y1  - destination coords

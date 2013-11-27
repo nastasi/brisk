@@ -592,13 +592,18 @@ class User {
                           if ($curtime > $G_lice_dtsoft) {
                               // call notify soft
                               $ret .=  show_notify_document("Versione corrente: [".$this->rec->lice_vers_get()."] Versione sito: ".$G_lice_vers,
-                               0, array($mlang_indrd['btn_backtotab'][$G_lang],"pippo", "pluto"),
-                               400, 600, TRUE, 0);
-                              $ret .= "alert('RESULT: ' + g_nd.ret_get());";
+                                       0, array("Accetto.", "Rifiuto.", "Leggo poi.",  /* , "Scarico." */),
+                                       400, 600, TRUE, 0);
+                              $ret .= sprintf("act_licencemgr('soft', g_nd.ret_get(), '%s', '%s');", 
+                                              xcape($this->rec->lice_vers_get()), xcape($G_lice_vers));
                           }
                           else if ($curtime > $G_lice_dthard) {
                               // call notify hard
-                              ;
+                              $ret .=  show_notify_document("Versione corrente: [".$this->rec->lice_vers_get()."] Versione sito: ".$G_lice_vers,
+                                       0, array("Accetto.", "Rifiuto." /* , "Scarico." */),
+                                       400, 600, TRUE, 0);
+                              $ret .= sprintf("act_licencemgr('hard', g_nd.ret_get(), '%s', '%s');", 
+                                              xcape($this->rec->lice_vers_get()), xcape($G_lice_vers));
                           }
 
 

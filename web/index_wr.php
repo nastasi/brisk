@@ -515,9 +515,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             $user->step_inc();
             
         }
-        
         else if ($argz[0] == 'placing') {
-            
             require_once("briskin5/Obj/briskin5.phh");
             require_once("briskin5/Obj/placing.phh");
             
@@ -526,11 +524,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
-            
-            
         }
-        
-        
         else if ($argz[0] == 'roadmap') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
             $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
@@ -550,13 +544,20 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'chatt') {
             $room->chatt_send(&$user, xcapemesg($mesg));
         }
+        else if ($argz[0] == 'licencemgr') {
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+
+            $user->comm[$user->step % COMM_N] .=  show_notify(xcape("FIN QUI |"."${argz[1]}"."|"."${argz[2]}"."|"."${argz[3]}"."|"."${argz[4]}"), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+
+            log_wr($user->comm[$user->step % COMM_N]);
+            $user->step_inc();
+        }
         /**********************
          *                    *
          *   SUBST: standup   *
          *                    *
          **********************/
         else if ($user->subst == 'standup') {
-
             if ($argz[0] == 'sitdown') {
                 log_wr("SITDOWN command");
 
