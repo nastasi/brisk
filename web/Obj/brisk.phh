@@ -814,7 +814,7 @@ class Client_prefs {
             $user->rec->supp_comp_set($this->supp_comp);
         }
         if ($is_save)
-            $user->store_set();
+            $user->prefs_store();
     }
 }
 

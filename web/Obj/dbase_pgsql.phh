@@ -163,9 +163,6 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (lintm) = (date 'epoch' + %d * INTERVAL '1 second') WHERE code = %d;", $G_dbpfx, $lintm, $code);
 
-        // $user_pg = $this->query($user_sql);
-        // $row_n = pg_affected_rows($user_pg);
-        // fprintf(STDERR, "query: %s   NUM: %d\n", ($user_pg == FALSE ? "FALSE" : "TRUE"), $row_n);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
@@ -178,7 +175,22 @@ class BriskDB
         GLOBAL $G_dbpfx;
 
         $user_sql = sprintf("UPDATE %susers SET (type, supp_comp) = (%d, '%s') WHERE code = %d;",
-                            $G_dbpfx, $flags, $supp_comp, $code);
+                            $G_dbpfx, $flags, escsql($supp_comp), $code);
+        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
+
+        return TRUE;
+    }
+
+    function user_licence_update($code, $lice_vers)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("UPDATE %susers SET (lice_vers) = ('%s') WHERE code = %d;",
+                            $G_dbpfx, escsql($lice_vers), $code);
         fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

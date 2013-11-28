@@ -99,6 +99,10 @@ class LoginDBItem {
     {
         return $this->lice_vers;
     }
+    function lice_vers_set($lice_vers)
+    {
+        $this->lice_vers = $lice_vers;
+    }
 
     function disa_reas_get()
     {

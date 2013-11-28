@@ -316,13 +316,21 @@ class User {
       $this->flags = ($flags_old | ($flags & $mask));
   }
 
-  function store_set()
+  function prefs_store()
   {
       if (($bdb = BriskDB::create()) == FALSE) {
           return FALSE;
       }
       return ($bdb->user_prefs_update($this->code, ($this->flags & (USER_FLAG_TY_ALL | USER_FLAG_MAP_AUTH)),
                                       $this->rec->supp_comp_get()));
+  }
+
+  function licence_store()
+  {
+      if (($bdb = BriskDB::create()) == FALSE) {
+          return FALSE;
+      }
+      return ($bdb->user_licence_update($this->code, $this->rec->lice_vers_get()));
   }
 
   function rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from)
