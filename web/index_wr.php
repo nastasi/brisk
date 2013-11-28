@@ -81,10 +81,14 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 
                       );
 
+define('LICMGR_CHO_ACCEPT', 0);
+define('LICMGR_CHO_REFUSE', 1);
+define('LICMGR_CHO_AFTER',  2);
+
 function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $G_room_passwdhowto, $mlang_indwr;
-
+    GLOBAL $G_lice_vers;
     $remote_addr = addrtoipv4($remote_addr_full);
 
     log_load("index_wr.php");
@@ -545,12 +549,31 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             $room->chatt_send(&$user, xcapemesg($mesg));
         }
         else if ($argz[0] == 'licencemgr') {
-            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            // check IF is authnticated user, both licences version matches
+            if ($user->flags & USER_FLAG_AUTH && count($argz) == 5) {
+                $f_type = $argz[1];      $f_code = $argz[2];
+                $f_lice_curr = $argz[3]; $f_lice_vers = $argz[4];
 
-            $user->comm[$user->step % COMM_N] .=  show_notify(xcape("FIN QUI |"."${argz[1]}"."|"."${argz[2]}"."|"."${argz[3]}"."|"."${argz[4]}"), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+                $user->comm[$user->step % COMM_N] .=  show_notify(xcape("FIN QUIZ |"."${argz[1]}"."|"."${argz[2]}"."|"."${argz[3]}"."|"."${argz[4]}"."|".$res), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+                log_wr($user->comm[$user->step % COMM_N]);
+                $user->step_inc();
 
-            log_wr($user->comm[$user->step % COMM_N]);
-            $user->step_inc();
+                if ("$f_lice_curr" == $user->rec->lice_vers_get()  &&
+                    "$f_lice_vers" == "$G_lice_vers") {
+                    if ("$f_type" == "soft" || "$f_type" == "hard") {
+                        $res = 100;
+                        switch ($f_code) {
+                        case LICMGR_CHO_ACCEPT:
+                            $user->rec->lice_vers_set($G_lice_vers);
+                            $res = $user->licence_store();
+                            break;
+                        case LICMGR_CHO_REFUSE:
+                            break;
+                        }
+                    }
+                }
+            }
         }
         /**********************
          *                    *
