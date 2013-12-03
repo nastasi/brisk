@@ -108,6 +108,10 @@ class LoginDBItem {
     {
         return $this->disa_reas;
     }
+    function disa_reas_set($disa_reas)
+    {
+        $this->disa_reas = $disa_reas;
+    }
 
 }
 

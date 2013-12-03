@@ -63,6 +63,7 @@ define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_SUSPEND', 0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
+// ... reasons for disabling account ...
 define('USER_DIS_REA_INVMAIL', 1);
 define('USER_DIS_REA_LICENCE', 2);
 define('USER_DIS_REA_BANNED',  3);
@@ -314,6 +315,8 @@ class User {
   {
       $flags_old = $this->flags & (~$mask);
       $this->flags = ($flags_old | ($flags & $mask));
+
+      return ($flags_old);
   }
 
   function prefs_store()
@@ -331,6 +334,15 @@ class User {
           return FALSE;
       }
       return ($bdb->user_licence_update($this->code, $this->rec->lice_vers_get()));
+  }
+
+  function state_store()
+  {
+   if (($bdb = BriskDB::create()) == FALSE) {
+          return FALSE;
+      }
+      return ($bdb->user_state_update($this->code, ($this->flags & (USER_FLAG_TY_ALL | USER_FLAG_MAP_AUTH)),
+                                      $this->rec->disa_reas_get()));
   }
 
   function rd_data_set($curtime, $transp, $enc, $stat, $subst, $step, $from)

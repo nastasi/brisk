@@ -554,11 +554,6 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                 $f_type = $argz[1];      $f_code = $argz[2];
                 $f_lice_curr = $argz[3]; $f_lice_vers = $argz[4];
 
-                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                $user->comm[$user->step % COMM_N] .=  show_notify(xcape("FIN QUIZ |"."${argz[1]}"."|"."${argz[2]}"."|"."${argz[3]}"."|"."${argz[4]}"."|".$res), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
-                log_wr($user->comm[$user->step % COMM_N]);
-                $user->step_inc();
-
                 if ("$f_lice_curr" == $user->rec->lice_vers_get()  &&
                     "$f_lice_vers" == "$G_lice_vers") {
                     if ("$f_type" == "soft" || "$f_type" == "hard") {
@@ -569,6 +564,13 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                             $res = $user->licence_store();
                             break;
                         case LICMGR_CHO_REFUSE:
+                            $user->flags_set(USER_FLAG_TY_DISABLE, USER_FLAG_TY_ALL);
+                            $user->rec->disa_reas_set(USER_DIS_REA_LICENCE);
+                            $res = $user->state_store();
+
+                            $user->comm[$user->step % COMM_N] = $user->blocking_error(TRUE);
+                            $user->the_end = TRUE;
+                            $user->step_inc();
                             break;
                         }
                     }

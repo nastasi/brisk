@@ -185,6 +185,21 @@ class BriskDB
         return TRUE;
     }
 
+    function user_state_update($code, $flags, $disa_reas)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("UPDATE %susers SET (type, disa_reas) = (%d, %d) WHERE code = %d;",
+                            $G_dbpfx, $flags, $disa_reas, $code);
+        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
+
+        return TRUE;
+    }
+
     function user_licence_update($code, $lice_vers)
     {
         GLOBAL $G_dbpfx;
