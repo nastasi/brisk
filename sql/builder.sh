@@ -16,6 +16,7 @@ usage () {
     echo "       piped"
     echo "       add <filesql> [<filesql2> [..]]"
     echo "       del <filesql> [<filesql2> [..]]"
+    echo "       res <filesql> [<filesql2> [..]]"
     echo "       dump [dumpfile]"
     echo "       dumpall [dumpfile]"
     echo "       all"
@@ -101,7 +102,7 @@ test "$DBUSER" != "" && pg_args="$pg_args -U $DBUSER"
 test "$DBPORT" != "" && pg_args="$pg_args -p $DBPORT"
 test "$DBBASE" != "" && pg_args="$pg_args $DBBASE"
 
-MATCH_DROP='^drop|^alter table.* drop '
+MATCH_DROP='^drop|^alter table.* drop |^delete '
 
 case $CMD in
     "create")
@@ -150,6 +151,9 @@ case $CMD in
         ;;
     "del")
         ( echo "-- MESG: del start" ; cat "$@" | egrep -i  "$MATCH_DROP" | tac ; echo "-- MESG: del end" ;   ) | sqlexe
+        ;;
+    "res")
+        ( echo "-- MESG: res start" ; cat "$@" | egrep -i  "$MATCH_DROP" | tac ; cat "$@" | egrep -iv "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "help"|"-h"|"--help")
         usage 0
