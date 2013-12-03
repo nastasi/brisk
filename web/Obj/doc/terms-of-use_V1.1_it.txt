@@ -1,0 +1,73 @@
+
+Regolamento per gli utenti autenticati del sito di Brisk. Vers. 1.1
+===================================================================
+
+1. Coesistenza pacifica.
+------------------------
+
+Ognuno è libero di esprimere le proprie opinioni nel rispetto
+degli altri; se qualcuno si dovesse sentire offeso dalle
+parole di qualcun altro quello che si deve fare è:
+
+- segnalare la cosa a colui che ha arrecato l'offesa per 
+assicurarsi della non intenzionalità dell'offesa medesima
+e possibilmente chiarirsi subito
+
+- IN TUTTI I CASI, se non ci si ritiene soddisfatti o l'insulto
+era palesemente intenzionale, NON SI CONTRATTACCA ma si segnala
+l'accaduto a me (il gestore del sito) e prenderò io una decisione
+sul da farsi: ammonizione, revoca della password o quant'altro.
+
+
+2. Strumenti d'indagine.
+------------------------
+
+Vi chiedo esplicitamente la possibilità di poter visionare i
+log delle chat del sito al fine di verificare eventuali segnalazioni
+di abusi.
+
+Vi garantisco che l'analisi dei log sarà fatta esclusivamente da
+me e che non verrà divulgato a terzi nessun contenuto esclusi
+ovviamente vincoli di legge come richieste da parte delle autorità.
+
+
+3. Non si può avere più di un nickname per utente.
+--------------------------------------------------
+
+Non è possibile che una singola persona abbia più di un nickname
+con password.
+
+4. Autorizzazione alla divulgazione del proprio garante.
+--------------------------------------------------------
+
+Si autorizza il sito a divulgare il nickname del proprio garante.
+
+5. Trattamento dei dati personali.
+----------------------------------
+
+Informativa ex art. 13 D.lgs. 196/2003
+
+Gentile Signore/a,
+
+Desideriamo informarLa che il D.lgs. n. 196 del 30 giugno 2003
+("Codice in materia di protezione dei dati personali") prevede la tutela
+delle persone e di altri soggetti rispetto al trattamento dei dati personali.
+
+Secondo la normativa indicata, tale trattamento sarà improntato ai principi
+di correttezza, liceità e trasparenza e di tutela della Sua riservatezza e
+dei Suoi diritti.
+
+Ai sensi dell'articolo 13 del D.lgs. n.196/2003, pertanto, Le forniamo
+le seguenti informazioni:
+
+1. I dati da Lei forniti verranno trattati per le seguenti finalità: garantire
+comunicazioni riservate tra il sito e l'utente.
+
+2. Il trattamento sarà di tipo informatizzato.
+
+3. Il conferimento dei dati è obbligatorio e l'eventuale rifiuto di fornire
+tali dati (indirizzo email) comporta la mancata possibilità di proseguire
+ad offrirLe un accesso riservato al sito e comunicazioni riservate.
+
+4. I dati non saranno comunicati ad altri soggetti, né saranno
+oggetto di diffusione.
