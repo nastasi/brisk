@@ -44,7 +44,10 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                       '1'  : { 'it' : '(solo aut.)',
                                                'en' : '(only aut.)' },
                                       '2'  : { 'it' : '(isolam.to)',
-                                               'en' : '(isolation)' } }
+                                               'en' : '(isolation)' } },
+                      'lic_refu'  : { 'it' : 'Rifiutando di sottoscrivere la nuova licenza d\' uso non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?',
+                                      'en' : 'EN Rifiutando di sottoscrivere la nuova licenza d\' uso non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?'
+                                    }
                     };
 
 function $(id) { return document.getElementById(id); }
@@ -475,8 +478,8 @@ function postact_logout()
 
 /*
   type - 'hard' or 'soft'
-  code - if soft: accept (0), deny (1), after (2)
-         if hard: accept (0), deny (1)
+  code - if soft: accept (0), refuse (1), after (2)
+         if hard: accept (0), refuse (1)
  */
 function act_licencemgr(type, code, lice_curr, lice_vers)
 {
@@ -493,6 +496,16 @@ function act_licencemgr(type, code, lice_curr, lice_vers)
     default:
         break;
     }
+    return true;
+}
+
+function lice_confirm(val)
+{
+    if (val == 1) {
+        return (window.confirm(mlang_commons['lic_refu'][g_lang]));
+    }
+
+    return true;
 }
 
 /*
@@ -646,13 +659,14 @@ function div_show(div)
   block_time:
   */
 
-function notify_document(st, text, tout, butt, w, h, is_opa, block_time)
+function notify_document(st, text, tout, butt, confirm_func, w, h, is_opa, block_time)
 {
     var i, clo, clodiv_ctx, clodiv_wai, box;
 
     this.st = st;
 
     this.ancestor = document.body;
+    this.confirm_func = confirm_func;
 
     this.st.st_loc_new++;
 
@@ -726,6 +740,8 @@ notify_document.prototype = {
     butt: null,
     tblkid: null,
 
+    confirm_func: null,
+
     ret: -1,
 
     /*
@@ -772,6 +788,11 @@ notify_document.prototype = {
 
     hide: function(val)
     {
+        if (this.confirm_func != null) {
+            if (this.confirm_func(val) == false) {
+                return false;
+            }
+        }
         this.ret = val;
 	clearTimeout(this.toutid);
 	this.ancestor.removeChild(this.notitag);

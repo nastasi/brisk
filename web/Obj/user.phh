@@ -605,7 +605,7 @@ class User {
                               // call notify soft
                               $ret .=  show_notify_document("Versione corrente: [".$this->rec->lice_vers_get()."] Versione sito: ".$G_lice_vers,
                                        0, array("Accetto.", "Rifiuto.", "Leggo poi.",  /* , "Scarico." */),
-                                       400, 600, TRUE, 0);
+                                       "lice_confirm", 600, 600, TRUE, 0);
                               $ret .= sprintf("act_licencemgr('soft', g_nd.ret_get(), '%s', '%s');", 
                                               xcape($this->rec->lice_vers_get()), xcape($G_lice_vers));
                           }
@@ -613,7 +613,7 @@ class User {
                               // call notify hard
                               $ret .=  show_notify_document("Versione corrente: [".$this->rec->lice_vers_get()."] Versione sito: ".$G_lice_vers,
                                        0, array("Accetto.", "Rifiuto." /* , "Scarico." */),
-                                       400, 600, TRUE, 0);
+                                       "lice_confirm", 600, 600, TRUE, 0);
                               $ret .= sprintf("act_licencemgr('hard', g_nd.ret_get(), '%s', '%s');", 
                                               xcape($this->rec->lice_vers_get()), xcape($G_lice_vers));
                           }
