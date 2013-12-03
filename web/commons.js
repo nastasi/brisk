@@ -697,6 +697,7 @@ function notify_document(st, text, tout, butt, confirm_func, w, h, is_opa, block
     cont.style.borderBottomColor = "gray";
     cont.style.height = (h - 30)+"px";
     cont.style.overflow = "auto";
+    cont.style.fontFamily = "monospace";
     cont.innerHTML = text;
 
     box =  document.createElement("div");
