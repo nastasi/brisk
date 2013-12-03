@@ -395,9 +395,8 @@ function eschtml($s)
 
 function esclfhtml($s)
 {
-    return str_replace("\n", "<br>\n", htmlentities($s));
+    return str_replace("\n", "<br>", htmlspecialchars($s));
 }
-
 
 function langtolng($lang)
 {
