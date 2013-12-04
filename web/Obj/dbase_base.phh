@@ -31,10 +31,10 @@ class LoginDBItem {
     var $type;
     var $last_dona;
     var $supp_comp;
-    var $lice_vers;
+    var $tos_vers;
     var $disa_reas;
 
-    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $lice_vers, $disa_reas)
+    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers, $disa_reas)
     {
         $this->code      = $code;
         $this->login     = $login;
@@ -43,7 +43,7 @@ class LoginDBItem {
         $this->type      = $type;
         $this->last_dona = $last_dona;
         $this->supp_comp = $supp_comp;
-        $this->lice_vers = $lice_vers;
+        $this->tos_vers  = $tos_vers;
         $this->disa_reas = $disa_reas;
     }
 
@@ -51,7 +51,7 @@ class LoginDBItem {
     {
         $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
                                $rec->email, $rec->type, $rec->last_dona,
-                               $rec->supp_comp, $rec->lice_vers, $rec->disa_reas);
+                               $rec->supp_comp, $rec->tos_vers, $rec->disa_reas);
 
         return ($ret);
     }
@@ -95,13 +95,13 @@ class LoginDBItem {
         $this->supp_comp = $supp_comp;
     }
 
-    function lice_vers_get()
+    function tos_vers_get()
     {
-        return $this->lice_vers;
+        return $this->tos_vers;
     }
-    function lice_vers_set($lice_vers)
+    function tos_vers_set($tos_vers)
     {
-        $this->lice_vers = $lice_vers;
+        $this->tos_vers = $tos_vers;
     }
 
     function disa_reas_get()

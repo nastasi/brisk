@@ -88,7 +88,7 @@ define('LICMGR_CHO_AFTER',  2);
 function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $G_room_passwdhowto, $mlang_indwr;
-    GLOBAL $G_lice_vers;
+    GLOBAL $G_tos_vers;
     $remote_addr = addrtoipv4($remote_addr_full);
 
     log_load("index_wr.php");
@@ -548,20 +548,20 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'chatt') {
             $room->chatt_send(&$user, xcapemesg($mesg));
         }
-        else if ($argz[0] == 'licencemgr') {
-            // check IF is authnticated user, both licences version matches
+        else if ($argz[0] == 'tosmgr') {
+            // check IF is authnticated user, both terms of service versions matches
             if ($user->flags & USER_FLAG_AUTH && count($argz) == 5) {
                 $f_type = $argz[1];      $f_code = $argz[2];
-                $f_lice_curr = $argz[3]; $f_lice_vers = $argz[4];
+                $f_tos_curr = $argz[3]; $f_tos_vers = $argz[4];
 
-                if ("$f_lice_curr" == $user->rec->lice_vers_get()  &&
-                    "$f_lice_vers" == "$G_lice_vers") {
+                if ("$f_tos_curr" == $user->rec->tos_vers_get()  &&
+                    "$f_tos_vers" == "$G_tos_vers") {
                     if ("$f_type" == "soft" || "$f_type" == "hard") {
                         $res = 100;
                         switch ($f_code) {
                         case LICMGR_CHO_ACCEPT:
-                            $user->rec->lice_vers_set($G_lice_vers);
-                            $res = $user->licence_store();
+                            $user->rec->tos_vers_set($G_tos_vers);
+                            $res = $user->tos_store();
                             break;
                         case LICMGR_CHO_REFUSE:
                             $user->flags_set(USER_FLAG_TY_DISABLE, USER_FLAG_TY_ALL);

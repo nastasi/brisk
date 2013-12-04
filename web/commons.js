@@ -45,8 +45,8 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                                'en' : '(only aut.)' },
                                       '2'  : { 'it' : '(isolam.to)',
                                                'en' : '(isolation)' } },
-                      'lic_refu'  : { 'it' : 'Rifiutando di sottoscrivere la nuova licenza d\' uso non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?',
-                                      'en' : 'EN Rifiutando di sottoscrivere la nuova licenza d\' uso non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?'
+                      'tos_refu'  : { 'it' : 'Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?',
+                                      'en' : 'EN Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?',
                                     }
                     };
 
@@ -481,7 +481,7 @@ function postact_logout()
   code - if soft: accept (0), refuse (1), after (2)
          if hard: accept (0), refuse (1)
  */
-function act_licencemgr(type, code, lice_curr, lice_vers)
+function act_tosmgr(type, code, tos_curr, tos_vers)
 {
     if (type != "soft" && type != "hard") {
         return false;
@@ -489,7 +489,7 @@ function act_licencemgr(type, code, lice_curr, lice_vers)
     switch (code) {
     case 0:
     case 1:
-        send_mesg("licencemgr|"+type+"|"+code+"|"+lice_curr+"|"+lice_vers);
+        send_mesg("tosmgr|"+type+"|"+code+"|"+tos_curr+"|"+tos_vers);
         break;
     case 2:
         break;
@@ -499,10 +499,10 @@ function act_licencemgr(type, code, lice_curr, lice_vers)
     return true;
 }
 
-function lice_confirm(val)
+function tos_confirm(val)
 {
     if (val == 1) {
-        return (window.confirm(mlang_commons['lic_refu'][g_lang]));
+        return (window.confirm(mlang_commons['tos_refu'][g_lang]));
     }
 
     return true;

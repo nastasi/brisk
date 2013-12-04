@@ -611,7 +611,7 @@ class Sac_a_push {
         GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
         GLOBAL $G_with_sidebanner, $G_with_sidebanner2, $G_with_splash;
         GLOBAL $G_with_topbanner;
-        GLOBAL $G_lice_vers, $G_lice_fname, $G_lice_dtsoft, $G_lice_dthard, $G_lice_idx;
+        GLOBAL $G_tos_vers, $G_tos_fname, $G_tos_dtsoft, $G_tos_dthard, $G_tos_idx;
 
         if ($this->main_loop) {
             return (FALSE);

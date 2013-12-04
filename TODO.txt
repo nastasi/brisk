@@ -4,19 +4,19 @@
   FEATURES |
  ----------+
    - AUTO-MAINTENANCE
-     . policy acceptance
-       DONE . policy version
-       DONE . user policy acceptance (db field)
-       DONE . show licence ([show me later, yes, no]/[yes, no])
+     . Terms Of Service acceptance
+       DONE . TOS version
+       DONE . user TOS acceptance (db field)
+       DONE . show TOS ([show me later, yes, no]/[yes, no])
        DONE . switch-off date
        DONE . manage accept
        DONE . manage refuse
-       DONE . show current licence
+       DONE . show current TOS
        . WIP disable user reason integer field and remove SUSPEND state (db, php)
        . checkbox for anonimous users with message when not checked
-       . opt - button on when arrived to the bottom of the licence
-       . opt - download licence
-       . min - check licence version between config file and licence file
+       . opt - button on when arrived to the bottom of the TOS
+       . opt - download TOS
+       . min - check TOS version between config file and TOS file
      . show guaranteer
 
      . email validation

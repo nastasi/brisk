@@ -200,12 +200,12 @@ class BriskDB
         return TRUE;
     }
 
-    function user_licence_update($code, $lice_vers)
+    function user_tos_update($code, $tos_vers)
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (lice_vers) = ('%s') WHERE code = %d;",
-                            $G_dbpfx, escsql($lice_vers), $code);
+        $user_sql = sprintf("UPDATE %susers SET (tos_vers) = ('%s') WHERE code = %d;",
+                            $G_dbpfx, escsql($toss_vers), $code);
         fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

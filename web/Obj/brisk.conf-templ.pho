@@ -85,10 +85,10 @@ $G_black_list = array();
 $G_btrace_pref_sub = "/home/nastasi/web/";
 
 // licence related stuff
-$G_lice_vers  = "2.0";
-$G_lice_fname = "Obj/doc/terms-of-use_%s_%s.txt";
+$G_tos_vers  = "2.0";
+$G_tos_fname = "Obj/doc/terms-of-service_%s_%s.txt";
 // USE date +%s -d 'Wed Nov 20 18:35:41 CET 2013' to calculate
-$G_lice_dthard = 1384968941;
-$G_lice_dtsoft = 1384968941;
-$G_lice_idx    = 1;
+$G_tos_dthard = 1384968941;
+$G_tos_dtsoft = 1384968941;
+$G_tos_idx    = 1;
 ?>
