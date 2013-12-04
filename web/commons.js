@@ -695,8 +695,10 @@ function notify_document(st, text, tout, butt, confirm_func, w, h, is_opa, block
     cont.style.borderBottomStyle = "solid";
     cont.style.borderBottomWidth = "1px";
     cont.style.borderBottomColor = "gray";
-    cont.style.height = (h - 30)+"px";
+    cont.style.height = (h - 50)+"px";
     cont.style.overflow = "auto";
+    cont.style.textAlign = "left";
+    cont.style.padding = "8px";
     cont.style.fontFamily = "monospace";
     cont.innerHTML = text;
 

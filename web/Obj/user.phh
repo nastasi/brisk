@@ -79,11 +79,18 @@ $S_load_stat = array( 'rU_heavy'      => 0,
                       'wR_minusone'   => 0,
                       'wR_the_end'    => 0 );
 
-$mlang_indrd = array( 
+$mlang_user = array(
                      'btn_backtotab'  => array('it' => ' torna ai tavoli ',
                                                'en' => ' back to tables '),
                      'btn_btotabsup'  => array('it' => ' grazie della donazione, torna ai tavoli ',
-                                               'en' => ' thank you for donation, back to tables ') 
+                                               'en' => ' thank you for donation, back to tables '),
+
+                     'btn_agree'      => array('it' => ' accetto ',
+                                               'en' => ' agree '),
+                     'btn_refuse'     => array('it' => ' rifiuto ',
+                                               'en' => ' refuse '),
+                     'btn_after'      => array('it' => ' leggo poi ',
+                                               'en' => ' read later ')
                      );
 
 class User {
@@ -557,7 +564,7 @@ class User {
 
   protected function maincheck($get, $post, $cookie)
   {
-      GLOBAL $G_lang, $G_base, $mlang_indrd;
+      GLOBAL $G_lang, $G_base, $mlang_user;
       // GLOBAL $first_loop;
       GLOBAL $G_with_splash, $G_splash_content, $G_splash_interval, $G_splash_idx;
       GLOBAL $G_splash_w, $G_splash_h, $G_splash_timeout;
@@ -615,9 +622,8 @@ class User {
                       if (versions_cmp($this->rec->tos_vers_get(), $G_tos_vers) < 0) { // comparison between user version and current version
                           if ($curtime > $G_tos_dtsoft) {
                               // call notify soft
-                              // FIXME: manage translations
                               $ret .=  show_notify_document(esclfhtml(file_get_contents($G_base.sprintf($G_tos_fname, $G_tos_vers, $G_lang))),
-                                       0, array("Accetto.", "Rifiuto.", "Leggo poi.",  /* , "Scarico." */),
+                                       0, array($mlang_user['btn_agree'][$G_lang], $mlang_user['btn_refuse'][$G_lang], $mlang_user['btn_after'][$G_lang] /* , "Scarico." */),
                                        "tos_confirm", 600, 600, TRUE, 0);
                               $ret .= sprintf("act_tosmgr('soft', g_nd.ret_get(), '%s', '%s');",
                                               xcape($this->rec->tos_vers_get()), xcape($G_tos_vers));
@@ -625,7 +631,7 @@ class User {
                           else if ($curtime > $G_tos_dthard) {
                               // call notify hard
                               $ret .=  show_notify_document(esclfhtml(file_get_contents($G_base.sprintf($G_tos_fname, $G_tos_vers, $G_lang))),
-                                       0, array("Accetto.", "Rifiuto." /* , "Scarico." */),
+                                       0, array($mlang_user['btn_agree'][$G_lang], $mlang_user['btn_refuse'][$G_lang] /* , "Scarico." */),
                                        "tos_confirm", 600, 600, TRUE, 0);
                               $ret .= sprintf("act_tosmgr('hard', g_nd.ret_get(), '%s', '%s');",
                                               xcape($this->rec->tos_vers_get()), xcape($G_tos_vers));
@@ -637,11 +643,11 @@ class User {
                   ($splashdate < $curtime - $G_splash_interval ||
                    $splashdate > $curtime)) {
                   $is_super = $this->flags & USER_FLAG_TY_SUPER;
-                  $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]), 
-                                          ($is_super ? 0 : $G_splash_timeout), 
-                                          // $mlang_indrd[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang], 
-                                          $mlang_indrd['btn_backtotab'][$G_lang], 
-                                          $G_splash_w, $G_splash_h, true, 
+                  $ret .=  show_notify_ex(str_replace("\n", " ", $G_splash_content[$G_lang]),
+                                          ($is_super ? 0 : $G_splash_timeout),
+                                          // $mlang_user[($is_super ? 'btn_btotabsup' : 'btn_backtotab')][$G_lang],
+                                          $mlang_user['btn_backtotab'][$G_lang],
+                                          $G_splash_w, $G_splash_h, true,
                                           ($is_super ? 0 : $G_splash_timeout));
                   $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
               }
