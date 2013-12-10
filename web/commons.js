@@ -915,12 +915,6 @@ function notify(st, text, tout, butt, w, h)
     notify_ex.call(this, st, text, tout, butt, w, h, false, 0);
 }
 	
-
-function $(id) { 
-    return document.getElementById(id); 
-}
-
-
 function globst() {
     this.st = -1;
     this.st_loc = -1;
