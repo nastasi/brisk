@@ -144,6 +144,16 @@ div.notify_clo {
     bottom:  4px;
 }
 
+div.doc_alert {
+    color: #ff5400;
+    background-color: #ffd780;
+    font-family: monospace;
+    font-weight: bold;
+    text-align: center;
+    margin: 8px;
+    padding: 8px;
+}
+
 .input_text { 
     background-color: #f8f8f8;
     border: 1px solid gray;  

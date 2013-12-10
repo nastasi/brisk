@@ -45,8 +45,8 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                                'en' : '(only aut.)' },
                                       '2'  : { 'it' : '(isolam.to)',
                                                'en' : '(isolation)' } },
-                      'tos_refu'  : { 'it' : 'Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?',
-                                      'en' : 'EN Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere col tuo utente registrato al sito, sei proprio sicuro di non voler accettare le nuove condizioni d\'uso ?',
+                      'tos_refu'  : { 'it' : 'Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere come utente registrato al sito, sei proprio sicuro di voler rifiutare le nuove condizioni d\'uso ?',
+                                      'en' : 'EN Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere come utente registrato al sito, sei proprio sicuro di voler rifiutare le nuove condizioni d\'uso ?'
                                     }
                     };
 
@@ -478,8 +478,8 @@ function postact_logout()
 
 /*
   type - 'hard' or 'soft'
-  code - if soft: accept (0), refuse (1), after (2)
-         if hard: accept (0), refuse (1)
+  code - if soft: accept (0), refuse (1), download (2), later (3)
+         if hard: accept (0), refuse (1), download (2)
  */
 function act_tosmgr(type, code, tos_curr, tos_vers)
 {
@@ -496,16 +496,26 @@ function act_tosmgr(type, code, tos_curr, tos_vers)
     default:
         break;
     }
+
     return true;
 }
 
-function tos_confirm(val)
+function tos_confirm(val, url)
 {
-    if (val == 1) {
-        return (window.confirm(mlang_commons['tos_refu'][g_lang]));
-    }
+    var dlm;
 
-    return true;
+    switch (val) {
+    case 1:
+        return (window.confirm(mlang_commons['tos_refu'][g_lang]));
+        break;
+    case 2:
+        dlm = new download_mgr(url);
+        return false;
+        break;
+    default:
+        return true;
+        break;
+    }
 }
 
 /*
@@ -659,7 +669,7 @@ function div_show(div)
   block_time:
   */
 
-function notify_document(st, text, tout, butt, confirm_func, w, h, is_opa, block_time)
+function notify_document(st, text, tout, butt, confirm_func, confirm_func_args, w, h, is_opa, block_time)
 {
     var i, clo, clodiv_ctx, clodiv_wai, box;
 
@@ -667,7 +677,7 @@ function notify_document(st, text, tout, butt, confirm_func, w, h, is_opa, block
 
     this.ancestor = document.body;
     this.confirm_func = confirm_func;
-
+    this.confirm_func_args = confirm_func_args;
     this.st.st_loc_new++;
 
     clodiv_ctx = document.createElement("div");
@@ -744,6 +754,7 @@ notify_document.prototype = {
     tblkid: null,
 
     confirm_func: null,
+    confirm_func_args: [],
 
     ret: -1,
 
@@ -792,7 +803,11 @@ notify_document.prototype = {
     hide: function(val)
     {
         if (this.confirm_func != null) {
-            if (this.confirm_func(val) == false) {
+            var args;
+
+            args = [ val ].concat(this.confirm_func_args);
+
+            if (this.confirm_func.apply(null, args) == false) {
                 return false;
             }
         }
@@ -1384,4 +1399,24 @@ function url_complete(parent, url)
     else {
         return (host+path+url);
     }
+}
+
+function download_mgr(url)
+{
+    var ifra;
+
+    if ((ifra = $('the_downloader')) == null) {
+        ifra = document.createElement("iframe");
+        ifra.style.display = "none";
+        ifra.id = 'the_downloader';
+        document.body.appendChild(ifra);
+    }
+
+    ifra.contentWindow.location.href = url;
+
+    this.ifra = ifra;
+}
+
+download_mgr.prototype = {
+    ifra: null
 }

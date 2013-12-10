@@ -2880,7 +2880,7 @@ function show_notify_ex($text, $tout, $butt, $w, $h, $is_opaque, $block_time)
   return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, %s, %d);', $text, $tout, $butt, $w, $h, ($is_opaque ? "true" : "false"), $block_time);
 }
 
-function show_notify_document($text, $tout, $butt_arr, $confirm_func, $w, $h, $is_opaque, $block_time)
+function show_notify_document($text, $tout, $butt_arr, $confirm_func, $confirm_func_args, $w, $h, $is_opaque, $block_time)
 {
   log_main("SHOW_NOTIFY OPAQUE: ".$text);
 
@@ -2889,8 +2889,8 @@ function show_notify_document($text, $tout, $butt_arr, $confirm_func, $w, $h, $i
       $butts .= sprintf("%s'%s'", ($i == 0 ? "" : ","), $butt_arr[$i]);
   }
 
-  return sprintf('g_nd = new notify_document(gst, "%s", %d, [ %s ], %s, %d, %d, %s, %d);|',
-                 escpush($text), $tout, $butts, ($confirm_func == NULL ? "null" : $confirm_func), $w, $h, ($is_opaque ? "true" : "false"), $block_time);
+  return sprintf('g_nd = new notify_document(gst, "%s", %d, [ %s ], %s, %s, %d, %d, %s, %d);|',
+                 escpush($text), $tout, $butts, ($confirm_func == NULL ? "null" : $confirm_func), (($confirm_func == NULL|| $confirm_func_args == NULL) ? "[]" : $confirm_func_args), $w, $h, ($is_opaque ? "true" : "false"), $block_time);
 }
 
 

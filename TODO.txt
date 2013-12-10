@@ -5,6 +5,7 @@
  ----------+
    - AUTO-MAINTENANCE
      . Terms Of Service acceptance
+       DONE . print date of hard switch
        DONE . TOS version
        DONE . user TOS acceptance (db field)
        DONE . show TOS ([show me later, yes, no]/[yes, no])
@@ -14,14 +15,12 @@
        DONE . show current TOS
        DONE . disable user reason integer field and remove SUSPEND state (db, php)
        DONE . fix tos layout
-       . opt - download TOS
-       . checkbox for anonimous users with message when not checked
-       . opt - button on when arrived to the bottom of the TOS
-       . min - check TOS version between config file and TOS file
+       DONE . opt - download TOS
+       . opt - checkbox for anonimous users with message when not checked
+       . opt - button enabled when arrived to the bottom of the TOS only
+       . opt - check TOS version between config file and TOS file
      . show guaranteer
-
      . email validation
-
      . account expiration
 
 

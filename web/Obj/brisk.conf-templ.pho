@@ -84,6 +84,9 @@ $G_black_list = array();
 // this is the prefix path to remove from backtrace
 $G_btrace_pref_sub = "/home/nastasi/web/";
 
+// where documents are stored
+$G_doc_path = "Obj/doc/";
+
 // licence related stuff
 $G_tos_vers  = "2.0";
 $G_tos_fname = "Obj/doc/terms-of-service_%s_%s.txt";
