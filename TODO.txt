@@ -25,21 +25,19 @@
      . account expiration
 
 
-   WIP - CONTINUE FEATURE
-     . replace explicit strings with multilanguage array
-
+   DONE - CONTINUE FEATURE
+     DONE . replace explicit strings with multilanguage array
+     DONE . add a php downloader with filtering on allowed requests
      DONE . save points every game
      DONE . modify points calculation to include order and mazzo
      DONE . exclude not standard types from statistics
          DONE . daily reports (1 for each active tournament)
          DONE . monthly stats (for normal match only)
-
      DONE . show current match ID when created
      DONE . add info about continue to the info page
      DONE . add command to continue
-       DONE . check consistency of the request
+         DONE . check consistency of the request
      DONE . rearrange users and game status to continue the selected match
-
      DONE . investigate user reordering ??
 
    - WEBSOCKET TRANSPORT
