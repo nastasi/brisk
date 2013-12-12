@@ -39,7 +39,7 @@ require_once($G_base."briskin5/index.php");
 require_once($G_base."briskin5/index_wr.php");
 
 
-function main()
+function main($argv)
 {
     pid_save();
     do {
@@ -49,7 +49,7 @@ function main()
             break;
         }
 
-        if (($s_a_p = Sac_a_push::create($room, USOCK_PATH, 0, 0)) === FALSE) {
+        if (($s_a_p = Sac_a_push::create($room, USOCK_PATH, 0, 0, $argv)) === FALSE) {
             $ret = 2;
             break;
         }
@@ -61,5 +61,5 @@ function main()
     exit($ret);
 }
 
-main();
+main($argv);
 ?>

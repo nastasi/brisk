@@ -404,6 +404,7 @@ class Sac_a_push {
     var $s2u;             // user associated with input socket
     var $s2p;             // pending page associated with input socket
     var $pending_pages;
+    var $is_daemon;
 
     var $list;
     var $in;
@@ -446,7 +447,7 @@ class Sac_a_push {
         }
     }
 
-    static function create(&$app, $sockname, $debug, $blocking_mode)
+    static function create(&$app, $sockname, $debug, $blocking_mode, $argv)
     {        
         $thiz = new Sac_a_push();
         
@@ -458,6 +459,11 @@ class Sac_a_push {
         $thiz->s2u  = array();
         $thiz->s2p  = array();
         $thiz->pending_pages = array();
+        $thiz->is_daemon = FALSE;
+
+        if (array_search("-d", $argv) !== FALSE || array_search("--daemon", $argv) !== FALSE) {
+            $thiz->is_daemon = TRUE;
+        }
 
         // create a couple of sockets for control management
         if (($sockpair = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM,
@@ -628,9 +634,15 @@ class Sac_a_push {
             /* if ($shutdown)  */
             /*     $read   = array_merge(array("$in" => $in), $socks); */
             /* else */
-            $read   = array_merge(array(intval($this->list) => $this->list, intval($this->in) => $this->in,
-                                        intval(static::$cnt_slave) => static::$cnt_slave),
-                                  $this->socks);
+            $pre_read = array_merge(array(intval($this->list) => $this->list,
+                                          intval(static::$cnt_slave) => static::$cnt_slave),
+                                    $this->socks);
+            if ($this->is_daemon == FALSE) {
+                $read = array_merge($pre_read, array(intval($this->in) => $this->in));
+            }
+            else {
+                $read = $pre_read;
+            }
             
             if ($this->debug > 1) {
                 printf("PRE_SELECT\n");
