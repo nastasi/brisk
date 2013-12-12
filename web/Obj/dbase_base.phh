@@ -33,8 +33,9 @@ class LoginDBItem {
     var $supp_comp;
     var $tos_vers;
     var $disa_reas;
+    var $guar_code;
 
-    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers, $disa_reas)
+    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers, $disa_reas, $guar_code)
     {
         $this->code      = $code;
         $this->login     = $login;
@@ -45,13 +46,14 @@ class LoginDBItem {
         $this->supp_comp = $supp_comp;
         $this->tos_vers  = $tos_vers;
         $this->disa_reas = $disa_reas;
+        $this->guar_code = $guar_code;
     }
 
     static function LoginDBItemFromRecord($rec)
     {
         $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
                                $rec->email, $rec->type, $rec->last_dona,
-                               $rec->supp_comp, $rec->tos_vers, $rec->disa_reas);
+                               $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code);
 
         return ($ret);
     }
@@ -111,6 +113,10 @@ class LoginDBItem {
     function disa_reas_set($disa_reas)
     {
         $this->disa_reas = $disa_reas;
+    }
+    function guar_code_get()
+    {
+        return $this->guar_code;
     }
 
 }

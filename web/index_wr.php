@@ -78,7 +78,6 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                            'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '), 
                       'badsit_b' => array( 'it' => ' prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.',
                                            'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access')
-
                       );
 
 define('LICMGR_CHO_ACCEPT', 0);
