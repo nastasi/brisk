@@ -133,9 +133,18 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                       'tit_onisol'=>array( 'it' => '(isolam.to)',
                                            'en' => '(isolation)'),
                       'db_failed' =>array('it'  => '<br>Il collegamento al database è fallito.<br>Temporaneamente tutte le autenticazioni verranno sospese, accederai a Brisk come un utente normale.<br><br>Ci scusiamo per il disagio.',
-                                          'en'  => 'Connection to the database failed<br>All authentications are suspended temporarly, you login as normal user.<br>We are about the limitation')
-                      
+                                          'en'  => 'Connection to the database failed<br>All authentications are suspended temporarly, you login as normal user.<br>We are about the limitation'),
 
+                      'tos_old'  => array( 'it' => '<b>%s</b> ha sottoscritto dei Termini del Servizio antecedenti a quelli necessari per poter richiedere questa funzionalità.',
+                                           'en' => 'EN <b>%s</b> ha sottoscritto dei Termini del Servizio antecedenti a quelli necessari per poter richiedere questa funzionalità.'),
+                      'gua_nfd'  => array( 'it' => 'Non è stato trovato un garante per <b>%s</b>.',
+                                           'en' => 'EN Non è stato trovato un garante per <b>%s</b>.'),
+                      'gua_self' => array( 'it' => '<b>%s</b> si è auto-garantito.',
+                                           'en' => 'EN <b>%s</b> si è auto-garantito.'),
+                      'gua_info' => array( 'it' => 'Il garante di <b>%s</b> è <b>%s</b>.',
+                                           'en' => 'EN Il garante di <b>%s</b> è <b>%s</b>.'),
+                      'gua_err'  => array( 'it' => 'Error %d. Utilizzo: <b>/guar <i>&lt;login&gt;</i></b>.',
+                                           'en' => 'Error %d. Usage: <b>/guar <i>&lt;login&gt;</i></b>.')
 );
 
 $G_lng = langtolng($G_lang);
@@ -174,6 +183,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
+<dd><b>/guar <i>&lt;login&gt;</i></b> - mostra il garante dell\'utente con il login passato come argomento
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
 <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
@@ -186,7 +196,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <b>EN Descrizione</b><br>
 EN Questa è un\'implementazione della briscola in cinque, cos&igrave; come &egrave; spiegata su
 <a target=\\"_blank\\" href=\\"http://it.wikipedia.org/wiki/Briscola#Gioco_a_5\\">Wikipedia</a>; in breve &egrave; la variante con l\'asta prima sulla carta e poi sui punti.<br><br>
-<b>EN Configurazione del browser.</b><br>
+<b>Configurazione del browser.</b><br>
 Occorre abilitare i cookies.<br>
 <br>
 <b>Uso del sito</b><br>
@@ -205,6 +215,8 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
+<dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
+<dd><b>/guar <i>&lt;login&gt;</i></b> - mostra il garante dell\'utente con il login passato come argomento
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
 <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
@@ -1286,6 +1298,63 @@ class Room
     }
   }
 
+  function guarantee_show($user, $user_login, $dt)
+  {
+      GLOBAL $G_lang, $mlang_brisk, $G_base;
+
+      $user_code = -1;
+      $ret = 0;
+
+      do {
+          if ($user_login == "") {
+              $ret = 1;
+              break;
+          }
+          if (($bdb = BriskDB::create()) == FALSE) {
+              $ret = 2;
+              break;
+          }
+          if (($user_item = $bdb->getitem_bylogin($user_login, $user_code)) == FALSE) {
+              $ret = 3;
+              break;
+          }
+          if (($guar_item = $bdb->getitem_bycode($user_item->guar_code_get())) != FALSE) {
+              $guar_login = $guar_item->login_get();
+          }
+          else {
+              $guar_login = "";
+          }
+          $user_tos_vers = $user_item->tos_vers_get();
+
+          if (versions_cmp($user_tos_vers, "1.2") < 0) {
+              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                              $dt, NICKSERV, sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login)));
+          }
+          else if ($guar_login == "") {
+              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                              $dt, NICKSERV, sprintf($mlang_brisk['gua_nfd'][$G_lang], xcape($user_login)));
+          }
+          else if ($guar_login == $user_login) {
+              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                              $dt, NICKSERV, sprintf($mlang_brisk['gua_self'][$G_lang], xcape($user_login)));
+          }
+          else {
+              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                              $dt, NICKSERV, sprintf($mlang_brisk['gua_info'][$G_lang],
+                                                     xcape($user_login), xcape($guar_login)));
+          }
+      } while (0);
+
+      if ($ret > 0) {
+          $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, sprintf($mlang_brisk['gua_err'][$G_lang], $ret));
+      }
+
+      $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$mesg;
+      $user->step_inc();
+
+      return TRUE;
+  }
+
   function room_outstandup($user)
   {
     $this->room_sitdown($user, -1);
@@ -1578,7 +1647,11 @@ class Room
         $update_room = TRUE;
       } while (0);
     } // nick chat command
+    else if (strncmp($msg, "/guar ", 6) == 0 || $msg == "/guar") {
+        $guar_user = substr($msg, 6);
 
+        $this->guarantee_show($user, $guar_user, $dt);
+    }
     else if (strncmp($msg, "/st ", 4) == 0) {
       log_main("chatt_send BEGIN");
 

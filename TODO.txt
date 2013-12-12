@@ -19,7 +19,12 @@
        . opt - checkbox for anonimous users with message when not checked
        . opt - button enabled when arrived to the bottom of the TOS only
        . opt - check TOS version between config file and TOS file
-     . show guaranteer
+     DONE . show guarantee (/guar <login> command)
+       DONE . multi-language
+       DONE . command documentation
+       DONE . manage disagreeding users investigation
+       DONE . self guaranteed
+
      . email validation
      . account expiration
 
