@@ -157,6 +157,21 @@ class BriskDB
         return ($user_obj);
     }
 
+    function getrecord_bycode($code) {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("SELECT * FROM %susers WHERE code = %d;",  $G_dbpfx, $code);
+        if (($user_pg  = $this->query($user_sql)) == FALSE) {
+            return FALSE;
+        }
+        if (pg_numrows($user_pg) != 1)
+            return FALSE;
+
+        $user_obj = pg_fetch_object($user_pg, 0);
+
+        return ($user_obj);
+    }
+
     function user_update_login_time($code, $lintm)
     {
         GLOBAL $G_dbpfx;
@@ -279,6 +294,17 @@ class BriskDB
             return $ret;
 
         $id = $user_obj->code;
+        return (LoginDBItem::LoginDBItemFromRecord($user_obj));
+    }
+
+    function getitem_bycode($code) {
+        $ret = FALSE;
+
+        log_main("getitem_bycode: ".$code);
+
+        if (($user_obj = $this->getrecord_bycode($code)) == FALSE)
+            return $ret;
+
         return (LoginDBItem::LoginDBItemFromRecord($user_obj));
     }
 
