@@ -803,7 +803,6 @@ class Sac_a_push {
                         if (!strncmp($path, SITE_PREFIX, SITE_PREFIX_LEN)) {
                             $rret = $this->app->request_mgr($this, $header, $header_out, $new_socket, substr($path, SITE_PREFIX_LEN), $addr, $get, $post, $cookie);
                         }
-                        fprintf(STDERR, "\n\n DI QUI PASSA [%s]\n\n", $rret);
                         if ($rret == FALSE) {
                             // FIXME: manage 404 !!!
                             printf("TODO: fix unknown page\n");

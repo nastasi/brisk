@@ -205,7 +205,7 @@ class BriskDB
         GLOBAL $G_dbpfx;
 
         $user_sql = sprintf("UPDATE %susers SET (tos_vers) = ('%s') WHERE code = %d;",
-                            $G_dbpfx, escsql($toss_vers), $code);
+                            $G_dbpfx, escsql($tos_vers), $code);
         fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

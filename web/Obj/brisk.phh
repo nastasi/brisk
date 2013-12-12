@@ -2363,7 +2363,6 @@ class Room
           //                   from the socket, waiting if necessary
           //
 
-          fprintf(STDERR, "\n\nDENTRO QUI\n\n");
           ob_start();
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
