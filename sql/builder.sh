@@ -1,6 +1,9 @@
 #! /bin/bash
-
+# set -x
 #
+MATCH_DROP='^DROP.*([^-]...|.[^-]..|..[^M].|...[^F])$|^ALTER TABLE.* DROP .*([^-]...|.[^-]..|..[^M].|...[^F])$|^DELETE .*([^-]...|.[^-]..|..[^M].|...[^F])$|--MB$'
+
+
 #  functions
 usage () {
     echo " USAGE"
@@ -20,6 +23,12 @@ usage () {
     echo "       dump [dumpfile]"
     echo "       dumpall [dumpfile]"
     echo "       all"
+    echo
+    echo "The match rule for clean lines is:"
+    echo "  [$MATCH_DROP]"
+    echo "NOTE: to invert normal 'del' rules add '--MF' (move forward) suffix to each line"
+    echo "      to invert normal 'add' rules add '--MB' (move backward) suffix to each line"
+
     exit $1
 }
 
@@ -102,7 +111,6 @@ test "$DBUSER" != "" && pg_args="$pg_args -U $DBUSER"
 test "$DBPORT" != "" && pg_args="$pg_args -p $DBPORT"
 test "$DBBASE" != "" && pg_args="$pg_args $DBBASE"
 
-MATCH_DROP='^drop|^alter table.* drop |^delete '
 
 case $CMD in
     "create")
@@ -115,14 +123,14 @@ case $CMD in
         su root -c "su postgres -c \"dropdb $DBBASE && dropuser $DBUSER\""
         ;;
     "clean")
-        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep -i "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
+        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
         ;;
     "build")
-        ( echo "-- MESG: build start" ; one_or_all $2 | egrep -iv "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) | sqlexe
+        ( echo "-- MESG: build start" ; one_or_all $2 | egrep -v "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) | sqlexe
         ;;
     "rebuild")
-        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep -i "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ; \
-            echo "-- MESG: build start" ; one_or_all $2 | egrep -iv "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) \
+        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ; \
+            echo "-- MESG: build start" ; one_or_all $2 | egrep -v "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) \
             | sqlexe
         ;;
     "psql")
@@ -147,13 +155,13 @@ case $CMD in
         fi
         ;;
     "add")
-        ( echo "-- MESG: add start" ; cat "$@" | egrep -iv "$MATCH_DROP" ; echo "-- MESG: add end" ;   ) | sqlexe
+        ( echo "-- MESG: add start" ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: add end" ;   ) | sqlexe
         ;;
     "del")
-        ( echo "-- MESG: del start" ; cat "$@" | egrep -i  "$MATCH_DROP" | tac ; echo "-- MESG: del end" ;   ) | sqlexe
+        ( echo "-- MESG: del start" ; cat "$@" | egrep "$MATCH_DROP" | tac ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "res")
-        ( echo "-- MESG: res start" ; cat "$@" | egrep -i  "$MATCH_DROP" | tac ; cat "$@" | egrep -iv "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
+        ( echo "-- MESG: res start" ; cat "$@" | egrep "$MATCH_DROP" | tac ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "help"|"-h"|"--help")
         usage 0
