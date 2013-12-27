@@ -413,4 +413,10 @@ fi
 if [ "$web_only" = "FALSE" ]; then
     mv "$ftokk_path" "$ftok_path"
 fi
+if [ -f WARNING.txt ]; then
+    echo ; echo "    ==== WARNING ===="
+    echo
+    cat WARNING.txt
+    echo
+fi
 exit 0
