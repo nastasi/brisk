@@ -67,6 +67,7 @@ define('USER_FLAG_TY_DISABLE', 0x800000); // done
 define('USER_DIS_REA_INVMAIL', 1);
 define('USER_DIS_REA_LICENCE', 2);
 define('USER_DIS_REA_BANNED',  3);
+define('USER_DIS_REA_MALICIOUS',  4);
 
 // 240 is the right value, 600 is for fwrite error test
 define('RD_ENDTIME_DELTA',  240);
