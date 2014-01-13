@@ -4,7 +4,7 @@
   FEATURES |
  ----------+
    - AUTO-MAINTENANCE
-     . Terms Of Service acceptance
+     DONE . Terms Of Service acceptance
        DONE . print date of hard switch
        DONE . TOS version
        DONE . user TOS acceptance (db field)
