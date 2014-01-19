@@ -416,7 +416,7 @@ div.table_commands {
 
 .vert_midfloat {
     position: relative;
-#position: absolute;
+    #position: absolute;
     _top: 50%;
     left: 0px;
     width: 100%;
@@ -425,8 +425,8 @@ div.table_commands {
 }
 
 .vert_innfloat {
-#position: relative;
-#top: -50%;
+    #position: relative;
+    #top: -50%;
     text-align: center;
 }
 
