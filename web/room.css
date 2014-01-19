@@ -67,7 +67,7 @@ div.topmenu {
     text-align: center;
     align: center;
     font-size: 85%;
-    padding:2px;	
+    padding: 2px 2px 0 2px;
 }
 
 div.proflash {
@@ -86,7 +86,7 @@ div.tables {
 
 div.bottom {
     position: relative;
-    top: -13px;
+    top: -20px;
     align: center:
     text-align: center;
     padding:2px;	 
@@ -344,7 +344,18 @@ div.esco {
     text-decoration: none;
 }
 
-.topbanner { 
+.sidebanner {
+    /* Top Right Bottom Left */
+    margin: 4px auto 0px auto;
+    position: relative;
+    align: center;
+    text-align:center;
+    background-color: #f8f8f8;
+    padding: 4px;
+    border: 1px solid #000000;
+}
+
+.topbanner {
     position: relative;
     align: center;
     text-align:center;

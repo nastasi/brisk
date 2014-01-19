@@ -478,9 +478,12 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
   
   
   
-  
-  
-  $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
+  /* NOTE: Brisk donate or donate fake if local */
+  if (!$G_is_local)
+      $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
+  else
+      $brisk_donate = '<div style="background-color: #ff0; height: 27px; margin-top: 4px;">BRISK_DONATE</div>';
+
   if ($brisk_donate == FALSE)
       $brisk_donate = "";
   
@@ -855,13 +858,15 @@ supported by:<br>
 '.$altout_support_big.'
 </div>
 <a style="/* position: absolute; top: 40px; left: 6px;" */ target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
-<br>
-<div id="proflashext" class="proflashext"><div id="proflash" class="proflash">
-</div><br><br></div>
+' . ( /* NOTE: here facebook or fake facebook */
+! $G_is_local ?
+'<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
+' : '<div style="margin-top: 4px; height: 20px; background-color: #00f;">FACEBOOK HERE</div>
+' ) . '<div id="proflashext" class="proflashext"><div id="proflash" class="proflash"></div></div>
+<img id="stm_stat" class="nobo" style="margin-top: 4px;" src="img/line-status_b.png">
 %s
 %s
-<br>
-<img id="stm_stat" class="nobo" src="img/line-status_b.png"></div>';
+</div>';
     
   /* Templates. */
   if ($ACTION == 'login') {
@@ -938,8 +943,27 @@ supported by:<br>
    //-->
 </SCRIPT>
 </head>
+<?php
+    if (!$G_is_local) {
+?>
 <!-- if myconsole <body onunload="deconsole();"> -->
+<body xmlns:fb="http://ogp.me/ns/fb#">
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/it_IT/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<?php
+    }
+    else {
+?>
 <body>
+<?php
+  }
+?>
 <?php
     printf($brisk_header_form);
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
@@ -951,9 +975,6 @@ supported by:<br>
 
    if ($G_with_sidebanner) {
      printf("%s", $G_sidebanner);
-     if ($G_with_sidebanner2) {
-       printf("<br>");
-     }
    }
 
 
@@ -964,7 +985,7 @@ supported by:<br>
 ?> 
 
 <!--  =========== tables ===========  -->
-<?php 
+<?php
 
 /* MLANG: "Digita il tuo nickname per accedere ai tavoli della briscola.", "entra", "Se non hai ancora una password, lascia il campo in bianco ed entra." ,"(se usi firefox e qualcosa non funziona prova a ricaricare la pagina con Ctrl + F5)" */
 echo "$body"; ?>
@@ -1113,17 +1134,31 @@ if ($is_login) {
    //-->
 </SCRIPT>
 </head>
+<?php
+    if (!$G_is_local) {
+?>
 <!-- if myconsole <body onunload="deconsole();"> -->
+<body xmlns:fb="http://ogp.me/ns/fb#">
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/it_IT/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<?php
+    }
+    else {
+?>
 <body>
+<?php
+  }
+?>
 <?php
    printf($brisk_header_form);
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
-   /*   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br><br><br>',
-	   $brisk_donate);
-   printf($brisk_vertical_menu, '<input type="button" class="button" name="xhelp"  value="Help." onclick="act_help();"><br><!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br>',
-	   $brisk_donate);*/
-   printf($brisk_vertical_menu, '<!-- <br><input type="button" class="button" name="xabout"  value="About." onclick="act_about();">--><br>',
-	   $brisk_donate);
+   printf($brisk_vertical_menu, '', $brisk_donate);
 
 
    if ($G_with_sidebanner xor $G_with_sidebanner2) {
@@ -1132,9 +1167,6 @@ if ($is_login) {
 
    if ($G_with_sidebanner) {
      printf("%s", $G_sidebanner);
-     if ($G_with_sidebanner2) {
-       printf("<br>");
-     }
    }
 
 
