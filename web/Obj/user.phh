@@ -808,11 +808,8 @@ function stream_main(&$body, $get, $post, $cookie)
     
     $pre_main = gettimeofday(TRUE);
     
-    $old_stat  = $this->rd_stat;
-    $old_subst = $this->rd_subst;
-    $old_step  = $this->rd_step;
     printf("xXx PRE : rd_step %d\n", $this->rd_step);
-    if (($ret = $this->maincheck($old_stat, $old_subst, $old_step, $get, $post, $cookie)) != FALSE) {
+    if (($ret = $this->maincheck($get, $post, $cookie)) != FALSE) {
         $body .= $this->rd_transp->chunk( $this->rd_scristp++, $ret);
         log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     }
