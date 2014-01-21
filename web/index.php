@@ -249,7 +249,7 @@ function carousel_top()
     }
 }
 
-function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $cookie)
+function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -283,16 +283,16 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
 
   if (isset($BRISK_SHOWHTML) == FALSE) {
       $is_table = FALSE;
-      log_main("lock Room");
+      log_main("lock Brisk");
       $curtime = time();
 
       /* Actions */
 
       if (validate_sess($sess)) {
           log_main("pre garbage_manager UNO");
-          $room->garbage_manager(TRUE);
+          $brisk->garbage_manager(TRUE);
           log_main("post garbage_manager");
-          if (($user = &$room->get_user($sess, &$idx)) != FALSE) {
+          if (($user = &$brisk->get_user($sess, &$idx)) != FALSE) {
               log_main("user stat: ".$user->stat);
               if ($user->stat == "table") {
                   $cookies = new Cookies();
@@ -313,11 +313,11 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
               $pass_private = FALSE;
           }
 
-          $room->garbage_manager(TRUE);
+          $brisk->garbage_manager(TRUE);
           /* try login */
 
           $ipv4addr = addrtoipv4($addr);
-          if (($user = $room->add_user(&$sess, &$idx, $name, $pass_private, $ipv4addr, $cookie)) != FALSE) {
+          if (($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private, $ipv4addr, $cookie)) != FALSE) {
               $ACTION = "room";
               if ($idx < 0) {
                   $idx = -$idx - 1;
@@ -337,7 +337,7 @@ function index_main(&$room, $transp_type, &$header_out, $addr, $get, $post, $coo
               }
 
               // setcookie ("sess", "", time() + 180);      
-              $room->standup_update(&$user);
+              $brisk->standup_update(&$user);
           }
           else {
               /* Login Rendering */

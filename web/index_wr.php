@@ -84,7 +84,7 @@ define('LICMGR_CHO_ACCEPT', 0);
 define('LICMGR_CHO_REFUSE', 1);
 define('LICMGR_CHO_AFTER',  2);
 
-function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
+function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;
@@ -122,7 +122,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
     $curtime = time();
     $dt = date("H:i ", $curtime);
 
-    if (($user = $room->get_user($sess, &$idx)) == FALSE) {
+    if (($user = $brisk->get_user($sess, &$idx)) == FALSE) {
         $argz = explode('|', xcapemesg($mesg));
 
         if ($argz[0] == 'getchallenge') {
@@ -195,7 +195,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             return FALSE;
         }
         return TRUE;
-    }
+    } // end if (($user = $brisk->get_user($sess, ... == FALSE) {
 
     $argz = explode('|', xcapemesg($mesg));
 
@@ -233,11 +233,11 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
         if ($argz[1] == 'save') {
             if ($user->stat == 'room' && $user->subst == 'standup') {
-                $room->standup_update($user);
+                $brisk->standup_update($user);
             }
             else if ($user->stat == 'room' && $user->subst == 'sitdown') {
                 log_main("chatt_send pre table update");
-                $room->table_update($user);
+                $brisk->table_update($user);
                 log_main("chatt_send post table update");
             }
         }
@@ -251,9 +251,9 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
 
         log_rd2("AUTO LOGOUT.");
         if ($user->subst == 'sitdown' || $user->stat == 'table')
-            $room->room_wakeup($user);
+            $brisk->room_wakeup($user);
         else if ($user->subst == 'standup')
-            $room->room_outstandup(&$user);
+            $brisk->room_outstandup(&$user);
         else {
             log_rd2("SHUTDOWN FROM WHAT ???");
         }
@@ -545,7 +545,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
             
         }
         else if ($argz[0] == 'chatt') {
-            $room->chatt_send(&$user, xcapemesg($mesg));
+            $brisk->chatt_send(&$user, xcapemesg($mesg));
         }
         else if ($argz[0] == 'tosmgr') {
             // check IF is authnticated user, both terms of service versions matches
@@ -592,7 +592,7 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                 
                 // Take parameters
                 $table_idx = (int)$argz[1];
-                $table = &$room->table[$table_idx];
+                $table = &$brisk->table[$table_idx];
     
                 $not_allowed_msg = "";
                 if ($G_shutdown) {
@@ -660,28 +660,28 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                     //
                     
                     // Create new spawned table
-                    // $bri_sem = Bin5::lock_data(TRUE, $table_idx);
+                    // $bin5_sem = Bin5::lock_data(TRUE, $table_idx);
                     $table_token = uniqid("");
-                    $room->table[$table_idx]->table_token = $table_token;
-                    $room->table[$table_idx]->table_start = $curtime;
+                    $brisk->table[$table_idx]->table_token = $table_token;
+                    $brisk->table[$table_idx]->table_start = $curtime;
                     
                     $plist = "$table_token|$user->table|$table->player_n";
                     for ($i = 0 ; $i < $table->player_n ; $i++) {
-                        $plist .= '|'.$room->user[$table->player[$i]]->sess;
+                        $plist .= '|'.$brisk->user[$table->player[$i]]->sess;
                     }
                     log_legal($curtime, $user->ip, $user, "STAT:CREATE_GAME", $plist);
                     
                     log_wr("pre new Bin5");
-                    if (($bri = new Bin5($room, $table_idx, $table_token, $get, $post, $cookie)) == FALSE)
+                    if (($bin5 = new Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie)) == FALSE)
                         log_wr("bri create: FALSE");
                     else
-                        log_wr("bri create: ".serialize($bri));
+                        log_wr("bri create: ".serialize($bin5));
                     
                     log_wr("pre init table");
                     // init table
-                    $bri_table = $bri->table[0];
-                    $bri_table->init($bri->user);
-                    $bri_table->game_init($bri->user);
+                    $bin5_table = $bin5->table[0];
+                    $bin5_table->init($bin5->user);
+                    $bin5_table->game_init($bin5->user);
                     //
                     // Init spawned users.
                     //
@@ -689,17 +689,17 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                     //
                     log_wr("game_init after");
                     for ($i = 0 ; $i < $table->player_n ; $i++) {
-                        $bri_user_cur = $bri->user[$i];
-                        $user_cur = $room->user[$table->player[$i]];
+                        $bin5_user_cur = $bin5->user[$i];
+                        $user_cur = $brisk->user[$table->player[$i]];
                         
-                        $bri_user_cur->laccwr = $curtime;
-                        $bri_user_cur->trans_step = $user_cur->step + 1;
-                        $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = "";
-                        $bri_user_cur->step_inc();
-                        $bri_user_cur->comm[$bri_user_cur->step % COMM_N] = show_table(&$bri,&$bri_user_cur,$bri_user_cur->step+1,TRUE, FALSE);
-                        $bri_user_cur->step_inc();
+                        $bin5_user_cur->laccwr = $curtime;
+                        $bin5_user_cur->trans_step = $user_cur->step + 1;
+                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
+                        $bin5_user_cur->step_inc();
+                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table(&$bin5,&$bin5_user_cur,$bin5_user_cur->step+1,TRUE, FALSE);
+                        $bin5_user_cur->step_inc();
                         
-                        log_wr("TRY PRESAVE: ".$bri_user_cur->step." TRANS STEP: ".$bri_user_cur->trans_step);
+                        log_wr("TRY PRESAVE: ".$bin5_user_cur->step." TRANS STEP: ".$bin5_user_cur->trans_step);
                         
                         log_wr("Pre if!");
                         
@@ -717,11 +717,11 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
                         $user_cur->step_inc();
                     }
                     log_wr("presave bri");
-                    $room->match_add($table_idx, $bri);
+                    $brisk->match_add($table_idx, $bin5);
                     log_wr("postsave bri");
                 }
                 // change room
-                $room->room_sitdown($user, $table_idx);
+                $brisk->room_sitdown($user, $table_idx);
                 
                 log_wr("MOP finish");
             }
@@ -739,10 +739,10 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
          **********************/
         else if ($user->subst == 'sitdown') {
             if ($argz[0] == 'wakeup') {
-                $room->room_wakeup($user);
+                $brisk->room_wakeup($user);
             }
             else if ($argz[0] == 'logout') {
-                $room->room_wakeup($user);
+                $brisk->room_wakeup($user);
                 $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                 $user->comm[$user->step % COMM_N] .= 'postact_logout();';
                 $user->the_end = TRUE;
@@ -751,10 +751,10 @@ function index_wr_main(&$room, $remote_addr_full, $get, $post, $cookie)
         }
     }
     log_wr("before save data");
-    // Room::save_data($room);
+    // Brisk::save_data($brisk);
     log_wr($user->step, 'index_wr.php: after save_data()');
     
-/* Room::unlock_data($sem); */
+/* Brisk::unlock_data($sem); */
 /* exit; */
     return (FALSE);
 }

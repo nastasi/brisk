@@ -43,13 +43,13 @@ function main($argv)
 {
     pid_save();
     do {
-        if (($room = Room::create(LEGAL_PATH."/brisk-crystal.data")) == FALSE) {
-            log_crit("room::create failed");
+        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data")) == FALSE) {
+            log_crit("Brisk::create failed");
             $ret = 1;
             break;
         }
 
-        if (($s_a_p = Sac_a_push::create($room, USOCK_PATH, 0, 0, $argv)) === FALSE) {
+        if (($s_a_p = Sac_a_push::create($brisk, USOCK_PATH, 0, 0, $argv)) === FALSE) {
             $ret = 2;
             break;
         }

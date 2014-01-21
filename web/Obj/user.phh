@@ -98,7 +98,7 @@ $mlang_user = array(
                      );
 
 class User {
-  var $room;       // reference to the room where the user is registered
+  var $brisk;      // reference to the room where the user is registered
   var $idx;        // index in the room users array when you are in game
   var $idx_orig;   // index in the room table users array when you aren't in game
   var $code;       // authentication code
@@ -154,11 +154,11 @@ class User {
   function User() {
   }
 
-  static function create(&$room, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
+  static function create(&$brisk, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
     if (($thiz = new User()) == FALSE)
       return (FALSE);
 
-    $thiz->room       = &$room;
+    $thiz->room       = &$brisk;
     $thiz->idx        = $idx;
     $thiz->idx_orig   = $idx;
     $thiz->code       = -1;
@@ -684,7 +684,7 @@ class User {
           log_rd2("NEWSTAT: ".$this->stat);
       } /* if ($this->rd_step == -1) { */
       else {
-          /* $sem = Room::lock_data(FALSE); */
+          /* $sem = Brisk::lock_data(FALSE); */
           $S_load_stat['rU_heavy']++;
           
           if ($this->rd_step < $this->step) {
@@ -692,7 +692,7 @@ class User {
                   if ($this->rd_step + COMM_N < $this->step) {
                       if (($this->rd_stat != $this->stat)) {
                           $to_stat = $this->stat;
-                          /* Room::unlock_data($sem); */
+                          /* Brisk::unlock_data($sem); */
                           log_load("RESYNC");
                           printf("xXx USER::MAINCHECK2 [%s]\n", get_class($this));
                           return ($this->page_sync($this->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $this->table, $this->table_token));
@@ -739,7 +739,7 @@ class User {
               } /* if ($this->the_end == TRUE) { ... */
           } /* if ($this->rd_step < $this->step) { */
           
-          /* Room::unlock_data($sem); */
+          /* Brisk::unlock_data($sem); */
       }  /* else of if ($this->rd_step == -1) { */
       
     

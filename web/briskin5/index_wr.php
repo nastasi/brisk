@@ -38,7 +38,7 @@ require_once("Obj/briskin5.phh");
 /*
  *  MAIN
  */
-function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
+function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_base, $G_dbasetype, $G_black_list;
 
@@ -50,7 +50,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
     }
 
     $curtime = time();
-    if ($bri == NULL) {
+    if ($bin5 == NULL) {
         return FALSE;
     }
 
@@ -71,7 +71,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
     log_wr(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
 
 
-    if (($user = &$bri->get_user($sess, &$idx)) == FALSE) {
+    if (($user = &$bin5->get_user($sess, &$idx)) == FALSE) {
         echo "Get User Error";
         log_wr("Get User Error");
         return FALSE;
@@ -97,7 +97,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
         log_rd2("bin5/index_wr.php: AUTO LOGOUT.");
         if ($user->stat == 'table') {
-            $bri->table_wakeup($user);
+            $bin5->table_wakeup($user);
             // to force the logout
             $user->lacc = 0;
         }
@@ -111,17 +111,17 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
      *********************/
     else if ($user->stat == 'table') {
         $user->laccwr = time();
-        $table = $bri->table[$user->table];
+        $table = $bin5->table[$user->table];
 
         if ($argz[0] == 'tableinfo') {
             log_wr("PER DI TABLEINFO");
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            $user->comm[$user->step % COMM_N] .= show_table_info(&$bri, &$table, $user->table_pos);
+            $user->comm[$user->step % COMM_N] .= show_table_info(&$bin5, &$table, $user->table_pos);
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
         }
         else if ($argz[0] == 'chatt') {
-            $bri->chatt_send(&$user,$mesg);
+            $bin5->chatt_send(&$user,$mesg);
         }
         else if ($argz[0] == 'preferences_update') {
             log_wr("PER DI PREFERENCES_UPDATE");
@@ -141,10 +141,10 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
             $logout_cont = TRUE;
             if ($remcalc >= 3) {
-                $lockcalc = $table->exitlock_calc(&$bri->user, $user->table_pos);
+                $lockcalc = $table->exitlock_calc(&$bin5->user, $user->table_pos);
                 if ($lockcalc < 3) {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                    $user->comm[$user->step % COMM_N] .= $table->exitlock_show(&$bri->user, $user->table_pos);
+                    $user->comm[$user->step % COMM_N] .= $table->exitlock_show(&$bin5->user, $user->table_pos);
                     $user->comm[$user->step % COMM_N] .=  show_notify("<br>I dati presenti sul server non erano allineati con quelli inviati dal tuo browser, adesso lo sono. Riprova ora.", 2000, "torna alla partita.", 400, 100);
 
                     log_wr($user->comm[$user->step % COMM_N]);
@@ -160,14 +160,14 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
             //      $user->bantime = $user->laccwr + BAN_TIME;
 
             if ($logout_cont == TRUE) {
-                $bri->table_wakeup(&$user);
+                $bin5->table_wakeup(&$user);
             }
         }
         else if ($argz[0] == 'exitlock') {
             if ($user->exitislock == TRUE) {
                 $user->exitislock = ($user->exitislock == TRUE ? FALSE : TRUE);
                 for ($ct = 0, $i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                    $user_cur[$i] = &$bri->user[$table->player[$i]];
+                    $user_cur[$i] = &$bin5->user[$table->player[$i]];
                     if ($user_cur[$i]->exitislock == FALSE)
                         $ct++;
                 }
@@ -207,14 +207,14 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                 /*     log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist); */
                 /* } */
 
-                /* $table->game_init(&$bri->user); */
+                /* $table->game_init(&$bin5->user); */
 
-                if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_ABANDON, $user)) {
+                if ($table->rules_engine(&$bin5, $curtime, BIN5_RULES_ABANDON, $user)) {
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                        $user_cur = &$bri->user[$table->player[$i]];
+                        $user_cur = &$bin5->user[$table->player[$i]];
 
                         $ret = sprintf('gst.st = %d;', $user_cur->step+1);
-                        $ret .= show_table(&$bri,&$user_cur,$user_cur->step+1, TRUE, TRUE);
+                        $ret .= show_table(&$bin5,&$user_cur,$user_cur->step+1, TRUE, TRUE);
                         $user_cur->comm[$user_cur->step % COMM_N] = $ret;
                         $user_cur->step_inc();
                     }
@@ -269,7 +269,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         /* next step */
                         $showst = "show_astat(";
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                            $user_cur = &$bri->user[$table->player[$i]];
+                            $user_cur = &$bin5->user[$table->player[$i]];
                             $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "),
                                                ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
                         }
@@ -279,7 +279,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
                         $maxcard = -2;
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                            $user_cur = &$bri->user[$table->player[$i]];
+                            $user_cur = &$bin5->user[$table->player[$i]];
                             if ($maxcard < $user_cur->asta_card)
                                 $maxcard = $user_cur->asta_card;
                         }
@@ -298,7 +298,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
 
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                $user_cur = &$bri->user[$table->player[$i]];
+                                $user_cur = &$bin5->user[$table->player[$i]];
                                 $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
                                 if ($user_cur->table_pos == ($table->gstart % BIN5_PLAYERS_N))
                                     $ret .= sprintf('dispose_asta(%d,%d, %s); remark_on();',
@@ -313,12 +313,12 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         else if ($table->asta_pla_n == 0) {
                             log_wr("PASSANO TUTTI!");
 
-                            if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_ALLPASS, $user)) {
+                            if ($table->rules_engine(&$bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
                                 for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                    $user_cur = &$bri->user[$table->player[$i]];
+                                    $user_cur = &$bin5->user[$table->player[$i]];
 
                                     $ret = sprintf('gst.st = %d;', $user_cur->step+1);
-                                    $ret .= show_table(&$bri,&$user_cur,$user_cur->step+1, TRUE, TRUE);
+                                    $ret .= show_table(&$bin5,&$user_cur,$user_cur->step+1, TRUE, TRUE);
                                     $user_cur->comm[$user_cur->step % COMM_N] = $ret;
                                     $user_cur->step_inc();
                                 }
@@ -349,7 +349,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                             $table->asta_win = $chooser;
 
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                $user_cur = &$bri->user[$table->player[$i]];
+                                $user_cur = &$bin5->user[$table->player[$i]];
                                 $ret = sprintf('gst.st = %d; %s dispose_asta(%d, %d, false);', $user_cur->step+1, $showst,
                                                $table->asta_card + 1,-($table->asta_pnt));
 
@@ -383,9 +383,9 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         log_wr("Setta la briscola a ".$a_brisco);
 
                         $chooser = $table->asta_win;
-                        $user_chooser = &$bri->user[$table->player[$chooser]];
+                        $user_chooser = &$bin5->user[$table->player[$chooser]];
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                            $user_cur = &$bri->user[$table->player[$i]];
+                            $user_cur = &$bin5->user[$table->player[$i]];
                             $user_cur->subst = 'game';
                             $ret = sprintf('gst.st = %d; subst = "game";', $user_cur->step+1);
 
@@ -396,7 +396,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                             $ret .= sprintf('document.title = "Brisk - Tavolo %d";', $user->table_orig);
 
                             /* bg of caller cell */
-                            $ret .= briscola_show($bri, $table, $user_cur);
+                            $ret .= briscola_show($bin5, $table, $user_cur);
 
                             /* first gamer */
                             if ($i == ($table->gstart % BIN5_PLAYERS_N))
@@ -466,7 +466,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                         $table->gstart = $winner;
                         $turn_nex = ($table->gstart + $table->turn) % BIN5_PLAYERS_N;
 
-                        log_wr(sprintf("The winner is: [%d] [%s]", $winner, $bri->user[$table->player[$winner]]->name));
+                        log_wr(sprintf("The winner is: [%d] [%s]", $winner, $bin5->user[$table->player[$winner]]->name));
                         $card_take = sprintf("sleep(gst,2000);|cards_take(%d);|", $winner);
                         $player_cur = "remark_off();" . $card_take;
                         if ($turn_cur != $turn_nex)
@@ -480,7 +480,7 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
 
                     log_wr(sprintf("Turn Cur %d Turn Nex %d",$turn_cur, $turn_nex));
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                        $user_cur = &$bri->user[$table->player[$i]];
+                        $user_cur = &$bin5->user[$table->player[$i]];
 
                         $ret = sprintf('gst.st = %d; ', $user_cur->step+1);
 
@@ -501,16 +501,16 @@ function bin5_index_wr_main(&$bri, $remote_addr_full, $get, $post, $cookie)
                     if ($table->turn == (BIN5_PLAYERS_N * BIN5_CARD_HAND)) { /* game finished */
                         log_wr(sprintf("GIOCO FINITO !!!"));
 
-                        if ($table->rules_engine(&$bri, $curtime, BIN5_RULES_FINISH, $user)) {
+                        if ($table->rules_engine(&$bin5, $curtime, BIN5_RULES_FINISH, $user)) {
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                $user_cur = &$bri->user[$table->player[$i]];
-                                $retar[$i] .= show_table(&$bri,&$user_cur,$user_cur->step+1,TRUE, TRUE);
+                                $user_cur = &$bin5->user[$table->player[$i]];
+                                $retar[$i] .= show_table(&$bin5,&$user_cur,$user_cur->step+1,TRUE, TRUE);
                             }
                         }
                     }
 
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                        $user_cur = &$bri->user[$table->player[$i]];
+                        $user_cur = &$bin5->user[$table->player[$i]];
 
                         $user_cur->comm[$user_cur->step % COMM_N] = $retar[$i];
                         $user_cur->step_inc();

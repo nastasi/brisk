@@ -94,7 +94,7 @@ function bin5_index_main($transp_type, &$header_out, $addr, $get, $post, $cookie
 
    var gst  = new globst();
    gst.st = <?php 
-       log_load("bin5/index.php");
+   log_load("bin5/index.php");
 
    if (isset($laststate) == false) {
        $laststate = -1;
