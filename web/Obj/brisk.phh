@@ -845,7 +845,7 @@ class Room
     
     var $delay_mgr;
 
-    function Room ($crystal_filename) {
+    function Room($crystal_filename) {
         $this->crystal_filename = $crystal_filename;
         $this->user  = array();
         $this->table = array();

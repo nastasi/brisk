@@ -1135,7 +1135,7 @@ class Bin5_user extends User {
 
 
       return ($ret);
-    }  //   function maincheck (...
+    }  //   function maincheck(...
 
     function continue_set($match_code)
     {
@@ -1167,7 +1167,7 @@ class Bin5 {
 
     var $delay_mgr;
 
-    function Bin5 ($room, $table_idx, $table_token, $get, $post, $cookie) {
+    function Bin5($room, $table_idx, $table_token, $get, $post, $cookie) {
         $this->user = array();
         $this->table = array();
 
