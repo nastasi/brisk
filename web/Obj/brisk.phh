@@ -845,6 +845,8 @@ class Brisk
     
     var $delay_mgr;
 
+    public static $sess_cur;
+
     function Brisk($crystal_filename) {
         $this->crystal_filename = $crystal_filename;
         $this->user  = array();
@@ -876,6 +878,8 @@ class Brisk
         $this->shm_sz = SHM_DIMS_MIN;
 
         $this->delay_mgr = new Delay_Manager(1.5);
+
+        static::$sess_cur = FALSE;
     }
 
   function garbage_manager($force)
@@ -2462,6 +2466,7 @@ class Brisk
 
                   break;
               }
+              $this->sess_cur_set($user->sess);
               // close a previous opened index_read_ifra socket, if exists
               if (($prev = $user->rd_socket_get()) != NULL) {
                   $s_a_p->socks_unset($user->rd_socket_get());
@@ -2542,7 +2547,15 @@ class Brisk
       }
       return NULL;
   }
+  function sess_cur_set($sess)
+  {
+      static::$sess_cur = $sess;
+  }
 
+  static function sess_cur_get()
+  {
+      return(static::$sess_cur);
+  }
 } // end class Brisk
 
 function make_seed()
@@ -2580,11 +2593,12 @@ function trace_ftok($id, $add)
 
 function log_mop($step, $log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LMOP) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2606,11 +2620,12 @@ function log_mop($step, $log)
 
 function log_only2($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONL2) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2631,11 +2646,12 @@ function log_only2($log)
 
 function log_crit($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_CRIT) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2656,11 +2672,12 @@ function log_crit($log)
 
 function log_only($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONLY) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2681,11 +2698,12 @@ function log_only($log)
 
 function log_main($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_MAIN) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2706,11 +2724,12 @@ function log_main($log)
 
 function log_rd($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_READ) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2731,11 +2750,12 @@ function log_rd($log)
 
 function log_rd2($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_REA2) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2757,11 +2777,12 @@ function log_rd2($log)
 
 function log_send($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SEND) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2782,11 +2803,12 @@ function log_send($log)
 
 function log_lock($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOCK) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2807,11 +2829,12 @@ function log_lock($log)
 
 function log_wr($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_WRIT) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2832,11 +2855,12 @@ function log_wr($log)
 
 function log_load($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOAD) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2877,11 +2901,12 @@ function log_auth($sess, $log)
 
 function log_shme($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SHME) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else

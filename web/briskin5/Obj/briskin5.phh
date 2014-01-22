@@ -1151,6 +1151,7 @@ class Bin5_user extends User {
 
 class Bin5 {
     static $delta_t = array();
+    var $brisk;// room object reference
 
     var $user;
     var $table;
@@ -1178,9 +1179,9 @@ class Bin5 {
             exit;
         }
 
+        $this->brisk = $brisk;
         $user  = $brisk->user;
         $table = $brisk->table[$table_idx];
-
         log_wr("Bin5 constructor");
 
         for ($i = 0 ; $i < $table->player_n ; $i++) {
@@ -1520,6 +1521,8 @@ class Bin5 {
                     return TRUE;
                     break;
                 }
+                $bri->brisk->sess_cur_set($user->sess);
+
                 // close a previous opened index_read_ifra socket, if exists
                 if (($prev = $user->rd_socket_get()) != NULL) {
                     $s_a_p->socks_unset($user->rd_socket_get());

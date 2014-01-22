@@ -197,6 +197,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         return TRUE;
     } // end if (($user = $brisk->get_user($sess, ... == FALSE) {
 
+    $brisk->sess_cur_set($user->sess);
     $argz = explode('|', xcapemesg($mesg));
 
     log_wr('POSTSPLIT: '.$argz[0]);

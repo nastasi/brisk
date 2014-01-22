@@ -293,6 +293,7 @@ function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $co
           $brisk->garbage_manager(TRUE);
           log_main("post garbage_manager");
           if (($user = &$brisk->get_user($sess, &$idx)) != FALSE) {
+              $brisk->sess_cur_set($user->sess);
               log_main("user stat: ".$user->stat);
               if ($user->stat == "table") {
                   $cookies = new Cookies();
@@ -318,6 +319,7 @@ function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $co
 
           $ipv4addr = addrtoipv4($addr);
           if (($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private, $ipv4addr, $cookie)) != FALSE) {
+              $brisk->sess_cur_set($user->sess);
               $ACTION = "room";
               if ($idx < 0) {
                   $idx = -$idx - 1;

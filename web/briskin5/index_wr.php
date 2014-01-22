@@ -76,7 +76,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
         log_wr("Get User Error");
         return FALSE;
     }
-
+    $bin5->brisk->sess_cur_set($user->sess);
     if (array_search($user->ip, $G_black_list) !== FALSE) {
         // TODO: waiting async 5 sec before close
         return (FALSE);
