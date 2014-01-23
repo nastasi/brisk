@@ -5,6 +5,7 @@
 //
 function transport_ws(doc, xynt_streaming, page)
 {
+    this.name = "WebSocket";
     this.ctx_new = "";
     var self = this;
 
@@ -55,6 +56,7 @@ this.xynt_streaming.log("PAGE: "+page);
 
 transport_ws.prototype = {
     doc: null,
+    name: null,
     xynt_streaming: "ready",
     ws: null,
     stopped: true,
@@ -161,6 +163,7 @@ this.xynt_streaming.log("WSCLOSE");
 //
 function transport_xhr(doc, xynt_streaming, page)
 {
+    this.name = "XHR";
     this.doc = doc;
     this.xynt_streaming = xynt_streaming;
     this.xhr = createXMLHttpRequest();
@@ -175,6 +178,7 @@ function transport_xhr(doc, xynt_streaming, page)
 
 transport_xhr.prototype = {
     doc: null,
+    name: null,
     xynt_streaming: "ready",
     xhr: null,
     stopped: true,
@@ -290,6 +294,7 @@ transport_xhr.prototype = {
 //
 function transport_htmlfile(doc, xynt_streaming, page)
 {
+    this.name = "HTMLFile";
     this.doc = doc;
     this.xynt_streaming = xynt_streaming;
     this.transfdoc = new ActiveXObject("htmlfile");
@@ -304,6 +309,7 @@ function transport_htmlfile(doc, xynt_streaming, page)
 
 transport_htmlfile.prototype = {
     doc: null,
+    name: null,
     xynt_streaming: null,
     stopped: true,
     ifra: null,
@@ -393,6 +399,7 @@ transport_htmlfile.prototype = {
 //
 function transport_iframe(doc, xynt_streaming, page)
 {
+    this.name = "IFRAME";
     this.doc = doc;
     this.xynt_streaming = xynt_streaming;
     this.ifra = doc.createElement("iframe");
@@ -404,6 +411,7 @@ function transport_iframe(doc, xynt_streaming, page)
 
 transport_iframe.prototype = {
     doc: null,
+    name: null,
     xynt_streaming: null,
     stopped: true,
     ifra: null,
@@ -725,8 +733,7 @@ xynt_streaming.prototype = {
         var ctx_new_len;
 
         if (this.sandbox != null) {
-            // from old: var zug = "POLL sess = "+sess+" stat = "+stat+" subst = "+subst+" step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new+" STOP: "+this.stopped;
-            var zug = "WATCHDOG  sess = ["+this.sess+"]  step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new;
+            var zug = "WATCHDOG  sess = ["+this.sess+"]  step = "+this.gst.st+" step_loc = "+this.gst.st_loc+" step_loc_new = "+this.gst.st_loc_new+"Transport: "+this.transp.name;
             if (zug != this.sandbox.innerHTML)
 	        this.sandbox.innerHTML = zug;
         }

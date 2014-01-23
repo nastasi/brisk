@@ -25,16 +25,6 @@ body {
     background-image: none;
     background-color: #fafafa;
     text-align: center;
-/* inherit from brisk.css
-    background-repeat: no-repeat;
-    background-position: top center;
-    margin:0px;
-
-    font-size: 12px;
-    padding: 0px;
-
-    align: center;
-*/
 }
 
 .chattshort {
@@ -43,7 +33,6 @@ body {
     border: 1px solid gray;
     vertical-align: text-bottom;
     text-align: left;
-    /*	font-size: 10pt;*/
 }
 
 table.chattshort_table {
@@ -52,7 +41,6 @@ table.chattshort_table {
 }
 
 .txtt {
-    /*	font-size: 10pt;*/
 }
 
 img.tableinfo {
@@ -90,7 +78,6 @@ img.card {
 
 img.astacard {
     position:     absolute; 
-    /*	visibility:   visible; */
     border-width: 0px;
 }
 
@@ -103,7 +90,6 @@ img.cover {
 }
 
 .chooseed {
-    /* background-color: yellow; */
     visibility:   hidden;
     position:absolute; 
     width:  200px;
@@ -114,7 +100,6 @@ img.cover {
 }
 
 .asta {
-    /* background-color: yellow; */
     visibility:   hidden;
     position:     absolute; 
     width:  200px;
@@ -168,8 +153,6 @@ img.seed3 {
 }
 
 .points {
-    /*    position:     relative;  */
-    
     margin-top: 8px; 
     padding: 8px;
     margin-left:auto; 
@@ -243,23 +226,16 @@ div.table_commands {
     width: 68;
     height: 50;
     margin-top: 4px;
-    /*
-      border-style: solid;
-      border-width: 1px;
-      border-color: blu;
-    */
     align: center;
     text-align: center;
 }
 
 .puntifield {
-    /*  position:     absolute;  */
     align: center;
     text-align: center;
 }
 
 .pubinfo {
-    /*  background-color: red;  */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -270,7 +246,6 @@ div.table_commands {
 }
 
 .pubinfo_iscalling {
-    /*  background-color: red;  */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -284,7 +259,6 @@ div.table_commands {
 }
 
 .public {
-    /* background-color: red;  */
     visibility: hidden;
     position: absolute;
     display: table;
@@ -328,7 +302,6 @@ div.table_commands {
 }
 
 .public_we {
-    /*  background-color: red;  */
     visibility: hidden;
     position: absolute;
     top: 250px;
@@ -340,7 +313,6 @@ div.table_commands {
 }
 
 .pubinfo_nw {
-    /*  background-color: red;  */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -351,7 +323,6 @@ div.table_commands {
 }
 
 .pubinfo_nw_iscalling {
-    /*  background-color: red;  */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -365,7 +336,6 @@ div.table_commands {
 }
 
 .public_nw {
-    /*  background-color: red;   */
     visibility: hidden;
     position: absolute;
     top: 125px;
@@ -377,7 +347,6 @@ div.table_commands {
 }
 
 .pubinfo_ne {
-    /*  background-color: red;  */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -388,7 +357,6 @@ div.table_commands {
 }
 
 .pubinfo_ne_iscalling {
-    /*  background-color: red;  */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -402,7 +370,6 @@ div.table_commands {
 }
 
 .public_ne {
-    /*  background-color: red;  */
     visibility: hidden;
     position: absolute;
     top: 125px;
@@ -414,7 +381,6 @@ div.table_commands {
 }
 
 .pubinfo_ea {
-    /*  background-color: red; */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -425,7 +391,6 @@ div.table_commands {
 }
 
 .pubinfo_ea_iscalling {
-    /*  background-color: red; */
     color: gray;
     visibility: visible;
     position: absolute;
@@ -439,7 +404,6 @@ div.table_commands {
 }
 
 .public_ea {
-    /*  background-color: red; */
     visibility: hidden;
     position: absolute;
     top: 250px;
@@ -452,7 +416,7 @@ div.table_commands {
 
 .vert_midfloat {
     position: relative;
-#position: absolute;
+    #position: absolute;
     _top: 50%;
     left: 0px;
     width: 100%;
@@ -461,17 +425,12 @@ div.table_commands {
 }
 
 .vert_innfloat {
-#position: relative;
-#top: -50%;
+    #position: relative;
+    #top: -50%;
     text-align: center;
 }
 
 .vert_innfloat_so {
-    /*  border-style: solid;
-	border-width: 1px;
-	border-color: black;
-
-	background-color: white; */
 #position: relative;
 #top: -50%;
     text-align: center;
@@ -522,10 +481,7 @@ div.table_commands {
 }
 
 .callerinfo {
-    /*	background-color: red; */
-    /*	visibility: visible; */
     position: absolute;
-    /*	font-size: 10pt;*/
     left: 5px;
     top: 55px;
     width: 115px;

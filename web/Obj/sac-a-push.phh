@@ -626,6 +626,7 @@ class Sac_a_push {
         $this->main_loop = TRUE;
         
         while ($this->main_loop) {
+            $this->app->sess_cur_set(FALSE);
             $this->curtime = time();
             fprintf(STDERR, "IN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
             

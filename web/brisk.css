@@ -21,25 +21,38 @@
  *
  */
 
+* {
+    font-family: verdana, helvetica, arial, sans-serif;
+    font-size: 13px;
+    line-height: 120%;
+}
+
+/* TRICK TO REMOVE EXCESS OF PADDING INSIDE INPUT BUTTONS WITH FIREFOX */
+input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+    margin-top:-2px;
+    margin-bottom: -2px;
+}
+
 body {
-    background-image: url('img/snowy.jpg');
+    background-image: url('img/happysunbg.png');
     background-color: #fafafa;
     background-repeat: no-repeat;
     background-position: center center; 
     margin:0px;
 
-    font-size: 12px;
     padding: 0px;
 
     align: center;
 }
 
 div {
-    font-size: 12px;
+    font-size: 100%;
 }
 
 td {
-    font-size: 12px;
+    font-size: 100%;
 }
 
 img {
@@ -212,16 +225,13 @@ input.input_sub_hi {
 input.button {
     border: 1px solid gray;  
     margin: 1px;
-    padding: 0px;
+    padding: 2px;
     color: black;
     background-color: RGB(246,246,246);
     vertical-align: middle;
     text-decoration: none;
     font-size: 100%;
     cursor: pointer;
-    height: 20px ! important;
-    max-height: 20px ! important;
-    min-height: 20px ! important;
     display: inline;
 }
 

@@ -48,7 +48,6 @@ body.* {
 }
 
 div.container {
-    /* border:1px solid gray; */
     position: relative;
     width:100%;
     margin:0px;
@@ -56,41 +55,36 @@ div.container {
 }
 
 div.header {
-    /* border: 1px solid yellow; */
     align: center;
     text-align: center;
-    font-size: 12px;
+    font-size: 100%;
     clear:left;
 }
 
 div.topmenu {
-    /* border: 1px solid red;  */
     width:94px;
     margin:0;
     text-align: center;
     align: center;
-    font-size: 10px;
-    padding:2px;	
+    font-size: 85%;
+    padding: 2px 2px 0 2px;
 }
 
 div.proflash {
-    /*	border: 1px solid red; */
     border: 1px solid gray;  
     background-color: RGB(246,246,246);
     text-align: center;
     align: center;
-    font-size: 10px;
+    font-size: 85%;
     padding:4px;	
 }
 
 div.tables {
-    /*	border: 1px solid gray; */
     margin-left:100px;
     padding:4px;
 }
 
 div.bottom {
-    /* border: 1px solid green; */
     position: relative;
     top: -13px;
     align: center:
@@ -105,9 +99,6 @@ div.room_tit {
     align: left;
     text-align: left;
     margin: 0px;
-    /* background-color: orange;  */
-    /* clip: auto; */
-    /* overflow: hidden; */
 }
 
 span.room_titin {
@@ -120,22 +111,18 @@ span.room_titin {
 
 table.floaty {
     width: 100%;
-    /* border: 1px solid red;   */
     border-collapse: collapse;
     border-spacing: 0px;
     padding: 0px;
 }
 
 table.floaty td {
-    /* border: 1px solid orange; */
     align: center;
     text-align: center;
     vertical-align: top;
 }
 
 table.placings {
-/*    border: 1px solid red; */
-/*    border-collapse: collapse; */
     border-spacing: 8px;
     margin: 0px;
     width: 100%;
@@ -174,7 +161,6 @@ table.floaty td.floatyleft {
 }
 
 table.macro {
-    /* border: 1px solid orange; */
     border-spacing: 0px;
     align: center;
     width: 100%;
@@ -182,14 +168,11 @@ table.macro {
 }
 	
 table.macro td {
-    /* border: 1px solid green;   */
     align: center;
     text-align: center;
 }
 
 div.room_tab {
-    /* border: 1px solid blue; */ 
-    /* background-color: green; */
     height: 346px;
     margin-left: auto;
     margin-right: auto;
@@ -200,16 +183,14 @@ div.room_tab {
 
 table.room_tab {
     width: 100%;
-    /* border: 0px solid red; */
     border-collapse: separate;
     border-spacing: 4px;
     border-style: none;
 }
 
 table.room_tab td {
-    /* background-color: yellow; */
     width: 25%;
-    height: 110px;
+    height: 120px;
     vertical-align: top;
     border: 1px solid gray;
  }
@@ -217,7 +198,6 @@ table.room_tab td {
 
 
 div.room_div {
-    /* background-color: orange; */
     position: relative; 
 }
 
@@ -234,20 +214,17 @@ div.table_act {
 div.room_standup {
     position: absolute; 
     vertical-align: "top";
-    /* align: left; */
     top:   26px;
     width: 100%;
     height: 80px;
     padding: 0px;
     margin: 0px;
-    /* background-color: orange; */
     overflow: auto;
     clip: auto;
 }
 
 table.room_standup {
     position: relative; 
-    /* margin-left: 4px; */
     width: 100%;
     border: 1px solid gray;
     border-spacing: 0px;
@@ -255,7 +232,6 @@ table.room_standup {
 }
 
 table.room_standup td {
-    /* background-color: yellow; */
     position: relative;
     border: 0px none gray; 
     vertical-align: top;
@@ -285,8 +261,6 @@ div.room_ex_standup {
 }
 
 table.table_standup {
-    /* background-color: red; */
-
     border-spacing: 0px;
     width: 100%; 
     margin: 0px;
@@ -294,8 +268,6 @@ table.table_standup {
 }
 
 table.table_standup td {
-    /* background-color: green; */
-    /* border: 1px solid red;  */
     width: 25%;
     text-align: center;
     align: center;
@@ -315,16 +287,12 @@ div.esco {
     height: 100px;
     overflow: auto;
     border: 1px solid gray;
-    /* padding: 2px;  */
     vertical-align: text-bottom;
 }
 
 .txtt {
-    /*	font-size: 10pt;*/
     position: relative;
-
     top: 2px;
-    /* rows: 1; */
 }
 
 .urgmsg {
@@ -337,7 +305,6 @@ div.esco {
     width: 100%;
     align: center;
     text-align: center;
-    /* background-color: green;  */
 }
 
 .webstart_hilite { 
@@ -377,7 +344,18 @@ div.esco {
     text-decoration: none;
 }
 
-.topbanner { 
+.sidebanner {
+    /* Top Right Bottom Left */
+    margin: 4px auto 0px auto;
+    position: relative;
+    align: center;
+    text-align:center;
+    background-color: #f8f8f8;
+    padding: 4px;
+    border: 1px solid #000000;
+}
+
+.topbanner {
     position: relative;
     align: center;
     text-align:center;
@@ -413,9 +391,6 @@ div.esco {
     width: 0px;
     height: 50px;
     z-index: 10;
-    /*background-color: #ff00ff;
-     clip: auto;
-    overflow: hidden; */
 }
 
 .wagon {
@@ -425,11 +400,10 @@ div.esco {
     cursor: pointer;
     left: 0px;
     top: 2px;
-    font-size: 10px;
+    font-size: 85%;
     font-weight: bold;
     padding: 4px;
     z-index: 10;
-    /* visibility: hidden; */
 }
 
 .wagon_disable {
@@ -439,12 +413,10 @@ div.esco {
     cursor: default;
     left: 0px;
     top: 2px;
-    font-size: 10px;
+    font-size: 85%;
     font-weight: bold;
     font-color: #999999;
     padding: 4px;
-    /*z-index: -1;*/
-    /* visibility: hidden; */
 }
 
 .wagon_disable2 {
@@ -454,11 +426,9 @@ div.esco {
     border: 1px solid green;
     left: 0px;
     top: 2px;
-    font-size: 10px;
+    font-size: 85%;
     font-color: #333333;
     padding: 4px;
-    /* z-index: -1;        */
-    /* visibility: hidden; */
 }
 
 .notebox {
@@ -467,7 +437,6 @@ div.esco {
     padding: 4px;
     position: absolute;
     visibility: hidden;
-    /* z-index: 15px; */
 }
 
 .room_standup_orig { 
@@ -479,7 +448,6 @@ td.tickbut {
     width: 0px;
     text-align: left;
     vertical-align: top;
-    /* background-color: red; */
     padding: 0px;
 }
 

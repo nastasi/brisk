@@ -1073,7 +1073,7 @@ class Bin5_user extends User {
           $this->rd_step  = $this->step;
       } /* if ($this->rd_step == -1) { */
       else {
-          /* $sem = Room::lock_data(FALSE); */
+          /* $sem = Brisk::lock_data(FALSE); */
           $S_load_stat['rU_heavy']++;
 
           if ($this->rd_step < $this->step) {
@@ -1081,7 +1081,7 @@ class Bin5_user extends User {
                   if ($this->rd_step + COMM_N < $this->step) {
                       if ($this->rd_stat != $this->stat) {
                           $to_stat = $this->stat;
-                          /* Room::unlock_data($sem); */
+                          /* Brisk::unlock_data($sem); */
                           log_load("RESYNC");
                           printf("xXx BIN5_USER::MAINCHECK\n");
                           return ($this->page_sync($this->sess, ($to_stat == "table" ? "index.php" : "../index.php"), $this->table, $this->table_token));
@@ -1130,12 +1130,12 @@ class Bin5_user extends User {
               } /* if ($this->the_end == TRUE) { ... */
           } /* if ($this->rd_step < $this->step) { */
 
-          /* Room::unlock_data($sem); */
+          /* Brisk::unlock_data($sem); */
       }  /* else of if ($this->rd_step == -1) { */
 
 
       return ($ret);
-    }  //   function maincheck (...
+    }  //   function maincheck(...
 
     function continue_set($match_code)
     {
@@ -1151,6 +1151,7 @@ class Bin5_user extends User {
 
 class Bin5 {
     static $delta_t = array();
+    var $brisk;// room object reference
 
     var $user;
     var $table;
@@ -1167,7 +1168,7 @@ class Bin5 {
 
     var $delay_mgr;
 
-    function Bin5 ($room, $table_idx, $table_token, $get, $post, $cookie) {
+    function Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie) {
         $this->user = array();
         $this->table = array();
 
@@ -1178,9 +1179,9 @@ class Bin5 {
             exit;
         }
 
-        $user  = $room->user;
-        $table = $room->table[$table_idx];
-
+        $this->brisk = $brisk;
+        $user  = $brisk->user;
+        $table = $brisk->table[$table_idx];
         log_wr("Bin5 constructor");
 
         for ($i = 0 ; $i < $table->player_n ; $i++) {
@@ -1483,7 +1484,6 @@ class Bin5 {
 
         break;
         case "index_wr.php":
-            // FIXME $content can be unset
             if (isset($table_idx) && isset($table_token)) {
                 if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) != FALSE) {
                     ob_start();
@@ -1521,6 +1521,8 @@ class Bin5 {
                     return TRUE;
                     break;
                 }
+                $bri->brisk->sess_cur_set($user->sess);
+
                 // close a previous opened index_read_ifra socket, if exists
                 if (($prev = $user->rd_socket_get()) != NULL) {
                     $s_a_p->socks_unset($user->rd_socket_get());

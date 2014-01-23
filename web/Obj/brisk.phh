@@ -150,12 +150,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.12.0";
+$G_brisk_version = "4.12.4";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: aggiunta la gestione automatica dei termini del servizio, comando /guar per info sul garante di un utente.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: potenziato il sistema di debug.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: automatic management of terms of services added, new /guar command to ask info about a user guarantee.',
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: empowered logging system.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
 
 $G_room_help = array( 'it' => '
@@ -623,17 +623,17 @@ class Table {
     return ($this->player_n - 1);
   }
   
-  function user_rem($room, $user)
+  function user_rem($brisk, $user)
   {
     $tabpos = $user->table_pos;
     
     /* verifico la consistenza dei dati */
-    if ($room->user[$this->player[$tabpos]] == $user) {
+    if ($brisk->user[$this->player[$tabpos]] == $user) {
       
       /* aggiorna l'array dei giocatori al tavolo. */
       for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
 	$this->player[$i] = $this->player[$i+1];
-	$user_cur = $room->user[$this->player[$i]];
+	$user_cur = $brisk->user[$this->player[$i]];
 	$user_cur->table_pos = $i;
       }
       $this->player_n--;
@@ -830,7 +830,7 @@ class Client_prefs {
 }
 
 
-class Room
+class Brisk
 {
     static $delta_t;
     
@@ -845,7 +845,9 @@ class Room
     
     var $delay_mgr;
 
-    function Room ($crystal_filename) {
+    public static $sess_cur;
+
+    function Brisk($crystal_filename) {
         $this->crystal_filename = $crystal_filename;
         $this->user  = array();
         $this->table = array();
@@ -876,6 +878,8 @@ class Room
         $this->shm_sz = SHM_DIMS_MIN;
 
         $this->delay_mgr = new Delay_Manager(1.5);
+
+        static::$sess_cur = FALSE;
     }
 
   function garbage_manager($force)
@@ -907,27 +911,27 @@ class Room
             
             $no_recovery = FALSE;
             if (isset($this->match[$table_idx])) {
-                $bri = $this->match[$table_idx];
+                $bin5 = $this->match[$table_idx];
 
-                if ($table_cur->table_token != $bri->table_token) {
-                    log_main("ERROR: not matching table_token. Room: ".$table_cur->table_token."  Table: ".$bri->table_token);
-                    log_main("ERROR: not matching table_start. Room: ".$table_cur->table_start."  Table: ".$bri->table_start);
+                if ($table_cur->table_token != $bin5->table_token) {
+                    log_main("ERROR: not matching table_token. Brisk: ".$table_cur->table_token."  Table: ".$bin5->table_token);
+                    log_main("ERROR: not matching table_start. Brisk: ".$table_cur->table_start."  Table: ".$bin5->table_start);
                     $no_recovery = TRUE;
-                    $bri = FALSE;
+                    $bin5 = FALSE;
                 }
 
-                if ($bri != FALSE) {
+                if ($bin5 != FALSE) {
                     //
                     //  SPAWN: JOIN
                     //
                     log_main("garbage_manager: bri loaded successfully.");
-                    $bri->garbage_manager(TRUE);
+                    $bin5->garbage_manager(TRUE);
                     
-                    $bri_table = $bri->table[0];
+                    $bin5_table = $bin5->table[0];
                     
                     // is the end of the table
                     
-                    if ($bri->the_end == TRUE) {
+                    if ($bin5->the_end == TRUE) {
                         /*
                          *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
                          */
@@ -938,16 +942,16 @@ class Room
                             $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
                         }
                         
-                        for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+                        for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
                             // stat must be "table" by definition
                             $user_cur = $this->user[$table_cur->player[$i]];
-                            $bri_user = $bri->user[$i];
+                            $bin5_user = $bin5->user[$i];
                             
-                            $user_cur->subst      = $bri_user->subst;
-                            $user_cur->step       = $bri_user->step;
-                            $user_cur->lacc       = $bri_user->lacc;
-                            $user_cur->laccwr     = $bri_user->lacc;
-                            $user_cur->bantime    = $bri_user->bantime;
+                            $user_cur->subst      = $bin5_user->subst;
+                            $user_cur->step       = $bin5_user->step;
+                            $user_cur->lacc       = $bin5_user->lacc;
+                            $user_cur->laccwr     = $bin5_user->lacc;
+                            $user_cur->bantime    = $bin5_user->bantime;
                         }
                         
                         log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
@@ -961,11 +965,11 @@ class Room
                     else {
                         log_main("gm:: save_data");
                         
-                        for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
-                            $this->user[$table_cur->player[$i]]->lacc = $bri->user[$i]->lacc;
+                        for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
+                            $this->user[$table_cur->player[$i]]->lacc = $bin5->user[$i]->lacc;
                         }
                     }
-                } // if ($bri == FALSE
+                } // if ($bin5 == FALSE
                 else if ($no_recovery == FALSE) {
                     log_crit("ERROR: table ".$table_idx." unrecoverable join");
                     
@@ -1809,19 +1813,19 @@ class Room
         // Before all align times with table timeout
         for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
             if (isset($this->match[$table_idx])) {
-                $bri = $this->match[$table_idx];
+                $bin5 = $this->match[$table_idx];
 
-                $bri_table = $bri->table[0];
-                for ($i = 0 ; $i < $bri_table->player_n ; $i++) {
+                $bin5_table = $bin5->table[0];
+                for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
                     // stat must be "table" by definition
-                    $bri_user = $bri->user[$i];
+                    $bin5_user = $bin5->user[$i];
               
-                    if ($target != "" && $bri_user->name != $target)
+                    if ($target != "" && $bin5_user->name != $target)
                         continue;
                     log_main("writa: ".$user_mesg);
-                    $bri_user->comm[$bri_user->step % COMM_N] = "gst.st = ".($bri_user->step+1)."; ";
-                    $bri_user->comm[$bri_user->step % COMM_N] .= $to_tabl;
-                    $bri_user->step_inc();
+                    $bin5_user->comm[$bin5_user->step % COMM_N] = "gst.st = ".($bin5_user->step+1)."; ";
+                    $bin5_user->comm[$bin5_user->step % COMM_N] .= $to_tabl;
+                    $bin5_user->step_inc();
                 }
             } // if (isset($this->match
         } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
@@ -1866,7 +1870,7 @@ class Room
   }
 
   /*
-   * function add_user(&$room, &$sess, &$idx, $name, $pass, $ip)
+   * function add_user(&$brisk, &$sess, &$idx, $name, $pass, $ip)
    *
    * RETURN VALUE:
    *   if ($idx >  -1    && ret == FALSE)  =>  duplicated nick
@@ -1975,12 +1979,12 @@ class Room
       if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
           require_once("${G_base}briskin5/Obj/briskin5.phh");
           if (isset($this->match[$table_idx])) {
-              $bri = $this->match[$table_idx];
+              $bin5 = $this->match[$table_idx];
 
-              if ($bri->the_end != TRUE) {
-                  $bri->user[$ghost_user->table_pos]->comm[$bri->user[$ghost_user->table_pos]->step % COMM_N] = "";
-                  $bri->user[$ghost_user->table_pos]->step_inc();
-                  $bri->user[$ghost_user->table_pos]->sess = $sess;
+              if ($bin5->the_end != TRUE) {
+                  $bin5->user[$ghost_user->table_pos]->comm[$bin5->user[$ghost_user->table_pos]->step % COMM_N] = "";
+                  $bin5->user[$ghost_user->table_pos]->step_inc();
+                  $bin5->user[$ghost_user->table_pos]->sess = $sess;
               }
           }
       }
@@ -2116,17 +2120,17 @@ class Room
   // Static functions
   static function create($crystal_filename)
   {
-      if (($room_ser = @file_get_contents($crystal_filename)) == FALSE ||
-          ($room = unserialize($room_ser)) == FALSE) {
+      if (($brisk_ser = @file_get_contents($crystal_filename)) == FALSE ||
+          ($brisk = unserialize($brisk_ser)) == FALSE) {
           fprintf(STDERR, "NEW ROOM\n");
-          $room = new Room($crystal_filename);
+          $brisk = new Brisk($crystal_filename);
       }
       else {
           fprintf(STDERR, "ROOM FROM FILE\n");
           rename($crystal_filename, $crystal_filename.".old");
       }
 
-    return $room;
+    return $brisk;
   }
   
   
@@ -2148,31 +2152,31 @@ class Room
 	$shm_sz = SHM_DIMS_MIN;
 
       if ($shm = shm_attach($tok, $shm_sz)) {
-          $room = @shm_get_var($shm, $tok); // CHECKED BELOW
+          $brisk = @shm_get_var($shm, $tok); // CHECKED BELOW
           
-          log_only("bri ==  ".($room == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($room === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($room) ?   "TRUE" : "FALSE"));
-          if (isset($room)) 
-              log_only("bri count ".count($room));
+          log_only("bri ==  ".($brisk == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($brisk === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($brisk) ?   "TRUE" : "FALSE"));
+          if (isset($brisk)) 
+              log_only("bri count ".count($brisk));
           
-          if ($room == FALSE) {
+          if ($brisk == FALSE) {
               log_only("INIT MAIN DATA");
               shm_detach($shm);
               
-              $room = Room::create();
+              $brisk = Brisk::create();
               
-              log_shme("Room::create");
+              log_shme("Brisk::create");
 
-              if (Room::save_data($room) == FALSE)
+              if (Brisk::save_data($brisk) == FALSE)
                   return FALSE;
 
-              return $room;
+              return $brisk;
           }
-          $room->shm_sz = $shm_sz;
+          $brisk->shm_sz = $shm_sz;
           
           shm_detach($shm);
 
           for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-              if (($room->user[$i] = User::load_data($i, FALSE)) == FALSE) {
+              if (($brisk->user[$i] = User::load_data($i, FALSE)) == FALSE) {
                   log_crit("User::load_data failed");
                   break;
               }
@@ -2185,30 +2189,30 @@ class Room
       //  
       // SHSPLIT: load users from the shared memory
       //
-      return ($room);
+      return ($brisk);
     } while (0);
     
     return (FALSE);
   }
   
 
-  function save_data_orig($room) 
+  function save_data_orig($brisk) 
   {
     GLOBAL $sess;
     
     $shm =   FALSE;
     
-    // var_dump($room);
+    // var_dump($brisk);
     
     if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) 
       return (FALSE);
     
-    while ($room->shm_sz < SHM_DIMS_MAX) {
-      if (($shm = shm_attach($tok, $room->shm_sz)) == FALSE)
+    while ($brisk->shm_sz < SHM_DIMS_MAX) {
+      if (($shm = shm_attach($tok, $brisk->shm_sz)) == FALSE)
 	break;
       
-      // log_only("PUT_VAR DI ".strlen(serialize($room)));
-      if (@shm_put_var($shm, $tok, $room) != FALSE) {
+      // log_only("PUT_VAR DI ".strlen(serialize($brisk)));
+      if (@shm_put_var($shm, $tok, $brisk) != FALSE) {
 	shm_detach($shm);
 	return (TRUE);
       }
@@ -2217,7 +2221,7 @@ class Room
 	break;
       }
       shm_detach($shm);
-      $room->shm_sz += SHM_DIMS_DLT;
+      $brisk->shm_sz += SHM_DIMS_DLT;
     } 
 
     if ($shm)
@@ -2227,16 +2231,16 @@ class Room
   }
   function dump_data()
   {
-      $room_ser = serialize($this);
-      $room_ser_len = mb_strlen($room_ser, "ASCII");
-      if (file_put_contents($this->crystal_filename, $room_ser) == $room_ser_len) {
+      $brisk_ser = serialize($this);
+      $brisk_ser_len = mb_strlen($brisk_ser, "ASCII");
+      if (file_put_contents($this->crystal_filename, $brisk_ser) == $brisk_ser_len) {
           return (TRUE);
       }
       
       return (FALSE);
   }
 
-  function save_data($room) 
+  function save_data($brisk) 
   {
       GLOBAL $sess;
     
@@ -2246,21 +2250,21 @@ class Room
       if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) 
           return (FALSE);
     
-      // SHSPLIT: before save the $room you must save users, 
+      // SHSPLIT: before save the $brisk you must save users, 
       //          detach from main struct and (then) reattach
       $user_park = array();
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-          $user_park[$i]  = $room->user[$i];
-          $room->user[$i] = FALSE;
+          $user_park[$i]  = $brisk->user[$i];
+          $brisk->user[$i] = FALSE;
       }
 
-      while ($room->shm_sz < SHM_DIMS_MAX) {
-          if (($shm = shm_attach($tok, $room->shm_sz)) == FALSE)
+      while ($brisk->shm_sz < SHM_DIMS_MAX) {
+          if (($shm = shm_attach($tok, $brisk->shm_sz)) == FALSE)
               break;
       
-          // log_only("PUT_VAR DI ".strlen(serialize($room)));
-          if (@shm_put_var($shm, $tok, $room) != FALSE) {
-              log_shme("Room::save_data");
+          // log_only("PUT_VAR DI ".strlen(serialize($brisk)));
+          if (@shm_put_var($shm, $tok, $brisk) != FALSE) {
+              log_shme("Brisk::save_data");
               $ret = TRUE;
               break;
           }
@@ -2269,7 +2273,7 @@ class Room
               break;
           }
           shm_detach($shm);
-          $room->shm_sz += SHM_DIMS_DLT;
+          $brisk->shm_sz += SHM_DIMS_DLT;
       } 
 
       if ($shm)
@@ -2278,7 +2282,7 @@ class Room
       // SHSPLIT: reattach users to the room class
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
           User::save_data($user_park[$i], $i);
-          $room->user[$i] = $user_park[$i];
+          $brisk->user[$i] = $user_park[$i];
       }
       log_load("FINISH: ".($ret == TRUE ? "TRUE" : "FALSE"));
 
@@ -2462,6 +2466,7 @@ class Room
 
                   break;
               }
+              $this->sess_cur_set($user->sess);
               // close a previous opened index_read_ifra socket, if exists
               if (($prev = $user->rd_socket_get()) != NULL) {
                   $s_a_p->socks_unset($user->rd_socket_get());
@@ -2542,8 +2547,16 @@ class Room
       }
       return NULL;
   }
+  function sess_cur_set($sess)
+  {
+      static::$sess_cur = $sess;
+  }
 
-} // end class Room
+  static function sess_cur_get()
+  {
+      return(static::$sess_cur);
+  }
+} // end class Brisk
 
 function make_seed()
 {
@@ -2580,11 +2593,12 @@ function trace_ftok($id, $add)
 
 function log_mop($step, $log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LMOP) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2606,11 +2620,12 @@ function log_mop($step, $log)
 
 function log_only2($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONL2) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2631,11 +2646,12 @@ function log_only2($log)
 
 function log_crit($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_CRIT) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2656,11 +2672,12 @@ function log_crit($log)
 
 function log_only($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONLY) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2681,11 +2698,12 @@ function log_only($log)
 
 function log_main($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_MAIN) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2706,11 +2724,12 @@ function log_main($log)
 
 function log_rd($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_READ) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2731,11 +2750,12 @@ function log_rd($log)
 
 function log_rd2($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_REA2) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2757,11 +2777,12 @@ function log_rd2($log)
 
 function log_send($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SEND) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2782,11 +2803,12 @@ function log_send($log)
 
 function log_lock($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOCK) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2807,11 +2829,12 @@ function log_lock($log)
 
 function log_wr($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_WRIT) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2832,11 +2855,12 @@ function log_wr($log)
 
 function log_load($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOAD) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
@@ -2877,11 +2901,12 @@ function log_auth($sess, $log)
 
 function log_shme($log)
 {
-    GLOBAL $sess, $PHP_SELF;
+    GLOBAL $PHP_SELF;
     
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SHME) == 0)
         return;
     
+    $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
