@@ -3,6 +3,13 @@
 
   FEATURES |
  ----------+
+   - PLACEMENT-NORMALIZATION
+      . Normalize previous points
+      . Denormalize "Info" view
+      . Denormalize explained matches
+      . Check placement
+      . Distinguish between inherited mult and local mult
+
    - AUTO-MAINTENANCE
      . Terms Of Service acceptance
        DONE . print date of hard switch

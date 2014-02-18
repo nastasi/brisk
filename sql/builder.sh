@@ -7,7 +7,7 @@ MATCH_DROP='^DROP.*([^-]...|.[^-]..|..[^M].|...[^F])$|^ALTER TABLE.* DROP .*([^-
 #  functions
 usage () {
     echo " USAGE"
-    echo "   ./builder <command> [-d|--dryrun] [-a|--allfiles] [-s|--short] ..."
+    echo "   ./builder <command> [-d|--dryrun] [-a|-p|--allfiles|--devfiles] [-s|--short] ..."
     echo "   ./builder <-h|--help|help>"
     echo "   commands are:"
     echo "       create"
@@ -46,16 +46,14 @@ sqlexe () {
 }
 
 one_or_all() {
-    if [ "$ALL_FILES" = "y" ]; then
-        sfx_files='*'
-    else
-        sfx_files='*.sql'
-    fi
-
-    if [ "$1" = "" ]; then
-        cat sql.d/$sfx_files
-    else
+    if [ "$1" ]; then
         cat "$1"
+    elif [ "$TYPE_FILES" = "a" ]; then
+        cat sql.d/[0-9]*
+    elif [ "$TYPE_FILES" = "d" ]; then
+        cat sql.d/[0-9]*.{sql,devel}
+    else
+        cat sql.d/[0-9]*.sql
     fi
 }
 
@@ -76,7 +74,10 @@ while [ $# -gt 0 ]; do
             }
             ;;
         -a|--allfiles)
-            ALL_FILES=y
+            TYPE_FILES=a
+            ;;
+        -p|--devfiles)
+            TYPE_FILES=d
             ;;
         -s|--short)
             SHORT=y
