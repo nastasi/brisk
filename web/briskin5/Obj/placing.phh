@@ -25,15 +25,24 @@
 
 define('TOP_NUM', 10);
 define('TRI_LIMIT', (90 * 24 * 60 * 60));
-define('TRI_MIN_GAMES', 70);
+if (BIN5_PLAYERS_N != 5)
+    define('TRI_MIN_GAMES', 0);
+else
+    define('TRI_MIN_GAMES', 70);
 define('TRI_MAX_GAMES', 140);
 
 define('MON_LIMIT', (30 * 24 * 60 * 60));
-define('MON_MIN_GAMES', 35);
+if (BIN5_PLAYERS_N != 5)
+    define('MON_MIN_GAMES', 0);
+else
+    define('MON_MIN_GAMES', 35);
 define('MON_MAX_GAMES', 70);
 
 define('WEE_LIMIT', (7 * 24 * 60 * 60));
-define('WEE_MIN_GAMES', 10);
+if (BIN5_PLAYERS_N != 5)
+    define('WEE_MIN_GAMES', 0);
+else
+    define('WEE_MIN_GAMES', 10);
 define('WEE_MAX_GAMES', 35);
 
 
