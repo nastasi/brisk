@@ -414,7 +414,8 @@ class BriskDB
         $num_obj = pg_fetch_object($num_pg, 0);
         $table->points_n = $num_obj->points_n;
 
-        $tot_sql = sprintf("SELECT sum(p.pts) AS pts
+        // TAG: POINTS_MANAGEMENT
+        $tot_sql = sprintf("SELECT sum(p.pts * (2^g.mult)) AS pts
                             FROM %sbin5_games AS g, %sbin5_points AS p, %susers AS u,
                                  %sbin5_table_orders AS o
                             WHERE g.mcode = %d AND g.code = p.gcode AND p.ucode = u.code
@@ -430,7 +431,8 @@ class BriskDB
 
         $u = 0;
         foreach ($users as $user) {
-            $pts_sql = sprintf("SELECT p.pts AS pts
+            // TAG: POINTS_MANAGEMENT
+            $pts_sql = sprintf("SELECT p.pts AS pts, g.mult AS mult
                                     FROM %sbin5_points as p, %sbin5_games as g
                                     WHERE p.gcode = g.code AND g.mcode = %d AND p.ucode = %d
                                     ORDER BY g.code ASC
@@ -450,9 +452,10 @@ class BriskDB
                 log_crit(sprintf("%s::%s: number of points great than number of games", __CLASS__, __FUNCTION__));
                 return (FALSE);
             }
+            // TAG: POINTS_MANAGEMENT
             for ($i = 0 , $ct = $table->points_n - $pts_n; $ct < $table->points_n ; $ct++, $i++) {
                 $pts_obj = pg_fetch_object($pts_pg, $i);
-                $table->points[$ct % MAX_POINTS][$u] = $pts_obj->pts;
+                $table->points[$ct % MAX_POINTS][$u] = $pts_obj->pts * pow(2, $pts_obj->mult);
             }
             $tot_obj = pg_fetch_object($tot_pg, $u);
             $table->total[$u] = $tot_obj->pts;

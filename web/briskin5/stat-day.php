@@ -405,7 +405,7 @@ function main_pgsql($from, $to)
 
                         fprintf($fpexp, "<%s class='%s'>%d</%s>",
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"),
-                                $cla_nam, $pts,
+                                $cla_nam, pow(2,$gam_obj->mult) * $pts,
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
@@ -426,9 +426,15 @@ function main_pgsql($from, $to)
                 // LISTA DEI TOTALI
                 fprintf($fpexp, "<tr>");
                 for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
+                    // NOTE: this part must be revisited when we move to multiple game rules
+                    //       probably removing the sum and adding another nested iteration on games.
                     $tot_sql = sprintf("
-SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u
-WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND ( (u.type & (CAST (X'00ff0000' as integer))) <> (CAST (X'00800000' as integer)) ) AND m.code = %d AND u.code = %d", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
+SELECT sum(p.pts * (2^g.mult)) AS pts
+    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u
+    WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode
+        AND ( (u.type & (CAST (X'00ff0000' as integer))) <> (CAST (X'00800000' as integer)) )
+        AND m.code = %d AND u.code = %d",
+                                       $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                        $tmt_obj->code, $users[$u]['code']);
                     if (($tot_pg  = pg_query($bdb->dbconn->db(), $tot_sql)) == FALSE ) {
                         break;
@@ -463,8 +469,6 @@ WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND ( (u.type &
     return ($ret);
 }
 
-// echo "QUIr\n";
-// exit(123);
 function main()
 {
     GLOBAL $G_lang, $G_dbasetype, $G_alarm_passwd, $pazz, $from, $to;
