@@ -399,6 +399,7 @@ class BriskDB
     function match_continue($match_code, $table, $tidx)
     {
         GLOBAL $G_dbpfx;
+        $sql_ttok = escsql($table->table_token);
 
         if (($users = $this->users_get($match_code, FALSE /*without minmaxidx*/, TRUE /*new game*/)) == FALSE) {
             log_crit(sprintf("%s::%s: retrieve users fails", __CLASS__, __FUNCTION__));
@@ -472,6 +473,14 @@ class BriskDB
                                               $gam_obj->friend, ($gam_obj->friend != -1 ?
                                                                  $users[$gam_obj->friend]['login'] : ""),
                                               $gam_obj->pnt, $gam_obj->asta_pnt);
+
+        // update matches with new ttok and table idx
+        $mtc_sql = sprintf("UPDATE %sbin5_matches SET (ttok, tidx) = ('%s', %d) WHERE code = %d RETURNING *;",
+                           $G_dbpfx, $sql_ttok, $tidx, $match_code);
+        if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+            log_crit(sprintf("%s::%s: update matches table failed", __CLASS__, __FUNCTION__));
+            return (FALSE);
+        }
 
         return (TRUE);
     }
