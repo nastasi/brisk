@@ -3,6 +3,7 @@
 #
 MATCH_DROP='^DROP.*([^-]...|.[^-]..|..[^M].|...[^F])$|^ALTER TABLE.* DROP .*([^-]...|.[^-]..|..[^M].|...[^F])$|^DELETE .*([^-]...|.[^-]..|..[^M].|...[^F])$|--MB$'
 
+DATECUR="$(date +%s)"
 
 #  functions
 usage () {
@@ -37,9 +38,9 @@ sqlexe () {
     sht=$1
 
     if [ "$SHORT" = "y" ];  then
-        sed "s/#PFX#/$PFX/g" | psql -a $pg_args 2>&1 | egrep 'ERROR|^-- MESG'
+        sed "s/#PFX#/$PFX/g;s/#NOW#/$DATECUR/g" | psql -a $pg_args 2>&1 | egrep 'ERROR|^-- MESG|^-- FILE '
     else
-        sed "s/#PFX#/$PFX/g" | psql -a $pg_args
+        sed "s/#PFX#/$PFX/g;s/#NOW#/$DATECUR/g" | psql -a $pg_args
     fi
 
     return 0
