@@ -335,7 +335,8 @@ function main_pgsql($curtime)
             $old_score = array( 1000000000, 1000000000);
             $old_gam   = array( -1, -1);
             $rank      = array(  0,  0);
-            
+
+            // TAG: POINTS_MANAGEMENT
             $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.login as login
                                 FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers as u 
                                 WHERE m.tcode = %d AND m.code = g.mcode AND
@@ -428,7 +429,10 @@ function main()
     
     $ctime = time();
 
-    $curtime = ((int)($ctime / (24 * 3600))) * 24 * 3600 - (((int)substr(date("O", $ctime), 0, -2)) * 3600);
+    if (BIN5_PLAYERS_N != 5)
+        $curtime = $ctime;
+    else
+        $curtime = ((int)($ctime / (24 * 3600))) * 24 * 3600 - (((int)substr(date("O", $ctime), 0, -2)) * 3600);
     if ($ret = $fun_name($curtime))
         echo "Success.<br>\n";
     else
