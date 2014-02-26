@@ -337,7 +337,7 @@ SELECT g.* FROM %sbin5_tournaments AS t, %sbin5_matches AS m, %sbin5_games AS g
 SELECT p.pts AS pts
     FROM %sbin5_games AS g, %sbin5_points AS p
     WHERE g.code = p.gcode AND g.mcode = %d AND p.ucode = %d
-    ORDER BY g.code",
+    ORDER BY g.tstamp",
                                        $G_dbpfx, $G_dbpfx,
                                        $tmt_obj->code, $users[$u]['code']);
 
