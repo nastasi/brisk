@@ -341,7 +341,8 @@ function main_pgsql($curtime)
                                 WHERE m.tcode = %d AND m.code = g.mcode AND
                                       ( (u.type & (CAST (X'ff0000' as integer))) <> (CAST (X'800000' as integer)) ) AND
                                       g.tstamp > to_timestamp(%d) AND g.tstamp <= to_timestamp(%d) AND
-                                      p.ucode = u.code AND p.gcode = g.code
+                                      p.ucode = u.code AND p.gcode = g.code AND
+                                      p.pts != 0
                                 GROUP BY u.code, u.login
                                 ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) DESC, 
                                          count(p.pts) DESC",
