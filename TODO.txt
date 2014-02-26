@@ -4,11 +4,11 @@
   FEATURES |
  ----------+
    - PLACEMENT-NORMALIZATION
-      . Normalize previous points
-      . Denormalize "Info" view
-      . Denormalize explained matches
-      . Check placement
-      . Distinguish between inherited mult and local mult
+      DONE . Normalize previous points
+      DONE . Denormalize "Info" view
+      DONE . Denormalize explained matches
+      DONE . Check placement
+      DONE . Distinguish between inherited mult and local mult
 
    - AUTO-MAINTENANCE
      . Terms Of Service acceptance
