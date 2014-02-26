@@ -2,6 +2,16 @@ Sparse documentation about Brisk.
 
 ==== brisk/table/user relationships ====
 
+=== points management ===
+
+read from db:
+  * continue a match
+  * calculate placings
+  * calculate explain
+
+write to db:
+  * finish a game
+
 === in the room ===
 
 // when standup

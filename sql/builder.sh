@@ -3,11 +3,12 @@
 #
 MATCH_DROP='^DROP.*([^-]...|.[^-]..|..[^M].|...[^F])$|^ALTER TABLE.* DROP .*([^-]...|.[^-]..|..[^M].|...[^F])$|^DELETE .*([^-]...|.[^-]..|..[^M].|...[^F])$|--MB$'
 
+DATECUR="$(date +%s)"
 
 #  functions
 usage () {
     echo " USAGE"
-    echo "   ./builder <command> [-d|--dryrun] [-a|--allfiles] [-s|--short] ..."
+    echo "   ./builder <command> [-d|--dryrun] [-a|-p|--allfiles|--devfiles] [-s|--short] ..."
     echo "   ./builder <-h|--help|help>"
     echo "   commands are:"
     echo "       create"
@@ -37,26 +38,34 @@ sqlexe () {
     sht=$1
 
     if [ "$SHORT" = "y" ];  then
-        sed "s/#PFX#/$PFX/g" | psql -a $pg_args 2>&1 | egrep 'ERROR|^-- MESG'
+        sed "s/#PFX#/$PFX/g;s/#NOW#/$DATECUR/g" | psql -a $pg_args 2>&1 | egrep 'ERROR|^-- MESG|^-- FILE '
     else
-        sed "s/#PFX#/$PFX/g" | psql -a $pg_args
+        sed "s/#PFX#/$PFX/g;s/#NOW#/$DATECUR/g" | psql -a $pg_args
     fi
 
     return 0
 }
 
 one_or_all() {
-    if [ "$ALL_FILES" = "y" ]; then
-        sfx_files='*'
-    else
-        sfx_files='*.sql'
-    fi
+    local old_ifs
 
-    if [ "$1" = "" ]; then
-        cat sql.d/$sfx_files
-    else
-        cat "$1"
-    fi
+    old_ifs="$IFS"
+    IFS=" "
+    for fil in $(
+        if [ "$1" ]; then
+            echo "$1"
+        elif [ "$TYPE_FILES" = "a" ]; then
+            echo sql.d/[0-9]*
+        elif [ "$TYPE_FILES" = "d" ]; then
+            echo sql.d/[0-9]*.{sql,devel}
+        else
+            echo sql.d/[0-9]*.sql
+            fi); do
+        echo "-- FILE BEG: $fil"
+        cat "$fil"
+        echo "-- FILE END: $fil"
+    done
+    IFS="$old_ifs"
 }
 
 #
@@ -76,7 +85,10 @@ while [ $# -gt 0 ]; do
             }
             ;;
         -a|--allfiles)
-            ALL_FILES=y
+            TYPE_FILES=a
+            ;;
+        -p|--devfiles)
+            TYPE_FILES=d
             ;;
         -s|--short)
             SHORT=y
@@ -123,13 +135,13 @@ case $CMD in
         su root -c "su postgres -c \"dropdb $DBBASE && dropuser $DBUSER\""
         ;;
     "clean")
-        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
+        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
         ;;
     "build")
         ( echo "-- MESG: build start" ; one_or_all $2 | egrep -v "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) | sqlexe
         ;;
     "rebuild")
-        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ; \
+        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: clean end" ; \
             echo "-- MESG: build start" ; one_or_all $2 | egrep -v "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) \
             | sqlexe
         ;;
@@ -158,10 +170,10 @@ case $CMD in
         ( echo "-- MESG: add start" ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: add end" ;   ) | sqlexe
         ;;
     "del")
-        ( echo "-- MESG: del start" ; cat "$@" | egrep "$MATCH_DROP" | tac ; echo "-- MESG: del end" ;   ) | sqlexe
+        ( echo "-- MESG: del start" ; cat "$@" | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "res")
-        ( echo "-- MESG: res start" ; cat "$@" | egrep "$MATCH_DROP" | tac ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
+        ( echo "-- MESG: res start" ; cat "$@" | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "help"|"-h"|"--help")
         usage 0

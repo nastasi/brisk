@@ -339,11 +339,9 @@ class Bin5_table extends Table {
     function multer($is_new)
     {
         if ($is_new) {
-            // return (pow(2, $this->mult) * $this->asta2mult($this->asta_pnt));
             return (static::s_multer($this->mult, $this->asta_pnt));
         }
         else {
-            // return (pow(2, $this->old_mult) * $this->asta2mult($this->old_asta_pnt));
             return (static::s_multer($this->old_mult, $this->old_asta_pnt));
         }
     }
@@ -351,6 +349,11 @@ class Bin5_table extends Table {
     static function s_multer($mult, $pnt)
     {
         return (pow(2, $mult) * static::asta2mult($pnt));
+    }
+
+    static function s_point_calc($pnt_done, $mult, $pnt_req, $is_allpoints)
+    {
+        return ($pnt_done * static::s_multer($mult, $pnt_req) * ($is_allpoints ? 2 : 1));
     }
 
     //   function bunch_create_old() function AND
@@ -509,7 +512,7 @@ class Bin5_table extends Table {
     {
         GLOBAL $G_all_points, $G_dbasetype;
 
-        $pts = array();
+        $pnts_sav = array();
 
         $this->old_act = $action;
         if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
@@ -517,7 +520,7 @@ class Bin5_table extends Table {
             $this->old_pnt = 0;
             $this->mult_inc(1);
             for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-                $pts[$i] = 0;
+                $pnts_sav[$i] = 0;
             }
 
             $game_delta = 1;
@@ -531,7 +534,7 @@ class Bin5_table extends Table {
             $this->mult_inc(1);
 
             for ($i = 0 ; $i < PLAYERS_N ; $i++) {
-                $pts[$i] = 0;
+                $pnts_sav[$i] = 0;
             }
 
             // Non si cambia mazzo se si abbandona la partita
@@ -563,13 +566,12 @@ class Bin5_table extends Table {
                     $this->points[$this->points_n % MAX_POINTS] = array();
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $this->points[$this->points_n % MAX_POINTS][$i] = 0;
-                        $pts[$i] = 0;
+                        $pnts_sav[$i] = 0;
                     }
                     $this->points_n++;
                     $this->old_pnt = $pro;
                     $this->mult_inc(1);
 
-                    // return($pts);
                     break;
                 }
 
@@ -578,31 +580,29 @@ class Bin5_table extends Table {
                 else
                     $sig = -1;
 
+                // TAG: POINTS_MANAGEMENT
                 $this->points[$this->points_n % MAX_POINTS] = array();
                 for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                     if ($i == $this->asta_win)
-                        $pt = ($i == $this->friend ? 4 : 2);
+                        $pnt = ($i == $this->friend ? 4 : 2);
                     else if ($i == $this->friend)
-                        $pt = 1;
+                        $pnt = 1;
                     else
-                        $pt = -1;
+                        $pnt = -1;
 
-                    log_wr(sprintf("PRO: pt[%d][%d] = %d", $this->points_n % MAX_POINTS, $i, $pt));
+                    log_wr(sprintf("PRO: pt[%d][%d] = %d", $this->points_n % MAX_POINTS, $i, $pnt));
 
-                    $pt = $pt * $sig * $this->multer(TRUE) * ($pro == 120 ? 2 : 1);
+                    $pnt_sav = static::s_point_calc($pnt * $sig,           0, $this->asta_pnt, ($pro == 120));
+                    $pnt_tab = static::s_point_calc($pnt * $sig, $this->mult, $this->asta_pnt, ($pro == 120));
 
-                    log_wr(sprintf("PRO:[%d][%d][%d]", $sig, $this->multer(TRUE), ($pro == 120 ? 2 : 1)));
-
-                    $this->points[$this->points_n % MAX_POINTS][$i] = $pt;
-                    $this->total[$i] += $pt;
-                    $pts[$i] = $pt;
+                    $this->points[$this->points_n % MAX_POINTS][$i] = $pnt_tab;
+                    $this->total[$i] += $pnt_tab;
+                    $pnts_sav[$i] = $pnt_sav;
                 }
                 $this->points_n++;
                 $this->old_pnt = $pro;
                 $this->old_asta_win = $this->asta_win;
                 $this->mult_set(0);
-
-                // return($pts);
             } while (0);
             $game_delta = 1;
         }
@@ -621,7 +621,7 @@ class Bin5_table extends Table {
             $ucodes[$i] = $user_cur->code_get();
 
             /* pro log */
-            $plist .= '|'.xcapelt($user_cur->name).'|'.$pts[$i];
+            $plist .= '|'.xcapelt($user_cur->name).'|'.$pnts_sav[$i];
             $codes .= '|'.xcapelt($user_cur->code_get());
         }
         $plist .= $codes;
@@ -646,7 +646,7 @@ class Bin5_table extends Table {
             require_once("../Obj/dbase_".$G_dbasetype.".phh");
 
             if (($bdb = BriskDB::create()) != FALSE) {
-                $bdb->bin5_points_save($curtime, $this, $user->table_orig, $action, $ucodes, $pts);
+                $bdb->bin5_points_save($curtime, $this, $user->table_orig, $action, $ucodes, $pnts_sav);
                 unset($bdb);
             }
             else {
@@ -1841,6 +1841,7 @@ function show_table_info(&$bri, &$table, $table_pos)
     $ret = "";
     $user = $bri->user[$table->player[$table_pos]];
 
+    // TAG: POINTS_MANAGEMENT
     $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
     $noty = sprintf('<table class=\"points\"><tr><th></th>');
 

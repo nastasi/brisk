@@ -399,6 +399,7 @@ class BriskDB
     function match_continue($match_code, $table, $tidx)
     {
         GLOBAL $G_dbpfx;
+        $sql_ttok = escsql($table->table_token);
 
         if (($users = $this->users_get($match_code, FALSE /*without minmaxidx*/, TRUE /*new game*/)) == FALSE) {
             log_crit(sprintf("%s::%s: retrieve users fails", __CLASS__, __FUNCTION__));
@@ -413,7 +414,8 @@ class BriskDB
         $num_obj = pg_fetch_object($num_pg, 0);
         $table->points_n = $num_obj->points_n;
 
-        $tot_sql = sprintf("SELECT sum(p.pts) AS pts
+        // TAG: POINTS_MANAGEMENT
+        $tot_sql = sprintf("SELECT sum(p.pts * (2^g.mult)) AS pts
                             FROM %sbin5_games AS g, %sbin5_points AS p, %susers AS u,
                                  %sbin5_table_orders AS o
                             WHERE g.mcode = %d AND g.code = p.gcode AND p.ucode = u.code
@@ -429,10 +431,11 @@ class BriskDB
 
         $u = 0;
         foreach ($users as $user) {
-            $pts_sql = sprintf("SELECT p.pts AS pts
+            // TAG: POINTS_MANAGEMENT
+            $pts_sql = sprintf("SELECT p.pts AS pts, g.mult AS mult
                                     FROM %sbin5_points as p, %sbin5_games as g
                                     WHERE p.gcode = g.code AND g.mcode = %d AND p.ucode = %d
-                                    ORDER BY g.code ASC
+                                    ORDER BY g.tstamp ASC
                                     LIMIT %d OFFSET %d;",
                                $G_dbpfx, $G_dbpfx, $match_code, $user['code'],
                                MAX_POINTS,
@@ -449,9 +452,10 @@ class BriskDB
                 log_crit(sprintf("%s::%s: number of points great than number of games", __CLASS__, __FUNCTION__));
                 return (FALSE);
             }
+            // TAG: POINTS_MANAGEMENT
             for ($i = 0 , $ct = $table->points_n - $pts_n; $ct < $table->points_n ; $ct++, $i++) {
                 $pts_obj = pg_fetch_object($pts_pg, $i);
-                $table->points[$ct % MAX_POINTS][$u] = $pts_obj->pts;
+                $table->points[$ct % MAX_POINTS][$u] = $pts_obj->pts * pow(2, $pts_obj->mult);
             }
             $tot_obj = pg_fetch_object($tot_pg, $u);
             $table->total[$u] = $tot_obj->pts;
@@ -459,7 +463,7 @@ class BriskDB
             $u++;
         }
 
-        $gam_sql = sprintf("SELECT * FROM %sbin5_games WHERE mcode = %d ORDER BY code DESC LIMIT 1;", $G_dbpfx, $match_code);
+        $gam_sql = sprintf("SELECT * FROM %sbin5_games WHERE mcode = %d ORDER BY tstamp DESC LIMIT 1;", $G_dbpfx, $match_code);
         if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_numrows($gam_pg) != 1) {
             log_crit(sprintf("%s::%s: get last game fails", __CLASS__, __FUNCTION__));
             return (FALSE);
@@ -472,6 +476,14 @@ class BriskDB
                                               $gam_obj->friend, ($gam_obj->friend != -1 ?
                                                                  $users[$gam_obj->friend]['login'] : ""),
                                               $gam_obj->pnt, $gam_obj->asta_pnt);
+
+        // update matches with new ttok and table idx
+        $mtc_sql = sprintf("UPDATE %sbin5_matches SET (ttok, tidx) = ('%s', %d) WHERE code = %d RETURNING *;",
+                           $G_dbpfx, $sql_ttok, $tidx, $match_code);
+        if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+            log_crit(sprintf("%s::%s: update matches table failed", __CLASS__, __FUNCTION__));
+            return (FALSE);
+        }
 
         return (TRUE);
     }

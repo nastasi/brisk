@@ -267,11 +267,18 @@ function main_pgsql($from, $to)
         $trn_n = pg_numrows($trn_pg);
         printf("Number of tournaments: %d\n", $trn_n);
 
+        // loop on tournaments
         for ($t = 0 ; $t < $trn_n ; $t++) {
             // log_crit("stat-day: LOOP t");
             $trn_obj = pg_fetch_object($trn_pg, $t);
 
-            $tmt_sql = sprintf("SELECT m.code AS code, m.mazzo_next as minus_one_is_old FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t WHERE t.code = m.tcode AND m.code = g.mcode AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' GROUP BY m.code, minus_one_is_old ORDER BY m.code, minus_one_is_old DESC;",
+            $tmt_sql = sprintf("
+SELECT m.code AS code, m.mazzo_next as minus_one_is_old
+    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t
+    WHERE t.code = m.tcode AND m.code = g.mcode
+        AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s'
+    GROUP BY m.code, minus_one_is_old
+    ORDER BY m.code, minus_one_is_old DESC;",
                                $G_dbpfx, $G_dbpfx, $G_dbpfx, $trn_obj->code, $from, $to);
 
             // if deletable old matches exists then ...
@@ -295,23 +302,29 @@ function main_pgsql($from, $to)
             printf("[Tournament [%s]], number of matches: %d\n", $mlang_stat_day[$trn_obj->name][$G_lang], $tmt_n);
             fprintf($fpexp, "<h3>%s</h3>", $mlang_stat_day[$trn_obj->name][$G_lang]);
 
+            // loop on matches
             for ($m = 0 ; $m < $tmt_n ; $m++) {
                 // log_crit("stat-day: LOOP m");
                 fprintf($fpexp, "<br>");
                 $tmt_obj = pg_fetch_object($tmt_pg, $m);
 
+                // get users for the match m
                 if (($users = $bdb->users_get($tmt_obj->code, TRUE, ($tmt_obj->minus_one_is_old > -1))) == FALSE) {
                     log_crit(sprintf("stat_day: users_get failed %d", $tmt_obj->code));
                     break;
                 }
 
-                $gam_sql = sprintf("SELECT g.* FROM %sbin5_tournaments as t, %sbin5_matches AS m, %sbin5_games AS g WHERE t.code = m.tcode AND m.code = g.mcode AND m.code = %d ORDER BY g.tstamp;",
+                $gam_sql = sprintf("
+SELECT g.* FROM %sbin5_tournaments AS t, %sbin5_matches AS m, %sbin5_games AS g
+    WHERE t.code = m.tcode AND m.code = g.mcode AND m.code = %d
+    ORDER BY g.tstamp;",
                                    $G_dbpfx, $G_dbpfx, $G_dbpfx, $tmt_obj->code);
                 if (($gam_pg = pg_query($bdb->dbconn->db(), $gam_sql)) == FALSE ) {
                     log_crit("stat-day: gam_sql failed");
                     break;
                 }
 
+                // loop on users of the match m
                 for ($u = 0 ; $u < count($users) ; $u++) {
                     // log_crit("stat-day: LOOP u");
                     if ($u == 0) {
@@ -320,7 +333,11 @@ function main_pgsql($from, $to)
                     }
                     fprintf($fpexp, "<th>%s</th>", $users[$u]['login']);
                     // note: we are looping on users, order on them not needed
-                    $pts_sql = sprintf("SELECT p.pts as pts from %sbin5_games as g, %sbin5_points as p WHERE g.code = p.gcode AND g.mcode = %d AND p.ucode = %d ORDER BY g.code",
+                    $pts_sql = sprintf("
+SELECT p.pts AS pts
+    FROM %sbin5_games AS g, %sbin5_points AS p
+    WHERE g.code = p.gcode AND g.mcode = %d AND p.ucode = %d
+    ORDER BY g.tstamp",
                                        $G_dbpfx, $G_dbpfx,
                                        $tmt_obj->code, $users[$u]['code']);
 
@@ -405,7 +422,7 @@ function main_pgsql($from, $to)
 
                         fprintf($fpexp, "<%s class='%s'>%d</%s>",
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"),
-                                $cla_nam, $pts,
+                                $cla_nam, pow(2,$gam_obj->mult) * $pts,
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
@@ -426,9 +443,15 @@ function main_pgsql($from, $to)
                 // LISTA DEI TOTALI
                 fprintf($fpexp, "<tr>");
                 for ($u = 0 ; $u < BIN5_PLAYERS_N ; $u++) {
+                    // NOTE: this part must be revisited when we move to multiple game rules
+                    //       probably removing the sum and adding another nested iteration on games.
                     $tot_sql = sprintf("
-SELECT SUM(p.pts) AS pts FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u
-WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND ( (u.type & (CAST (X'00ff0000' as integer))) <> (CAST (X'00800000' as integer)) ) AND m.code = %d AND u.code = %d", $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
+SELECT sum(p.pts * (2^g.mult)) AS pts
+    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u
+    WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode
+        AND ( (u.type & (CAST (X'00ff0000' as integer))) <> (CAST (X'00800000' as integer)) )
+        AND m.code = %d AND u.code = %d",
+                                       $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
                                        $tmt_obj->code, $users[$u]['code']);
                     if (($tot_pg  = pg_query($bdb->dbconn->db(), $tot_sql)) == FALSE ) {
                         break;
@@ -463,8 +486,6 @@ WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND ( (u.type &
     return ($ret);
 }
 
-// echo "QUIr\n";
-// exit(123);
 function main()
 {
     GLOBAL $G_lang, $G_dbasetype, $G_alarm_passwd, $pazz, $from, $to;
