@@ -47,15 +47,25 @@ sqlexe () {
 }
 
 one_or_all() {
-    if [ "$1" ]; then
-        cat "$1"
-    elif [ "$TYPE_FILES" = "a" ]; then
-        cat sql.d/[0-9]*
-    elif [ "$TYPE_FILES" = "d" ]; then
-        cat sql.d/[0-9]*.{sql,devel}
-    else
-        cat sql.d/[0-9]*.sql
-    fi
+    local old_ifs
+
+    old_ifs="$IFS"
+    IFS=" "
+    for fil in $(
+        if [ "$1" ]; then
+            echo "$1"
+        elif [ "$TYPE_FILES" = "a" ]; then
+            echo sql.d/[0-9]*
+        elif [ "$TYPE_FILES" = "d" ]; then
+            echo sql.d/[0-9]*.{sql,devel}
+        else
+            echo sql.d/[0-9]*.sql
+            fi); do
+        echo "-- FILE BEG: $fil"
+        cat "$fil"
+        echo "-- FILE END: $fil"
+    done
+    IFS="$old_ifs"
 }
 
 #
@@ -125,13 +135,13 @@ case $CMD in
         su root -c "su postgres -c \"dropdb $DBBASE && dropuser $DBUSER\""
         ;;
     "clean")
-        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
+        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
         ;;
     "build")
         ( echo "-- MESG: build start" ; one_or_all $2 | egrep -v "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) | sqlexe
         ;;
     "rebuild")
-        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP" | tac ; echo "-- MESG: clean end" ; \
+        ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: clean end" ; \
             echo "-- MESG: build start" ; one_or_all $2 | egrep -v "$MATCH_DROP" ; echo "-- MESG: build end" ;   ) \
             | sqlexe
         ;;
@@ -160,10 +170,10 @@ case $CMD in
         ( echo "-- MESG: add start" ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: add end" ;   ) | sqlexe
         ;;
     "del")
-        ( echo "-- MESG: del start" ; cat "$@" | egrep "$MATCH_DROP" | tac ; echo "-- MESG: del end" ;   ) | sqlexe
+        ( echo "-- MESG: del start" ; cat "$@" | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "res")
-        ( echo "-- MESG: res start" ; cat "$@" | egrep "$MATCH_DROP" | tac ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
+        ( echo "-- MESG: res start" ; cat "$@" | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; cat "$@" | egrep -v "$MATCH_DROP" ; echo "-- MESG: del end" ;   ) | sqlexe
         ;;
     "help"|"-h"|"--help")
         usage 0
