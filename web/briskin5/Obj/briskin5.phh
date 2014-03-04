@@ -514,8 +514,8 @@ class Bin5_table extends Table {
 
         $pnts_sav = array();
 
-        $this->old_act = $action;
         if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
+            $this->old_act = $action;
             $this->old_asta_win = -1;
             $this->old_pnt = 0;
             $this->mult_inc(1);
@@ -528,6 +528,10 @@ class Bin5_table extends Table {
             $this->game_init(&$bri->user);
         }
         else if ($action == BIN5_RULES_ABANDON) { // return TRUE if all correct
+            if (!($user->handpt <= 2)) {
+                return (FALSE);
+            }
+            $this->old_act = $action;
             log_wr(sprintf("GIOCO FINITO !!!"));
             $this->old_asta_win = $user->table_pos;
             $this->old_pnt = 0;
@@ -543,6 +547,7 @@ class Bin5_table extends Table {
             $this->game_init(&$bri->user);
         }
         else if ($action == BIN5_RULES_FINISH) { // return TRUE if all correct
+            $this->old_act = $action;
             do {
                 $pro = 0;
 
