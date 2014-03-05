@@ -8,4 +8,9 @@ ProxyPassMatch ^/brisk/.*\.(png|gif|jpg|css|js)$ !
     ProxyPass /brisk/index_rd.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/index_wr.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-
+--------
+#
+# PLEASE, ADD THE ErrorDocument LINE TO APACHE CONF FILE.
+#
+         ErrorLog ${APACHE_LOG_DIR}/error.log
++        ErrorDocument 500 /error.php
