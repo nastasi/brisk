@@ -237,18 +237,6 @@ function poll_dom() {
     return '';
 }
 
-function carousel_top()
-{
-    $what = rand(1,2);
-    if ($what == 1) {
-        $rn = rand(1, 3);
-        return (sprintf('<a target="_blank" href="http://shop.alternativeoutput.it"><img class="nobo" style="display: inline; border: 1px solid #808080;" alt="il negozio virtuale di Brisk" title="il negozio virtuale di Brisk" src="img/briskshop%d.gif"></a>', $rn));
-        }
-    else {
-        return (sprintf('<a target="_blank" href="http://www.alternativeoutput.it/briskblog"><img class="nobo" alt="il nuovo blog di Brisk" title="il nuovo blog di Brisk" style="display: inline; border: 1px solid #808080;" src="img/briskblog_bannersmall.png"></a>'));
-    }
-}
-
 function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;

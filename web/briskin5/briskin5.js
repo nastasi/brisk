@@ -115,7 +115,7 @@ function dispose_asta(idx, pnt, nopoint)
 	btn.style.left = asta_xarr[i % 3];
 	btn.style.top = parseInt(i / 3) * 50 + 24;
 	btn.src = "img/astalascio"+lng+".png";
-	btn.style.visibility = "visible";
+	btn.style.visibility = "";
 	btn.onclick = function () { safelascio(); };
 	}
     else {
