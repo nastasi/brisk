@@ -567,7 +567,7 @@ class Bin5_table extends Table {
                 log_wr(sprintf("PRO: [%d]", $pro));
 
                 // PATTA case !
-                if ($this->asta_pnt == 61 && $pro == 60) {
+                if (game_result($this->asta_pnt, $pro) == 0) {
                     $this->points[$this->points_n % MAX_POINTS] = array();
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $this->points[$this->points_n % MAX_POINTS][$i] = 0;
@@ -575,6 +575,7 @@ class Bin5_table extends Table {
                     }
                     $this->points_n++;
                     $this->old_pnt = $pro;
+                    $this->old_asta_win = $this->asta_win;
                     $this->mult_inc(1);
 
                     break;
@@ -1976,10 +1977,11 @@ function briscola_show($bri, $table, $user)
 
 function game_result($asta_pnt, $pnt)
 {
+    $sixtee = 60;
     if ($asta_pnt == 61) {
-        if ($pnt > 60)
+        if ($pnt > $sixtee)
             return (1);
-        else if ($pnt == 60)
+        else if ($pnt == $sixtee)
             return (0);
         else
             return (-1);
