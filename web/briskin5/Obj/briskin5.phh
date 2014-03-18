@@ -1977,11 +1977,11 @@ function briscola_show($bri, $table, $user)
 
 function game_result($asta_pnt, $pnt)
 {
-    $sixtee = 60;
+    $sixty = 60;
     if ($asta_pnt == 61) {
-        if ($pnt > $sixtee)
+        if ($pnt > $sixty)
             return (1);
-        else if ($pnt == $sixtee)
+        else if ($pnt == $sixty)
             return (0);
         else
             return (-1);
