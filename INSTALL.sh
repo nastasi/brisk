@@ -95,6 +95,14 @@ if [ "$1" = "chk" ]; then
     for i in $(find -name '*.pho' -o -name '*.phh' -o -name '*.php'); do
         php5 -l $i
     done
+
+    taggit="$(git describe --tags | sed 's/^v//g')"
+    tagphp="$(grep "^\$G_brisk_version = " web/Obj/brisk.phh | sed 's/^[^"]\+"//g;s/".*//g')"
+    if [ "$taggit" != "v$tagphp" ]; then
+        echo
+	echo "WARNING: taggit: [$taggit] tagphp: [$tagphp]"
+        echo
+    fi
     exit 0
 fi
 
