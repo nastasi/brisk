@@ -302,6 +302,37 @@ Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+function cmd_return($val, $desc)
+{
+    return array('val' => $val, 'desc' => $desc);
+}
+
+function cmd_serialize($attrs)
+{
+    $ret = "";
+
+    $sep = "";
+    foreach ($attrs as $key => $value) {
+        $ret .= $sep . $key . '=' . urlencode($value);
+        $sep = "&";
+    }
+    return $ret;
+}
+
+function cmd_deserialize($cmd)
+{
+    $ret = array();
+    $a = explode('&', $cmd);
+    $i = 0;
+    while ($i < count($a)) {
+        $b = split('=', $a[$i]);
+        $ret[urldecode($b[0])] = urldecode($b[1]);
+        $i++;
+    }
+
+    return $ret;
+}
+
 //  return values
 // -1 v1 < v2
 //  0 equal
