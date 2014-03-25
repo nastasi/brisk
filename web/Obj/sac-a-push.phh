@@ -720,7 +720,7 @@ class Sac_a_push {
                     else {
                         $buf = fread($sock, 4096);
                         // if socket is closed
-                        if ($buf == FALSE || mb_strlen($buf, "ASCII") == 0) {
+                        if ($buf == FALSE || feof($sock)) {
                             // close socket case
                             if ($buf == FALSE) {
                                 printf("INFO: read return false\n");
