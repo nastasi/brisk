@@ -32,6 +32,9 @@
        DONE . manage disagreeding users investigation
        DONE . self guaranteed
 
+     DONE . userauth command works
+     DONE . use it by the usermgmt page
+     . finish to implement the user management system
      . email validation
      . account expiration
 

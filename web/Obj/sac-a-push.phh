@@ -937,17 +937,30 @@ class Sac_a_push {
 
     function direct_command($cmdstr)
     {
+        GLOBAL $G_alarm_passwd;
+
         $cmd = cmd_deserialize($cmdstr);
 
         if (!isset($cmd['cmd'])) {
             return cmd_return(500, 'no cmd found');
         }
-        // "cmd" => "userauth", "login" => 'mop', 'private' => 'it_must_be_correct',
+        // "cmd" => "userauth", "sess" => 'xxxxxxxxxxx', 'private' => 'it_must_be_correct',
         //           'the_end' => 'true' );
+        // cmd=userauth&sess=52d796ac08c47&private=yourpasswd192.168.122.152d796ac08c47&the_end=true
         if ($cmd['cmd'] == 'userauth') {
-            if (!isset($cmd['login']) || !isset($cmd['private'])) {
-                return cmd_return(503, 'malformed cmd');
+            if (!isset($cmd['sess']) || !isset($cmd['private'])) {
+                return cmd_return(401, 'malformed cmd');
             }
+            $idx = -1;
+            if (($user = $this->app->get_user($cmd['sess'], &$idx)) == FALSE)
+                return cmd_return(402, 'user not found');
+
+            if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00)
+                return cmd_return(403, 'permission denied');
+
+            if (md5($G_alarm_passwd.$user->ip.$user->sess) != $cmd['private'])
+                return cmd_return(404, 'authentication failed ['.$cmd['private'].']['.$G_alarm_passwd.$user->ip.$user->sess.']');
+
             return cmd_return(200, 'success');
         }
 

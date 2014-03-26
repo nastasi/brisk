@@ -60,7 +60,7 @@ define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_CERT',    0x040000); // done
 //  ... other usefull status ...
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
-// define('USER_FLAG_TY_free-to-use', 0x400000); // done
+define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
 // ... reasons for disabling account ...
