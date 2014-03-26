@@ -2,7 +2,7 @@
 /*
  *  brisk - index_wr.php
  *
- *  Copyright (C) 2006-2012 Matteo Nastasi
+ *  Copyright (C) 2006-2014 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -21,16 +21,6 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  */
-
-// require_once("Obj/brisk.phh");
-// require_once("Obj/auth.phh");
-// require_once("Obj/proxyscan.phh");
-
-// Use of proxies isn't allowed.
-// if (is_proxy()) {
-//   sleep(5);
-//   exit;
-// }
 
 $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                                 'en' => 'Back to tables.' ),
@@ -77,7 +67,50 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                       'badsit_a' => array( 'it' => '<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ',
                                            'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '), 
                       'badsit_b' => array( 'it' => ' prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.',
-                                           'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access')
+                                           'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access'),
+                      'nu_msubj' => array( 'it' => 'Brisk: verifica email',
+                                           'en' => 'Brisk: email verification'),
+                      'nu_mtext' => array( 'it' =>
+'Ciao, sono l\' amministratore del sito di Brisk.
+
+L\' utente \'%s\' ha garantito per te
+con accesso \'%s\' e password \'%s\', 
+vai al link: %s/mailmgr.php?id=%s 
+per confermare il tuo indirizzo di posta elettronica.
+
+Una volta verificato ti sarà possibile accedere al sito.
+
+Saluti e buone partite, mop.',
+                                           'en' => 'EN mtext %s %s %s'), 
+                      'nu_mhtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
+L\' utente \'%s\' ha garantito per te<br>
+con accesso \'%s\' e password \'%s\'<br>
+<a href="%s/mailmgr.php?id=%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
+Una volta verificato ti sarà possibile accedere al sito.<br><br>
+Saluti e buone partite, mop.<br>',
+                                           'en' => 'EN mhtml %s %s %s %s'), 
+                      'nu_gtext' => array( 'it' =>
+'Ciao %s, sono l\' amministratore del sito di Brisk.
+
+Ti volevo avvisare che ho attivato i login di \'%s\' che hai
+garantito.
+
+Ti ricordo che i login vanno dati a persone di fiducia, se 3
+di quelli che hai autenticato verranno segnati come molestatori
+verrà sospeso anche il tuo accesso.
+
+Grazie dell\' impegno, mop.',
+                                           'en' => ''),
+
+                      'nu_ghtml' => array( 'it' => 
+'Ciao %s, sono l\' amministratore del sito di Brisk.<br><br>
+Ti volevo avvisare che ho attivato i login di \'%s\' che hai
+garantito.<br><br>
+Ti ricordo che i login vanno dati a persone di fiducia, se 3
+di quelli che hai autenticato verranno segnati come molestatori
+verrà sospeso anche il tuo accesso.<br><br>
+Grazie dell\' impegno, mop.',
+                                           'en' => '')
                       );
 
 define('LICMGR_CHO_ACCEPT', 0);
@@ -86,7 +119,8 @@ define('LICMGR_CHO_AFTER',  2);
 
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about, $G_room_passwdhowto, $mlang_indwr;
+    GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about;
+    GLOBAL $G_mail_seed, $G_mail_domain, $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;
     $remote_addr = addrtoipv4($remote_addr_full);
 
@@ -271,22 +305,57 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         
         log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
         if ($user->flags & USER_FLAG_AUTH) {
-            if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
-                if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
-                    /* Unix time | session | nickname | IP | where was | mesg */
-                    fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
-                    fclose($fp);
+            if (0 == 1) {
+                if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
+                    if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
+                        /* Unix time | session | nickname | IP | where was | mesg */
+                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
+                        fclose($fp);
+                    }
+                    Warrant::unlock_data($wa_lock);
+                    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+                    /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
+                    $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['warrrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
+                    $user->step_inc();
+                    echo "1";
                 }
-                Warrant::unlock_data($wa_lock);
-                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
-                $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['warrrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
-                $user->step_inc();
-                echo "1";
-            }
+                else {
+                    /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
+                    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                }
+            } // 0 == 1
             else {
-                /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                // check existence of username or email
+                $is_trans = FALSE;
+                do {
+                    if (($bdb = BriskDB::create()) == FALSE)
+                        break;
+
+                    $cli_name = urldecode($cli_name);
+                    $cli_email = urldecode($cli_email);
+
+                    // check for already used fields
+                    if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
+                        $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV,
+                                                ($idret == 1 ? "login già in uso" :
+                                                 ($idret == 2 ? "email già utilizzata" : "errore sconosciuto"))
+                                                );
+                        break;
+                    }
+                    //   insert the new user disabled with reason NU_MAILED
+                    if (($usr_obj = $bdb->user_add($cli_name, $the_pass, $cli_email, 
+                                                   USER_FLAG_TY_DISABLE, 
+                                                   USER_DIS_REA_NU_TOBECHK, $user->code)) == FALSE) {
+                        fprintf(STDERR, "user_add FAILED\n");
+                        break;
+                    }
+ 
+                    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+                    /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
+                    $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['warrrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
+                    $user->step_inc();
+                    echo "1";
+                } while(FALSE);
             }
             
         }

@@ -56,7 +56,7 @@ index.php:
 
 --- CLI ------------
   POST index.php with passid_private field equal to calcMD5(tokens[1]+calcMD5(form.elements['passid'].value))
-
+  add_user -> validate_name, login_verify
 
 
 ===== Game Lifecycle =====
@@ -81,4 +81,32 @@ index.php:
 $ret = $user->maincheck($old_stat, $old_subst, $old_step, $this->rd_stat, $this->rd_subst, $this->rd_step,
                         $splashdate, $table_idx, $table_token))
 $user->rd_transp->chunk($this->rd_scristp++, $ret);
+
+
+===== New users workflow =====
+
+status     |      |         DB         |
+---------- |------+--------------------+
+unknown    |
+           V
+         brisk   ->      mail-table
+MAILED     |                 |
+           V                 |
+          user               |
+           |                 |
+           V                 |
+        mailbox              |
+           |                 |
+           V                 |
+        procmail             |
+           |                 |
+           V                 |
+  check with mail-table      |
+     and update DB      <----+
+  (needs ad-hoc page)
+TOBECHK    |
+           V
+       authorize
+normal     |
+           V
 

@@ -64,10 +64,14 @@ define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
 
 // ... reasons for disabling account ...
-define('USER_DIS_REA_INVMAIL', 1);
-define('USER_DIS_REA_LICENCE', 2);
-define('USER_DIS_REA_BANNED',  3);
+define('USER_DIS_REA_INVMAIL',    1);
+define('USER_DIS_REA_LICENCE',    2);
+define('USER_DIS_REA_BANNED',     3);
 define('USER_DIS_REA_MALICIOUS',  4);
+define('USER_DIS_REA_NU_MAILED',  5);
+define('USER_DIS_REA_NU_TOBECHK', 6);
+
+
 
 // 240 is the right value, 600 is for fwrite error test
 define('RD_ENDTIME_DELTA',  240);

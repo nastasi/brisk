@@ -37,7 +37,31 @@
      . finish to implement the user management system
      . email validation
      . account expiration
+     . New Users Guarantee Procedure
+       . Change guarantee workflow
+       . Db update
+       . Send email with appropriate headers
+           |
+           V
+         brisk   ->      mail-table
+           |                 |
+           V
+          user               |
+           |
+           V                 |
+      click-link -> check with mail-table
+                             |
+                             V
+                         and update DB
+                      (needs ad-hoc page)
 
+       . Admin panel
+       . Write automatic procmail filter
+         . Procmail configuration
+         . Mail-recipient-side
+         . Server-side
+     . Email validation
+     . Account expiration
 
    DONE - CONTINUE FEATURE
      DONE . replace explicit strings with multilanguage array

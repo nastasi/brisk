@@ -5,6 +5,9 @@ $G_dbasetype="pgsql";
 $G_dbauth = "host=... port=... user=... password=... dbname=... options='--client_encoding=UTF8'";
 $G_dbpfx = "bsk_";
 
+$G_admin_mail = "admin@example.com";
+$G_mail_seed = 281741;
+
 $G_lang = "it";
 
 $G_crypt_key = "cryptkey";

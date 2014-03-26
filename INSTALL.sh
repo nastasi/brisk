@@ -22,7 +22,7 @@ legal_path="/home/nastasi/brisk-priv/brisk"
 prefix_path="/brisk/"
 brisk_conf="brisk_spu.conf.pho"
 web_only="FALSE"
-
+test_add="FALSE"
 #
 # functions
 function usage () {
@@ -30,7 +30,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 3|8] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>]"
+    echo "$1 [-W] [-n 3|5] [-c 3|8] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -50,6 +50,7 @@ function usage () {
     echo "  -C config filename              - def. \"$brisk_conf\""
     echo "  -U unix socket path             - def. \"$usock_path\""
     echo "  -u system user to run brisk dae - def. \"$sys_user\""
+    echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
 
@@ -161,6 +162,7 @@ while [ $# -gt 0 ]; do
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
         system) action=system;;
         -W) web_only="TRUE";;
+        -x) test_add="TRUE";;
         -h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
     esac
@@ -194,6 +196,7 @@ echo "    brisk_conf: \"$brisk_conf\""
 echo "    usock_path: \"$usock_path\""
 echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
+echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
   ( 
@@ -216,6 +219,7 @@ if [ ! -z "$outconf" ]; then
     echo "usock_path=\"$usock_path\""
     echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
+    echo "test_add=\"$test_add\""
   ) > "$outconf"
 fi
 
@@ -339,6 +343,12 @@ done
 for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
+if [ "$test_add" = "TRUE" ]; then
+    for i in $(find webtest -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^........//g'); do
+        install -m 644 "webtest/$i" "${web_path}__/$i"
+    done
+fi
+
 chmod 755 "${web_path}__/spush/brisk-spush.php"
 
 prefix_path_len=$(echo -n "$prefix_path" | wc -c)

@@ -2186,7 +2186,7 @@ class Brisk
           $brisk = @shm_get_var($shm, $tok); // CHECKED BELOW
           
           log_only("bri ==  ".($brisk == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($brisk === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($brisk) ?   "TRUE" : "FALSE"));
-          if (isset($brisk)) 
+          if (isset($brisk))
               log_only("bri count ".count($brisk));
           
           if ($brisk == FALSE) {

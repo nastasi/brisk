@@ -157,6 +157,70 @@ class BriskDB
         return ($user_obj);
     }
 
+    function user_add($login, $pass, $email, $type, $disa_reas, $guar_code) {
+        GLOBAL $G_dbpfx;
+
+        $usr_sql = sprintf("INSERT INTO %susers (login, pass, email, type, disa_reas, guar_code) 
+                            VALUES ('%s', '%s', '%s', %d, %d, %d) RETURNING *;",
+                           $G_dbpfx, escsql(strtolower($login)), escsql($pass), escsql($email), 
+                           $type, $disa_reas, $guar_code);
+        
+        if ( ! (($usr_pg  = $this->query($usr_sql)) != FALSE && pg_affected_rows($usr_pg) == 1) ) {
+            return FALSE;
+        }
+        $usr_obj = pg_fetch_object($usr_pg, 0);
+
+        return $usr_obj;
+    }
+
+    function transaction($cmd) {
+        if ($cmd != "BEGIN" && $cmd != "COMMIT" && $cmd != "ROLLBACK")
+            return FALSE;
+
+        $trans_sql = sprintf("%s;", $cmd);
+        if (($trans_pg  = $this->query($trans_sql)) == FALSE) {
+            return FALSE;
+        }
+
+        return (TRUE);
+    }
+
+    function mail_reserve_code() {
+        GLOBAL $G_dbpfx;
+
+        $mail_sql = sprintf("SELECT nextval('%smails_code_seq'::regclass) AS nextval;", $G_dbpfx);
+        if (($mail_pg  = $this->query($mail_sql)) == FALSE) {
+            return FALSE;
+        }
+        if (pg_numrows($mail_pg) != 1)
+            return FALSE;
+
+        $mail_obj = pg_fetch_object($mail_pg, 0);
+
+        return ($mail_obj->nextval);
+    }
+
+    function check_record_by_login_or_email($login, $email) {
+        GLOBAL $G_dbpfx;
+
+        $arr_fie = array('login', 'email');
+        $arr_val = array($login, $email);
+
+        for ($i = 0 ; $i < 2 ; $i++) {
+            $user_sql = sprintf("SELECT * FROM %susers WHERE %s = lower('%s');",
+                                $G_dbpfx, $arr_fie[$i], escsql($arr_val[$i]));
+            if (($user_pg  = $this->query($user_sql)) == FALSE) {
+                fprintf(STDERR, "QUERY [%s]_ FALSE", $user_sql);
+                return (3);
+            }
+            if (pg_numrows($user_pg) == 1) {
+                return ($i + 1);
+            }
+        }
+
+        return (0);
+    }
+
     function getrecord_bycode($code) {
         GLOBAL $G_dbpfx;
 
