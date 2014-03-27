@@ -74,21 +74,21 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 'Ciao, sono l\' amministratore del sito di Brisk.
 
 L\' utente \'%s\' ha garantito per te
-con accesso \'%s\' e password \'%s\', 
-vai al link: %s/mailmgr.php?id=%s 
+con accesso \'%s\' e password \'%s\',
+vai al link: %s/mailmgr.php?id=%s
 per confermare il tuo indirizzo di posta elettronica.
 
 Una volta verificato ti sarà possibile accedere al sito.
 
 Saluti e buone partite, mop.',
-                                           'en' => 'EN mtext %s %s %s'), 
+                                           'en' => 'EN mtext %s %s %s'),
                       'nu_mhtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 L\' utente \'%s\' ha garantito per te<br>
 con accesso \'%s\' e password \'%s\'<br>
 <a href="%s/mailmgr.php?id=%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
 Una volta verificato ti sarà possibile accedere al sito.<br><br>
 Saluti e buone partite, mop.<br>',
-                                           'en' => 'EN mhtml %s %s %s %s'), 
+                                           'en' => 'EN mhtml %s %s %s %s'),
                       'nu_gtext' => array( 'it' =>
 'Ciao %s, sono l\' amministratore del sito di Brisk.
 
@@ -102,7 +102,7 @@ verrà sospeso anche il tuo accesso.
 Grazie dell\' impegno, mop.',
                                            'en' => ''),
 
-                      'nu_ghtml' => array( 'it' => 
+                      'nu_ghtml' => array( 'it' =>
 'Ciao %s, sono l\' amministratore del sito di Brisk.<br><br>
 Ti volevo avvisare che ho attivato i login di \'%s\' che hai
 garantito.<br><br>
@@ -344,12 +344,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     }
                     //   insert the new user disabled with reason NU_MAILED
                     if (($usr_obj = $bdb->user_add($cli_name, $the_pass, $cli_email, 
-                                                   USER_FLAG_TY_DISABLE, 
+                                                   USER_FLAG_TY_DISABLE,
                                                    USER_DIS_REA_NU_TOBECHK, $user->code)) == FALSE) {
                         fprintf(STDERR, "user_add FAILED\n");
                         break;
                     }
- 
+
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                     /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
                     $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['warrrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);

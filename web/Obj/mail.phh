@@ -1,0 +1,35 @@
+<?php
+include_once 'Mail.php';
+include_once 'Mail/mime.php';
+
+$brisk_mail_hp = array( "text_charset"  => "utf-8",
+                        "html_charset" => "utf-8",
+                        "header_charset" => "utf-8",
+                        "eol" => "\n" );
+
+// references: <alfanum-8-chars>@<domain>
+function brisk_mail($to, $subject, $text, $html, $refs)
+{
+    GLOBAL $brisk_mail_hp, $G_admin_mail;
+
+    $hdrs = array(
+              'From'    => $G_admin_mail,
+              'Subject' => $subject,
+              'References' => $refs
+              );
+
+    $mime = new Mail_mime($brisk_mail_hp);
+
+    $mime->setTXTBody($text);
+    $mime->setHTMLBody($html);
+
+    $body = $mime->get();
+    $hdrs = $mime->headers($hdrs);
+
+    $mail = Mail::factory('mail');
+
+    $mail->send($to, $hdrs, $body);
+
+    return TRUE;
+}
+?>
