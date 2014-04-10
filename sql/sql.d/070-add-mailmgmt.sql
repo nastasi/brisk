@@ -10,4 +10,4 @@ CREATE TABLE #PFX#mails (
        subj       text,                              -- email subject
        body_txt   text,                              -- email body (text version)
        body_htm   text,                              -- email body (html version)
-       refs       text);                             -- email references
+       hash       text);                             -- reference hash to complete registration

@@ -8,15 +8,16 @@ $brisk_mail_hp = array( "text_charset"  => "utf-8",
                         "eol" => "\n" );
 
 // references: <alfanum-8-chars>@<domain>
-function brisk_mail($to, $subject, $text, $html, $refs)
+function brisk_mail($to, $subject, $text, $html)
 {
     GLOBAL $brisk_mail_hp, $G_admin_mail;
 
     $hdrs = array(
               'From'    => $G_admin_mail,
-              'Subject' => $subject,
-              'References' => $refs
+              'Subject' => $subject
               );
+    // if ($refs != Null)
+    //    $hdrs['References'] = $refs;
 
     $mime = new Mail_mime($brisk_mail_hp);
 

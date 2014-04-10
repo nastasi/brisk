@@ -31,37 +31,30 @@
        DONE . command documentation
        DONE . manage disagreeding users investigation
        DONE . self guaranteed
-
-     DONE . userauth command works
-     DONE . use it by the usermgmt page
-     . finish to implement the user management system
-     . email validation
-     . account expiration
      . New Users Guarantee Procedure
-       . Change guarantee workflow
-       . Db update
-       . Send email with appropriate headers
+       . WIP Change guarantee workflow
+       . DONE Db update
+       . Send email with appropriate link embedded
            |
            V
-         brisk   ->      mail-table
+      DONE brisk   ->  DONE mail-table
            |                 |
-           V
-          user               |
-           |
            V                 |
-      click-link -> check with mail-table
+       DONE user             |
+           |                 |
+           V                 |
+    DONE click-link -> TODO check with     <- ¡WE ARE HERE NOW!
+                         mails-table
+                        and update DB
                              |
                              V
-                         and update DB
                       (needs ad-hoc page)
 
-       . Admin panel
-       . Write automatic procmail filter
-         . Procmail configuration
-         . Mail-recipient-side
-         . Server-side
-     . Email validation
+       . WIP Admin panel
+
+     . Email-address expiration check
      . Account expiration
+
 
    DONE - CONTINUE FEATURE
      DONE . replace explicit strings with multilanguage array

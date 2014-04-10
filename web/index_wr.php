@@ -70,25 +70,25 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                            'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access'),
                       'nu_msubj' => array( 'it' => 'Brisk: verifica email',
                                            'en' => 'Brisk: email verification'),
+                      // %s(guar) %s(login) %s(baseurl) %d(code) %s(hash)
                       'nu_mtext' => array( 'it' =>
 'Ciao, sono l\' amministratore del sito di Brisk.
 
-L\' utente \'%s\' ha garantito per te
-con accesso \'%s\' e password \'%s\',
-vai al link: %s/mailmgr.php?id=%s
+L\' utente \'%s\' ha garantito per te col nickname \'%s\',
+vai al link: %s/mailmgr.php?code=%d&hash=%s
 per confermare il tuo indirizzo di posta elettronica.
 
-Una volta verificato ti sarà possibile accedere al sito.
+Ciò è necessario per ottenere la password.
 
 Saluti e buone partite, mop.',
-                                           'en' => 'EN mtext %s %s %s'),
+                                           'en' => 'EN mtext [%s] [%s] [%s] [%d] [%s]'),
                       'nu_mhtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
-L\' utente \'%s\' ha garantito per te<br>
-con accesso \'%s\' e password \'%s\'<br>
-<a href="%s/mailmgr.php?id=%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
-Una volta verificato ti sarà possibile accedere al sito.<br><br>
+L\' utente \'%s\' ha garantito per te col nickname \'%s\',<br>
+<a href="%s/mailmgr.php?code=%d&hash=%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
+Ciò è necessario per ottenere la password.<br><br>
 Saluti e buone partite, mop.<br>',
-                                           'en' => 'EN mhtml %s %s %s %s'),
+                                           'en' => 'EN mhtml [%s] [%s] [%s] [%d] [%s]'),
+
                       'nu_gtext' => array( 'it' =>
 'Ciao %s, sono l\' amministratore del sito di Brisk.
 
@@ -100,7 +100,7 @@ di quelli che hai autenticato verranno segnati come molestatori
 verrà sospeso anche il tuo accesso.
 
 Grazie dell\' impegno, mop.',
-                                           'en' => ''),
+                                           'en' => 'EN nu_gtext [%s][%s]'),
 
                       'nu_ghtml' => array( 'it' =>
 'Ciao %s, sono l\' amministratore del sito di Brisk.<br><br>
@@ -110,7 +110,7 @@ Ti ricordo che i login vanno dati a persone di fiducia, se 3
 di quelli che hai autenticato verranno segnati come molestatori
 verrà sospeso anche il tuo accesso.<br><br>
 Grazie dell\' impegno, mop.',
-                                           'en' => '')
+                                           'en' => 'EN nu_ghtml [%s][%s]')
                       );
 
 define('LICMGR_CHO_ACCEPT', 0);
@@ -119,8 +119,9 @@ define('LICMGR_CHO_AFTER',  2);
 
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_shutdown, $G_black_list, $G_lang, $G_room_help, $G_room_about;
-    GLOBAL $G_mail_seed, $G_mail_domain, $G_room_passwdhowto, $mlang_indwr;
+    GLOBAL $G_domain, $G_webbase, $G_mail_domain, $G_mail_seed;
+    GLOBAL $G_shutdown, $G_alarm_passwd, $G_black_list, $G_lang, $G_room_help, $G_room_about;
+    GLOBAL $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;
     $remote_addr = addrtoipv4($remote_addr_full);
 
@@ -342,20 +343,55 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                                                 );
                         break;
                     }
+                    $bdb->transaction('BEGIN');
+                    $is_trans = TRUE;
                     //   insert the new user disabled with reason NU_MAILED
+                    /*
+                     *  FIXME: password management
+                     */
+                    $the_pass = "LA PASSWORD";
+
                     if (($usr_obj = $bdb->user_add($cli_name, $the_pass, $cli_email, 
                                                    USER_FLAG_TY_DISABLE,
                                                    USER_DIS_REA_NU_TOBECHK, $user->code)) == FALSE) {
-                        fprintf(STDERR, "user_add FAILED\n");
+                        fprintf(STDERR, "ERROR: user_add FAILED\n");
                         break;
                     }
+                    if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
+                        fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
+                        break;
+                    }
+                    $hash = md5($curtime . $G_alarm_passwd . $cli_name . $the_pass . $cli_email);
 
+                    $confirm_page = sprintf("http://%s/%s/mailcheck.php", $G_domain, $G_webbase);
+                    $subj = $mlang_indwr['nu_msubj'][$G_lang];
+                    $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
+                                        $user->name, $cli_name, $confirm_page, $mail_code, $hash);
+                    $body_htm = sprintf($mlang_indwr['nu_mhtml'][$G_lang],
+                                        $user->name, $cli_name, $confirm_page, $mail_code, $hash);
+
+                    $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
+                                                $curtime, $subj, $body_txt, $body_htm, $hash);
+
+                    if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                        // mail error
+                        fprintf(STDERR, "ERROR: mail send FAILED\n");
+                        break;
+                    }
+                    // save the mail
+                    if ($mail_item->store($bdb) == FALSE) {
+                        // store mail error
+                        fprintf(STDERR, "ERROR: store mail FAILED\n");
+                        break;
+                    }
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                     /* MLANG: "<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni vi verr&agrave;<br><br>notificata l\'avvenuta registrazione." */
                     $user->comm[$user->step % COMM_N] .=  show_notify($mlang_indwr['warrrepl'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
                     $user->step_inc();
                     echo "1";
+                    $bdb->transaction('COMMIT');
                 } while(FALSE);
+                $bdb->transaction('ROLLBACK');
             }
             
         }

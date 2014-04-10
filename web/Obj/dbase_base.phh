@@ -121,4 +121,41 @@ class LoginDBItem {
 
 }
 
+define('MAIL_TYP_CHECK', 1);
+
+class MailDBItem {
+    var $code;
+    var $ucode;
+    var $type;
+    var $tstamp;
+    var $subj;
+    var $body_txt;
+    var $body_htm;
+    var $hash;
+
+    function MailDBItem($code, $ucode, $type, $tstamp, $subj, $body_txt, $body_htm, $hash=NULL)
+    {
+        $this->code = $code;
+        $this->ucode = $ucode;
+        $this->type = $type;
+        $this->tstamp = $tstamp;
+        $this->subj = $subj;
+        $this->body_txt = $body_txt;
+        $this->body_htm = $body_htm;
+        $this->hash = $hash;
+    }
+
+    static function MailDBItemFromRecord($rec)
+    {
+        $ret = new MailDBItem($rec->code, $rec->ucode, $rec->type, $rec->tstamp, $rec->subj,
+                              $rec->body_txt, $rec->body_htm, $rec->hash);
+
+        return ($ret);
+    }
+
+    function store($bdb)
+    {
+        return $bdb->mail_add_fromitem($this);
+    }
+}
 ?>

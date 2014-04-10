@@ -185,6 +185,9 @@ class BriskDB
         return (TRUE);
     }
 
+    /*
+      to be able to add mail record code into the record itself I must reserve it before.
+     */
     function mail_reserve_code() {
         GLOBAL $G_dbpfx;
 
@@ -687,6 +690,25 @@ class BriskDB
             $this->query("ROLLBACK");
 
         return $ret;
+    }
+
+    function mail_add_fromitem($mail) {
+        GLOBAL $G_dbpfx;
+
+        $usr_sql = sprintf("
+INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
+            VALUES (%d, %d, %d, to_timestamp(%d), '%s', '%s', '%s', '%s') RETURNING *;",
+                           $G_dbpfx, $mail->code, $mail->ucode, $mail->type, $mail->tstamp,
+                           escsql($mail->subj), escsql($mail->body_txt), escsql($mail->body_htm),
+                           ($mail->hash == NULL ? "" : escsql($mail->hash))
+                           );
+
+        if (! (($usr_pg  = $this->query($usr_sql)) != FALSE && pg_affected_rows($usr_pg) == 1) ) {
+            return FALSE;
+        }
+        $usr_obj = pg_fetch_object($usr_pg, 0);
+
+        return $usr_obj;
     }
 
 } // End class BriskDB
