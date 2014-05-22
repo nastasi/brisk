@@ -252,6 +252,37 @@ class BriskDB
         return TRUE;
     }
 
+    function user_update_flag_ty($code, $old_type, $old_reas, $type, $reas)
+    {
+        GLOBAL $G_dbpfx;
+
+        // (u.type & (CAST (X'00ff0000' as integer)))
+
+        $user_sql = sprintf("UPDATE %susers SET (type, disa_reas) = ((%d & (CAST (X'00ff0000' as integer))), %d)
+WHERE code = %d AND (type & CAST (X'%08x' as integer)) != 0 AND disa_reas = %d;",
+                            $G_dbpfx, $type, $reas, $code, $old_type, $old_reas);
+
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    function user_update_passwd($code, $passwd)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("UPDATE %susers SET (pass) = (md5('%s')) WHERE code = %d;",
+                            $G_dbpfx, $passwd, $code);
+
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+
+        return TRUE;
+    }
+
     function user_prefs_update($code, $flags, $supp_comp)
     {
         GLOBAL $G_dbpfx;
