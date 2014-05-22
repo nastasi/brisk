@@ -302,6 +302,82 @@ Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nasta
 <br><b>version '.$G_brisk_version.'</b><br><br>
 Copyright 2006-2012 <a href=\\"mailto:brisk@alternativeoutput.it\\">Matteo Nastasi</a> (aka mop)<br><br>');
 
+
+$G_PG_vow = array("a", "e", "i", "o", "u", "y");
+$G_PG_vow_n = 6;
+$G_PG_cons = array(
+      "b", "bb", "bc", "bd", "bf", "bg", "bk", "bl", "bm", "bn", "bp",       "br", "bs", "bt", "bv", "bw",       "bz",
+      "c", "cb", "cc", "cd", "cf", "cg", "ck", "cl", "cm", "cn", "cp", "cq", "cr", "cs", "ct", "cv", "cw", "cx", "cz",
+      "d", "db", "dc", "dd", "df", "dg", "dk", "dl", "dm", "dn", "dp",       "dr", "ds", "dt", "dv", "dw", "dx", "dz",
+      "f", "fb", "fc", "fd", "ff", "fg", "fk", "fl", "fm", "fn", "fp",       "fr", "fs", "ft", "fv", "fw", "fx", "fz",
+      "g", "gb", "gc", "gd", "gf", "gg", "gk", "gl", "gm", "gn", "gp",       "gr", "gs", "gt", "gv", "gw", "gx", "gz",
+      "j", "jb", "jc", "jd", "jf", "jg", "jk", "jl", "jm", "jn", "jp", "jq", "jr", "js", "jt", "jv", "jw", "jx", "jz",
+      "k", "kb", "kc", "kd", "kf", "kg", "kk", "kl", "km", "kn", "kp",       "kr", "ks", "kt", "kv", "kw", "kx", "kz",
+      "l", "lb", "lc", "ld", "lf", "lg", "lk", "ll", "lm", "ln", "lp",       "lr", "ls", "lt", "lv", "lw", "lx", "lz",
+      "m", "mb", "mc", "md", "mf", "mg", "mk", "ml", "mm", "mn", "mp",       "mr", "ms", "mt", "mv", "mw", "mx", "mz",
+      "n", "nb", "nc", "nd", "nf", "ng", "nk", "nl", "nm", "nn", "np",       "nr", "ns", "nt", "nv", "nw", "nx", "nz",
+      "p", "pb", "pc", "pd", "pf", "pg", "pk", "pl", "pm", "pn", "pp",       "pr", "ps", "pt", "pv", "pw", "px", "pz",
+      "q", "qb", "qc", "qd", "qf", "qg", "qk", "ql", "qm", "qn", "qp", "qq", "qr", "qs", "qt", "qv", "qw", "qx", "qz",
+      "r", "rb", "rc", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp",       "rr", "rs", "rt", "rv", "rw", "rx", "rz",
+      "s", "sb", "sc", "sd", "sf", "sg", "sk", "sl", "sm", "sn", "sp", "sq", "sr", "ss", "st", "sv", "sw", "sx", "sz",
+      "t", "tb", "tc", "td", "tf", "tg", "tk", "tl", "tm", "tn", "tp",       "tr", "ts", "tt", "tv", "tw", "tx", "tz",
+      "v", "vb", "vc", "vd", "vf", "vg", "vk", "vl", "vm", "vn", "vp",       "vr", "vs", "vt", "vv", "vw", "vx", "vz",
+      "w", "wb", "wc", "wd", "wf", "wg", "wk", "wl", "wm", "wn", "wp",       "wr", "ws", "wt", "wv", "ww", "wx", "wz",
+      "x", "xb", "xc", "xd", "xf", "xg", "xk", "xl", "xm", "xn", "xp",       "xr", "xs", "xt", "xv", "xw", "xx", "xz",
+      "z", "zb", "zc", "zd", "zf", "zg", "zk", "zl", "zm", "zn", "zp",       "zr", "zs", "zt", "zv", "zw", "zx", "zz",
+                  );
+// $G_PG_cons_n = count($G_PG_cons);
+// printf("N CONS: %d\n", $G_PG_cons_n);
+$G_PG_cons_n = 345;
+    /*     printf("%d %d\n", count($voc), count($cons)); */
+    /* for ($i = 0 ; $i < 26 ; $i++) { */
+    /*     if (array_search(chr(ord('a') + $i), $voc) !== FALSE || $i == 7) */
+    /*         continue; */
+    /*     printf('      "%s", ', chr(ord('a') + $i)); */
+    /*     for ($e = 0 ; $e < 26 ; $e++) { */
+    /*         if (array_search(chr(ord('a') + $e), $voc) !== FALSE || $e == 7) */
+    /*             continue; */
+    /*         printf('"%s%s", ', chr(ord('a') + $i), chr(ord('a') + $e)); */
+    /*     } */
+    /*     printf("\n"); */
+    /* } */
+
+function passwd_gen($seed = NULL)
+{
+    GLOBAL $G_PG_vow, $G_PG_vow_n, $G_PG_cons, $G_PG_cons_n;
+
+    $pw = "";
+
+    if ($seed != NULL)
+        mt_srand($seed);
+    else
+        mt_srand();
+
+    for ($sil = 0 ; $sil < 7 ; $sil++) {
+        if (($sil % 2) == 0) {
+            // vowels
+            for ($n = 0 ; $n < mt_rand(1,2) ; $n++) {
+                if ($n == 0) {
+                    $old = mt_rand(0, $G_PG_vow_n-1);
+                    $pw .= $G_PG_vow[$old];
+                }
+                else {
+                    $new = mt_rand(0, $G_PG_vow_n-1);
+                    if ($new == $old)
+                        $new = ($new + mt_rand(0, $G_PG_vow_n-2)) % $G_PG_vow_n;
+                    $pw .= $G_PG_vow[$new];
+                }
+            }
+        }
+        else {
+            // consonants
+            $pw .= $G_PG_cons[mt_rand(0, $G_PG_cons_n-1)];
+        }
+    }
+
+    return $pw;
+}
+
 function cmd_return($val, $desc)
 {
     return array('val' => $val, 'desc' => $desc);
