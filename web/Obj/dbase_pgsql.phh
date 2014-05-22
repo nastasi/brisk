@@ -742,6 +742,34 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return $usr_obj;
     }
 
+    function mail_check($code, $type, $hash)
+    {
+        GLOBAL $G_dbpfx;
+
+        $mai_sql = sprintf("SELECT * FROM %smails WHERE code = %d AND type = %d AND hash = '%s';",
+                           $G_dbpfx, $code, $type, escsql($hash));
+        if (($mai_pg  = $this->query($mai_sql)) == FALSE || pg_numrows($mai_pg) != 1) {
+            // check failed
+            return (FALSE);
+        }
+
+        $mai_obj = pg_fetch_object($mai_pg, 0);
+        return ($mai_obj);
+    }
+
+    function mail_delete($code)
+    {
+        GLOBAL $G_dbpfx;
+
+        $mai_sql = sprintf("DELETE FROM %smails WHERE code = %d;", $G_dbpfx, $code);
+
+        if (($mai_pg = $this->query($mai_sql)) == FALSE || pg_affected_rows($mai_pg) != 1) {
+            return (FALSE);
+        }
+        return (TRUE);
+    }
+
+
 } // End class BriskDB
 
 class LoginDBOld
