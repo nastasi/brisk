@@ -3,12 +3,14 @@
 --
 
 -- macro for user_flag bit-field
--- define(USER_FLAG_TY_ALL,     0x000f0000); // done
--- define(USER_FLAG_TY_NORM,    0x00010000); // done
--- define(USER_FLAG_TY_SUPER,   0x00020000); // done
--- define(USER_FLAG_TY_FIRONLY, 0x00200000); // done
--- define(USER_FLAG_TY_SUSPEND, 0x00400000); // done
--- define(USER_FLAG_TY_DISABLE, 0x00800000); // done
+-- define('USER_FLAG_TY_ALL',     0xff0000); // done
+-- define('USER_FLAG_TY_NORM',    0x010000); // done
+-- define('USER_FLAG_TY_SUPER',   0x020000); // done
+-- define('USER_FLAG_TY_CERT',    0x040000); // done
+-- define('USER_FLAG_TY_FIRONLY', 0x200000); // done
+-- define('USER_FLAG_TY_ADMIN',   0x400000); // done
+-- define('USER_FLAG_TY_DISABLE', 0x800000); // done
+
 
 DELETE FROM #PFX#users WHERE code = 10101;
 DELETE FROM #PFX#users WHERE guar_code = 10101 AND code != 10101;
