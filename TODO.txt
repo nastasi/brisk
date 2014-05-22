@@ -31,26 +31,45 @@
        DONE . command documentation
        DONE . manage disagreeding users investigation
        DONE . self guaranteed
-     . New Users Guarantee Procedure
-       . WIP Change guarantee workflow
+     . DONE New Users Guarantee Procedure
+       . DONE Change guarantee workflow
        . DONE Db update
-       . Send email with appropriate link embedded
-           |
-           V
-      DONE brisk   ->  DONE mail-table
-           |                 |
-           V                 |
-       DONE user             |
-           |                 |
-           V                 |
-    DONE click-link -> TODO check with     <- ¡WE ARE HERE NOW!
-                         mails-table
-                        and update DB
-                             |
-                             V
-                      (needs ad-hoc page)
 
-       . WIP Admin panel
+         UserA                 UserB                      Admin
+-------------------------------------------------------------------------
+      guarante UserB
+           |
+           v
+      Save on mail
+         table,
+      email to UserB
+    (Disabled, MAILED)
+-------------------------------------------------------------------------
+                           Receive email
+                           to check address
+                                 |
+                                 v
+                           Click on link
+                                 |
+                                 v
+                           Check on mail
+                               table,
+                           update user status,
+                           delete mail rec
+                          (Disabled, TOBECHK)
+-------------------------------------------------------------------------
+                                                       admin panel
+                                                       accept user
+                                                            |
+                                                            v
+                                                     send email with
+                                                     password,
+                                                     update user status
+                                                      (Normal, NONE)
+-------------------------------------------------------------------------
+                           Receive email
+                           with password
+-------------------------------------------------------------------------
 
      . Email-address expiration check
      . Account expiration
@@ -226,7 +245,6 @@
      - sistema di inserimento nuovi utenti (riversatore da form di inserimento)
 
      STEP 2
-     - aggiornare le funz di gestione db in modo che prevedano anche il flag SUSPEND
      - modifica password   
      - ripristino password 
 

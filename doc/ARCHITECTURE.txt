@@ -85,28 +85,38 @@ $user->rd_transp->chunk($this->rd_scristp++, $ret);
 
 ===== New users workflow =====
 
-status     |      |         DB         |
----------- |------+--------------------+
-unknown    |
-           V
-         brisk   ->      mail-table
-MAILED     |                 |
-           V                 |
-          user               |
-           |                 |
-           V                 |
-        mailbox              |
-           |                 |
-           V                 |
-        procmail             |
-           |                 |
-           V                 |
-  check with mail-table      |
-     and update DB      <----+
-  (needs ad-hoc page)
-TOBECHK    |
-           V
-       authorize
-normal     |
-           V
-
+         UserA                 UserB                      Admin
+-------------------------------------------------------------------------
+      guarante UserB
+           |
+           v
+      Save on mail
+         table,
+      email to UserB
+    (Disabled, MAILED)
+-------------------------------------------------------------------------
+                           Receive email
+                           to check address
+                                 |
+                                 v
+                           Click on link
+                                 |
+                                 v
+                           Check on mail
+                               table,
+                           update user status,
+                           delete mail rec
+                          (Disabled, TOBECHK)
+-------------------------------------------------------------------------
+                                                       admin panel
+                                                       accept user
+                                                            |
+                                                            v
+                                                     send email with
+                                                     password,
+                                                     update user status
+                                                      (Normal, NONE)
+-------------------------------------------------------------------------
+                           Receive email
+                           with password
+-------------------------------------------------------------------------
