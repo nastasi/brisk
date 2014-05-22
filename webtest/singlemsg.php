@@ -1,6 +1,6 @@
 <?php
 /*
- *  brisk - index_wr.php
+ *  brisk - singlemsg.php
  *
  *  Copyright (C) 2014      Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
@@ -22,8 +22,15 @@
  *
  */
 
-echo "code: $code<br>";
-echo "hash: $hash<br>";
+$G_base = "";
 
-exit;
+require_once("Obj/brisk.phh");
+require_once("Obj/user.phh");
+require_once("Obj/auth.phh");
+require_once("Obj/dbase_${G_dbasetype}.phh");
+require_once("Obj/singlemsg.phh");
+
+
+singlemsg("Ci siamo title", "Ci siamo fun");
+
 ?>

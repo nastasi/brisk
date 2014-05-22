@@ -24,20 +24,29 @@
 
 $G_base = "";
 
-$mlang_stat_day = array( 'normal match'=> array( 'it' => 'Partite normali',
-                                                 'en' => 'Normal matches' ),
-                         'special match' => array( 'it' => 'Partite speciali',
-                                                   'en' => 'Special matches'),
+$mlang_umgmt = array( 'nu_psubj' => array( 'it' => 'Brisk: credenziali di accesso.',
+                                           'en' => 'Brisk: credentials.'),
+                      'nu_ptext' => array( 'it' =>
+'Ciao, sono l\' amministratore del sito di Brisk.
 
-                         'info_total'=> array( 'it' => 'totali',
-                                               'en' => 'En totali')
-                         );
+La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al sito
+d\'ora in poi potrai utilizzare l\' utente \'%s\' e la password \'%s\'.
+
+Benvenuto e buone partite, mop.',
+                                           'en' => 'EN ptext [%s] [%s]'),
+                      'nu_phtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
+La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al  sito d\'ora in poi potrai usare l\' utente \'%s\' e la password \'%s\'.<br>
+Benvenuto e buone partite, mop.<br>',
+                                           'en' => 'EN phtml [%s] [%s]')
+                      );
+
 
 ini_set("max_execution_time",  "240");
 
 require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
+require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
 require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/Obj/placing.phh");
@@ -84,7 +93,7 @@ function check_auth()
 }
 
 function main() {
-    GLOBAL $G_dbpfx, $G_alarm_passwd, $f_mailusers, $sess, $_POST, $_SERVER;
+    GLOBAL $G_dbpfx, $G_lang, $G_alarm_passwd, $mlang_umgmt, $f_mailusers, $sess, $_POST, $_SERVER;
 
     if (check_auth() == FALSE) {
         echo "Authentication failed";
@@ -132,8 +141,32 @@ SELECT usr.*, guar.login AS guar_login
             
             printf("KEY: %s: %s %s<br>\n", $id, $value, $usr_obj->login);
             // change state
+            $passwd = passwd_gen();
+
+            if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
+                echo "fail 1.5<br>";
+                break;
+            }
+
+            if (($bdb->user_update_flag_ty($usr_obj->code,
+                                        USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_TOBECHK,
+                                        USER_FLAG_TY_NORM, USER_DIS_REA_NU_NONE)) == FALSE) {
+                echo "fail 2<br>";
+                break;
+            }
+
             // send mail
-            // populate
+            $subj = $mlang_umgmt['nu_psubj'][$G_lang];
+            $body_txt = sprintf($mlang_umgmt['nu_ptext'][$G_lang],
+                                $usr_obj->login, $passwd);
+            $body_htm = sprintf($mlang_umgmt['nu_phtml'][$G_lang],
+                                $usr_obj->login, $passwd);
+
+            if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                // mail error
+                fprintf(STDERR, "ERROR: mail send FAILED\n");
+                break;
+            }
         }
         exit;
     }

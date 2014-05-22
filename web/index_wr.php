@@ -75,19 +75,19 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 'Ciao, sono l\' amministratore del sito di Brisk.
 
 L\' utente \'%s\' ha garantito per te col nickname \'%s\',
-vai al link: %s/mailmgr.php?code=%d&hash=%s
+vai al link: %s
 per confermare il tuo indirizzo di posta elettronica.
 
 Ciò è necessario per ottenere la password.
 
 Saluti e buone partite, mop.',
-                                           'en' => 'EN mtext [%s] [%s] [%s] [%d] [%s]'),
+                                           'en' => 'EN mtext [%s] [%s] [%s]'),
                       'nu_mhtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
 L\' utente \'%s\' ha garantito per te col nickname \'%s\',<br>
-<a href="%s/mailmgr.php?code=%d&hash=%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
+<a href="%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
 Ciò è necessario per ottenere la password.<br><br>
 Saluti e buone partite, mop.<br>',
-                                           'en' => 'EN mhtml [%s] [%s] [%s] [%d] [%s]'),
+                                           'en' => 'EN mhtml [%s] [%s] [%s]'),
 
                       'nu_gtext' => array( 'it' =>
 'Ciao %s, sono l\' amministratore del sito di Brisk.
@@ -346,14 +346,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $bdb->transaction('BEGIN');
                     $is_trans = TRUE;
                     //   insert the new user disabled with reason NU_MAILED
-                    /*
-                     *  FIXME: password management
-                     */
-                    $the_pass = "LA PASSWORD";
-
-                    if (($usr_obj = $bdb->user_add($cli_name, $the_pass, $cli_email, 
+                    if (($usr_obj = $bdb->user_add($cli_name, 'THE_PASS', $cli_email,
                                                    USER_FLAG_TY_DISABLE,
-                                                   USER_DIS_REA_NU_TOBECHK, $user->code)) == FALSE) {
+                                                   USER_DIS_REA_NU_MAILED, $user->code)) == FALSE) {
                         fprintf(STDERR, "ERROR: user_add FAILED\n");
                         break;
                     }
@@ -361,14 +356,15 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                         fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
                         break;
                     }
-                    $hash = md5($curtime . $G_alarm_passwd . $cli_name . $the_pass . $cli_email);
+                    $hash = md5($curtime . $G_alarm_passwd . $cli_name . $cli_email);
 
-                    $confirm_page = sprintf("http://%s/%s/mailcheck.php", $G_domain, $G_webbase);
+                    $confirm_page = sprintf("http://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
+                                            $G_domain, $G_webbase, $mail_code, $hash);
                     $subj = $mlang_indwr['nu_msubj'][$G_lang];
                     $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
-                                        $user->name, $cli_name, $confirm_page, $mail_code, $hash);
+                                        $user->name, $cli_name, $confirm_page);
                     $body_htm = sprintf($mlang_indwr['nu_mhtml'][$G_lang],
-                                        $user->name, $cli_name, $confirm_page, $mail_code, $hash);
+                                        $user->name, $cli_name, $confirm_page);
 
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
