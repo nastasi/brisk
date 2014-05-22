@@ -138,7 +138,7 @@ SELECT usr.*, guar.login AS guar_login
                 break;
             }
             $usr_obj = pg_fetch_object($usr_pg, 0);
-            
+
             printf("KEY: %s: %s %s<br>\n", $id, $value, $usr_obj->login);
             // change state
             $passwd = passwd_gen();
@@ -179,11 +179,11 @@ SELECT usr.*, guar.login AS guar_login
 
             // retrieve list of active tournaments
             $usr_sql = sprintf("
-SELECT usr.*, guar.login AS guar_login 
-     FROM %susers AS usr 
-     JOIN %susers AS guar ON guar.code = usr.guar_code 
+SELECT usr.*, guar.login AS guar_login
+     FROM %susers AS usr
+     JOIN %susers AS guar ON guar.code = usr.guar_code
      WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d;", 
+         AND usr.disa_reas = %d;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_ALL, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_TOBECHK);
@@ -191,12 +191,12 @@ SELECT usr.*, guar.login AS guar_login
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
-            
+
             $usr_n = pg_numrows($usr_pg);
             $tab_lines = "";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
-                
+
                 $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td></td></tr>\n",
                                       $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login));
             }

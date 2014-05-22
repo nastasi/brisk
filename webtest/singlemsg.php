@@ -3,7 +3,7 @@
  *  brisk - singlemsg.php
  *
  *  Copyright (C) 2014      Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *

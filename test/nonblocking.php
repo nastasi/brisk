@@ -4,7 +4,7 @@
  *  brisk - test/nonblocking.php
  *
  *  Copyright (C) 2014 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -98,7 +98,7 @@ function sock_mgmt($sock)
     }
 }
 
-function main() 
+function main()
 {
     GLOBAL $blocking_mode;
 
@@ -120,7 +120,7 @@ function main()
     if (file_exists($file_socket)) {
         unlink($file_socket);
         }
-    
+
     $old_umask = umask(0);
     if (($list = stream_socket_server($unix_socket, $err, $errs)) === FALSE) {
         return (FALSE);
@@ -128,7 +128,7 @@ function main()
     umask($old_umask);
     printf("Blocking mode (listen): %d\n", $blocking_mode);
     stream_set_blocking($list, $blocking_mode); // Set the stream to non-blocking
-    
+
     while(1) {
         printf("\nLOOP BEGIN\n");
         if (($new_unix = stream_socket_accept($list)) == FALSE) {
