@@ -119,7 +119,7 @@ define('LICMGR_CHO_AFTER',  2);
 
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_domain, $G_webbase, $G_mail_domain, $G_mail_seed;
+    GLOBAL $G_domain, $G_webbase, $G_mail_seed;
     GLOBAL $G_shutdown, $G_alarm_passwd, $G_black_list, $G_lang, $G_room_help, $G_room_about;
     GLOBAL $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;

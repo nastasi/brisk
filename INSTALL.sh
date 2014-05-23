@@ -99,7 +99,7 @@ if [ "$1" = "chk" ]; then
 
     taggit="$(git describe --tags | sed 's/^v//g')"
     tagphp="$(grep "^\$G_brisk_version = " web/Obj/brisk.phh | sed 's/^[^"]\+"//g;s/".*//g')"
-    if [ "$taggit" != "v$tagphp" ]; then
+    if [ "$taggit" != "$tagphp" ]; then
         echo
 	echo "WARNING: taggit: [$taggit] tagphp: [$tagphp]"
         echo
@@ -416,7 +416,7 @@ if [ -f "$etc_path/$brisk_conf" ]; then
     echo "Config file $etc_path/$brisk_conf exists."
     echo "=== Dump the diff. ==="
     # diff -u "$etc_path/$brisk_conf" "${web_path}__""/Obj/brisk.conf-templ.pho"
-    diff -u <(cat "$etc_path/$brisk_conf" | grep '\$[a-zA-Z_ ]\+=' | sed 's/ = .*/ = /g' | sort | uniq) <(cat "${web_path}__""/Obj/brisk.conf-templ.pho" | grep '\$[a-zA-Z_ ]\+=' | sed 's/ = .*/ = /g' | sort | uniq )
+    diff -u <(cat "$etc_path/$brisk_conf" | egrep -v '^//|^#' | grep '\$[a-zA-Z_ ]\+=' | sed 's/ \+= .*/ = /g' | sort | uniq) <(cat "${web_path}__""/Obj/brisk.conf-templ.pho" | egrep -v '^//|^#' | grep '\$[a-zA-Z_ ]\+=' | sed 's/ \+= .*/ = /g' | sort | uniq )
     echo "===   End dump.    ==="
 else
     echo "Config file $etc_path/$brisk_conf not exists."
