@@ -71,7 +71,7 @@
                            with password
 -------------------------------------------------------------------------
 
-     . More user info in the list
+     DONE . More user info in the list
      DONE . Manage date to display when a user was required
      . Email-address expiration check
      . Account expiration

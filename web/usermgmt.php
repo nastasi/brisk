@@ -228,15 +228,19 @@ SELECT usr.*, guar.login AS guar_login
                 break;
             }
             $usr_n = pg_numrows($usr_pg);
-            $tab_lines = "";
+            $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td></td></tr>\n",
-                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login));
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login), $usr_obj->lintm);
             }
             ?>
 <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Brisk: new imported users management.</title>
+</head>
 <body>
 <h2> New imported users management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
@@ -355,15 +359,20 @@ SELECT usr.*, guar.login AS guar_login
             }
 
             $usr_n = pg_numrows($usr_pg);
-            $tab_lines = "";
+            $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td></td></tr>\n",
-                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login));
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login),
+                                      $usr_obj->lintm);
             }
             ?>
 <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Brisk: email verified user management.</title>
+</head>
      <body>
      <h2> E-mail verified user management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>

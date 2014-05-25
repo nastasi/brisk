@@ -509,7 +509,7 @@ function escinput($s)
 
 function eschtml($s)
 {
-    return htmlentities($s);
+    return htmlentities($s, ENT_COMPAT, "UTF-8");
 }
 
 function esclfhtml($s)
