@@ -160,8 +160,8 @@ class BriskDB
     function user_add($login, $pass, $email, $type, $disa_reas, $guar_code) {
         GLOBAL $G_dbpfx;
 
-        $usr_sql = sprintf("INSERT INTO %susers (login, pass, email, type, disa_reas, guar_code)
-                            VALUES ('%s', '%s', '%s', %d, %d, %d) RETURNING *;",
+        $usr_sql = sprintf("INSERT INTO %susers (login, pass, email, type, disa_reas, guar_code, lintm)
+                            VALUES ('%s', '%s', '%s', %d, %d, %d, now()) RETURNING *;",
                            $G_dbpfx, escsql(strtolower($login)), escsql($pass), escsql($email),
                            $type, $disa_reas, $guar_code);
 

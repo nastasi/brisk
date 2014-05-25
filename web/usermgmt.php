@@ -51,6 +51,7 @@ require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
 require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/Obj/placing.phh");
 require_once($G_base."spush/brisk-spush.phh");
+require_once($G_base."index_wr.php");
 
 function check_auth()
 {
@@ -93,85 +94,246 @@ function check_auth()
 }
 
 function main() {
-    GLOBAL $G_dbpfx, $G_lang, $G_alarm_passwd, $mlang_umgmt, $f_mailusers, $sess, $_POST, $_SERVER;
+    GLOBAL $G_dbpfx, $G_lang, $G_alarm_passwd, $G_domain, $G_webbase;
+    GLOBAL $mlang_umgmt, $mlang_indwr, $f_mailusers, $sess, $_POST, $_SERVER;
+
+    $curtime = time();
+    $status = "";
 
     if (check_auth() == FALSE) {
         echo "Authentication failed";
         exit;
     }
 
-    if (isset($_POST['f_accept'])) {
-        $action = "accept";
-    }
-    else if (isset($_POST['f_delete'])) {
-        $action = "delete";
-    }
-
-
-    if ($action == "accept") {
-        if (($bdb = BriskDB::create()) == FALSE) {
-            log_crit("stat-day: database connection failed");
-            break;
+    if (isset($_GET['do']) && $_GET['do'] == 'newuser') {
+        if (isset($_POST['f_accept'])) {
+            $action = "accept";
+        }
+        else if (isset($_POST['f_delete'])) {
+            $action = "delete";
+        }
+        else {
+            $action = "show";
         }
 
-        foreach($_POST as $key => $value) {
-            if (substr($key, 0, 9) != "f_newuser")
-                continue;
+        if ($action == "accept") {
+            foreach($_POST as $key => $value) {
+                if (substr($key, 0, 9) != "f_newuser")
+                    continue;
 
-            $id = (int)substr($key, 9);
-            if ($id <= 0)
-                continue;
+                $id = (int)substr($key, 9);
+                if ($id <= 0)
+                    continue;
 
+                // check existence of username or email
+                $is_trans = FALSE;
+                $res = FALSE;
+                do {
+                    if (($bdb = BriskDB::create()) == FALSE)
+                        break;
 
-            // retrieve list of active tournaments
-            $usr_sql = sprintf("
+                    // retrieve list added users
+                    $usr_sql = sprintf("
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
      WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
          AND usr.disa_reas = %d AND usr.code = %d;",
                                $G_dbpfx, $G_dbpfx,
-                               USER_FLAG_TY_ALL, USER_FLAG_TY_DISABLE,
-                               USER_DIS_REA_NU_TOBECHK, $id);
+                               USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                               USER_DIS_REA_NU_ADDED, $id);
+                    if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
+                        log_crit("stat-day: select from tournaments failed");
+                        break;
+                    }
+                    $usr_n = pg_numrows($usr_pg);
+                    if ($usr_n != 1) {
+                        $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
+                                          $id, $usr_n);
+                        break;
+                    }
+
+                    $usr_obj = pg_fetch_object($usr_pg, 0);
+
+                    $bdb->transaction('BEGIN');
+                    $is_trans = TRUE;
+
+
+                    if (($bdb->user_update_flag_ty($usr_obj->code,
+                                                   USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_ADDED,
+                                                   USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_MAILED)) == FALSE) {
+                        echo "fail 2<br>";
+                        break;
+                    }
+
+                    if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
+                        fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
+                        break;
+                    }
+                    $hash = md5($curtime . $G_alarm_passwd . $usr_obj->login . $usr_obj->email);
+
+                    $confirm_page = sprintf("http://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
+                                            $G_domain, $G_webbase, $mail_code, $hash);
+                    $subj = $mlang_indwr['nu_msubj'][$G_lang];
+                    $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
+                                        $usr_obj->guar_login, $usr_obj->login, $confirm_page);
+                    $body_htm = sprintf($mlang_indwr['nu_mhtml'][$G_lang],
+                                        $usr_obj->guar_login, $usr_obj->login, $confirm_page);
+
+                    $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
+                                                $curtime, $subj, $body_txt, $body_htm, $hash);
+
+                    if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                        // mail error
+                        fprintf(STDERR, "ERROR: mail send FAILED\n");
+                        break;
+                    }
+                    // save the mail
+                    if ($mail_item->store($bdb) == FALSE) {
+                        // store mail error
+                        fprintf(STDERR, "ERROR: store mail FAILED\n");
+                        break;
+                    }
+                    $status .= sprintf("status change for %s: SUCCESS<br>", $usr_obj->login);
+                    $bdb->transaction('COMMIT');
+                    $res = TRUE;
+                } while(FALSE);
+                if ($res == FALSE) {
+                    $status .= sprintf("Error occurred during accept action<br>");
+                    if ($is_trans)
+                        $bdb->transaction('ROLLBACK');
+                    break;
+                }
+            }
+        }
+
+        do {
+            if (($bdb = BriskDB::create()) == FALSE) {
+                log_crit("stat-day: database connection failed");
+                break;
+            }
+
+            // retrieve list added users
+            $usr_sql = sprintf("
+SELECT usr.*, guar.login AS guar_login
+     FROM %susers AS usr
+     JOIN %susers AS guar ON guar.code = usr.guar_code
+     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
+         AND usr.disa_reas = %d;",
+                               $G_dbpfx, $G_dbpfx,
+                               USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                               USER_DIS_REA_NU_ADDED);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
-            $usr_obj = pg_fetch_object($usr_pg, 0);
+            $usr_n = pg_numrows($usr_pg);
+            $tab_lines = "";
+            for ($i = 0 ; $i < $usr_n ; $i++) {
+                $usr_obj = pg_fetch_object($usr_pg, $i);
 
-            printf("KEY: %s: %s %s<br>\n", $id, $value, $usr_obj->login);
-            // change state
-            $passwd = passwd_gen();
-
-            if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
-                echo "fail 1.5<br>";
-                break;
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td></td></tr>\n",
+                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login));
             }
-
-            if (($bdb->user_update_flag_ty($usr_obj->code,
-                                        USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_TOBECHK,
-                                        USER_FLAG_TY_NORM, USER_DIS_REA_NU_NONE)) == FALSE) {
-                echo "fail 2<br>";
-                break;
-            }
-
-            // send mail
-            $subj = $mlang_umgmt['nu_psubj'][$G_lang];
-            $body_txt = sprintf($mlang_umgmt['nu_ptext'][$G_lang],
-                                $usr_obj->login, $passwd);
-            $body_htm = sprintf($mlang_umgmt['nu_phtml'][$G_lang],
-                                $usr_obj->login, $passwd);
-
-            if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
-                // mail error
-                fprintf(STDERR, "ERROR: mail send FAILED\n");
-                break;
-            }
-        }
+            ?>
+<html>
+<body>
+<h2> New imported users management.</h2>
+     <?php if ($status != "") { echo "$status"; } ?>
+<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+<table>
+<?php
+     echo $tab_lines;
+?>
+</table>
+<input type="submit" name="f_accept" value="Newuser Accept">
+<input type="submit" name="f_delete" value="Newuser Delete">
+</form>
+</body>
+</html>
+<?php
+           exit;
+        } while(FALSE);
+        printf("Some error occurred during newuser visualization\n");
         exit;
     }
-    else {
-        do {
+    else { // if ($_GET['do'] ...
+        if (isset($_POST['f_accept'])) {
+            $action = "accept";
+        }
+        else if (isset($_POST['f_delete'])) {
+            $action = "delete";
+        }
+        else {
+            $action = "show";
+        }
+
+        if ($action == "accept") {
+            if (($bdb = BriskDB::create()) == FALSE) {
+                log_crit("stat-day: database connection failed");
+                break;
+            }
+
+            foreach($_POST as $key => $value) {
+                if (substr($key, 0, 9) != "f_newuser")
+                    continue;
+
+                $id = (int)substr($key, 9);
+                if ($id <= 0)
+                    continue;
+
+
+                // retrieve list of active tournaments
+                $usr_sql = sprintf("
+SELECT usr.*, guar.login AS guar_login
+     FROM %susers AS usr
+     JOIN %susers AS guar ON guar.code = usr.guar_code
+     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
+         AND usr.disa_reas = %d AND usr.code = %d;",
+                                   $G_dbpfx, $G_dbpfx,
+                                   USER_FLAG_TY_ALL, USER_FLAG_TY_DISABLE,
+                                   USER_DIS_REA_NU_TOBECHK, $id);
+                if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
+                    log_crit("stat-day: select from tournaments failed");
+                    break;
+                }
+                $usr_obj = pg_fetch_object($usr_pg, 0);
+
+                printf("KEY: %s: %s %s<br>\n", $id, $value, $usr_obj->login);
+                // change state
+                $passwd = passwd_gen();
+
+                if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
+                    echo "fail 1.5<br>";
+                    break;
+                }
+
+                if (($bdb->user_update_flag_ty($usr_obj->code,
+                                               USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_TOBECHK,
+                                               USER_FLAG_TY_NORM, USER_DIS_REA_NONE)) == FALSE) {
+                    echo "fail 2<br>";
+                    break;
+                }
+
+                $bdb->user_update_login_time($usr_obj->code, 0);
+
+                // send mail
+                $subj = $mlang_umgmt['nu_psubj'][$G_lang];
+                $body_txt = sprintf($mlang_umgmt['nu_ptext'][$G_lang],
+                                    $usr_obj->login, $passwd);
+                $body_htm = sprintf($mlang_umgmt['nu_phtml'][$G_lang],
+                                    $usr_obj->login, $passwd);
+
+                if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                    // mail error
+                    fprintf(STDERR, "ERROR: mail send FAILED\n");
+                    break;
+                }
+            }
+            exit;
+        }
+        else {
+            do {
             if (($bdb = BriskDB::create()) == FALSE) {
                 log_crit("stat-day: database connection failed");
                 break;
@@ -202,25 +364,26 @@ SELECT usr.*, guar.login AS guar_login
             }
             ?>
 <html>
-<body>
-<form action="<?php echo "$PHP_SELF"; ?>" method="POST">
-<table>
-<?php
+     <body>
+     <h2> E-mail verified user management.</h2>
+     <?php if ($status != "") { echo "$status"; } ?>
+     <form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+     <table>
+     <?php
      echo $tab_lines;
-?>
-</table>
-<input type="submit" name="f_accept" value="Accept">
-<input type="submit" name="f_delete" value="Delete">
-</form>
-</body>
-</html>
-<?php
-        } while(FALSE);
-    }
+            ?>
+            </table>
+                  <input type="submit" name="f_accept" value="Accept">
+                  <input type="submit" name="f_delete" value="Delete">
+                  </form>
+                  </body>
+                  </html>
+                  <?php
+                  } while(FALSE);
+        } // else of if ($action ...
+    } // else of if ($do ...
 }
 
-
 main();
-
 
 ?>

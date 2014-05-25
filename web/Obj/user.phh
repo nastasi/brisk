@@ -69,8 +69,9 @@ define('USER_DIS_REA_INVMAIL',    1);
 define('USER_DIS_REA_LICENCE',    2);
 define('USER_DIS_REA_BANNED',     3);
 define('USER_DIS_REA_MALICIOUS',  4);
-define('USER_DIS_REA_NU_MAILED',  5); // new user: mail sent to be confirmed
-define('USER_DIS_REA_NU_TOBECHK', 6); // new user: name verification
+define('USER_DIS_REA_NU_ADDED',   5); // new user: new user added by hand or external sql
+define('USER_DIS_REA_NU_MAILED',  6); // new user: mail sent to be confirmed
+define('USER_DIS_REA_NU_TOBECHK', 7); // new user: name verification
 
 
 
