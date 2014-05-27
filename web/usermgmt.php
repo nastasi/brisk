@@ -47,6 +47,7 @@ require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
+require_once($G_base."Obj/dbase_base.phh");
 require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
 require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/Obj/placing.phh");
@@ -103,6 +104,11 @@ function main() {
     if (check_auth() == FALSE) {
         echo "Authentication failed";
         exit;
+    }
+
+    $nocheck = FALSE;
+    if (isset($_GET['f_nocheck'])) {
+        $nocheck = TRUE;
     }
 
     if (isset($_GET['do']) && $_GET['do'] == 'newuser') {
@@ -232,8 +238,9 @@ SELECT usr.*, guar.login AS guar_login
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login), $usr_obj->lintm);
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      $usr_obj->code, ($nocheck ? "" : "CHECKED"),
+                                      eschtml($usr_obj->login), eschtml($usr_obj->guar_login), $usr_obj->lintm);
             }
             ?>
 <html>
@@ -252,6 +259,123 @@ SELECT usr.*, guar.login AS guar_login
 </table>
 <input type="submit" name="f_accept" value="Newuser Accept">
 <input type="submit" name="f_delete" value="Newuser Delete">
+</form>
+</body>
+</html>
+<?php
+           exit;
+        } while(FALSE);
+        printf("Some error occurred during newuser visualization\n");
+        exit;
+    }
+
+    if (isset($_GET['do']) && $_GET['do'] == 'mailed') {
+        if (isset($_POST['f_resend'])) {
+            $action = "resend";
+        }
+        else if (isset($_POST['f_delete'])) {
+            $action = "delete";
+        }
+        else {
+            $action = "show";
+        }
+
+        if ($action == "resend") {
+            foreach($_POST as $key => $value) {
+                if (substr($key, 0, 9) != "f_newuser")
+                    continue;
+
+                $id = (int)substr($key, 9);
+                if ($id <= 0)
+                    continue;
+
+                $res = FALSE;
+                do {
+                    if (($bdb = BriskDB::create()) == FALSE) {
+                        $status .= "1<br>";
+                        break;
+                    }
+                    // retrieve list added users
+                    $mai_sql = sprintf("
+SELECT mail.*, usr.email AS email
+     FROM %susers AS usr
+     JOIN %smails AS mail ON mail.ucode = usr.code
+     WHERE mail.ucode = %d AND mail.type = %d",
+                                       $G_dbpfx, $G_dbpfx, $id, MAIL_TYP_CHECK);
+                    if (($mai_pg = pg_query($bdb->dbconn->db(), $mai_sql)) == FALSE) {
+                        log_crit("retrieve mail failed");
+                        $status .= "2<br>";
+                        break;
+                    }
+                    $mai_n = pg_numrows($mai_pg);
+                    if ($mai_n != 1) {
+                        $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
+                                          $id, $mai_n);
+                        break;
+                    }
+                    $mai_obj = pg_fetch_object($mai_pg, 0);
+                    $mail = MailDBItem::MailDBItemFromRecord($mai_obj);
+
+                    if (brisk_mail($mai_obj->email, $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
+                        // mail error
+                        $status .= sprintf("Send mail filed for user id %d<br>\n", $id);
+                        break;
+                    }
+                    $res = TRUE;
+                } while(FALSE);
+                if ($res == FALSE) {
+                    $status .= sprintf("Error occurred during resend action<br>");
+                    break;
+                }
+            } // foreach
+        }
+
+        do {
+            if (($bdb = BriskDB::create()) == FALSE) {
+                log_crit("stat-day: database connection failed");
+                break;
+            }
+
+            // retrieve list added users
+            $usr_sql = sprintf("
+SELECT usr.*, guar.login AS guar_login
+     FROM %susers AS usr
+     JOIN %susers AS guar ON guar.code = usr.guar_code
+     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
+         AND usr.disa_reas = %d;",
+                               $G_dbpfx, $G_dbpfx,
+                               USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                               USER_DIS_REA_NU_MAILED);
+            if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
+                log_crit("stat-day: select from tournaments failed");
+                break;
+            }
+            $usr_n = pg_numrows($usr_pg);
+            $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
+            for ($i = 0 ; $i < $usr_n ; $i++) {
+                $usr_obj = pg_fetch_object($usr_pg, $i);
+
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      $usr_obj->code, ($nocheck ? "" : "CHECKED"),
+                                      eschtml($usr_obj->login), eschtml($usr_obj->guar_login), $usr_obj->lintm);
+            }
+            ?>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Brisk: new mailed users management.</title>
+</head>
+<body>
+<h2> New mailed users management.</h2>
+     <?php if ($status != "") { echo "$status"; } ?>
+<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+<table>
+<?php
+     echo $tab_lines;
+?>
+</table>
+<input type="submit" name="f_resend" value="Mailed Resend">
+<input type="submit" name="f_delete" value="Mailed Delete">
 </form>
 </body>
 </html>
@@ -363,9 +487,9 @@ SELECT usr.*, guar.login AS guar_login
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" CHECKED></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-                                      $usr_obj->code, eschtml($usr_obj->login), eschtml($usr_obj->guar_login),
-                                      $usr_obj->lintm);
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      $usr_obj->code, ($nocheck ? "" : "CHECKED"),
+                                      eschtml($usr_obj->login), eschtml($usr_obj->guar_login), $usr_obj->lintm);
             }
             ?>
 <html>
