@@ -75,7 +75,7 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
 'Ciao, sono l\' amministratore del sito di Brisk.
 
 L\' utente \'%s\' ha garantito per te col nickname \'%s\',
-vai al link: %s
+vai al link: <%s>
 per confermare il tuo indirizzo di posta elettronica.
 
 Ciò è necessario per ottenere la password.

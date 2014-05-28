@@ -21,7 +21,8 @@ function brisk_mail($to, $subject, $text, $html)
 
     $mime = new Mail_mime($brisk_mail_hp);
 
-    $mime->setTXTBody($text);
+    // disabled to avoid client problems
+    // $mime->setTXTBody($text);
     $mime->setHTMLBody($html);
 
     $body = $mime->get();
