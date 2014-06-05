@@ -373,7 +373,7 @@ function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $co
       $tables .= '<table class="room_tab">';
       for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
           if ($user->flags & USER_FLAG_AUTH)
-        $i = $ii;
+              $i = $ii;
           else
               $i = TABLES_N - $ii - 1;
 

@@ -751,11 +751,6 @@ class Table {
     }
   }
 
-
-
-  //      $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
-  //                              ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
-
   // function act_content($isstanding, $sitted, $table, $cur_table, $allowed)
   function act_content($user)
   {
@@ -967,16 +962,7 @@ class Brisk
         
         for ($i = 0 ; $i < TABLES_N ; $i++) {
             $this->table[$i] = Table::create($i);
-            /* OLD METHOD
-               if ($i < 12) {
-               $row = ( (((int)($i / 4)) % 2) == 0 );
-               $col = ($i % 2 == 0);
-               $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
-               }
-               else {
-               $this->table[$i]->auth_only = FALSE;
-               }
-            */
+
             if ($i < TABLES_AUTH_N) 
                 $this->table[$i]->auth_only = TRUE;
             else
@@ -1197,8 +1183,7 @@ class Brisk
     for ($i = 0 ; $i < TABLES_N ; $i++) {
 
       $ret .= $this->table_content($user, $i);
-      // $ret .= table_act_content(($user->subst == 'standup'), $this->table[$i]->player_n, $i, $user->table, 
-      //                          ($this->table[$i]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
+
       $ret .=  $this->table[$i]->act_content($user);
       if ($this->table[$i]->wag_own != -1) 
         $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
@@ -1286,15 +1271,11 @@ class Brisk
 	  // clean the action buttons in other tables
 	  for ($e = 0 ; $e < TABLES_N ; $e++) {
 	    if ($this->table[$e]->player_n < PLAYERS_N) {
-	      // $ret .= table_act_content(TRUE, 0, $e, $user->table, 
-              //                           ($this->table[$e]->auth_only == FALSE ? TRUE : $user->flags & USER_FLAG_AUTH));
               $ret .= $this->table[$e]->act_content($user);
             }
 	  }
 	}
 	else {
-	  // $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table,
-          //                           ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
           $ret .= $table->act_content($user_cur);
 	}
       }
@@ -1369,8 +1350,6 @@ class Brisk
 	$ret .= $this->table_content($user_cur, $table_idx);
 	$ret .= $this->standup_content($user_cur);
 	
-	// $ret .= table_act_content(FALSE, 0, $table_idx, $user_cur->table,
-        //                           ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
         $ret .= $table->act_content($user_cur);
 
 
@@ -1398,8 +1377,7 @@ class Brisk
 	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
 	log_main("JOIN_WAKEUP more");
-	// $ret .= table_act_content(($user_cur->subst == 'standup'), $table->player_n, $table_idx, $user_cur->table,
-        //                           ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
+
         $ret .= $table->act_content($user_cur);
 
 	log_main("JOIN_WAKEUP end more");
@@ -1542,8 +1520,7 @@ class Brisk
           }
           else if ($table_idx > -1) {
               if ($table->player_n == PLAYERS_N) {
-                  // $ret .= table_act_content(($user_cur->subst == 'standup'), PLAYERS_N, $table_idx, $user_cur->table,
-                  ///                      ($table->auth_only == FALSE ? TRUE : $user_cur->flags & USER_FLAG_AUTH));
+
                   $ret .= $table->act_content($user_cur);
               }
           }
