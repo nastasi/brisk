@@ -10,6 +10,7 @@ card_hand=3
 players_n=3
 tables_n=44
 tables_auth_n=12
+tables_cert_n=4
 brisk_auth_conf="brisk_spu_auth.conf.pho"
 brisk_debug="0x0400"
 # brisk_debug="0xffff"
@@ -30,7 +31,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 3|8] [-t <(n>=4)>] [-T <auth_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 3|8] [-t <(n>=4)>] [-T <auth_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -40,6 +41,7 @@ function usage () {
     echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
     echo "  -T number of auth-only tables   - def. $tables_auth_n"
+    echo "  -G number of cert-only tables   - def. $tables_cert_n"
     echo "  -a authorization file name      - def. \"$brisk_auth_conf\""
     echo "  -d activate dabug               - def. $brisk_debug"
     echo "  -w dir where place the web tree - def. \"$web_path\""
@@ -150,6 +152,7 @@ while [ $# -gt 0 ]; do
         -n*) players_n="$(get_param "-n" "$1" "$2")"; sh=$?;;
         -t*) tables_n="$(get_param "-t" "$1" "$2")"; sh=$?;;
         -T*) tables_auth_n="$(get_param "-T" "$1" "$2")"; sh=$?;;
+        -G*) tables_cert_n="$(get_param "-G" "$1" "$2")"; sh=$?;;
         -a*) brisk_auth_conf="$(get_param "-a" "$1" "$2")"; sh=$?;;
         -d*) brisk_debug="$(get_param "-d" "$1" "$2")"; sh=$?;;
         -w*) web_path="$(get_param "-w" "$1" "$2")"; sh=$?;;
@@ -185,6 +188,7 @@ echo "    card_hand:   $card_hand"
 echo "    players_n:   $players_n"
 echo "    tables_n:    $tables_n"
 echo "    tables_auth_n: $tables_auth_n"
+echo "    tables_cert_n: $tables_cert_n"
 echo "    brisk_auth_conf: \"$brisk_auth_conf\""
 echo "    brisk_debug:\"$brisk_debug\""
 echo "    web_path:   \"$web_path\""
@@ -208,6 +212,7 @@ if [ ! -z "$outconf" ]; then
     echo "players_n=$players_n"
     echo "tables_n=$tables_n"
     echo "tables_auth_n=$tables_auth_n"
+    echo "tables_cert_n=$tables_cert_n"
     echo "brisk_auth_conf=\"$brisk_auth_conf\""
     echo "brisk_debug=\"$brisk_debug\""
     echo "web_path=\"$web_path\""
@@ -374,23 +379,18 @@ sed -i "s/define *( *'BIN5_PLAYERS_N', *[0-9]\+ *)/define('BIN5_PLAYERS_N', $pla
 
 sed -i "s@define *( *'FTOK_PATH',[^)]*)@define('FTOK_PATH', \"$ftok_path\")@g" $(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'FTOK_PATH',[^)]*)" {} \;)
 
-sed -i "s@define *( *'SITE_PREFIX',[^)]*)@define('SITE_PREFIX', \"$prefix_path\")@g" ${web_path}__/Obj/sac-a-push.phh
-
-sed -i "s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len)@g" ${web_path}__/Obj/sac-a-push.phh
+sed -i "s@define *( *'SITE_PREFIX',[^)]*)@define('SITE_PREFIX', \"$prefix_path\")@g;
+s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len)@g" ${web_path}__/Obj/sac-a-push.phh
 
 sed -i "s@define *( *'USOCK_PATH',[^)]*)@define('USOCK_PATH', \"$usock_path\")@g" ${web_path}__/spush/brisk-spush.phh
 
-sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g" ${web_path}__/Obj/brisk.phh
-
-sed -i "s@define *( *'TABLES_AUTH_N',[^)]*)@define('TABLES_AUTH_N', $tables_auth_n)@g" ${web_path}__/Obj/brisk.phh
-
-sed -i "s@define *( *'BRISK_DEBUG',[^)]*)@define('BRISK_DEBUG', $brisk_debug)@g" ${web_path}__/Obj/brisk.phh
-
-sed -i "s@define *( *'LEGAL_PATH',[^)]*)@define('LEGAL_PATH', \"$legal_path\")@g" ${web_path}__/Obj/brisk.phh
-
-sed -i "s@define *( *'PROXY_PATH',[^)]*)@define('PROXY_PATH', \"$proxy_path\")@g" ${web_path}__/Obj/brisk.phh
-
-sed -i "s@define *( *'BRISK_CONF',[^)]*)@define('BRISK_CONF', \"$brisk_conf\")@g" ${web_path}__/Obj/brisk.phh
+sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g;
+s@define *( *'TABLES_AUTH_N',[^)]*)@define('TABLES_AUTH_N', $tables_auth_n)@g;
+s@define *( *'TABLES_CERT_N',[^)]*)@define('TABLES_CERT_N', $tables_cert_n)@g;
+s@define *( *'BRISK_DEBUG',[^)]*)@define('BRISK_DEBUG', $brisk_debug)@g;
+s@define *( *'LEGAL_PATH',[^)]*)@define('LEGAL_PATH', \"$legal_path\")@g;
+s@define *( *'PROXY_PATH',[^)]*)@define('PROXY_PATH', \"$proxy_path\")@g;
+s@define *( *'BRISK_CONF',[^)]*)@define('BRISK_CONF', \"$brisk_conf\")@g;" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
 

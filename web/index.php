@@ -888,6 +888,7 @@ supported by:<br>
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
+   var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
    var g_prefs, g_prefs_new = null;
    var g_listen;
    var g_withflash = false;
@@ -1046,6 +1047,7 @@ echo "$body"; ?>
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
+   var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
    var g_prefs, g_prefs_new = null;
    var g_listen;
    var g_is_spawn = 0;
