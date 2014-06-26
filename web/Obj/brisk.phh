@@ -2255,28 +2255,6 @@ class Brisk
       return (FALSE);
   }
 
-  static function lock_data($is_exclusive)
-  {
-      if (($res = file_lock(FTOK_PATH."/main", $is_exclusive)) != FALSE) {
-          self::$delta_t = microtime(TRUE);
-          log_lock("LOCK   room         [".self::$delta_t."]");
-          
-          return ($res);
-      }
-
-      return (FALSE);
-  }
-  
-  static function unlock_data($res)
-  {
-    GLOBAL $sess; 
-    
-    log_lock("UNLOCK room         [".(microtime(TRUE) - (self::$delta_t))."]");
-
-    file_unlock($res);
-  }
-
-
   function standup_content($user)
   {
     $ret = "";

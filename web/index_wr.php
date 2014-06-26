@@ -853,8 +853,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
     }
     
-/* Brisk::unlock_data($sem); */
-/* exit; */
     return (FALSE);
 }
 ?>

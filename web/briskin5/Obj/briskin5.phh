@@ -1079,7 +1079,6 @@ class Bin5_user extends User {
           $this->rd_step  = $this->step;
       } /* if ($this->rd_step == -1) { */
       else {
-          /* $sem = Brisk::lock_data(FALSE); */
           $S_load_stat['rU_heavy']++;
 
           if ($this->rd_step < $this->step) {
@@ -1087,7 +1086,6 @@ class Bin5_user extends User {
                   if ($this->rd_step + COMM_N < $this->step) {
                       if ($this->rd_stat != $this->stat) {
                           $to_stat = $this->stat;
-                          /* Brisk::unlock_data($sem); */
                           log_load("RESYNC");
                           printf("xXx BIN5_USER::MAINCHECK\n");
                           return ($this->page_sync($this->sess, ($to_stat == "table" ? "index.php" : "../index.php"), $this->table, $this->table_token));
@@ -1136,7 +1134,6 @@ class Bin5_user extends User {
               } /* if ($this->the_end == TRUE) { ... */
           } /* if ($this->rd_step < $this->step) { */
 
-          /* Brisk::unlock_data($sem); */
       }  /* else of if ($this->rd_step == -1) { */
 
 
