@@ -954,39 +954,59 @@ class Brisk
 
     public static $sess_cur;
 
-    function Brisk($crystal_filename) {
-        $this->crystal_filename = $crystal_filename;
-        $this->user  = array();
-        $this->table = array();
-        $this->match = array();
+    function Brisk()
+    {
+    }
+
+    // constructor
+    static function create($crystal_filename)
+    {
+        if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
+            if (($brisk = unserialize($brisk_ser)) != FALSE) {
+                fprintf(STDERR, "ROOM FROM FILE\n");
+                rename($crystal_filename, $crystal_filename.".old");
+
+                return($brisk);
+            }
+        }
+
+        fprintf(STDERR, "NEW ROOM\n");
+        $thiz = new Brisk();
+
+        $thiz->crystal_filename = $crystal_filename;
+        $thiz->user  = array();
+        $thiz->table = array();
+        $thiz->match = array();
         
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-            $this->user[$i] = User::create($this, $i, "", "");
+            $thiz->user[$i] = User::create($thiz, $i, "", "");
         }
         
         for ($i = 0 ; $i < TABLES_N ; $i++) {
-            $this->table[$i] = Table::create($i);
+            $thiz->table[$i] = Table::create($i);
             /* OLD METHOD
                if ($i < 12) {
                $row = ( (((int)($i / 4)) % 2) == 0 );
                $col = ($i % 2 == 0);
-               $this->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
+               $thiz->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
                }
                else {
-               $this->table[$i]->auth_only = FALSE;
+               $thiz->table[$i]->auth_only = FALSE;
                }
             */
             if ($i < TABLES_AUTH_N) 
-                $this->table[$i]->auth_only = TRUE;
+                $thiz->table[$i]->auth_only = TRUE;
             else
-                $this->table[$i]->auth_only = FALSE;
+                $thiz->table[$i]->auth_only = FALSE;
         }
-        $this->garbage_timeout = 0;
-        $this->shm_sz = SHM_DIMS_MIN;
+        $thiz->garbage_timeout = 0;
+        $thiz->shm_sz = SHM_DIMS_MIN;
 
-        $this->delay_mgr = new Delay_Manager(1.5);
+        $thiz->delay_mgr = new Delay_Manager(1.5);
 
         static::$sess_cur = FALSE;
+
+        return ($thiz);
     }
 
   function garbage_manager($force)
@@ -2224,23 +2244,6 @@ class Brisk
     }
   }
 
-  // Static functions
-  static function create($crystal_filename)
-  {
-      if (($brisk_ser = @file_get_contents($crystal_filename)) == FALSE ||
-          ($brisk = unserialize($brisk_ser)) == FALSE) {
-          fprintf(STDERR, "NEW ROOM\n");
-          $brisk = new Brisk($crystal_filename);
-      }
-      else {
-          fprintf(STDERR, "ROOM FROM FILE\n");
-          rename($crystal_filename, $crystal_filename.".old");
-      }
-
-    return $brisk;
-  }
-  
-  
   function load_data() 
   {
     GLOBAL $sess;
