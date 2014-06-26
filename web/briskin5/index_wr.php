@@ -527,8 +527,6 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                 log_wr("NOSENSE");
         }
     }
-    log_wr("before save data");
-    log_wr($user->step, 'bin::index_wr.php: after save_data()');
     return TRUE;
 }
 ?>

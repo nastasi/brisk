@@ -852,9 +852,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             }
         }
     }
-    log_wr("before save data");
-    // Brisk::save_data($brisk);
-    log_wr($user->step, 'index_wr.php: after save_data()');
     
 /* Brisk::unlock_data($sem); */
 /* exit; */
