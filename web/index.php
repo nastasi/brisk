@@ -237,7 +237,7 @@ function poll_dom() {
     return '';
 }
 
-function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $cookie)
+function index_main(&$brisk, $transp_type, &$header_out, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -258,8 +258,10 @@ function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $co
     if (($table_token = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
         unset ($table_token);
 
+    $remote_addr = addrtoipv4($remote_addr_full);
+
     // Use of proxies isn't allowed.
-    if (!$G_is_local && is_proxy($addr)) {
+    if (!$G_is_local && is_proxy($remote_addr)) {
         return FALSE;
     }
 
@@ -298,15 +300,22 @@ function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $co
       if ($ACTION == "login" && isset($name)) {
           log_main("pre garbage_manager DUE");
 
-          if (isset($pass_private) == FALSE) {
+          if (isset($pass_private) == FALSE || $pass_private == "") {
               $pass_private = FALSE;
+
+              $banned = FALSE;
+              if ($brisk->ban_check($remote_addr)) {
+                  // TODO: find a way to add a nonblocking sleep(5) here
+                  $banned = TRUE;
+                  $idx = -1;
+              }
           }
 
           $brisk->garbage_manager(TRUE);
           /* try login */
 
-          $ipv4addr = addrtoipv4($addr);
-          if (($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private, $ipv4addr, $cookie)) != FALSE) {
+          if ($banned == FALSE &&
+              ($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private, $remote_addr, $cookie)) != FALSE) {
               $brisk->sess_cur_set($user->sess);
               $ACTION = "room";
               if ($idx < 0) {
@@ -314,7 +323,7 @@ function index_main(&$brisk, $transp_type, &$header_out, $addr, $get, $post, $co
                   $is_login = TRUE;
               }
 
-              log_legal($curtime, $ipv4addr, $user, "STAT:LOGIN", '');
+              log_legal($curtime, $remote_addr, $user, "STAT:LOGIN", '');
 
               // recovery lost game
               if ($user->stat == "table") {

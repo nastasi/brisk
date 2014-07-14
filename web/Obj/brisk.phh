@@ -151,10 +151,10 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.14.2";
+$G_brisk_version = "4.14.3";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuovo sistema di registrazione degli utenti, aggiunto reinvio dell\' email di verifica',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuovo sistema di registrazione degli utenti, aggiunto reinvio dell\' email di verifica, ban con classi di IP',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: new users subscription system.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
@@ -578,6 +578,33 @@ function xcapemesg($s)
 }
 
 
+class IPClass {
+    var $addr;
+    var $mask;
+
+    function IPClass($ipset)
+    {
+        //split
+        $elem = split("/", $ipset, 2);
+        $addr = $elem[0];
+        $mask = (int)$elem[1];
+
+        //convert mask
+
+        $this->mask = ((1<<($mask))-1) << (32 - $mask);
+        $this->addr = ip2long($addr) & $this->mask;
+
+        fprintf(STDERR, "New ipclass: %x (%x)\n", $this->addr, $this->mask);
+    }
+
+    function match($ip)
+    {
+        fprintf(STDERR, "IP: %x, ADDR: %x, MASK: %x -> (%d)\n",
+                $ip, $this->addr, $this->mask, ((ip2long($ip) & $this->mask) == $this->addr));
+        return (($ip & $this->mask) == $this->addr);
+    }
+}
+
 class Vect {
     function Vect($a)
     {
@@ -945,35 +972,185 @@ class Brisk
     var $step; // current step of the comm array
     var $garbage_timeout;
     var $shm_sz;
-    
+
+    var $ban_list;  // ban list (authized allowed)
+    var $black_list;  // black list (anti-dos, noone allowed)
+
     var $delay_mgr;
 
     public static $sess_cur;
 
-    function Brisk($crystal_filename) {
-        $this->crystal_filename = $crystal_filename;
-        $this->user  = array();
-        $this->table = array();
-        $this->match = array();
-        
+    function Brisk()
+    {
+    }
+
+    // constructor
+    static function create($crystal_filename, $ban_list, $black_list) {
+        if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
+            if (($brisk = unserialize($brisk_ser)) != FALSE) {
+                fprintf(STDERR, "ROOM FROM FILE\n");
+                rename($crystal_filename, $crystal_filename.".old");
+
+                $brisk->reload();
+
+                return($brisk);
+            }
+        }
+
+        fprintf(STDERR, "NEW ROOM\n");
+        $thiz = new Brisk();
+
+        $thiz->crystal_filename = $crystal_filename;
+        $thiz->user  = array();
+        $thiz->table = array();
+        $thiz->match = array();
+
+        $thiz->ban_list = NULL;
+        $thiz->black_list = NULL;
+
+        fprintf(STDERR, "PRE IPCLASS_UPDATE (%d, %d)\n", count($ban_list), count($black_list));
+        $thiz->ipclass_update('ban_list', $ban_list);
+        $thiz->ipclass_update('black_list', $black_list);
+        fprintf(STDERR, "POST IPCLASS_UPDATE %d %d\n", count($thiz->ban_list), count($thiz->black_list));
+
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-            $this->user[$i] = User::create($this, $i, "", "");
+            $thiz->user[$i] = User::create($thiz, $i, "", "");
         }
         
         for ($i = 0 ; $i < TABLES_N ; $i++) {
-            $this->table[$i] = Table::create($i);
-
+            $thiz->table[$i] = Table::create($i);
+            /* OLD METHOD
+               if ($i < 12) {
+               $row = ( (((int)($i / 4)) % 2) == 0 );
+               $col = ($i % 2 == 0);
+               $thiz->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
+               }
+               else {
+               $thiz->table[$i]->auth_only = FALSE;
+               }
+            */
             if ($i < TABLES_AUTH_N) 
-                $this->table[$i]->auth_only = TRUE;
+                $thiz->table[$i]->auth_only = TRUE;
             else
-                $this->table[$i]->auth_only = FALSE;
+                $thiz->table[$i]->auth_only = FALSE;
         }
-        $this->garbage_timeout = 0;
-        $this->shm_sz = SHM_DIMS_MIN;
+        $thiz->garbage_timeout = 0;
+        $thiz->shm_sz = SHM_DIMS_MIN;
 
-        $this->delay_mgr = new Delay_Manager(1.5);
+        $thiz->delay_mgr = new Delay_Manager(1.5);
 
         static::$sess_cur = FALSE;
+
+        return ($thiz);
+    }
+
+    function ipclass_update($ip_out_s, $ip_in)
+    {
+        fprintf(STDERR, "N_IN: %d\n", count($ip_in));
+
+        $ip_out = &$this->$ip_out_s;
+
+        // if already set clean the ban_list property
+        if ($ip_out) {
+            $ct = count($ip_out);
+            for ($i = 0 ; $i < $ct ; $i++) {
+                unset($ip_out[$i]);
+            }
+            unset($ip_out);
+        }
+
+        $ip_out = array();
+        for ($i = 0 ; $i < count($ip_in) ; $i++) {
+            $ip_out[$i] = new IPClass($ip_in[$i]);
+        }
+    }
+
+    function reload($ban_list, $black_list)
+    {
+        fprintf(STDERR, "RELOAD STUFF (%d)(%d)\n", count($ban_list), count($black_list));
+
+        $this->ipclass_update("ban_list", $ban_list);
+        $this->ipclass_update("black_list", $black_list);
+
+        $this->banned_kickoff();
+        $this->garbage_manager(TRUE);
+    }
+
+    function banned_kickoff()
+    {
+        $is_ban = FALSE;
+
+        for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+            $table_cur = $this->table[$table_idx];
+            // if the table is complete and exists we check users IP
+
+            if ($table_cur->player_n == PLAYERS_N) {
+                if (isset($this->match[$table_idx]) &&
+                    $table_cur->table_token == $bin5->table_token) {
+                    log_main("PLAYERS == N TABLE ".$table_idx);
+
+                    $bin5 = $this->match[$table_idx];
+
+                    $is_ban |= $bin5->banned_kickoff();
+                }
+            }
+        }
+
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+
+            if ($user_cur->sess == "")
+                continue;
+
+            // check if the IP is blacklisted
+            if ($this->black_check($user_cur->ip)) {
+                $user_cur->lacc = 0;
+                $is_ban = TRUE;
+                continue;
+            }
+
+            // if authorized not check if banlisted
+            if ($user_cur->flags & USER_FLAG_AUTH) {
+                continue;
+            }
+
+            if ($this->ban_check($user_cur->ip)) {
+                $user_cur->lacc = 0;
+                $is_ban = TRUE;
+            }
+        }
+
+        return $is_ban;
+    }
+
+    function ban_check($ip_str)
+    {
+        $ip = ip2long($ip_str);
+        fprintf(STDERR, "Brisk::ban_check %d\n", count($this->ban_list));
+        for ($i = 0 ; $i < count($this->ban_list) ; $i++) {
+            fprintf(STDERR, "ban_list[%d] = %x (%x)\n", $i,
+                    $this->ban_list[$i]->addr, $this->ban_list[$i]->mask);
+            if ($this->ban_list[$i]->match($ip)) {
+                fprintf(STDERR, "\n\nMATCHA!\n\n");
+                return(TRUE);
+            }
+        }
+        return (FALSE);
+    }
+
+    function black_check($ip_str)
+    {
+        $ip = ip2long($ip_str);
+        fprintf(STDERR, "Brisk::black_check %d\n", count($this->black_list));
+        for ($i = 0 ; $i < count($this->black_list) ; $i++) {
+            fprintf(STDERR, "black_list[%d] = %x (%x)\n", $i,
+                   $this->black_list[$i]->addr, $this->black_list[$i]->mask);
+            if ($this->black_list[$i]->match($ip)) {
+                fprintf(STDERR, "\n\nMATCHA!\n\n");
+                return(TRUE);
+            }
+        }
+        return (FALSE);
     }
 
   function garbage_manager($force)
@@ -2098,7 +2275,6 @@ class Brisk
       $this->user[$idx]->ip = $ip;
 
       $this->user[$idx]->rec = $authenticate;
-      fprintf(STDERR, "MOP: [%s]\n", $authenticate->supp_comp);
       $this->user[$idx]->flags = $user_type;
       $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
       $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
@@ -2202,118 +2378,6 @@ class Brisk
     }
   }
 
-  // Static functions
-  static function create($crystal_filename)
-  {
-      if (($brisk_ser = @file_get_contents($crystal_filename)) == FALSE ||
-          ($brisk = unserialize($brisk_ser)) == FALSE) {
-          fprintf(STDERR, "NEW ROOM\n");
-          $brisk = new Brisk($crystal_filename);
-      }
-      else {
-          fprintf(STDERR, "ROOM FROM FILE\n");
-          rename($crystal_filename, $crystal_filename.".old");
-      }
-
-    return $brisk;
-  }
-  
-  
-  function load_data() 
-  {
-    GLOBAL $sess;
-
-    do {
-      if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) {
-	log_main("ftok failed");
-	break;
-      }
-    
-      if (($shm_sz = sharedmem_sz($tok)) == -1) {
-	log_main("shmop_open failed");
-      }
-	
-      if ($shm_sz == -1)
-	$shm_sz = SHM_DIMS_MIN;
-
-      if ($shm = shm_attach($tok, $shm_sz)) {
-          $brisk = @shm_get_var($shm, $tok); // CHECKED BELOW
-          
-          log_only("bri ==  ".($brisk == FALSE ?   "FALSE" : "TRUE")."  bri ===  ".($brisk === FALSE ? "FALSE" : "TRUE")."  bri isset ".(isset($brisk) ?   "TRUE" : "FALSE"));
-          if (isset($brisk))
-              log_only("bri count ".count($brisk));
-          
-          if ($brisk == FALSE) {
-              log_only("INIT MAIN DATA");
-              shm_detach($shm);
-              
-              $brisk = Brisk::create();
-              
-              log_shme("Brisk::create");
-
-              if (Brisk::save_data($brisk) == FALSE)
-                  return FALSE;
-
-              return $brisk;
-          }
-          $brisk->shm_sz = $shm_sz;
-          
-          shm_detach($shm);
-
-          for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-              if (($brisk->user[$i] = User::load_data($i, FALSE)) == FALSE) {
-                  log_crit("User::load_data failed");
-                  break;
-              }
-          }
-          if ($i < MAX_PLAYERS) {
-              break;
-          }
-      }
-      
-      //  
-      // SHSPLIT: load users from the shared memory
-      //
-      return ($brisk);
-    } while (0);
-    
-    return (FALSE);
-  }
-  
-
-  function save_data_orig($brisk) 
-  {
-    GLOBAL $sess;
-    
-    $shm =   FALSE;
-    
-    // var_dump($brisk);
-    
-    if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) 
-      return (FALSE);
-    
-    while ($brisk->shm_sz < SHM_DIMS_MAX) {
-      if (($shm = shm_attach($tok, $brisk->shm_sz)) == FALSE)
-	break;
-      
-      // log_only("PUT_VAR DI ".strlen(serialize($brisk)));
-      if (@shm_put_var($shm, $tok, $brisk) != FALSE) {
-	shm_detach($shm);
-	return (TRUE);
-      }
-      if (shm_remove($shm) === FALSE) {
-	log_only("REMOVE FALLITA");
-	break;
-      }
-      shm_detach($shm);
-      $brisk->shm_sz += SHM_DIMS_DLT;
-    } 
-
-    if ($shm)
-      shm_detach($shm);
-    
-    return (FALSE);
-  }
   function dump_data()
   {
       $brisk_ser = serialize($this);
@@ -2324,77 +2388,6 @@ class Brisk
       
       return (FALSE);
   }
-
-  function save_data($brisk) 
-  {
-      GLOBAL $sess;
-    
-      $ret =   FALSE;
-      $shm =   FALSE;
-    
-      if (($tok = @ftok(FTOK_PATH."/main", "C")) == -1) 
-          return (FALSE);
-    
-      // SHSPLIT: before save the $brisk you must save users, 
-      //          detach from main struct and (then) reattach
-      $user_park = array();
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-          $user_park[$i]  = $brisk->user[$i];
-          $brisk->user[$i] = FALSE;
-      }
-
-      while ($brisk->shm_sz < SHM_DIMS_MAX) {
-          if (($shm = shm_attach($tok, $brisk->shm_sz)) == FALSE)
-              break;
-      
-          // log_only("PUT_VAR DI ".strlen(serialize($brisk)));
-          if (@shm_put_var($shm, $tok, $brisk) != FALSE) {
-              log_shme("Brisk::save_data");
-              $ret = TRUE;
-              break;
-          }
-          if (shm_remove($shm) === FALSE) {
-              log_only("REMOVE FALLITA");
-              break;
-          }
-          shm_detach($shm);
-          $brisk->shm_sz += SHM_DIMS_DLT;
-      } 
-
-      if ($shm)
-          shm_detach($shm);
-    
-      // SHSPLIT: reattach users to the room class
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-          User::save_data($user_park[$i], $i);
-          $brisk->user[$i] = $user_park[$i];
-      }
-      log_load("FINISH: ".($ret == TRUE ? "TRUE" : "FALSE"));
-
-      return ($ret);
-  }
-
-  static function lock_data($is_exclusive)
-  {
-      if (($res = file_lock(FTOK_PATH."/main", $is_exclusive)) != FALSE) {
-          self::$delta_t = microtime(TRUE);
-          log_lock("LOCK   room         [".self::$delta_t."]");
-          
-          return ($res);
-      }
-
-      return (FALSE);
-  }
-  
-  static function unlock_data($res)
-  {
-    GLOBAL $sess; 
-    
-    log_lock("UNLOCK room         [".(microtime(TRUE) - (self::$delta_t))."]");
-
-    file_unlock($res);
-  }
-
 
   function standup_content($user)
   {
@@ -2488,9 +2481,17 @@ class Brisk
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
-      GLOBAL $G_black_list;
+      GLOBAL $G_ban_list, $G_black_list;
 
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
+      $remote_addr = addrtoipv4($addr);
+
+          fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
+      if ($this->black_check($remote_addr)) {
+          // TODO: waiting async 5 sec before close
+          fprintf(STDERR, "\n\n\n BLACK_CHECK \n\n\n");
+          return (FALSE);
+      }
 
       $enc = get_encoding($header);
       if (isset($header['User-Agent'])) {

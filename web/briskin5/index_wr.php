@@ -40,14 +40,9 @@ require_once("Obj/briskin5.phh");
  */
 function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_base, $G_dbasetype, $G_black_list;
+    GLOBAL $G_base, $G_dbasetype, $G_ban_list, $G_black_list;
 
     $remote_addr = addrtoipv4($remote_addr_full);
-
-    if (array_search($remote_addr, $G_black_list) !== FALSE) {
-        // TODO: waiting async 5 sec before close
-        return (FALSE);
-    }
 
     $curtime = time();
     if ($bin5 == NULL) {
@@ -77,7 +72,8 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
         return FALSE;
     }
     $bin5->brisk->sess_cur_set($user->sess);
-    if (array_search($user->ip, $G_black_list) !== FALSE) {
+    if (!($user->flags & USER_FLAG_AUTH) &&
+        $bin5->brisk->ban_check($user->ip)) {
         // TODO: waiting async 5 sec before close
         return (FALSE);
     }
@@ -527,8 +523,6 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                 log_wr("NOSENSE");
         }
     }
-    log_wr("before save data");
-    log_wr($user->step, 'bin::index_wr.php: after save_data()');
     return TRUE;
 }
 ?>
