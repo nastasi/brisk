@@ -577,6 +577,33 @@ function xcapemesg($s)
 }
 
 
+class IPClass {
+    var $addr;
+    var $mask;
+
+    function IPClass($ipset)
+    {
+        //split
+        $elem = split("/", $ipset, 2);
+        $addr = $elem[0];
+        $mask = (int)$elem[1];
+
+        //convert mask
+
+        $this->mask = ((1<<($mask))-1) << (32 - $mask);
+        $this->addr = ip2long($addr) & $this->mask;
+
+        fprintf(STDERR, "New ipclass: %x (%x)\n", $this->addr, $this->mask);
+    }
+
+    function match($ip)
+    {
+        fprintf(STDERR, "IP: %x, ADDR: %x, MASK: %x -> (%d)\n",
+                $ip, $this->addr, $this->mask, ((ip2long($ip) & $this->mask) == $this->addr));
+        return (($ip & $this->mask) == $this->addr);
+    }
+}
+
 class Vect {
     function Vect($a)
     {
@@ -949,7 +976,10 @@ class Brisk
     var $step; // current step of the comm array
     var $garbage_timeout;
     var $shm_sz;
-    
+
+    var $ban_list;  // ban list (authized allowed)
+    var $black_list;  // black list (anti-dos, noone allowed)
+
     var $delay_mgr;
 
     public static $sess_cur;
@@ -959,12 +989,13 @@ class Brisk
     }
 
     // constructor
-    static function create($crystal_filename)
-    {
+    static function create($crystal_filename, $ban_list, $black_list) {
         if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
             if (($brisk = unserialize($brisk_ser)) != FALSE) {
                 fprintf(STDERR, "ROOM FROM FILE\n");
                 rename($crystal_filename, $crystal_filename.".old");
+
+                $brisk->reload();
 
                 return($brisk);
             }
@@ -977,7 +1008,15 @@ class Brisk
         $thiz->user  = array();
         $thiz->table = array();
         $thiz->match = array();
-        
+
+        $thiz->ban_list = NULL;
+        $thiz->black_list = NULL;
+
+        fprintf(STDERR, "PRE IPCLASS_UPDATE (%d, %d)\n", count($ban_list), count($black_list));
+        $thiz->ipclass_update('ban_list', $ban_list);
+        $thiz->ipclass_update('black_list', $black_list);
+        fprintf(STDERR, "POST IPCLASS_UPDATE %d %d\n", count($thiz->ban_list), count($thiz->black_list));
+
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
             $thiz->user[$i] = User::create($thiz, $i, "", "");
         }
@@ -1007,6 +1046,115 @@ class Brisk
         static::$sess_cur = FALSE;
 
         return ($thiz);
+    }
+
+    function ipclass_update($ip_out_s, $ip_in)
+    {
+        fprintf(STDERR, "N_IN: %d\n", count($ip_in));
+
+        $ip_out = &$this->$ip_out_s;
+
+        // if already set clean the ban_list property
+        if ($ip_out) {
+            $ct = count($ip_out);
+            for ($i = 0 ; $i < $ct ; $i++) {
+                unset($ip_out[$i]);
+            }
+            unset($ip_out);
+        }
+
+        $ip_out = array();
+        for ($i = 0 ; $i < count($ip_in) ; $i++) {
+            $ip_out[$i] = new IPClass($ip_in[$i]);
+        }
+    }
+
+    function reload($ban_list, $black_list)
+    {
+        fprintf(STDERR, "RELOAD STUFF (%d)(%d)\n", count($ban_list), count($black_list));
+
+        $this->ipclass_update("ban_list", $ban_list);
+        $this->ipclass_update("black_list", $black_list);
+
+        $this->banned_kickoff();
+        $this->garbage_manager(TRUE);
+    }
+
+    function banned_kickoff()
+    {
+        $is_ban = FALSE;
+
+        for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+            $table_cur = $this->table[$table_idx];
+            // if the table is complete and exists we check users IP
+
+            if ($table_cur->player_n == PLAYERS_N) {
+                if (isset($this->match[$table_idx]) &&
+                    $table_cur->table_token == $bin5->table_token) {
+                    log_main("PLAYERS == N TABLE ".$table_idx);
+
+                    $bin5 = $this->match[$table_idx];
+
+                    $is_ban |= $bin5->banned_kickoff();
+                }
+            }
+        }
+
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+
+            if ($user_cur->sess == "")
+                continue;
+
+            // check if the IP is blacklisted
+            if ($this->black_check($user_cur->ip)) {
+                $user_cur->lacc = 0;
+                $is_ban = TRUE;
+                continue;
+            }
+
+            // if authorized not check if banlisted
+            if ($user_cur->flags & USER_FLAG_AUTH) {
+                continue;
+            }
+
+            if ($this->ban_check($user_cur->ip)) {
+                $user_cur->lacc = 0;
+                $is_ban = TRUE;
+            }
+        }
+
+        return $is_ban;
+    }
+
+    function ban_check($ip_str)
+    {
+        $ip = ip2long($ip_str);
+        fprintf(STDERR, "Brisk::ban_check %d\n", count($this->ban_list));
+        for ($i = 0 ; $i < count($this->ban_list) ; $i++) {
+            fprintf(STDERR, "ban_list[%d] = %x (%x)\n", $i,
+                    $this->ban_list[$i]->addr, $this->ban_list[$i]->mask);
+            if ($this->ban_list[$i]->match($ip)) {
+                fprintf(STDERR, "\n\nMATCHA!\n\n");
+                return(TRUE);
+            }
+        }
+        return (FALSE);
+    }
+
+    function black_check($ip_str)
+    {
+        $ip = ip2long($ip_str);
+        fprintf(STDERR, "Brisk::black_check %d\n", count($this->black_list));
+        for ($i = 0 ; $i < count($this->black_list) ; $i++) {
+            fprintf(STDERR, "black_list[%d] = %x (%x)\n", $i,
+                   $this->black_list[$i]->addr, $this->black_list[$i]->mask);
+            if ($this->black_list[$i]->match($ip)) {
+                fprintf(STDERR, "\n\nMATCHA!\n\n");
+                return(TRUE);
+            }
+        }
+        return (FALSE);
     }
 
   function garbage_manager($force)
@@ -2140,7 +2288,6 @@ class Brisk
       $this->user[$idx]->ip = $ip;
 
       $this->user[$idx]->rec = $authenticate;
-      fprintf(STDERR, "MOP: [%s]\n", $authenticate->supp_comp);
       $this->user[$idx]->flags = $user_type;
       $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
       $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
@@ -2347,9 +2494,17 @@ class Brisk
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
-      GLOBAL $G_black_list;
+      GLOBAL $G_ban_list, $G_black_list;
 
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
+      $remote_addr = addrtoipv4($addr);
+
+          fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
+      if ($this->black_check($remote_addr)) {
+          // TODO: waiting async 5 sec before close
+          fprintf(STDERR, "\n\n\n BLACK_CHECK \n\n\n");
+          return (FALSE);
+      }
 
       $enc = get_encoding($header);
       if (isset($header['User-Agent'])) {

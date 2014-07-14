@@ -1228,7 +1228,32 @@ class Bin5 {
 
         return (FALSE);
     }
+    function banned_kickoff()
+    {
+        $is_ban = FALSE;
 
+        for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+
+            // check if the IP is blacklisted
+            if ($this->brisk->black_check($user_cur->ip)) {
+                $user_cur->lacc = 0;
+                $is_ban = TRUE;
+                continue;
+            }
+
+            // if authorized not check if banlisted
+            if ($user_cur->flags & USER_FLAG_AUTH) {
+                continue;
+            }
+
+            if ($this->brisk->ban_check($user_cur->ip)) {
+                $user_cur->lacc = 0;
+                $is_ban = TRUE;
+            }
+        }
+        return ($is_ban);
+    }
 
     function garbage_manager($force)
     {
@@ -1449,7 +1474,7 @@ class Bin5 {
 
     static function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
     {
-        GLOBAL $G_black_list;
+        GLOBAL $G_ban_list, $G_black_list;
 
         printf("NEW_SOCKET (root): %d\n", intval($new_socket));
 

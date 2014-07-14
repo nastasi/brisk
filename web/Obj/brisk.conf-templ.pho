@@ -83,7 +83,8 @@ $G_poll_entries = array( array( 'id' => 'din', 'cont' => 'Dinner room'),
                          array( 'id' => 'bat', 'cont' => 'Bath room'),
                          array( 'id' => 'coo', 'cont' => 'Cooking room') );
 
-$G_black_list = array();
+$G_ban_list = array();   // each element in the form "IP/<MSBs_number>" i.e. "192.15.21.4/24"
+$G_black_list = array(); // each element in the form "IP/<MSBs_number>" i.e. "192.15.21.4/24"
 
 
 // this is the prefix path to remove from backtrace

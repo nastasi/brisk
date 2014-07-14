@@ -120,12 +120,12 @@ define('LICMGR_CHO_AFTER',  2);
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_domain, $G_webbase, $G_mail_seed;
-    GLOBAL $G_shutdown, $G_alarm_passwd, $G_black_list, $G_lang, $G_room_help, $G_room_about;
+    GLOBAL $G_shutdown, $G_alarm_passwd, $G_ban_list, $G_black_list, $G_lang, $G_room_help, $G_room_about;
     GLOBAL $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;
-    $remote_addr = addrtoipv4($remote_addr_full);
 
     log_load("index_wr.php");
+    $remote_addr = addrtoipv4($remote_addr_full);
 
     if (($mesg = gpcs_var('mesg', $get, $post, $cookie)) === FALSE) 
         unset($mesg);
@@ -142,13 +142,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     /*
      *  MAIN
      */
-
-    /* if the IP is banned, exit without do nothing */
-    if (array_search($remote_addr, $G_black_list) !== FALSE) {
-        // TODO: find a way to add a nonblocking sleep(5) here
-        return (FALSE);
-    }
-
     $is_spawn = FALSE;
 
     log_wr(0, 'index_wr.php: COMM: '.xcapemesg($mesg));
@@ -240,7 +233,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     // LACC UPDATED
     $user->lacc = $curtime;
 
-    if (array_search($user->ip, $G_black_list) !== FALSE) {
+    if (!($user->flags & USER_FLAG_AUTH) &&
+        $brisk->ban_check($user->ip)) {
         // TODO: find a way to add a nonblocking sleep(5) here
         return (FALSE);
     }
