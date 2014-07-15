@@ -1010,7 +1010,7 @@ class Brisk
                 fprintf(STDERR, "ROOM FROM FILE\n");
                 rename($crystal_filename, $crystal_filename.".old");
 
-                $brisk->reload();
+                $brisk->reload($ban_list, $black_list);
 
                 return($brisk);
             }
