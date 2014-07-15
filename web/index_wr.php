@@ -41,7 +41,9 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                       'shutmsg'  => array( 'it' => '<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>',
                                            'en' => '<b>The server is going to be rebooted, new games are not allowed.</b>'),
                       'mustauth' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica.</b>',
-                                           'en' => '<b>the table where you want to sit require authentication</b>'),
+                                           'en' => '<b>The table where you want to sit require authentication</b>'),
+                      'mustcert' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica e certificazione.</b>',
+                                           'en' => '<b>The table where you want to sit require authentication and certification</b>'),
                       'tabwait_a'=> array( 'it' => '<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra ',
                                            'en' => '<b>The table is only just opened, you will sit down in '), // FIXME
                       'tabwait_b'=> array( 'it' => ' secondi.</b>',
@@ -700,7 +702,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                                                $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang],
                                                $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
                 }
-                else if ($table->auth_only && (($user->flags & USER_FLAG_AUTH) == 0)) {
+                else if ($table->auth_type == TABLE_AUTH_TY_CERT
+                         && ( (($user->flags & USER_FLAG_AUTH) == 0) || (($user->flags & USER_FLAG_TY_CERT) == 0) ) ) {
+                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+                                               $dt, NICKSERV, $mlang_indwr['mustcert'][$G_lang]);
+                }
+                else if ($table->auth_type == TABLE_AUTH_TY_AUTH && (($user->flags & USER_FLAG_AUTH) == 0)) {
                     $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
                                                $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
                 }

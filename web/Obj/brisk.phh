@@ -622,12 +622,17 @@ class Vect {
     }
 }
 
+define('TABLE_AUTH_TY_PUBL', 0);
+define('TABLE_AUTH_TY_AUTH', 1);
+define('TABLE_AUTH_TY_CERT', 2);
+
+
 class Table {
   var $idx;
   var $player;
   var $player_n;
 
-  var $auth_only;     // se tavolo riservato o libero
+  var $auth_type;     // required authorization to sit down
 
   var $wag_own;
   var $wag_com;
@@ -650,7 +655,13 @@ class Table {
     $thiz->idx       =   $idx;
     $thiz->player    =   array();
     $thiz->player_n  =   0;
-    $thiz->auth_only =   FALSE;
+
+    if ($idx < TABLES_CERT_N)
+        $thiz->auth_type =   TABLE_AUTH_TY_CERT;
+    else if ($idx < TABLES_AUTH_N)
+        $thiz->auth_type =   TABLE_AUTH_TY_AUTH;
+    else
+        $thiz->auth_type =   TABLE_AUTH_TY_PUBL;
 
     $thiz->wag_own   =  -1;
     $thiz->wag_com   =  "";
@@ -674,7 +685,7 @@ class Table {
 
     log_main("PLAYER_N - parent::copy.".$this->player_n);
     
-    $this->auth_only =  $from->auth_only;
+    $this->auth_type =  $from->auth_type;
 
     $this->wag_own   =  $from->wag_own;
     $this->wag_com   =  $from->wag_com;
@@ -707,7 +718,7 @@ class Table {
       $thiz->player[$i] = $i;
     $thiz->player_n = $from->player_n;
 
-    $thiz->auth_only =  $from->auth_only;
+    $thiz->auth_type =  $from->auth_type;
 
     $thiz->wag_own = $from->wag_own;
     $thiz->wag_com = $from->wag_com;
@@ -778,7 +789,7 @@ class Table {
     }
   }
 
-  // function act_content($isstanding, $sitted, $table, $cur_table, $allowed)
+  // Table->act_content - return 'id' of type of output required for table button
   function act_content($user)
   {
     $ret = "";
@@ -790,15 +801,23 @@ class Table {
 
     if ($isstanding) {
       if ($sitted < PLAYERS_N) {
-        if ($this->auth_only) {
-          if ($user->flags & USER_FLAG_AUTH) 
-            $act = "sitreser";
-          else
-            $act = 'reserved';
-        }
-        else {
-          $act = 'sit';
-        }
+          switch ($this->auth_type) {
+          case TABLE_AUTH_TY_CERT:
+              if ($user->flags & USER_FLAG_AUTH && $user->flags & USER_FLAG_TY_CERT)
+                  $act = "sitcert";
+              else
+                  $act = 'resercert';
+              break;
+          case TABLE_AUTH_TY_AUTH:
+              if ($user->flags & USER_FLAG_AUTH)
+                  $act = "sitreser";
+              else
+                  $act = 'reserved';
+              break;
+          default:
+              $act = 'sit';
+              break;
+          }
       }
       else {
         $act = 'none';
@@ -1019,20 +1038,6 @@ class Brisk
         
         for ($i = 0 ; $i < TABLES_N ; $i++) {
             $thiz->table[$i] = Table::create($i);
-            /* OLD METHOD
-               if ($i < 12) {
-               $row = ( (((int)($i / 4)) % 2) == 0 );
-               $col = ($i % 2 == 0);
-               $thiz->table[$i]->auth_only = (($row && $col) || (!$row && !$col));
-               }
-               else {
-               $thiz->table[$i]->auth_only = FALSE;
-               }
-            */
-            if ($i < TABLES_AUTH_N) 
-                $thiz->table[$i]->auth_only = TRUE;
-            else
-                $thiz->table[$i]->auth_only = FALSE;
         }
         $thiz->garbage_timeout = 0;
         $thiz->shm_sz = SHM_DIMS_MIN;
@@ -1881,7 +1886,7 @@ class Brisk
           if (strcasecmp($user->name,$name_new) != 0) {
              if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
                 ($user->subst == 'standup' || 
-                 ($user->subst != 'standup' && $this->table[$user->table]->auth_only == FALSE)
+                 ($user->subst != 'standup' && $this->table[$user->table]->auth_type == TABLE_AUTH_TY_PUBL)
                  )
                 ) {
               $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL); // Remove auth if name changed

@@ -1,7 +1,7 @@
 /*
  *  brisk - room.js
  *
- *  Copyright (C) 2006-2012 Matteo Nastasi
+ *  Copyright (C) 2006-2014 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -460,13 +460,20 @@ function j_tab_act_cont(idx, act)
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
     }
     else if (act == 'sitreser') {
-        // <img class="nobo" title="tavolo riservato agli utenti registrati" style="display: inline; margin-right: 80px;" src="img/okauth.png">
         // MLANG 1
-        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okauth.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okauth.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated users only" : "tavolo riservato agli utenti registrati")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated users only" : "tavolo riservato agli utenti registrati")+'">';
+    }
+    else if (act == 'sitcert') {
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okcert.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated users only" : "tavolo riservato agli utenti registrati e certificati")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated and certificated users only" : "tavolo riservato agli utenti registrati e certificati")+'">';
     }
     else if (act == 'wake') {
         // MLANG 1
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xwakeup"  value="'+(g_lang == 'en' ? "Wake up." : "Mi alzo.")+'" onclick="act_wakeup();">';
+    }
+    else if (act == 'resercert') {
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<img class="nobo" title="'+(g_lang == 'en' ? "reserved table for authenticated and certified users only" : "tavolo riservato agli utenti registrati e certificati")+'" style="margin-right: 20px;" src="img/onlycert.png">';
     }
     else if (act == 'reserved') {
         // MLANG 1

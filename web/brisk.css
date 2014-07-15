@@ -253,13 +253,31 @@ span.au1 {
 
 span.au2 {
     font-style: italic;
-/*    text-decoration: underline; */
     background-color: #bafcba;
 }
 
 span.au3 {
     font-weight: bold;
     font-style: italic;
-/*    text-decoration: underline; */
     background-color: #bafcba;
+}
+
+span.au4 {
+    background-color: #ffd780;
+}
+
+span.au5 {
+    font-weight: bold;
+    background-color: #ffd780;
+}
+
+span.au6 {
+    font-style: italic;
+    background-color: #ffd780;
+}
+
+span.au7 {
+    font-weight: bold;
+    font-style: italic;
+    background-color: #ffd780;
 }
