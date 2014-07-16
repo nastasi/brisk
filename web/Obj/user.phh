@@ -562,9 +562,17 @@ class User {
       // 4 -> is certified
       // 2 -> is authorized
       // 1 -> is myself
-      $class_id = (($this->flags & USER_FLAG_TY_CERT) >> 16) | ($this->flags & USER_FLAG_AUTH) | 1;
-      
-      return (sprintf('$("myname").innerHTML = "<span class=\"au%d\">%s</span>";', $class_id, 
+      $class_ids = (($this->flags & USER_FLAG_TY_CERT) >> 16) | ($this->flags & USER_FLAG_AUTH) | 1;
+      $sp = "";
+      $cl = "";
+
+      for ($i = 0 ; $i < 3 ; $i++) {
+          if ($class_ids & (1 << $i)) {
+              $cl .= sprintf("%sau%d", $sp, $i);
+              $sp = " ";
+          }
+      }
+      return (sprintf('$("myname").innerHTML = "<span class=\"%s\">%s</span>";', $cl,
                       xcape($this->name,ENT_COMPAT,"UTF-8")));
   }
 

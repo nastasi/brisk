@@ -60,7 +60,7 @@ define('WAKEUP_TIME', 12);
 // BAN_TIME da allineare anche in commons.js
 define('BAN_TIME', 3600);
 define('GARBAGE_TIMEOUT', 5);
-define('NICKSERV', "<i>BriskServ</i>");
+define('NICKSERV', "BriskServ");
 
 define('LOCK_SHARE_MAX', 10000);
 
@@ -110,8 +110,8 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                            'en' => '<br>The entered password is not correct.<br><br>'),
                       'alarret'  => array( 'it' => '"Alarm \\"<b>%s</b>\\" inviato a <b>%s</b>."',
                                            'en' => '"Alarm \\"<b>%s</b>\\" sent to <b>%s</b>."'),
-                      'authmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>',
-                                           'en' => '<b>To authenticate someone you have to be authenticated.</b>'), // on your turn
+                      'authmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato e certificato.</b>',
+                                           'en' => '<b>To authenticate someone you have to be authenticated and certified.</b>'), // on your turn
                       'mesgmust' => array( 'it' => '<b>Per inviare un messaggio devi essere autenticato.</b>',
                                            'en' => '<b>To send a message you have to be authenticated.</b>'),
                       'nickmust' => array( 'it' => 'Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.',

@@ -32,8 +32,8 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                           'en' => '<b>An error was occurred during the saving, try again or contact the administrator.</b>'),
                       'coerrdb' => array( 'it' => '<b>Il database è temporaneamente irraggiungibile, riprova più tardi o contatta l\'amministratore.</b>',
                                           'en' => '<b>The database is temporarly unavailable, retry to later or conctact the administrator.</b>'),
-                      'warrmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>',
-                                           'en' => 'To authenticate somebody you have to be authenticated in your turn'),
+                      'warrmust' => array( 'it' => '<b>Per autenticare qualcuno devi a tua volta essere autenticato e certificato.</b>',
+                                           'en' => 'To authenticate somebody you have to be authenticated and certified yourown'),
                       'mesgrepl' => array( 'it' => '<br><br>Il messaggio &egrave; stato inoltrato all\'amministratore.',
                                            'en' => '<br><br>The message was forwarded to the administrator'),
                       'mesgmust' => array( 'it' => '<b>Per mandare messaggi all\'amministratore devi essere autenticato.</b>',
@@ -300,8 +300,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         
         $mesg_to_user = "";
         
-        log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".$user->is_auth());
-        if ($user->is_auth()) {
+        log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] CERT: ".$user->is_cert());
+        if ($user->is_cert()) {
             if (0 == 1) {
                 if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                     if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
