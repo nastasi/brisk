@@ -235,7 +235,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     // LACC UPDATED
     $user->lacc = $curtime;
 
-    if (!($user->flags & USER_FLAG_AUTH) &&
+    if ( ( ! $user->is_auth() ) &&
         $brisk->ban_check($user->ip)) {
         // TODO: find a way to add a nonblocking sleep(5) here
         return (FALSE);
@@ -300,8 +300,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         
         $mesg_to_user = "";
         
-        log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
-        if ($user->flags & USER_FLAG_AUTH) {
+        log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] AUTH: ".$user->is_auth());
+        if ($user->is_auth()) {
             if (0 == 1) {
                 if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                     if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
@@ -410,8 +410,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         
         $mesg_to_user = "";
         
-        log_wr("INFO:SKIP:argz == mesgtoadm name: [".$user->name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
-        if ($user->flags & USER_FLAG_AUTH) {
+        log_wr("INFO:SKIP:argz == mesgtoadm name: [".$user->name."] AUTH: ".$user->is_auth());
+        if ($user->is_auth()) {
             if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                 if (($bdb = BriskDB::create()) != FALSE) {
                     $bdb->users_load();
@@ -489,8 +489,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
         $dobreak = FALSE;
         do {
-            log_wr("INFO:SKIP:argz == poll name: [".$cli_poll_name."] AUTH: ".($user->flags & USER_FLAG_AUTH));
-            if (($user->flags & USER_FLAG_AUTH) != USER_FLAG_AUTH) {
+            log_wr("INFO:SKIP:argz == poll name: [".$cli_poll_name."] AUTH: ".$user->is_auth());
+            if ( ! $user->is_auth() ) {
                 // MLANG: <b>Per partecipare al sondaggio devi essere autenticato.</b>
                 $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['pollmust'][$G_lang]);
                 log_wr("break1");
@@ -647,7 +647,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
         else if ($argz[0] == 'tosmgr') {
             // check IF is authnticated user, both terms of service versions matches
-            if ($user->flags & USER_FLAG_AUTH && count($argz) == 5) {
+            if ($user->is_auth() && count($argz) == 5) {
                 $f_type = $argz[1];      $f_code = $argz[2];
                 $f_tos_curr = $argz[3]; $f_tos_vers = $argz[4];
 
@@ -702,12 +702,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                                                $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang],
                                                $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
                 }
-                else if ($table->auth_type == TABLE_AUTH_TY_CERT
-                         && ( (($user->flags & USER_FLAG_AUTH) == 0) || (($user->flags & USER_FLAG_TY_CERT) == 0) ) ) {
+                else if ($table->auth_type == TABLE_AUTH_TY_CERT && ( ! $user->is_cert() ) ) {
                     $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
                                                $dt, NICKSERV, $mlang_indwr['mustcert'][$G_lang]);
                 }
-                else if ($table->auth_type == TABLE_AUTH_TY_AUTH && (($user->flags & USER_FLAG_AUTH) == 0)) {
+                else if ($table->auth_type == TABLE_AUTH_TY_AUTH && ( ! $user->is_auth() ) ) {
                     $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
                                                $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
                 }
@@ -725,11 +724,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 // if ($user->bantime > $user->laccwr) {
                 require_once("Obj/hardban.phh");
 
-                if (($bantime = Hardbans::check(($user->flags & USER_FLAG_AUTH ? $user->name : FALSE),
+                if (($bantime = Hardbans::check(($user->is_auth() ? $user->name : FALSE),
                                                 $user->ip, $user->sess)) != -1) {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                     /* MLANG: "<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", "resta in piedi.", "<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere." */
-                    if ($user->flags & USER_FLAG_AUTH) {
+                    if ($user->is_auth()) {
                         $user->comm[$user->step % COMM_N] .= show_notify($mlang_indwr['badwake_a'][$G_lang].secstoword($user->bantime - $user->laccwr).$mlang_indwr['badwake_b'][$G_lang], 2000, $mlang_indwr['btn_stays'][$G_lang], 400, 100);
                     }
                     else {

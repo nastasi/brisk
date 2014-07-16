@@ -381,7 +381,7 @@ function index_main(&$brisk, $transp_type, &$header_out, $remote_addr_full, $get
       $tables .= '<div class="room_tab">';
       $tables .= '<table class="room_tab">';
       for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
-          if ($user->flags & USER_FLAG_AUTH)
+          if ($user->is_auth())
               $i = $ii;
           else
               $i = TABLES_N - $ii - 1;
@@ -816,7 +816,7 @@ google_color_url = "000000";
           // MLANG garantisci
           .$mlang_room['tit_splash'][$G_lang].
           '</a><br>
-'.($user->flags & USER_FLAG_AUTH ? '
+'.($user->is_auth() ? '
 <a href="#" title="'
           // MLANG garantisci per un tuo conoscente
           .$mlang_room['prefs_desc'][$G_lang].'"

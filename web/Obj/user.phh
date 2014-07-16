@@ -329,6 +329,16 @@ class User {
     return ($thiz);
   }
 
+  function is_auth()
+  {
+      return ($this->flags & USER_FLAG_AUTH);
+  }
+
+  function is_cert()
+  {
+      return (($this->flags & USER_FLAG_AUTH) && ($this->flags & USER_FLAG_TY_CERT));
+  }
+
   function flags_set($flags, $mask)
   {
       $flags_old = $this->flags & (~$mask);
@@ -549,7 +559,10 @@ class User {
 
   function myname_innerHTML()
   {
-      $class_id = ($this->flags & USER_FLAG_AUTH) + 1;
+      // 4 -> is certified
+      // 2 -> is authorized
+      // 1 -> is myself
+      $class_id = (($this->flags & USER_FLAG_TY_CERT) >> 16) | ($this->flags & USER_FLAG_AUTH) | 1;
       
       return (sprintf('$("myname").innerHTML = "<span class=\"au%d\">%s</span>";', $class_id, 
                       xcape($this->name,ENT_COMPAT,"UTF-8")));

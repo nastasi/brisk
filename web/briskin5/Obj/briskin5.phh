@@ -1243,7 +1243,7 @@ class Bin5 {
             }
 
             // if authorized not check if banlisted
-            if ($user_cur->flags & USER_FLAG_AUTH) {
+            if ($user_cur->is_auth()) {
                 continue;
             }
 
@@ -1292,7 +1292,7 @@ class Bin5 {
                         $remcalc = $this->table[0]->exitlock_calc(&$this->user, $user_cur->table_pos);
                         if ($remcalc < 3) {
                             require_once("${G_base}Obj/hardban.phh");
-                            Hardbans::add(($user_cur->flags & USER_FLAG_AUTH ? $user_cur->name : FALSE),
+                            Hardbans::add(($user_cur->is_auth() ? $user_cur->name : FALSE),
                                           $user_cur->ip, $user_cur->sess, $user_cur->laccwr + BAN_TIME);
                         }
                         //      $user->bantime = $user->laccwr + BAN_TIME;
@@ -2021,7 +2021,7 @@ function log_points($remote_addr, $curtime, $user, $where, $mesg)
     if (($fp = @fopen(LEGAL_PATH."/points.log", 'a')) != FALSE) {
         /* Unix time | session | nickname | IP | where was | mesg */
         fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
-                            ($user->flags & USER_FLAG_AUTH ? 'A' : 'N'),
+                            ($user->is_auth() ? 'A' : 'N'),
                             $user->name, $remote_addr, $where , $mesg));
         fclose($fp);
     }

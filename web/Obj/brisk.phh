@@ -803,13 +803,13 @@ class Table {
       if ($sitted < PLAYERS_N) {
           switch ($this->auth_type) {
           case TABLE_AUTH_TY_CERT:
-              if ($user->flags & USER_FLAG_AUTH && $user->flags & USER_FLAG_TY_CERT)
+              if ($user->is_cert())
                   $act = "sitcert";
               else
                   $act = 'resercert';
               break;
           case TABLE_AUTH_TY_AUTH:
-              if ($user->flags & USER_FLAG_AUTH)
+              if ($user->is_auth())
                   $act = "sitreser";
               else
                   $act = 'reserved';
@@ -1115,7 +1115,7 @@ class Brisk
             }
 
             // if authorized not check if banlisted
-            if ($user_cur->flags & USER_FLAG_AUTH) {
+            if ($user_cur->is_auth()) {
                 continue;
             }
 
@@ -1840,16 +1840,16 @@ class Brisk
       }
     }
     else if (strcmp($msg, "/authreq") == 0) {
-      if ($user->flags & USER_FLAG_AUTH) {
-        $to_user = sprintf('authbox(300,200);');
-      }
-      else {
-        /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
-      }
+        if ($user->is_cert()) {
+            $to_user = sprintf('authbox(300,200);');
+        }
+        else {
+            /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
+            $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
+        }
     }
     else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
-      if ($user->flags & USER_FLAG_AUTH) {
+        if ($user->is_auth()) {
         $to_user = sprintf('mesgtoadmbox(500,300);');
       }
       else {
@@ -1882,7 +1882,7 @@ class Brisk
         }
         
         /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-        if ($user->flags & USER_FLAG_AUTH) {
+        if ($user->is_auth()) {
           if (strcasecmp($user->name,$name_new) != 0) {
              if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
                 ($user->subst == 'standup' || 
@@ -1902,7 +1902,7 @@ class Brisk
         }
 	$user->name = $name_new; // OK - nick changed
         /* se nome gia' in uso, segnala cosa potrebbe capitare */
-        if (($user->flags & USER_FLAG_AUTH) == 0) {
+        if ( ! $user->is_auth() ) {
             if (($bdb = BriskDB::create()) != FALSE) {
                 $bdb->users_load();
                 /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
@@ -2055,9 +2055,9 @@ class Brisk
         if ($is_normchat == TRUE) {
           // use MAP_AUTH to check if auth or isolation
           if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
-            if (($user->flags & USER_FLAG_AUTH) == 0) {
-              continue;
-            }
+              if ( ! $user->is_auth() ) {
+                  continue;
+              }
           }
         }
         /*
@@ -2211,7 +2211,7 @@ class Brisk
       if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
           if ($authenticate != FALSE) {
               $ghost = $i;
-              $ghost_auth = ($this->user[$i]->flags & USER_FLAG_AUTH);
+              $ghost_auth = $this->user[$i]->is_auth();
           }
           else {
               $idx = $i;
@@ -3025,7 +3025,7 @@ function log_legal($curtime, $addr, $user, $where, $mesg)
   if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {
     /* Unix time | session | nickname | IP | where was | mesg */
     fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
-                        ($user->flags & USER_FLAG_AUTH ? 'A' : 'N'),
+                        ($user->is_auth() ? 'A' : 'N'),
                         $user->name, $addr, $where , $mesg));
     fclose($fp);
   }

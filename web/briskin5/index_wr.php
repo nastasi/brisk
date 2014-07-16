@@ -72,7 +72,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
         return FALSE;
     }
     $bin5->brisk->sess_cur_set($user->sess);
-    if (!($user->flags & USER_FLAG_AUTH) &&
+    if ( ( ! $user->is_auth() ) &&
         $bin5->brisk->ban_check($user->ip)) {
         // TODO: waiting async 5 sec before close
         return (FALSE);
@@ -150,7 +150,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
             }
             else {
                 require_once("../Obj/hardban.phh");
-                Hardbans::add(($user->flags & USER_FLAG_AUTH ? $user->name : FALSE),
+                Hardbans::add(($user->is_auth() ? $user->name : FALSE),
                               $user->ip, $user->sess, $user->laccwr + BAN_TIME);
             }
             //      $user->bantime = $user->laccwr + BAN_TIME;
