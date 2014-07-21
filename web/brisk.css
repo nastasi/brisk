@@ -255,11 +255,9 @@ span.au1 {
     padding-left: 2px;
     padding-right: 4px;
     font-style: italic;
-    background-color: #bafcba;
+    background-color: #ffd780;
 }
 
 span.au2 {
-    /* orange: background-color: #ffd780; */
-    /* background-color: #e0ff00; */
-    background-color: #8c7dfb;
+    background-color: #bafcba;
 }
