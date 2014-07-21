@@ -3,7 +3,7 @@
  *  brisk - brisk.phh
  *
  *  Copyright (C) 2006-2013 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -79,7 +79,7 @@ define('DBG_LMOP', 0x0800);
 define('DBG_TRAC', 0x1000);
 define('DBG_SHME', 0x2000);
 define('DBG_ENGI', 0x4000);
-// NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols 
+// NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols
 define('BRISK_DEBUG', 0x0800);
 
 define('BRISK_SINGLE_DEBUG',0);
@@ -96,7 +96,7 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                       'tit_all' => array( 'it' => 'tutti',
                                           'en' => 'all' ),
 
-                      'tabtout_a'=> array( 'it' => '<br>Sei stato inattivo per ', 
+                      'tabtout_a'=> array( 'it' => '<br>Sei stato inattivo per ',
                                            'en' => '<br>You are being idle for ' ),
                       'tabtout_b'=> array( 'it' => ' minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.',
                                            'en' => ' minutes. <br><br>Then you return with the <b>standing players</b>.'),
@@ -181,7 +181,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dl>
 <dt><b>Comandi della chat</b>
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
-<dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
+<dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
 <dd><b>/guar <i>&lt;login&gt;</i></b> - mostra il garante dell\'utente con il login passato come argomento
@@ -214,7 +214,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dl>
 <dt><b>Comandi della chat</b>
 <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
-<dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti 
+<dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
 <dd><b>/guar <i>&lt;login&gt;</i></b> - mostra il garante dell\'utente con il login passato come argomento
@@ -225,7 +225,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 </div>
 ');
 
-//  
+//
 $G_room_passwdhowto = array( 'it' => '<br><h2>Come registrarsi su Brisk</h2>
 <div style=\\"text-align: left; padding: 8px;\\">
 Attualmente ci sono due metodi per ottenere una password sul sito:<br><br>
@@ -472,7 +472,7 @@ function file_lock($fname, $is_exclusive)
     if (($res = @fopen($fname, "r+")) == FALSE) {
         return (FALSE);
     }
-        
+
     if (flock($res, ($is_exclusive ? LOCK_EX : LOCK_SH)) == FALSE) {
         fclose($res);
         return (FALSE);
@@ -504,7 +504,7 @@ $escinp_to = array(   "&quot;" );
 function escinput($s)
 {
     GLOBAL $escinp_from, $escinp_to;
-    
+
     return str_replace($escinp_from, $escinp_to, $s);
 }
 
@@ -610,12 +610,12 @@ class Vect {
     {
         $this->el = $a;
     }
-    
+
     function getbyid($idx)
     {
         return ($this->el[$idx]);
     }
-    
+
     function setbyid($idx, $v)
     {
         $this->el[$idx] = $v;
@@ -643,11 +643,11 @@ class Table {
 
   var $wakeup_time;
 
-  function Table() 
+  function Table()
   {
   }
-  
-  function create($idx) 
+
+  function create($idx)
   {
     if (($thiz = new Table()) == FALSE)
       return (FALSE);
@@ -669,7 +669,7 @@ class Table {
 
     $thiz->table_token  = "";
     $thiz->table_start  = 0;
-    
+
     $thiz->wakeup_time = 0;
 
     return ($thiz);
@@ -684,7 +684,7 @@ class Table {
     $this->player_n = $from->player_n;
 
     log_main("PLAYER_N - parent::copy.".$this->player_n);
-    
+
     $this->auth_type =  $from->auth_type;
 
     $this->wag_own   =  $from->wag_own;
@@ -706,12 +706,12 @@ class Table {
 
     return ($thiz);
   }
-  
+
   function spawn($from)
   {
     if (($thiz = new Table()) == FALSE)
       return (FALSE);
-    
+
     $thiz->idx = $from->idx;
     $thiz->player = array();
     for ($i = 0 ; $i < $from->player_n ; $i++)
@@ -765,22 +765,22 @@ class Table {
   {
     $this->player[$this->player_n] = $idx;
     $this->player_n++;
-    
+
     return ($this->player_n - 1);
   }
-  
+
   function user_rem($brisk, $user)
   {
     $tabpos = $user->table_pos;
-    
+
     /* verifico la consistenza dei dati */
     if ($brisk->user[$this->player[$tabpos]] == $user) {
-      
+
       /* aggiorna l'array dei giocatori al tavolo. */
       for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
-	$this->player[$i] = $this->player[$i+1];
-	$user_cur = $brisk->user[$this->player[$i]];
-	$user_cur->table_pos = $i;
+        $this->player[$i] = $this->player[$i+1];
+        $user_cur = $brisk->user[$this->player[$i]];
+        $user_cur->table_pos = $i;
       }
       $this->player_n--;
     }
@@ -829,10 +829,10 @@ class Table {
       else
         $act = 'none';
     }
-    
+
     if ($act != '')
       $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
-    
+
     return ($ret);
   }
 } // end class Table
@@ -982,7 +982,7 @@ class Client_prefs {
 class Brisk
 {
     static $delta_t;
-    
+
     var $crystal_filename;
     var $user;
     var $table;
@@ -1035,7 +1035,7 @@ class Brisk
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
             $thiz->user[$i] = User::create($thiz, $i, "", "");
         }
-        
+
         for ($i = 0 ; $i < TABLES_N ; $i++) {
             $thiz->table[$i] = Table::create($i);
         }
@@ -1175,16 +1175,16 @@ class Brisk
         $this->delay_mgr->lastcheck_set($curtime);
         return ($ismod);
     }
-      
+
     // Before all align times with table timeout
     for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-	$table_cur = $this->table[$table_idx];
-	// if the table is complete and exists its shared mem we get the info about users lacc
-        
-	if ($table_cur->player_n == PLAYERS_N) {
+        $table_cur = $this->table[$table_idx];
+        // if the table is complete and exists its shared mem we get the info about users lacc
+
+        if ($table_cur->player_n == PLAYERS_N) {
             log_main("PLAYERS == N TABLE ".$table_idx);
-            
-            
+
+
             $no_recovery = FALSE;
             if (isset($this->match[$table_idx])) {
                 $bin5 = $this->match[$table_idx];
@@ -1202,45 +1202,45 @@ class Brisk
                     //
                     log_main("garbage_manager: bri loaded successfully.");
                     $bin5->garbage_manager(TRUE);
-                    
+
                     $bin5_table = $bin5->table[0];
-                    
+
                     // is the end of the table
-                    
+
                     if ($bin5->the_end == TRUE) {
                         /*
                          *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
                          */
                         log_main("garbage_manager: INSIDE THE END.");
-                        
+
                         $plist = "$table_cur->table_token|$table_cur->idx|$table_cur->player_n";
                         for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
                             $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
                         }
-                        
+
                         for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
                             // stat must be "table" by definition
                             $user_cur = $this->user[$table_cur->player[$i]];
                             $bin5_user = $bin5->user[$i];
-                            
+
                             $user_cur->subst      = $bin5_user->subst;
                             $user_cur->step       = $bin5_user->step;
                             $user_cur->lacc       = $bin5_user->lacc;
                             $user_cur->laccwr     = $bin5_user->lacc;
                             $user_cur->bantime    = $bin5_user->bantime;
                         }
-                        
+
                         log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
-                        
-                        $this->room_join_wakeup($user_cur, FALSE, 0); 
+
+                        $this->room_join_wakeup($user_cur, FALSE, 0);
                         $table_cur->table_token = "";
                         $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
-                        
+
                         $this->match_del($table_idx);
                     }
                     else {
                         log_main("gm:: save_data");
-                        
+
                         for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
                             $this->user[$table_cur->player[$i]]->lacc = $bin5->user[$i]->lacc;
                         }
@@ -1248,12 +1248,12 @@ class Brisk
                 } // if ($bin5 == FALSE
                 else if ($no_recovery == FALSE) {
                     log_crit("ERROR: table ".$table_idx." unrecoverable join");
-                    
+
                     for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
                         $user_cur = $this->user[$table_cur->player[$i]];
                         $user_cur->subst = "shutdowner";
                         $user_cur->step_inc();
-                        
+
                         $ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
                         $ret .= "gst.st = ".($user_cur->step+1)."; ";
                         // MLANG <br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>
@@ -1262,39 +1262,39 @@ class Brisk
                         $user_cur->comm[$user_cur->step % COMM_N] = $ret;
                         $user_cur->step_inc();
                     }
-                    
+
                     $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
                     for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
                         $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
                     }
                     log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
-                    
-                    $this->room_join_wakeup($user_cur, TRUE, -2); 
+
+                    $this->room_join_wakeup($user_cur, TRUE, -2);
                     $table_cur->table_token = "";
                 }
             }
         } //  if ($table_cur->player_n == PLAYERS_N) {
     } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-    
+
     log_rd2("out new loop.");
-    
+
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-	$user_cur = $this->user[$i];
-	
-	log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
-	
-	if ($user_cur->sess == "") 
+        $user_cur = $this->user[$i];
+        
+        log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
+        
+        if ($user_cur->sess == "")
             continue;
-	
-	if ($user_cur->lacc + EXPIRE_TIME_RD < ($curtime - $delta)) {
+        
+        if ($user_cur->lacc + EXPIRE_TIME_RD < ($curtime - $delta)) {
             // Auto logout dell'utente
             log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
-            
+
             if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
                 log_auth($user_cur->sess, "Autologout session.");
-                
+
                 $user_cur->reset();
-	    
+        
                 log_rd2("AUTO LOGOUT.");
                 if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
                     $this->room_wakeup($user_cur);
@@ -1303,9 +1303,9 @@ class Brisk
                 else
                     log_rd2("LOGOUT FROM WHAT ???");
             }
-	}
+        }
 
-	if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < ($curtime - $delta)) { // lo rimettiamo in piedi
+        if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < ($curtime - $delta)) { // lo rimettiamo in piedi
             if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
                 $this->room_wakeup($user_cur);
                 $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
@@ -1313,10 +1313,10 @@ class Brisk
                 $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
                 $user_cur->step_inc();
             }
-	}
+        }
     }
     log_rd2("GARBAGE UPDATED!");
-    
+
     $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
     $ismod = TRUE;
 
@@ -1328,7 +1328,7 @@ class Brisk
   {
     GLOBAL $G_lang, $mlang_brisk;
     log_main("show_room: username: ".$user->name);
-    
+
     $ret = sprintf('gst.st = %d; ',  $user_step);
 
     $prefs = Client_prefs::from_user($user);
@@ -1352,7 +1352,7 @@ class Brisk
       $ret .= "tra.hide(); ";
 
     $ret .= sprintf('stat = "%s";',  $user->stat);
-    
+
     $ret .= root_welcome($user);
     if ($user->flags & USER_FLAG_DBFAILED) {
         $ret .= "gst.st = ".($user->step+1)."; ";
@@ -1367,9 +1367,9 @@ class Brisk
       $ret .= $this->table_content($user, $i);
 
       $ret .=  $this->table[$i]->act_content($user);
-      if ($this->table[$i]->wag_own != -1) 
+      if ($this->table[$i]->wag_own != -1)
         $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
-      else 
+      else
         $ret .= sprintf('tra.rem(%d); ', $i);
     }
     $ret .= $this->standup_content($user);
@@ -1377,7 +1377,7 @@ class Brisk
 
     return ($ret);
   }
-  
+
 
   function room_wakeup($user)
   {
@@ -1393,20 +1393,20 @@ class Brisk
       log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
       for ($i = 0 ; $i < $table->player_n ; $i++) {
-	$user_cur = $this->user[$table->player[$i]];
-	log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
+        $user_cur = $this->user[$table->player[$i]];
+        log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
 
-	if ($user->idx_get() != $table->player[$i]) {
-	  $user_cur->stat_set("room");
-	  $user_cur->subst = "sitdown";
-	  $user_cur->laccwr = $curtime;
-	}
-	else if ($user->sess != "") {
-	  $user_cur->stat_set("room");
-	  $user_cur->subst = "standup";
-	  $user_cur->laccwr = $curtime;
-	  $user_cur->table = -1;
-	}
+        if ($user->idx_get() != $table->player[$i]) {
+          $user_cur->stat_set("room");
+          $user_cur->subst = "sitdown";
+          $user_cur->laccwr = $curtime;
+        }
+        else if ($user->sess != "") {
+          $user_cur->stat_set("room");
+          $user_cur->subst = "standup";
+          $user_cur->laccwr = $curtime;
+          $user_cur->table = -1;
+        }
       }
     }
     else {
@@ -1414,13 +1414,13 @@ class Brisk
       $user->subst = "standup";
       $user->laccwr = $curtime;
     }
-    
+
     $remove_wagon = FALSE;
     if($table->wag_own == $user->idx_get()) {
       $table->wag_reset($curtime);
       $remove_wagon = TRUE;
     }
-    
+
 
     /* aggiorna l'array dei giocatori al tavolo. */
     $table->user_rem($this, $user);
@@ -1428,38 +1428,38 @@ class Brisk
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
-	continue;
-      
+        continue;
+
       // log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
       if ($from_table && ($user_cur->table == $table_idx || $user->idx_get() == $i)) {
-	$ret .= 'gst.st_loc++; xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
-	// $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
-	log_main("DOCUMENT.index.php: from table");
+        $ret .= 'gst.st_loc++; xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
+        // $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
+        log_main("DOCUMENT.index.php: from table");
       }
       else if ($user_cur->stat == "room") {
-	log_main("DOCUMENT.index.php: from table");
+        log_main("DOCUMENT.index.php: from table");
 
-	$ret .= $this->table_content($user_cur, $table_idx);
-	$ret .= $this->standup_content($user_cur);
-	
-	// $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
-	$ret .= $table->act_content($user);
+        $ret .= $this->table_content($user_cur, $table_idx);
+        $ret .= $this->standup_content($user_cur);
+        
+        // $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
+        $ret .= $table->act_content($user);
 
-	if ($user->idx_get() == $i) {
-	  // set the new status 
-	  $ret .=  'subst = "standup"; tra.show(); ';
-	  // clean the action buttons in other tables
-	  for ($e = 0 ; $e < TABLES_N ; $e++) {
-	    if ($this->table[$e]->player_n < PLAYERS_N) {
+        if ($user->idx_get() == $i) {
+          // set the new status
+          $ret .=  'subst = "standup"; tra.show(); ';
+          // clean the action buttons in other tables
+          for ($e = 0 ; $e < TABLES_N ; $e++) {
+            if ($this->table[$e]->player_n < PLAYERS_N) {
               $ret .= $this->table[$e]->act_content($user);
             }
-	  }
-	}
-	else {
+          }
+        }
+        else {
           $ret .= $table->act_content($user_cur);
-	}
+        }
       }
       log_wr("ROOM_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
@@ -1471,7 +1471,7 @@ class Brisk
   {
     $table_idx = $user->table;
     $table = $this->table[$table_idx];
-    
+
     log_main("JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
     $curtime = time();
@@ -1480,32 +1480,32 @@ class Brisk
     $user_tab = array();
     $user_tab_n = 0;
     log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
-    
+
     for ($i = 0 ; $i < $table->player_n ; $i++) {
       $user_cur = $this->user[$table->player[$i]];
       log_main("PREIMPOST INLOOP name: ".$user_cur->name);
       if ($user_cur->sess != "") {
-	if ($update_lacc == TRUE) {
-	  $user_cur->laccwr = $curtime;
-	}
-	log_main("cur: ".$user_cur->name."  subst: ".$user_cur->subst);
-	if ($user_cur->subst == "shutdowned") {
-	  $user_cur->stat_set("room");
-	  $user_cur->subst = "sitdown";
-	}
-	else if ($user_cur->subst == "shutdowner") {
-	  $user_cur->stat_set("room");
-	  $user_cur->subst = "standup";
-	  $user_cur->table = -1;
-	  $user_wup[$user_wup_n++] = $user_cur;
-          
+        if ($update_lacc == TRUE) {
+          $user_cur->laccwr = $curtime;
+        }
+        log_main("cur: ".$user_cur->name."  subst: ".$user_cur->subst);
+        if ($user_cur->subst == "shutdowned") {
+          $user_cur->stat_set("room");
+          $user_cur->subst = "sitdown";
+        }
+        else if ($user_cur->subst == "shutdowner") {
+          $user_cur->stat_set("room");
+          $user_cur->subst = "standup";
+          $user_cur->table = -1;
+          $user_wup[$user_wup_n++] = $user_cur;
+
           $remove_wagon = FALSE;
           if($table->wag_own == $table->player[$i]) {
             $remove_wagon = TRUE;
             $table->wag_reset($curtime);
           }
-	}
-	$user_tab[$user_tab_n++] = $table->player[$i];
+        }
+        $user_tab[$user_tab_n++] = $table->player[$i];
       }
     }
 
@@ -1518,8 +1518,8 @@ class Brisk
       log_main("START LOOP");
       $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room') {
-	log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
-	continue;
+        log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
+        continue;
       }
 
       log_main("___");
@@ -1527,42 +1527,42 @@ class Brisk
 
       $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
       if ($user_cur->stat == "room") {
-	log_main("DOCUMENT.index.php from table");
+        log_main("DOCUMENT.index.php from table");
 
-	$ret .= $this->table_content($user_cur, $table_idx);
-	$ret .= $this->standup_content($user_cur);
-	
+        $ret .= $this->table_content($user_cur, $table_idx);
+        $ret .= $this->standup_content($user_cur);
+        
         $ret .= $table->act_content($user_cur);
 
 
-	for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
-            if ($user_tab[$tab_idx] == $i) 
+        for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
+            if ($user_tab[$tab_idx] == $i)
                 break;
 
-	// for users that wakeup the room will be reconstructed by index_rd.php
-	if ($tab_idx < $user_tab_n) {
-	  log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
+        // for users that wakeup the room will be reconstructed by index_rd.php
+        if ($tab_idx < $user_tab_n) {
+          log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
 //        ARRAY_POP DISABLED
-// 	  if ($trans_delta == 0)
-// 	    while (array_pop($user_cur->comm) != NULL);
+//           if ($trans_delta == 0)
+//             while (array_pop($user_cur->comm) != NULL);
 
-	  $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
-	  $user_cur->comm[$user_cur->step % COMM_N] = "";
-	  $user_cur->step_inc();
-	  $user_cur->comm[$user_cur->step % COMM_N] = $this->show_room(($user_cur->step + 1), $user_cur);
-	  $user_cur->step_inc();
-	  log_main("POST show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
+          $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
+          $user_cur->comm[$user_cur->step % COMM_N] = "";
+          $user_cur->step_inc();
+          $user_cur->comm[$user_cur->step % COMM_N] = $this->show_room(($user_cur->step + 1), $user_cur);
+          $user_cur->step_inc();
+          log_main("POST show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
-	  continue;
-	}
-	log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
+          continue;
+        }
+        log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
 
-	log_main("JOIN_WAKEUP more");
+        log_main("JOIN_WAKEUP more");
 
         $ret .= $table->act_content($user_cur);
 
-	log_main("JOIN_WAKEUP end more");
+        log_main("JOIN_WAKEUP end more");
       }
       log_wr("ROOM_JOIN_WAKEUP: ".$ret);
       $user_cur->comm[$user_cur->step % COMM_N] = $ret;
@@ -1599,26 +1599,26 @@ class Brisk
           $user_tos_vers = $user_item->tos_vers_get();
 
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
-              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
                               $dt, NICKSERV, sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login)));
           }
           else if ($guar_login == "") {
-              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
                               $dt, NICKSERV, sprintf($mlang_brisk['gua_nfd'][$G_lang], xcape($user_login)));
           }
           else if ($guar_login == $user_login) {
-              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
                               $dt, NICKSERV, sprintf($mlang_brisk['gua_self'][$G_lang], xcape($user_login)));
           }
           else {
-              $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
+              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
                               $dt, NICKSERV, sprintf($mlang_brisk['gua_info'][$G_lang],
                                                      xcape($user_login), xcape($guar_login)));
           }
       } while (0);
 
       if ($ret > 0) {
-          $mesg = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, sprintf($mlang_brisk['gua_err'][$G_lang], $ret));
+          $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, sprintf($mlang_brisk['gua_err'][$G_lang], $ret));
       }
 
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$mesg;
@@ -1631,26 +1631,26 @@ class Brisk
   {
     $this->room_sitdown($user, -1);
   }
-  
+
   function table_update($user)
   {
     log_main("table_update: pre - USER: ".$user->name);
 
     $table_idx = $user->table;
 
-    if ($table_idx > -1) 
+    if ($table_idx > -1)
       $table = $this->table[$table_idx];
-    
+
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $ret = "";
       $user_cur = $this->user[$i];
       if ($user_cur->sess == '' || $user_cur->stat != 'room')
       continue;
-      
+
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($table_idx > -1)
-	$ret .= $this->table_content($user_cur, $table_idx);
-      
+        $ret .= $this->table_content($user_cur, $table_idx);
+
       if ($user->idx_get() == $i) {
           $ret .= $user->myname_innerHTML();
       }
@@ -1664,35 +1664,35 @@ class Brisk
   function room_sitdown($user, $table_idx)
   {
       log_main("room_sitdown ".($user == FALSE ? "USER: FALSE" : "USER: ".$user->name));
-      
+
       $train_app = "";
-      
-      if ($table_idx > -1 && $table_idx < TABLES_N) { 
+
+      if ($table_idx > -1 && $table_idx < TABLES_N) {
           $table = $this->table[$table_idx];
-          
-          // wagon shutdown 
-          if ($table->wag_own != -1 && $table->player_n == PLAYERS_N) {        
+
+          // wagon shutdown
+          if ($table->wag_own != -1 && $table->player_n == PLAYERS_N) {
               for ($i = 0 ; $i < TABLES_N ; $i++) {
                   if ($table->wag_own == $table->player[$i]) {
-                      $train_app = sprintf("tra.rem(%d); ", $table_idx); 
+                      $train_app = sprintf("tra.rem(%d); ", $table_idx);
                       $table->wag_reset(time());
                       break;
                   }
               }
           }
       }
-      
+
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
           $ret = "";
           $user_cur = $this->user[$i];
           if ($user_cur->sess == '' || $user_cur->stat != 'room')
               continue;
-          
+
           $ret = "gst.st = ".($user_cur->step+1)."; ".$train_app;
           if ($table_idx > -1)
               $ret .= $this->table_content($user_cur, $table_idx);
           $ret .= $this->standup_content($user_cur);
-          
+
           if ($user->idx_get() == $i) {
               $ret .=  'subst = "sitdown"; tra.hide(); ';
               // clean the action buttons in other tables
@@ -1715,7 +1715,7 @@ class Brisk
   {
     GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
-    
+
     // common settings
     $msg = mb_substr($mesg, 6, 128, "UTF-8");
     $curtime = time();
@@ -1734,7 +1734,7 @@ class Brisk
     /* for old isolation management $is_ticker   = FALSE; */
     $update_room = FALSE;
 
-    if (strcmp($msg,  "/tav") == 0 || 
+    if (strcmp($msg,  "/tav") == 0 ||
         strncmp($msg, "/tav ", 5) == 0) {
       do {
         if ($user->stat != 'room' || $user->subst != 'sitdown') {
@@ -1746,9 +1746,9 @@ class Brisk
         }
 
         $table = $this->table[$user->table];
-        
+
         if ($table->wag_own != -1) {
-          // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> 
+          // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>
           $msg = $mlang_brisk['tickjust'][$G_lang];
           $to_user = show_notify($msg, 0, "chiudi", 400, 100);
 
@@ -1764,9 +1764,9 @@ class Brisk
 
           break;
         }
-        
+
         $msg = substr($msg, 5);
-        
+
         $table->wag_set($user->idx_get(), $msg);
         $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
         $to_room = $to_user;
@@ -1794,9 +1794,9 @@ class Brisk
         }
 
         /* MLANG: "Alarm <b>%s</b> inviato a <b>%s</b>." */
-        $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))), 
+        $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))),
                            ($target == "" ? $mlang_brisk['tit_all'][$G_lang] : xcape($target)) );
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],%s);', 
+        $to_user = sprintf('chatt_sub("%s",[2,"%s"],%s);',
                            $dt, NICKSERV, $prestr);
 
         $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
@@ -1812,8 +1812,8 @@ class Brisk
         $flags_old = 0;
         if ($user->stat == 'room' && $user->subst == 'sitdown' &&
             $user->table >= TABLES_AUTH_N) {
-          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
-          
+          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
+
         }
         else {
           $user->flags &= ~USER_FLAG_MAP_AUTH;
@@ -1831,12 +1831,12 @@ class Brisk
         $flags_old = $user->flags;
         $user->flags &= ~USER_FLAG_MAP_AUTH;
         $to_user = 'list_set(\'all\', true, \'\'); ';
-        
+
       }
       // if from isolation redraw standup area
       if (($flags_old ^ $user->flags) & USER_FLAG_ISOLAUTH) {
         $to_user .= 'standup_data_old = null; '.$this->standup_content($user);
-        
+
       }
     }
     else if (strcmp($msg, "/authreq") == 0) {
@@ -1845,7 +1845,7 @@ class Brisk
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
-            $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
+            $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
         }
     }
     else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
@@ -1854,7 +1854,7 @@ class Brisk
       }
       else {
         /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
-        $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['mesgmust'][$G_lang]);
+        $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['mesgmust'][$G_lang]);
       }
     }
     else if (strncmp($msg, "/nick ", 6) == 0) {
@@ -1862,7 +1862,7 @@ class Brisk
 
       do {
         if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
-          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
+          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
           break;
         }
 
@@ -1877,15 +1877,15 @@ class Brisk
           }
         if ($i <  MAX_PLAYERS) {
           $prestr = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
-          $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
+          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $prestr);
           break;
         }
-        
+
         /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
         if ($user->is_auth()) {
           if (strcasecmp($user->name,$name_new) != 0) {
              if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
-                ($user->subst == 'standup' || 
+                ($user->subst == 'standup' ||
                  ($user->subst != 'standup' && $this->table[$user->table]->auth_type == TABLE_AUTH_TY_PUBL)
                  )
                 ) {
@@ -1895,12 +1895,12 @@ class Brisk
               }
             }
             else {
-              $to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
+              $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
               break;
             }
           }
         }
-	$user->name = $name_new; // OK - nick changed
+        $user->name = $name_new; // OK - nick changed
         /* se nome gia' in uso, segnala cosa potrebbe capitare */
         if ( ! $user->is_auth() ) {
             if (($bdb = BriskDB::create()) != FALSE) {
@@ -1908,7 +1908,7 @@ class Brisk
                 /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
                 if ($bdb->login_exists($name_new)) {
                     $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
-                    $to_user .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $prestr);
+                    $to_user .= sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $prestr);
                 }
             }
         }
@@ -1928,7 +1928,7 @@ class Brisk
 
       do {
         $st_str = substr($msg, 4);
-        
+
         if (strcasecmp($st_str, "normale") == 0) {
           $st = USER_FLAG_S_NORM;
         }
@@ -1979,7 +1979,7 @@ class Brisk
         }
         else {
           /* MLANG: "Questo stato non esiste." */
-          $to_user = sprintf('chatt_sub("%s", [2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
+          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
           break;
         }
 
@@ -1995,9 +1995,9 @@ class Brisk
       $is_normchat = TRUE;
       if (CHAT_ENABLED && $curtime < ($user->chat_ban + $user->chat_dlt)) {
         $only_you = TRUE;
-        $user->chat_dlt = $user->chat_dlt * 2; 
+        $user->chat_dlt = $user->chat_dlt * 2;
         if ($user->chat_dlt > 120)
-          $user->chat_dlt = 120; 
+          $user->chat_dlt = 120;
       }
       else if ($user->chat_lst == $msg)
         $only_you = TRUE;
@@ -2012,18 +2012,18 @@ class Brisk
       }
 
       if ($only_you) {
-        $to_user = sprintf('chatt_sub("%s", [%d, "%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
+        $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
       }
       else {
-        $to_user = sprintf('chatt_sub("%s", [%d, "%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
-	// temporary silentiation for troll (will became array check)
-	// if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
+        $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
+        // temporary silentiation for troll (will became array check)
+        // if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
         $to_room = $to_user;
       }
 
       log_legal($curtime, $user->ip, $user,
-		($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
-      
+                ($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
+
       $user->chat_lst = "$msg";
       $user->chattime[$user->chat_cur % CHAT_N] = $curtime;
       $user->chat_cur++;
@@ -2051,7 +2051,7 @@ class Brisk
           continue;
         if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user->idx_get() == $i)
           continue;
-        
+
         if ($is_normchat == TRUE) {
           // use MAP_AUTH to check if auth or isolation
           if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
@@ -2069,11 +2069,11 @@ class Brisk
         }
         */
         $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
-        $user_cur->comm[$user_cur->step % COMM_N] .= $to_room; 
+        $user_cur->comm[$user_cur->step % COMM_N] .= $to_room;
         $user_cur->step_inc();
       }
     }
-    
+
     if ($to_tabl) {
         // FIXME BRISK4: include for each kind of table
         require_once("${G_base}briskin5/Obj/briskin5.phh");
@@ -2086,7 +2086,7 @@ class Brisk
                 for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
                     // stat must be "table" by definition
                     $bin5_user = $bin5->user[$i];
-              
+
                     if ($target != "" && $bin5_user->name != $target)
                         continue;
                     log_main("writa: ".$user_mesg);
@@ -2118,15 +2118,15 @@ class Brisk
 
     if (validate_sess($sess)) {
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-	if (strcmp($sess, $this->user[$i]->sess) == 0) {
-	  // find it
-	  $idx = $i;
-	  $ret = $this->user[$i];
-	  return ($ret);
-	}
+        if (strcmp($sess, $this->user[$i]->sess) == 0) {
+          // find it
+          $idx = $i;
+          $ret = $this->user[$i];
+          return ($ret);
+        }
       }
       log_main(sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
-      // for ($i = 0 ; $i < MAX_PLAYERS ; $i++) 
+      // for ($i = 0 ; $i < MAX_PLAYERS ; $i++)
       // log_main(sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
     }
     else {
@@ -2169,7 +2169,7 @@ class Brisk
     }
 
     log_auth("XXX", sprintf("ARRIVA: [%s] pass:[%s]", $sess, ($pass == FALSE ? "FALSE" : $pass)));
-    if (validate_sess($sess) == FALSE) 
+    if (validate_sess($sess) == FALSE)
       $sess = "";
 
     /* if pass != FALSE verify the login with pass */
@@ -2181,7 +2181,7 @@ class Brisk
             log_auth("XXX", "auth2");
             $authenticate = $bdb->login_verify($name_new, $pass, $code);
             log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
-            
+
             if ($authenticate != FALSE) {
                 $user_type = $authenticate->type_get();
             }
@@ -2201,11 +2201,11 @@ class Brisk
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       /* free user ? */
       if (strcmp($sess, $this->user[$i]->sess) == 0) {
-	if ($idx == -1)
-	  $idx = $i;
+        if ($idx == -1)
+          $idx = $i;
       }
       if ($idfree == -1 && strcmp($this->user[$i]->sess, "") == 0) {
-	$idfree = $i;
+        $idfree = $i;
         continue; // NOTE: CHECK IT !!
       }
       if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
@@ -2234,13 +2234,13 @@ class Brisk
       $ghost_user->comm[$ghost_user->step % COMM_N] = "";
       $ghost_user->step_inc();
       if ($sess == "") {
-        $sess = uniqid(""); 
+        $sess = uniqid("");
         $ghost_user->sess = $sess;
       }
       else {
         $ghost_user->sess = $sess;
       }
-      
+
       // If user at the table we need to update the table data too
       $table_idx = $ghost_user->table;
       if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
@@ -2264,10 +2264,10 @@ class Brisk
       $curtime = time();
       if ($sess == "") {
         $sess = uniqid("");
-	$this->user[$idx]->sess = $sess;
+        $this->user[$idx]->sess = $sess;
       }
       else {
-	$this->user[$idx]->sess = $sess;
+        $this->user[$idx]->sess = $sess;
       }
       $this->user[$idx]->name = $name_new; // OK - add new user
       $this->user[$idx]->stat_set("room");
@@ -2284,7 +2284,7 @@ class Brisk
       $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
       $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
       log_auth("XXX", sprintf("FLAGS: [%x]", $this->user[$idx]->flags));
-      
+
       if ($authenticate != FALSE) {
           $this->user[$idx]->code = $authenticate->code_get();
           if (0 == 1) {
@@ -2319,9 +2319,9 @@ class Brisk
           for ($sfx = 1 ; $sfx <= MAX_PLAYERS ; $sfx++) {
             $ghostname = 'ghost'.$sfx;
             for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-              if (strcmp("", $this->user[$i]->sess) == 0) 
+              if (strcmp("", $this->user[$i]->sess) == 0)
                 continue;
-              
+
               if (strcasecmp($this->user[$i]->name, $ghostname) == 0) {
                 $ghostname = '';
                 break;
@@ -2330,9 +2330,9 @@ class Brisk
             if ($ghostname != '')
               break;
           }
-          
+
           $ghost_user->name = $ghostname;
-          
+
           if ($ghost_user->stat == 'room' && $ghost_user->subst == 'standup') {
             $this->standup_update($ghost_user);
           }
@@ -2361,24 +2361,24 @@ class Brisk
 
     return (FALSE);
   }
-  
+
   function standup_update($user)
   {
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = $this->user[$i];
       if ($user_cur->sess == '')
-	continue;
+        continue;
 
       log_main("STANDUP START: ".$user_cur->stat);
-      
+
       if ($user_cur->stat == 'room') {
-	$user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".$this->standup_content($user_cur);
-	if ($user->idx_get() == $i) {
+        $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".$this->standup_content($user_cur);
+        if ($user->idx_get() == $i) {
           $user_cur->comm[$user_cur->step % COMM_N] .= $user->myname_innerHTML();
-	}
-	log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
-	
-	$user_cur->step_inc();
+        }
+        log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
+        
+        $user_cur->step_inc();
       }
     }
   }
@@ -2390,7 +2390,7 @@ class Brisk
       if (file_put_contents($this->crystal_filename, $brisk_ser) == $brisk_ser_len) {
           return (TRUE);
       }
-      
+
       return (FALSE);
   }
 
@@ -2398,25 +2398,25 @@ class Brisk
   {
     $ret = "";
     $content = "";
-    
+
     if ($user->stat != 'room')
       return;
-    
+
     for ($i = 0 , $ct = 0 ; $ct < 4 && $i < MAX_PLAYERS ; $i++) {
       if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
         continue;
       $ct++;
     }
-    
+
     // $content .= sprintf('<table cols=\\"%d\\" class=\\"table_standup\\">', $ct);
-    
+
     $content = ' j_stand_cont( [ ';
 
     $user_cur_id = $user->idx_get();
     for ($i = 0 , $ct = 0 ; $i < MAX_PLAYERS ; $i++) {
       if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
         continue;
-      
+
       $flags = $this->user[$i]->flags;
 
       // sql record exists AND last donate > 2013-01-01
@@ -2431,17 +2431,17 @@ class Brisk
           if ($user_cur_id == $i) {
               $flags |= 1;
           }
-          
+
           $content .= sprintf('%s[ %d, "%s"%s ]',($ct > 0 ? ', ' : ''), $flags,
                               xcape($this->user[$i]->name), $supp_comp_s);
           $ct++;
       }
     }
     $content .= ' ]);';
-    
+
     return ($content);
   }
-  
+
   function table_content($user, $table_idx)
   {
     $content = "";
@@ -2450,23 +2450,23 @@ class Brisk
     //
     //   Si possono usare i dati nella classe table
     //
-    
+
     $sess = $user->sess;
     $table = $this->table[$table_idx];
-    
+
     if ($user->stat != 'room')
       return;
-    
+
     $user_cur_id = $user->idx_get();
     $content = "[ ";
     for ($i = 0 ; $i < $table->player_n ; $i++) {
         $user_cur = $this->user[$table->player[$i]];
-        
+
         $flags = $user_cur->flags;
-        
+
         if ($user_cur_id == $table->player[$i])
             $flags |= 1;
-        
+
         log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
         if ($user_cur->is_supp_custom())
             $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
@@ -2480,7 +2480,7 @@ class Brisk
     $content .= ' ]';
 
     $ret .= sprintf('j_tab_cont(%d, %s);', $table_idx, $content);
-    
+
     return ($ret);
   }
 
@@ -2535,7 +2535,7 @@ class Brisk
           index_wr_main($this, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
           ob_end_clean();
-          
+
           $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
           return TRUE;
 
@@ -2549,7 +2549,7 @@ class Brisk
           do {
               if (!isset($cookie['sess'])
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
-                  
+
                   $content = User::stream_fini($transp, $s_a_p->rndstr, TRUE);
 
                   $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
@@ -2570,7 +2570,7 @@ class Brisk
               $user->stream_init($s_a_p->rndstr, $enc, $header, $header_out, $content, $get, $post, $cookie);
               $response = headers_render($header_out, -1).$user->chunked_content($content);
               $response_l = mb_strlen($response, "ASCII");
-              
+
               $wret = @fwrite($new_socket, $response, $response_l);
               if ($wret < $response_l) {
                   printf("TROUBLES WITH FWRITE: %d\n", $wret);
@@ -2580,14 +2580,14 @@ class Brisk
                   $user->rd_cache_set("");
               }
               fflush($new_socket);
-              
-              
+
+
               $s_a_p->socks_set($new_socket, $user, NULL);
               $user->rd_socket_set($new_socket);
               printf(" - qui ci siamo - ");
               return TRUE;
           } while (FALSE);
-          
+
           return FALSE;
           break;
       case 'test.php':
@@ -2631,7 +2631,7 @@ class Brisk
   function match_get($idx, $token)
   {
       if (isset($this->match[$idx])) {
-          if (   $token == NULL 
+          if (   $token == NULL
               || $token == $this->match[$idx]->table_token) {
               return ($this->match[$idx]);
           }
@@ -2663,12 +2663,12 @@ function btrace_line($ar)
     for ($i = 0 ; $i < count($ar) ; $i++) {
         $with_class = isset($ar[$i]['class']);
         $with_file  = isset($ar[$i]['file']);
-        $ret .= sprintf("%s%s%s (%s:%d)", ($i == 0 ? "" : ", "), 
-                        ($with_class ?  $ar[$i]['class'].$ar[$i]['type'] : ""), 
-                        $ar[$i]['function'], ($with_file ? str_replace($G_btrace_pref_sub, "", $ar[$i]['file']) : ""), 
+        $ret .= sprintf("%s%s%s (%s:%d)", ($i == 0 ? "" : ", "),
+                        ($with_class ?  $ar[$i]['class'].$ar[$i]['type'] : ""),
+                        $ar[$i]['function'], ($with_file ? str_replace($G_btrace_pref_sub, "", $ar[$i]['file']) : ""),
                         ($with_file ? $ar[$i]['line'] : ""));
     }
-    
+
     return ($ret);
 }
 
@@ -2685,19 +2685,19 @@ function trace_ftok($id, $add)
 function log_mop($step, $log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LMOP) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LMOP) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2712,19 +2712,19 @@ function log_mop($step, $log)
 function log_only2($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONL2) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONL2) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2738,19 +2738,19 @@ function log_only2($log)
 function log_crit($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_CRIT) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_CRIT) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2764,19 +2764,19 @@ function log_crit($log)
 function log_only($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_ONLY) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_ONLY) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2790,19 +2790,19 @@ function log_only($log)
 function log_main($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_MAIN) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_MAIN) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2816,23 +2816,23 @@ function log_main($log)
 function log_rd($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_READ) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_READ) == 0)
         return;
 
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
-        $btrace = "";    
+        $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("READ: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2842,24 +2842,24 @@ function log_rd($log)
 function log_rd2($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_REA2) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_REA2) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
-    
+
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("REA2: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
         fclose($fp);
@@ -2869,20 +2869,20 @@ function log_rd2($log)
 function log_send($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SEND) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_SEND) == 0)
         return;
 
-    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)    
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
         $btrace = "";
@@ -2895,19 +2895,19 @@ function log_send($log)
 function log_lock($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOCK) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOCK) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2921,19 +2921,19 @@ function log_lock($log)
 function log_wr($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_WRIT) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_WRIT) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2947,19 +2947,19 @@ function log_wr($log)
 function log_load($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_LOAD) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_LOAD) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2976,10 +2976,10 @@ function log_auth($sess, $log)
 
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_AUTH) == 0)
         return;
-    
+
     if (( (BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_AUTH) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($sess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -2993,19 +2993,19 @@ function log_auth($sess, $log)
 function log_shme($log)
 {
     GLOBAL $PHP_SELF;
-    
+
     if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_SHME) == 0)
         return;
-    
+
     $sess = Brisk::sess_cur_get();
     if (isset($sess) == FALSE)
         $ssess = "XXXX";
     else
         $ssess = $sess;
-    
+
     if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_SHME) == 0)
         return;
-    
+
     if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
         $btrace = btrace_line(debug_backtrace());
     else
@@ -3089,24 +3089,24 @@ function root_welcome($user)
 
   $curtime = time();
   $dt = date("H:i ", $curtime);
-    
+
   for ($i = 0 ; $i < count($root_wellarr[$G_lang]) ; $i++)
-    $ret .= sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
+    $ret .= sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
 
   return ($ret);
 }
 
 
 
-function validate_sess($sess) 
+function validate_sess($sess)
 {
-  if (strlen($sess) == SESS_LEN) 
+  if (strlen($sess) == SESS_LEN)
     return (TRUE);
   else
     return (FALSE);
 }
 
-function validate_name($name) 
+function validate_name($name)
 {
     $name_new = str_replace(' ', '_', mb_substr(trim($name),0,12, "UTF-8"));
 
@@ -3133,16 +3133,16 @@ function secstoword($secs)
   $mins = floor($secs / 60);
   $secs = $secs % 60;
   if ($G_lang == 'en') {
-    if ($mins > 0) 
+    if ($mins > 0)
       $ret = sprintf("%d minute%s%s", $mins, ($mins > 1 ? "s" : ""), ($secs > 0 ? " and " : ""));
-    
+
     if ($secs > 0)
       $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "s" : ""));
   }
   else {
-    if ($mins > 0) 
+    if ($mins > 0)
       $ret = sprintf("%d minut%s%s", $mins, ($mins > 1 ? "i" : "o"), ($secs > 0 ? " e " : ""));
-    
+
     if ($secs > 0)
       $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "i" : "o"));
   }
@@ -3157,10 +3157,10 @@ function sharedmem_sz($tok)
   }
   $shm_sz = shmop_size($shm_id);
   shmop_close($shm_id);
-  
+
   // log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
   return ($shm_sz);
-}    
+}
 
 class Warrant {
     static $delta_t;
@@ -3170,17 +3170,17 @@ class Warrant {
       if (($res = file_lock(FTOK_PATH."/warrant", $is_exclusive)) != FALSE) {
           self::$delta_t = microtime(TRUE);
           log_lock("LOCK   warrant      [".self::$delta_t."]");
-          
+
           return ($res);
       }
 
       return (FALSE);
   }
-  
+
   static function unlock_data($res)
   {
-    GLOBAL $sess; 
-    
+    GLOBAL $sess;
+
     log_lock("UNLOCK warrant      [".(microtime(TRUE) - (self::$delta_t))."]");
 
     file_unlock($res);
@@ -3195,19 +3195,19 @@ class Poll {
       if (($res = file_lock(FTOK_PATH."/poll", $is_exclusive)) != FALSE) {
           self::$delta_t = microtime(TRUE);
           log_lock("LOCK   poll         [".self::$delta_t."]");
-          
+
           return ($res);
       }
 
       return (FALSE);
   }
-  
+
   static function unlock_data($res)
   {
-    GLOBAL $sess; 
-    
+    GLOBAL $sess;
+
     log_lock("UNLOCK poll         [".(microtime(TRUE) - (self::$delta_t))."]");
-    
+
     file_unlock($res);
   }
 }
