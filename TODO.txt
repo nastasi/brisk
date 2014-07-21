@@ -3,6 +3,17 @@
 
   FEATURES |
  ----------+
+   - CERTIFICATIONS
+      DONE . Guarantes for certified-only (buttons choice managed)
+      DONE . Tables for certified-only
+      . Term Of Use
+      . Placing for certified-only
+
+   - IP CLASSES BAN
+      DONE . BAN and BLACK lists added
+      DONE . update method to SIGHUP manager
+      DONE . create constructor refactored
+
    - PLACEMENT-NORMALIZATION
       DONE . Normalize previous points
       DONE . Denormalize "Info" view
