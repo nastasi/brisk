@@ -230,7 +230,7 @@ $G_room_passwdhowto = array( 'it' => '<br><h2>Come registrarsi su Brisk</h2>
 <div style=\\"text-align: left; padding: 8px;\\">
 Attualmente ci sono due metodi per ottenere una password sul sito:<br><br>
 <dir>
-<li><b>Facendosi garantire da un utente di Brisk che gi&agrave; possidede una password</b><br><br>
+<li><b>Facendosi garantire da un utente di Brisk che sia certificato.</b><br><br>
 <li><b>Auto-garantendosi utilizzando uno dei seguenti sistemi di identificazione digitale:</b><br><br>
 <dir>
 <li>Carta Regionale dei Servizi della Lombardia (la tessera sanitaria)
@@ -244,13 +244,12 @@ Attualmente ci sono due metodi per ottenere una password sul sito:<br><br>
 <li>il lettore di smart-card per collegare la carta al PC (acquistabile di solito presso le edicole)
 </dir>
 <br>
-<b>Per effettuare la registrazione collegarsi al sito:</b><br><br>
-<dl>
-<dd><a class=\\"flat\\"  target=\\"_blank\\" href=\\"https://brisk.mine.nu\\">https://brisk.mine.nu</a>
-</dl>
-<br><br>
+<b>Per effettuare la registrazione collegarsi al sito:</b> <a class=\\"flat\\"  target=\\"_blank\\" href=\\"https://brisk.mine.nu\\">https://brisk.mine.nu</a>
+<br>
 Se sei in possesso di una carta che permette l\'identificazione via internet che non è nell\'elenco qui sopra
-<a class=\\"flat\\" href=\\"mailto:authadmbrisk@alternativeoutput.it\\">fai una segnalazione</a>.
+<a class=\\"flat\\" href=\\"mailto:authadmbrisk@alternativeoutput.it\\">fai una segnalazione</a>.<br><br>
+Le regole per ottenere la certificazione sono in via di definizione, l\' unica accettata è la conoscenza
+diretta dell\' utente da parte dell\' amministratore.
 
 </dir>
 </div>
@@ -272,13 +271,13 @@ EN Attualmente ci sono due metodi per ottenere una password sul sito:<br><br>
 <li>il lettore di smart-card per collegare la carta al PC (acquistabile di solito presso le edicole)
 </dir>
 <br>
-<b>Per effettuare la registrazione collegarsi al sito:</b><br><br>
-<dl>
-<dd><a class=\\"flat\\"  target=\\"_blank\\" href=\\"https://brisk.mine.nu\\">https://brisk.mine.nu</a>
-</dl>
-<br><br>
+<b>Per effettuare la registrazione collegarsi al sito:</b> <a class=\\"flat\\"  target=\\"_blank\\" href=\\"https://brisk.mine.nu\\">https://brisk.mine.nu</a>
+<br>
 Se sei in possesso di una carta che permette l\'identificazione via internet che non è nell\'elenco qui sopra
-<a class=\\"flat\\" href=\\"mailto:authadmbrisk@alternativeoutput.it\\">fai una segnalazione</a>.
+<a class=\\"flat\\" href=\\"mailto:authadmbrisk@alternativeoutput.it\\">fai una segnalazione</a>.<br><br>
+Le regole per ottenere la certificazione sono in via di definizione, l\' unica accettata è la conoscenza
+diretta dell\' utente da parte dell\' amministratore.
+
 
 </dir>
 </div>
