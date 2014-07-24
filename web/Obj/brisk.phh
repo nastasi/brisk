@@ -342,6 +342,10 @@ $G_PG_cons_n = 345;
     /*     printf("\n"); */
     /* } */
 
+function nickserv_msg($dt, $msg) {
+    return sprintf('chatt_sub("%s",[0x040003,"%s"],"%s");', $dt, NICKSERV, $msg);
+}
+
 function passwd_gen($seed = NULL)
 {
     GLOBAL $G_PG_vow, $G_PG_vow_n, $G_PG_cons, $G_PG_cons_n;
@@ -1598,26 +1602,22 @@ class Brisk
           $user_tos_vers = $user_item->tos_vers_get();
 
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
-              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
-                              $dt, NICKSERV, sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login)));
+              $mesg = nickserv_msg($dt, sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login)));
           }
           else if ($guar_login == "") {
-              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
-                              $dt, NICKSERV, sprintf($mlang_brisk['gua_nfd'][$G_lang], xcape($user_login)));
+              $mesg = nickserv_msg($dt, sprintf($mlang_brisk['gua_nfd'][$G_lang], xcape($user_login)));
           }
           else if ($guar_login == $user_login) {
-              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
-                              $dt, NICKSERV, sprintf($mlang_brisk['gua_self'][$G_lang], xcape($user_login)));
+              $mesg = nickserv_msg($dt, sprintf($mlang_brisk['gua_self'][$G_lang], xcape($user_login)));
           }
           else {
-              $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");',
-                              $dt, NICKSERV, sprintf($mlang_brisk['gua_info'][$G_lang],
-                                                     xcape($user_login), xcape($guar_login)));
+              $mesg = nickserv_msg($dt, sprintf($mlang_brisk['gua_info'][$G_lang],
+                                                xcape($user_login), xcape($guar_login)));
           }
       } while (0);
 
       if ($ret > 0) {
-          $mesg = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, sprintf($mlang_brisk['gua_err'][$G_lang], $ret));
+          $mesg = nickserv_msg($dt, sprintf($mlang_brisk['gua_err'][$G_lang], $ret));
       }
 
       $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$mesg;
@@ -1795,8 +1795,7 @@ class Brisk
         /* MLANG: "Alarm <b>%s</b> inviato a <b>%s</b>." */
         $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))),
                            ($target == "" ? $mlang_brisk['tit_all'][$G_lang] : xcape($target)) );
-        $to_user = sprintf('chatt_sub("%s",[2,"%s"],%s);',
-                           $dt, NICKSERV, $prestr);
+        $to_user = nickserv_msg($dt, $prestr);
 
         $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
                        $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
@@ -1811,7 +1810,7 @@ class Brisk
         $flags_old = 0;
         if ($user->stat == 'room' && $user->subst == 'sitdown' &&
             $user->table >= TABLES_AUTH_N) {
-          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['listmust'][$G_lang]);
+          $to_user = nickserv_msg($dt, $mlang_brisk['listmust'][$G_lang]);
 
         }
         else {
@@ -1844,7 +1843,7 @@ class Brisk
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
-            $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authmust'][$G_lang]);
+            $to_user = nickserv_msg($dt, $mlang_brisk['authmust'][$G_lang]);
         }
     }
     else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
@@ -1853,7 +1852,7 @@ class Brisk
       }
       else {
         /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
-        $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['mesgmust'][$G_lang]);
+        $to_user = nickserv_msg($dt, $mlang_brisk['mesgmust'][$G_lang]);
       }
     }
     else if (strncmp($msg, "/nick ", 6) == 0) {
@@ -1861,7 +1860,7 @@ class Brisk
 
       do {
         if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
-          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['nickmust'][$G_lang]);
+          $to_user = nickserv_msg($dt, $mlang_brisk['nickmust'][$G_lang]);
           break;
         }
 
@@ -1876,7 +1875,7 @@ class Brisk
           }
         if ($i <  MAX_PLAYERS) {
           $prestr = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
-          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $prestr);
+          $to_user = nickserv_msg($dt, $prestr);
           break;
         }
 
@@ -1894,7 +1893,7 @@ class Brisk
               }
             }
             else {
-              $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['authchan'][$G_lang]);
+              $to_user = nickserv_msg($dt, $mlang_brisk['authchan'][$G_lang]);
               break;
             }
           }
@@ -1907,7 +1906,7 @@ class Brisk
                 /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
                 if ($bdb->login_exists($name_new)) {
                     $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
-                    $to_user .= sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $prestr);
+                    $to_user .= nickserv_msg($dt, $prestr);
                 }
             }
         }
@@ -1978,7 +1977,7 @@ class Brisk
         }
         else {
           /* MLANG: "Questo stato non esiste." */
-          $to_user = sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, $mlang_brisk['statunkn'][$G_lang]);
+          $to_user = nickserv_msg($dt, $mlang_brisk['statunkn'][$G_lang]);
           break;
         }
 
@@ -3090,7 +3089,7 @@ function root_welcome($user)
   $dt = date("H:i ", $curtime);
 
   for ($i = 0 ; $i < count($root_wellarr[$G_lang]) ; $i++)
-    $ret .= sprintf('chatt_sub("%s",[2,"%s"],"%s");', $dt, NICKSERV, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
+      $ret .= nickserv_msg($dt, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
 
   return ($ret);
 }

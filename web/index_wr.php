@@ -318,7 +318,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
                 else {
                     /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                    $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
                 }
             } // 0 == 1
             else {
@@ -333,10 +333,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     // check for already used fields
                     if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
-                        $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV,
-                                                ($idret == 1 ? "login già in uso" :
-                                                 ($idret == 2 ? "email già utilizzata" : "errore sconosciuto"))
-                                                );
+                        $mesg_to_user = nickserv_msg($dt, ($idret == 1 ? "login già in uso" :
+                                                           ($idret == 2 ? "email già utilizzata"
+                                                            : "errore sconosciuto")));
                         break;
                     }
                     $bdb->transaction('BEGIN');
@@ -389,7 +388,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-            $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['warrmust'][$G_lang]);
+            $mesg_to_user = nickserv_msg($dt, $mlang_indwr['warrmust'][$G_lang]);
         }
         
         if ($mesg_to_user != "") {
@@ -436,19 +435,19 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
                 else {
                     /* MLANG: "<b>Il database è temporaneamente irraggiungibile, riprova più tardi o contatta l\'amministratore.</b>" */
-                    $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['coerrdb'][$G_lang]);
+                    $mesg_to_user = nickserv_msg($dt, $mlang_indwr['coerrdb'][$G_lang]);
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                 }
             }
             else {
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
             }
             
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
-            $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['mesgmust'][$G_lang]);
+            $mesg_to_user = nickserv_msg($dt, $mlang_indwr['mesgmust'][$G_lang]);
         }
         
         if ($mesg_to_user != "") {
@@ -492,7 +491,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             log_wr("INFO:SKIP:argz == poll name: [".$cli_poll_name."] AUTH: ".$user->is_auth());
             if ( ! $user->is_auth() ) {
                 // MLANG: <b>Per partecipare al sondaggio devi essere autenticato.</b>
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['pollmust'][$G_lang]);
+                $mesg_to_user = nickserv_msg($dt, $mlang_indwr['pollmust'][$G_lang]);
                 log_wr("break1");
                 break;
             }
@@ -511,7 +510,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     
             if (($poll_lock = Poll::lock_data(TRUE)) == FALSE) {
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
                 log_wr("break3");
                 break;
             }
@@ -520,7 +519,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 $fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'w+');
             
             if ($fp == FALSE) {
-                $mesg_to_user = sprintf('chatt_sub("%s", [2, "%s"],"%s");', $dt, NICKSERV, $mlang_indwr['commerr'][$G_lang]);
+                $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
                 log_wr("break4");
                 break;
             }
@@ -694,25 +693,20 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     
                 $not_allowed_msg = "";
                 if ($G_shutdown) {
-                        $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
-                                                   $dt, NICKSERV, $mlang_indwr['shutmsg'][$G_lang]);
+                        $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['shutmsg'][$G_lang]);
                 }
                 else if ($table->wakeup_time > $curtime) {
-                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s%d%s");',
-                                               $dt, NICKSERV, $mlang_indwr['tabwait_a'][$G_lang],
+                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['tabwait_a'][$G_lang],
                                                $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
                 }
                 else if ($table->auth_type == TABLE_AUTH_TY_CERT && ( ! $user->is_cert() ) ) {
-                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
-                                               $dt, NICKSERV, $mlang_indwr['mustcert'][$G_lang]);
+                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustcert'][$G_lang]);
                 }
                 else if ($table->auth_type == TABLE_AUTH_TY_AUTH && ( ! $user->is_auth() ) ) {
-                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"],"%s");',
-                                               $dt, NICKSERV, $mlang_indwr['mustauth'][$G_lang]);
+                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustauth'][$G_lang]);
                 }
                 else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {
-                    $not_allowed_msg = sprintf('chatt_sub("%s", [2, "%s"], "%s");',
-                                               $dt, NICKSERV, $mlang_indwr['mustfirst'][$G_lang]);
+                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustfirst'][$G_lang]);
                 }
                 if ($not_allowed_msg != "") {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$not_allowed_msg;

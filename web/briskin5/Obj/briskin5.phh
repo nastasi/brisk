@@ -791,8 +791,7 @@ class Bin5_table extends Table {
                 continue;
             $user_cur = &$bri->user[$this->player[$i]];
             $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-            $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s", [2, "%s"],"%s");',
-                                                                 $dt, NICKSERV, $msg);
+            $user_cur->comm[$user_cur->step % COMM_N] .= nickserv_msg($dt, $msg);
             $user_cur->step_inc();
         }
     }
