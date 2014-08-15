@@ -225,7 +225,8 @@ SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
      WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d;",
+         AND usr.disa_reas = %d
+     ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED);
@@ -342,7 +343,8 @@ SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
      WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d;",
+         AND usr.disa_reas = %d
+     ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_MAILED);
@@ -473,7 +475,8 @@ SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
      WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d;",
+         AND usr.disa_reas = %d
+     ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_ALL, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_TOBECHK);

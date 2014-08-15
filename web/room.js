@@ -106,7 +106,7 @@ function state_add(flags, comp)
     }
 
     if ((flags & 0xf0000) != 0) {
-        superst = flags & 0xf0000;
+        superst = flags & 0x20000;
         if (name != "") {
             supersfx = "_side";                
         }
