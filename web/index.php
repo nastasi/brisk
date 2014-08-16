@@ -237,12 +237,71 @@ function poll_dom() {
     return '';
 }
 
+function sidebanners_init($sidebanner_idx)
+{
+    for ($i = 0 ; $i < count($sidebanner_idx) ; $i++) {
+        printf("     sidebanner_init(%d);\n", $i);
+    }
+}
+
+function sidebanners_render($sidebanner, $sidebanner_idx)
+{
+    $sb_n = count($sidebanner_idx);
+    if ($sb_n == 0) {
+        return;
+    }
+
+    if ($sb_n == 1) {
+        printf("<br><br>");
+    }
+
+    for ($i = 0 ; $i < $sb_n ; $i++) {
+        $idx = $sidebanner_idx[$i];
+        $sb  = $sidebanner[$idx];
+        if (!array_key_exists('link', $sb)
+            || !array_key_exists('title', $sb)
+            || !array_key_exists('icon_big', $sb)) {
+            continue;
+        }
+        $sb_type = (array_key_exists('type', $sb) ? $sb['type'] : 'meeting');
+        if (array_key_exists('icon', $sb)) {
+            $sb_icon = $sb['icon'];
+        }
+        else {
+            if ($sb_type == 'meeting') {
+                if ($sb_n < 3) {
+                    $sb_icon = 'img/brisk_meeting60.gif';
+                }
+                else {
+                    $sb_icon = 'img/brisk_meeting35.gif';
+                }
+            }
+            else {
+                // no standard icon for other type of events please add them
+                continue;
+            }
+        }
+        $sb_dx =  (array_key_exists('dx', $sb) ? $sb['dx'] : 100);
+        $sb_dy =  (array_key_exists('dy', $sb) ? $sb['dy'] : -230);
+
+        printf('<div class="sidebanner" style="background: #ffd780; border: solid 1px #ffae00; width: 60px;" id="sidebanner%d">', $i);
+        printf('<a target="_blank" href="%s">', $sb['link']);
+        printf('<img style="position: static; border: solid 0px black;" src="%s"', $sb_icon);
+        printf('  onMouseOver="show_bigpict($(\'sidebanner%d\'), \'over\', %d, %d, \'\');"', $i, $sb_dx, $sb_dy);
+        printf('  onMouseOut="show_bigpict($(\'sidebanner%d\'), \'out\', 0, 0, \'\');"', $i);
+        $tit = eschtml($sb['title']);
+        printf('  alt="%s" title="%s"></a></div>', $tit, $tit);
+        printf("\n");
+        printf('<img class="nobohide" style="z-index: 255; border: 1px solid gray;" id="sidebanner%d_big" src="%s">', $i, $sb['icon_big']);
+        printf("\n");
+    }
+}
+
 function index_main(&$brisk, $transp_type, &$header_out, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
-    GLOBAL $G_with_sidebanner, $G_sidebanner;
-    GLOBAL $G_with_sidebanner2, $G_sidebanner2;
+    GLOBAL $G_sidebanner, $G_sidebanner_idx;
     GLOBAL $G_with_poll;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
@@ -923,13 +982,8 @@ supported by:<br>
 <?php
      if ($G_with_topbanner) {
        printf("     topbanner_init();\n");
-    }
-     if ($G_with_sidebanner) {
-       printf("     sidebanner_init();\n");
-    }
-     if ($G_with_sidebanner2) {
-       printf("     sidebanner2_init();\n");
-    }
+     }
+     sidebanners_init($G_sidebanner_idx);
 ?>
 
      g_withflash = DetectFlashVer(6,0,0);
@@ -969,18 +1023,7 @@ supported by:<br>
     printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
     printf($brisk_vertical_menu, '', '');
 
-   if ($G_with_sidebanner xor $G_with_sidebanner2) {
-     printf("<br><br>");
-   }
-
-   if ($G_with_sidebanner) {
-     printf("%s", $G_sidebanner);
-   }
-
-
-   if ($G_with_sidebanner2) {
-     printf("%s", $G_sidebanner2);
-   }
+    sidebanners_render($G_sidebanner, $G_sidebanner_idx);
    printf("</td><td>");
 ?> 
 
@@ -1095,13 +1138,7 @@ else {
      if ($G_with_topbanner) {
        printf("     topbanner_init();\n");
      }
-     if ($G_with_sidebanner) {
-       printf("     sidebanner_init();\n");
-    }
-     if ($G_with_sidebanner2) {
-       printf("     sidebanner2_init();\n");
-    }
-
+     sidebanners_init($G_sidebanner_idx);
 ?>
      sess = "<?php echo "$sess"; ?>";
 xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", 80, 2, null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
@@ -1161,19 +1198,7 @@ if ($is_login) {
    printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
    printf($brisk_vertical_menu, '', $brisk_donate);
 
-
-   if ($G_with_sidebanner xor $G_with_sidebanner2) {
-     printf("<br><br>");
-   }
-
-   if ($G_with_sidebanner) {
-     printf("%s", $G_sidebanner);
-   }
-
-
-   if ($G_with_sidebanner2) {
-     printf("%s", $G_sidebanner2);
-   }
+   sidebanners_render($G_sidebanner, $G_sidebanner_idx);
 
    printf("</td><td>");
 ?>

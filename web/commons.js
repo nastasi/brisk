@@ -1228,38 +1228,20 @@ function topbanner_cb()
     // console.log("A: "+a+"  B: "+b);
 }
 
-function sidebanner_init()
+function sidebanner_init(idx)
 {
-    setInterval(sidebanner_cb, 666);
+    setInterval(function () { sidebanner_cb(idx); }, 666);
 }
 
-function sidebanner2_init()
-{
-    setInterval(sidebanner2_cb, 666);
-}
-
-function sidebanner_cb()
+function sidebanner_cb(idx)
 {
     var a, b;
 
-    a = $('sidebanner').style.backgroundColor;
-    b = $('sidebanner').style.borderLeftColor;
+    a = $('sidebanner'+idx).style.backgroundColor;
+    b = $('sidebanner'+idx).style.borderLeftColor;
 
-    $('sidebanner').style.backgroundColor = b;
-    $('sidebanner').style.borderColor = a+" "+a+" "+a+" "+a;
-
-    // console.log("A: "+a+"  B: "+b);
-}
-
-function sidebanner2_cb()
-{
-    var a, b;
-
-    a = $('sidebanner2').style.backgroundColor;
-    b = $('sidebanner2').style.borderLeftColor;
-
-    $('sidebanner2').style.backgroundColor = b;
-    $('sidebanner2').style.borderColor = a+" "+a+" "+a+" "+a;
+    $('sidebanner'+idx).style.backgroundColor = b;
+    $('sidebanner'+idx).style.borderColor = a+" "+a+" "+a+" "+a;
 
     // console.log("A: "+a+"  B: "+b);
 }
