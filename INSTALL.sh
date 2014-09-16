@@ -120,7 +120,8 @@ if [ "$1" = "pkg" ]; then
     fi
     nam1="brisk_${tag}.tgz"
     nam2="brisk-img_${tag}.tgz"
-    echo "Build packages ${nam1} and ${nam2}."
+    nam2="curl-de-sac_${tag}.tgz"
+    echo "Build packages ${nam1}, ${nam2} and ${nam3}."
     read -p "Proceed [y/n]: " a
     if [ "$a" != "y" -a  "$a" != "Y" ]; then
         exit 1
@@ -129,11 +130,15 @@ if [ "$1" = "pkg" ]; then
     cd ../brisk-img
     git archive --format=tar --prefix=brisk-${tag}/brisk-img/ $tag | gzip > ../$nam2
     cd -
+    cd ../curl-de-sac
+    git archive --format=tar --prefix=brisk-${tag}/curl-de-sac/ $tag | gzip > ../$nam3
+    cd -
     exit 0
 fi
 
 if [ -f "$CONFIG_FILE" ]; then
    source "$CONFIG_FILE"
+   conffile_in="$CONFIG_FILE"
 fi
 
 if [ "x$prefix_path" = "x" ]; then
@@ -175,6 +180,7 @@ while [ $# -gt 0 ]; do
    	    exit 1
         fi
         . "$conffile"
+        conffile_in="$conffile"
     fi
     shift $sh
 done
@@ -341,7 +347,7 @@ if [ "$web_only" = "FALSE" ]; then
 
 fi
 install -d ${web_path}__
-for i in $(find web -type d | sed 's/^....//g'); do
+for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
     install -d ${web_path}__/$i 
 done
 
@@ -408,6 +414,15 @@ fi
 if [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__
+    cd - >/dev/null 2>&1
+fi
+if [ -d ../curl-de-sac ]; then
+    cd ../curl-de-sac
+    if [ ! -z "$conffile_in" ]; then
+        ./INSTALL.sh -f "$conffile_in" -w ${web_path}__
+    else
+        ./INSTALL.sh -w ${web_path}__
+    fi
     cd - >/dev/null 2>&1
 fi
 
