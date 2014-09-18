@@ -356,13 +356,13 @@ function index_main(&$brisk, $transp_type, &$header_out, $remote_addr_full, $get
           }
       }
 
+      $banned = FALSE;
       if ($ACTION == "login" && isset($name)) {
           log_main("pre garbage_manager DUE");
 
           if (isset($pass_private) == FALSE || $pass_private == "") {
               $pass_private = FALSE;
 
-              $banned = FALSE;
               if ($brisk->ban_check($remote_addr)) {
                   // TODO: find a way to add a nonblocking sleep(5) here
                   $banned = TRUE;

@@ -32,6 +32,7 @@ require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/zlibstream.phh");
 require_once($G_base."Obj/mail.phh");
+require_once($G_base."Obj/curl-de-brisk.phh");
 // require_once("../Obj/proxyscan.phh");
 require_once($G_base."index.php");
 require_once($G_base."index_wr.php");
@@ -43,6 +44,19 @@ require_once($G_base."briskin5/index_wr.php");
 function main($argv)
 {
     GLOBAL $G_ban_list, $G_black_list;
+
+    // create cds
+    $cds = new Curl_de_sac();
+
+    // create tor_chk_cls
+    $tor_chk_cls = new tor_chk_cmd_cls();
+
+    // registrer tor_chk_cls
+    printf("MAIN: Register 'tor_chk_cls'\n");
+    if (($cds->cmd_cls_register($tor_chk_cls)) == FALSE) {
+        fprintf(STDERR, "MAIN: 'tor_chk_cls' registration failed\n");
+        exit(1);
+    }
 
     pid_save();
     do {

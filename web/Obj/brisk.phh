@@ -79,6 +79,7 @@ define('DBG_LMOP', 0x0800);
 define('DBG_TRAC', 0x1000);
 define('DBG_SHME', 0x2000);
 define('DBG_ENGI', 0x4000);
+define('DBG_CDS',  0x8000);
 // NOTE: BRISK DEBUG must be a numerical constant, not the result of operations on symbols
 define('BRISK_DEBUG', 0x0800);
 
@@ -1000,10 +1001,24 @@ class Brisk
 
     var $delay_mgr;
 
+    var $cds;
+
     public static $sess_cur;
 
     function Brisk()
     {
+        // create cds
+        $this->cds = new Curl_de_sac();
+
+        // create tor_chk_cls
+        $tor_chk_cls = new tor_chk_cmd_cls();
+
+        // registrer tor_chk_cls
+        printf("MAIN: Register 'tor_chk_cls'\n");
+        if (($this->cds->cmd_cls_register($tor_chk_cls)) == FALSE) {
+            fprintf(STDERR, "MAIN: 'tor_chk_cls' registration failed\n");
+            exit(1);
+        }
     }
 
     // constructor
@@ -2354,6 +2369,10 @@ class Brisk
       log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s] count [%d] name [%s] code [%s]", $idx, $sess, $name_new, count($this->user),$this->user[$real_idx]->name, $this->user[$real_idx]->code));
 
       $ret = $this->user[$real_idx];
+      if ($this->cds->execute("tor_chk", $this, $real_idx, $sess, $ip) == FALSE) {
+          log_main("cds_execute failed");
+      }
+
       return ($ret);
     }
 
@@ -2702,6 +2721,33 @@ function log_mop($step, $log)
         $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("LMOP: [%f] [%05d] [%s] [%s]\n", gettimeofday(TRUE), $step, $log, $btrace));
+        fclose($fp);
+    }
+}
+
+
+function log_cds($log)
+{
+    GLOBAL $PHP_SELF;
+
+    if (BRISK_SINGLE_SESS == "" && (BRISK_DEBUG & DBG_CDS) == 0)
+        return;
+
+    $sess = Brisk::sess_cur_get();
+    if (isset($sess) == FALSE)
+        $ssess = "XXXX";
+    else
+        $ssess = $sess;
+
+    if (( (BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_CDS) == 0)
+        return;
+
+    if ((BRISK_DEBUG | ($ssess == BRISK_SINGLE_SESS ? BRISK_SINGLE_DEBUG : 0) ) & DBG_TRAC)
+        $btrace = btrace_line(debug_backtrace());
+    else
+        $btrace = "";
+    if (($fp = @fopen(LEGAL_PATH."/cds.log", 'a')) != FALSE) {
+        fwrite($fp, sprintf("CDS: [%f] [%s] [%s]\n", gettimeofday(TRUE), $log, $btrace));
         fclose($fp);
     }
 }
