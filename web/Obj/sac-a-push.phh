@@ -796,7 +796,7 @@ class Sac_a_push {
                                 $line = trim($buf);
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
-                                    $this->app->reload($G_ban_list, $G_black_list);
+                                    $this->app->reload(FALSE, $G_ban_list, $G_black_list);
                                     global_dump();
                                 }
                                 else if ($line == "shutdown" || $line == "sd") {

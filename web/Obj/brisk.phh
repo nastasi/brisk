@@ -1007,18 +1007,7 @@ class Brisk
 
     function Brisk()
     {
-        // create cds
-        $this->cds = new Curl_de_sac();
-
-        // create tor_chk_cls
-        $tor_chk_cls = new tor_chk_cmd_cls();
-
-        // registrer tor_chk_cls
-        printf("MAIN: Register 'tor_chk_cls'\n");
-        if (($this->cds->cmd_cls_register($tor_chk_cls)) == FALSE) {
-            fprintf(STDERR, "MAIN: 'tor_chk_cls' registration failed\n");
-            exit(1);
-        }
+        $this->cds = NULL;
     }
 
     // constructor
@@ -1028,7 +1017,7 @@ class Brisk
                 fprintf(STDERR, "ROOM FROM FILE\n");
                 rename($crystal_filename, $crystal_filename.".old");
 
-                $brisk->reload($ban_list, $black_list);
+                $brisk->reload(TRUE, $ban_list, $black_list);
 
                 return($brisk);
             }
@@ -1045,11 +1034,6 @@ class Brisk
         $thiz->ban_list = NULL;
         $thiz->black_list = NULL;
 
-        fprintf(STDERR, "PRE IPCLASS_UPDATE (%d, %d)\n", count($ban_list), count($black_list));
-        $thiz->ipclass_update('ban_list', $ban_list);
-        $thiz->ipclass_update('black_list', $black_list);
-        fprintf(STDERR, "POST IPCLASS_UPDATE %d %d\n", count($thiz->ban_list), count($thiz->black_list));
-
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
             $thiz->user[$i] = User::create($thiz, $i, "", "");
         }
@@ -1063,6 +1047,8 @@ class Brisk
         $thiz->delay_mgr = new Delay_Manager(1.5);
 
         static::$sess_cur = FALSE;
+
+        $thiz->reload(TRUE, $ban_list, $black_list);
 
         return ($thiz);
     }
@@ -1088,15 +1074,17 @@ class Brisk
         }
     }
 
-    function reload($ban_list, $black_list)
+    function reload($is_first, $ban_list, $black_list)
     {
         fprintf(STDERR, "RELOAD STUFF (%d)(%d)\n", count($ban_list), count($black_list));
 
         $this->ipclass_update("ban_list", $ban_list);
         $this->ipclass_update("black_list", $black_list);
 
-        $this->banned_kickoff();
-        $this->garbage_manager(TRUE);
+        if (!$is_first) {
+            $this->banned_kickoff();
+            $this->garbage_manager(TRUE);
+        }
     }
 
     function banned_kickoff()
