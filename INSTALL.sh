@@ -407,10 +407,6 @@ sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path
 document_root="$(grep DocumentRoot "${apache_conf}"  | grep -v '^[ 	]*#' | awk '{ print $2 }')"
 sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph*
 
-if [ -d ${web_path} ]; then
-    mv ${web_path} ${web_path}.old
-fi
-
 if [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__
@@ -437,6 +433,10 @@ else
     echo "Config file $etc_path/$brisk_conf not exists."
     echo "Install a template."
     cp  "${web_path}__""/Obj/brisk.conf-templ.pho" "$etc_path/$brisk_conf"
+fi
+
+if [ -d ${web_path} ]; then
+    mv ${web_path} ${web_path}.old
 fi
 
 mv ${web_path}__ ${web_path}
