@@ -90,6 +90,7 @@ function searchetc() {
 #
 #  MAIN
 #
+declare -a nam
 if [ "$1" = "chk" ]; then
     set -e
     oldifs="$IFS"
@@ -100,7 +101,7 @@ if [ "$1" = "chk" ]; then
     done
 
     taggit="$(git describe --tags | sed 's/^v//g')"
-    tagphp="$(grep "^\$G_brisk_version = " web/Obj/brisk.phh | sed 's/^[^"]\+"//g;s/".*//g')"
+    tagphp="$(grep "^\$G_brisk_version = " web/Obj/brisk.phh | sed 's/^[^"]\+"//g;s/".*//g')" # ' emacs hell
     if [ "$taggit" != "$tagphp" ]; then
         echo
 	echo "WARNING: taggit: [$taggit] tagphp: [$tagphp]"
@@ -111,17 +112,28 @@ fi
 
 # before all check errors on the sources
 $0 chk || exit 3
-
 if [ "$1" = "pkg" ]; then
     if [ "$2" != "" ]; then
         tag="$2"
     else
         tag="$(git describe)"
     fi
-    nam1="brisk_${tag}.tgz"
-    nam2="brisk-img_${tag}.tgz"
-    nam2="curl-de-sac_${tag}.tgz"
-    echo "Build packages ${nam1}, ${nam2} and ${nam3}."
+    nam_idx=0
+    nam[$nam_idx]="brisk_${tag}.tgz"
+    nam_idx=$((nam_idx + 1))
+    nam[$nam_idx]="brisk-img_${tag}.tgz"
+
+    if [ -d ../curl-de-sac ]; then
+       nam_idx=$((nam_idx + 1))
+       nam[$nam_idx]="curl-de-sac_${tag}.tgz"
+    fi
+    pkg_list=""
+    sep=""
+    for i in ${nam[@]}; do
+        pkg_list="${pkg_list}${sep}${i}"
+        sep=", "
+    done
+    echo "Build packages ${pkg_list}."
     read -p "Proceed [y/n]: " a
     if [ "$a" != "y" -a  "$a" != "Y" ]; then
         exit 1
@@ -130,9 +142,11 @@ if [ "$1" = "pkg" ]; then
     cd ../brisk-img
     git archive --format=tar --prefix=brisk-${tag}/brisk-img/ $tag | gzip > ../$nam2
     cd -
-    cd ../curl-de-sac
-    git archive --format=tar --prefix=brisk-${tag}/curl-de-sac/ $tag | gzip > ../$nam3
-    cd -
+    if [ -d ../curl-de-sac ]; then
+        cd ../curl-de-sac
+        git archive --format=tar --prefix=brisk-${tag}/curl-de-sac/ $tag | gzip > ../$nam3
+        cd -
+    fi
     exit 0
 fi
 
