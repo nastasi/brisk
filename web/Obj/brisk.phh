@@ -2,7 +2,7 @@
 /*
  *  brisk - brisk.phh
  *
- *  Copyright (C) 2006-2013 Matteo Nastasi
+ *  Copyright (C) 2006-2014 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -1053,12 +1053,6 @@ class Brisk
         return ($thiz);
     }
 
-    function tor_chk_postprocess($user_idx, $user_sess, $conn_ip, $is_auth, $is_tor)
-    {
-        log_cds(sprintf("user_idx: %d, user_sess: %s, conn_ip: %s, is_auth: %s, is_tor: %s",
-                        $user_idx, $user_sess, $conn_ip, ($is_auth ? "YES" : "NO"), ($is_tor ? "YES" : "NO")));
-    }
-
     function ipclass_update($ip_out_s, $ip_in)
     {
         fprintf(STDERR, "N_IN: %d\n", count($ip_in));
@@ -1084,24 +1078,11 @@ class Brisk
     {
         fprintf(STDERR, "RELOAD STUFF (%d)(%d)\n", count($ban_list), count($black_list));
 
-        if ($this->cds != NULL) {
-            $this->cds->cmd_cls_deregister_all();
-            unset($this->cds);
-            $this->cds = NULL;
+        if (defined('CURL_DE_SAC_VERS')) {
+            if (brisk_cds_reload($this) == FALSE) {
+                exit(12);
+            }
         }
-        // create cds
-        $this->cds = new Curl_de_sac();
-
-        // create tor_chk_cls
-        $tor_chk_cls = new tor_chk_cmd_cls();
-
-        // registrer tor_chk_cls
-        printf("MAIN: Register 'tor_chk_cls'\n");
-        if (($this->cds->cmd_cls_register($tor_chk_cls)) == FALSE) {
-            fprintf(STDERR, "MAIN: 'tor_chk_cls' registration failed\n");
-            exit(1);
-        }
-
         $this->ipclass_update("ban_list", $ban_list);
         $this->ipclass_update("black_list", $black_list);
 
@@ -2282,10 +2263,9 @@ class Brisk
       }
 
       $idx = $ghost;
-      if ($this->cds->execute("tor_chk", $this, $ghost, $sess, $ip, $authenticate != FALSE) == FALSE) {
-          log_main("cds_execute failed");
+      if (defined('CURL_DE_SAC_VERS')) {
+          brisk_cds_execute($this, $real_idx, $sess, $ip, $authenticate);
       }
-
       return ($this->user[$ghost]);
     }
     else if ($idx != -1 && $i == MAX_PLAYERS) {
@@ -2385,10 +2365,9 @@ class Brisk
       log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s] count [%d] name [%s] code [%s]", $idx, $sess, $name_new, count($this->user),$this->user[$real_idx]->name, $this->user[$real_idx]->code));
 
       $ret = $this->user[$real_idx];
-      if ($this->cds->execute("tor_chk", $this, $real_idx, $sess, $ip, $authenticate != FALSE) == FALSE) {
-          log_main("cds_execute failed");
+      if (defined('CURL_DE_SAC_VERS')) {
+          brisk_cds_execute($this, $real_idx, $sess, $ip, $authenticate);
       }
-
       return ($ret);
     }
 
