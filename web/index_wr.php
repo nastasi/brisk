@@ -834,6 +834,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
          *                    *
          **********************/
         else if ($user->subst == 'sitdown') {
+            if ($user->the_end == TRUE) {
+                log_wr("INFO:SKIP:argz == sitdown && ->the_end == TRUE => ignore request.");
+                return FALSE;
+            }
+
             if ($argz[0] == 'wakeup') {
                 $brisk->room_wakeup($user);
             }
