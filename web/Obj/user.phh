@@ -749,19 +749,16 @@ class User {
                   log_rd2("LOGOUT BYE BYE!!");
                   log_auth($this->sess, "Explicit logout.");
                   
-                  if ($this->the_end == TRUE) {
-                      $this->reset();
-                      
-                      if ($this->subst == 'sitdown') {
-                          log_load("ROOM WAKEUP");
-                          $this->room->room_wakeup($this);
-                      }
-                      else if ($this->subst == 'standup')
-                          $this->room->room_outstandup($this);
-                      else
-                          log_rd2("LOGOUT FROM WHAT ???");
-                      
-                  } /* if ($this->the_end == TRUE) { ... */
+                  $this->reset();
+
+                  if ($this->subst == 'sitdown') {
+                      log_load("ROOM WAKEUP");
+                      $this->room->room_wakeup($this);
+                  }
+                  else if ($this->subst == 'standup')
+                      $this->room->room_outstandup($this);
+                  else
+                      log_rd2("LOGOUT FROM WHAT ???");
               } /* if ($this->the_end == TRUE) { ... */
           } /* if ($this->rd_step < $this->step) { */
       }  /* else of if ($this->rd_step == -1) { */
