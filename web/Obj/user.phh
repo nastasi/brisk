@@ -129,6 +129,7 @@ class User {
   var $rd_scristp; // current script step (for each session) 
   var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
   var $rd_cache;   // place where store failed fwrite data
+  var $rd_toflush; // bool to inform about unfflushed socket
   var $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
   var $rd_transp;  // class that define stream encapsulation type (iframe, xhr, ...)
   var $rd_is_chunked; // is the transport chunked or not ?
@@ -190,6 +191,7 @@ class User {
     $thiz->rd_scristp = -1;
     $thiz->rd_kalive  = -1;
     $thiz->rd_cache   = "";
+    $thiz->td_toflush = FALSE;
     $thiz->rd_zls     = FALSE;
     $thiz->rd_transp  = NULL;
     $thiz->rd_is_chunked = FALSE;
