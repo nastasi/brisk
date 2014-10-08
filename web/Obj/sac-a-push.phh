@@ -874,6 +874,13 @@ class Sac_a_push {
                 $id = intval($sock);
                 if (isset($this->s2u[$id])) {
                     $user = $this->s2u[$id];
+
+                    if ($user->rd_toflush) {
+                        if (fflush($sock) == FALSE)
+                            continue;
+                        else
+                            $user->rd_toflush = FALSE;
+                    }
                     $response = $user->rd_cache_get();
                     $do_ping = FALSE;
                     if (($this->curtime - $user->lacc) > (EXPIRE_TIME_RD / 3)) {
@@ -911,7 +918,10 @@ class Sac_a_push {
                         else {
                             $user->rd_cache_set("");
                         }
-                        fflush($sock);
+                        if (fflush($sock) == FALSE) {
+                            $user->rd_toflush = TRUE;
+                            continue;
+                        }
                         $user->rd_kalive_reset($this->curtime);
                     }
                     
