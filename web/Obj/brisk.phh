@@ -2143,7 +2143,7 @@ class Brisk
   }
 
   /*
-   * function add_user(&$brisk, &$sess, &$idx, $name, $pass, $ip)
+   * function add_user(&$brisk, &$sess, &$idx, $name, $pass, $ip, $header, $cookie)
    *
    * RETURN VALUE:
    *   if ($idx >  -1    && ret == FALSE)  =>  duplicated nick
@@ -2154,7 +2154,7 @@ class Brisk
    *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db)
    */
 
-  function add_user(&$sess, &$idx, $name, $pass, $ip, $cookie)
+  function add_user(&$sess, &$idx, $name, $pass, $ip, $header, $cookie)
   {
     GLOBAL $G_base;
 
@@ -2264,7 +2264,7 @@ class Brisk
 
       $idx = $ghost;
       if (defined('CURL_DE_SAC_VERS')) {
-          brisk_cds_execute($this, $real_idx, $sess, $ip, $authenticate);
+          brisk_cds_execute($this, $ghost, $real_idx, $sess, $ip, $authenticate, $header);
       }
       return ($this->user[$ghost]);
     }
@@ -2366,7 +2366,7 @@ class Brisk
 
       $ret = $this->user[$real_idx];
       if (defined('CURL_DE_SAC_VERS')) {
-          brisk_cds_execute($this, $real_idx, $sess, $ip, $authenticate);
+          brisk_cds_execute($this, $ghost, $real_idx, $sess, $ip, $authenticate, $header);
       }
       return ($ret);
     }
@@ -2528,7 +2528,7 @@ class Brisk
       case "":
       case "index.php":
           ob_start();
-          index_main($this, $transp_type, $header_out, $addr, $get, $post, $cookie);
+          index_main($this, $transp_type, $header, $header_out, $addr, $get, $post, $cookie);
           $content = ob_get_contents();
           ob_end_clean();
 

@@ -297,7 +297,7 @@ function sidebanners_render($sidebanner, $sidebanner_idx)
     }
 }
 
-function index_main(&$brisk, $transp_type, &$header_out, $remote_addr_full, $get, $post, $cookie)
+function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_with_donors, $G_donors_cur, $G_donors_all;
     GLOBAL $G_with_topbanner, $G_topbanner, $G_is_local;
@@ -374,7 +374,7 @@ function index_main(&$brisk, $transp_type, &$header_out, $remote_addr_full, $get
           /* try login */
 
           if ($banned == FALSE &&
-              ($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private, $remote_addr, $cookie)) != FALSE) {
+              ($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private, $remote_addr, $header, $cookie)) != FALSE) {
               $brisk->sess_cur_set($user->sess);
               $ACTION = "room";
               if ($idx < 0) {
