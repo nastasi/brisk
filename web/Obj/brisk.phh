@@ -983,6 +983,67 @@ class Client_prefs {
     }
 }
 
+define('GHOST_SESS_TOUT', 300);
+define('GHOST_SESS_REAS_ANOT', 1);
+class GhostSessEl
+{
+    var $time;
+    var $sess;
+    var $reas;
+
+    function GhostSessEl($time, $sess, $reas)
+    {
+        $this->time = $time + GHOST_SESS_TOUT;
+        $this->sess = $sess;
+        $this->reas = $reas;
+    }
+}
+
+class GhostSess
+{
+    var $gs;
+
+    function GhostSess()
+    {
+        $this->gs = array();
+    }
+
+    // push or update for this session
+    function push($time, $sess, $reas)
+    {
+        foreach($this->gs as $el) {
+            if ($el->sess == "$sess") {
+                $el->reas = $reas;
+                $el->time = $time + GHOST_SESS_TOUT;
+                return TRUE;
+            }
+        }
+
+        $this->gs[] = new GhostSessEl($time, $sess, $reas);
+        return TRUE;
+    }
+
+    function pop($sess)
+    {
+        foreach($this->gs as $key => $el) {
+            if ($el->sess == "$sess") {
+                $ret = $this->gs[$key];
+                unset($this->gs[$key]);
+                return ($ret);
+            }
+        }
+        return FALSE;
+    }
+
+    function garbage_manager($curtime)
+    {
+        foreach($this->gs as $key => $el) {
+            if ($el->time < $curtime) {
+                unset($this->gs[$key]);
+            }
+        }
+    }
+}
 
 class Brisk
 {
@@ -999,7 +1060,7 @@ class Brisk
 
     var $ban_list;  // ban list (authized allowed)
     var $black_list;  // black list (anti-dos, noone allowed)
-
+    var $ghost_sess;
     var $delay_mgr;
 
     var $cds;
@@ -1034,6 +1095,7 @@ class Brisk
 
         $thiz->ban_list = NULL;
         $thiz->black_list = NULL;
+        $thiz->ghost_sess = new GhostSess();
 
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
             $thiz->user[$i] = User::create($thiz, $i, "", "");
@@ -1331,6 +1393,8 @@ class Brisk
 
     $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
     $ismod = TRUE;
+
+    $this->ghost_sess->garbage_manager($curtime);
 
     $this->delay_mgr->lastcheck_set($curtime);
     return ($ismod);
@@ -2238,6 +2302,7 @@ class Brisk
 
       $ghost_user = $this->user[$ghost];
       $curtime = time();
+      $this->ghost_sess->push($curtime, $ghost_user->sess, GHOST_SESS_REAS_ANOT);
       $ghost_user->comm[$ghost_user->step % COMM_N] = "";
       $ghost_user->step_inc();
       if ($sess == "") {

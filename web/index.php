@@ -38,8 +38,10 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'Standing players'),
                      'headline'     => array('it' => 'briscola chiamata in salsa ajax',
                                              'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
-                     'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola',
-                                             'en' => 'Enter your nickname to access to the tables of briscola'),
+                     'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola.',
+                                             'en' => 'Enter your nickname to access to the tables of briscola.'),
+                     'reas_anot'    => array('it' => 'La tua sessione è stata assegnata ad un altro browser.',
+                                             'en' => 'EN La tua sessione è stata assegnata ad un altro browser.'),
                      'btn_enter'    => array('it' => 'entra',
                                              'en' => 'enter'),
                      'passwarn'     => array('it' => 'Se non hai ancora una password, lascia il campo in bianco ed entra.',
@@ -336,7 +338,11 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
       $curtime = time();
 
       /* Actions */
-
+      if (($ghost_sess = $brisk->ghost_sess->pop($sess)) != FALSE) {
+          if ($ghost_sess->reas == GHOST_SESS_REAS_ANOT) {
+              $last_msg = $mlang_room['reas_anot'][$G_lang];
+          }
+      }
       if (validate_sess($sess)) {
           log_main("pre garbage_manager UNO");
           $brisk->garbage_manager(TRUE);
