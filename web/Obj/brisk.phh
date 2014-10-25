@@ -153,10 +153,10 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.14.5";
+$G_brisk_version = "4.15.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuovo sistema di registrazione degli utenti, aggiunto reinvio dell\' email di verifica, ban con classi di IP, nuovi colori, nuovo sistema bi banner laterali per gli eventi',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: primo passo per rendere più robusto il sistema di notifica.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: new users subscription system, refactored sidebanner system.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
