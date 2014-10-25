@@ -129,8 +129,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     log_load("index_wr.php");
     $remote_addr = addrtoipv4($remote_addr_full);
 
-    if (($mesg = gpcs_var('mesg', $get, $post, $cookie)) === FALSE) 
+    if (($mesg = gpcs_var('mesg', $get, $post, $cookie)) === FALSE)
         unset($mesg);
+
+    if (($cl_step = gpcs_var('stp', $get, NULL, NULL)) === FALSE)
+        $cl_step = -2;
 
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         $sess = "";
@@ -234,6 +237,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
     // LACC UPDATED
     $user->lacc = $curtime;
+    if ($user->cl_step < $cl_step) {
+        log_step(sprintf("%s|%s|%d|%d|%d|%d", $user->sess, $user->name, $user->step, $user->cl_step, $cl_step, $user->step - $user->cl_step));
+        $user->cl_step = $cl_step;
+    }
 
     if ( ( ! $user->is_auth() ) &&
         $brisk->ban_check($user->ip)) {

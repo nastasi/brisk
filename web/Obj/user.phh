@@ -119,6 +119,7 @@ class User {
   var $subst;      // substatus for each status   
   var $step;       // step of the current status
   var $trans_step; // step to enable transition between pages (disable == -1)
+  var $cl_step;    // current step returned by client
 
   var $rd_socket;  // socket handle of push stream
   var $rd_endtime; // end time for push stream
@@ -180,6 +181,7 @@ class User {
     $thiz->subst      = $subst;
     $thiz->step       = 1;
     $thiz->trans_step = -1;
+    $thiz->cl_step    = -1;
     $thiz->comm       = array();
 
     $thiz->rd_socket  = NULL;
@@ -233,6 +235,7 @@ class User {
     $this->subst      = $from->subst;
     $this->step       = $from->step;
     $this->trans_step = $from->trans_step;
+    $this->cl_step    = $from->cl_step;
     $this->comm       = array();
 
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
@@ -296,6 +299,7 @@ class User {
     $thiz->subst      = $from->subst;
     $thiz->step       = $from->step;
     $thiz->trans_step = $from->trans_step;
+    $thiz->cl_step    = $from->cl_step;
     $thiz->comm       = array();
 
     /*
@@ -615,7 +619,7 @@ class User {
       
       $ret = FALSE;
       $curtime = time();
-      
+
       /* Nothing changed, return. */
       if ($this->rd_step == $this->step)
           return (FALSE);
