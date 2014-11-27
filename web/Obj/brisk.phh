@@ -984,7 +984,11 @@ class Client_prefs {
 }
 
 define('GHOST_SESS_TOUT', 300);
-define('GHOST_SESS_REAS_ANOT', 1);
+define('GHOST_SESS_REAS_LOUT', 1); // logout
+define('GHOST_SESS_REAS_ANOT', 2); // another user get session
+define('GHOST_SESS_REAS_TOUT', 3); // room timeout
+define('GHOST_SESS_REAS_TTOT', 4); // table timeout
+
 class GhostSessEl
 {
     var $time;
@@ -1315,6 +1319,9 @@ class Brisk
                             $user_cur->laccwr     = $bin5_user->lacc;
                             $user_cur->bantime    = $bin5_user->bantime;
                             $user_cur->the_end    = $bin5_user->the_end;
+                            if ($user_cur->the_end) {
+                                $this->ghost_sess->push($curtime, $user_cur->sess, GHOST_SESS_REAS_TTOT);
+                            }
                         }
 
                         log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
@@ -1377,6 +1384,7 @@ class Brisk
             // Auto logout dell'utente
             log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
 
+            $this->ghost_sess->push($curtime, $user_cur->sess, GHOST_SESS_REAS_TOUT);
             $user_cur->the_end = TRUE;
 
             log_rd2("AUTO LOGOUT.");

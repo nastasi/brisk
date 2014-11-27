@@ -41,6 +41,14 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
                      'welcome'      => array('it' => 'Digita il tuo nickname per accedere ai tavoli della briscola.',
                                              'en' => 'Enter your nickname to access to the tables of briscola.'),
+                     'reas_unkn'    => array('it' => 'Logout per motivi sconosciuti.',
+                                             'en' => 'Logout with unknown reason.'),
+                     'reas_lout'    => array('it' => 'Orevoire.',
+                                             'en' => 'EN Orevoire.'),
+                     'reas_tout'    => array('it' => 'Abbiamo perso le tue tracce, quindi ti abbiamo disconnesso.',
+                                             'en' => 'EN Abbiamo perso le tue tracce, quindi ti abbiamo disconnesso.'),
+                     'reas_ttot'    => array('it' => 'Abbiamo perso le tue tracce mentre stavi giocando, quindi ti abbiamo disconnesso.',
+                                             'en' => 'EN Abbiamo perso le tue tracce mentre stavi giocando, quindi ti abbiamo disconnesso.'),
                      'reas_anot'    => array('it' => 'La tua sessione è stata assegnata ad un altro browser.',
                                              'en' => 'EN La tua sessione è stata assegnata ad un altro browser.'),
                      'btn_enter'    => array('it' => 'entra',
@@ -341,8 +349,22 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
 
       /* Actions */
       if (($ghost_sess = $brisk->ghost_sess->pop($sess)) != FALSE) {
-          if ($ghost_sess->reas == GHOST_SESS_REAS_ANOT) {
+          switch ($ghost_sess->reas) {
+          case GHOST_SESS_REAS_LOUT:
+              $last_msg = $mlang_room['reas_lout'][$G_lang];
+              break;
+          case GHOST_SESS_REAS_ANOT:
               $last_msg = $mlang_room['reas_anot'][$G_lang];
+              break;
+          case GHOST_SESS_REAS_TOUT:
+              $last_msg = $mlang_room['reas_tout'][$G_lang];
+              break;
+          case GHOST_SESS_REAS_TTOT:
+              $last_msg = $mlang_room['reas_ttot'][$G_lang];
+              break;
+          default:
+              $last_msg = $mlang_room['reas_unkn'][$G_lang];
+              break;
           }
       }
       if (validate_sess($sess)) {

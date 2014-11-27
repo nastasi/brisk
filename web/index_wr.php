@@ -730,7 +730,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                     /* MLANG: "<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", "resta in piedi.", "<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere." */
                     if ($user->is_auth()) {
-                        $user->comm[$user->step % COMM_N] .= show_notify($mlang_indwr['badwake_a'][$G_lang].secstoword($user->bantime - $user->laccwr).$mlang_indwr['badwake_b'][$G_lang], 2000, $mlang_indwr['btn_stays'][$G_lang], 400, 100);
+                        $user->comm[$user->step % COMM_N] .= show_notify($mlang_indwr['badwake_a'][$G_lang].secstoword($bantime - $user->laccwr).$mlang_indwr['badwake_b'][$G_lang], 2000, $mlang_indwr['btn_stays'][$G_lang], 400, 140);
                     }
                     else {
                         $user->comm[$user->step % COMM_N] .= show_notify($mlang_indwr['badsit_a'][$G_lang].secstoword($bantime - $user->laccwr).$mlang_indwr['badsit_a'][$G_lang], 2000, $mlang_indwr['btn_stays'][$G_lang], 400, 180);
