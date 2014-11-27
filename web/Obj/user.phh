@@ -345,6 +345,18 @@ class User {
       return (($this->flags & USER_FLAG_AUTH) && ($this->flags & USER_FLAG_TY_CERT));
   }
 
+  function is_empty()
+  {
+      return ($this->sess == "");
+  }
+
+  function is_active()
+  {
+      if ($this->sess != "" && !$this->the_end) // OK: is_active()
+          return TRUE;
+      return FALSE;
+  }
+
   function flags_set($flags, $mask)
   {
       $flags_old = $this->flags & (~$mask);
@@ -384,7 +396,7 @@ class User {
       $this->rd_endtime = $curtime + RD_ENDTIME_DELTA;
       $this->rd_stat    = $stat;
       $this->rd_subst   = $subst;
-      $this->rd_step    = $step;
+      $this->rd_step    = $step; // TRACKED
       $this->rd_from    = $from;
       $this->rd_scristp = 0;
       $this->rd_kalive  = $curtime + RD_KEEPALIVE_TOUT;
@@ -617,7 +629,7 @@ class User {
 
       log_rd("maincheck begin");
       
-      $ret = FALSE;
+      $ret = "";
       $curtime = time();
 
       /* Nothing changed, return. */
@@ -627,19 +639,13 @@ class User {
       log_rd2("do other cur_stat[".$this->rd_stat."] user->stat[".$this->stat."] cur_step[".$this->rd_step."] user_step[".$this->step."]");
       
       if ($this->rd_step == -1) {
-          /*
-           *  if $this->rd_step == -1 load the current state from the main struct
-           */
-          
+          /*  if $this->rd_step == -1 load the current state from the main struct  */
           $S_load_stat['wR_minusone']++;
-          
-          // if ($this->the_end == TRUE) {
-          // log_rd2("main_check: the end".var_export(debug_backtrace()));
-          // }
-          
+
           if ($this->trans_step != -1) {
               log_rd2("TRANS USATO ".$this->trans_step);
-              $this->rd_step = $this->trans_step;
+              $this->rd_step = $this->step = $this->trans_step; // TRACKED
+              $ret .= $this->room->show_room($this->step, $this);
               $this->trans_step = -1;
           }
           else {
@@ -654,7 +660,6 @@ class User {
           
           if ($this->stat == 'room') {
               log_rd("roomma ".$this->step);
-              $curtime = time();
               if ($this->rec !== FALSE) {
                   $doc_filepath = $G_base.$G_doc_path.sprintf($G_tos_fname, $G_tos_vers, $G_lang);
                   $doc_filename = basename($doc_filepath);
@@ -702,7 +707,7 @@ class User {
               /* NOTE the sets went common */
               $this->rd_stat =  $this->stat;
               $this->rd_subst = $this->subst;
-              $this->rd_step =  $this->step;
+              $this->rd_step =  $this->step; // TRACKED
           }
           /***************
            *             *
@@ -746,29 +751,18 @@ class User {
                   }
                   $this->rd_stat =  $this->stat;
                   $this->rd_subst = $this->subst;
-                  $this->rd_step =  $this->step;
+                  $this->rd_step = $this->step;
               } while (0);
               
               log_rd2($this->step, 'index_rd.php: after ret set');
-              
-              if ($this->the_end == TRUE) {
-                  log_rd2("LOGOUT BYE BYE!!");
-                  log_auth($this->sess, "Explicit logout.");
-                  
-                  $this->reset();
 
-                  if ($this->subst == 'sitdown') {
-                      log_load("ROOM WAKEUP");
-                      $this->room->room_wakeup($this);
-                  }
-                  else if ($this->subst == 'standup')
-                      $this->room->room_outstandup($this);
-                  else
-                      log_rd2("LOGOUT FROM WHAT ???");
-              } /* if ($this->the_end == TRUE) { ... */
+              // if ($this->the_end == TRUE) { management is moved
+              // in the spush scope
           } /* if ($this->rd_step < $this->step) { */
       }  /* else of if ($this->rd_step == -1) { */
-      
+
+      if ($ret == "")
+          $ret = FALSE;
     
       return ($ret);
   }  //   function maincheck(...

@@ -1112,27 +1112,9 @@ class Bin5_user extends User {
 
               log_rd2($this->step, 'index_rd.php: after ret set');
 
-              if ($this->the_end == TRUE) {
-                  log_rd2("LOGOUT BYE BYE!!");
-                  log_auth($this->sess, "Explicit logout.");
-
-                  if ($this->the_end == TRUE) {
-                      $this->reset();
-
-                      // FIXME !!!
-                      /* if ($this->subst == 'sitdown') { */
-                      /*     log_load("ROOM WAKEUP"); */
-                      /*     $this->room->room_wakeup($this); */
-                      /* } */
-                      /* else if ($this->subst == 'standup') */
-                      /*     $this->room->room_outstandup($this); */
-                      /* else */
-                      /*     log_rd2("LOGOUT FROM WHAT ???"); */
-
-                  } /* if ($this->the_end == TRUE) { ... */
-              } /* if ($this->the_end == TRUE) { ... */
+              // if ($this->the_end == TRUE) { management is moved
+              // in the spush scope
           } /* if ($this->rd_step < $this->step) { */
-
       }  /* else of if ($this->rd_step == -1) { */
 
 
@@ -1210,6 +1192,8 @@ class Bin5 {
 
         if (validate_sess($sess)) {
             for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
+                if ($this->user[$i]->is_empty())
+                    continue;
                 if (strcmp($sess, $this->user[$i]->sess) == 0) {
                     // find it
                     $idx = $i;
@@ -1267,7 +1251,7 @@ class Bin5 {
         if ($force || $this->garbage_timeout < $curtime) {
             for ($i = 0 ; $i < BIN5_MAX_PLAYERS ; $i++) {
                 $user_cur = $this->user[$i];
-                if ($user_cur->sess == "" ||
+                if ($user_cur->is_active() == FALSE || // is not active user or
                     ($user_cur->stat == 'table' && ($user_cur->subst == 'shutdowned' || $user_cur->subst == 'shutdowner')))
                     continue;
 
@@ -1277,15 +1261,8 @@ class Bin5 {
                     if ($user_cur->stat == 'table') {
                         log_auth($user_cur->sess," bin5 Autologout session.");
 
-                        /* SI DELEGA AL garbage_manager principale LA RIMOZIONE DELL'UTENTE
-
-                           $tmp_sess = $user_cur->sess;
-                           $user_cur->sess = "";
-                           Bin5_user::step_unproxy($tmp_sess);
-                           $user_cur->name = "";
-                           $user_cur->the_end = FALSE;
-
-                        */
+                        /* main garbage_manager is delegate as autologout management */
+                        $user_cur->the_end = TRUE;
 
                         /* se gli altri utenti non erano d'accordo questo utente viene bannato */
                         $remcalc = $this->table[0]->exitlock_calc(&$this->user, $user_cur->table_pos);
@@ -1402,7 +1379,7 @@ class Bin5 {
             for ($i = 0 ; $i < ($user->stat == 'room' ? BIN5_MAX_PLAYERS : BIN5_PLAYERS_N) ; $i++) {
                 if ($user->stat == 'room') {
                     $user_cur = &$this->user[$i];
-                    if ($user_cur->sess == '' || $user_cur->stat != 'room')
+                    if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or stat isn't 'room'
                         continue;
                 }
                 else {

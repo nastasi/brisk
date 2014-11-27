@@ -22,6 +22,7 @@
  *
  */
 
+require_once("Obj/user.phh");
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
 require_once("Obj/proxyscan.phh");
@@ -331,6 +332,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
   $tables = "";
   $standup = "";
   $ACTION = "login";
+  $last_msg = "";
 
   if (isset($BRISK_SHOWHTML) == FALSE) {
       $is_table = FALSE;
@@ -348,17 +350,19 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
           $brisk->garbage_manager(TRUE);
           log_main("post garbage_manager");
           if (($user = &$brisk->get_user($sess, &$idx)) != FALSE) {
-              $brisk->sess_cur_set($user->sess);
-              log_main("user stat: ".$user->stat);
-              if ($user->stat == "table") {
-                  $cookies = new Cookies();
-                  $cookies->add("table_token", $user->table_token, $curtime + 31536000);
-                  $cookies->add("table_idx", $user->table, $curtime + 31536000);
-                  $header_out['cookies'] = $cookies;
-                  $header_out['Location'] = "briskin5/index.php";
-                  return TRUE;
+              if ($user->the_end == FALSE) {
+                  $brisk->sess_cur_set($user->sess);
+                  log_main("user stat: ".$user->stat);
+                  if ($user->stat == "table") {
+                      $cookies = new Cookies();
+                      $cookies->add("table_token", $user->table_token, $curtime + 31536000);
+                      $cookies->add("table_idx", $user->table, $curtime + 31536000);
+                      $header_out['cookies'] = $cookies;
+                      $header_out['Location'] = "briskin5/index.php";
+                      return TRUE;
+                  }
+                  $ACTION = "room";
               }
-              $ACTION = "room";
           }
       }
 
@@ -1040,7 +1044,9 @@ supported by:<br>
 echo "$body"; ?>
 <br>
 <div style="text-align: center;">
-   <br><br><br>
+   <br>
+     <div class="bye_msg" id="bye_msg"><?php echo "$last_msg"; ?></div>
+<br>
 <?php echo $mlang_room['welcome'][$G_lang];?>
 <br><br>
 <form accept-charset="utf-8" method="post" action="" onsubmit="return j_login_manager(this);">

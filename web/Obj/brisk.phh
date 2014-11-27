@@ -1178,7 +1178,7 @@ class Brisk
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
             $user_cur = $this->user[$i];
 
-            if ($user_cur->sess == "")
+            if ($user_cur->is_active() == FALSE)
                 continue;
 
             // check if the IP is blacklisted
@@ -1230,6 +1230,17 @@ class Brisk
             }
         }
         return (FALSE);
+    }
+
+    function users_cleanup()
+    {
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+
+            if ($user_cur->the_end) {
+                $user_cur->reset(); // users_cleanup, OK
+            }
+        }
     }
 
   function garbage_manager($force)
@@ -1298,10 +1309,12 @@ class Brisk
                             $bin5_user = $bin5->user[$i];
 
                             $user_cur->subst      = $bin5_user->subst;
+                            $user_cur->rd_step    = $bin5_user->rd_step;
                             $user_cur->step       = $bin5_user->step;
                             $user_cur->lacc       = $bin5_user->lacc;
                             $user_cur->laccwr     = $bin5_user->lacc;
                             $user_cur->bantime    = $bin5_user->bantime;
+                            $user_cur->the_end    = $bin5_user->the_end;
                         }
 
                         log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
@@ -1354,22 +1367,22 @@ class Brisk
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
         $user_cur = $this->user[$i];
-        
+
         log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
-        
-        if ($user_cur->sess == "")
+
+        if ($user_cur->is_active() == FALSE)
             continue;
-        
+
         if ($user_cur->lacc + EXPIRE_TIME_RD < ($curtime - $delta)) {
             // Auto logout dell'utente
             log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
 
+            $user_cur->the_end = TRUE;
+
+            log_rd2("AUTO LOGOUT.");
             if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
                 log_auth($user_cur->sess, "Autologout session.");
 
-                $user_cur->reset();
-        
-                log_rd2("AUTO LOGOUT.");
                 if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
                     $this->room_wakeup($user_cur);
                 else if ($user_cur->subst == 'standup')
@@ -1466,35 +1479,35 @@ class Brisk
 
     $from_table = ($user->stat == "table");
     if ($from_table) {
-      log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+        log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
-      for ($i = 0 ; $i < $table->player_n ; $i++) {
-        $user_cur = $this->user[$table->player[$i]];
-        log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
+        for ($i = 0 ; $i < $table->player_n ; $i++) {
+            $user_cur = $this->user[$table->player[$i]];
+            log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
 
-        if ($user->idx_get() != $table->player[$i]) {
-          $user_cur->stat_set("room");
-          $user_cur->subst = "sitdown";
-          $user_cur->laccwr = $curtime;
+            if ($user->idx_get() != $table->player[$i]) {
+                $user_cur->stat_set("room");
+                $user_cur->subst = "sitdown";
+                $user_cur->laccwr = $curtime;
+            }
+            else if ($user->is_active()) {
+                $user_cur->stat_set("room");
+                $user_cur->subst = "standup";
+                $user_cur->laccwr = $curtime;
+                $user_cur->table = -1;
+            }
         }
-        else if ($user->sess != "") {
-          $user_cur->stat_set("room");
-          $user_cur->subst = "standup";
-          $user_cur->laccwr = $curtime;
-          $user_cur->table = -1;
-        }
-      }
     }
     else {
-      $user->stat_set("room");
-      $user->subst = "standup";
-      $user->laccwr = $curtime;
+        $user->stat_set("room");
+        $user->subst = "standup";
+        $user->laccwr = $curtime;
     }
 
     $remove_wagon = FALSE;
     if($table->wag_own == $user->idx_get()) {
-      $table->wag_reset($curtime);
-      $remove_wagon = TRUE;
+        $table->wag_reset($curtime);
+        $remove_wagon = TRUE;
     }
 
 
@@ -1503,7 +1516,7 @@ class Brisk
 
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = $this->user[$i];
-      if ($user_cur->sess == '' || $user_cur->stat != 'room')
+      if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
         continue;
 
       // log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
@@ -1519,7 +1532,7 @@ class Brisk
 
         $ret .= $this->table_content($user_cur, $table_idx);
         $ret .= $this->standup_content($user_cur);
-        
+
         // $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
         $ret .= $table->act_content($user);
 
@@ -1558,31 +1571,32 @@ class Brisk
     log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
     for ($i = 0 ; $i < $table->player_n ; $i++) {
-      $user_cur = $this->user[$table->player[$i]];
-      log_main("PREIMPOST INLOOP name: ".$user_cur->name);
-      if ($user_cur->sess != "") {
+        $user_cur = $this->user[$table->player[$i]];
+        log_main("PREIMPOST INLOOP name: ".$user_cur->name);
+        if ($user_cur->is_empty()) {
+            continue;
+        }
         if ($update_lacc == TRUE) {
-          $user_cur->laccwr = $curtime;
+            $user_cur->laccwr = $curtime;
         }
         log_main("cur: ".$user_cur->name."  subst: ".$user_cur->subst);
         if ($user_cur->subst == "shutdowned") {
-          $user_cur->stat_set("room");
-          $user_cur->subst = "sitdown";
+            $user_cur->stat_set("room");
+            $user_cur->subst = "sitdown";
         }
         else if ($user_cur->subst == "shutdowner") {
-          $user_cur->stat_set("room");
-          $user_cur->subst = "standup";
-          $user_cur->table = -1;
-          $user_wup[$user_wup_n++] = $user_cur;
+            $user_cur->stat_set("room");
+            $user_cur->subst = "standup";
+            $user_cur->table = -1;
+            $user_wup[$user_wup_n++] = $user_cur;
 
-          $remove_wagon = FALSE;
-          if($table->wag_own == $table->player[$i]) {
-            $remove_wagon = TRUE;
-            $table->wag_reset($curtime);
-          }
+            $remove_wagon = FALSE;
+            if($table->wag_own == $table->player[$i]) {
+                $remove_wagon = TRUE;
+                $table->wag_reset($curtime);
+            }
         }
         $user_tab[$user_tab_n++] = $table->player[$i];
-      }
     }
 
     for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
@@ -1593,7 +1607,7 @@ class Brisk
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       log_main("START LOOP");
       $user_cur = $this->user[$i];
-      if ($user_cur->sess == '' || $user_cur->stat != 'room') {
+      if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') { // is not active user or the stat isn't 'room'
         log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
         continue;
       }
@@ -1607,7 +1621,7 @@ class Brisk
 
         $ret .= $this->table_content($user_cur, $table_idx);
         $ret .= $this->standup_content($user_cur);
-        
+
         $ret .= $table->act_content($user_cur);
 
 
@@ -1716,8 +1730,8 @@ class Brisk
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $ret = "";
       $user_cur = $this->user[$i];
-      if ($user_cur->sess == '' || $user_cur->stat != 'room')
-      continue;
+      if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
+          continue;
 
       $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($table_idx > -1)
@@ -1757,7 +1771,7 @@ class Brisk
       for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
           $ret = "";
           $user_cur = $this->user[$i];
-          if ($user_cur->sess == '' || $user_cur->stat != 'room')
+          if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
               continue;
 
           $ret = "gst.st = ".($user_cur->step+1)."; ".$train_app;
@@ -1941,7 +1955,7 @@ class Brisk
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
           $user_cur = $this->user[$i];
 
-          if ($user_cur->sess == '')
+          if ($user_cur->is_active() == FALSE)
             continue;
           if (strcasecmp($user_cur->name,$name_new) == 0)
             break;
@@ -2120,7 +2134,9 @@ class Brisk
         $user_cur = $this->user[$i];
         if ($target != "" && $user_cur->name != $target)
           continue;
-        if ($user_cur->sess == '' || $user_cur->stat == 'table' || $user->idx_get() == $i)
+        if ($user_cur->is_active() == FALSE // is not active user
+            || $user_cur->stat == 'table'   // or stat is 'table'
+            || $user->idx_get() == $i)      // or the $user idx is equal to current var
           continue;
 
         if ($is_normchat == TRUE) {
@@ -2185,26 +2201,28 @@ class Brisk
 
   function get_user($sess, &$idx)
   {
-    GLOBAL $PHP_SELF;
+      GLOBAL $PHP_SELF;
 
-    if (validate_sess($sess)) {
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        if (strcmp($sess, $this->user[$i]->sess) == 0) {
-          // find it
-          $idx = $i;
-          $ret = $this->user[$i];
-          return ($ret);
-        }
+      if (validate_sess($sess)) {
+          for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+              if ($this->user[$i]->is_empty())
+                  continue;
+              if (strcmp($sess, $this->user[$i]->sess) == 0) {
+                  // find it
+                  $idx = $i;
+                  $ret = $this->user[$i];
+                  return ($ret);
+              }
+          }
+          log_main(sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
+          // for ($i = 0 ; $i < MAX_PLAYERS ; $i++)
+          // log_main(sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
       }
-      log_main(sprintf("get_user: Wrong sess from page [%s]",$PHP_SELF));
-      // for ($i = 0 ; $i < MAX_PLAYERS ; $i++)
-      // log_main(sprintf("get_user: Wrong sess compared with [%s]",$this->user[$i]->sess));
-    }
-    else {
-      log_main(sprintf("get_user: Wrong strlen [%s]",$sess));
-    }
+      else {
+          log_main(sprintf("get_user: Wrong strlen [%s]",$sess));
+      }
 
-    return (FALSE);
+      return (FALSE);
   }
 
   /*
@@ -2270,25 +2288,28 @@ class Brisk
         // no actions at this moment
     }
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      /* free user ? */
-      if (strcmp($sess, $this->user[$i]->sess) == 0) {
-        if ($idx == -1)
-          $idx = $i;
-      }
-      if ($idfree == -1 && strcmp($this->user[$i]->sess, "") == 0) {
-        $idfree = $i;
-        continue; // NOTE: CHECK IT !!
-      }
-      if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
-          if ($authenticate != FALSE) {
-              $ghost = $i;
-              $ghost_auth = $this->user[$i]->is_auth();
-          }
-          else {
-              $idx = $i;
-              break;
-          }
-      }
+        /* free user ? */
+        if ($this->user[$i]->is_empty()) {
+            if ($idfree == -1) {
+                $idfree = $i;
+            }
+            continue;
+        }
+        if (strcmp($sess, $this->user[$i]->sess) == 0) {
+            if ($idx == -1) {
+                $idx = $i;
+            }
+        }
+        if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
+            if ($authenticate != FALSE) {
+                $ghost = $i;
+                $ghost_auth = $this->user[$i]->is_auth();
+            }
+            else {
+                $idx = $i;
+                break;
+            }
+        }
     }
     if ($idx == -1)
       $idx = $idfree;
@@ -2444,7 +2465,7 @@ class Brisk
   {
     for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
       $user_cur = $this->user[$i];
-      if ($user_cur->sess == '')
+      if ($user_cur->is_active() == FALSE)
         continue;
 
       log_main("STANDUP START: ".$user_cur->stat);
@@ -2455,7 +2476,7 @@ class Brisk
           $user_cur->comm[$user_cur->step % COMM_N] .= $user->myname_innerHTML();
         }
         log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
-        
+
         $user_cur->step_inc();
       }
     }
@@ -2475,24 +2496,17 @@ class Brisk
   function standup_content($user)
   {
     $ret = "";
-    $content = "";
 
     if ($user->stat != 'room')
       return;
-
-    for ($i = 0 , $ct = 0 ; $ct < 4 && $i < MAX_PLAYERS ; $i++) {
-      if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
-        continue;
-      $ct++;
-    }
-
-    // $content .= sprintf('<table cols=\\"%d\\" class=\\"table_standup\\">', $ct);
 
     $content = ' j_stand_cont( [ ';
 
     $user_cur_id = $user->idx_get();
     for ($i = 0 , $ct = 0 ; $i < MAX_PLAYERS ; $i++) {
-      if ($this->user[$i]->sess == "" || $this->user[$i]->stat != "room" || $this->user[$i]->name == "")
+        if ($this->user[$i]->is_active() == FALSE // is not active user
+            || $this->user[$i]->stat != "room"    // or the stat isn't 'room'
+            || $this->user[$i]->name == "")       // or the name is empty, happens when user is reset (TODO: check it)
         continue;
 
       $flags = $this->user[$i]->flags;

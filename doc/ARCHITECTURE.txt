@@ -1,4 +1,11 @@
-Sparse documentation about Brisk.
+===== Sparse documentation about Brisk. =====
+
+User cleanup:
+  spush::garbage_manager()
+    if (user->the_end)
+        close opened socket
+
+    brisk->users_cleanup() to reset all users with the_end set
 
 ==== brisk/table/user relationships ====
 

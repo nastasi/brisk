@@ -3,7 +3,7 @@
  *  brisk - index_wr.php
  *
  *  Copyright (C) 2006-2014 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -286,7 +286,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     else if ($argz[0] == 'shutdown') {
         log_auth($user->sess, "Shutdown session.");
 
-        $user->reset();
+        $user->the_end = TRUE;
 
         log_rd2("AUTO LOGOUT.");
         if ($user->subst == 'sitdown' || $user->stat == 'table')
@@ -799,7 +799,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                         $bin5_user_cur->trans_step = $user_cur->step + 1;
                         $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
                         $bin5_user_cur->step_inc();
-                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table(&$bin5,&$bin5_user_cur,$bin5_user_cur->step+1,TRUE, FALSE);
+                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table(&$bin5,&$bin5_user_cur,$bin5_user_cur->step+1,TRUE,FALSE);
                         $bin5_user_cur->step_inc();
                         
                         log_wr("TRY PRESAVE: ".$bin5_user_cur->step." TRANS STEP: ".$bin5_user_cur->trans_step);
@@ -829,10 +829,17 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 log_wr("MOP finish");
             }
             else if ($argz[0] == 'logout') {
-                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                $user->comm[$user->step % COMM_N] .= 'postact_logout();';
+                $brisk->ghost_sess->push($curtime, $user->sess, GHOST_SESS_REAS_LOUT);
                 $user->the_end = TRUE;
-                $user->step_inc();
+
+                if ($user->subst == 'sitdown') {
+                    log_load("ROOM WAKEUP");
+                    $brisk->room_wakeup($user);
+                }
+                else if ($user->subst == 'standup')
+                    $brisk->room_outstandup($user);
+                else
+                    log_rd2("LOGOUT FROM WHAT ???");
             }
         }
         /**********************
@@ -850,11 +857,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 $brisk->room_wakeup($user);
             }
             else if ($argz[0] == 'logout') {
-                $brisk->room_wakeup($user);
-                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-                $user->comm[$user->step % COMM_N] .= 'postact_logout();';
+                $brisk->ghost_sess->push($curtime, $user->sess, GHOST_SESS_REAS_LOUT);
                 $user->the_end = TRUE;
-                $user->step_inc();
+
+                $brisk->room_wakeup($user);
             }
         }
     }

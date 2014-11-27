@@ -605,7 +605,7 @@ class Sac_a_push {
         foreach ($this->socks as $k => $sock) {
             $id = intval($sock);
             if (isset($this->s2u[$id])) {
-                if ($this->s2u[$id]->sess == '') {
+                if ($this->s2u[$id]->the_end) {
                     if ($this->s2u[$id]->rd_socket_get() != NULL) {
                         $this->s2u[$id]->rd_socket_set(NULL);
                     }
@@ -616,6 +616,7 @@ class Sac_a_push {
                 }
             }
         }
+        $this->app->users_cleanup();
     }
 
     function run()
