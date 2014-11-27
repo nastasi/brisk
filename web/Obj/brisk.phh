@@ -1867,6 +1867,37 @@ class Brisk
         /* for old isolation management $is_ticker = TRUE; */
       } while (0);
     } // /tav chat command
+    // just for development use currently
+    else if (FALSE && strncmp($msg, "/out ", 5) == 0) {
+        fprintf(STDERR, "MOP OUT\n");
+       $target = substr($msg, 5);
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_out = $this->user[$i];
+            if (!strcmp($user_out->name, $target)) {
+
+                $user_out->the_end = TRUE;
+                fprintf(STDERR, "MOP: GHOST_SESS: %d\n", GHOST_SESS_REAS_LOUT);
+                $this->ghost_sess->push($curtime, $user_out->sess, GHOST_SESS_REAS_LOUT);
+
+                if ($user_out->stat == 'table' || $user_out->stat == 'room') {
+                    if ($user_out->subst == 'sitdown' || $user_out->stat == 'table') {
+                        $this->room_wakeup($user_out);
+                    }
+                    else if ($user_out->subst == 'standup') {
+                        $this->room_outstandup($user_out);
+                    }
+                    else {
+                        log_rd2("LOGOUT FROM WHAT ???");
+                    }
+                }
+
+                fprintf(STDERR, "MOP: OUT FIND [%s] step %d rd_step %d\n", $target, $user_out->step,  $user_out->rd_step);
+                break;
+            }
+        }
+    }
+
+
 
     else if (strncmp($msg, "/alarm ", 7) == 0) {
       if (strncmp($msg, "/alarm to ", 10) == 0) {
