@@ -1,0 +1,24 @@
+stream
+  - types of streams
+
+room
+  - login
+    . splash
+    . ghost with passwd
+    . ghost without passwd
+    . replace
+  - reload (without splash)
+  - normal exit
+  - timeout (table or standup)
+  - ticker test
+    . set and wakeup
+    . set and logout
+    . set and timeout
+table
+  - normal exit
+  - timeout exit
+  - auction 
+  - info
+  - points
+  - a monte
+
