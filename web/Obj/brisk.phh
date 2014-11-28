@@ -153,12 +153,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.15.0";
+$G_brisk_version = "4.16.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: primo passo per rendere più robusto il sistema di notifica.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: rifattorizzazione del motore di Brisk e messaggio di uscita.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: new users subscription system, refactored sidebanner system.',
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: engine refactoring and logout message.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
 
 $G_room_help = array( 'it' => '
@@ -983,7 +983,7 @@ class Client_prefs {
     }
 }
 
-define('GHOST_SESS_TOUT', 300);
+define('GHOST_SESS_TOUT', 1800);
 define('GHOST_SESS_REAS_LOUT', 1); // logout
 define('GHOST_SESS_REAS_ANOT', 2); // another user get session
 define('GHOST_SESS_REAS_TOUT', 3); // room timeout

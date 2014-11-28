@@ -22,4 +22,4 @@ table
   - info
   - points
   - a monte
-
+  - exit without agreement
