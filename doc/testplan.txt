@@ -14,6 +14,7 @@ room
     . set and wakeup
     . set and logout
     . set and timeout
+  - timeout to sit again after table open
 table
   - normal exit
   - timeout exit

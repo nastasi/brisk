@@ -2390,7 +2390,7 @@ class Brisk
 
       $idx = $ghost;
       if (defined('CURL_DE_SAC_VERS')) {
-          brisk_cds_execute($this, $ghost, $real_idx, $sess, $ip, $authenticate, $header);
+          brisk_cds_execute($this, $ghost, $idx, $sess, $ip, $authenticate, $header);
       }
       return ($this->user[$ghost]);
     }
