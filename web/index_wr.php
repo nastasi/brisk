@@ -22,7 +22,9 @@
  *
  */
 
-$mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
+$mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
+                                                'en' => 'unknown error'),
+                      'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                                 'en' => 'Back to tables.' ),
                       'warrrepl'  => array( 'it' => '<br>Il nominativo &egrave; stato inoltrato all\'amministratore.<br><br>Nell\'arco di pochi giorni verr&agrave;<br><br>notificata al garantito l\'avvenuta registrazione.',
                                             'en' => '<br>The subscription was forwarded to the administrator.<br><br>In a few days we will notify<br><br>your friend the occurred registration.'),
@@ -44,10 +46,8 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                            'en' => '<b>The table where you want to sit require authentication</b>'),
                       'mustcert' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica e certificazione.</b>',
                                            'en' => '<b>The table where you want to sit require authentication and certification</b>'),
-                      'tabwait_a'=> array( 'it' => '<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra ',
-                                           'en' => '<b>The table is only just opened, you will sit down in '), // FIXME
-                      'tabwait_b'=> array( 'it' => ' secondi.</b>',
-                                           'en' => ' seconds.</b>'),
+                      'tabwait'=> array( 'it' => '<b>Il tavolo si &egrave; appena liberato, ci si potr&agrave; sedere tra %d secondi.',
+                                           'en' => '<b>The table is only just opened, you will sit down in %d seconds.'),
                       'mustfirst'=> array( 'it' => '<b>Il tuo utente può sedersi al tavolo solo per primo.</b>',
                                            'en' => '<b>Your can sit down as first user only.' ),
                       'pollmust' => array( 'it' => '<b>Per partecipare al sondaggio devi essere autenticato.</b>',
@@ -70,6 +70,10 @@ $mlang_indwr = array( 'btn_backtotab' => array( 'it' => 'Torna ai tavoli.',
                                            'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '), 
                       'badsit_b' => array( 'it' => ' prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.',
                                            'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access'),
+                      'nu_loginau' => array('it' => "login già in uso",
+                                            'en' => "login already in use"),
+                      'nu_emailau' => array('it' => "email già utilizzata",
+                                            'en' => "email already in use"),
                       'nu_msubj' => array( 'it' => 'Brisk: verifica email',
                                            'en' => 'Brisk: email verification'),
                       // %s(guar) %s(login) %s(baseurl) %d(code) %s(hash)
@@ -340,9 +344,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     // check for already used fields
                     if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
-                        $mesg_to_user = nickserv_msg($dt, ($idret == 1 ? "login già in uso" :
-                                                           ($idret == 2 ? "email già utilizzata"
-                                                            : "errore sconosciuto")));
+                        $mesg_to_user = nickserv_msg($dt, ($idret == 1 ?  $mlang_indwr['nu_loginau'][$G_lang] :
+                                                           ($idret == 2 ? $mlang_indwr['nu_emailau'][$G_lang]
+                                                            : $mlang_indwr['unknownerr'][$G_lang])));
                         break;
                     }
                     $bdb->transaction('BEGIN');
@@ -703,8 +707,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                         $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['shutmsg'][$G_lang]);
                 }
                 else if ($table->wakeup_time > $curtime) {
-                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['tabwait_a'][$G_lang],
-                                               $table->wakeup_time - $curtime, $mlang_indwr['tabwait_b'][$G_lang]);
+                    $not_allowed_msg = nickserv_msg($dt, sprintf($mlang_indwr['tabwait'][$G_lang],
+                                                                 $table->wakeup_time - $curtime));
                 }
                 else if ($table->auth_type == TABLE_AUTH_TY_CERT && ( ! $user->is_cert() ) ) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustcert'][$G_lang]);
