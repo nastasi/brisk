@@ -120,6 +120,7 @@ class User {
   var $step;       // step of the current status
   var $trans_step; // step to enable transition between pages (disable == -1)
   var $cl_step;    // current step returned by client
+  var $ping_req;   // ping is already requested ?
 
   var $rd_socket;  // socket handle of push stream
   var $rd_endtime; // end time for push stream
@@ -182,6 +183,7 @@ class User {
     $thiz->step       = 1;
     $thiz->trans_step = -1;
     $thiz->cl_step    = -1;
+    $thiz->ping_req   = FALSE;
     $thiz->comm       = array();
 
     $thiz->rd_socket  = NULL;
@@ -197,6 +199,7 @@ class User {
     $thiz->rd_zls     = FALSE;
     $thiz->rd_transp  = NULL;
     $thiz->rd_is_chunked = FALSE;
+    $thiz->ping_req   = FALSE;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -236,6 +239,7 @@ class User {
     $this->step       = $from->step;
     $this->trans_step = $from->trans_step;
     $this->cl_step    = $from->cl_step;
+    $this->ping_req   = $from->ping_req;
     $this->comm       = array();
 
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
@@ -300,6 +304,7 @@ class User {
     $thiz->step       = $from->step;
     $thiz->trans_step = $from->trans_step;
     $thiz->cl_step    = $from->cl_step;
+    $thiz->ping_req   = $from->ping_req;
     $thiz->comm       = array();
 
     /*
