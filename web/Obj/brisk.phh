@@ -2290,7 +2290,7 @@ class Brisk
    *   if ($idx == -3    && ret == FALSE)  =>  wrong password
    *   if ($idx == -1    && ret == FALSE)  =>  no space left
    *   if ($idx ==  0    && ret == user)   =>  SUCCESS
-   *   if ($idx == -$idx && ret == user)   =>  SUCCESS (but the login exists in the auth db)
+   *   if ($idx == -($idx + 1) && ret == user)   =>  SUCCESS (but the login exists in the auth db)
    */
 
   function add_user(&$sess, &$idx, $name, $pass, $ip, $header, $cookie)
