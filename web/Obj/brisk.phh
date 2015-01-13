@@ -1806,6 +1806,68 @@ class Brisk
       }
   }
 
+  function kickuser($user, $out_reas)
+  {
+      $curtime = time();
+
+      fprintf(STDERR, "MOP: GHOST_SESS: %d\n", $out_reas);
+
+      $this->ghost_sess->push($curtime, $user->sess, $out_reas);
+
+      fprintf(STDERR, "MOP: status out: %s %s %d\n", $user->stat, $user->subst, $user->idx);
+      if ($user->stat == 'table' && $user->subst != 'sitdown') {
+          $bin5 = &$this->match[$user->table];
+          $user_bin5 = &$bin5->user[$user->table_pos];
+          fprintf(STDERR, "MOP: status in: %s %s %d\n", $user_bin5->stat, $user_bin5->subst, $user_bin5->idx);
+          $bin5->table_wakeup($user_bin5);
+          $user->the_end = TRUE;
+          $this->room_wakeup($user);
+          return;
+      }
+
+      if ($user->stat == 'table' || $user->stat == 'room') {
+          $user->the_end = TRUE;
+          if ($user->subst == 'sitdown' || $user->stat == 'table') {
+              $this->room_wakeup($user);
+          }
+          else if ($user->subst == 'standup') {
+              fprintf(STDERR, "MOP: KICK here [%s]\n", btrace_line(debug_backtrace()));
+              $this->room_outstandup($user);
+          }
+          else {
+              log_rd2("LOGOUT FROM WHAT ???");
+          }
+      }
+  }
+
+  function kickuser_by_name($name, $out_reas)
+  {
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          $user_out = $this->user[$i];
+          if (strcmp($user_out->name, $name) == 0) {
+              return ($this->kickuser($user_out, $out_reas));
+          }
+      }
+      return FALSE;
+  }
+
+  function kickuser_by_sess($sess, $out_reas)
+  {
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          $user_out = $this->user[$i];
+          if (strcmp($user_out->sess, $sess) == 0) {
+              return ($this->kickuser($user_out, $out_reas));
+          }
+      }
+      return FALSE;
+  }
+
+  function kickuser_by_idx($idx, $out_reas)
+  {
+      $user_out = $this->user[$idx];
+      return ($this->kickuser($user_out, $out_reas));
+  }
+
   function chatt_send($user, $mesg)
   {
     GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
@@ -1871,35 +1933,9 @@ class Brisk
     // just for development use currently
     else if (FALSE && strncmp($msg, "/out ", 5) == 0) {
         fprintf(STDERR, "MOP OUT\n");
-       $target = substr($msg, 5);
-        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-            $user_out = $this->user[$i];
-            if (!strcmp($user_out->name, $target)) {
-
-                $user_out->the_end = TRUE;
-                fprintf(STDERR, "MOP: GHOST_SESS: %d\n", GHOST_SESS_REAS_LOUT);
-                $this->ghost_sess->push($curtime, $user_out->sess, GHOST_SESS_REAS_LOUT);
-
-                if ($user_out->stat == 'table' || $user_out->stat == 'room') {
-                    if ($user_out->subst == 'sitdown' || $user_out->stat == 'table') {
-                        $this->room_wakeup($user_out);
-                    }
-                    else if ($user_out->subst == 'standup') {
-                        $this->room_outstandup($user_out);
-                    }
-                    else {
-                        log_rd2("LOGOUT FROM WHAT ???");
-                    }
-                }
-
-                fprintf(STDERR, "MOP: OUT FIND [%s] step %d rd_step %d\n", $target, $user_out->step,  $user_out->rd_step);
-                break;
-            }
-        }
+        $target = substr($msg, 5);
+        $this->kickuser_by_name($target, GHOST_SESS_REAS_ANON);
     }
-
-
-
     else if (strncmp($msg, "/alarm ", 7) == 0) {
       if (strncmp($msg, "/alarm to ", 10) == 0) {
         $sp_pos = strpos($msg, " ", 10);
