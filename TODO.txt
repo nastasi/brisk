@@ -3,6 +3,9 @@
 
   FEATURES |
  ----------+
+   - DEANONYMIZER
+      . study how to move login delta injection
+
    - CERTIFICATIONS
       DONE . Guarantes for certified-only (buttons choice managed)
       DONE . Tables for certified-only

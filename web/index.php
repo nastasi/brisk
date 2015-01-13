@@ -49,6 +49,8 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'EN Abbiamo perso le tue tracce, quindi ti abbiamo disconnesso.'),
                      'reas_ttot'    => array('it' => 'Abbiamo perso le tue tracce mentre stavi giocando, quindi ti abbiamo disconnesso.',
                                              'en' => 'EN Abbiamo perso le tue tracce mentre stavi giocando, quindi ti abbiamo disconnesso.'),
+                     'reas_anon'    => array('it' => 'L\' accesso attraverso sistemi di anonimizzazione non è consentito.',
+                                             'en' => 'EN L\' accesso attraverso sistemi di anonimizzazione non è consentito.'),
                      'reas_anot'    => array('it' => 'La tua sessione è stata assegnata ad un altro browser.',
                                              'en' => 'EN La tua sessione è stata assegnata ad un altro browser.'),
                      'btn_enter'    => array('it' => 'entra',
@@ -361,6 +363,9 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
               break;
           case GHOST_SESS_REAS_TTOT:
               $last_msg = $mlang_room['reas_ttot'][$G_lang];
+              break;
+          case GHOST_SESS_REAS_ANON:
+              $last_msg = $mlang_room['reas_anon'][$G_lang];
               break;
           default:
               $last_msg = $mlang_room['reas_unkn'][$G_lang];

@@ -988,6 +988,7 @@ define('GHOST_SESS_REAS_LOUT', 1); // logout
 define('GHOST_SESS_REAS_ANOT', 2); // another user get session
 define('GHOST_SESS_REAS_TOUT', 3); // room timeout
 define('GHOST_SESS_REAS_TTOT', 4); // table timeout
+define('GHOST_SESS_REAS_ANON', 5); // anonymizer access
 
 class GhostSessEl
 {

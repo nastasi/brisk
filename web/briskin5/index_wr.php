@@ -156,7 +156,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
             //      $user->bantime = $user->laccwr + BAN_TIME;
 
             if ($logout_cont == TRUE) {
-                $bin5->table_wakeup(&$user);
+                $bin5->table_wakeup($user);
             }
         }
         else if ($argz[0] == 'exitlock') {
