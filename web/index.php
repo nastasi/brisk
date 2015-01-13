@@ -430,9 +430,6 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                   $header_out['Location'] = "briskin5/index.php";
                   return TRUE;
               }
-
-              // setcookie ("sess", "", time() + 180);      
-              $brisk->standup_update(&$user);
           }
           else {
               /* Login Rendering */

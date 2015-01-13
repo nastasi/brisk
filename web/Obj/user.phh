@@ -2,7 +2,7 @@
 /*
  *  brisk - Obj/user.phh
  *
- *  Copyright (C) 2012 Matteo Nastasi
+ *  Copyright (C) 2012-2015 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -122,6 +122,8 @@ class User {
   var $cl_step;    // current step returned by client
   var $ping_req;   // ping is already requested ?
 
+  var $pend_async; // number of async check that must be returned
+
   var $rd_socket;  // socket handle of push stream
   var $rd_endtime; // end time for push stream
   var $rd_stat;    // actual status of push stream
@@ -184,6 +186,7 @@ class User {
     $thiz->trans_step = -1;
     $thiz->cl_step    = -1;
     $thiz->ping_req   = FALSE;
+    $thiz->pend_async = 0;
     $thiz->comm       = array();
 
     $thiz->rd_socket  = NULL;
@@ -199,7 +202,6 @@ class User {
     $thiz->rd_zls     = FALSE;
     $thiz->rd_transp  = NULL;
     $thiz->rd_is_chunked = FALSE;
-    $thiz->ping_req   = FALSE;
 
     $thiz->asta_card  = -2;
     $thiz->asta_pnt   = -1;
@@ -240,6 +242,7 @@ class User {
     $this->trans_step = $from->trans_step;
     $this->cl_step    = $from->cl_step;
     $this->ping_req   = $from->ping_req;
+    $this->pend_async = $from->pend_async;
     $this->comm       = array();
 
     $i_start = (1 > ($from->step - COMM_N) ? 1 : ($from->step - COMM_N)); 
@@ -305,6 +308,7 @@ class User {
     $thiz->trans_step = $from->trans_step;
     $thiz->cl_step    = $from->cl_step;
     $thiz->ping_req   = $from->ping_req;
+    $thiz->pend_async = $from->pend_async;
     $thiz->comm       = array();
 
     /*
@@ -643,7 +647,8 @@ class User {
       
       log_rd2("do other cur_stat[".$this->rd_stat."] user->stat[".$this->stat."] cur_step[".$this->rd_step."] user_step[".$this->step."]");
       
-      if ($this->rd_step == -1) {
+      fprintf(STDERR, "ASYNC: %d %d\n", $this->rd_step, $this->pend_async);
+      if ($this->rd_step == -1 && $this->pend_async == 0) {
           /*  if $this->rd_step == -1 load the current state from the main struct  */
           $S_load_stat['wR_minusone']++;
 
@@ -658,7 +663,9 @@ class User {
           }
       }
       
-      
+      if ($this->pend_async > 0) {
+          return (FALSE);
+      }
       /* this part I suppose is read only on $this->room structure */
       if ($this->rd_step == -1) {
           log_rd2("PRE-NEWSTAT: ".$this->stat);
@@ -706,6 +713,7 @@ class User {
                                           ($is_super ? 0 : $G_splash_timeout));
                   $ret .= sprintf('|createCookie("CO_splashdate%d", %d, 24*365, cookiepath);', $G_splash_idx, $curtime);
               }
+              $this->room->standup_update($this);
               $ret .= $this->room->show_room($this->step, $this);
               
               // TODO uncomment and test
