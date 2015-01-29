@@ -851,6 +851,7 @@ class Sac_a_push {
                         if ($rret == FALSE) {
                             // FIXME: manage 404 !!!
                             printf("TODO: fix unknown page\n");
+                            fclose($new_socket);
                         }
                     }
                 }
