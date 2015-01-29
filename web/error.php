@@ -2,7 +2,7 @@
 /*
  *  brisk - error.php
  *
- *  Copyright (C) 2014      Matteo Nastasi
+ *  Copyright (C) 2014-2015 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -65,59 +65,59 @@ $redir_meta = sprintf('<META HTTP-EQUIV="refresh" CONTENT="%d;URL=\'%s\'">', $re
 </head>
 <body style="background-image: url('img/saddysunbg.png');">
 <?php
-  /* MLANG: "briscola chiamata in salsa ajax", */
-  
-  mt_srand(make_seed());
-  if (!$G_is_local) {
-      $rn = rand(0, 1);
-      
-      if ($rn == 0) { 
-          $banner_top_left = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript"
-  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>';
-          $banner_top_right = carousel_top();
-      }
-      else { 
-          $banner_top_left = carousel_top();
-          $banner_top_right = '<script type="text/javascript"><!--
-google_ad_client = "pub-5246925322544303";
-google_ad_width = 234;
-google_ad_height = 60;
-google_ad_format = "234x60_as";
-google_ad_type = "text_image";
-google_ad_channel = "";
-google_color_border = "808080";
-google_color_bg = "f6f6f6";
-google_color_link = "ffae00";
-google_color_text = "404040";
-google_color_url = "000000";
-//-->
-</script>
-<script type="text/javascript"
-  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>';
-      }
-  }
-  else { // !$G_is_local
-      $banner_top_left  = carousel_top();
-      $banner_top_right = carousel_top();
-  }
+/* MLANG: "briscola chiamata in salsa ajax", */
 
-  $brisk_header_form = '<div class="container">
+mt_srand(make_seed());
+if (!$G_is_local) {
+    $rn = rand(0, 1);
+
+    if ($rn == 0) { 
+        $banner_top_left = '<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>';
+        $banner_top_right = carousel_top();
+    }
+    else { 
+        $banner_top_left = carousel_top();
+        $banner_top_right = '<script type="text/javascript"><!--
+google_ad_client = "pub-5246925322544303";
+google_ad_width = 234;
+google_ad_height = 60;
+google_ad_format = "234x60_as";
+google_ad_type = "text_image";
+google_ad_channel = "";
+google_color_border = "808080";
+google_color_bg = "f6f6f6";
+google_color_link = "ffae00";
+google_color_text = "404040";
+google_color_url = "000000";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>';
+    }
+}
+else { // !$G_is_local
+    $banner_top_left  = carousel_top();
+    $banner_top_right = carousel_top();
+}
+
+$brisk_header_form = '<div class="container">
 <!-- =========== header ===========  -->
 <div id="header" class="header">
 <table width="100%%" border="0" cols="3"><tr>
@@ -131,13 +131,12 @@ google_color_url = "000000";
 </tr></table>
 </div>';
 
-    printf($brisk_header_form);
+printf($brisk_header_form);
 ?> 
 
 <div style="text-align: center; font-size: 18px; height: 600px;">
-     <div style="height: 200px;"></div>
-                                              <?php echo $mlang_error['content'][$G_lang]; ?>
-                                             
+    <div style="height: 200px;"></div>
+    <?php echo $mlang_error['content'][$G_lang]; ?>
 </div>
 
 <div id="imgct"></div>

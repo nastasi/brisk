@@ -1,0 +1,40 @@
+DONE - web/admin.php
+DONE - web/brisk-fb-whois.php
+- web/briskin5/explain.php
+- web/briskin5/index.php
+- web/briskin5/index_wr.php
+- web/briskin5/Obj/briskin5.phh
+- web/briskin5/Obj/placing.phh
+- web/briskin5/players-corr.php
+- web/briskin5/statadm.php
+- web/briskin5/stat-day.php
+- web/bug.php
+- web/doc_download.php
+DONE - web/donometer.php
+DONE - web/error.php
+DONE - web/index.php
+- web/index_wr.php
+- web/mailmgr.php
+- web/notidoc_test.php
+- web/Obj/auth.phh
+- web/Obj/brisk.conf-templ.pho
+- web/Obj/brisk.phh
+- web/Obj/brisk.phh.rej
+- web/Obj/dbase_base.phh
+- web/Obj/dbase_file.phh
+- web/Obj/dbase_pgsql.phh
+- web/Obj/hardban.phh
+- web/Obj/mail.phh
+- web/Obj/proxyscan.phh
+- web/Obj/sac-a-push.phh
+- web/Obj/singlemsg.phh
+- web/Obj/transports.phh
+- web/Obj/user.phh
+- web/Obj/zlibstream.phh
+- web/spush/brisk-spush.phh
+- web/spush/brisk-spush.php
+- web/suprend.php
+- web/usermgmt.php
+- web/weboftrust.php
+- web/ws.php
+- web/xynt_test01.php

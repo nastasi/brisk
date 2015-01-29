@@ -2,7 +2,7 @@
   /*
    *  brisk - admin.php
    *
-   *  Copyright (C) 2011-2012 Matteo Nastasi
+   *  Copyright (C) 2011-2015 Matteo Nastasi
    *                          mailto: nastasi@alternativeoutput.it 
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
@@ -23,7 +23,7 @@
    */
 
 $G_base = "";
-    
+
 require_once("Obj/brisk.phh");
 require_once("Obj/dbase_pgsql.phh");
 
@@ -43,7 +43,7 @@ class ImpPoints
     var $nplayers;
     var $logins;
     var $pts;
-    
+
     function ImpPoints($s)
     {
         $arr = explode('|', $s);
@@ -52,7 +52,7 @@ class ImpPoints
             return FALSE;
         }
 
- 
+
         $this->time      = $arr[0];
         $this->usess     = $arr[1];
         $this->isauth    = $arr[2];
@@ -62,7 +62,7 @@ class ImpPoints
         $this->ttok      = $arr[6];
         $this->tidx      = $arr[7];
         $this->nplayers  = $arr[8];
-        
+
         $this->logins = array();
         $this->pts    = array();
 
@@ -80,7 +80,7 @@ function main()
 {
     GLOBAL $cont, $G_dbpfx, $G_alarm_passwd, $F_pass_private, $F_ACT, $F_filename;
 
-    
+
     if (FALSE && $F_pass_private != $G_alarm_passwd) {
         $cont .= sprintf("Wrong password, operation aborted.<br>\n");
         return;
@@ -89,10 +89,10 @@ function main()
     if ($F_ACT == "append") {
         do {
             /*
-            if ($F_pass_private != $G_alarm_passwd) {
-                $cont .= sprintf("Wrong password, operation aborted.<br>\n");
-                break;
-                }*/
+              if ($F_pass_private != $G_alarm_passwd) {
+                  $cont .= sprintf("Wrong password, operation aborted.<br>\n");
+                  break;
+              }*/
             $cont .= sprintf("FILENAME: %s<br>\n", $F_filename); 
             if (($olddb = new LoginDBOld($F_filename)) == FALSE) {
                 $cont .= sprintf("Loading failed.<br>\n"); 
@@ -118,7 +118,7 @@ function main()
             }
 
             $cont .= sprintf("FILENAME: %s<br>\n", $F_filename); 
-            
+
             if (!($fp = @fopen($F_filename, "r"))) {
                 $cont .= sprintf("Open file [%s] failed.<br>\n", $F_filename); 
                 break;
@@ -146,7 +146,7 @@ function main()
                 // else {
                 //     $cont .= sprintf("ttok: %s<br>\n", $pts->ttok);
                 // }
-            
+
                 /*
                  * matches management
                  */
@@ -161,7 +161,7 @@ function main()
                                          eschtml($bf), eschtml($mtc_sql));
                         break;                        
                     }
-                    
+
                 }
                 $mtc_obj = pg_fetch_object($mtc_pg,0);
                 // $cont .= sprintf("MTC: %s<br>\n", esclfhtml(print_r($mtc_obj, TRUE)));
@@ -201,7 +201,7 @@ function main()
                         continue;
                     }
                     $usr_obj = pg_fetch_object($usr_pg,0);
-                    
+
                     /* put points */
                     $pts_sql = sprintf("INSERT INTO %sbin5_points (gcode, ucode, pts) 
                                                VALUES (%d, %d, %d) RETURNING *;",
@@ -212,9 +212,9 @@ function main()
                                          eschtml($bf), eschtml($gam_sql), $i);
                         break;
                     }
-                    
+
                 }
-                
+
             }
             fclose($fp);
         } while (0);
@@ -229,7 +229,6 @@ function save_rej($s)
 
     fwrite($fp, sprintf("%s\n", $s));
     fclose($fp);
-    
 }
 
 main();
@@ -242,7 +241,7 @@ main();
 <body>
 
 <?php
-echo "$cont";
+    echo "$cont";
 ?>
 <b>Append users from a file</b><br>
 <form accept-charset="utf-8" method="post" action="<?php echo $PHP_SELF;?>">

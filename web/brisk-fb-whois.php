@@ -14,7 +14,7 @@ function retrieve_login($userid)
     $cache_file = '/var/www/webspace/brisk-priv/brisk-fb-whois.cache';
     // $cache_file = '/tmp/brisk-fb-whois.cache';
     $cache_max_age = 3600;
-    
+
     $page_name = 'http://www.alternativeoutput.it/briskblog/doku.php?id=utenti:social&do=edit';
     $userid_pfx = 'https://www.facebook.com/';
 
