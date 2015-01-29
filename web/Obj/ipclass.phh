@@ -1,0 +1,106 @@
+<?php
+/*
+ *  brisk - Obj/ipclass.phh
+ *
+ *  Copyright (C)      2015 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+class IPClassItem {
+    var $addr;
+    var $mask;
+
+    function IPClassItem($ipset)
+    {
+        //split
+        $elem = split("/", $ipset, 2);
+        $addr = $elem[0];
+        $mask = (int)$elem[1];
+
+        //convert mask
+
+        $this->mask = ((1<<($mask))-1) << (32 - $mask);
+        $this->addr = ip2long($addr) & $this->mask;
+
+        fprintf(STDERR, "New ipclass item: %x (%x)\n", $this->addr, $this->mask);
+    }
+
+    function match($ip)
+    {
+        // fprintf(STDERR, "IP: %x, ADDR: %x, MASK: %x -> (%d)\n",
+        //       $ip, $this->addr, $this->mask, ((ip2long($ip) & $this->mask) == $this->addr));
+        return (($ip & $this->mask) == $this->addr);
+    }
+}
+
+class IPClass {
+    var $ipcl;
+
+    function IPClass()
+    {
+        $this->ipcl = NULL;
+    }
+
+    static function create($ip_in=NULL)
+    {
+        $thiz = new IPClass();
+
+        if ($ip_in != NULL)
+            $thiz->update($ip_in);
+
+        return ($thiz);
+    }
+
+
+    function update($ip_in)
+    {
+        $this->clean();
+
+        $this->ipcl = array();
+        for ($i = 0 ; $i < count($ip_in) ; $i++) {
+            $this->ipcl[$i] = new IPClassItem($ip_in[$i]);
+        }
+    }
+
+    function clean()
+    {
+        if ($this->ipcl != NULL) {
+            $ct = count($this->ipcl);
+            for ($i = 0 ; $i < $ct ; $i++) {
+                unset($this->ipcl[$i]);
+            }
+            $this->ipcl = NULL;
+        }
+    }
+
+    function check($ip_str)
+    {
+        $ip = ip2long($ip_str);
+
+        for ($i = 0 ; $i < count($this->ipcl) ; $i++) {
+            if ($this->ipcl[$i]->match($ip)) {
+                fprintf(STDERR, "ban_list[%d] = %x (%x) MATCH\n", $i,
+                        $this->ipcl[$i]->addr, $this->ipcl[$i]->mask);
+                return(TRUE);
+            }
+        }
+        return (FALSE);
+    }
+}
+?>

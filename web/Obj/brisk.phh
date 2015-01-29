@@ -89,6 +89,7 @@ define('BRISK_SINGLE_SESS', "");
 define('DEBUGGING', "no-debugging");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
+require_once("${G_base}Obj/ipclass.phh");
 
 $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                                'en' => 'back standing' ),
@@ -583,33 +584,6 @@ function xcapemesg($s)
 }
 
 
-class IPClass {
-    var $addr;
-    var $mask;
-
-    function IPClass($ipset)
-    {
-        //split
-        $elem = split("/", $ipset, 2);
-        $addr = $elem[0];
-        $mask = (int)$elem[1];
-
-        //convert mask
-
-        $this->mask = ((1<<($mask))-1) << (32 - $mask);
-        $this->addr = ip2long($addr) & $this->mask;
-
-        fprintf(STDERR, "New ipclass: %x (%x)\n", $this->addr, $this->mask);
-    }
-
-    function match($ip)
-    {
-        fprintf(STDERR, "IP: %x, ADDR: %x, MASK: %x -> (%d)\n",
-                $ip, $this->addr, $this->mask, ((ip2long($ip) & $this->mask) == $this->addr));
-        return (($ip & $this->mask) == $this->addr);
-    }
-}
-
 class Vect {
     function Vect($a)
     {
@@ -1098,8 +1072,8 @@ class Brisk
         $thiz->table = array();
         $thiz->match = array();
 
-        $thiz->ban_list = NULL;
-        $thiz->black_list = NULL;
+        $thiz->ban_list = IpClass::create();
+        $thiz->black_list = IpClass::create();
         $thiz->ghost_sess = new GhostSess();
 
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
@@ -1121,27 +1095,6 @@ class Brisk
         return ($thiz);
     }
 
-    function ipclass_update($ip_out_s, $ip_in)
-    {
-        fprintf(STDERR, "N_IN: %d\n", count($ip_in));
-
-        $ip_out = &$this->$ip_out_s;
-
-        // if already set clean the ban_list property
-        if ($ip_out) {
-            $ct = count($ip_out);
-            for ($i = 0 ; $i < $ct ; $i++) {
-                unset($ip_out[$i]);
-            }
-            unset($ip_out);
-        }
-
-        $ip_out = array();
-        for ($i = 0 ; $i < count($ip_in) ; $i++) {
-            $ip_out[$i] = new IPClass($ip_in[$i]);
-        }
-    }
-
     function reload($is_first, $ban_list, $black_list)
     {
         fprintf(STDERR, "RELOAD STUFF (%d)(%d)\n", count($ban_list), count($black_list));
@@ -1151,8 +1104,8 @@ class Brisk
                 exit(12);
             }
         }
-        $this->ipclass_update("ban_list", $ban_list);
-        $this->ipclass_update("black_list", $black_list);
+        $this->ban_list->update($ban_list);
+        $this->black_list->update($black_list);
 
         if (!$is_first) {
             $this->banned_kickoff();
@@ -1209,32 +1162,12 @@ class Brisk
 
     function ban_check($ip_str)
     {
-        $ip = ip2long($ip_str);
-        fprintf(STDERR, "Brisk::ban_check %d\n", count($this->ban_list));
-        for ($i = 0 ; $i < count($this->ban_list) ; $i++) {
-            fprintf(STDERR, "ban_list[%d] = %x (%x)\n", $i,
-                    $this->ban_list[$i]->addr, $this->ban_list[$i]->mask);
-            if ($this->ban_list[$i]->match($ip)) {
-                fprintf(STDERR, "\n\nMATCHA!\n\n");
-                return(TRUE);
-            }
-        }
-        return (FALSE);
+        return ($this->ban_list->check($ip_str));
     }
 
     function black_check($ip_str)
     {
-        $ip = ip2long($ip_str);
-        fprintf(STDERR, "Brisk::black_check %d\n", count($this->black_list));
-        for ($i = 0 ; $i < count($this->black_list) ; $i++) {
-            fprintf(STDERR, "black_list[%d] = %x (%x)\n", $i,
-                   $this->black_list[$i]->addr, $this->black_list[$i]->mask);
-            if ($this->black_list[$i]->match($ip)) {
-                fprintf(STDERR, "\n\nMATCHA!\n\n");
-                return(TRUE);
-            }
-        }
-        return (FALSE);
+        return ($this->black_list->check($ip_str));
     }
 
     function users_cleanup()
@@ -2676,7 +2609,7 @@ class Brisk
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
       $remote_addr = addrtoipv4($addr);
 
-          fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
+      fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
       if ($this->black_check($remote_addr)) {
           // TODO: waiting async 5 sec before close
           fprintf(STDERR, "\n\n\n BLACK_CHECK \n\n\n");
