@@ -1,0 +1,116 @@
+<?php
+/*
+ *  brisk - Obj/provider_proxy.phh
+ *
+ *  Copyright (C) 2015      Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+require_once("${G_base}Obj/ipclass.phh");
+
+$G_pproxy = array( "samosa" => array("headitem" => "X-Forwarded-For",
+                                     "ipclass" => array("107.178.33.0/24",
+                                                        "107.178.34.0/24",
+                                                        "107.178.35.0/24",
+                                                        "107.178.37.0/24",
+                                                        "107.178.38.0/24",
+                                                        "107.178.39.0/24",
+                                                        "107.178.41.0/24",
+                                                        "107.178.42.0/24",
+                                                        "107.178.43.0/24",
+                                                        "107.178.45.0/24",
+                                                        "107.178.46.0/24",
+                                                        "107.178.47.0/24",
+                                                        "206.173.221.0/24") ),
+                   "mytest" => array("headitem" => "X-Forwarded-For",
+                                     "ipclass" => array("192.168.2.3/24") )
+                   );
+
+class ProviderProxyItem
+{
+    var $name;
+    var $headitem;
+    var $ipclass;
+
+    function ProviderProxyItem($pp_name, $pp_descr)
+    {
+        $this->name     = $pp_name;
+        $this->headitem = $pp_descr['headitem'];
+        $this->ipclass  = IPClass::create($pp_descr['ipclass']);
+    }
+}
+
+
+class ProviderProxy
+{
+    var $pp;
+
+    function ProviderProxy()
+    {
+        $this->pp = NULL;
+    }
+
+    static function create($pproxy = NULL)
+    {
+        $thiz = new ProviderProxy();
+        
+        if ($pproxy != NULL)
+            $thiz->update($pproxy);
+
+        return ($thiz);
+    }
+
+    function clean()
+    {
+        if ($this->pp != NULL) {
+            foreach ($this->pp as $pp_name) {
+                unset($this->pp[$pp_name]);
+            }
+            unset($this->pp);
+            $this->pp = NULL;
+        }
+    }
+
+    function update($pproxy)
+    {
+        $this->clean();
+
+        $this->pp = array();
+        foreach ($pproxy as $pp_name => $pp_descr) {
+            $this->pp[$pp_name] = new ProviderProxyItem($pp_name, $pp_descr);
+        }
+    }
+
+    function realip($headers, $ip)
+    {
+        if ($this->pp != NULL) {
+            foreach ($this->pp as $pp_name => $pp_item) {
+                if ($pp_item->match($ip)) {
+                    if (isset($headers[$pp_item->headitem])) {
+                        fprintf(STDERR, "Match public proxy [%s]\n", $pp_name);
+                        return ($headers[$pp_item->headitem]);
+                    }
+                }
+            }
+        }
+        return ($ip);
+    }
+}
+
+?>

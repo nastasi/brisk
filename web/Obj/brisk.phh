@@ -90,6 +90,7 @@ define('DEBUGGING', "no-debugging");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 require_once("${G_base}Obj/ipclass.phh");
+require_once("${G_base}Obj/provider_proxy.phh");
 
 $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                                'en' => 'back standing' ),
@@ -1039,6 +1040,7 @@ class Brisk
 
     var $ban_list;  // ban list (authized allowed)
     var $black_list;  // black list (anti-dos, noone allowed)
+    var $provider_proxy; // list of provider/browser that offer proxy service
     var $ghost_sess;
     var $delay_mgr;
 
@@ -1052,13 +1054,13 @@ class Brisk
     }
 
     // constructor
-    static function create($crystal_filename, $ban_list, $black_list) {
+    static function create($crystal_filename, $ban_list, $black_list, $prov_proxy) {
         if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
             if (($brisk = unserialize($brisk_ser)) != FALSE) {
                 fprintf(STDERR, "ROOM FROM FILE\n");
                 rename($crystal_filename, $crystal_filename.".old");
 
-                $brisk->reload(TRUE, $ban_list, $black_list);
+                $brisk->reload(TRUE, $ban_list, $black_list, $prov_proxy);
 
                 return($brisk);
             }
@@ -1074,6 +1076,7 @@ class Brisk
 
         $thiz->ban_list = IpClass::create();
         $thiz->black_list = IpClass::create();
+        $thiz->provider_proxy = ProviderProxy::create();
         $thiz->ghost_sess = new GhostSess();
 
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
@@ -1090,14 +1093,14 @@ class Brisk
 
         static::$sess_cur = FALSE;
 
-        $thiz->reload(TRUE, $ban_list, $black_list);
+        $thiz->reload(TRUE, $ban_list, $black_list, $prov_proxy);
 
         return ($thiz);
     }
 
-    function reload($is_first, $ban_list, $black_list)
+    function reload($is_first, $ban_list, $black_list, $prov_proxy)
     {
-        fprintf(STDERR, "RELOAD STUFF (%d)(%d)\n", count($ban_list), count($black_list));
+        fprintf(STDERR, "RELOAD STUFF (%d)(%d)(%d)\n", count($ban_list), count($black_list), count($prov_proxy));
 
         if (defined('CURL_DE_SAC_VERS')) {
             if (brisk_cds_reload($this) == FALSE) {
@@ -1106,6 +1109,7 @@ class Brisk
         }
         $this->ban_list->update($ban_list);
         $this->black_list->update($black_list);
+        $this->provider_proxy->update($prov_proxy);
 
         if (!$is_first) {
             $this->banned_kickoff();
@@ -1168,6 +1172,11 @@ class Brisk
     function black_check($ip_str)
     {
         return ($this->black_list->check($ip_str));
+    }
+
+    function pproxy_realip($ip_str)
+    {
+        return ($this->provider_proxy->realip($ip_str));
     }
 
     function users_cleanup()
@@ -2607,7 +2616,8 @@ class Brisk
       GLOBAL $G_ban_list, $G_black_list;
 
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
-      $remote_addr = addrtoipv4($addr);
+      // $remote_addr = addrtoipv4($addr);
+      $remote_addr = $this->pproxy_realip(addrtoipv4($addr));
 
       fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
       if ($this->black_check($remote_addr)) {
