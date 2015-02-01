@@ -31,6 +31,9 @@ class IPClassItem {
         //split
         $elem = split("/", $ipset, 2);
         $addr = $elem[0];
+        if (!isset($elem[1])) {
+            fprintf(STDERR, "ORIG: %s\n", $ipset);
+        }
         $mask = (int)$elem[1];
 
         //convert mask
@@ -46,6 +49,13 @@ class IPClassItem {
         // fprintf(STDERR, "IP: %x, ADDR: %x, MASK: %x -> (%d)\n",
         //       $ip, $this->addr, $this->mask, ((ip2long($ip) & $this->mask) == $this->addr));
         return (($ip & $this->mask) == $this->addr);
+    }
+
+    static function compare($a, $b)
+    {
+        if ($a->addr == $b->addr)
+            return (0);
+        return (($a->addr < $b->addr) ? -1 : 1);
     }
 }
 
@@ -76,6 +86,7 @@ class IPClass {
         for ($i = 0 ; $i < count($ip_in) ; $i++) {
             $this->ipcl[$i] = new IPClassItem($ip_in[$i]);
         }
+        usort($this->ipcl, array("IPClassItem", "compare"));
     }
 
     function clean()
@@ -93,10 +104,42 @@ class IPClass {
     {
         $ip = ip2long($ip_str);
 
-        for ($i = 0 ; $i < count($this->ipcl) ; $i++) {
-            if ($this->ipcl[$i]->match($ip)) {
-                fprintf(STDERR, "ban_list[%d] = %x (%x) MATCH\n", $i,
-                        $this->ipcl[$i]->addr, $this->ipcl[$i]->mask);
+        if (count($this->ipcl) == 0) {
+            return (FALSE);
+        }
+
+        if ($ip < $this->ipcl[0]->addr)
+            return (FALSE);
+
+        $imin = 0;
+        $imax = count($this->ipcl) - 1;
+
+        while ($imax >= $imin) {
+            $imid = intval($imin + (($imax - $imin) / 2));
+            // printf("X: %d M: %d N: %d | ", $arr[$imin], $arr[$imid], $arr[$imax]);
+            if ($this->ipcl[$imid]->addr == $ip) {
+                break;
+            }
+            else if ($this->ipcl[$imid]->addr > $ip) {
+                $imax = $imid - 1;
+            }
+            else {
+                $imin = $imid + 1;
+            }
+        }
+        if ($this->ipcl[$imid]->addr > $ip) {
+            if ($imid > 0) {
+                $imid--;
+            }
+            else {
+                $imid = -1;
+            }
+        }
+
+        if ($imid > -1) {
+            if ($this->ipcl[$imid]->match($ip)) {
+                fprintf(STDERR, "ban_list[%d] = %x (%x) MATCH\n", $imid,
+                        $this->ipcl[$imid]->addr, $this->ipcl[$imid]->mask);
                 return(TRUE);
             }
         }
