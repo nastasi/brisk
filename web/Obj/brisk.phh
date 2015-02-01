@@ -155,7 +155,7 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.18.0";
+$G_brisk_version = "4.18.1";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Puffin riattivato, accessi da cloud disattivati.',
@@ -1971,7 +1971,7 @@ class Brisk
         $to_user = nickserv_msg($dt, $mlang_brisk['mesgmust'][$G_lang]);
       }
     }
-    else if (strncmp($msg, "/nick ", 6) == 0) {
+    else if (FALSE && strncmp($msg, "/nick ", 6) == 0) {
       log_main("chatt_send BEGIN");
 
       do {
@@ -2132,17 +2132,19 @@ class Brisk
           if ( TRUE && (! $user->is_auth()) ) {
               $to_user = nickserv_msg($dt, xcape("Visto l'elevato numero di molestatori che ultimamente hanno preso dimora su Brisk abbiamo deciso"));
               $to_user .= nickserv_msg($dt, xcape("di disattivare temporaneamente la chat in room per i non registrati, non ce ne vogliate e buone feste."));
-              $aug_head = array("Tanti", "Tantissimi", "Un enormità", "Un milione", "Un' esagerazione");
-              $aug_body = array("a tutti gli utenti", "a tutti gli uomini", "a tutte le donne", "a tutti gli utenti");
-              $aug_tail = array("di Brisk", "del sito", "della ciurma", "della comitiva", "del gruppo");
+              if (FALSE) {
+                  $aug_head = array("Tanti", "Tantissimi", "Un enormità", "Un milione", "Un' esagerazione");
+                  $aug_body = array("a tutti gli utenti", "a tutti gli uomini", "a tutte le donne", "a tutti gli utenti");
+                  $aug_tail = array("di Brisk", "del sito", "della ciurma", "della comitiva", "del gruppo");
 
-              $auguri = sprintf("%s auguri %s %s.",
-                                $aug_head[mt_rand(0, count($aug_head)-1)],
-                                $aug_body[mt_rand(0, count($aug_body)-1)],
-                                $aug_tail[mt_rand(0, count($aug_tail)-1)]);
+                  $auguri = sprintf("%s auguri %s %s.",
+                                    $aug_head[mt_rand(0, count($aug_head)-1)],
+                                    $aug_body[mt_rand(0, count($aug_body)-1)],
+                                    $aug_tail[mt_rand(0, count($aug_tail)-1)]);
 
-              $to_room = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name),
-                                 xcape($auguri));
+                  $to_room = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name),
+                                     xcape($auguri));
+              }
           }
           else {
               $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
