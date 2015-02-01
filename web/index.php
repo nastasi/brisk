@@ -377,6 +377,13 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 break;
             }
         }
+        if ($brisk->cloud_check($remote_addr)) {
+            // TODO: find a way to add a nonblocking sleep(5) here
+            $banned = TRUE;
+            $last_msg = $mlang_room['reas_cloud'][$G_lang];
+        }
+
+
         if (validate_sess($sess)) {
             log_main("pre garbage_manager UNO");
             $brisk->garbage_manager(TRUE);

@@ -1039,8 +1039,9 @@ class Brisk
     var $garbage_timeout;
     var $shm_sz;
 
-    var $ban_list;  // ban list (authized allowed)
-    var $black_list;  // black list (anti-dos, noone allowed)
+    var $ban_list;       // ban list (authized allowed)
+    var $black_list;     // black list (anti-dos, noone allowed)
+    var $cloud_smasher;  // list of cloud ip ranges to be rejected
     var $provider_proxy; // list of provider/browser that offer proxy service
     var $ghost_sess;
     var $delay_mgr;
@@ -1055,13 +1056,13 @@ class Brisk
     }
 
     // constructor
-    static function create($crystal_filename, $ban_list, $black_list, $prov_proxy) {
+    static function create($crystal_filename, $ban_list, $black_list, $cloud_smasher, $prov_proxy) {
         if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
             if (($brisk = unserialize($brisk_ser)) != FALSE) {
                 fprintf(STDERR, "ROOM FROM FILE\n");
                 rename($crystal_filename, $crystal_filename.".old");
 
-                $brisk->reload(TRUE, $ban_list, $black_list, $prov_proxy);
+                $brisk->reload(TRUE, $ban_list, $black_list, $cloud_smasher, $prov_proxy);
 
                 return($brisk);
             }
@@ -1077,6 +1078,7 @@ class Brisk
 
         $thiz->ban_list = IpClass::create();
         $thiz->black_list = IpClass::create();
+        $thiz->cloud_smasher = IpClass::create();
         $thiz->provider_proxy = ProviderProxy::create();
         $thiz->ghost_sess = new GhostSess();
 
@@ -1094,14 +1096,15 @@ class Brisk
 
         static::$sess_cur = FALSE;
 
-        $thiz->reload(TRUE, $ban_list, $black_list, $prov_proxy);
+        $thiz->reload(TRUE, $ban_list, $black_list, $cloud_smasher, $prov_proxy);
 
         return ($thiz);
     }
 
-    function reload($is_first, $ban_list, $black_list, $prov_proxy)
+    function reload($is_first, $ban_list, $black_list, $cloud_smasher, $prov_proxy)
     {
-        fprintf(STDERR, "RELOAD STUFF (%d)(%d)(%d)\n", count($ban_list), count($black_list), count($prov_proxy));
+        fprintf(STDERR, "RELOAD STUFF (%d)(%d)(%d)(%d)\n",
+                count($ban_list), count($black_list), count($cloud_smasher), count($prov_proxy));
 
         if (defined('CURL_DE_SAC_VERS')) {
             if (brisk_cds_reload($this) == FALSE) {
@@ -1110,6 +1113,7 @@ class Brisk
         }
         $this->ban_list->update($ban_list);
         $this->black_list->update($black_list);
+        $this->cloud_smasher->update($cloud_smasher);
         $this->provider_proxy->update($prov_proxy);
 
         if (!$is_first) {
@@ -1145,7 +1149,8 @@ class Brisk
                 continue;
 
             // check if the IP is blacklisted
-            if ($this->black_check($user_cur->ip)) {
+            if ($this->black_check($user_cur->ip) ||
+                $this->cloud_check($user_cur->ip)) {
                 $user_cur->lacc = 0;
                 $is_ban = TRUE;
                 continue;
@@ -1173,6 +1178,11 @@ class Brisk
     function black_check($ip_str)
     {
         return ($this->black_list->check($ip_str));
+    }
+
+    function cloud_check($ip_str)
+    {
+        return ($this->cloud_smasher->check($ip_str));
     }
 
     function pproxy_realip($header, $ip_str)
@@ -2614,17 +2624,23 @@ class Brisk
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
-      GLOBAL $G_ban_list, $G_black_list, $G_provider_proxy;
+      GLOBAL $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy;
 
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
       // $remote_addr = addrtoipv4($addr);
       $remote_addr = $this->pproxy_realip($header, addrtoipv4($addr));
 
-      fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
+      fprintf(STDERR, "\n\n\n PRE_BLACK [%s]\n\n\n", $remote_addr);
       if ($this->black_check($remote_addr)) {
           // TODO: waiting async 5 sec before close
           fprintf(STDERR, "\n\n\n BLACK CHECK\n\n\n");
           return (FALSE);
+      }
+      if ($path != "" && $path != "index.php") {
+          if ($this->cloud_check($remote_addr)) {
+              // TODO: waiting async 5 sec before close
+              return (FALSE);
+          }
       }
 
       $enc = get_encoding($header);

@@ -42,11 +42,11 @@ require_once($G_base."briskin5/index_wr.php");
 
 function main($argv)
 {
-    GLOBAL $G_ban_list, $G_black_list, $G_provider_proxy;
+    GLOBAL $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy;
 
     pid_save();
     do {
-        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list, $G_provider_proxy)) == FALSE) {
+        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy)) == FALSE) {
             log_crit("Brisk::create failed");
             $ret = 1;
             break;

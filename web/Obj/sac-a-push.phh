@@ -623,7 +623,7 @@ class Sac_a_push {
     {
         GLOBAL $DOCUMENT_ROOT, $HTTP_HOST;
 
-        GLOBAL $G_alarm_passwd, $G_ban_list, $G_black_list, $G_provider_proxy;
+        GLOBAL $G_alarm_passwd, $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy;
         GLOBAL $G_btrace_pref_sub, $G_dbauth;
         GLOBAL $G_dbpfx, $G_donors_all, $G_donors_cur, $G_is_local, $G_lang;
         GLOBAL $G_poll_entries, $G_poll_name, $G_poll_title, $G_proxy_white_list;
@@ -801,7 +801,7 @@ class Sac_a_push {
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
                                     $this->app->reload(FALSE, $G_ban_list, $G_black_list,
-                                                       $G_provider_proxy);
+                                                       $G_cloud_smasher, $G_provider_proxy);
                                     global_dump();
                                 }
                                 else if ($line == "shutdown" || $line == "sd") {
