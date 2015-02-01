@@ -1,4 +1,11 @@
 <?php
+if (file_exists("$DOCUMENT_ROOT/Etc/provider_proxy.phh")) {
+    require_once("$DOCUMENT_ROOT/Etc/provider_proxy.phh");
+}
+else {
+    $G_provider_proxy = array();
+}
+
 // G_dbasetype value can be "pgsql" or "file"
 $G_dbasetype="pgsql";
 

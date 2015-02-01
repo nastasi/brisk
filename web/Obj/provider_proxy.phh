@@ -24,24 +24,6 @@
 
 require_once("${G_base}Obj/ipclass.phh");
 
-$G_pproxy = array( "samosa" => array("headitem" => "X-Forwarded-For",
-                                     "ipclass" => array("107.178.33.0/24",
-                                                        "107.178.34.0/24",
-                                                        "107.178.35.0/24",
-                                                        "107.178.37.0/24",
-                                                        "107.178.38.0/24",
-                                                        "107.178.39.0/24",
-                                                        "107.178.41.0/24",
-                                                        "107.178.42.0/24",
-                                                        "107.178.43.0/24",
-                                                        "107.178.45.0/24",
-                                                        "107.178.46.0/24",
-                                                        "107.178.47.0/24",
-                                                        "206.173.221.0/24") ),
-                   "mytest" => array("headitem" => "X-Forwarded-For",
-                                     "ipclass" => array("192.168.2.3/24") )
-                   );
-
 class ProviderProxyItem
 {
     var $name;
@@ -79,8 +61,9 @@ class ProviderProxy
     function clean()
     {
         if ($this->pp != NULL) {
-            foreach ($this->pp as $pp_name) {
-                unset($this->pp[$pp_name]);
+            foreach ($this->pp as $pp_key => $pp_value) {
+                fprintf(STDERR, "PHP PPN: %s\n", $pp_key);
+                unset($this->pp[$pp_key]);
             }
             unset($this->pp);
             $this->pp = NULL;
@@ -92,19 +75,19 @@ class ProviderProxy
         $this->clean();
 
         $this->pp = array();
-        foreach ($pproxy as $pp_name => $pp_descr) {
-            $this->pp[$pp_name] = new ProviderProxyItem($pp_name, $pp_descr);
+        foreach ($pproxy as $pp_key => $pp_value) {
+            $this->pp[$pp_key] = new ProviderProxyItem($pp_key, $pp_value);
         }
     }
 
-    function realip($headers, $ip)
+    function realip($header, $ip)
     {
         if ($this->pp != NULL) {
             foreach ($this->pp as $pp_name => $pp_item) {
-                if ($pp_item->match($ip)) {
-                    if (isset($headers[$pp_item->headitem])) {
-                        fprintf(STDERR, "Match public proxy [%s]\n", $pp_name);
-                        return ($headers[$pp_item->headitem]);
+                if ($pp_item->ipclass->check($ip)) {
+                    if (isset($header[$pp_item->headitem])) {
+                        fprintf(STDERR, "Match public proxy [%s][%s]\n", $pp_name, $header[$pp_item->headitem]);
+                        return ($header[$pp_item->headitem]);
                     }
                 }
             }

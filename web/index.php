@@ -27,14 +27,16 @@ require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
 require_once("Obj/proxyscan.phh");
 
-$mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati.',
-                                             'en' => 'Wrong user and/or password.'),
-                     'userpassmust' => array('it' => 'Il nickname deve contenere almeno una lettera o una cifra.',
-                                             'en' => 'The nickname have to contain at least one letter or one number.'),
+$mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; gi&agrave; in uso.',
+                                             'en' => 'Your nickname is already in use.'),
                      'userpassend'  => array('it' => 'Spiacenti, non ci sono pi&ugrave; posti liberi. Riprova pi&ugrave; tardi.',
                                              'en' => 'We are sorry, there aren\'t free place. Try again later.'),
-                     'userpassuse'  => array('it' => 'Il tuo nickname &egrave; gi&agrave; in uso.',
-                                             'en' => 'Your nickname is already in use.'),
+                     'userpassmust' => array('it' => 'Il nickname deve contenere almeno una lettera o una cifra.',
+                                             'en' => 'The nickname have to contain at least one letter or one number.'),
+                     'userpasserr'  => array('it' => 'Utente e/o password errati.',
+                                             'en' => 'Wrong user and/or password.'),
+                     'userpassban'  => array('it' => 'Il tuo indirizzo IP è stato bannato perché precedentemente utilizzato da qualche molestatore.',
+                                             'en' => 'Your IP address is banned because trolling activity was detected from it.'),
                      'standing'     => array('it' => 'Giocatori in piedi',
                                              'en' => 'Standing players'),
                      'headline'     => array('it' => 'briscola chiamata in salsa ajax',
@@ -53,6 +55,9 @@ $mlang_room = array( 'userpasserr'  => array('it' => 'Utente e/o password errati
                                              'en' => 'EN L\' accesso attraverso sistemi di anonimizzazione non è consentito.'),
                      'reas_anot'    => array('it' => 'La tua sessione è stata assegnata ad un altro browser.',
                                              'en' => 'EN La tua sessione è stata assegnata ad un altro browser.'),
+                     'reas_cloud'   => array('it' => 'La connessione dai computer di una cloud non è ammessa.',
+                                             'en' => 'Connection from cloud computers is not allowed.'),
+
                      'btn_enter'    => array('it' => 'entra',
                                              'en' => 'enter'),
                      'passwarn'     => array('it' => 'Se non hai ancora una password, lascia il campo in bianco ed entra.',
@@ -342,6 +347,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     $standup = "";
     $ACTION = "login";
     $last_msg = "";
+    $banned = FALSE;
 
     if (isset($BRISK_SHOWHTML) == FALSE) {
         $is_table = FALSE;
@@ -391,9 +397,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 }
             }
         }
-
-        $banned = FALSE;
-        if ($ACTION == "login" && isset($name)) {
+        if (!$banned && $ACTION == "login" && isset($name)) {
             log_main("pre garbage_manager DUE");
 
             if (isset($pass_private) == FALSE || $pass_private == "") {
@@ -402,7 +406,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 if ($brisk->ban_check($remote_addr)) {
                     // TODO: find a way to add a nonblocking sleep(5) here
                     $banned = TRUE;
-                    $idx = -1;
+                    $idx = -4;
                 }
             }
 
@@ -432,15 +436,24 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 }
             }
             else {
+                fprintf(STDERR, "POST CHECK QUI\n");
                 /* Login Rendering */
-                if ($idx == -3)
+                switch($idx) {
+                case -4:
+                    $sfx = 'ban';
+                    break;
+                case -3:
                     $sfx = 'err';
-                else if ($idx == -2)
+                    break;
+                case -2:
                     $sfx = 'must';
-                else if ($idx == -1)
+                    break;
+                case -1:
                     $sfx = 'end';
-                else
+                    break;
+                default:
                     $sfx = 'use';
+                }
 
                 $body .= '<div class="urgmsg"><b>'.$mlang_room['userpass'.$sfx][$G_lang].'</b></div>';
             }

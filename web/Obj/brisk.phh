@@ -447,6 +447,7 @@ function versions_cmp($v1, $v2)
     return 0;
 }
 
+// return string with IPV4 address
 function addrtoipv4($addr)
 {
     $ipv4addr_arr = explode(':' , $addr);
@@ -1174,9 +1175,9 @@ class Brisk
         return ($this->black_list->check($ip_str));
     }
 
-    function pproxy_realip($ip_str)
+    function pproxy_realip($header, $ip_str)
     {
-        return ($this->provider_proxy->realip($ip_str));
+        return ($this->provider_proxy->realip($header, $ip_str));
     }
 
     function users_cleanup()
@@ -2613,16 +2614,16 @@ class Brisk
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
-      GLOBAL $G_ban_list, $G_black_list;
+      GLOBAL $G_ban_list, $G_black_list, $G_provider_proxy;
 
       printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
       // $remote_addr = addrtoipv4($addr);
-      $remote_addr = $this->pproxy_realip(addrtoipv4($addr));
+      $remote_addr = $this->pproxy_realip($header, addrtoipv4($addr));
 
       fprintf(STDERR, "\n\n\n PRE_BLACK_CHECK \n\n\n");
       if ($this->black_check($remote_addr)) {
           // TODO: waiting async 5 sec before close
-          fprintf(STDERR, "\n\n\n BLACK_CHECK \n\n\n");
+          fprintf(STDERR, "\n\n\n BLACK CHECK\n\n\n");
           return (FALSE);
       }
 
