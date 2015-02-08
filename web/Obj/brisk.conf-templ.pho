@@ -1,14 +1,14 @@
 <?php
 
 if (file_exists("$DOCUMENT_ROOT/Etc/cloud_smasher.phh")) {
-    require_once("$DOCUMENT_ROOT/Etc/cloud_smasher.phh");
+    require("$DOCUMENT_ROOT/Etc/cloud_smasher.phh");
 }
 else {
     $G_cloud_smasher = array();
 }
 
 if (file_exists("$DOCUMENT_ROOT/Etc/provider_proxy.phh")) {
-    require_once("$DOCUMENT_ROOT/Etc/provider_proxy.phh");
+    require("$DOCUMENT_ROOT/Etc/provider_proxy.phh");
 }
 else {
     $G_provider_proxy = array();
