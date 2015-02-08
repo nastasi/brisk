@@ -401,6 +401,8 @@ class Sac_a_push {
     static $fixed_fd = 3;
     static $cnt_master = NULL;
     static $cnt_slave  = NULL;
+
+    var $provider_proxy; // list of provider/browser that offer proxy service
     
     var $file_socket;
     var $unix_socket;
@@ -455,9 +457,14 @@ class Sac_a_push {
 
     static function create(&$app, $sockname, $debug, $blocking_mode, $argv)
     {        
+        GLOBAL $G_provider_proxy;
+
         $thiz = new Sac_a_push();
         
         $thiz->app = $app;
+
+        $thiz->provider_proxy = ProviderProxy::create();
+
         $thiz->file_socket = $sockname;
         $thiz->unix_socket = "unix://$sockname";
         $thiz->direct_socket = "unix://${sockname}2";
@@ -517,6 +524,7 @@ class Sac_a_push {
         }
 
         $thiz->main_loop = FALSE;
+        $thiz->reload(TRUE, $G_provider_proxy);
 
         return ($thiz);
     }
@@ -709,7 +717,10 @@ class Sac_a_push {
                                 == FALSE) {
                                 fprintf(STDERR, "TODO: fix wrong header management\n");
                             }
-                            $addr = stream_socket_get_name($new_socket, TRUE);
+                            $addr_full = stream_socket_get_name($new_socket, TRUE);
+                            // FOR TEST $header['X-Forwarded-For'] = '154.155.22.33';
+                            $addr = $this->pproxy_realip($header, addrtoipv4($addr_full));
+
                             printf("PATH: [%s]\n", $path);
                             if ($method == "POST" && $rest > 0) {
                                 if (isset($header['Expect']) && $header['Expect'] == '100-continue') {
@@ -800,8 +811,9 @@ class Sac_a_push {
                                 $line = trim($buf);
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
+                                    $this->reload(FALSE, $G_provider_proxy);
                                     $this->app->reload(FALSE, $G_ban_list, $G_black_list,
-                                                       $G_cloud_smasher, $G_provider_proxy);
+                                                       $G_cloud_smasher);
                                     global_dump();
                                 }
                                 else if ($line == "shutdown" || $line == "sd") {
@@ -952,6 +964,18 @@ class Sac_a_push {
             }
         }  // while (...
     }  // function run(...
+
+    function pproxy_realip($header, $ip_str)
+    {
+        return ($this->provider_proxy->realip($header, $ip_str));
+    }
+
+    function reload($is_first, $prov_proxy)
+    {
+        fprintf(STDERR, "SAP RELOAD STUFF (%d)\n", count($prov_proxy));
+
+        $this->provider_proxy->update($prov_proxy);
+    }
 
     function direct_command($cmdstr)
     {

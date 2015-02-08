@@ -82,11 +82,13 @@ class ProviderProxy
 
     function realip($header, $ip)
     {
+        fprintf(STDERR, "PP realip: [%d]\n", count($this->pp));
         if ($this->pp != NULL) {
             foreach ($this->pp as $pp_name => $pp_item) {
+                // fprintf(STDERR, "PP loop: [%s][%s]\n", $pp_name, $ip);
                 if ($pp_item->ipclass->check($ip)) {
                     if (isset($header[$pp_item->headitem])) {
-                        fprintf(STDERR, "Match public proxy [%s][%s]\n", $pp_name, $header[$pp_item->headitem]);
+                        fprintf(STDERR, "PP: match public proxy [%s][%s]\n", $pp_name, $header[$pp_item->headitem]);
                         return ($header[$pp_item->headitem]);
                     }
                 }

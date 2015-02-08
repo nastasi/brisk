@@ -33,6 +33,7 @@ require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/zlibstream.phh");
 require_once($G_base."Obj/mail.phh");
+require_once($G_base."Obj/provider_proxy.phh");
 require_once($G_base."index.php");
 require_once($G_base."index_wr.php");
 require_once($G_base."briskin5/Obj/briskin5.phh");
