@@ -80,7 +80,7 @@ class ProviderProxy
         }
     }
 
-    function realip($header, $ip)
+    function realip(&$header, $ip)
     {
         fprintf(STDERR, "PP realip: [%d]\n", count($this->pp));
         if ($this->pp != NULL) {
@@ -89,7 +89,9 @@ class ProviderProxy
                 if ($pp_item->ipclass->check($ip)) {
                     if (isset($header[$pp_item->headitem])) {
                         fprintf(STDERR, "PP: match public proxy [%s][%s]\n", $pp_name, $header[$pp_item->headitem]);
-                        return ($header[$pp_item->headitem]);
+                        $ret = $header['POST_'.$pp_item->headitem] = $header[$pp_item->headitem];
+                        unset($header[$pp_item->headitem]);
+                        return ($ret);
                     }
                 }
             }

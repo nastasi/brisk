@@ -719,7 +719,7 @@ class Sac_a_push {
                             // FOR TEST $header['X-Forwarded-For'] = '154.155.22.33';
                             $addr = $this->pproxy_realip($header, addrtoipv4($addr_full));
 
-                            printf("PATH: [%s]\n", $path);
+                            printf("PATH: [%s] [%s]\n", $path, print_r($header, TRUE));
                             if ($method == "POST" && $rest > 0) {
                                 if (isset($header['Expect']) && $header['Expect'] == '100-continue') {
                                     fprintf(STDERR, "\nPOSTA DE CHE\n\n");
@@ -963,7 +963,7 @@ class Sac_a_push {
         }  // while (...
     }  // function run(...
 
-    function pproxy_realip($header, $ip_str)
+    function pproxy_realip(&$header, $ip_str)
     {
         return ($this->provider_proxy->realip($header, $ip_str));
     }
