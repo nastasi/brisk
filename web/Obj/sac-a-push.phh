@@ -455,10 +455,8 @@ class Sac_a_push {
         }
     }
 
-    static function create(&$app, $sockname, $debug, $blocking_mode, $argv)
+    static function create(&$app, $sockname, $debug, $blocking_mode, $provider_proxy, $argv)
     {        
-        GLOBAL $G_provider_proxy;
-
         $thiz = new Sac_a_push();
         
         $thiz->app = $app;
@@ -524,7 +522,7 @@ class Sac_a_push {
         }
 
         $thiz->main_loop = FALSE;
-        $thiz->reload(TRUE, $G_provider_proxy);
+        $thiz->reload(TRUE, $provider_proxy);
 
         return ($thiz);
     }

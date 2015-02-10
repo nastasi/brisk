@@ -1054,7 +1054,7 @@ class Brisk
     }
 
     // constructor
-    static function create($crystal_filename, $ban_list, $black_list, $cloud_smasher, $prov_proxy) {
+    static function create($crystal_filename, $ban_list, $black_list, $cloud_smasher) {
         if (($brisk_ser = @file_get_contents($crystal_filename)) != FALSE) {
             if (($brisk = unserialize($brisk_ser)) != FALSE) {
                 fprintf(STDERR, "ROOM FROM FILE\n");

@@ -47,13 +47,13 @@ function main($argv)
 
     pid_save();
     do {
-        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy)) == FALSE) {
+        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list, $G_cloud_smasher)) == FALSE) {
             log_crit("Brisk::create failed");
             $ret = 1;
             break;
         }
 
-        if (($s_a_p = Sac_a_push::create($brisk, USOCK_PATH, 0, 0, $argv)) === FALSE) {
+        if (($s_a_p = Sac_a_push::create($brisk, USOCK_PATH, 0, 0, $G_provider_proxy, $argv)) === FALSE) {
             $ret = 2;
             break;
         }
