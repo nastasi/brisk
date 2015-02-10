@@ -154,12 +154,12 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "4.18.2";
+$G_brisk_version = "4.18.3";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Puffin riattivato, accessi da cloud disattivati, corretto bug sulla gestione di puffin.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: Puffin riattivato, accessi da cloud disattivati, corretto bug sulla gestione di puffin, riabilitato blocco dei proxy.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: Puffin re-enabled, cloud accesses disabled, fixed puffin mgmt bug.',
+                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: Puffin re-enabled, cloud accesses disabled, fixed puffin mgmt bug, re-enabled proxy access block.',
                                        'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
 
 $G_room_help = array( 'it' => '
