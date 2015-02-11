@@ -27,7 +27,6 @@
 $G_base = "../";
 
 require_once("../Obj/brisk.phh");
-require_once("../Obj/proxyscan.phh");
 require_once("Obj/briskin5.phh");
 
 $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Scegli il seme:',
@@ -57,11 +56,6 @@ function bin5_index_main($transp_type, &$header_out, $addr, $get, $post, $cookie
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         unset ($sess);
 
-    // Use of proxies isn't allowed.
-    // if (is_proxy()) {
-    // return (FALSE);
-    // }
-    
 // header('Content-type: text/html; charset="utf-8"',true);
     ?>
 <html>

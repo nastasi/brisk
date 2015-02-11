@@ -25,7 +25,6 @@
 require_once("Obj/user.phh");
 require_once("Obj/brisk.phh");
 require_once("Obj/auth.phh");
-require_once("Obj/proxyscan.phh");
 
 $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; gi&agrave; in uso.',
                                              'en' => 'Your nickname is already in use.'),
@@ -337,11 +336,6 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         unset ($table_token);
 
     $remote_addr = addrtoipv4($remote_addr_full);
-
-    // Use of proxies isn't allowed.
-    if (!$G_is_local && is_proxy($remote_addr)) {
-        return FALSE;
-    }
 
     $is_login = FALSE;
     $body = "";
