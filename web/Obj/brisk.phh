@@ -964,6 +964,7 @@ define('GHOST_SESS_REAS_ANOT', 2); // another user get session
 define('GHOST_SESS_REAS_TOUT', 3); // room timeout
 define('GHOST_SESS_REAS_TTOT', 4); // table timeout
 define('GHOST_SESS_REAS_ANON', 5); // anonymizer access
+define('GHOST_SESS_REAS_PROX', 6); // proxy access
 
 class GhostSessEl
 {

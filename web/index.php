@@ -53,6 +53,8 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'EN Abbiamo perso le tue tracce mentre stavi giocando, quindi ti abbiamo disconnesso.'),
                      'reas_anon'    => array('it' => 'L\' accesso attraverso sistemi di anonimizzazione non è consentito.',
                                              'en' => 'EN L\' accesso attraverso sistemi di anonimizzazione non è consentito.'),
+                     'reas_prox'    => array('it' => 'L\' accesso attraverso proxy non è consentito, se lo usi solo tu e pochi altri utenti comunica il suo indirizzo IP all\' <a href="mailto: brisk@alternativeoutput.it">amministratore</a> per aggiungerlo alle eccezioni.',
+                                             'en' => 'EN L\' accesso attraverso proxy non è consentito, se lo usi solo tu e pochi altri utenti comunica il suo indirizzo IP all\' <a href="mailto: brisk@alternativeoutput.it">amministratore</a> per aggiungerlo alle eccezioni.'),
                      'reas_anot'    => array('it' => 'La tua sessione è stata assegnata ad un altro browser.',
                                              'en' => 'EN La tua sessione è stata assegnata ad un altro browser.'),
                      'reas_cloud'   => array('it' => 'La connessione dai computer di una cloud non è ammessa.',
@@ -371,6 +373,9 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 break;
             case GHOST_SESS_REAS_ANON:
                 $last_msg = $mlang_room['reas_anon'][$G_lang];
+                break;
+            case GHOST_SESS_REAS_PROX:
+                $last_msg = $mlang_room['reas_prox'][$G_lang];
                 break;
             default:
                 $last_msg = $mlang_room['reas_unkn'][$G_lang];
