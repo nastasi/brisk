@@ -200,6 +200,10 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'contacts'),
                      'itm_mail'     => array('it' => 'contatti',
                                              'en' => 'contacts'),
+                     'tit_cook'      => array('it' => 'policy sui cookie',
+                                              'en' => 'cookie policy'),
+                     'itm_cook'      => array('it' => 'cookie',
+                                              'en' => 'cookie'),
                      'tit_cla'      => array('it' => 'classifiche degli utenti',
                                              'en' => 'user\'s placings'),
                      'itm_cla'      => array('it' => 'classifiche',
@@ -310,7 +314,13 @@ function sidebanners_render($sidebanner, $sidebanner_idx)
         $tit = eschtml($sb['title']);
         printf('  alt="%s" title="%s"></a></div>', $tit, $tit);
         printf("\n");
-        printf('<img class="nobohide" style="z-index: 255; border: 1px solid gray;" id="sidebanner%d_big" src="%s">', $i, $sb['icon_big']);
+
+        $ib_class =  "";
+        if (array_key_exists('icon_big_class', $sb)) {
+            $ib_class = $sb['icon_big_class'];
+        }
+
+        printf('<img class="nobohide bordergray %s" style="z-index: 255;" id="sidebanner%d_big" src="%s">', $ib_class, $i, $sb['icon_big']);
         printf("\n");
     }
 }
@@ -322,7 +332,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_sidebanner, $G_sidebanner_idx;
     GLOBAL $G_with_poll;
     GLOBAL $G_lang, $G_lng, $mlang_room;
-    GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER;
+    GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
 
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         $sess = "";
@@ -334,6 +344,13 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         unset ($table_idx);
     if (($table_token = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
         unset ($table_token);
+
+    log_step("LOGIN: $name");
+
+    // default values
+    $_cookie_law_3party = 'true';
+    if (isset($cookie['_cookie_law_3party']))
+        $_cookie_law_3party = $cookie['_cookie_law_3party'];
 
     $remote_addr = addrtoipv4($remote_addr_full);
 
@@ -587,7 +604,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     /* MLANG: "briscola chiamata in salsa ajax", */
 
     mt_srand(make_seed());
-    if (!$G_is_local) {
+    if (!$G_is_local && $_cookie_law_3party == 'true') {
         $rn = rand(0, 1);
 
         if ($rn == 0) {
@@ -700,6 +717,10 @@ google_color_url = "000000";
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_mail'][$G_lang].'">'.$mlang_room['itm_mail'][$G_lang].'</a><br>
 
+<a target="_blank" href="http://www.alternativeoutput.it/cookie.php"
+   onmouseover="menu_hide(0,1);"
+   title="'.$mlang_room['tit_cook'][$G_lang].'"
+   alt="'.$mlang_room['tit_cook'][$G_lang].'">'.$mlang_room['itm_cook'][$G_lang].'</a><br>
 <hr>
 
 <!--
@@ -951,10 +972,9 @@ supported by:<br>
 </div>
 <a style="/* position: absolute; top: 40px; left: 6px;" */ target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
-! $G_is_local ?
+(!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
-' : '<div style="margin-top: 4px; height: 20px; background-color: #00f;">FACEBOOK HERE</div>
-' ) . '<div id="proflashext" class="proflashext"><div id="proflash" class="proflash"></div></div>
+' : '' ) . '<div id="proflashext" class="proflashext"><div id="proflash" class="proflash"></div></div>
 <img id="stm_stat" class="nobo" style="margin-top: 4px;" src="img/line-status_b.png">
 %s
 %s
@@ -981,6 +1001,8 @@ supported by:<br>
 <script type="text/javascript" src="md5.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
 <script type="text/javascript" src="json2.js"></script>
+<script type="text/javascript" src="/cookie_law.js"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css">
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 
@@ -1032,7 +1054,7 @@ window.onload = function() {
 </script>
 </head>
 <?php
-        if (!$G_is_local) {
+        if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
 <body xmlns:fb="http://ogp.me/ns/fb#">
@@ -1102,6 +1124,12 @@ window.onload = function() {
     <div id="xhrlog"></div>
     </pre>
     <div id="xhrdeltalog"></div>
+
+<script language="JavaScript">
+<!--
+cookie_law(null);
+// -->
+</script>
 </body>
 </html>
 <?php
@@ -1126,6 +1154,8 @@ window.onload = function() {
 <script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
 <script type="text/javascript" src="json2.js"></script>
+<script type="text/javascript" src="/cookie_law.js"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css">
 <link rel="stylesheet" type="text/css" href="brisk.css">
 <link rel="stylesheet" type="text/css" href="room.css">
 <script type="text/javascript"><!--
@@ -1207,7 +1237,7 @@ xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", 80, 2, null /
 </script>
 </head>
 <?php
-    if (!$G_is_local) {
+    if (!$G_is_local && $_cookie_law_3party == 'true') {
 ?>
 <!-- if myconsole <body onunload="deconsole();"> -->
 <body xmlns:fb="http://ogp.me/ns/fb#">
@@ -1423,6 +1453,11 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_prefs_save'][$G_lang]; ?>"/>
 </div>
 </div>
+<script language="JavaScript">
+<!--
+cookie_law(null);
+// -->
+</script>
 </body>
 </html>
 <?php

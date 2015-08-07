@@ -86,6 +86,14 @@ img.nobohide {
     z-index: 12;
 }
 
+img.bordergray {
+    border: 1px solid gray;
+}
+
+img.ib_nobo {
+    border: 0px solid gray;
+}
+
 .bg_white {
     background-color: #ffffff;
 }
