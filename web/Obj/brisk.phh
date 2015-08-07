@@ -3301,7 +3301,7 @@ function validate_name($name)
 {
     $name_new = str_replace(' ', '_', mb_substr(trim($name),0,12, "UTF-8"));
 
-  for ($i = 0 ; $i < strlen($name_new) ; $i++) {
+  for ($i = 0 ; $i < mb_strlen($name_new) ; $i++) {
     $c = $name_new[$i];
     if (($c >= "a" && $c <= "z") || ($c >= "A" && $c <= "Z") || ($c >= "0" && $c <= "9"))
       return ($name_new);
