@@ -59,8 +59,8 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                      'reas_cloud'   => array('it' => 'La connessione dai computer di una cloud non è ammessa.',
                                              'en' => 'Connection from cloud computers is not allowed.'),
 
-                     'btn_enter'    => array('it' => 'entra',
-                                             'en' => 'enter'),
+                     'btn_enter'    => array('it' => 'Entra.',
+                                             'en' => 'Enter.'),
                      'passwarn'     => array('it' => 'Se non hai ancora una password, lascia il campo in bianco ed entra.',
                                              'en' => 'If you don\'t have a password, leave blank the field and enter.'),
                      'browwarn'     => array('it' => 'Se qualcosa non funziona prova a ricaricare la pagina con <b>Ctrl + F5</b><br><br>Se non riesci più ad entrare nel nuovo Brisk e prima ci riuscivi potrebbe essere un problema di antivirus,<br>guarda la <a class=\'flat\' style=\'background-color: white; font-weight: bold;\' target=\'_blank\' href=\'http://www.alternativeoutput.it/blog/doku.php?id=brisk:guida_agli_antivirus\'>pagina sugli antivirus</a> per maggiori informazioni su come configurarlo.<br><br>Se ancora non funziona nulla contatta <a class=\'flat\' style=\'background-color: white; font-weight: bold;\' href=\'mailto:brisk@alternativeoutput.it\'>l\'amministratore del sito</a>.',
