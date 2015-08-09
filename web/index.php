@@ -1100,15 +1100,32 @@ window.onload = function() {
     <form accept-charset="utf-8" method="post" action="" onsubmit="return j_login_manager(this);">
     <input id="passid_private" name="pass_private" type="hidden" value="">
     <table class="login">
-    <tr><td>user:</td>
+    <tr><td>nickname:</td>
     <td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
-    <tr><td>pwd:</td>
+    <tr><td>password:</td>
     <td><input id="passid" class="input_text" name="pass" type="password" size="24" maxlength="64" value=""></td></tr>
     <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_enter'][$G_lang];?>" type="submit" class="button"></td></tr>
     </table>
-    </form><br>
-    <b><?php echo $mlang_room['passwarn'][$G_lang];?></b><br><br>
-<?php echo $mlang_room['browwarn'][$G_lang];?><br>
+    </form></br>         
+
+    <?php echo $mlang_room['passwarn'][$G_lang];?></br></br>
+
+         <button onclick="$('apprendice_div').style.display = 'inline-block';">Vuoi ottenere un accesso da apprendista ?</button></br></br>
+             <div id="apprendice_div" style="display: none; background-color: #ffd780; border: 1px solid #ffae00; padding: 8px;">
+         </br>
+         Inserisci il tuo nickname e il tuo indirizzo e-mail.</br>
+         Il tuo nickname non può essere più lungo di 12 caratteri, </br>deve essere composto soltanto da lettere non accentate e numeri,</br>senza ripetere lo stesso carattere per più di 3 volte di fila.</br></br>
+    <form accept-charset="utf-8" method="post" action="" onsubmit="return j_new_apprendice(this);">
+    <table class="login">
+    <tr><td>nickname:</td>
+    <td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+    <tr><td>e-mail:</td>
+    <td><input id="emailid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+    <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_send'][$G_lang];?>" type="submit" class="button"></td></tr>
+    </table>
+    </form></div>
+         </br></br>
+<?php echo $mlang_room['browwarn'][$G_lang];?></br>
     </div>
     </br></br></br></br>
     </br></br></br></br>
