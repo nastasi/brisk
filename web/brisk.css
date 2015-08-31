@@ -117,6 +117,7 @@ img.ib_nobo {
 .notify {
 /*    top: 10%; */
     top: 0;
+    padding: 8px;
 
     left: 50%; 
     position: absolute;
