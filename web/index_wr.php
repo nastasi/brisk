@@ -223,7 +223,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
         }
         else if ($argz[0] == 'apprendice') {
-            log_step("APPREND");
             if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
                 $cli_name = "";
 
@@ -238,7 +237,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($bdb = BriskDB::create()) == FALSE)
                     break;
 
-                log_step("APPREND1");
                 // FIXME: CHECK IP AS PREVIOUS REQUIRER
 
                 $cli_name = urldecode($cli_name);
@@ -251,7 +249,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                                       $mlang_indwr['unknownerr'][$G_lang]));
                     break;
                 }
-                log_step("APPREND2");
 
                 $bdb->transaction('BEGIN');
                 $is_trans = TRUE;
@@ -263,7 +260,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     fprintf(STDERR, "ERROR: user_add FAILED\n");
                     break;
                 }
-                log_step("APPREND3");
 
                 if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
                     fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
@@ -281,14 +277,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                 $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                             $curtime, $subj, $body_txt, $body_htm, $hash);
-                log_step("APPREND4");
 
                 if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     break;
                 }
-                log_step("APPREND5");
 
                 // save the mail
                 if ($mail_item->store($bdb) == FALSE) {
@@ -296,7 +290,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     fprintf(STDERR, "ERROR: store mail FAILED\n");
                     break;
                 }
-                log_step("APPREND6");
 
                 echo "1";
                 $bdb->transaction('COMMIT');
