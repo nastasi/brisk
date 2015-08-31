@@ -1,37 +1,58 @@
 <?php
-include_once 'Mail.php';
-include_once 'Mail/mime.php';
+if (__FILE__ == realpath($argv[0])) {
+    $G_base = "web/";
+}
+require_once("${G_base}Obj/class.phpmailer.php");
 
-$brisk_mail_hp = array( "text_charset"  => "utf-8",
-                        "html_charset" => "utf-8",
-                        "header_charset" => "utf-8",
-                        "eol" => "\n" );
-
-// references: <alfanum-8-chars>@<domain>
 function brisk_mail($to, $subject, $text, $html)
 {
-    GLOBAL $brisk_mail_hp, $G_admin_mail;
+    GLOBAL $G_admin_mail;
 
-    $hdrs = array(
-              'From'    => $G_admin_mail,
-              'Subject' => $subject
-              );
-    // if ($refs != Null)
-    //    $hdrs['References'] = $refs;
+    $mail = new PHPMailer(TRUE);
+    $mail->CharSet = "UTF-8";
 
-    $mime = new Mail_mime($brisk_mail_hp);
+    $mail->From = $G_admin_mail;
+    $mail->FromName = 'Brisk Admin';
+    $mail->addAddress($to);     // Add a recipient
+    $mail->addReplyTo($G_admin_mail, 'Brisk Admin');
 
-    // disabled to avoid client problems
-    // $mime->setTXTBody($text);
-    $mime->setHTMLBody($html);
+    $mail->Subject = $subject;
+    $mail->AltBody = $text;
 
-    $body = $mime->get();
-    $hdrs = $mime->headers($hdrs);
+    $body_html = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
+                             $subject, $html);
 
-    $mail = Mail::factory('mail');
+    $mail->MsgHTML($body_html);
 
-    $mail->send($to, $hdrs, $body);
 
-    return TRUE;
+    return ($mail->Send());
+}
+
+
+if (__FILE__ == realpath($argv[0])) {
+    $G_admin_mail = "brisk@alternativeoutput.it";
+
+    $to = "brisk@alternativeoutput.it";
+    $subject = "Brisk: credenziali di accesso.";
+    $body_txt = "Ciao, sono l' amministratore del sito di Brisk.
+
+La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al sito
+d'ora in poi potrai utilizzare l' utente 'mopz' e la password 'ienxedsiyndo'.
+
+Benvenuto e buone partite, mop.";
+    $body_htm = "Ciao, sono l' amministratore del sito di Brisk.</br></br>
+La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al  sito d'ora in poi potrai usare l' utente 'mopz' e la password 'ienxedsiyndo'.</br>
+Benvenuto e buone partite, mop.</br>";
+
+    $body_htm_full = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
+                             $subject, $body_htm);
+
+
+    if (brisk_mail("brisk@alternativeoutput.it", $subject, $body_txt, $body_htm)) {
+        echo "SUCCESS";
+    }
+    else {
+        echo "ERROR";
+    }
 }
 ?>
