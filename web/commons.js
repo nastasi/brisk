@@ -1027,9 +1027,11 @@ var CHATT_MAXLINES = 40;
 function user_decorator(user)
 {
     var name, i, sp = "", cl = "";
-    var flags = user[0] & 0x03 | ((user[0] & 0x040000) >> 16);
+    var flags = user[0] & 0x03 | ((user[0] & 0x0c0000) >> 16);
 
-    for (i = 0 ; i < 3 ; i++) {
+    console.log(user[1]+" FLAGS: "+flags);
+
+    for (i = 0 ; i < 4 ; i++) {
         if (flags & (1 << i)) {
             cl += sp + "au" + i;
             sp = " ";
@@ -1037,7 +1039,7 @@ function user_decorator(user)
     }
 
     if (flags != 0)
-        name = "<span class='" + cl + "'>"+user[1]+"</span>";
+        name = "<span class='" + cl + "'><span>"+user[1]+"</span></span>";
     else
         name = user[1];
 

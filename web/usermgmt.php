@@ -484,7 +484,6 @@ SELECT usr.*, guar.login AS guar_login
 
 
                 if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
-            // if (brisk_mail($usr_obj->email, "Il titolo", "zozozo", "il <b>body</b> fine.") == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     break;
