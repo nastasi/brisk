@@ -58,6 +58,7 @@ define('USER_FLAG_TY_ALL',     0xff0000); // done
 define('USER_FLAG_TY_NORM',    0x010000); // done
 define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_CERT',    0x040000); // done
+define('USER_FLAG_TY_APPR',    0x080000); // done
 //  ... other usefull status ...
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_ADMIN',   0x400000); // done

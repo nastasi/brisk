@@ -2,7 +2,7 @@
  *  brisk - room.js
  *
  *  Copyright (C) 2006-2014 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -22,12 +22,11 @@
  */
 
 
-/* 
+/*
 
    data = [ [ flags, name ],  ... ]
-   
-*/
 
+*/
 
 function state_add(flags, comp)
 {
@@ -108,7 +107,7 @@ function state_add(flags, comp)
     if ((flags & 0xf0000) != 0) {
         superst = flags & 0x20000;
         if (name != "") {
-            supersfx = "_side";                
+            supersfx = "_side";
         }
 
         switch (superst) {
@@ -127,7 +126,7 @@ function state_add(flags, comp)
     if (supername != "") {
         content += '&nbsp;<img title="'+supertit+'" class="inline" src="'+supername+'">';
     }
-    
+
     if (name != "") {
         content += '&nbsp;<img title="'+tit+'" class="inline" src="img/'+name+'">';
     }
@@ -147,7 +146,7 @@ function table_add(curtag, td)
     do {
         // console.log("wt: "+curtag.tagName);
 
-        if (curtag.tagName.toLowerCase() == "div" || 
+        if (curtag.tagName.toLowerCase() == "div" ||
             curtag.tagName.toLowerCase() == "table") {
             curtag = curtag.firstChild;
         }
@@ -158,7 +157,7 @@ function table_add(curtag, td)
         else
             curtag = null;
     } while (curtag != null);
-    
+
     curtag = tbody.firstChild;
     ct = 0;
     do {
@@ -221,7 +220,7 @@ function table_walk(curtag)
 {
     do {
         // console.log("wt: "+curtag.tagName);
-        if (curtag.tagName.toLowerCase() == "div" || 
+        if (curtag.tagName.toLowerCase() == "div" ||
             curtag.tagName.toLowerCase() == "table" ||
             curtag.tagName.toLowerCase() == "tbody") {
             curtag = curtag.firstChild;
@@ -251,7 +250,7 @@ function table_walk(curtag)
 
     if (1 == 0) {
         if (curtag == null)
-            alert("outtag == null"); 
+            alert("outtag == null");
         else
             alert("outtag: "+curtag.tagName);
     }
@@ -300,14 +299,14 @@ function j_stand_cont(ddata)
             content += '<td id="'+i+'" class="room_standup">';
             content += j_stand_tdcont(data[i]);
             content += '</td>';
-            
+
             if ((i % 4) == 3)
                 content += '</tr>';
         }
         if ((i % 4) < 3)
             content += '</tr>';
         content += '</table>';
-        
+
         $("standup").innerHTML = content;
 
         standup_data_old = data;
@@ -325,7 +324,7 @@ function j_stand_cont(ddata)
         idx_mod = new Array();
         arr_mod = new Array();
         map_cur = new Array();
-        
+
         // find removed entries
         for (i = 0 ; i < standup_data_old.length ; i++) {
             for (e = 0 ; e < data.length ; e++) {
@@ -362,7 +361,7 @@ function j_stand_cont(ddata)
                 map_add[idx_add_n++] = e;
             }
         }
-        
+
         // TODO: qui travaso add in del
 
         i_del = 0;
@@ -430,9 +429,9 @@ function j_stand_cont(ddata)
 }
 
 function esco_cb() {
-    window.onbeforeunload = null; 
-    window.onunload = null; 
-    // nonunload = true; 
+    window.onbeforeunload = null;
+    window.onunload = null;
+    // nonunload = true;
     act_logout(0);
  };
 
@@ -484,6 +483,78 @@ function j_tab_act_cont(idx, act)
     }
 }
 
+function j_check_login(login, ret)
+{
+    if (login.length > 12) {
+        // FIXME LANG
+        ret.ret += (g_lang == 'en' ? "Nickname too long." : "Nickname troppo lungo.");
+        return (false);
+        }
+    var old_c = '', old_ct = 0;
+
+    for (i = 0 ; i < login.length ; i++) {
+        if ((login[i] >= '0' && login[i] <= '9') ||
+            (login[i] >= 'a' && login[i] <= 'z') ||
+            (login[i] >= 'A' && login[i] <= 'Z')) {
+            if (old_c != login[i]) {
+                old_c = login[i];
+                old_ct = 0;
+            }
+            else {
+                if (old_ct > 3) {
+                    // FIXME LANG
+                    ret.ret = (g_lang == 'en' ? "More than three contiguous '" + old_c + "' not allowed." :
+                               "Il nickname contiene più di tre caratteri '" + old_c + "' consecutivi.");
+                    return (false);
+                }
+            }
+            old_ct++;
+            continue;
+        }
+        else {
+            // FIXME LANG
+            ret.ret = (g_lang == 'en' ? "Nickname includes not allowed '" + login[i] + "' character." :
+                       "Il nickname contiene un carattere '" + login[i] + "' non consentito.");
+            return (false);
+        }
+    }
+
+    return (true);
+}
+
+
+function j_new_apprendice(form)
+{
+    var ret = { ret: '' };
+    var token;
+
+    do {
+        if (j_check_login(form.elements['nameid'].value, ret) == false ||
+            j_check_email(form.elements['emailid'].value, ret) == false) {
+
+            no = new notify(gst, "</br><b>" + ret.ret + "</b></br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
+            break;
+            }
+
+        // submit the request
+        token = server_request('mesg', 'apprendice',
+                               'cli_name', encodeURIComponent(form.elements['nameid'].value),
+                               'cli_email', encodeURIComponent(form.elements['emailid'].value),
+                               'cli_lang', g_lang);
+        if (token == "1") {
+            // FIXME LANG
+            $('apprendice_div').style.display = "none";
+            no = new notify(gst, "</br>Richiesta inviata con successo.</br>Riceverai a breve un' e-mail per verificare la correttezza dell'indirizzo.</br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
+        }
+        else {
+            no = new notify(gst, "</br>" + token + "</br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
+        }
+    } while (0);
+
+    return (false);
+}
+
+
 function j_login_manager(form)
 {
     var token;
@@ -496,20 +567,20 @@ function j_login_manager(form)
         /* richiede token */
         token = server_request('mesg', 'getchallenge', 'cli_name', encodeURIComponent(form.elements['nameid'].value));
         tokens = token.split('|');
-        
+
         // console.log('XX token: '+token);
         // console.log(tokens);
         if (token == null)
             return (false);
 
         token = calcMD5(tokens[1]+calcMD5(form.elements['passid'].value));
-        
+
         form.elements['passid_private'].value = token;
         form.elements['passid'].value = ""; // FIXME da sost con la stessa len di A
 
         return (true);
     }
-    
+
     return (false);
 }
 
@@ -555,16 +626,19 @@ function mesgtoadm_formtext_hilite(form)
 }
 
 
-function j_check_email(email)
+function j_check_email(email, ret)
 {
-    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,10})+$/.test(email))
         return (true);
+    ret.ret += (g_lang == 'en' ? "Invalid email address. " :
+                "Indirizzo e-mail non valido.");
+
     return (false);
 }
 
 function j_authbox(form)
 {
-    var no; 
+    var no, ret = { "ret": "" };
 
     do {
         if (form.elements['realsub'].value == "chiudi") {
@@ -572,17 +646,17 @@ function j_authbox(form)
             break;
         }
 
-        if (form.elements['name'].value == '' || j_check_email(form.elements['email'].value) == false) {
+        if (form.elements['name'].value == '' || j_check_email(form.elements['email'].value, ret) == false) {
             // MLANG 2-4
-            no = new notify(gst, 
-                            (g_lang == 'en' ? "<br><b>nickname</b> and/or <b>e-mail</b> fields are invalid;<br>please, fix them." :
-                             "<br>I campi <b>nickname</b> e/o <b>e-mail</b> non sono validi;<br> correggeteli per favore."),
-                            1, (g_lang == 'en' ? "close" : "chiudi"), 280, 100); 
+            no = new notify(gst,
+                            (g_lang == 'en' ? "<br><b>" + ret.ret + "</b><br>please, fix." :
+                             "<br><b>" + ret.ret + "</b><br>correggere, per favore."),
+                            1, (g_lang == 'en' ? "close" : "chiudi"), 280, 100);
             break;
         }
 
         // submit the request
-        token = server_request('mesg', 'warranty', 
+        token = server_request('mesg', 'warranty',
                                'cli_name', encodeURIComponent(form.elements['name'].value),
                                'cli_email', encodeURIComponent(form.elements['email'].value) );
         if (token == "1") {
@@ -616,7 +690,7 @@ function authbox(w, h)
 
 function j_mesgtoadmbox(form)
 {
-    var no; 
+    var no;
 
     do {
         if (form.elements['realsub'].value == "chiudi") {
@@ -627,13 +701,13 @@ function j_mesgtoadmbox(form)
         if (form.elements['mesg'].value == '' || form.elements['subj'].value == '') {
             // MLANG 1-3
             no = new notify(gst, (g_lang == 'en' ? "<br><b>subject</b> and the <b>message</b> cannot be void;<br>please, fix them." :
-                                  "<br>Il <b>soggetto</b> e il <b>messaggo</b> non possono essere vuoti;<br>correggeteli per favore."), 1, 
-                                  (g_lang == 'en' ? "close" : "chiudi"), 280, 100); 
+                                  "<br>Il <b>soggetto</b> e il <b>messaggo</b> non possono essere vuoti;<br>correggeteli per favore."), 1,
+                                  (g_lang == 'en' ? "close" : "chiudi"), 280, 100);
             break;
         }
-                
+
         // submit the request
-        token = server_request('mesg', 'mesgtoadm', 
+        token = server_request('mesg', 'mesgtoadm',
                                'cli_subj', encodeURIComponent(form.elements['subj'].value),
                                'cli_mesg', encodeURIComponent(form.elements['mesg'].value) );
         if (token == "1") {
@@ -667,11 +741,11 @@ function mesgtoadmbox(w, h)
 
 function j_pollbox(form)
 {
-    var no, i, choose; 
+    var no, i, choose;
 
     do {
         // submit the request
-        
+
         for (i = 0 ; i < form.elements.length ; i++) {
             if (form.elements[i].checked == true)
                 break;
@@ -679,14 +753,14 @@ function j_pollbox(form)
         if (i == form.elements.length) {
             // MLANG 1-3
             no = new notify(gst, (g_lang == 'en' ? "<br>You must choose ah item;<br> please, fix it." :
-                                  "<br>Non hai espresso nessuna preferenza;<br> correggi per favore."), 1, 
-                            (g_lang == 'en' ? "close" : "chiudi"), 280, 100); 
+                                  "<br>Non hai espresso nessuna preferenza;<br> correggi per favore."), 1,
+                            (g_lang == 'en' ? "close" : "chiudi"), 280, 100);
             return false;
         }
         else
             choose = form.elements[i].value;
 
-        token = server_request('mesg', 'poll', 
+        token = server_request('mesg', 'poll',
                                'cli_choose', encodeURIComponent(choose) );
 
         if (token == "1") {
@@ -725,7 +799,7 @@ sideslide.prototype = {
 
     start: function() {
         var instant = this;
-        
+
         this.st = 'wait';
         this.id = setTimeout(function () { instant.sideslide_cb(); }, this.twait);
     },

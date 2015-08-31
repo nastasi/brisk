@@ -1114,13 +1114,14 @@ window.onload = function() {
              <div id="apprendice_div" style="display: none; background-color: #ffd780; border: 1px solid #ffae00; padding: 8px;">
          </br>
          Inserisci il tuo nickname e il tuo indirizzo e-mail.</br>
-         Il tuo nickname non può essere più lungo di 12 caratteri, </br>deve essere composto soltanto da lettere non accentate e numeri,</br>senza ripetere lo stesso carattere per più di 3 volte di fila.</br></br>
+         Il tuo nickname non può essere più lungo di 12 caratteri, </br>deve essere composto soltanto da lettere non accentate e numeri,</br>senza ripetere lo stesso carattere per più di 3 volte consecutive.</br></br>
     <form accept-charset="utf-8" method="post" action="" onsubmit="return j_new_apprendice(this);">
+    <input type="hidden" name="new_apprendice" value="666">
     <table class="login">
     <tr><td>nickname:</td>
-    <td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+    <td><input id="nameid" class="input_text" name="cli_name" type="text" size="24" maxlength="12" value=""></td></tr>
     <tr><td>e-mail:</td>
-    <td><input id="emailid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+    <td><input id="emailid" class="input_text" name="cli_email" type="text" size="24" maxlength="512" value=""></td></tr>
     <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_send'][$G_lang];?>" type="submit" class="button"></td></tr>
     </table>
     </form></div>

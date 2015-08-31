@@ -59,9 +59,9 @@ function main() {
                 break;
             }
 
-            if (($bdb->user_update_flag_ty($mai->ucode,
-                                        USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_MAILED,
-                                        USER_FLAG_TY_DISABLE, USER_DIS_REA_NU_TOBECHK)) == FALSE) {
+            if (($bdb->user_update_flag_ty($mai->ucode, USER_FLAG_TY_DISABLE,
+                                        TRUE, USER_DIS_REA_NU_MAILED,
+                                        TRUE, USER_DIS_REA_NU_TOBECHK)) == FALSE) {
                 $errcode = 10003;
                 break;
             }

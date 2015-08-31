@@ -55,7 +55,7 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                       'pollnone' => array( 'it' => '<br><br>Al momento non è attivo alcun sondaggio.',
                                            'en' => '<br><br>At this moment no polls are active.'),
                       'pollchoo' => array( 'it' => '<br><br>Non hai espresso nessuna preferenza.',
-                                           'en' => '<br><br>You don\'t choose any preference, do it'), 
+                                           'en' => '<br><br>You don\'t choose any preference, do it'),
                       'pollagai' => array( 'it' => '<br>Per questo sondaggio hai già votato.<br><br>Non si può esprimere la propria preferenza più di una volta.',
                                            'en' => '<br>You just express your preference about this poll.<br><br>You cannot do it again.'),
                       'pollrec'  => array ('it' => '<br><br>Il tuo voto è stato registrato.',
@@ -67,7 +67,7 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                       'btn_stays'=> array( 'it' => 'resta in piedi.',
                                            'en' => 'stay standing.'),
                       'badsit_a' => array( 'it' => '<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ',
-                                           'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '), 
+                                           'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '),
                       'badsit_b' => array( 'it' => ' prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.',
                                            'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access'),
                       'nu_loginau' => array('it' => "login già in uso",
@@ -95,28 +95,24 @@ Ciò è necessario per ottenere la password.<br><br>
 Saluti e buone partite, mop.<br>',
                                            'en' => 'EN mhtml [%s] [%s] [%s]'),
 
-                      'nu_gtext' => array( 'it' =>
-'Ciao %s, sono l\' amministratore del sito di Brisk.
+                      'ap_mtext' => array( 'it' =>
+'Ciao, sono l\' amministratore del sito di Brisk.
 
-Ti volevo avvisare che ho attivato i login di \'%s\' che hai
-garantito.
+Ti sei registrato col nickname \'%s\',
+vai al link: <%s>
+per confermare il tuo indirizzo di posta elettronica.
 
-Ti ricordo che i login vanno dati a persone di fiducia, se 3
-di quelli che hai autenticato verranno segnati come molestatori
-verrà sospeso anche il tuo accesso.
+Ciò è necessario per ottenere la password.
 
-Grazie dell\' impegno, mop.',
-                                           'en' => 'EN nu_gtext [%s][%s]'),
+Saluti e buone partite, mop.',
+                                           'en' => 'EN mtext [%s] [%s]'),
 
-                      'nu_ghtml' => array( 'it' =>
-'Ciao %s, sono l\' amministratore del sito di Brisk.<br><br>
-Ti volevo avvisare che ho attivato i login di \'%s\' che hai
-garantito.<br><br>
-Ti ricordo che i login vanno dati a persone di fiducia, se 3
-di quelli che hai autenticato verranno segnati come molestatori
-verrà sospeso anche il tuo accesso.<br><br>
-Grazie dell\' impegno, mop.',
-                                           'en' => 'EN nu_ghtml [%s][%s]')
+                      'ap_mhtml' => array( 'it' => 'Ciao, sono l\' amministratore del sito di Brisk.<br><br>
+Ti sei registrato col nickname \'%s\',<br>
+<a href="%s">clicca qui</a> per confermare il tuo indirizzo di posta elettronica.<br><br>
+Ciò è necessario per ottenere la password.<br><br>
+Saluti e buone partite, mop.<br>',
+                                           'en' => 'EN mhtml [%s] [%s]'),
                       );
 
 define('LICMGR_CHO_ACCEPT', 0);
@@ -165,15 +161,15 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         if ($argz[0] == 'getchallenge') {
             if (isset($get['cli_name']))
                 $cli_name = $get['cli_name'];
-            if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) { 
+            if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
                 log_main("chal lock data success");
-                
+
                 if (($chals = &Challenges::load_data()) != FALSE) {
-                    
+
                     $token =  uniqid("");
                     // echo '2|'.$argz[1].'|'.$token.'|'.$remote_addr.'|'.$curtime.'|';
                     // exit;
-                    
+
                     if (($login_new = validate_name(urldecode($cli_name))) != FALSE) {
                         if ($chals->add($login_new, $token, $remote_addr, $curtime) != FALSE) {
                             log_send("SUCCESS: token:".$token);
@@ -192,8 +188,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                         Challenges::save_data(&$chals);
                     }
                 }
-                
-                
+
+
                 Challenges::unlock_data($a_sem);
             }
             else {
@@ -220,13 +216,97 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'placing') {
             require_once("briskin5/Obj/briskin5.phh");
             require_once("briskin5/Obj/placing.phh");
-            
+
             echo show_notify(str_replace("\n", " ", placings_show(FALSE)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
         }
         else if ($argz[0] == 'whysupport') {
             echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
         }
-        else { 
+        else if ($argz[0] == 'apprendice') {
+            log_step("APPREND");
+            if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
+                $cli_name = "";
+
+            if (($cli_email = gpcs_var('cli_email', $get, $post, $cookie)) === FALSE)
+                $cli_email = "";
+
+            $mesg_to_user = "";
+
+            // check existence of username or email
+            $is_trans = FALSE;
+            do {
+                if (($bdb = BriskDB::create()) == FALSE)
+                    break;
+
+                log_step("APPREND1");
+                // FIXME: CHECK IP AS PREVIOUS REQUIRER
+
+                $cli_name = urldecode($cli_name);
+                $cli_email = urldecode($cli_email);
+
+                // check for already used fields
+                if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
+                    $mesg_to_user = ($idret == 1 ?  $mlang_indwr['nu_loginau'][$G_lang] :
+                                     ($idret == 2 ? $mlang_indwr['nu_emailau'][$G_lang] :
+                                      $mlang_indwr['unknownerr'][$G_lang]));
+                    break;
+                }
+                log_step("APPREND2");
+
+                $bdb->transaction('BEGIN');
+                $is_trans = TRUE;
+                //   insert the new user disabled with reason NU_MAILED
+                // FIXME: move 'no-guaran' user into configuration file
+                if (($usr_obj = $bdb->user_add($cli_name, 'THE_PASS', $cli_email,
+                                               USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
+                                               USER_DIS_REA_NU_MAILED, 10103)) == FALSE) {
+                    fprintf(STDERR, "ERROR: user_add FAILED\n");
+                    break;
+                }
+                log_step("APPREND3");
+
+                if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
+                    fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
+                    break;
+                }
+                $hash = md5($curtime . $G_alarm_passwd . $cli_name . $cli_email);
+
+                $confirm_page = sprintf("http://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
+                                        $G_domain, $G_webbase, $mail_code, $hash);
+                $subj = $mlang_indwr['nu_msubj'][$G_lang];
+                $body_txt = sprintf($mlang_indwr['ap_mtext'][$G_lang],
+                                    $cli_name, $confirm_page);
+                $body_htm = sprintf($mlang_indwr['ap_mhtml'][$G_lang],
+                                    $cli_name, $confirm_page);
+
+                $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
+                                            $curtime, $subj, $body_txt, $body_htm, $hash);
+                log_step("APPREND4");
+
+                if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                    // mail error
+                    fprintf(STDERR, "ERROR: mail send FAILED\n");
+                    break;
+                }
+                log_step("APPREND5");
+
+                // save the mail
+                if ($mail_item->store($bdb) == FALSE) {
+                    // store mail error
+                    fprintf(STDERR, "ERROR: store mail FAILED\n");
+                    break;
+                }
+                log_step("APPREND6");
+
+                echo "1";
+                $bdb->transaction('COMMIT');
+                return TRUE;
+            } while(FALSE);
+            $bdb->transaction('ROLLBACK');
+            echo "$mesg_to_user";
+            return FALSE;
+        }
+        else {
             log_wr("Get User Error");
             echo "Get User Error:" + $argz[0];
             return FALSE;
@@ -302,15 +382,14 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
     }
     else if ($argz[0] == 'warranty') {
-        if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE) 
+        if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
             $cli_name = "";
-        
+
         if (($cli_email = gpcs_var('cli_email', $get, $post, $cookie)) === FALSE)
             $cli_email = "";
 
-        
         $mesg_to_user = "";
-        
+
         log_wr("INFO:SKIP:argz == warranty name: [".$cli_name."] CERT: ".$user->is_cert());
         if ($user->is_cert()) {
             if (0 == 1) {
@@ -353,7 +432,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $is_trans = TRUE;
                     //   insert the new user disabled with reason NU_MAILED
                     if (($usr_obj = $bdb->user_add($cli_name, 'THE_PASS', $cli_email,
-                                                   USER_FLAG_TY_DISABLE,
+                                                   USER_FLAG_TY_DISABLE | USER_FLAG_TY_NORM,
                                                    USER_DIS_REA_NU_MAILED, $user->code)) == FALSE) {
                         fprintf(STDERR, "ERROR: user_add FAILED\n");
                         break;
@@ -395,42 +474,40 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 } while(FALSE);
                 $bdb->transaction('ROLLBACK');
             }
-            
+
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
             $mesg_to_user = nickserv_msg($dt, $mlang_indwr['warrmust'][$G_lang]);
         }
-        
+
         if ($mesg_to_user != "") {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            
+
             $user->comm[$user->step % COMM_N] .= $mesg_to_user;
             $user->step_inc();
         }
     }
     else if ($argz[0] == 'mesgtoadm') {
-        if (($cli_subj = gpcs_var('cli_subj', $get, $post, $cookie)) === FALSE) 
+        if (($cli_subj = gpcs_var('cli_subj', $get, $post, $cookie)) === FALSE)
             $cli_subj = "";
-        
+
         if (($cli_mesg = gpcs_var('cli_mesg', $get, $post, $cookie)) === FALSE)
             $cli_mesg = "";
 
-
-        
         $mesg_to_user = "";
-        
+
         log_wr("INFO:SKIP:argz == mesgtoadm name: [".$user->name."] AUTH: ".$user->is_auth());
         if ($user->is_auth()) {
             if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                 if (($bdb = BriskDB::create()) != FALSE) {
                     $bdb->users_load();
-                
+
                     if (($ema = $bdb->getmail($user->name)) != FALSE) {
                         //  mail("nastasi",
                         mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
                     }
-                    
+
                     if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
                         fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name,
@@ -454,16 +531,16 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
                 $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
             }
-            
+
         }
         else {
             /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>" */
             $mesg_to_user = nickserv_msg($dt, $mlang_indwr['mesgmust'][$G_lang]);
         }
-        
+
         if ($mesg_to_user != "") {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            
+
             $user->comm[$user->step % COMM_N] .= $mesg_to_user;
             $user->step_inc();
         }
@@ -473,15 +550,15 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
     else if ($argz[0] == 'poll') {
         GLOBAL $G_with_poll, $G_poll_name;
-        if (($cli_choose = gpcs_var('cli_choose', $get, $post, $cookie)) === FALSE) 
+        if (($cli_choose = gpcs_var('cli_choose', $get, $post, $cookie)) === FALSE)
             $cli_choose = "";
-        
+
         if (($cli_poll_name = gpcs_var('cli_poll_name', $get, $post, $cookie)) === FALSE)
             $cli_poll_name = "";
 
         $poll_lock = FALSE;
         $mesg_to_user = "";
-  
+
         $fp = FALSE;
         $echont = "0";
 
@@ -506,38 +583,38 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 log_wr("break1");
                 break;
             }
-            
+
             if ($G_with_poll == FALSE && $G_poll_name != FALSE && $G_poll_name != "") {
                 $mesg_to_user = show_notify($mlang_indwr['pollnone'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
                 log_wr("break2");
                 break;
             }
-    
+
             if ($cli_choose == "" || !isset($cli_choose)) {
                 $mesg_to_user = show_notify($mlang_indwr['pollchoo'][$G_lang], 0, $mlang_indwr['btn_close'][$G_lang], 400, 110);
                 log_wr("break2.5");
                 break;
             }
-    
+
             if (($poll_lock = Poll::lock_data(TRUE)) == FALSE) {
                 /* MLANG: "<b>E\' occorso un errore durante il salvataggio, riprova o contatta l\'amministratore.</b>" */
                 $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
                 log_wr("break3");
                 break;
             }
-    
+
             if (($fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'r+')) == FALSE)
                 $fp = @fopen(LEGAL_PATH."/".$G_poll_name.".txt", 'w+');
-            
+
             if ($fp == FALSE) {
                 $mesg_to_user = nickserv_msg($dt, $mlang_indwr['commerr'][$G_lang]);
                 log_wr("break4");
                 break;
             }
-    
+
             log_wr("poll: cp");
             fseek($fp, 0);
-            
+
             log_wr("poll: cp2");
             while (!feof($fp)) {
                 log_wr("poll: cp3");
@@ -554,12 +631,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
             }
             log_wr("poll: cp4");
-            
+
             if ($dobreak) {
                 log_wr("break5");
                 break;
             }
-      
+
             /* Unix time | nickname | choose */
             fwrite($fp, sprintf("%ld|%s|%s\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_choose))));
             fflush($fp);
@@ -567,16 +644,16 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             $echont = "1";
             log_wr("poll: cp5");
         } while (0);
-        
+
         if ($fp != FALSE)
             fclose($fp);
-        
+
         if ($poll_lock != FALSE)
             Poll::unlock_data($poll_lock);
-        
+
         if ($mesg_to_user != "") {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            
+
             $user->comm[$user->step % COMM_N] .= $mesg_to_user;
             $user->step_inc();
         }
@@ -621,36 +698,36 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'about') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
             $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_about[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
-            
+
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
-            
+
         }
         else if ($argz[0] == 'placing') {
             require_once("briskin5/Obj/briskin5.phh");
             require_once("briskin5/Obj/placing.phh");
-            
+
             $user->comm[$user->step % COMM_N] =  "gst.st = ".($user->step+1)."; ";
             $user->comm[$user->step % COMM_N] .= show_notify_ex(str_replace("\n", " ", placings_show($user)), 0, $mlang_indwr['btn_backtotab'][$G_lang], 800, 600, TRUE, 0);
-            
+
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
         }
         else if ($argz[0] == 'roadmap') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
             $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
-            
+
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
-            
+
         }
         else if ($argz[0] == 'whysupport') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
             $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
-            
+
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
-            
+
         }
         else if ($argz[0] == 'chatt') {
             $brisk->chatt_send(&$user, xcapemesg($mesg));
@@ -697,11 +774,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     log_wr("INFO:SKIP:argz == sitdown && ->the_end == TRUE => ignore request.");
                     return FALSE;
                 }
-                
+
                 // Take parameters
                 $table_idx = (int)$argz[1];
                 $table = &$brisk->table[$table_idx];
-    
+
                 $not_allowed_msg = "";
                 if ($G_shutdown) {
                         $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['shutmsg'][$G_lang]);
@@ -724,7 +801,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $user->step_inc();
                     return TRUE;
                 }
-                
+
                 /* TODO: refact to a function */
                 // if ($user->bantime > $user->laccwr) {
                 require_once("Obj/hardban.phh");
@@ -742,48 +819,48 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $user->step_inc();
                     return TRUE;
                 }
-    
+
                 if ($table->player_n == PLAYERS_N) {
                     log_wr("WARN:FSM: Sitdown unreachable, table full.");
                     return FALSE;
                 }
-      
+
                 // set new status
                 $user->subst = "sitdown";
                 $user->table = $table_idx;
                 $user->table_pos = $table->user_add($idx);
-                
+
                 log_wr("MOP before");
-                
+
                 if ($table->player_n == PLAYERS_N) {
                     require_once("briskin5/Obj/briskin5.phh");
                     log_wr("MOP inall");
-                    
+
                     // Start game for this table.
                     log_wr("Start game!");
 	
                     //
                     //  START THE SPAWN HERE!!!!
                     //
-                    
+
                     // Create new spawned table
                     // $bin5_sem = Bin5::lock_data(TRUE, $table_idx);
                     $table_token = uniqid("");
                     $brisk->table[$table_idx]->table_token = $table_token;
                     $brisk->table[$table_idx]->table_start = $curtime;
-                    
+
                     $plist = "$table_token|$user->table|$table->player_n";
                     for ($i = 0 ; $i < $table->player_n ; $i++) {
                         $plist .= '|'.$brisk->user[$table->player[$i]]->sess;
                     }
                     log_legal($curtime, $user->ip, $user, "STAT:CREATE_GAME", $plist);
-                    
+
                     log_wr("pre new Bin5");
                     if (($bin5 = new Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie)) == FALSE)
                         log_wr("bri create: FALSE");
                     else
                         log_wr("bri create: ".serialize($bin5));
-                    
+
                     log_wr("pre init table");
                     // init table
                     $bin5_table = $bin5->table[0];
@@ -798,26 +875,26 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     for ($i = 0 ; $i < $table->player_n ; $i++) {
                         $bin5_user_cur = $bin5->user[$i];
                         $user_cur = $brisk->user[$table->player[$i]];
-                        
+
                         $bin5_user_cur->laccwr = $curtime;
                         $bin5_user_cur->trans_step = $user_cur->step + 1;
                         $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
                         $bin5_user_cur->step_inc();
                         $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table(&$bin5,&$bin5_user_cur,$bin5_user_cur->step+1,TRUE,FALSE);
                         $bin5_user_cur->step_inc();
-                        
+
                         log_wr("TRY PRESAVE: ".$bin5_user_cur->step." TRANS STEP: ".$bin5_user_cur->trans_step);
-                        
+
                         log_wr("Pre if!");
-                        
+
                         //          ARRAY_POP DISABLED
                         // 	    // CHECK
                         while (array_pop($user_cur->comm) != NULL);
-          
+
                         $user_cur->trans_step = $user_cur->step + 1;
                         $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
                         log_wr("TRANS ATTIVATO");
-                        
+
                         $user_cur->stat_set('table');
                         $user_cur->subst = 'asta';
                         $user_cur->laccwr = $curtime;
@@ -829,7 +906,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
                 // change room
                 $brisk->room_sitdown($user, $table_idx);
-                
+
                 log_wr("MOP finish");
             }
             else if ($argz[0] == 'logout') {
@@ -868,7 +945,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             }
         }
     }
-    
+
     return (FALSE);
 }
 ?>
