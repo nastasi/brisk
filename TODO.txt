@@ -3,6 +3,26 @@
 
   FEATURES |
  ----------+
+   - APPRENDICE
+     Phase1
+     - ip check and time limit
+       - sql
+       - message
+
+     - title appending
+     - temporary table limitation
+
+     Phase2
+     - match counter
+
+   - MENTORS
+     - listen all
+
+   - BUDDY LIST
+     - white list
+     - black list
+     - delegate
+
    - DEANONYMIZER
       . study how to move login delta injection
 
