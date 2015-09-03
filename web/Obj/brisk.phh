@@ -345,6 +345,20 @@ $G_PG_cons_n = 345;
     /*     printf("\n"); */
     /* } */
 
+function ip2int($s)
+{
+    $v = ip2long($s);
+    if (PHP_INT_SIZE == 4)
+        return ($v);
+
+    return ( ($v & 0x80000000 ? 0xffffffff00000000 : 0x00) | $v );
+}
+
+function int2ip($i)
+{
+    return long2ip($i & 0xffffffff);
+}
+
 function nickserv_msg($dt, $msg) {
     return sprintf('chatt_sub("%s",[0x040003,"%s"],"%s");', $dt, NICKSERV, $msg);
 }

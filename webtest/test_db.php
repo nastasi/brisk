@@ -56,7 +56,7 @@ function main() {
         }
         succ("COMMIT");
 
-        $arr_ip = array("1.1.1.1", "127.0.0.1", "255.255.255.255", "255.255.0.0" );
+        $arr_ip = array("1.1.1.1", "127.0.0.1", "255.255.255.255", "255.255.0.0", "201.102.123.111", "5.9.11.13" );
 
         if ($bdb->query("DROP TABLE IF EXISTS test_ip;") == FALSE) {
             fail("DROP TABLE test_ip");
@@ -75,16 +75,15 @@ function main() {
         succ("CREATE TABLE test_ip");
 
         foreach ($arr_ip as $i) {
-            $v = $v_or = ip2long($i);
-            if (PHP_INT_SIZE == 8 && $v & 0x80000000)
-                $v = 0xffffffff00000000 | $v_or;
+            $v = ip2int($i);
 
-            if ($bdb->query(sprintf("INSERT INTO test_ip (ip, atime) VALUES (CAST(%d AS integer), '1999-01-08 04:05:06');",  $v)) == FALSE) {
+            $msg = sprintf("&nbsp;&nbsp;INSERT INTO test_ip [%s]  val: [%d (%x)]", $i, $v, $v);
+            if ($bdb->query(sprintf("INSERT INTO test_ip (ip, atime) VALUES (%d, '1999-01-08 04:05:06');", $v)) == FALSE) {
                 printf("%s<br>\n", $bdb->last_error());
-                fail("INSERT INTO test_ip ".$i."  V: ".$v."  V_or: ".$v_or);
+                fail($msg);
                 break;
             }
-            succ("INSERT INTO test_ip ".$i."  V: ".$v."  V_or: ".$v_or);
+            succ($msg);
         }
 
         if (($ip_pg = $bdb->query(sprintf("SELECT * FROM test_ip ORDER BY code;"))) == FALSE) {
@@ -97,18 +96,15 @@ function main() {
         for ($r = 0 ; $r < pg_numrows($ip_pg) ; $r++) {
             $ip_obj = pg_fetch_object($ip_pg, $r);
 
-            if (PHP_INT_SIZE == 8)
-                $v =  $ip_obj->ip & 0x00000000ffffffff;
-            else
-                $v = $ip_obj->ip;
+            $v = int2ip($ip_obj->ip);
 
-            if ($arr_ip[$r] != long2ip($v)) {
-                fail(sprintf("  Expected: %s, retrieved: %s", $arr_ip[$r], long2ip($v)));
+            if ($arr_ip[$r] != $v) {
+                fail(sprintf("&nbsp;&nbsp;Expected: %s, retrieved: %s", $arr_ip[$r], $v));
             }
             else {
-                succ(sprintf("  Expected: %s", $arr_ip[$r]));
+                succ(sprintf("&nbsp;&nbsp;Expected: %s", $arr_ip[$r]));
             }
-            // printf("RET IP: %d V: %d  IP: %s<br>\n", $ip_obj->ip, $v, long2ip($v));
+            // printf("RET IP: %d  IP: %s<br>\n", $ip_obj->ip, $v));
 
         }
 

@@ -122,6 +122,11 @@ class BriskDB
         return ($res);
     }
 
+    function last_error()
+    {
+        return pg_last_error($this->dbconn->db);
+    }
+
     function users_load()
     {
     }
