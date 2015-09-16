@@ -532,22 +532,22 @@ function j_new_apprendice(form)
         if (j_check_login(form.elements['nameid'].value, ret) == false ||
             j_check_email(form.elements['emailid'].value, ret) == false) {
 
-            no = new notify(gst, "</br><b>" + ret.ret + "</b></br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
+            no = new notify(gst, "<br><b>" + ret.ret + "</b><br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
             break;
             }
 
         // submit the request
-        token = server_request('mesg', 'apprendice',
+        token = server_request('mesg', 'apprentice',
                                'cli_name', encodeURIComponent(form.elements['nameid'].value),
                                'cli_email', encodeURIComponent(form.elements['emailid'].value),
                                'cli_lang', g_lang);
         if (token == "1") {
             // FIXME LANG
-            $('apprendice_div').style.display = "none";
-            no = new notify(gst, "</br>Richiesta inviata con successo.</br>Riceverai a breve un' e-mail per verificare la correttezza dell'indirizzo.</br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
+            $('apprentice_div').style.display = "none";
+            no = new notify(gst, "<br>Richiesta inviata con successo.<br>Riceverai a breve un' e-mail per verificare la correttezza dell'indirizzo.<br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
         }
         else {
-            no = new notify(gst, "</br>" + token + "</br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
+            no = new notify(gst, "<br>" + token + "<br>", 1, (g_lang == 'en' ? "Close." : "Chiudi."), 280, 100);
         }
     } while (0);
 
