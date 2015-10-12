@@ -3,18 +3,19 @@
 
   FEATURES |
  ----------+
-   - APPRENDICE
+   - APPRENTICE
      Phase1
-     - ip check and time limit
-       - sql
-       - message
-
-     - title appending
-     - temporary table limitation
-
-     Phase2
+     DONE - ip check and time limit
+       DONE . sql
+         DONE . temporary table limitation
+       DONE . message
+     DONE - usermgmt extension
+     DONE - add close button
+     DONE - add apprentice icon
+     - guarantee for apprentice
      - match counter
 
+     Phase2
    - MENTORS
      - listen all
 
