@@ -77,6 +77,8 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Reset.'),
                      'btn_prefs_close' => array('it' => 'Chiudi.',
                                              'en' => 'Close.'),
+                     'btn_prefs_send'  => array('it' => 'Invia.',
+                                             'en' => 'Send.'),
                      'tit_tabl'     => array('it' => 'Tavolo ',
                                              'en' => 'Table '),
                      'tit_stat'     => array('it' => 'imposta lo stato del tuo utente',
@@ -226,10 +228,6 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Send a message to the administrator:'),
                      'mesgtoadm_sub'=> array('it' => 'soggetto:',
                                              'en' => 'subject:'),
-                     'btn_send'     => array('it' => 'Invia.',
-                                             'en' => 'Send.'),
-                     'btn_close'    => array('it' => 'Chiudi.',
-                                             'en' => 'Close.')
                      );
 
 require_once("briskin5/Obj/briskin5.phh");
