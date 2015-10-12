@@ -347,16 +347,35 @@ $G_PG_cons_n = 345;
 
 function ip2int($s)
 {
-    $v = ip2long($s);
-    if (PHP_INT_SIZE == 4)
-        return ($v);
-
-    return ( ($v & 0x80000000 ? 0xffffffff00000000 : 0x00) | $v );
+    return (ip2long($s));
 }
 
 function int2ip($i)
 {
-    return long2ip($i & 0xffffffff);
+    return (long2ip($i));
+}
+
+function int2four($l)
+{
+    if (PHP_INT_SIZE == 4)
+        return ($l);
+
+    return ( ($l & 0x80000000 ? 0xffffffff00000000 : 0x00) | $l );
+}
+
+function four2int($s)
+{
+    return ($s & 0xffffffff);
+}
+
+function ip2four($s)
+{
+    return int2four( ip2int($s) );
+}
+
+function four2ip($i)
+{
+    return int2ip( four2int($i) );
 }
 
 function nickserv_msg($dt, $msg) {
