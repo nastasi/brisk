@@ -1414,3 +1414,8 @@ function download_mgr(url)
 download_mgr.prototype = {
     ifra: null
 }
+
+function submit_click(obj)
+{
+    obj.form.elements['realsub'].value = obj.id;
+}
