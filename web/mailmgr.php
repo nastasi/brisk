@@ -72,7 +72,7 @@ function main() {
             }
             $bdb->transaction('COMMIT');
 
-            singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.");
+            singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Riceverai a breve una email con la tua nuova password.<br>Benvenuto!");
             $errcode = 0;
         } while (FALSE);
         if ($errcode) {

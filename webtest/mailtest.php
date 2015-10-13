@@ -28,9 +28,9 @@ La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata 
 d'ora in poi potrai utilizzare l' utente 'mopz' e la password 'ienxedsiyndo'.
 
 Benvenuto e buone partite, mop.";
-    $body_htm_full = "Ciao, sono l' amministratore del sito di Brisk.</br></br>
-La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al  sito d'ora in poi potrai usare l' utente 'mopz' e la password 'ienxedsiyndo'.</br>
-Benvenuto e buone partite, mop.</br>";
+    $body_htm_full = "Ciao, sono l' amministratore del sito di Brisk.<br><br>
+La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al  sito d'ora in poi potrai usare l' utente 'mopz' e la password 'ienxedsiyndo'.<br>
+Benvenuto e buone partite, mop.<br>";
 
 
     $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>mysòóbject test</title></head><body><b>my Bòóody</b><a href="http://www.alternativeoutput.it/">Clicca quì</a></body></html>';
@@ -51,9 +51,9 @@ La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata 
 d'ora in poi potrai utilizzare l' utente 'mopz' e la password 'ienxedsiyndo'.
 
 Benvenuto e buone partite, mop.";
-    $body_htm = "Ciao, sono l' amministratore del sito di Brisk.</br></br>
-La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al  sito d'ora in poi potrai usare l' utente 'mopz' e la password 'ienxedsiyndo'.</br>
-Benvenuto e buone partite, mop.</br>";
+    $body_htm = "Ciao, sono l' amministratore del sito di Brisk.<br><br>
+La verifica del tuo indirizzo di posta elettronica e del tuo nickname è andata a buon fine, per accedere al  sito d'ora in poi potrai usare l' utente 'mopz' e la password 'ienxedsiyndo'.<br>
+Benvenuto e buone partite, mop.<br>";
 
     $body_htm_full = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>", 
                              $subject, $body_htm);

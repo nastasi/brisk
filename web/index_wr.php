@@ -2,7 +2,7 @@
 /*
  *  brisk - index_wr.php
  *
- *  Copyright (C) 2006-2014 Matteo Nastasi
+ *  Copyright (C) 2006-2015 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -70,6 +70,10 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                            'en' => '<br>You or someone with your same IP address is standing up from a table without the permission of the other players <br><br>You will wait '),
                       'badsit_b' => array( 'it' => ' prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere.',
                                            'en' => ' before you can sit down again. If you don\'t leave the table and you have a login with a password, authenticating with this one you will access'),
+                      'nu_netguard' => array('it' => "Di recente è già arrivata una richiesta da un indirizzo IP simile al tuo, riprova tra qualche tempo.",
+                                             'en' => "EN di recente è già arrivata una richiesta da un indirizzo IP simile al tuo, riprova tra qualche tempo."),
+                      'nu_unkerr' => array('it' => "Si è verificato un errore inatteso, contattare l'amministratore.",
+                                           'en' => "EN Si è verificato un errore inatteso, contattare l'amministratore."),
                       'nu_loginau' => array('it' => "login già in uso",
                                             'en' => "login already in use"),
                       'nu_emailau' => array('it' => "email già utilizzata",
@@ -128,6 +132,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
     log_load("index_wr.php");
     $remote_addr = addrtoipv4($remote_addr_full);
+    $remote_ip = ip2int($remote_addr);
 
     if (($mesg = gpcs_var('mesg', $get, $post, $cookie)) === FALSE)
         unset($mesg);
@@ -222,7 +227,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'whysupport') {
             echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
         }
-        else if ($argz[0] == 'apprendice') {
+        else if ($argz[0] == 'apprentice') {
             if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
                 $cli_name = "";
 
@@ -237,7 +242,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($bdb = BriskDB::create()) == FALSE)
                     break;
 
-                // FIXME: CHECK IP AS PREVIOUS REQUIRER
+                // check IP address as previous requirer
+                if ($bdb->selfreg_check($remote_ip) == FALSE) {
+                    $mesg_to_user = $mlang_indwr['nu_netguard'][$G_lang];
+                    break;
+                }
 
                 $cli_name = urldecode($cli_name);
                 $cli_email = urldecode($cli_email);
@@ -278,12 +287,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                             $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
-                    // mail error
-                    fprintf(STDERR, "ERROR: mail send FAILED\n");
-                    break;
-                }
-
                 // save the mail
                 if ($mail_item->store($bdb) == FALSE) {
                     // store mail error
@@ -291,8 +294,21 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     break;
                 }
 
-                echo "1";
+                // check IP address as previous requirer
+                if ($bdb->selfreg_set($remote_ip) == FALSE) {
+                    $mesg_to_user = $mlang_indwr['nu_unkerr'][$G_lang];
+                    break;
+                }
+
+                if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                    // mail error
+                    fprintf(STDERR, "ERROR: mail send FAILED\n");
+                    break;
+                }
+
                 $bdb->transaction('COMMIT');
+                fprintf(STDERR, "REMOTE: %d\n", $remote_ip);
+                echo "1";
                 return TRUE;
             } while(FALSE);
             $bdb->transaction('ROLLBACK');

@@ -2,7 +2,7 @@
 /*
  *  brisk - test_db.php
  *
- *  Copyright (C) 2014 Matteo Nastasi
+ *  Copyright (C) 2014-2015 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -75,7 +75,7 @@ function main() {
         succ("CREATE TABLE test_ip");
 
         foreach ($arr_ip as $i) {
-            $v = ip2int($i);
+            $v = ip2four($i);
 
             $msg = sprintf("&nbsp;&nbsp;INSERT INTO test_ip [%s]  val: [%d (%x)]", $i, $v, $v);
             if ($bdb->query(sprintf("INSERT INTO test_ip (ip, atime) VALUES (%d, '1999-01-08 04:05:06');", $v)) == FALSE) {
@@ -85,6 +85,31 @@ function main() {
             }
             succ($msg);
         }
+        printf("<br>\n");
+        foreach ($arr_ip as $i) {
+            $cmp = int2four(ip2int($i) & 0xffffff00);
+            $msk = int2four(0xffffff00);
+            $cmp_que = sprintf("SELECT * FROM test_ip WHERE (ip & %d = %d);", $msk, $cmp);
+            if (($cmp_pg = $bdb->query($cmp_que)) == FALSE) {
+                printf("%s<br>\n", $bdb->last_error());
+                fail("SELECT * FROM test_ip");
+                break;
+            }
+            succ($cmp_que);
+
+            for ($r = 0 ; $r < pg_numrows($cmp_pg) ; $r++) {
+                $cmp_obj = pg_fetch_object($cmp_pg, $r);
+
+                if ($ip_obj->ip & $msk != $cmp) {
+                    fail(sprintf("&nbsp;&nbsp;Expected: %s, retrieved: %s", int2ip($cmp), int2ip($ip_obj->ip & $msk)));
+                }
+                else {
+                    succ(sprintf("&nbsp;&nbsp;Expected: %s (%s)", int2ip($cmp), int2ip($cmp_obj->ip)));
+                }
+                // printf("RET IP: %d  IP: %s<br>\n", $ip_obj->ip, $v));
+            }
+        }
+        printf("<br>\n");
 
         if (($ip_pg = $bdb->query(sprintf("SELECT * FROM test_ip ORDER BY code;"))) == FALSE) {
             printf("%s<br>\n", $bdb->last_error());

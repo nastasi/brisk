@@ -2,7 +2,7 @@
  *  brisk - room.css
  *
  *  Copyright (C) 2006-2012 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -43,7 +43,7 @@ a.flat:hover {
 
 
 body.* {
-    margin:0px;
+    margin: 0px;
     padding: 0px;
 }
 
@@ -71,7 +71,7 @@ div.topmenu {
 }
 
 div.proflash {
-    border: 1px solid gray;  
+    border: 1px solid gray;
     background-color: RGB(246,246,246);
     text-align: center;
     align: center;
@@ -89,7 +89,7 @@ div.bottom {
     top: -13px;
     align: center:
     text-align: center;
-    padding:2px;	 
+    padding:2px;
     clear:left;
 }
 
@@ -106,7 +106,7 @@ span.room_titin {
     left: 6px;
     top: 6px;
     z-index: 20;
-    background-color: white; 
+    background-color: white;
 }
 
 table.floaty {
@@ -130,8 +130,8 @@ table.placings {
 
 table.placings td
 {
-    border: 1px solid gray; 
-    padding: auto;         
+    border: 1px solid gray;
+    padding: auto;
     margin: auto;
     vertical-align: top;
     text-align: center;
@@ -198,10 +198,10 @@ table.room_tab td {
 
 
 div.room_div {
-    position: relative; 
+    position: relative;
 }
 
-div.table_act { 
+div.table_act {
     position: absolute;
     align: right;
     text-align: right;
@@ -212,7 +212,7 @@ div.table_act {
 
 
 div.room_standup {
-    position: absolute; 
+    position: absolute;
     vertical-align: "top";
     top:   26px;
     width: 100%;
@@ -224,7 +224,7 @@ div.room_standup {
 }
 
 table.room_standup {
-    position: relative; 
+    position: relative;
     width: 100%;
     border: 1px solid gray;
     border-spacing: 0px;
@@ -233,19 +233,19 @@ table.room_standup {
 
 table.room_standup td {
     position: relative;
-    border: 0px none gray; 
+    border: 0px none gray;
     vertical-align: top;
     align: left;
  }
 
-table.login { 
+table.login {
     margin: auto;
     border: 1px solid gray;
     margin-top: 8px;
     background-color: #f0f0f0
  }
 
-table.login td { 
+table.login td {
     padding: 4px;
     vertical-align: middle;
  }
@@ -262,7 +262,7 @@ div.room_ex_standup {
 
 table.table_standup {
     border-spacing: 0px;
-    width: 100%; 
+    width: 100%;
     margin: 0px;
     padding:0px;
 }
@@ -299,7 +299,7 @@ div.esco {
     text-align: center;
 }
 
-.proxhr { 
+.proxhr {
     position: relative;
     top:  10px;
     width: 100%;
@@ -307,10 +307,10 @@ div.esco {
     text-align: center;
 }
 
-.webstart_hilite { 
-    background: #ffd780; 
+.webstart_hilite {
+    background: #ffd780;
     border: 1px solid #ffae00;
-    padding: 6px; 
+    padding: 6px;
     text-align: center;
 }
 
@@ -322,7 +322,7 @@ div.esco {
     visibility: hidden;
     border: 1px solid gray;
     text-align: left;
-    width: 100px; 
+    width: 100px;
     padding: 8px;
 }
 
@@ -439,19 +439,19 @@ div.esco {
     visibility: hidden;
 }
 
-.room_standup_orig { 
+.room_standup_orig {
     position: absolute;
 }
 
-td.tickbut { 
-    visibility: hidden; 
+td.tickbut {
+    visibility: hidden;
     width: 0px;
     text-align: left;
     vertical-align: top;
     padding: 0px;
 }
 
-img.tickbut { 
+img.tickbut {
     border: 0px solid black;
     cursor: pointer;
     margin-top:4px;

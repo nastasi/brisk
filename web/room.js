@@ -523,12 +523,17 @@ function j_check_login(login, ret)
 }
 
 
-function j_new_apprendice(form)
+function j_new_apprentice(form)
 {
     var ret = { ret: '' };
     var token;
 
     do {
+        if (form.elements['realsub'].value == "close") {
+            $('apprentice_div').style.display = 'none';
+            break;
+        }
+
         if (j_check_login(form.elements['nameid'].value, ret) == false ||
             j_check_email(form.elements['emailid'].value, ret) == false) {
 
@@ -693,7 +698,7 @@ function j_mesgtoadmbox(form)
     var no;
 
     do {
-        if (form.elements['realsub'].value == "chiudi") {
+        if (form.elements['realsub'].value == "cloid") {
             $('mesgtoadmbox').style.visibility = "hidden";
             break;
         }

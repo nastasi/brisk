@@ -40,8 +40,8 @@ body {
     background-color: #fafafa;
     background-repeat: no-repeat;
     background-position: center center;
-    margin:0px;
-
+    margin: 0px;
+    height: 800px;
     padding: 0px;
 
     align: center;

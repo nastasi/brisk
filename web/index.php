@@ -1106,29 +1106,25 @@ window.onload = function() {
 
     <?php echo $mlang_room['passwarn'][$G_lang];?><br><br>
 
-         <button onclick="$('apprentice_div').style.display = 'inline-block';">Vuoi ottenere un accesso da apprendista ?</button><br><br>
+         <button onclick="$('apprentice_div').style.display = ($('apprentice_div').style.display == 'none' ? 'inline-block' : 'none');">Vuoi ottenere un accesso da apprendista ?</button><br><br>
              <div id="apprentice_div" style="display: none; background-color: #ffd780; border: 1px solid #ffae00; padding: 8px;">
          <br>
          Inserisci il tuo nickname e il tuo indirizzo e-mail.<br>
-         Il tuo nickname non può essere più lungo di 12 caratteri, <br>deve essere composto soltanto da lettere non accentate e numeri,<br>senza ripetere lo stesso carattere per più di 3 volte consecutive.<br><br>
+         Il tuo nickname non può essere più lungo di 12 caratteri,<br>deve essere composto soltanto da lettere non accentate e numeri,<br>senza ripetere lo stesso carattere per più di 3 volte consecutive.<br><br>
     <form accept-charset="utf-8" method="post" action="" onsubmit="return j_new_apprentice(this);">
-    <input type="hidden" name="new_apprentice" value="666">
+    <input type="hidden" name="realsub" value="666">
     <table class="login">
     <tr><td>nickname:</td>
     <td><input id="nameid" class="input_text" name="cli_name" type="text" size="24" maxlength="12" value=""></td></tr>
     <tr><td>e-mail:</td>
     <td><input id="emailid" class="input_text" name="cli_email" type="text" size="24" maxlength="512" value=""></td></tr>
-    <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_send'][$G_lang];?>" type="submit" class="button"></td></tr>
+                                                                          <tr><td colspan="2"><table style="margin: auto;"><tr><td><input id="send" onclick="submit_click(this);" value="<?php echo $mlang_room['btn_prefs_send'][$G_lang];?>" type="submit" class="button"></td>
+        <td><input id="close" onclick="submit_click(this);" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang];?>" type="submit" class="button"></td></tr></table></td></tr>
     </table>
     </form></div>
          <br><br>
 <?php echo $mlang_room['browwarn'][$G_lang];?><br>
     </div>
-    <br><br><br><br>
-    <br><br><br><br>
-    <br><br><br><br>
-    <br><br><br><br>
-    <br><br><br><br>
 
     <div id="imgct"></div>
     <div id="logz"></div>
@@ -1322,11 +1318,11 @@ xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", 80, 2, null /
 <tr><td colspan="2" style="text-align: center;">
     <!-- MLANG: Garantisci per un tuo conoscente: -->
        <input id="subid" name="sub" value=
-"<?php echo $mlang_room['btn_send'][$G_lang]; ?>"
+"<?php echo $mlang_room['btn_prefs_send'][$G_lang]; ?>"
  type="submit" onclick="this.form.elements['realsub'].value = 'invia';" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <!-- MLANG: Garantisci per un tuo conoscente: -->
 <input id="cloid" name="clo" value=
-"<?php echo $mlang_room['btn_close'][$G_lang]; ?>"
+"<?php echo $mlang_room['btn_prefs_close'][$G_lang]; ?>"
 type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chiudi';"></td></tr>
 </table>
     </form>
@@ -1346,8 +1342,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <tr><td><img title="messaggio" class="nobo" src="img/mesgtoadm_mesg<?php echo $G_lng;?>.png"></td>
 <td><textarea id="mesgid" class="input_text" name="mesg" cols="40" rows="8" wrap="soft"></textarea></td></tr>
 <tr><td colspan="2" style="text-align: center;">
-       <input id="subid" name="sub" value="<?php echo $mlang_room['btn_send'][$G_lang];?>" type="submit" onclick="this.form.elements['realsub'].value = 'invia';" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<input id="cloid" name="clo" value="<?php echo $mlang_room['btn_close'][$G_lang];?>" type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chiudi';"></td></tr>
+       <input id="subid" name="sub" value="<?php echo $mlang_room['btn_prefs_send'][$G_lang];?>" type="submit" onclick="submit_click(this);" class="button">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input id="cloid" name="clo" value="<?php echo $mlang_room['btn_prefs_close'][$G_lang];?>" type="submit" class="button" onclick="submit_click(this);"></td></tr>
 </table>
     </form>
     </div>
