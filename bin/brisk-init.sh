@@ -47,6 +47,10 @@ case "$1" in
         fi
         ;;
 
+    devstart)
+        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; ./brisk-spush.php'
+        ;;
+
     start)
         su - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
         ;;
