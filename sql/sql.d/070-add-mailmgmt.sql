@@ -1,7 +1,7 @@
 --
 --  Table to manage mails sent to users
 --
-DROP TABLE #PFX#mails;
+DROP TABLE IF EXISTS #PFX#mails;
 CREATE TABLE #PFX#mails (
        code       SERIAL PRIMARY KEY,
        ucode      integer REFERENCES #PFX#users (code) ON DELETE cascade ON UPDATE cascade,

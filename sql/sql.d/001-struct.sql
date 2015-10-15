@@ -2,7 +2,7 @@
 --   DONE - CASCADE ON DELETE of orders related tables
 --   DONE - STATUS on orders
 
-DROP TABLE #PFX#users;
+DROP TABLE IF EXISTS #PFX#users;
 CREATE TABLE #PFX#users (
        code   SERIAL PRIMARY KEY,
        login  text UNIQUE,
@@ -13,7 +13,7 @@ CREATE TABLE #PFX#users (
        mtime  timestamp DEFAULT to_timestamp(0)  -- last access
        );
 
-DROP TABLE #PFX#groups;
+DROP TABLE IF EXISTS #PFX#groups;
 CREATE TABLE #PFX#groups (
        code   SERIAL PRIMARY KEY,
        name   text

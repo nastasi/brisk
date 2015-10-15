@@ -6,14 +6,14 @@
 -- wee = 4
 --
 
-DROP   TABLE #PFX#bin5_places_mtime;
+DROP TABLE IF EXISTS #PFX#bin5_places_mtime;
 CREATE TABLE #PFX#bin5_places_mtime (
        code   int,
        mtime  timestamp
 );
 INSERT INTO #PFX#bin5_places_mtime (code, mtime) VALUES (0, now());
 
-DROP   TABLE #PFX#bin5_places;
+DROP TABLE IF EXISTS #PFX#bin5_places;
 CREATE TABLE #PFX#bin5_places (
        type   integer,
        rank   integer,

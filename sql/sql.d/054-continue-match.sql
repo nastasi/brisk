@@ -1,4 +1,4 @@
-DROP TABLE #PFX#bin5_table_orders;
+DROP TABLE IF EXISTS #PFX#bin5_table_orders;
 CREATE TABLE #PFX#bin5_table_orders (
        mcode  integer REFERENCES #PFX#bin5_matches (code) ON DELETE cascade ON UPDATE cascade,
        pos    integer,

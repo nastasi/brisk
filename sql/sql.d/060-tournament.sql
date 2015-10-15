@@ -1,4 +1,4 @@
-DROP TABLE #PFX#bin5_tournaments;
+DROP TABLE IF EXISTS #PFX#bin5_tournaments;
 CREATE TABLE #PFX#bin5_tournaments (
        code   SERIAL PRIMARY KEY,
        active integer,
