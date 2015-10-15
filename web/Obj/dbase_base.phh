@@ -34,8 +34,11 @@ class LoginDBItem {
     var $tos_vers;
     var $disa_reas;
     var $guar_code;
+    var $match_cnt;
+    var $game_cnt;
 
-    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers, $disa_reas, $guar_code)
+    function LoginDBItem($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers,
+                         $disa_reas, $guar_code, $match_cnt, $game_cnt)
     {
         $this->code      = $code;
         $this->login     = $login;
@@ -47,13 +50,16 @@ class LoginDBItem {
         $this->tos_vers  = $tos_vers;
         $this->disa_reas = $disa_reas;
         $this->guar_code = $guar_code;
+        $this->match_cnt = $match_cnt;
+        $this->game_cnt  = $game_cnt;
     }
 
     static function LoginDBItemFromRecord($rec)
     {
         $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
                                $rec->email, $rec->type, $rec->last_dona,
-                               $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code);
+                               $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code,
+                               $rec->match_cnt, $rec->game_cnt);
 
         return ($ret);
     }
@@ -119,6 +125,23 @@ class LoginDBItem {
         return $this->guar_code;
     }
 
+    function match_cnt_get()
+    {
+        return $this->match_cnt;
+    }
+    function match_cnt_add($v)
+    {
+        return $this->match_cnt += $v;
+    }
+
+    function game_cnt_get()
+    {
+        return $this->game_cnt;
+    }
+    function game_cnt_add($v)
+    {
+        return $this->game_cnt += $v;
+    }
 }
 
 define('MAIL_TYP_CHECK', 1);
