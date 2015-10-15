@@ -8,8 +8,8 @@ DATECUR="$(date +%s)"
 #  functions
 usage () {
     echo " USAGE"
-    echo "   ./builder <command> [-d|--dryrun] [-a|-p|--allfiles|--devfiles] [-s|--short] ..."
-    echo "   ./builder <-h|--help|help>"
+    echo "   $0 <command> [-d|--dryrun] [<-a|--allfiles>|<-p|--devfiles>] [-s|--short] ..."
+    echo "   $0 <-h|--help|help>"
     echo "   commands are:"
     echo "       create"
     echo "       destroy"
