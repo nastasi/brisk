@@ -1029,7 +1029,7 @@ function user_decorator(user)
     var name, i, sp = "", cl = "";
     var flags = user[0] & 0x03 | ((user[0] & 0x0c0000) >> 16);
 
-    console.log(user[1]+" FLAGS: "+flags);
+    // console.log(user[1]+" FLAGS: "+flags);
 
     for (i = 0 ; i < 4 ; i++) {
         if (flags & (1 << i)) {

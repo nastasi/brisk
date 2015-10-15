@@ -1,0 +1,2 @@
+#!/bin/bash
+su - -c "su - -c \"script -q -c \\\"screen -r\\\" /dev/null \" www-data"

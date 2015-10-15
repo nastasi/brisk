@@ -2,7 +2,7 @@
   /*
    *  brisk - dbase_pgsql.phh
    *
-   *  Copyright (C) 2006-2012 Matteo Nastasi
+   *  Copyright (C) 2006-2015 Matteo Nastasi
    *                          mailto: nastasi@alternativeoutput.it
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
@@ -191,6 +191,63 @@ class BriskDB
     }
 
     /*
+      $laddr is native php int (32 or 64 bit)
+      if ret True is ip is free
+    */
+    function selfreg_check($laddr)
+    {
+        GLOBAL $G_dbpfx, $G_selfreg_tout, $G_selfreg_mask;
+
+        $sere_sql = sprintf("DELETE from %sselfreg_chk WHERE atime < now();", $G_dbpfx);
+        if (($sere_pg = $this->query($sere_sql)) == FALSE) {
+            return (FALSE);
+        }
+
+        if (($sere_pg = $this->query($sere_sql)) == FALSE) {
+            return (FALSE);
+        }
+
+        $sere_sql = sprintf("SELECT * FROM %sselfreg_chk WHERE (ip & %d) = %d;",
+                            $G_dbpfx, int2four($G_selfreg_mask), int2four($laddr & $G_selfreg_mask));
+        if (($sere_pg  = $this->query($sere_sql)) == FALSE) {
+            return(FALSE);
+        }
+
+        $ret = pg_numrows($sere_pg);
+
+        if ($ret === FALSE) {
+            return(FALSE);
+        }
+        else if ($ret === 0) {
+            return(TRUE);
+        }
+        else if ($ret > 0) {
+            // already present
+            return(FALSE);
+        }
+        else {
+            // unreachable branch
+            return(FALSE);
+        }
+    }
+
+    /*
+      $laddr is native php int (32 or 64 bit)
+      if ret True is ip is free
+    */
+    function selfreg_set($laddr)
+    {
+        GLOBAL $G_dbpfx, $G_selfreg_tout, $G_selfreg_mask;
+
+        $newi_sql = sprintf("INSERT INTO %sselfreg_chk (ip, atime) VALUES (%d, now() + interval '%d seconds');",
+                            $G_dbpfx, int2four($laddr & $G_selfreg_mask), $G_selfreg_tout);
+        if (($newi_pg  = $this->query($newi_sql)) == FALSE) {
+            return(FALSE);
+        }
+        return(TRUE);
+    }
+
+    /*
       to be able to add mail record code into the record itself I must reserve it before.
      */
     function mail_reserve_code() {
@@ -257,15 +314,16 @@ class BriskDB
         return TRUE;
     }
 
-    function user_update_flag_ty($code, $old_type, $old_reas, $type, $reas)
+    function user_update_flag_ty($code, $type, $old_val, $old_reas, $new_val, $new_reas)
     {
         GLOBAL $G_dbpfx;
 
-        // (u.type & (CAST (X'00ff0000' as integer)))
-
-        $user_sql = sprintf("UPDATE %susers SET (type, disa_reas) = ((%d & (CAST (X'00ff0000' as integer))), %d)
-WHERE code = %d AND (type & CAST (X'%08x' as integer)) != 0 AND disa_reas = %d;",
-                            $G_dbpfx, $type, $reas, $code, $old_type, $old_reas);
+        $user_sql = sprintf("UPDATE %susers SET (type, disa_reas)
+            = (type & ~(CAST (X'%08x' as integer)) | (CAST (X'%08x' as integer)), %d)
+            WHERE code = %d AND (type & (CAST (X'%08x' as integer)))
+                = (CAST (X'%08x' as integer)) AND disa_reas = %d;",
+                            $G_dbpfx, $type, ($new_val ? $type : 0), $new_reas,
+                            $code, $type, ($old_val ? $type : 0), $old_reas);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;

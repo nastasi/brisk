@@ -796,10 +796,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $not_allowed_msg = nickserv_msg($dt, sprintf($mlang_indwr['tabwait'][$G_lang],
                                                                  $table->wakeup_time - $curtime));
                 }
-                else if ($table->auth_type == TABLE_AUTH_TY_CERT && ( ! $user->is_cert() ) ) {
+                else if ( $table->auth_type == TABLE_AUTH_TY_CERT &&
+                          (!$user->is_cert() || $user->is_appr()) ) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustcert'][$G_lang]);
                 }
-                else if ($table->auth_type == TABLE_AUTH_TY_AUTH && ( ! $user->is_auth() ) ) {
+                else if ( $table->auth_type == TABLE_AUTH_TY_AUTH &&
+                          (!$user->is_auth() || $user->is_appr()) ) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustauth'][$G_lang]);
                 }
                 else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {

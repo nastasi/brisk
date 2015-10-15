@@ -2,7 +2,7 @@
 /*
  *  brisk - brisk.phh
  *
- *  Copyright (C) 2006-2014 Matteo Nastasi
+ *  Copyright (C) 2006-2015 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -816,13 +816,13 @@ class Table {
       if ($sitted < PLAYERS_N) {
           switch ($this->auth_type) {
           case TABLE_AUTH_TY_CERT:
-              if ($user->is_cert())
+              if ($user->is_cert() && !$user->is_appr())
                   $act = "sitcert";
               else
                   $act = 'resercert';
               break;
           case TABLE_AUTH_TY_AUTH:
-              if ($user->is_auth())
+              if ($user->is_auth() && !$user->is_appr())
                   $act = "sitreser";
               else
                   $act = 'reserved';

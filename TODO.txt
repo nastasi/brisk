@@ -12,11 +12,15 @@
      DONE - usermgmt extension
      DONE - add close button
      DONE - add apprentice icon
-     - guarantee for apprentice
-     - match counter
+     - match counters
+       . sql for match counters
+       . migration script for old users
 
      Phase2
-   - MENTORS
+     - new info system
+     - guarantee for apprentice
+   
+    - MENTORS
      - listen all
 
    - BUDDY LIST

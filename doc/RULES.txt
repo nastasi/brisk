@@ -1,0 +1,20 @@
+
+FINISH REASON:
+
+    1) complete game   | 2) all pass       | 3) abandon because too less points
+ ----------------------+-------------------+----------------------------------------------
+    mult deps on win   | mult_inc()        | mult_inc()
+    calculate_points() | old_reason_set()  | old_reason_set()
+    game_next(1)       | game_next(1)      | game_next(0)
+    game_init()        | game_init()       | game_init()
+
+    set old_reason
+    mult++
+    game_next(1)
+    game_init()
+
+ 3) 
+    mult++
+    set old_reason
+    game_next(0)
+    game_init()

@@ -345,6 +345,11 @@ class User {
     return ($thiz);
   }
 
+  function is_appr()
+  {
+      return ($this->flags & USER_FLAG_TY_APPR);
+  }
+
   function is_auth()
   {
       return ($this->flags & USER_FLAG_AUTH);

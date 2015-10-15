@@ -1,5 +1,5 @@
 <?php
-if (__FILE__ == realpath($argv[0])) {
+if (isset($argv) && __FILE__ == realpath($argv[0])) {
     $G_base = "web/";
 }
 require_once("${G_base}Obj/class.phpmailer.php");
@@ -29,7 +29,7 @@ function brisk_mail($to, $subject, $text, $html)
 }
 
 
-if (__FILE__ == realpath($argv[0])) {
+if (isset($argv) && __FILE__ == realpath($argv[0])) {
     $G_admin_mail = "brisk@alternativeoutput.it";
 
     $to = "brisk@alternativeoutput.it";

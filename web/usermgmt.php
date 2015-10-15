@@ -157,7 +157,7 @@ function main() {
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d AND usr.code = %d;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
@@ -246,9 +246,8 @@ SELECT usr.*, guar.login AS guar_login
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d
-     ORDER BY usr.lintm;",
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
+         AND usr.disa_reas = %d ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_ADDED);
@@ -367,9 +366,8 @@ SELECT mail.*, usr.email AS email
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d
-     ORDER BY usr.lintm;",
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
+         AND usr.disa_reas = %d ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
                                USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_MAILED);
@@ -444,10 +442,10 @@ SELECT usr.*, guar.login AS guar_login
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
          AND usr.disa_reas = %d AND usr.code = %d;",
                                    $G_dbpfx, $G_dbpfx,
-                                   USER_FLAG_TY_ALL & ~USER_FLAG_TY_APPR, USER_FLAG_TY_DISABLE,
+                                   USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                    USER_DIS_REA_NU_TOBECHK, $id);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                     log_crit("stat-day: select from tournaments failed");
@@ -503,11 +501,10 @@ SELECT usr.*, guar.login AS guar_login
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE ( (usr.type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer)) )
-         AND usr.disa_reas = %d
-     ORDER BY usr.lintm;",
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
+         AND usr.disa_reas = %d ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
-                               USER_FLAG_TY_ALL & ~USER_FLAG_TY_APPR, USER_FLAG_TY_DISABLE,
+                               USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                USER_DIS_REA_NU_TOBECHK);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                 log_crit("stat-day: select from tournaments failed");
