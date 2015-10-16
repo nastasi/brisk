@@ -656,9 +656,9 @@ class Bin5_table extends Table {
                 unset($bdb);
             }
             else {
-                log_points($remote_addr, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", "DATABASE CONNECTION FAILED");
+                log_points($user->ip, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", "DATABASE CONNECTION FAILED");
             }
-            log_points($remote_addr, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
+            log_points($user->ip, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
         }
 
         $this->game_init(&$bri->user);

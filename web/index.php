@@ -336,14 +336,15 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         $sess = "";
     if (($name = gpcs_var('name', $get, $post, $cookie)) === FALSE)
         unset($name);
+    else
+        log_step("LOGIN: $name");
+
     if (($pass_private = gpcs_var('pass_private', $get, $post, $cookie)) === FALSE)
         unset ($pass_private);
     if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
         unset ($table_idx);
     if (($table_token = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
         unset ($table_token);
-
-    log_step("LOGIN: $name");
 
     // default values
     $_cookie_law_3party = 'true';
