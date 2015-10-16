@@ -364,7 +364,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                 if ($table->asta_win > -1 &&
                     $user->table_pos == $table->asta_win) {
                     $a_brisco = $argz[1];
-                    if ($a_brisco >= 0 && $a_brisco < 40) {
+                    if ($a_brisco >= 0 && $a_brisco < (BIN5_CARD_HAND * BIN5_PLAYERS_N)) {
                         $table->briscola = $a_brisco;
                         $table->friend   = $table->card[$a_brisco]->owner;
                         log_wr("GSTART 2");
