@@ -709,6 +709,7 @@ class BriskDB
             /*
              * matches management
              */
+            $codes_where = "";
             $mtc_sql = sprintf("UPDATE %sbin5_matches SET (mazzo_next, mult_next) = (%d, %d) WHERE ttok = '%s' RETURNING *;",
                                $G_dbpfx, $table->mazzo, $table->mult, $sql_ttok);
             if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
@@ -729,12 +730,35 @@ class BriskDB
                         log_crit(sprintf("bin5_points_save: failed at insert table order [%s]", $ord_sql));
                         break;
                     }
+                    $codes_where .= sprintf("%scode = %d", ($i == 0  ? "" : " OR "), $ucodes[$i]);
                 }
                 if ($i < $n)
                     break;
+
+                $cnt_sql = sprintf("UPDATE %susers SET (match_cnt, game_cnt)
+                                        = (match_cnt+1, game_cnt+1) WHERE %s;",
+                                   $G_dbpfx, $codes_where);
+                error_log($cnt_sql);
+                if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
+                    log_crit(sprintf("bin5_points_save: failed increment match and game [%s]", $cnt_sql));
+                    break;
+                }
             }
             else {
                 $mtc_obj = pg_fetch_object($mtc_pg,0);
+
+                for ($i = 0 ; $i < $n ; $i++) {
+                    $codes_where .= sprintf("%scode = %d", ($i == 0 ? "" : " OR "), $ucodes[$i]);
+                }
+
+                $cnt_sql = sprintf("UPDATE %susers SET (game_cnt)
+                                        = (game_cnt+1) WHERE %s;",
+                                       $G_dbpfx, $codes_where);
+                error_log($cnt_sql);
+                if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
+                    log_crit(sprintf("bin5_points_save: failed increment game [%s]", $cnt_sql));
+                    break;
+                }
             }
 
             /*
