@@ -31,7 +31,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 3|8] [-t <(n>=4)>] [-T <auth_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -291,8 +291,8 @@ IFS='
 #
 ftokk_path="${ftok_path}k"
 
-if [ $card_hand -lt 3 -o $card_hand -gt 8 ]; then
-    echo "card_hand ($card_hand) out of range (3 <= c <= 8)"
+if [ $card_hand -lt 2 -o $card_hand -gt 8 ]; then
+    echo "card_hand ($card_hand) out of range (2 <= c <= 8)"
     exit 1
 fi
 
