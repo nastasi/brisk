@@ -421,11 +421,13 @@ function j_stand_cont(ddata)
 
             table_add($("standup"), td);
         }
-
         standup_data_old = data;
-        return;
     }
-    // $("esco").innerHTML =  '<input class="button" name="logout" value="Esco." onclick="esco_cb();" type="button">';
+
+    var usr = $("standup").getElementsByClassName("id_usr");
+    for (i = 0 ; i < usr.length ; i++) {
+        addEvent(usr[i], "click", click_update_cb);
+    }
 }
 
 function esco_cb() {
@@ -435,7 +437,11 @@ function esco_cb() {
     act_logout(0);
  };
 
-
+function click_update_cb(e)
+{
+    console.log("qui");
+    console.log(e.target.innerHTML);
+}
 
 function j_tab_cont(table_idx, data)
 {
@@ -443,13 +449,15 @@ function j_tab_cont(table_idx, data)
     var content = '';
 
     for (i = 0 ; i < data.length ; i++) {
-        // content += user_decorator(data[i]);
-        // content += state_add(data[i][0]);
         content += j_stand_tdcont(data[i]);
 
         content += '<br>';
     }
     $("table"+table_idx).innerHTML = content;
+    var usr = $("table"+table_idx).getElementsByClassName("id_usr");
+    for (i = 0 ; i < usr.length ; i++) {
+        addEvent(usr[i], "click", click_update_cb);
+    }
 }
 
 function j_tab_act_cont(idx, act)

@@ -12,12 +12,15 @@
      DONE - usermgmt extension
      DONE - add close button
      DONE - add apprentice icon
-     - match counters
-       . sql for match counters
-       . migration script for old users
+     DONE - match counters (part 1)
+       DONE . sql for match counters
+     WIP - new info system
+       WIP - click management
+       - show user info (RO)
 
      Phase2
-     - new info system
+     - match counters (part 2)
+       . migration script for old users
      - guarantee for apprentice
    
     - MENTORS
