@@ -1,7 +1,7 @@
 /*
  *  brisk - commons.js
  *
- *  Copyright (C) 2006-2012 Matteo Nastasi
+ *  Copyright (C) 2006-2015 Matteo Nastasi
  *                          mailto: nastasi@alternativeoutput.it 
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
@@ -145,7 +145,7 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 
 })()
 
-function addEvent(obj,type,fn)
+function addEvent(obj, type, fn)
 {
     if (obj.addEventListener) {
         obj.addEventListener( type, fn, false);
@@ -1024,7 +1024,7 @@ var chatt_lines_n = 0;
 
 var CHATT_MAXLINES = 40;
 
-function user_decorator(user)
+function user_decorator(user, is_real)
 {
     var name, i, sp = "", cl = "";
     var flags = user[0] & 0x03 | ((user[0] & 0x0c0000) >> 16);
@@ -1039,7 +1039,9 @@ function user_decorator(user)
     }
 
     if (flags != 0)
-        name = "<span class='" + cl + "'><span>"+user[1]+"</span></span>";
+        name = "<span class='" + cl + "'><span class='" +
+        (is_real && (flags & 0xfffffe) ? "id_usr" : "") +
+        "'>"+user[1]+"</span></span>";
     else
         name = user[1];
 
@@ -1051,7 +1053,7 @@ function user_dec_and_state(el)
     var content = "";
     var val_el;
 
-    content = user_decorator(el);
+    content = user_decorator(el, true);
     content += state_add(el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
     
     return (content);
@@ -1066,7 +1068,7 @@ function chatt_sub(dt,data,str)
     var flags;
     var isauth;
     var bolder = [ (data[0] | 1), data[1] ];
-    name = user_decorator(bolder);
+    name = user_decorator(bolder, false);
 
     if ($("txt").scrollTop + parseInt(getStyle($("txt"),"height", "height")) -  $("txt").scrollHeight >= 0)
         must_scroll = true;

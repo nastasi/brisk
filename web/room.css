@@ -457,3 +457,6 @@ img.tickbut {
     margin-top:4px;
 }
 
+span.id_usr {
+    cursor: pointer;
+}
