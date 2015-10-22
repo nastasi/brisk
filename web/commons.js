@@ -1045,7 +1045,7 @@ function user_decorator(user, is_real)
 
     if (flags != 0)
         name = "<span class='" + cl + "'><span class='" +
-        (is_real && (flags & 0xfffffe) ? "id_usr" : "") +
+        (is_real && (flags & 0xfffffe && (flags & 0x01 == 0)) ? "id_usr" : "") +
         "'>"+user[1]+"</span></span>";
     else
         name = user[1];
