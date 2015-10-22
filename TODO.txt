@@ -17,6 +17,7 @@
      WIP - new info system
        WIP - click management
        - show user info (RO)
+         - require command/info
 
      Phase2
      - match counters (part 2)

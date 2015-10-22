@@ -437,10 +437,26 @@ function esco_cb() {
     act_logout(0);
  };
 
+var g_user_info_target = "";
+
+function info_show(username)
+{
+    // ret = server_request('mesg', 'prefs|save','__POST__', 'prefs', JSON.stringify(g_prefs));
+    var udata = server_request('mesg', 'chatt|/info ' + username);
+
+    // FIXME: just to be finished
+    console.log(udata);
+}
+
 function click_update_cb(e)
 {
-    console.log("qui");
-    console.log(e.target.innerHTML);
+    if (g_user_info_target == e.target.innerHTML) {
+        g_user_info_target = "";
+        info_show(e.target.innerHTML);
+        }
+    else {
+        g_user_info_target = e.target.innerHTML;
+        }
 }
 
 function j_tab_cont(table_idx, data)

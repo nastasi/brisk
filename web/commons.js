@@ -358,7 +358,12 @@ function chatt_checksend(obj,e)
 }
 function act_chatt(value)
 {
-    send_mesg("chatt|"+encodeURIComponent(value));
+    if (value.substring(0, 6) == "/info ") {
+        show_user_info(value.substring(6));
+    }
+    else {
+        send_mesg("chatt|"+encodeURIComponent(value));
+    }
     /*
     obj.disabled = true;
     obj.value = "";
