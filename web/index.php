@@ -228,6 +228,18 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Send a message to the administrator:'),
                      'mesgtoadm_sub'=> array('it' => 'soggetto:',
                                              'en' => 'subject:'),
+                     'info_login' => array('it' => 'Utente:',
+                                          'en' => 'User:'),
+                     'info_state' => array('it' => 'Stato:',
+                                          'en' => 'State:'),
+                     'info_guar' => array('it' => 'Garante:',
+                                          'en' => 'Guarantee:'),
+                     'info_match' => array('it' => 'Partite:',
+                                           'en' => 'Matches:'),
+                     'info_game' => array('it' => 'Mani:',
+                                          'en' => 'Hands:'),
+                     'info_frie' => array('it' => 'Conoscenza:',
+                                          'en' => 'Friendship:'),
                      );
 
 require_once("briskin5/Obj/briskin5.phh");
@@ -989,6 +1001,7 @@ supported by:<br>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script>
+<script type="text/javascript" src="fieldify.js"></script>
 <script type="text/javascript" src="prefs.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
@@ -1156,6 +1169,7 @@ cookie_law(null);
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script type="text/javascript" src="commons.js"></script>
+<script type="text/javascript" src="fieldify.js"></script>
 <script type="text/javascript" src="prefs.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
@@ -1359,6 +1373,29 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrlog"></div>
 <div id="xhrdeltalog"></div>
 </div>
+
+<div id="info" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 340px; top: 150px; visibility: hidden;">
+<table class="info">
+<tr><td class="le"><?php echo $mlang_room['info_login'][$G_lang]; ?></td><td class="ri"><span class="login_id"></span></td></tr>
+<tr><td class="le"><?php echo $mlang_room['info_state'][$G_lang]; ?></td><td class="ri"><span class="state_id"></span></td></tr>
+<tr><td class="le"><?php echo $mlang_room['info_guar'][$G_lang]; ?></td><td class="ri"><span class="guar_id"></span></td></tr>
+<tr><td class="le"><?php echo $mlang_room['info_match'][$G_lang]; ?></td><td class="ri"><span class="match_id"></span></td></tr>
+<tr><td class="le"><?php echo $mlang_room['info_game'][$G_lang]; ?></td><td class="ri"><span class="game_id"></span></td></tr>
+<tr><td class="le ri" colspan="2"><?php echo $mlang_room['info_frie'][$G_lang]; ?></td></tr>
+<tr><td class="le"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
+    <td class="ri noborder"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
+<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="unknown">Sconosciuto</td>
+<td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="bff">Amico fidato</td></tr>
+<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="test">In prova</td></tr>
+</table>
+<div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>
+<!-- <input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_reset();" value="<?php echo $mlang_room['btn_reset'][$G_lang]; ?>"/>
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_save'][$G_lang]; ?>"/> -->
+</div>
+
+</div>
+
 <div id="preferences" class="notify" style="z-index: 200; width: 600px; margin-left: -300px; height: 240px; top: 150px; visibility: hidden;">
 <div id="preferences_child" style="border-bottom: 1px solid gray; overflow: auto; height: 370px;">
 

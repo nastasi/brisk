@@ -442,10 +442,26 @@ var g_user_info_target = "";
 function info_show(username)
 {
     // ret = server_request('mesg', 'prefs|save','__POST__', 'prefs', JSON.stringify(g_prefs));
-    var udata = server_request('mesg', 'chatt|/info ' + username);
+    var info_in = JSON.parse(server_request('mesg', 'chatt|/info ' + username));
+    var info = null;
 
+    if (info_in.ret == 0) {
+        var fields = { login: { type: 'value' },
+                       state: { type: 'value' },
+                       guar: { type: 'value' },
+                       match: { type: 'value' },
+                       game: { type: 'value' },
+                       friend: { type: 'radio' } };
+
+        info = new Fieldify($('info'), fields);
+        info.populate(info_in);
+        info.visible(true);
+        }
+    else {
+        console.log("some error: open a dialog");
+    }
     // FIXME: just to be finished
-    console.log(udata);
+    console.log(info);
 }
 
 function click_update_cb(e)

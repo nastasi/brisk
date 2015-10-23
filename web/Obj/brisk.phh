@@ -1693,7 +1693,20 @@ class Brisk
           $jret = json_encode(array("ret" => $ret, "mesg" => $mesg));
       }
       else {
-          $jret = json_encode(array("ret" => 0, "mesg" => "", "guar" => $guar_login));
+          $jret = json_encode(array("ret" => 0,
+                                    "mesg" => "",
+                                    "login" => $user_login,
+                                    // FIXME: state internationalization
+                                    "state" =>
+                                    ($user_item->type & USER_FLAG_TY_APPR ? "Apprendista" :
+                                     ($user_item->type & USER_FLAG_TY_CERT ? "Certificato" :
+                                      ($user_item->type & (USER_FLAG_TY_NORM | USER_FLAG_TY_SUPER) ?
+                                       "Normale" : "Stato sconosciuto"))),
+                                    "guar" => ($user_item->type & USER_FLAG_TY_APPR ?
+                                               "" : $guar_login),
+                                    "match" => $user_item->match_cnt,
+                                    "game" => $user_item->game_cnt,
+                                    "friend" => "unknown"));
       }
 
       return $jret;

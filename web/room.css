@@ -460,3 +460,32 @@ img.tickbut {
 span.id_usr {
     cursor: pointer;
 }
+
+table.info {
+    margin: auto;
+    border-collapse: collapse;
+}
+
+table.info td {
+    border-top: 1px solid grey;
+    padding: 4px;
+    width: 50%;
+}
+
+table.info td.info-opt {
+    border-top: 0px;
+    padding: 0px 4px 4px 4px;
+    }
+
+table.info td.noborder {
+    border-top: 0px;
+    }
+
+table.info td.le {
+    padding-left: 16px;
+    }
+
+table.info td.ro {
+    padding-right: 16px;
+    }
+
