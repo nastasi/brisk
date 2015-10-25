@@ -95,10 +95,10 @@ div.bottom {
 
 div.room_tit {
     position: relative;
-    top: 6px;
     align: left;
     text-align: left;
     margin: 0px;
+    padding: 6px;
 }
 
 span.room_titin {
