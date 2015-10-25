@@ -511,6 +511,60 @@ table.info td {
     width: 50%;
 }
 
+
+table.info table.fiverank {
+    border-collapse: collapse;
+}
+
+table.info table.fiverank td {
+    border-top: 0px;
+    padding: 0px 0px 0px 0px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+table.info table.fiverank td.c1t {
+    padding-top: 4px;
+    background-color: #ffabab;
+}
+table.info table.fiverank td.c2t {
+    padding-top: 4px;
+    background-color: #ffd3ab;
+}
+table.info table.fiverank td.c3t {
+    padding-top: 4px;
+    background-color: #fffcab;
+}
+table.info table.fiverank td.c4t {
+    padding-top: 4px;
+    background-color: #d4f4ab;
+}
+table.info table.fiverank td.c5t {
+    padding-top: 4px;
+    background-color: #abecab;
+}
+
+table.info table.fiverank td.c1b {
+    padding-bottom: 4px;
+    background-color: #ffabab;
+}
+table.info table.fiverank td.c2b {
+    padding-bottom: 4px;
+    background-color: #ffd3ab;
+}
+table.info table.fiverank td.c3b {
+    padding-bottom: 4px;
+    background-color: #fffcab;
+}
+table.info table.fiverank td.c4b {
+    padding-bottom: 4px;
+    background-color: #d4f4ab;
+}
+table.info table.fiverank td.c5b {
+    padding-bottom: 4px;
+    background-color: #abecab;
+}
+
 table.info td.info-opt {
     border-top: 0px;
     padding: 0px 4px 4px 4px;

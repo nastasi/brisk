@@ -1121,7 +1121,7 @@ window.onload = function() {
     <?php echo $mlang_room['passwarn'][$G_lang];?><br><br>
 
          <button onclick="$('apprentice_div').style.display = ($('apprentice_div').style.display == 'none' ? 'inline-block' : 'none');">Vuoi ottenere un accesso da apprendista ?</button><br><br>
-             <div id="apprentice_div" style="display: none; background-color: #ffd780; border: 1px solid #ffae00; padding: 8px;">
+             <div id="apprentice_div" style="display: none;" class="apprentice">
          <br>
          Inserisci il tuo nickname e il tuo indirizzo e-mail.<br>
          Il tuo nickname non può essere più lungo di 12 caratteri,<br>deve essere composto soltanto da lettere non accentate e numeri,<br>senza ripetere lo stesso carattere per più di 3 volte consecutive.<br><br>
@@ -1376,17 +1376,48 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 
 <div id="info" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 340px; top: 150px; visibility: hidden;">
 <table class="info">
-<tr><td class="le"><?php echo $mlang_room['info_login'][$G_lang]; ?></td><td class="ri"><span class="login_id"></span></td></tr>
-<tr><td class="le"><?php echo $mlang_room['info_state'][$G_lang]; ?></td><td class="ri"><span class="state_id"></span></td></tr>
-<tr><td class="le"><?php echo $mlang_room['info_guar'][$G_lang]; ?></td><td class="ri"><span class="guar_id"></span></td></tr>
-<tr><td class="le"><?php echo $mlang_room['info_match'][$G_lang]; ?></td><td class="ri"><span class="match_id"></span></td></tr>
-<tr><td class="le"><?php echo $mlang_room['info_game'][$G_lang]; ?></td><td class="ri"><span class="game_id"></span></td></tr>
-<tr><td class="le ri" colspan="2"><?php echo $mlang_room['info_frie'][$G_lang]; ?></td></tr>
-<tr><td class="le"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
-    <td class="ri noborder"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
+<tr><td class="le"><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri"><span class="login_id"></span></td></tr>
+<tr><td class="le"><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri"><span class="state_id"></span></td></tr>
+<tr><td class="le"><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td></tr>
+<tr><td colspan="2" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
+<tr><td class="le"><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td></tr>
+<tr><td class="le"><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
+<tr><td class="le ri" colspan="2"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td></tr>
+<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
+    <td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
 <tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="unknown">Sconosciuto</td>
 <td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="bff">Amico fidato</td></tr>
 <tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="test">In prova</td></tr>
+<tr><td class="le"><b>Bravura:</b></td><td class="le"><b>Credibilità:</b></td></tr>
+<tr><td class="info-opt">
+    <table class="fiverank" style="margin: auto;">
+       <tr><td class="c1t">1</td>
+           <td class="c2t">2</td>
+           <td class="c3t">3</td>
+           <td class="c4t">4</td>
+           <td class="c5t">5</td></tr>
+       <tr><td class="c1b"><input type="radio" name="skill" class="skill_id" value="1"></td>
+           <td class="c2b"><input type="radio" name="skill" class="skill_id" value="2"></td>
+           <td class="c3b"><input type="radio" name="skill" class="skill_id" value="3"></td>
+           <td class="c4b"><input type="radio" name="skill" class="skill_id" value="4"></td>
+           <td class="c5b"><input type="radio" name="skill" class="skill_id" value="5"></td>
+       </tr>
+    </table>
+</td><td class="info-opt">
+    <table class="fiverank" style="margin: auto;">
+       <tr><td class="c1t">1</td>
+           <td class="c2t">2</td>
+           <td class="c3t">3</td>
+           <td class="c4t">4</td>
+           <td class="c5t">5</td></tr>
+       <tr><td class="c1b"><input type="radio" name="credib" class="credib_id" value="1"></td>
+           <td class="c2b"><input type="radio" name="credib" class="credib_id" value="2"></td>
+           <td class="c3b"><input type="radio" name="credib" class="credib_id" value="3"></td>
+           <td class="c4b"><input type="radio" name="credib" class="credib_id" value="4"></td>
+           <td class="c5b"><input type="radio" name="credib" class="credib_id" value="5"></td>
+       </tr>
+    </table>
+</td></tr>
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>

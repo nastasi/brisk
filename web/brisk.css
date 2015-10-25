@@ -297,3 +297,14 @@ span.au3 span {
 div.bye_msg {
     font-weigth: bold;
 }
+
+div.apprentice {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+
+    display: none;
+    background-color: #ffd780;
+    border: 1px solid #ffae00;
+    padding: 8px;
+}
