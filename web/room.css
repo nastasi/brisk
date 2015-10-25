@@ -189,6 +189,10 @@ table.room_tab {
 }
 
 table.room_tab td {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+
     background-image: url('img/najole_light.png');
     background-attachment: fixed;
 
@@ -227,6 +231,10 @@ div.room_standup {
 }
 
 table.room_standup {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+
     position: relative;
     width: 100%;
     border: 1px solid gray;
@@ -245,6 +253,10 @@ table.room_standup td {
  }
 
 table.login {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+
     margin: auto;
     border: 1px solid gray;
     margin-top: 8px;
@@ -297,6 +309,10 @@ div.esco {
     border: 1px solid gray;
     vertical-align: text-bottom;
 
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+
     background-image: url('img/najole_light.png');
     background-attachment: fixed;
 }
@@ -319,6 +335,10 @@ div.esco {
 }
 
 .webstart_hilite {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+
     background: #ffd780;
     border: 1px solid #ffae00;
     padding: 6px;
@@ -326,6 +346,10 @@ div.esco {
 }
 
 .webstart {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+
     position: absolute;
     background-color: white;
     left: 80px;
@@ -356,6 +380,10 @@ div.esco {
 }
 
 .sidebanner {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+
     /* Top Right Bottom Left */
     margin: 4px auto 0px auto;
     position: relative;
