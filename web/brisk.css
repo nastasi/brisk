@@ -28,10 +28,9 @@
 }
 
 body {
-    background-image: url('img/happysunbg.png');
+    background-image: url('img/najole.png');
     background-color: #fafafa;
-    background-repeat: no-repeat;
-    background-position: center center;
+    background-attachment: fixed;
     margin: 0px;
     height: 800px;
     padding: 0px;
@@ -107,7 +106,9 @@ img.ib_nobo {
 }
 
 .notify {
-/*    top: 10%; */
+    background-image: url('img/najole_light.png');
+    background-attachment: fixed;
+
     top: 0;
     padding: 8px;
 

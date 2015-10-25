@@ -189,6 +189,9 @@ table.room_tab {
 }
 
 table.room_tab td {
+    background-image: url('img/najole_light.png');
+    background-attachment: fixed;
+
     width: 25%;
     height: 120px;
     vertical-align: top;
@@ -229,6 +232,9 @@ table.room_standup {
     border: 1px solid gray;
     border-spacing: 0px;
     padding: 0px;
+
+    background-image: url('img/najole_light.png');
+    background-attachment: fixed;
 }
 
 table.room_standup td {
@@ -242,7 +248,9 @@ table.login {
     margin: auto;
     border: 1px solid gray;
     margin-top: 8px;
-    background-color: #f0f0f0
+
+    background-image: url('img/najole_light.png');
+    background-attachment: fixed;
  }
 
 table.login td {
@@ -288,6 +296,9 @@ div.esco {
     overflow: auto;
     border: 1px solid gray;
     vertical-align: text-bottom;
+
+    background-image: url('img/najole_light.png');
+    background-attachment: fixed;
 }
 
 .txtt {
