@@ -14,10 +14,13 @@
      DONE - add apprentice icon
      DONE - match counters (part 1)
        DONE . sql for match counters
-     WIP - new info system
-       WIP - click management
-       - show user info (RO)
-         - require command/info
+     DONE - new info system
+       DONE - click management
+       DONE - show user info (RO)
+         DONE - require command/info
+         DONE - fix fiverank table
+         DONE - fix bug with bitwise
+         - fix layout of tables
 
      Phase2
      - match counters (part 2)
