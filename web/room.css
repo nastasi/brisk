@@ -514,6 +514,7 @@ table.info td {
 
 table.info table.fiverank {
     border-collapse: collapse;
+    margin: auto;
 }
 
 table.info table.fiverank td {
@@ -521,6 +522,7 @@ table.info table.fiverank td {
     padding: 0px 0px 0px 0px;
     text-align: center;
     vertical-align: middle;
+    width: 20%;
 }
 
 table.info table.fiverank td.c1t {
