@@ -506,7 +506,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
         $tables .= '<div class="room_tab">';
         $tables .= '<table class="room_tab">';
         for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
-            if ($user->is_auth())
+            if ($user->is_auth() && !$user->is_appr())
                 $i = $ii;
             else
                 $i = TABLES_N - $ii - 1;

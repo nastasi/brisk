@@ -74,6 +74,7 @@ function global_dump()
     fprintf(STDERR, "G_with_splash = [%s]\n", print_r($G_with_splash, TRUE));
     fprintf(STDERR, "G_with_topbanner = [%s]\n", print_r($G_with_topbanner, TRUE));
     fprintf(STDERR, "G_selfreg_mask = [%x]\n", print_r($G_selfreg_mask, TRUE));
+
     fprintf(STDERR, "G_selfreg_tout = [%s]\n", print_r($G_selfreg_tout, TRUE));
 
 }

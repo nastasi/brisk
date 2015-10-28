@@ -593,7 +593,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         $dobreak = FALSE;
         do {
             log_wr("INFO:SKIP:argz == poll name: [".$cli_poll_name."] AUTH: ".$user->is_auth());
-            if ( ! $user->is_auth() ) {
+            if ( ! $user->is_auth() || $user->is_appr() ) {
                 // MLANG: <b>Per partecipare al sondaggio devi essere autenticato.</b>
                 $mesg_to_user = nickserv_msg($dt, $mlang_indwr['pollmust'][$G_lang]);
                 log_wr("break1");
