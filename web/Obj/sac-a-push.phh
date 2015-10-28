@@ -40,7 +40,7 @@ function global_dump()
     GLOBAL $G_splash_h, $G_splash_idx, $G_splash_interval, $G_splash_timeout;
     GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
     GLOBAL $G_with_splash, $G_sidebanner, $G_sidebanner_idx;
-    GLOBAL $G_with_topbanner;
+    GLOBAL $G_with_topbanner, $G_selfreg_tout;
 
     fprintf(STDERR, "G_alarm_passwd = [%s]\n", print_r($G_alarm_passwd, TRUE));
     fprintf(STDERR, "G_ban_list = [%s]\n", print_r($G_ban_list, TRUE));
@@ -73,6 +73,9 @@ function global_dump()
     fprintf(STDERR, "G_sidebanner_idx = [%s]\n", print_r($G_sidebanner_idx, TRUE));
     fprintf(STDERR, "G_with_splash = [%s]\n", print_r($G_with_splash, TRUE));
     fprintf(STDERR, "G_with_topbanner = [%s]\n", print_r($G_with_topbanner, TRUE));
+    fprintf(STDERR, "G_selfreg_mask = [%x]\n", print_r($G_selfreg_mask, TRUE));
+    fprintf(STDERR, "G_selfreg_tout = [%s]\n", print_r($G_selfreg_tout, TRUE));
+
 }
 
 function pid_save()
