@@ -125,7 +125,7 @@ define('LICMGR_CHO_AFTER',  2);
 
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_domain, $G_webbase, $G_mail_seed;
+    GLOBAL $G_domain, $G_webbase, $G_mail_seed, $G_notguar_code;
     GLOBAL $G_shutdown, $G_alarm_passwd, $G_ban_list, $G_black_list, $G_lang, $G_room_help, $G_room_about;
     GLOBAL $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;
@@ -239,8 +239,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             // check existence of username or email
             $is_trans = FALSE;
             do {
-                if (($bdb = BriskDB::create()) == FALSE)
+                if (($bdb = BriskDB::create()) == FALSE) {
+                    $mesg_to_user = "Connessione al database fallita";
                     break;
+                }
 
                 // check IP address as previous requirer
                 if ($bdb->selfreg_check($remote_ip) == FALSE) {
@@ -265,13 +267,15 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 // FIXME: move 'no-guaran' user into configuration file
                 if (($usr_obj = $bdb->user_add($cli_name, 'THE_PASS', $cli_email,
                                                USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
-                                               USER_DIS_REA_NU_MAILED, 10103)) == FALSE) {
+                                               USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE) {
                     fprintf(STDERR, "ERROR: user_add FAILED\n");
+                    $mesg_to_user = "Fallito inserimento nel database.";
                     break;
                 }
 
                 if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
                     fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
+                    $mesg_to_user = "Fallita creazione codice email.";
                     break;
                 }
                 $hash = md5($curtime . $G_alarm_passwd . $cli_name . $cli_email);
@@ -291,6 +295,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if ($mail_item->store($bdb) == FALSE) {
                     // store mail error
                     fprintf(STDERR, "ERROR: store mail FAILED\n");
+                    $mesg_to_user = "Fallita procedura di store.";
                     break;
                 }
 
@@ -303,6 +308,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
+                    $mesg_to_user = "Fallito invio email.";
                     break;
                 }
 
@@ -311,7 +317,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 echo "1";
                 return TRUE;
             } while(FALSE);
-            $bdb->transaction('ROLLBACK');
+            if ($is_trans)
+                $bdb->transaction('ROLLBACK');
             echo "$mesg_to_user";
             return FALSE;
         }
