@@ -152,7 +152,7 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "5.1.0";
+$G_brisk_version = "5.1.1";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: comando /info e doppio click sugli utenti registrati, nuovi utenti apprendisti, info su numero di mani e di partite.',
@@ -1664,8 +1664,7 @@ class Brisk
               $ret = 3;
               break;
           }
-          // FIXME: just for test
-          if ($user_login == $user->name && FALSE) {
+          if ($user_login == $user->name) {
               $ret = 4;
               $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
