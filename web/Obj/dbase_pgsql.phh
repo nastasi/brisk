@@ -735,34 +735,28 @@ class BriskDB
                 if ($i < $n)
                     break;
 
-                // FIXME: uncomment when counters are updated
-                if (0 == 1) {
-                    $cnt_sql = sprintf("UPDATE %susers SET (match_cnt, game_cnt)
+                $cnt_sql = sprintf("UPDATE %susers SET (match_cnt, game_cnt)
                                         = (match_cnt+1, game_cnt+1) WHERE %s;",
-                                       $G_dbpfx, $codes_where);
-                    error_log($cnt_sql);
-                    if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
-                        log_crit(sprintf("bin5_points_save: failed increment match and game [%s]", $cnt_sql));
-                        break;
-                    }
+                                   $G_dbpfx, $codes_where);
+                error_log($cnt_sql);
+                if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
+                    log_crit(sprintf("bin5_points_save: failed increment match and game [%s]", $cnt_sql));
+                    break;
                 }
             }
             else {
                 $mtc_obj = pg_fetch_object($mtc_pg,0);
 
-                // FIXME: uncomment when counters are updated
-                if (0 == 1) {
-                    for ($i = 0 ; $i < $n ; $i++) {
-                        $codes_where .= sprintf("%scode = %d", ($i == 0 ? "" : " OR "), $ucodes[$i]);
-                    }
-                    $cnt_sql = sprintf("UPDATE %susers SET (game_cnt)
+                for ($i = 0 ; $i < $n ; $i++) {
+                    $codes_where .= sprintf("%scode = %d", ($i == 0 ? "" : " OR "), $ucodes[$i]);
+                }
+                $cnt_sql = sprintf("UPDATE %susers SET (game_cnt)
                                         = (game_cnt+1) WHERE %s;",
-                                       $G_dbpfx, $codes_where);
-                    error_log($cnt_sql);
-                    if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
-                        log_crit(sprintf("bin5_points_save: failed increment game [%s]", $cnt_sql));
-                        break;
-                    }
+                                   $G_dbpfx, $codes_where);
+                error_log($cnt_sql);
+                if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
+                    log_crit(sprintf("bin5_points_save: failed increment game [%s]", $cnt_sql));
+                    break;
                 }
             }
 

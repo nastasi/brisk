@@ -1379,9 +1379,9 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <tr><td class="le"><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri"><span class="login_id"></span></td></tr>
 <tr><td class="le"><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri"><span class="state_id"></span></td></tr>
 <tr><td class="le"><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td></tr>
-<tr><td colspan="2" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
 <tr><td class="le"><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td></tr>
 <tr><td class="le"><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
+<tr><td colspan="2" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
 <tr><td class="le ri" colspan="2"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td></tr>
 <tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
     <td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
