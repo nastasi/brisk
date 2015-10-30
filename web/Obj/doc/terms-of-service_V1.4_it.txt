@@ -21,10 +21,10 @@ password o quant'altro.
    2. Strumenti d'indagine.
    ------------------------
 
-Vi chiedo esplicitamente la possibilità di poter visionare i log delle chat del
+Si chiede esplicitamente la possibilità di poter visionare i log delle chat del
 sito al fine di verificare eventuali segnalazioni di abusi.
 
-Vi garantisco che l'analisi dei log sarà fatta esclusivamente da me o da persone
+Si garantisce che l'analisi dei log sarà fatta esclusivamente da me o da persone
 di mia fiducia e che non verrà divulgato a terzi nessun contenuto esclusi
 ovviamente vincoli di legge come richieste da parte delle autorità.
 
@@ -34,19 +34,24 @@ ovviamente vincoli di legge come richieste da parte delle autorità.
 
 Non è possibile che una singola persona abbia più di un nickname con password.
 
-   4. Autorizzazione alla divulgazione del proprio garante.
-   --------------------------------------------------------
+   4. Autorizzazione alla divulgazione di propri dati relativi al sito.
+   --------------------------------------------------------------------
 
-Si autorizza il sito a divulgare il nickname del proprio garante.
+Si autorizza il sito a divulgare il nickname del proprio garante, ed in
+generale tutte le informazioni relate al sito (ad esempio: numero di partite giocate,
+di mani fatte, punteggi, valutazioni da parte degli altri utenti) per permettere
+a chi ancora non vi conosce di farsi una idea della vostra reputazione.
 
    5. Certificazioni
    -----------------
 
 Per poter diventare un garante occorre essere un utente certificato.
-Al momento le regole per diventare un utente certificato sono in via
-di definizione, l'unica già in vigore è la conoscenza diretta.
 
-   6. Trattamento dei dati personali.
+Le regole per essere certificati le potete trovare all'indirizzo:
+http://www.alternativeoutput.it/briskblog/doku.php?id=funz:certificazione
+
+
+   7. Trattamento dei dati personali.
    ----------------------------------
 
 Informativa ex art. 13 D.lgs. 196/2003
