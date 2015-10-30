@@ -138,6 +138,9 @@ table.placings td
 }
 
 table.placing {
+    background-image: url('img/najole_light.png');
+    background-attachment: fixed;
+
     border: 1px solid gray;
     border-collapse: collapse;
     border-spacing: 0px;
@@ -584,3 +587,27 @@ table.info td.ro {
     padding-right: 16px;
     }
 
+body.explain h1 {
+    font-size: 200%;
+    background-color: #fafafa;
+}
+
+body.explain h2 {
+    font-size: 180%;
+    background-color: #fafafa;
+}
+
+body.explain h3 {
+    font-size: 160%;
+    background-color: #fafafa;
+}
+
+body.explain h4 {
+    font-size: 140%;
+    background-color: #fafafa;
+}
+
+body.explain h5 {
+    font-size: 120%;
+    background-color: #fafafa;
+}

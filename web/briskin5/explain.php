@@ -54,7 +54,7 @@ function main() {
 <link rel="stylesheet" type="text/css" href="../brisk.css">
 <link rel="stylesheet" type="text/css" href="../room.css">
 </head>
-<body>
+<body class="explain">
 <div style="text-align: center;">
 <?php 
 main();
