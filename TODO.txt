@@ -3,12 +3,14 @@
 
   FEATURES |
  ----------+
+   - Global vars checker
    - APPRENTICE
      Phase1
+     DONE - correggere minuta giornaliera
+     DONE - aggiungere mask per autogar
      DONE - correggere email per apprentice
      DONE - verificare la variabile per tout IP ban apprentice
-     - correggere minuta giornaliera
-     - chat ban for apprentice
+     DONE - chat ban for apprentice
 
      DONE - ip check and time limit
        DONE . sql
