@@ -2169,7 +2169,9 @@ class Brisk
         $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
       }
       else {
-          if ( TRUE && (!$user->is_auth() || $user->is_appr()) ) {
+          // TEMPORARY DISABLED UNTIL test user option will be available
+          // if ( TRUE && (!$user->is_auth() || $user->is_appr()) ) {
+          if (!$user->is_auth()) {
               $to_user = nickserv_msg($dt, xcape("Visto l'elevato numero di molestatori che ultimamente hanno preso dimora su Brisk abbiamo deciso"));
               $to_user .= nickserv_msg($dt, xcape("di disattivare temporaneamente la chat in room per i non registrati, non ce ne vogliate e buone feste."));
               if (FALSE) {
