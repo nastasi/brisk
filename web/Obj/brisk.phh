@@ -1660,13 +1660,13 @@ class Brisk
               $ret = 2;
               break;
           }
-          if (($user_item = $bdb->getitem_bylogin($user_login, $user_code)) == FALSE) {
+          if ($user_login == $user->name) {
               $ret = 3;
+              $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
           }
-          if ($user_login == $user->name) {
+          if (($user_item = $bdb->getitem_bylogin($user_login, $user_code)) == FALSE) {
               $ret = 4;
-              $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
           }
           if (($guar_item = $bdb->getitem_bycode($user_item->guar_code_get())) != FALSE) {
@@ -1676,6 +1676,10 @@ class Brisk
               $guar_login = "";
           }
           $user_tos_vers = $user_item->tos_vers_get();
+
+          if (($usernet_item = $bdb->usernet_bycode($user->code, $user_item->code)) == FALSE) {
+              $usernet_item = $bdb->usernet_default($user->code, $user_item->code);
+          }
 
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
               $mesg = sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login));

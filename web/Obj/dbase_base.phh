@@ -3,7 +3,7 @@
    *  brisk - dbase_base.phh
    *
    *  Copyright (C) 2011-2012 Matteo Nastasi
-   *                          mailto: nastasi@alternativeoutput.it 
+   *                          mailto: nastasi@alternativeoutput.it
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
    *
@@ -56,7 +56,7 @@ class LoginDBItem {
 
     static function LoginDBItemFromRecord($rec)
     {
-        $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
+        $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass,
                                $rec->email, $rec->type, $rec->last_dona,
                                $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code,
                                $rec->match_cnt, $rec->game_cnt);
@@ -73,7 +73,7 @@ class LoginDBItem {
     {
         return $this->login;
     }
-    
+
     function pass_get()
     {
         return $this->pass;
@@ -181,4 +181,47 @@ class MailDBItem {
         return $bdb->mail_add_fromitem($this);
     }
 }
+
+define('USERNET_FRIEND', 0);
+define('USERNET_CLEVER', 1);
+define('USERNET_TRUST', 2);
+class UserNetItem {
+    var $owner;
+    var $target;
+    var $friend;
+    var $clever;
+    var $trust;
+
+    var $from_db;
+
+    function UserNetItem($owner, $target, $friend, $clever, $trust, $from_db)
+    {
+        $this->owner = $owner;
+        $this->target = $target;
+        $this->friend = $friend;
+        $this->clever = $clever;
+        $this->trust = $trust;
+
+        $this->from_db = $from_db;
+    }
+
+    static function UserNetItemFromRecord($rec)
+    {
+        $ret = new UserNetItem($rec->owner, $rec->target, $rec->friend,
+                               $rec->clever, $rec->trust, TRUE);
+
+        return ($ret);
+    }
+
+    static function UserNetItemDefaults($owner, $target)
+    {
+        $ret = new UserNetItem($owner, $target, USERNET_FRIEND,
+                               USERNET_CLEVER, USERNET_TRUST, FALSE);
+
+        return ($ret);
+    }
+
+
+}
+
 ?>

@@ -3,7 +3,35 @@
 
   FEATURES |
  ----------+
+   * Users Network construction
+     DONE - sql
+     - dbase API
+     - enhance info interface
+       . disable parts of interface
+     - minisplash at end of the match
+
+   * Double click on chat to open preferences
+
+   * APPRENTICE
+     Phase2
+     DONE - match counters (part 2)
+       DONE . migration script for old users
+     - guarantee for apprentice
+
+  BUGS |
+ ------+
    - Global vars checker
+   - Remove books from chat
+   - Not triple chars between letters
+   - 10002 message when already clicked
+
+
+---------
+   - APPRENTICE
+     Phase2
+     DONE - match counters (part 2)
+       DONE . migration script for old users
+
    - APPRENTICE
      Phase1
      DONE - correggere minuta giornaliera
@@ -30,11 +58,6 @@
          DONE - fix layout of tables
      DONE - aggiungere books.png
 
-     Phase2
-     - match counters (part 2)
-       . migration script for old users
-     - guarantee for apprentice
-   
     - MENTORS
      - listen all
 
