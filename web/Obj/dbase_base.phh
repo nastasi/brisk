@@ -182,41 +182,41 @@ class MailDBItem {
     }
 }
 
-define('USERNET_FRIEND', 0);
-define('USERNET_CLEVER', 1);
-define('USERNET_TRUST', 2);
-class UserNetItem {
+define('USERSNET_FRIEND', 1);
+define('USERSNET_SKILL', 1);
+define('USERSNET_TRUST', 2);
+class UsersNetItem {
     var $owner;
     var $target;
     var $friend;
-    var $clever;
+    var $skill;
     var $trust;
 
     var $from_db;
 
-    function UserNetItem($owner, $target, $friend, $clever, $trust, $from_db)
+    function UsersNetItem($owner, $target, $friend, $skill, $trust, $from_db)
     {
         $this->owner = $owner;
         $this->target = $target;
         $this->friend = $friend;
-        $this->clever = $clever;
+        $this->skill = $skill;
         $this->trust = $trust;
 
         $this->from_db = $from_db;
     }
 
-    static function UserNetItemFromRecord($rec)
+    static function UsersNetItemFromRecord($rec)
     {
-        $ret = new UserNetItem($rec->owner, $rec->target, $rec->friend,
-                               $rec->clever, $rec->trust, TRUE);
+        $ret = new UsersNetItem($rec->owner, $rec->target, $rec->friend,
+                               $rec->skill, $rec->trust, TRUE);
 
         return ($ret);
     }
 
-    static function UserNetItemDefaults($owner, $target)
+    static function UsersNetItemDefaults($owner, $target)
     {
-        $ret = new UserNetItem($owner, $target, USERNET_FRIEND,
-                               USERNET_CLEVER, USERNET_TRUST, FALSE);
+        $ret = new UsersNetItem($owner, $target, USERSNET_FRIEND,
+                               USERSNET_SKILL, USERSNET_TRUST, FALSE);
 
         return ($ret);
     }

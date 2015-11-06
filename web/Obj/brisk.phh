@@ -1677,8 +1677,8 @@ class Brisk
           }
           $user_tos_vers = $user_item->tos_vers_get();
 
-          if (($usernet_item = $bdb->usernet_bycode($user->code, $user_item->code)) == FALSE) {
-              $usernet_item = $bdb->usernet_default($user->code, $user_item->code);
+          if (($usersnet_item = $bdb->usersnet_bycode($user->code, $user_item->code)) == FALSE) {
+              $usersnet_item = $bdb->usersnet_default($user->code, $user_item->code);
           }
 
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
@@ -1710,7 +1710,9 @@ class Brisk
                                                "" : $guar_login),
                                     "match" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->match_cnt) ,
                                     "game" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->game_cnt),
-                                    "friend" => "unknown"));
+                                    "friend" => usersnet_friend_getlabel($usersnet_item->friend),
+                                    "skill" => $usersnet_item->skill,
+                                    "trust"  => $usersnet_item->trust));
       }
 
       return $jret;

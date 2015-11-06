@@ -923,5 +923,19 @@ function chunked_fini()
 
 } // end class User
 
+if (!isset($__usersnet_friend_map)) {
+    $__usersnet_friend_map = array("black", "unknown", "test", "friend", "bff");
+}
 
+function usersnet_friend_getlabel($id)
+{
+    GLOBAL $__usersnet_friend_map;
+
+    $id_i = intval($id);
+
+    if ($id_i < 0 || $id_i >= count($__usersnet_friend_map)) {
+        return FALSE;
+    }
+    return ($__usersnet_friend_map[$id_i]);
+}
 ?>

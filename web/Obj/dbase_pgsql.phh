@@ -855,12 +855,12 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return (TRUE);
     }
 
-    function usernet_bycode($owner, $target)
+    function usersnet_bycode($owner, $target)
     {
         GLOBAL $G_dbpfx;
         $ret = FALSE;
 
-        $net_sql = sprintf("SELECT * FROM %susers_net WHERE owner = %d AND target = %d;",
+        $net_sql = sprintf("SELECT * FROM %susersnet WHERE owner = %d AND target = %d;",
                             $G_dbpfx, $owner, $target);
         if (($net_pg  = $this->query($net_sql)) == FALSE) {
             return FALSE;
@@ -870,12 +870,12 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
 
         $net_obj = pg_fetch_object($net_pg, 0);
 
-        return (UserNetItem::UserNetItemFromRecord($net_obj));
+        return (UsersNetItem::UsersNetItemFromRecord($net_obj));
     }
 
-    function usernet_default($owner, $target)
+    function usersnet_default($owner, $target)
     {
-        return (UserNetItem::UserNetItemDefaults($owner, $target));
+        return (UsersNetItem::UsersNetItemDefaults($owner, $target));
     }
 
 } // End class BriskDB

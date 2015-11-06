@@ -1410,11 +1410,11 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
            <td class="c3t">3</td>
            <td class="c4t">4</td>
            <td class="c5t">5</td></tr>
-       <tr><td class="c1b"><input type="radio" name="credib" class="credib_id" value="1"></td>
-           <td class="c2b"><input type="radio" name="credib" class="credib_id" value="2"></td>
-           <td class="c3b"><input type="radio" name="credib" class="credib_id" value="3"></td>
-           <td class="c4b"><input type="radio" name="credib" class="credib_id" value="4"></td>
-           <td class="c5b"><input type="radio" name="credib" class="credib_id" value="5"></td>
+       <tr><td class="c1b"><input type="radio" name="trust" class="trust_id" value="1"></td>
+           <td class="c2b"><input type="radio" name="trust" class="trust_id" value="2"></td>
+           <td class="c3b"><input type="radio" name="trust" class="trust_id" value="3"></td>
+           <td class="c4b"><input type="radio" name="trust" class="trust_id" value="4"></td>
+           <td class="c5b"><input type="radio" name="trust" class="trust_id" value="5"></td>
        </tr>
     </table>
 </td></tr>

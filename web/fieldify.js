@@ -3,7 +3,7 @@
 function Fieldify(ancestor, fieldsdescr)
 {
     this.ancestor = ancestor;
-    
+
     this.field = new Array();
     for (k in fieldsdescr) {
         this.field[k] = fieldsdescr[k];
@@ -13,7 +13,7 @@ function Fieldify(ancestor, fieldsdescr)
 Fieldify.prototype = {
     ancestor: null,
     field: null,
-    
+
     visible: function(is_visible) {
         this.ancestor.style.visibility = (is_visible ? "visible" : "hidden" );
     },
@@ -33,20 +33,17 @@ Fieldify.prototype = {
 
     fld_value_set: function(name, value)
     {
-        console.log(name + "=" + value);
         this.ancestor.getElementsByClassName(name + '_id')[0].innerHTML = value;
     },
-    
+
     fld_radio_set: function(name, value)
     {
         var arr = this.ancestor.getElementsByClassName(name + '_id');
 
-        console.log(name + "=" + value);
-
         for (k in arr) {
             if (arr[k].value == value)
                 arr[k].checked = true;
-            else 
+            else
                 arr[k].checked = false;
         }
     },

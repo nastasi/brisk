@@ -451,7 +451,10 @@ function info_show(username)
                        guar: { type: 'value' },
                        match: { type: 'value' },
                        game: { type: 'value' },
-                       friend: { type: 'radio' } };
+                       friend: { type: 'radio' },
+                       skill: { type: 'radio' },
+                       trust: { type: 'radio' }
+                     };
 
         info = new Fieldify($('info'), fields);
         info.populate(info_in);
