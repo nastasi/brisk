@@ -24,6 +24,8 @@
    - Remove books from chat
    - Not triple chars between letters
    - 10002 message when already clicked
+   - usermgmt: add user delete
+   DONE - usermgmt: add email
 
 
 ---------
