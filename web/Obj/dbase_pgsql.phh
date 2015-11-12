@@ -138,7 +138,7 @@ class BriskDB
         /* check the existence of the nick in the BriskDB */
         log_main("login_exists: ".$login);
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s')",
+        $user_sql = sprintf("SELECT * FROM %susers WHERE login = '%s'",
                             $G_dbpfx, escsql($login));
         if (($user_pg = $this->query($user_sql)) != FALSE)
             if (pg_numrows($user_pg) == 1)

@@ -2065,7 +2065,7 @@ class Brisk
             if (($bdb = BriskDB::create()) != FALSE) {
                 $bdb->users_load();
                 /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-                if ($bdb->login_exists($name_new)) {
+                if ($bdb->login_exists(strtolower($name_new))) {
                     $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
                     $to_user .= nickserv_msg($dt, $prestr);
                 }
@@ -2364,7 +2364,7 @@ class Brisk
         $bdb->users_load();
         if ($pass != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
             log_auth("XXX", "auth2");
-            $authenticate = $bdb->login_verify($name_new, $pass, $code);
+            $authenticate = $bdb->login_verify(strtolower($name_new), $pass, $code);
             log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
 
             if ($authenticate != FALSE) {
@@ -2376,7 +2376,7 @@ class Brisk
             }
         }
         else {
-            $login_exists =  $bdb->login_exists($name_new);
+            $login_exists =  $bdb->login_exists(strtolower($name_new));
         }
     }
     else {
