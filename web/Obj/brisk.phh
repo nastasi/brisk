@@ -2078,10 +2078,10 @@ class Brisk
       } while (0);
     } // nick chat command
     else if (strncmp($msg, "/info ", 6) == 0) {
-        $guar_user = substr($msg, 6);
+        $info_user = substr($msg, 6);
 
-        error_log("here [" . $guar_user."]");
-        echo $this->info_show($user, $guar_user, $dt);
+        error_log("here [" . $info_user."][".escsql(urldecode($info_user)). "]");
+        echo $this->info_show($user, urldecode($info_user), $dt);
     }
     else if (strncmp($msg, "/st ", 4) == 0) {
       log_main("chatt_send BEGIN");

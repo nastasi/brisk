@@ -1003,6 +1003,7 @@ supported by:<br>
 <script type="text/javascript" src="commons.js"></script>
 <script type="text/javascript" src="fieldify.js"></script>
 <script type="text/javascript" src="prefs.js"></script>
+<script type="text/javascript" src="info.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
@@ -1171,6 +1172,7 @@ cookie_law(null);
 <script type="text/javascript" src="commons.js"></script>
 <script type="text/javascript" src="fieldify.js"></script>
 <script type="text/javascript" src="prefs.js"></script>
+<script type="text/javascript" src="info.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
@@ -1421,8 +1423,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>
-<!-- <input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_reset();" value="<?php echo $mlang_room['btn_reset'][$G_lang]; ?>"/>
-<input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_save'][$G_lang]; ?>"/> -->
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="info_reset();" value="<?php echo $mlang_room['btn_reset'][$G_lang]; ?>"/>
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="info_save();" value="<?php echo $mlang_room['btn_save'][$G_lang]; ?>"/>
 </div>
 
 </div>
