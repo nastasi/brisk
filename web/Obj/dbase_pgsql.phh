@@ -25,7 +25,7 @@
 require_once("${G_base}Obj/dbase_base.phh");
 
 $escsql_from = array( "\\",   "'"   );
-$escsql_to   = array( "\\\\", "\\'" );
+$escsql_to   = array( "\\\\", "''" );
 
 function escsql($s)
 {
