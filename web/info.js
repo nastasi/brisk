@@ -65,29 +65,10 @@ function info_show_cb(e)
     }
 }
 
-function info_save()
-{
-    var ret;
-
-    info = info_fld($('info'));
-    ret = info.dom2json();
-
-    console.log(ret);
-
-    if (0 == 1) {
-        if (typeof(g_prefs) == 'undefined')
-            return false;
-
-        ret = server_request('mesg', 'info|save','__POST__', 'prefs', JSON.stringify(g_prefs));
-
-        if (ret == 1)
-            $('preferences').style.visibility = 'hidden';
-    }
-}
-
 function info_reset()
 {
-    var ret;
+    var ret, target;
 
-    ret = server_request('mesg', 'prefs|reset');
+    target = $('info').getElementsByClassName('login_id')[0].innerHTML;
+    return info_show(target);
 }

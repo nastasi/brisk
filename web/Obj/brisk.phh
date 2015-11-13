@@ -1643,6 +1643,12 @@ class Brisk
     }
   }
 
+  /*
+    function info_show($user, $user_login, $dt)
+
+    if success return assoc. array with "ret" => 0 and other fields
+    else return an assoc. array with "ret: != 0 and "mesg" with an error description
+  */
   function info_show($user, $user_login, $dt)
   {
       GLOBAL $G_lang, $mlang_brisk, $G_base;
