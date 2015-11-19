@@ -1644,12 +1644,12 @@ class Brisk
   }
 
   /*
-    function info_show($user, $user_login, $dt)
+    function info_show($user, $target, $dt)
 
     if success return assoc. array with "ret" => 0 and other fields
     else return an assoc. array with "ret: != 0 and "mesg" with an error description
   */
-  function info_show($user, $user_login, $dt)
+  function info_show($user, $target, $dt)
   {
       GLOBAL $G_lang, $mlang_brisk, $G_base;
 
@@ -1658,7 +1658,7 @@ class Brisk
       $ret = 0;
 
       do {
-          if ($user_login == "") {
+          if ($target == "") {
               $ret = 1;
               break;
           }
@@ -1666,12 +1666,12 @@ class Brisk
               $ret = 2;
               break;
           }
-          if ($user_login == $user->name) {
+          if ($target == $user->name) {
               $ret = 3;
               $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
           }
-          if (($user_item = $bdb->getitem_bylogin($user_login, $user_code)) == FALSE) {
+          if (($user_item = $bdb->getitem_bylogin($target, $user_code)) == FALSE) {
               $ret = 4;
               break;
           }
@@ -1688,10 +1688,10 @@ class Brisk
           }
 
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
-              $mesg = sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login));
+              $mesg = sprintf($mlang_brisk['tos_old'][$G_lang], xcape($target));
           }
           else if ($guar_login == "") {
-              $mesg = sprintf($mlang_brisk['inf_nfd'][$G_lang], xcape($user_login));
+              $mesg = sprintf($mlang_brisk['inf_nfd'][$G_lang], xcape($target));
           }
       } while (0);
 
@@ -1705,7 +1705,7 @@ class Brisk
       else {
           $jret = json_encode(array("ret" => 0,
                                     "mesg" => "",
-                                    "login" => $user_login,
+                                    "login" => $target,
                                     // FIXME: state internationalization
                                     "state" =>
                                     ($user_item->type & USER_FLAG_TY_APPR ? "Apprendista" :
