@@ -1724,6 +1724,35 @@ class Brisk
       return $jret;
   }
 
+  function info_save($user, $json_s)
+  {
+      GLOBAL $G_lang, $mlang_brisk, $G_base;
+
+      $mesg = "";
+      $user_code = -1;
+      $ret = 0;
+
+
+      do {
+          if (($json = json_decode($json_s)) == FALSE) {
+              $ret = 1;
+              break;
+          }
+
+          if (($bdb = BriskDB::create()) == FALSE) {
+              $ret = 2;
+              break;
+          }
+
+          if (($user_item = $bdb->usersnet_save($user->code, $json)) == FALSE) {
+              $ret = 4;
+              break;
+          }
+          return (TRUE);
+      } while(0);
+      return (FALSE);
+  }
+
   function room_outstandup($user)
   {
     $this->room_sitdown($user, -1);

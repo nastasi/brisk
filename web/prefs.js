@@ -114,8 +114,12 @@ function prefs_save()
 
     ret = server_request('mesg', 'prefs|save','__POST__', 'prefs', JSON.stringify(g_prefs));
 
-    if (ret == 1)
+    if (ret == 1) {
         $('preferences').style.visibility = 'hidden';
+    }
+    else {
+        alert(ret);
+    }
 }
 
 function prefs_reset()
