@@ -62,8 +62,9 @@ class DBConn
     static function destroy()
     {
         if (DBConn::$dbcnnx != FALSE) {
+            $ret = pg_close(DBConn::$dbcnnx);
             DBConn::$dbcnnx = FALSE;
-            return (pg_close(DBConn::$dbcnnx));
+            return ($ret);
         }
         return TRUE;
     }
@@ -112,11 +113,13 @@ class BriskDB
 
     function query($sql)
     {
-        if (($res = pg_query($this->dbconn->db(), $sql)) == FALSE) {
+        if (($res = @pg_query($this->dbconn->db(), $sql)) == FALSE) {
+            error_log('pg_result_status: ' .  pg_result_status($res));
+            error_log('pg_connection_status: ' .  pg_connection_status($this->dbconn->db()));
             // try to recover the connection
             if (($this->dbconn = DBConn::recover()) == FALSE)
                 return FALSE;
-            return (pg_query($this->dbconn->db(), $sql));
+            return (@pg_query($this->dbconn->db(), $sql));
         }
 
         return ($res);
