@@ -18,7 +18,7 @@ INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10101
 DELETE FROM #PFX#users WHERE code = 10102;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10102, 'due', md5('two'), 'due@pluto.com', CAST (X'00010000' as integer), 10101);
 DELETE FROM #PFX#users WHERE code = 10103;
-INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10103, 'tre', md5('thr'), 'tre@pluto.com', CAST (X'00010000' as integer), 10102);
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10103, 'tre', md5('thr'), 'tre@pluto.com', CAST (X'00030000' as integer), 10102);
 DELETE FROM #PFX#users WHERE code = 10104;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10104, 'qua', md5('for'), 'qua@pluto.com', CAST (X'00010000' as integer), 10102);
 DELETE FROM #PFX#users WHERE code = 10105;
