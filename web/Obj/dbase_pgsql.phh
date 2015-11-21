@@ -880,7 +880,72 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
     {
         return (UsersNetItem::UsersNetItemDefaults($owner, $target));
     }
+    function usersnet_save($owner_id, $json)
+    {
+        GLOBAL $G_dbpfx;
+        $ret = 99999;
+        $trans = FALSE;
 
+        do {
+            $friend = usersnet_friend_getid($json->friend);
+
+            if ($json->skill < 1 || $json->skill > 5 ||
+                $json->trust < 1 || $json->trust > 5 ||
+                $friend == FALSE) {
+                $ret = 1;
+                break;
+            }
+
+            $this->transaction('BEGIN');
+            $trans = TRUE;
+
+            // try to update
+            $net_sql = sprintf("
+                    UPDATE %susersnet SET (friend, skill, trust, mtime) =
+                        (%d, %d, %d, now())
+                        FROM %susers as us
+                        WHERE owner = %d AND us.login = '%s' AND target = us.code RETURNING *;",
+                               $G_dbpfx,
+                               $friend, $json->skill, $json->trust,
+                               $G_dbpfx,
+                               $owner_id, escsql($json->login));
+            if (($net_pg  = $this->query($net_sql)) == FALSE || pg_numrows($net_pg) == 0) {
+                $net_sql = sprintf("
+                INSERT INTO %susersnet SELECT %d AS owner, us.code as target,
+                        %d as friend, %d as skill, %d as trust
+                    FROM %susers as us WHERE us.login = '%s' RETURNING *;",
+                                   $G_dbpfx, $owner_id,
+                                   $friend, $json->skill, $json->trust,
+                                   $G_dbpfx, $json->login);
+                if (($net_pg  = $this->query($net_sql)) == FALSE) {
+                    log_wr('insert query failed');
+                    $ret = 2;
+                    break;
+                }
+                if (pg_numrows($net_pg) != 1) {
+                    log_wr(sprintf('insert numrow failed [%s] [%d]', $net_sql, pg_numrows($net_pg)));
+                    $ret = 3;
+                    break;
+                }
+            }
+            else {
+                if (pg_numrows($net_pg) != 1) {
+                    log_wr('update numrow failed');
+                    $ret = 4;
+                    break;
+                }
+            }
+
+            $net_obj = pg_fetch_object($net_pg, 0);
+            $this->transaction('COMMIT');
+            return (0);
+        } while (0);
+
+        if ($trans)
+            $this->transaction('ROLLBACK');
+
+        return ($ret);
+    }
 } // End class BriskDB
 
 class LoginDBOld

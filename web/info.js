@@ -72,3 +72,20 @@ function info_reset()
     target = $('info').getElementsByClassName('login_id')[0].innerHTML;
     return info_show(target);
 }
+
+function info_save()
+{
+    var info, jinfo, ret;
+
+    info = info_fld($('info'));
+    jinfo = info.dom2json();
+
+    ret = server_request('mesg', 'info|save','__POST__', 'info', JSON.stringify(jinfo));
+
+    if (ret == 1) {
+        $('info').style.visibility = 'hidden';
+    }
+    else {
+        alert(ret);
+    }
+}

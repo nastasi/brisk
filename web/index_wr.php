@@ -117,6 +117,8 @@ Ti sei registrato col nickname \'%s\',<br>
 Ciò è necessario per ottenere la password.<br><br>
 Saluti e buone partite, mop.<br>',
                                            'en' => 'EN mhtml [%s] [%s]'),
+                      'info_err' => array( 'it' => 'E\' occorso un errore (%d), riprova più tardi.',
+                                           'en' => 'Some error occurs (%d), retry later.')
                       );
 
 define('LICMGR_CHO_ACCEPT', 0);
@@ -350,6 +352,22 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
     if ($argz[0] == 'ping') {
         log_wr("PING RECEIVED");
+    }
+    else if ($argz[0] == 'info') {
+        if ($argz[1] == 'save') {
+            if (!isset($post['info'])) {
+                return FALSE;
+            }
+
+            if (($ret = $brisk->info_save($user, $post['info'])) == TRUE) {
+                if ($ret == TRUE) {
+                    echo "1";
+                    return TRUE;
+                }
+            }
+            printf($mlang_indwr['info_err'][$G_lang], $ret);
+            return FALSE;
+        }
     }
     else if ($argz[0] == 'prefs') {
         if ($argz[1] == 'save') {
