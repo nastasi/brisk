@@ -428,7 +428,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                     if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
-                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
+                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(trim(urldecode($cli_name))), xcapelt(trim(urldecode($cli_email)))));
                         fclose($fp);
                     }
                     Warrant::unlock_data($wa_lock);
@@ -450,8 +450,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     if (($bdb = BriskDB::create()) == FALSE)
                         break;
 
-                    $cli_name = urldecode($cli_name);
-                    $cli_email = urldecode($cli_email);
+                    $cli_name = trim(urldecode($cli_name));
+                    $cli_email = trim(urldecode($cli_email));
 
                     // check for already used fields
                     if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {

@@ -7,7 +7,7 @@
    - Not triple chars between letters
    - 10002 message when already clicked
    - usermgmt: add user delete
-   - trim spaces in apprentice form
+   DONE - trim spaces in apprentice form
    DONE - Remove books from chat
    DONE - usermgmt: add email
 
