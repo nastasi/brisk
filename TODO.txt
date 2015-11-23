@@ -1,14 +1,26 @@
  TODO |
 ------+
 
+  BUGS |
+ ------+
+   - Global vars checker
+   - Not triple chars between letters
+   - 10002 message when already clicked
+   - usermgmt: add user delete
+   - trim spaces in apprentice form
+   DONE - Remove books from chat
+   DONE - usermgmt: add email
+
   FEATURES |
  ----------+
+   * inherited info
    * Users Network construction
      DONE - sql
      - dbase API
      - enhance info interface
        . disable parts of interface
      - minisplash at end of the match
+     - differentiate table authorization
 
    * Double click on chat to open preferences
 
@@ -18,14 +30,6 @@
        DONE . migration script for old users
      - guarantee for apprentice
 
-  BUGS |
- ------+
-   - Global vars checker
-   - Remove books from chat
-   - Not triple chars between letters
-   - 10002 message when already clicked
-   - usermgmt: add user delete
-   DONE - usermgmt: add email
 
 
 ---------
