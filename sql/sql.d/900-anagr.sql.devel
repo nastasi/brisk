@@ -7,6 +7,7 @@
 -- define('USER_FLAG_TY_NORM',    0x010000); // done
 -- define('USER_FLAG_TY_SUPER',   0x020000); // done
 -- define('USER_FLAG_TY_CERT',    0x040000); // done
+-- define('USER_FLAG_TY_APPR',    0x080000); // done
 -- define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 -- define('USER_FLAG_TY_ADMIN',   0x400000); // done
 -- define('USER_FLAG_TY_DISABLE', 0x800000); // done
@@ -27,4 +28,6 @@ DELETE FROM #PFX#users WHERE code = 10106;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10106, 'sei', md5('six'), 'sei@pluto.com', CAST (X'00210000' as integer), 10103);
 DELETE FROM #PFX#users WHERE code = 10107;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10107, E'"/\\''|', md5('sev'), 'sev@pluto.com', CAST (X'00210000' as integer), 10103);
-ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 10108;
+DELETE FROM #PFX#users WHERE code = 10108;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10108, E'appr', md5('appr'), 'appr@pluto.com', CAST (X'00080000' as integer), 10103);
+ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 10109;
