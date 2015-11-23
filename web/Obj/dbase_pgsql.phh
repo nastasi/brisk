@@ -887,13 +887,15 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         do {
             $friend = usersnet_friend_getid($json->friend);
 
+            $json->skill = intval($json->skill);
+            $json->trust = intval($json->trust);
+
             if ($json->skill < 1 || $json->skill > 5 ||
                 $json->trust < 1 || $json->trust > 5 ||
                 $friend == FALSE) {
                 $ret = 1;
                 break;
             }
-
             $this->transaction('BEGIN');
             $trans = TRUE;
 
