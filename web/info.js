@@ -21,6 +21,10 @@
  *
  */
 
+var mlang_info = { 'btn_close' : { 'it' : 'Chiudi.',
+                                   'en' : 'Close.' }
+                 };
+
 function info_fld(dobj)
 {
     var fields = { login: { type: 'value' },
@@ -49,7 +53,7 @@ function info_show(username)
         info.visible(true);
         }
     else {
-        alert("error: open info window failed");
+        var noti = new notify(gst, info_in.mesg, 0, mlang_info['btn_close'][g_lang], 400, 150);
     }
 }
 

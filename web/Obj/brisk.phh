@@ -1732,7 +1732,6 @@ class Brisk
       $user_code = -1;
       $ret = 0;
 
-
       do {
           if (($json = json_decode($json_s)) == FALSE) {
               $ret = 1;
@@ -1744,13 +1743,13 @@ class Brisk
               break;
           }
 
-          if (($user_item = $bdb->usersnet_save($user->code, $json)) == FALSE) {
-              $ret = 4;
+          if (($user_item = $bdb->usersnet_save($user->code, $json)) != 0) {
+              $ret = 4000 + $user_item;
               break;
           }
-          return (TRUE);
       } while(0);
-      return (FALSE);
+
+      return ($ret);
   }
 
   function room_outstandup($user)
@@ -2115,7 +2114,6 @@ class Brisk
     else if (strncmp($msg, "/info ", 6) == 0) {
         $info_user = substr($msg, 6);
 
-        error_log("here [" . $info_user."][".escsql(urldecode($info_user)). "]");
         echo $this->info_show($user, urldecode($info_user), $dt);
     }
     else if (strncmp($msg, "/st ", 4) == 0) {

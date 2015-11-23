@@ -358,13 +358,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             if (!isset($post['info'])) {
                 return FALSE;
             }
-
-            if (($ret = $brisk->info_save($user, $post['info'])) == TRUE) {
-                if ($ret == TRUE) {
-                    echo "1";
-                    return TRUE;
-                }
+            if (($ret = $brisk->info_save($user, $post['info'])) == 0) {
+                echo "1";
+                return TRUE;
             }
+
             printf($mlang_indwr['info_err'][$G_lang], $ret);
             return FALSE;
         }
