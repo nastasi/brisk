@@ -113,6 +113,10 @@ class BriskDB
 
     function query($sql)
     {
+        if (!$this->dbconn)
+            if (($this->dbconn = DBConn::recover()) == FALSE)
+                return FALSE;
+
         if (($res = @pg_query($this->dbconn->db(), $sql)) == FALSE) {
             error_log('pg_result_status: ' .  pg_result_status($res));
             error_log('pg_connection_status: ' .  pg_connection_status($this->dbconn->db()));
@@ -355,11 +359,9 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (type, supp_comp) = (%d, '%s') WHERE code = %d;",
                             $G_dbpfx, $flags, escsql($supp_comp), $code);
-        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
-        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }
@@ -370,11 +372,9 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (type, disa_reas) = (%d, %d) WHERE code = %d;",
                             $G_dbpfx, $flags, $disa_reas, $code);
-        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
-        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }
@@ -385,11 +385,9 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (tos_vers) = ('%s') WHERE code = %d;",
                             $G_dbpfx, escsql($tos_vers), $code);
-        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
-        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }
