@@ -5,8 +5,8 @@
  ------+
    - Global vars checker
    - Not triple chars between letters
-   - 10002 message when already clicked
    - usermgmt: add user delete
+   DONE - 10002 message when already clicked
    DONE - trim spaces in apprentice form
    DONE - Remove books from chat
    DONE - usermgmt: add email

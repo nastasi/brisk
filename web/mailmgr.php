@@ -76,8 +76,14 @@ function main() {
             $errcode = 0;
         } while (FALSE);
         if ($errcode) {
-            singlemsg("E' occorso un errore durante la verifica della e-mail.",
-                      sprintf("E' occorso un errore durante la verifica della e-mail.<br><br>Codice d'errore: %d.<br>", $errcode));
+            if ($errcode == 10002) {
+                singlemsg("L'email è già stata verificata con successo.",
+                          "L'email è già stata verificata con successo, ora attenda che le venga recapitata la password.");
+            }
+            else {
+                singlemsg("E' occorso un errore durante la verifica della e-mail.",
+                          sprintf("E' occorso un errore durante la verifica della e-mail.<br><br>Codice d'errore: %d.<br>", $errcode));
+            }
             $bdb->transaction('ROLLBACK');
         }
     }
