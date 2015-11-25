@@ -28,6 +28,7 @@ define('FTOK_PATH', "/var/lib/brisk");
 define('LEGAL_PATH', "/tmp/legal_brisk");
 define('PROXY_PATH', "/var/lib/brisk_proxy");
 define('TABLES_N', 36);
+define('TABLES_APPR_N', 12);
 define('TABLES_AUTH_N', 8);
 define('TABLES_CERT_N', 4);
 define('PLAYERS_N', 3);
@@ -634,8 +635,9 @@ class Vect {
 }
 
 define('TABLE_AUTH_TY_PUBL', 0);
-define('TABLE_AUTH_TY_AUTH', 1);
-define('TABLE_AUTH_TY_CERT', 2);
+define('TABLE_AUTH_TY_APPR', 1);
+define('TABLE_AUTH_TY_AUTH', 2);
+define('TABLE_AUTH_TY_CERT', 3);
 
 
 class Table {
@@ -671,6 +673,8 @@ class Table {
         $thiz->auth_type =   TABLE_AUTH_TY_CERT;
     else if ($idx < TABLES_AUTH_N)
         $thiz->auth_type =   TABLE_AUTH_TY_AUTH;
+    else if ($idx < TABLES_APPR_N)
+        $thiz->auth_type =   TABLE_AUTH_TY_APPR;
     else
         $thiz->auth_type =   TABLE_AUTH_TY_PUBL;
 
@@ -822,6 +826,12 @@ class Table {
           case TABLE_AUTH_TY_AUTH:
               if ($user->is_auth() && !$user->is_appr())
                   $act = "sitreser";
+              else
+                  $act = 'reserved';
+              break;
+          case TABLE_AUTH_TY_APPR:
+              if ($user->is_auth())
+                  $act = "sitappr";
               else
                   $act = 'reserved';
               break;

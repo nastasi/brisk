@@ -16,11 +16,13 @@
    * inherited info
    * Users Network construction
      DONE - sql
-     - dbase API
+     DONE - dbase API
+     DONE - add apprentices tables
      - enhance info interface
        . disable parts of interface
      - minisplash at end of the match
      - differentiate table authorization
+   * add new kind of isolation for apprentice
 
    * Double click on chat to open preferences
 

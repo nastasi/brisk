@@ -42,6 +42,8 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                            'en' => 'To send a message to the administrator you have to be authenticated'),
                       'shutmsg'  => array( 'it' => '<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>',
                                            'en' => '<b>The server is going to be rebooted, new games are not allowed.</b>'),
+                      'mustappr' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica o apprendistato.</b>',
+                                           'en' => '<b>The table where you want to sit require authentication or apprentice</b>'),
                       'mustauth' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica.</b>',
                                            'en' => '<b>The table where you want to sit require authentication</b>'),
                       'mustcert' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica e certificazione.</b>',
@@ -826,6 +828,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 else if ( $table->auth_type == TABLE_AUTH_TY_AUTH &&
                           (!$user->is_auth() || $user->is_appr()) ) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustauth'][$G_lang]);
+                }
+                else if ( $table->auth_type == TABLE_AUTH_TY_APPR &&
+                          (!$user->is_auth()) ) {
+                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustappr'][$G_lang]);
                 }
                 else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustfirst'][$G_lang]);

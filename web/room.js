@@ -460,6 +460,10 @@ function j_tab_act_cont(idx, act)
         // MLANG 1
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
     }
+    else if (act == 'sitappr') {
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okappr.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'">';
+    }
     else if (act == 'sitreser') {
         // MLANG 1
         $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okauth.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated users only" : "tavolo riservato agli utenti registrati")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated users only" : "tavolo riservato agli utenti registrati")+'">';
