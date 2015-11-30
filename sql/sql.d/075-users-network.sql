@@ -5,8 +5,6 @@ DROP TABLE IF EXISTS #PFX#usersnet;
 CREATE TABLE #PFX#usersnet (
        owner      integer REFERENCES #PFX#users (code)
                   ON DELETE cascade ON UPDATE cascade, -- network owner
-       inher      integer NULL REFERENCES #PFX#users (code)
-                  ON DELETE cascade ON UPDATE cascade, -- inheriting user
        target     integer REFERENCES #PFX#users (code)
                   ON DELETE cascade ON UPDATE cascade, -- evaluated user
        friend     integer,                             -- friendship level
@@ -20,14 +18,10 @@ CREATE TABLE #PFX#usersnet (
 DROP INDEX IF EXISTS #PFX#usersnet_owner_idx;
 DROP INDEX IF EXISTS #PFX#usersnet_target_idx;
 DROP INDEX IF EXISTS #PFX#usersnet_owner_target_idx;
-DROP INDEX IF EXISTS #PFX#usersnet_owner_inher_idx;
-DROP INDEX IF EXISTS #PFX#usersnet_owner_target_inher_idx;
 
 CREATE INDEX #PFX#usersnet_owner_idx ON #PFX#usersnet (owner);
 CREATE INDEX #PFX#usersnet_target_idx ON #PFX#usersnet (target);
-CREATE INDEX #PFX#usersnet_owner_target_idx ON #PFX#usersnet (owner, target);
-CREATE INDEX #PFX#usersnet_owner_inher_idx ON #PFX#usersnet (owner,inher);
-CREATE UNIQUE INDEX #PFX#usersnet_owner_target_inher_idx ON #PFX#usersnet (owner, target, inher);
+CREATE UNIQUE INDEX #PFX#usersnet_owner_target_idx ON #PFX#usersnet (owner, target);
 
 DROP VIEW #PFX#usersnet_wideskill;
 CREATE VIEW #PFX#usersnet_wideskill
