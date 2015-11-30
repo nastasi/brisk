@@ -26,16 +26,18 @@ CREATE UNIQUE INDEX #PFX#usersnet_owner_target_idx ON #PFX#usersnet (owner, targ
 DROP VIEW #PFX#usersnet_wideskill;
 CREATE VIEW #PFX#usersnet_wideskill
     AS SELECT un.owner, ur.target, SUM(ur.skill * un.trust) / SUM(un.trust) as skill, count(*) as count
-        FROM bsk_usersnet AS un, bsk_usersnet AS ur
-        WHERE un.owner = 10101                           -- owner is xxx
-            AND un.target = ur.owner AND un.friend >= 4  -- 'un' is, at least, our friend
+        FROM #PFX#usersnet AS un, #PFX#usersnet AS ur
+        WHERE un.target = ur.owner AND un.friend >= 4  -- 'un' is, at least, our friend
         GROUP BY un.owner, ur.target;
 
 DROP VIEW #PFX#usersnet_narrowskill;
 CREATE VIEW #PFX#usersnet_narrowskill
     AS SELECT un.owner, ur.target, SUM(ur.skill * un.trust) / SUM(un.trust) as skill, count(*) as count
-        FROM bsk_usersnet AS un, bsk_usersnet AS ur      -- 'un' primary records, 'ur' inheriting records
-        WHERE un.owner = 10101                           -- owner is xxx
-            AND un.target = ur.owner AND un.friend = 5   -- 'un' is, at least, our friend
+        FROM #PFX#usersnet AS un, #PFX#usersnet AS ur      -- 'un' primary records, 'ur' inheriting records
+        WHERE un.target = ur.owner AND un.friend = 5   -- 'un' is, at least, our friend
         GROUP BY un.owner, ur.target;
 
+-- DROP VIEW #PFX#usersnet_allfriends;
+-- CREATE VIEW #PFX#usersnet_allfriends
+--     AS SELECT un.owner, ur.target FROM #PFX#usersnet AS un, #PFX#usersnet AS ur
+--     WHERE 
