@@ -55,12 +55,12 @@ one_or_all() {
         if [ "$1" ]; then
             echo "$1"
         elif [ "$TYPE_FILES" = "a" ]; then
-            echo sql.d/[0-9]*
+            find sql.d/ -name '[0-9]*' -type f | tr '\n' ' '
         elif [ "$TYPE_FILES" = "d" ]; then
-            echo sql.d/[0-9]*.{sql,devel}
+            find sql.d/ -name '[0-9]*' | egrep '.*_devel.sql$|^[^_]+.sql$' | tr '\n' ' '
         else
-            echo sql.d/[0-9]*.sql
-            fi); do
+            find sql.d/ -name '[0-9]*' | egrep '^[^_]+.sql$' | tr '\n' ' '
+        fi); do
         echo "-- FILE BEG: $fil"
         cat "$fil"
         echo "-- FILE END: $fil"
