@@ -55,11 +55,11 @@ one_or_all() {
         if [ "$1" ]; then
             echo "$1"
         elif [ "$TYPE_FILES" = "a" ]; then
-            find sql.d/ -name '[0-9]*' -type f | tr '\n' ' '
+            find sql.d/ -name '[0-9]*' -type f | sort -n | tr '\n' ' '
         elif [ "$TYPE_FILES" = "d" ]; then
-            find sql.d/ -name '[0-9]*' | egrep '.*_devel.sql$|^[^_]+.sql$' | tr '\n' ' '
+            find sql.d/ -name '[0-9]*' | egrep '.*_devel.sql$|^[^_]+.sql$' | sort -n | tr '\n' ' '
         else
-            find sql.d/ -name '[0-9]*' | egrep '^[^_]+.sql$' | tr '\n' ' '
+            find sql.d/ -name '[0-9]*' | egrep '^[^_]+.sql$' | sort -n | tr '\n' ' '
         fi); do
         echo "-- FILE BEG: $fil"
         cat "$fil"
