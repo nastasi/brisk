@@ -3,24 +3,28 @@
 
   BUGS |
  ------+
-   - Global vars checker
    - Not triple chars between letters
+   <release>
+   - Global vars checker
    - usermgmt: add user delete
    DONE - 10002 message when already clicked
    DONE - trim spaces in apprentice form
    DONE - Remove books from chat
    DONE - usermgmt: add email
 
+
   FEATURES |
  ----------+
-   * inherited info
+   WIP * inherited info
    * Users Network construction
      DONE - sql
      DONE - dbase API
      DONE - add apprentices tables
      - remove entry when set unknown
      - enhance info interface
+       . SQL to show current evaluation
        . disable parts of interface
+     <release>
      - minisplash at end of the match
      - differentiate table authorization
    * add new kind of isolation for apprentice

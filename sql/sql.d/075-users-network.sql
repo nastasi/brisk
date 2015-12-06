@@ -32,12 +32,19 @@ CREATE VIEW #PFX#usersnet_wideskill
 
 DROP VIEW #PFX#usersnet_narrowskill;
 CREATE VIEW #PFX#usersnet_narrowskill
-    AS SELECT un.owner, ur.target, SUM(ur.skill * un.trust) / SUM(un.trust) as skill, count(*) as count
-        FROM #PFX#usersnet AS un, #PFX#usersnet AS ur      -- 'un' primary records, 'ur' inheriting records
-        WHERE un.target = ur.owner AND un.friend = 5   -- 'un' is, at least, our friend
-        GROUP BY un.owner, ur.target;
+    AS SELECT un.owner AS owner, ur.target AS target, SUM(ur.skill * un.trust) / SUM(un.trust) AS skill,
+           COUNT(*) AS count,
+           SUM(CASE WHEN ur.friend = 1 THEN 1 ELSE 0 END) AS black  -- count number of friend
+                                                                    -- blacklisting the target
+           FROM #PFX#usersnet AS un, #PFX#usersnet as ur
+           WHERE un.target = ur.owner AND un.friend = 5             -- ur owner must be bbf of un.owner
+           GROUP BY un.owner, ur.target HAVING SUM(CASE WHEN ur.friend = 1 THEN 1 ELSE 0 END) = 0;
 
--- DROP VIEW #PFX#usersnet_allfriends;
--- CREATE VIEW #PFX#usersnet_allfriends
---     AS SELECT un.owner, ur.target FROM #PFX#usersnet AS un, #PFX#usersnet AS ur
---     WHERE 
+DROP VIEW #PFX#usersnet_party;
+CREATE VIEW #PFX#usersnet_party
+    AS  (SELECT ns.* FROM #PFX#usersnet_narrowskill AS ns
+              -- all except targets managed directly by the owner
+              WHERE target NOT IN (SELECT target FROM #PFX#usersnet WHERE owner = ns.owner)
+          UNION ALL
+         (SELECT owner, target, skill, 1 AS count, 0 AS black FROM #PFX#usersnet
+             WHERE friend > 2)) ORDER BY target;

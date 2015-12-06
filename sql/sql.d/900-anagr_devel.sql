@@ -30,4 +30,16 @@ DELETE FROM #PFX#users WHERE code = 10107;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10107, E'"/\\''|', md5('sev'), 'sev@pluto.com', CAST (X'00210000' as integer), 10103);
 DELETE FROM #PFX#users WHERE code = 10108;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10108, E'appr', md5('appr'), 'appr@pluto.com', CAST (X'00080000' as integer), 10103);
-ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 10109;
+
+DELETE FROM #PFX#users WHERE code = 10109;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10109, 'bosi', md5('bosi'), 'bosi@pluto.com', CAST (X'00010000' as integer), 10103);
+DELETE FROM #PFX#users WHERE code = 10110;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10110, 'bono', md5('bono'), 'bono@pluto.com', CAST (X'00010000' as integer), 10103);
+DELETE FROM #PFX#users WHERE code = 10111;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10111, 'nosi', md5('nosi'), 'nosi@pluto.com', CAST (X'00010000' as integer), 10103);
+DELETE FROM #PFX#users WHERE code = 10112;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10112, 'sino', md5('sino'), 'sino@pluto.com', CAST (X'00010000' as integer), 10103);
+DELETE FROM #PFX#users WHERE code = 10113;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10113, 'doub', md5('boub'), 'doub@pluto.com', CAST (X'00010000' as integer), 10103);
+
+ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 10114;
