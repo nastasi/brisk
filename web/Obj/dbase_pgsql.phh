@@ -856,11 +856,20 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return (TRUE);
     }
 
+    function friendship_default()
+    {
+        return (array(usersnet_friend_getlabel(1) => "//",
+                      usersnet_friend_getlabel(2) => "//",
+                      usersnet_friend_getlabel(3) => "//",
+                      usersnet_friend_getlabel(4) => "//",
+                      usersnet_friend_getlabel(5) => "//"));
+    }
+
     function usersnet_widefriend($owner, $target)
     {
         GLOBAL $G_dbpfx;
 
-        $widefriend = array(1 => "//", 2 => "//", 3 => "//", 4 => "//", 5 => "//");
+        $widefriend = $this->friendship_default();
 
         $wfri_sql = sprintf("SELECT * FROM %susersnet_widefriend WHERE owner = %d AND target = %d;",
                             $G_dbpfx, $owner, $target);
@@ -870,7 +879,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
 
         for ($i = 0 ; $i < pg_numrows($wfri_pg) ; $i++) {
             $wfri_obj = pg_fetch_object($wfri_pg, $i);
-            $widefriend[intval($wfri_obj->friend)] = $wfri_obj->count;
+            $widefriend[usersnet_friend_getlabel(intval($wfri_obj->friend))] = $wfri_obj->count;
         }
 
         return ($widefriend);
@@ -880,7 +889,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
     {
         GLOBAL $G_dbpfx;
 
-        $narrowfriend = array(1 => "//", 2 => "//", 3 => "//", 4 => "//", 5 => "//");
+        $narrowfriend = $this->friendship_default();
 
         $nfri_sql = sprintf("SELECT * FROM %susersnet_narrowfriend WHERE owner = %d AND target = %d;",
                             $G_dbpfx, $owner, $target);
@@ -890,7 +899,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
 
         for ($i = 0 ; $i < pg_numrows($nfri_pg) ; $i++) {
             $nfri_obj = pg_fetch_object($nfri_pg, $i);
-            $narrowfriend[intval($nfri_obj->friend)] = $nfri_obj->count;
+            $narrowfriend[usersnet_friend_getlabel(intval($nfri_obj->friend))] = $nfri_obj->count;
         }
         return ($narrowfriend);
     }
