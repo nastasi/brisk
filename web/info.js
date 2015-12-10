@@ -48,8 +48,7 @@ function info_fld(dobj)
                    skill: { type: 'radio' },
                    trust: { type: 'radio' }
                  };
-
-    return (new Fieldify(dobj, fields));
+    return (new Fieldify([dobj], fields));
  }
 
 function info_show(username)

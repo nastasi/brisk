@@ -858,11 +858,11 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
 
     function friendship_default()
     {
-        return (array(usersnet_friend_getlabel(1) => "//",
-                      usersnet_friend_getlabel(2) => "//",
-                      usersnet_friend_getlabel(3) => "//",
-                      usersnet_friend_getlabel(4) => "//",
-                      usersnet_friend_getlabel(5) => "//"));
+        return (array(usersnet_friend_getlabel(1) => "0",
+                      usersnet_friend_getlabel(2) => "0",
+                      usersnet_friend_getlabel(3) => "0",
+                      usersnet_friend_getlabel(4) => "0",
+                      usersnet_friend_getlabel(5) => "0"));
     }
 
     function usersnet_widefriend($owner, $target)

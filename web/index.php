@@ -1392,7 +1392,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <tr class="widefriend_id"><td class="le info-opt">Da evitare: <span class="black_id"></span></td>
 <td class="le info-opt">In prova: <span class="test_id"></span></td>
 <td class="le info-opt">Amico: <span class="friend_id"></span></td>
-<td class="le info-opt">Fidato: <span class="bff_id"></span></td><td></td></tr>
+<td class="le info-opt">Fidato: <span class="bff_id"></span></td></tr>
 
 <!-- <tr class="narrowfriendh_id"><td colspan="3"><b>Cosa ne pensano gli amici fidati:</b></td>
 <td class="le info-opt">Bravura: <span class="skill_id"></span></td></tr> -->

@@ -1,25 +1,36 @@
+function __fieldify_findfirst(objarr, name)
+{
+    for (var i = 0, obj = objarr[i] ; i < objarr.length ; i++) {
+        var item = obj.getElementsByClassName(name + '_id');
+        if (item.length > 0) {
+            return (item);
+        }
+    }
+    return false;
+}
 
 // fieldsdescr = { name: { type: 'typename' }, ... }
-function Fieldify(ancestor, fieldsdescr)
+function Fieldify(ancestors, fieldsdescr)
 {
-    this.ancestor = ancestor;
-
+    this.ancestors = ancestors;
     this.field = new Array();
     for (k in fieldsdescr) {
         this.field[k] = fieldsdescr[k];
         if (this.field[k].type == 'fields') {
-            this.field[k].obj = new Fieldify(this.ancestor.getElementsByClassName(k + '_id')[0],
-                                             this.field[k].fields);
+            var item = __fieldify_findfirst(this.ancestors, k);
+            if (item) {
+                this.field[k].obj = new Fieldify(item, this.field[k].fields);
+            }
         }
     }
 }
 
 Fieldify.prototype = {
-    ancestor: null,
+    ancestors: null,
     field: null,
 
     visible: function(is_visible) {
-        this.ancestor.style.visibility = (is_visible ? "visible" : "hidden" );
+        this.ancestors[0].style.visibility = (is_visible ? "visible" : "hidden" );
     },
 
     // { 'name': 'value' }
@@ -59,35 +70,44 @@ Fieldify.prototype = {
 
     fld_value_set: function(name, value)
     {
-        this.ancestor.getElementsByClassName(name + '_id')[0].innerHTML = value;
+        var item = __fieldify_findfirst(this.ancestors, name);
+        if (item) {
+            item[0].innerHTML = value;
+        }
     },
 
     fld_value_get: function(name)
     {
-        return this.ancestor.getElementsByClassName(name + '_id')[0].innerHTML;
+        var item = __fieldify_findfirst(this.ancestors, name);
+        if (item) {
+            return (item[0].innerHTML);
+        }
+        return false;
     },
 
     fld_radio_set: function(name, value)
     {
-        var arr = this.ancestor.getElementsByClassName(name + '_id');
-
-        for (k in arr) {
-            if (arr[k].value == value)
-                arr[k].checked = true;
-            else
-                arr[k].checked = false;
+        var arr = __fieldify_findfirst(this.ancestors, name);
+        if (arr) {
+            for (k in arr) {
+                if (arr[k].value == value)
+                    arr[k].checked = true;
+                else
+                    arr[k].checked = false;
+            }
         }
     },
 
     fld_radio_get: function(name)
     {
-        var arr = this.ancestor.getElementsByClassName(name + '_id');
-        ret = null;
-
-        for (k in arr) {
-            if (arr[k].checked == true) {
-                ret = arr[k].value;
-                break;
+        var ret = null;
+        var arr = __fieldify_findfirst(this.ancestors, name);
+        if (arr) {
+            for (k in arr) {
+                if (arr[k].checked == true) {
+                    ret = arr[k].value;
+                    break;
+                }
             }
         }
         return ret;
