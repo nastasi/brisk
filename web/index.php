@@ -234,9 +234,9 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                           'en' => 'State:'),
                      'info_guar' => array('it' => 'Garante:',
                                           'en' => 'Guarantee:'),
-                     'info_match' => array('it' => 'Partite:',
+                     'info_match' => array('it' => '<span title="Partite giocate ai tavoli riservati.">Partite:</span>',
                                            'en' => 'Matches:'),
-                     'info_game' => array('it' => 'Mani:',
+                     'info_game' => array('it' => '<span title="Mani giocate ai tavoli riservati.">Mani:</span>',
                                           'en' => 'Hands:'),
                      'info_frie' => array('it' => 'Conoscenza:',
                                           'en' => 'Friendship:'),
@@ -1380,12 +1380,24 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 
 <div id="info" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 340px; top: 150px; visibility: hidden;">
 <table class="info">
-<tr><td class="le"><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri"><span class="login_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri"><span class="state_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
-<tr><td colspan="2" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
+<tr><td><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri"><span class="login_id"></span></td>
+<td><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri"><span class="state_id"></span></td></tr>
+<tr><td><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td><td></td><td></td></tr>
+<tr><td><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td>
+<td><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
+<tr><td colspan="4"><b>Cosa ne pensano gli amici.</b></td></tr>
+
+<tr><td class="le info-opt">Da evitare:<span class="frie_black"></span></td>
+<td class="le info-opt">In prova:<span class="frie_test"></span></td>
+<td class="le info-opt">Amico:<span class="frie_friend"></span></td>
+<td class="le info-opt">Amico fidato:<span class="frie_bff"></span></td></tr>
+
+<tr><td colspan="4"><b>Cosa ne pensano gli amici fidati:</b></td></tr>
+<tr><td class="le info-opt">Da evitare:<span class="frie_black"></span></td>
+<td class="le info-opt">In prova:<span class="frie_test"></span></td>
+<td class="le info-opt">Amico:<span class="frie_friend"></span></td>
+<td class="le info-opt">Amico fidato:<span class="frie_bff"></span></td></tr>
+<!-- 
 <tr><td class="le ri" colspan="2"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td></tr>
 <tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
     <td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
@@ -1422,6 +1434,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
        </tr>
     </table>
 </td></tr>
+-->
+<tr><td colspan="4" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>

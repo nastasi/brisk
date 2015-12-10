@@ -856,28 +856,68 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return (TRUE);
     }
 
-    function usersnet_bycode($owner, $target)
+    function usersnet_widefriend($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $widefriend = array(1 => "//", 2 => "//", 3 => "//", 4 => "//", 5 => "//");
+
+        $wfri_sql = sprintf("SELECT * FROM %susersnet_widefriend WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($wfri_pg  = $this->query($wfri_sql)) == FALSE) {
+            return ($widefriend);
+        }
+
+        for ($i = 0 ; $i < pg_numrows($wfri_pg) ; $i++) {
+            $wfri_obj = pg_fetch_object($wfri_pg, $i);
+            $widefriend[intval($wfri_obj->friend)] = $wfri_obj->count;
+        }
+
+        return ($widefriend);
+    }
+
+    function usersnet_narrowfriend($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $narrowfriend = array(1 => "//", 2 => "//", 3 => "//", 4 => "//", 5 => "//");
+
+        $nfri_sql = sprintf("SELECT * FROM %susersnet_narrowfriend WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($nfri_pg  = $this->query($nfri_sql)) == FALSE) {
+            return $narrowfriend;
+        }
+
+        for ($i = 0 ; $i < pg_numrows($nfri_pg) ; $i++) {
+            $nfri_obj = pg_fetch_object($nfri_pg, $i);
+            $narrowfriend[intval($nfri_obj->friend)] = $nfri_obj->count;
+        }
+        return ($narrowfriend);
+    }
+
+    function usersnet_bycode($owner, $target, $widefriend, $narrowfriend)
     {
         GLOBAL $G_dbpfx;
         $ret = FALSE;
 
         $net_sql = sprintf("SELECT * FROM %susersnet WHERE owner = %d AND target = %d;",
-                            $G_dbpfx, $owner, $target);
-        if (($net_pg  = $this->query($net_sql)) == FALSE) {
+                           $G_dbpfx, $owner, $target);
+        if (($net_pg  = $this->query($net_sql)) == FALSE)
             return FALSE;
-        }
+
         if (pg_numrows($net_pg) != 1)
             return FALSE;
 
         $net_obj = pg_fetch_object($net_pg, 0);
 
-        return (UsersNetItem::UsersNetItemFromRecord($net_obj));
+        return (UsersNetItem::UsersNetItemFromRecord($net_obj, $widefriend, $narrowfriend));
     }
 
-    function usersnet_default($owner, $target)
+    function usersnet_default($owner, $target, $widefriend, $narrowfriend)
     {
-        return (UsersNetItem::UsersNetItemDefaults($owner, $target));
+        return (UsersNetItem::UsersNetItemDefaults($owner, $target, $widefriend, $narrowfriend));
     }
+
     function usersnet_save($owner_id, $json)
     {
         GLOBAL $G_dbpfx;

@@ -1693,8 +1693,13 @@ class Brisk
           }
           $user_tos_vers = $user_item->tos_vers_get();
 
-          if (($usersnet_item = $bdb->usersnet_bycode($user->code, $user_item->code)) == FALSE) {
-              $usersnet_item = $bdb->usersnet_default($user->code, $user_item->code);
+          $widefriend = $bdb->usersnet_widefriend($user->code, $user_item->code);
+          $narrowfriend = $bdb->usersnet_narrowfriend($user->code, $user_item->code);
+
+          if (($usersnet_item = $bdb->usersnet_bycode($user->code, $user_item->code,
+                                                      $widefriend, $narrowfriend)) == FALSE) {
+              $usersnet_item = $bdb->usersnet_default($user->code, $user_item->code,
+                                                      $widefriend, $narrowfriend);
           }
 
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
@@ -1728,7 +1733,10 @@ class Brisk
                                     "game" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->game_cnt),
                                     "friend" => usersnet_friend_getlabel($usersnet_item->friend),
                                     "skill" => $usersnet_item->skill,
-                                    "trust"  => $usersnet_item->trust));
+                                    "trust"  => $usersnet_item->trust,
+                                    "widefriend" => $usersnet_item->widefriend,
+                                    "narrowfriend" => $usersnet_item->narrowfriend
+                                    ));
       }
 
       return $jret;

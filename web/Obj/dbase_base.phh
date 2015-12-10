@@ -194,29 +194,34 @@ class UsersNetItem {
 
     var $from_db;
 
-    function UsersNetItem($owner, $target, $friend, $skill, $trust, $from_db)
+    function UsersNetItem($owner, $target, $friend, $skill, $trust,
+                          $widefriend, $narrowfriend, $from_db)
     {
         $this->owner = $owner;
         $this->target = $target;
         $this->friend = $friend;
         $this->skill = $skill;
         $this->trust = $trust;
+        $this->widefriend = $widefriend;
+        $this->narrowfriend = $narrowfriend;
 
         $this->from_db = $from_db;
     }
 
-    static function UsersNetItemFromRecord($rec)
+    static function UsersNetItemFromRecord($rec, $widefriend, $narrowfriend)
     {
         $ret = new UsersNetItem($rec->owner, $rec->target, $rec->friend,
-                               $rec->skill, $rec->trust, TRUE);
+                               $rec->skill, $rec->trust,
+                                $widefriend, $narrowfriend, TRUE);
 
         return ($ret);
     }
 
-    static function UsersNetItemDefaults($owner, $target)
+    static function UsersNetItemDefaults($owner, $target, $widefriend, $narrowfriend)
     {
         $ret = new UsersNetItem($owner, $target, USERSNET_FRIEND,
-                               USERSNET_SKILL, USERSNET_TRUST, FALSE);
+                                USERSNET_SKILL, USERSNET_TRUST,
+                                $widefriend, $narrowfriend, FALSE);
 
         return ($ret);
     }

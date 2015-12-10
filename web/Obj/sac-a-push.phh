@@ -40,7 +40,7 @@ function global_dump()
     GLOBAL $G_splash_h, $G_splash_idx, $G_splash_interval, $G_splash_timeout;
     GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
     GLOBAL $G_with_splash, $G_sidebanner, $G_sidebanner_idx;
-    GLOBAL $G_with_topbanner, $G_selfreg_tout;
+    GLOBAL $G_with_topbanner, $G_selfreg_tout, $G_selfreg_mask;
 
     fprintf(STDERR, "G_alarm_passwd = [%s]\n", print_r($G_alarm_passwd, TRUE));
     fprintf(STDERR, "G_ban_list = [%s]\n", print_r($G_ban_list, TRUE));
