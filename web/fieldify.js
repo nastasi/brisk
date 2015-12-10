@@ -7,6 +7,10 @@ function Fieldify(ancestor, fieldsdescr)
     this.field = new Array();
     for (k in fieldsdescr) {
         this.field[k] = fieldsdescr[k];
+        if (this.field[k].type == 'fields') {
+            this.field[k].obj = new Fieldify(this.ancestor.getElementsByClassName(k + '_id')[0],
+                                             this.field[k].fields);
+        }
     }
 }
 
@@ -28,6 +32,9 @@ Fieldify.prototype = {
             else if (this.field[k].type == 'radio') {
                 this.fld_radio_set(k, field_values[k]);
             }
+            else if (this.field[k].type == 'fields') {
+                this.field[k].obj.json2dom(field_values[k]);
+            }
         }
     },
 
@@ -42,6 +49,9 @@ Fieldify.prototype = {
             }
             else if (this.field[k].type == 'radio') {
                 ret[k] = this.fld_radio_get(k);
+            }
+            else if (this.field[k].type == 'fields') {
+                ret[k] = this.field[k].obj.dom2json();
             }
         }
         return ret;

@@ -25,11 +25,23 @@ var mlang_info = { 'btn_close' : { 'it' : 'Chiudi.',
                                    'en' : 'Close.' }
                  };
 
+
 function info_fld(dobj)
 {
     var fields = { login: { type: 'value' },
                    state: { type: 'value', perms: 'ro' },
                    guar: { type: 'value', perms: 'ro' },
+
+                   widefriend: { type: 'fields', fields: { black: { type: 'value', perms: 'ro' },
+                                                           test: { type: 'value', perms: 'ro'},
+                                                           friend: { type: 'value', perms: 'ro'},
+                                                           bff: { type: 'value', perms: 'ro'}
+                                                         } },
+                   narrowfriend: { type: 'fields', fields: { black: { type: 'value', perms: 'ro'},
+                                                             test: { type: 'value', perms: 'ro'},
+                                                             friend: { type: 'value', perms: 'ro'},
+                                                             bff: { type: 'value', perms: 'ro'}
+                                                         } },
                    match: { type: 'value', perms: 'ro' },
                    game: { type: 'value', perms: 'ro' },
                    friend: { type: 'radio' },

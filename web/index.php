@@ -1385,18 +1385,23 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <tr><td><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td><td></td><td></td></tr>
 <tr><td><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td>
 <td><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
+<!-- <tr class="widefriendh_id"><td colspan="3"><b>Cosa ne pensano gli amici.</b></td>
+<td class="le info-opt">Bravura: <span class="skill_id"></span></td></tr> -->
 <tr><td colspan="4"><b>Cosa ne pensano gli amici.</b></td></tr>
 
-<tr><td class="le info-opt">Da evitare:<span class="frie_black"></span></td>
-<td class="le info-opt">In prova:<span class="frie_test"></span></td>
-<td class="le info-opt">Amico:<span class="frie_friend"></span></td>
-<td class="le info-opt">Amico fidato:<span class="frie_bff"></span></td></tr>
+<tr class="widefriend_id"><td class="le info-opt">Da evitare: <span class="black_id"></span></td>
+<td class="le info-opt">In prova: <span class="test_id"></span></td>
+<td class="le info-opt">Amico: <span class="friend_id"></span></td>
+<td class="le info-opt">Fidato: <span class="bff_id"></span></td><td></td></tr>
 
+<!-- <tr class="narrowfriendh_id"><td colspan="3"><b>Cosa ne pensano gli amici fidati:</b></td>
+<td class="le info-opt">Bravura: <span class="skill_id"></span></td></tr> -->
 <tr><td colspan="4"><b>Cosa ne pensano gli amici fidati:</b></td></tr>
-<tr><td class="le info-opt">Da evitare:<span class="frie_black"></span></td>
-<td class="le info-opt">In prova:<span class="frie_test"></span></td>
-<td class="le info-opt">Amico:<span class="frie_friend"></span></td>
-<td class="le info-opt">Amico fidato:<span class="frie_bff"></span></td></tr>
+
+<tr class="narrowfriend_id"><td class="le info-opt">Da evitare: <span class="black_id"></span></td>
+<td class="le info-opt">In prova: <span class="test_id"></span></td>
+<td class="le info-opt">Amico: <span class="friend_id"></span></td>
+<td class="le info-opt">Fidato: <span class="bff_id"></span></td></tr>
 <!-- 
 <tr><td class="le ri" colspan="2"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td></tr>
 <tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
