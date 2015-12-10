@@ -69,3 +69,5 @@ SELECT un.owner, ur.target, SUM(ur.skill * un.trust) AS num, SUM(un.trust) AS de
 
 SELECT us.login, pa.* FROM #PFX#usersnet_party pa, #PFX#users as us WHERE pa.target = us.code AND pa.owner = 10101;
 
+SELECT * FROM #PFX#usersnet_widefriend ORDER BY owner, target, friend;
+SELECT * FROM #PFX#usersnet_narrowfriend ORDER BY owner, target, friend;

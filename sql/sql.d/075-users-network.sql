@@ -23,6 +23,20 @@ CREATE INDEX #PFX#usersnet_owner_idx ON #PFX#usersnet (owner);
 CREATE INDEX #PFX#usersnet_target_idx ON #PFX#usersnet (target);
 CREATE UNIQUE INDEX #PFX#usersnet_owner_target_idx ON #PFX#usersnet (owner, target);
 
+DROP VIEW #PFX#usersnet_widefriend;
+CREATE VIEW #PFX#usersnet_widefriend
+    AS SELECT un.owner, ur.target, ur.friend, count(*) as count
+        FROM #PFX#usersnet AS un, #PFX#usersnet AS ur
+        WHERE un.target = ur.owner AND un.friend >= 4  -- 'un' is, at least, our friend
+        GROUP BY un.owner, ur.target, ur.friend;
+
+DROP VIEW #PFX#usersnet_narrowfriend;
+CREATE VIEW #PFX#usersnet_narrowfriend
+    AS SELECT un.owner, ur.target, ur.friend, count(*) as count
+        FROM #PFX#usersnet AS un, #PFX#usersnet AS ur
+        WHERE un.target = ur.owner AND un.friend >= 5  -- 'un' is, at least, our friend
+        GROUP BY un.owner, ur.target, ur.friend;
+
 DROP VIEW #PFX#usersnet_wideskill;
 CREATE VIEW #PFX#usersnet_wideskill
     AS SELECT un.owner, ur.target, SUM(ur.skill * un.trust) / SUM(un.trust) as skill, count(*) as count
