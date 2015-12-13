@@ -885,6 +885,27 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return ($widefriend);
     }
 
+    function usersnet_wideskill($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $wideskill = "//";
+
+        $wskl_sql = sprintf("SELECT * FROM %susersnet_wideskill WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($wskl_pg  = $this->query($wskl_sql)) == FALSE) {
+            return ($wideskill);
+        }
+
+        if (pg_numrows($wskl_pg) > 0) {
+            $wskl_obj = pg_fetch_object($wskl_pg, 0);
+            // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
+            // if ($wskl_obj->count >= 3)
+            $wideskill = sprintf("%3.2f", $wskl_obj->skill);
+        }
+        return ($wideskill);
+    }
+
     function usersnet_narrowfriend($owner, $target)
     {
         GLOBAL $G_dbpfx;
@@ -902,6 +923,27 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             $narrowfriend[usersnet_friend_getlabel(intval($nfri_obj->friend))] = $nfri_obj->count;
         }
         return ($narrowfriend);
+    }
+
+    function usersnet_narrowskill($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $narrowskill = "//";
+
+        $nskl_sql = sprintf("SELECT * FROM %susersnet_narrowskill WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($nskl_pg = $this->query($nskl_sql)) == FALSE) {
+            return ($narrowskill);
+        }
+
+        if (pg_numrows($nskl_pg) > 0) {
+            $nskl_obj = pg_fetch_object($nskl_pg, 0);
+            // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
+            // if ($nskl_obj->count >= 3)
+            $narrowskill = sprintf("%3.2f", $nskl_obj->skill);
+        }
+        return ($narrowskill);
     }
 
     function usersnet_bycode($owner, $target, $widefriend, $narrowfriend)

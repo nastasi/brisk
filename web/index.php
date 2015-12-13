@@ -1378,39 +1378,38 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrdeltalog"></div>
 </div>
 
-<div id="info" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 340px; top: 150px; visibility: hidden;">
+<div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
 <table class="info">
-<tr><td><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri"><span class="login_id"></span></td>
-<td><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri"><span class="state_id"></span></td></tr>
-<tr><td><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td><td></td><td></td></tr>
-<tr><td><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td>
-<td><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
-<!-- <tr class="widefriendh_id"><td colspan="3"><b>Cosa ne pensano gli amici.</b></td>
-<td class="le info-opt">Bravura: <span class="skill_id"></span></td></tr> -->
-<tr><td colspan="4"><b>Cosa ne pensano gli amici.</b></td></tr>
+<tr><td><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri b-right data"><span class="login_id"></span></td>
+<td><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri data"><span class="state_id"></span></td></tr>
+<tr><td><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri b-right data"><span class="guar_id"></span></td><td></td><td></td></tr>
+<tr><td><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri b-right data"><span class="match_id"></span></td>
+<td><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri data"><span class="game_id"></span></td></tr>
+<tr class="widefriend_id"><td colspan="3"><b>Cosa ne pensano gli amici:</b></td>
+<td class="le data">Bravura: <span class="skill_id"></span></td></tr>
 
-<tr class="widefriend_id"><td class="le info-opt">Da evitare: <span class="black_id"></span></td>
-<td class="le info-opt">In prova: <span class="test_id"></span></td>
-<td class="le info-opt">Amico: <span class="friend_id"></span></td>
-<td class="le info-opt">Fidato: <span class="bff_id"></span></td></tr>
+<tr class="widefriend_id"><td class="le info-opt data">Da evitare: <span class="black_id"></span></td>
+<td class="le info-opt data">In prova: <span class="test_id"></span></td>
+<td class="le info-opt data">Amico: <span class="friend_id"></span></td>
+<td class="le data">Fidato: <span class="bff_id"></span></td></tr>
 
-<!-- <tr class="narrowfriendh_id"><td colspan="3"><b>Cosa ne pensano gli amici fidati:</b></td>
-<td class="le info-opt">Bravura: <span class="skill_id"></span></td></tr> -->
-<tr><td colspan="4"><b>Cosa ne pensano gli amici fidati:</b></td></tr>
+<tr class="narrowfriend_id"><td colspan="3"><b>Cosa ne pensano gli amici fidati:</b></td>
+<td class="le data">Bravura: <span class="skill_id"></span></td></tr>
 
-<tr class="narrowfriend_id"><td class="le info-opt">Da evitare: <span class="black_id"></span></td>
-<td class="le info-opt">In prova: <span class="test_id"></span></td>
-<td class="le info-opt">Amico: <span class="friend_id"></span></td>
-<td class="le info-opt">Fidato: <span class="bff_id"></span></td></tr>
-<!-- 
-<tr><td class="le ri" colspan="2"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td></tr>
-<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
-    <td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
-<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="unknown">Sconosciuto</td>
-<td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="bff">Amico fidato</td></tr>
-<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="test">In prova</td></tr>
-<tr><td class="le"><b>Bravura:</b></td><td class="le"><b>Credibilità:</b></td></tr>
-<tr><td class="info-opt">
+<tr class="narrowfriend_id"><td class="le info-opt data">Da evitare: <span class="black_id"></span></td>
+<td class="le info-opt data">In prova: <span class="test_id"></span></td>
+<td class="le info-opt data">Amico: <span class="friend_id"></span></td>
+<td class="le data">Fidato: <span class="bff_id"></span></td></tr>
+<tr><td class="le ri triple" colspan="3"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td>
+<td class="le data triple"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td></tr>
+<tr>
+<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="unknown">Sconosciuto</td>
+<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="test">In prova</td>
+<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td>
+<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="bff">Amico fidato</td>
+</tr>
+<tr><td class="le"><b>Bravura:</b></td>
+<td class="data">
     <table class="fiverank" style="margin: auto;">
        <tr><td class="c1t">1</td>
            <td class="c2t">2</td>
@@ -1424,7 +1423,9 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
            <td class="c5b"><input type="radio" name="skill" class="skill_id" value="5"></td>
        </tr>
     </table>
-</td><td class="info-opt">
+</td>
+<td class="le"><b>Credibilità:</b></td>
+<td class="data">
     <table class="fiverank" style="margin: auto;">
        <tr><td class="c1t">1</td>
            <td class="c2t">2</td>
@@ -1439,8 +1440,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
        </tr>
     </table>
 </td></tr>
--->
-<tr><td colspan="4" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
+<!-- <tr><td colspan="4" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr> -->
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>

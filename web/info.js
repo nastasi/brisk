@@ -32,12 +32,14 @@ function info_fld(dobj)
                    state: { type: 'value', perms: 'ro' },
                    guar: { type: 'value', perms: 'ro' },
 
-                   widefriend: { type: 'fields', fields: { black: { type: 'value', perms: 'ro' },
+                   widefriend: { type: 'fields', fields: { skill: { type: 'value', perms: 'ro' },
+                                                           black: { type: 'value', perms: 'ro' },
                                                            test: { type: 'value', perms: 'ro'},
                                                            friend: { type: 'value', perms: 'ro'},
                                                            bff: { type: 'value', perms: 'ro'}
                                                          } },
-                   narrowfriend: { type: 'fields', fields: { black: { type: 'value', perms: 'ro'},
+                   narrowfriend: { type: 'fields', fields: { skill: { type: 'value', perms: 'ro' },
+                                                             black: { type: 'value', perms: 'ro'},
                                                              test: { type: 'value', perms: 'ro'},
                                                              friend: { type: 'value', perms: 'ro'},
                                                              bff: { type: 'value', perms: 'ro'}
@@ -48,7 +50,10 @@ function info_fld(dobj)
                    skill: { type: 'radio' },
                    trust: { type: 'radio' }
                  };
-    return (new Fieldify([dobj], fields));
+
+    var ret = new Fieldify([dobj], fields);
+    console.log(ret);
+    return (ret);
  }
 
 function info_show(username)

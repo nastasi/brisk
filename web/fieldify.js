@@ -1,6 +1,9 @@
-function __fieldify_findfirst(objarr, name)
+function __fieldify_find_ancestors(objarr, name)
 {
-    for (var i = 0, obj = objarr[i] ; i < objarr.length ; i++) {
+    var obj;
+
+    for (var i = 0 ; i < objarr.length ; i++) {
+        obj = objarr[i];
         var item = obj.getElementsByClassName(name + '_id');
         if (item.length > 0) {
             return (item);
@@ -12,13 +15,14 @@ function __fieldify_findfirst(objarr, name)
 // fieldsdescr = { name: { type: 'typename' }, ... }
 function Fieldify(ancestors, fieldsdescr)
 {
+    var item;
+
     this.ancestors = ancestors;
     this.field = new Array();
     for (k in fieldsdescr) {
         this.field[k] = fieldsdescr[k];
         if (this.field[k].type == 'fields') {
-            var item = __fieldify_findfirst(this.ancestors, k);
-            if (item) {
+            if (item = __fieldify_find_ancestors(this.ancestors, k)) {
                 this.field[k].obj = new Fieldify(item, this.field[k].fields);
             }
         }
@@ -70,7 +74,7 @@ Fieldify.prototype = {
 
     fld_value_set: function(name, value)
     {
-        var item = __fieldify_findfirst(this.ancestors, name);
+        var item = __fieldify_find_ancestors(this.ancestors, name);
         if (item) {
             item[0].innerHTML = value;
         }
@@ -78,7 +82,7 @@ Fieldify.prototype = {
 
     fld_value_get: function(name)
     {
-        var item = __fieldify_findfirst(this.ancestors, name);
+        var item = __fieldify_find_ancestors(this.ancestors, name);
         if (item) {
             return (item[0].innerHTML);
         }
@@ -87,7 +91,7 @@ Fieldify.prototype = {
 
     fld_radio_set: function(name, value)
     {
-        var arr = __fieldify_findfirst(this.ancestors, name);
+        var arr = __fieldify_find_ancestors(this.ancestors, name);
         if (arr) {
             for (k in arr) {
                 if (arr[k].value == value)
@@ -101,7 +105,7 @@ Fieldify.prototype = {
     fld_radio_get: function(name)
     {
         var ret = null;
-        var arr = __fieldify_findfirst(this.ancestors, name);
+        var arr = __fieldify_find_ancestors(this.ancestors, name);
         if (arr) {
             for (k in arr) {
                 if (arr[k].checked == true) {

@@ -1694,7 +1694,9 @@ class Brisk
           $user_tos_vers = $user_item->tos_vers_get();
 
           $widefriend = $bdb->usersnet_widefriend($user->code, $user_item->code);
+          $widefriend['skill'] = $bdb->usersnet_wideskill($user->code, $user_item->code);
           $narrowfriend = $bdb->usersnet_narrowfriend($user->code, $user_item->code);
+          $narrowfriend['skill'] = $bdb->usersnet_narrowskill($user->code, $user_item->code);
 
           if (($usersnet_item = $bdb->usersnet_bycode($user->code, $user_item->code,
                                                       $widefriend, $narrowfriend)) == FALSE) {
