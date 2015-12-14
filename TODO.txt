@@ -3,7 +3,8 @@
 
   BUGS |
  ------+
-   - Not triple chars between letters
+   DONE - Not sequence of 3 same chars
+   DONE   . check server side with test
    <release>
    - Global vars checker
    - usermgmt: add user delete

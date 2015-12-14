@@ -504,13 +504,13 @@ function j_check_login(login, ret)
             (login[i] >= 'A' && login[i] <= 'Z')) {
             if (old_c != login[i]) {
                 old_c = login[i];
-                old_ct = 0;
+                old_ct = 1;
             }
             else {
-                if (old_ct > 3) {
+                if (old_ct > 2) {
                     // FIXME LANG
-                    ret.ret = (g_lang == 'en' ? "More than three contiguous '" + old_c + "' not allowed." :
-                               "Il nickname contiene più di tre caratteri '" + old_c + "' consecutivi.");
+                    ret.ret = (g_lang == 'en' ? "More than two contiguous '" + old_c + "' not allowed." :
+                               "Il nickname contiene più di 2 caratteri '" + old_c + "' consecutivi.");
                     return (false);
                 }
             }

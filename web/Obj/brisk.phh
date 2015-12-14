@@ -3524,5 +3524,31 @@ function carousel_top()
     }
 }
 
+function login_consistency($name)
+{
+    $old_c = '';
+    if (($len = mb_strlen($name)) > 12) {
+        return FALSE;
+    }
 
+    for ($i = 0 ; $i < mb_strlen($name) ; $i++) {
+        $c = mb_substr($name, $i, 1);
+        if (mb_ereg_match ("[a-zA-Z0-9]", $c)) {
+            if ($old_c != $c) {
+                $old_c = $c;
+                $old_ct = 1;
+            }
+            else {
+                $old_ct++;
+                if ($old_ct > 2) {
+                    return (FALSE);
+                }
+            }
+        }
+        else {
+            return (FALSE);
+        }
+    }
+    return (TRUE);
+}
 ?>

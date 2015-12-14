@@ -243,6 +243,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             // check existence of username or email
             $is_trans = FALSE;
             do {
+                error_log($cli_name);
+                if (login_consistency($cli_name) == FALSE) {
+                    $mesg_to_user = "Il nickname non è conforme alle regole per la sua costruzione.";
+                    break;
+                }
+
                 if (($bdb = BriskDB::create()) == FALSE) {
                     $mesg_to_user = "Connessione al database fallita";
                     break;
