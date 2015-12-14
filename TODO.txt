@@ -21,7 +21,7 @@
      DONE - sql
      DONE - dbase API
      DONE - add apprentices tables
-     - remove entry when set unknown
+     DONE - remove entry when set unknown
      DONE - enhance info interface
        DONE . SQL to show current evaluation
        . disable parts of interface

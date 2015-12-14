@@ -182,9 +182,10 @@ class MailDBItem {
     }
 }
 
-define('USERSNET_FRIEND', 1);
-define('USERSNET_SKILL', 1);
-define('USERSNET_TRUST', 2);
+define('USERSNET_DEF_FRIEND', 2);
+define('USERSNET_DEF_SKILL', 2);
+define('USERSNET_DEF_TRUST', 2);
+
 class UsersNetItem {
     var $owner;
     var $target;
@@ -219,8 +220,8 @@ class UsersNetItem {
 
     static function UsersNetItemDefaults($owner, $target, $widefriend, $narrowfriend)
     {
-        $ret = new UsersNetItem($owner, $target, USERSNET_FRIEND,
-                                USERSNET_SKILL, USERSNET_TRUST,
+        $ret = new UsersNetItem($owner, $target, USERSNET_DEF_FRIEND,
+                                USERSNET_DEF_SKILL, USERSNET_DEF_TRUST,
                                 $widefriend, $narrowfriend, FALSE);
 
         return ($ret);

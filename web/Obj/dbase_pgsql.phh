@@ -210,10 +210,6 @@ class BriskDB
             return (FALSE);
         }
 
-        if (($sere_pg = $this->query($sere_sql)) == FALSE) {
-            return (FALSE);
-        }
-
         $sere_sql = sprintf("SELECT * FROM %sselfreg_chk WHERE (ip & %d) = %d;",
                             $G_dbpfx, int2four($G_selfreg_mask), int2four($laddr & $G_selfreg_mask));
         if (($sere_pg  = $this->query($sere_sql)) == FALSE) {
@@ -990,44 +986,58 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             $this->transaction('BEGIN');
             $trans = TRUE;
 
-            // try to update
-            $net_sql = sprintf("
+            if ($friend == USERSNET_FRIEND_UNKNOWN) {
+               // try to update
+                $net_sql = sprintf("
+                    DELETE FROM %susersnet
+                        USING %susers as us
+                        WHERE owner = %d AND us.login = '%s' AND target = us.code;",
+                                   $G_dbpfx, $G_dbpfx,
+                                   $owner_id, escsql($json->login));
+
+                if (($net_pg = $this->query($net_sql)) == FALSE) {
+                    $ret = 5;
+                    break;
+                }
+             }
+            else { // if ($friend == USERSNET_FRIEND_UNKNOWN
+                // try to update
+                $net_sql = sprintf("
                     UPDATE %susersnet SET (friend, skill, trust, mtime) =
                         (%d, %d, %d, now())
                         FROM %susers as us
                         WHERE owner = %d AND us.login = '%s' AND target = us.code RETURNING *;",
-                               $G_dbpfx,
-                               $friend, $json->skill, $json->trust,
-                               $G_dbpfx,
-                               $owner_id, escsql($json->login));
-            if (($net_pg  = $this->query($net_sql)) == FALSE || pg_numrows($net_pg) == 0) {
-                $net_sql = sprintf("
+                                   $G_dbpfx,
+                                   $friend, $json->skill, $json->trust,
+                                   $G_dbpfx,
+                                   $owner_id, escsql($json->login));
+                if (($net_pg  = $this->query($net_sql)) == FALSE || pg_numrows($net_pg) == 0) {
+                    $net_sql = sprintf("
                 INSERT INTO %susersnet SELECT %d AS owner, us.code as target,
                         %d as friend, %d as skill, %d as trust
                     FROM %susers as us WHERE us.login = '%s' RETURNING *;",
-                                   $G_dbpfx, $owner_id,
-                                   $friend, $json->skill, $json->trust,
-                                   $G_dbpfx, $json->login);
-                if (($net_pg  = $this->query($net_sql)) == FALSE) {
-                    log_wr('insert query failed');
-                    $ret = 2;
-                    break;
+                                       $G_dbpfx, $owner_id,
+                                       $friend, $json->skill, $json->trust,
+                                       $G_dbpfx, $json->login);
+                    if (($net_pg  = $this->query($net_sql)) == FALSE) {
+                        log_wr('insert query failed');
+                        $ret = 2;
+                        break;
+                    }
+                    if (pg_numrows($net_pg) != 1) {
+                        log_wr(sprintf('insert numrow failed [%s] [%d]', $net_sql, pg_numrows($net_pg)));
+                        $ret = 3;
+                        break;
+                    }
                 }
-                if (pg_numrows($net_pg) != 1) {
-                    log_wr(sprintf('insert numrow failed [%s] [%d]', $net_sql, pg_numrows($net_pg)));
-                    $ret = 3;
-                    break;
+                else {
+                    if (pg_numrows($net_pg) != 1) {
+                        log_wr('update numrow failed');
+                        $ret = 4;
+                        break;
+                    }
                 }
             }
-            else {
-                if (pg_numrows($net_pg) != 1) {
-                    log_wr('update numrow failed');
-                    $ret = 4;
-                    break;
-                }
-            }
-
-            $net_obj = pg_fetch_object($net_pg, 0);
             $this->transaction('COMMIT');
             return (0);
         } while (0);

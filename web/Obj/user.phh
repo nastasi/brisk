@@ -923,6 +923,12 @@ function chunked_fini()
 
 } // end class User
 
+define('USERSNET_FRIEND_BLACK', 1);
+define('USERSNET_FRIEND_UNKNOWN', 2);
+define('USERSNET_FRIEND_TEST', 3);
+define('USERSNET_FRIEND_FRIEND', 4);
+define('USERSNET_FRIEND_BFF', 5);
+
 if (!isset($__usersnet_friend_map)) {
     $__usersnet_friend_map = array("black", "unknown", "test", "friend", "bff");
 }

@@ -1751,6 +1751,7 @@ class Brisk
       $mesg = "";
       $user_code = -1;
       $ret = 0;
+      $subret = 0;
 
       do {
           if (($json = json_decode($json_s)) == FALSE) {
@@ -1763,8 +1764,8 @@ class Brisk
               break;
           }
 
-          if (($user_item = $bdb->usersnet_save($user->code, $json)) != 0) {
-              $ret = 4000 + $user_item;
+          if (($subret = $bdb->usersnet_save($user->code, $json)) != 0) {
+              $ret = 4000 + $subret;
               break;
           }
       } while(0);
