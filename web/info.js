@@ -52,7 +52,6 @@ function info_fld(dobj)
                  };
 
     var ret = new Fieldify([dobj], fields);
-    console.log(ret);
     return (ret);
  }
 
@@ -66,6 +65,7 @@ function info_show(username)
     if (info_in.ret == 0) {
         info = info_fld($('info'));
         info.json2dom(info_in);
+        info_onlyifknown_isvisible();
         info.visible(true);
         }
     else {
@@ -108,4 +108,26 @@ function info_save()
     else {
         alert(ret);
     }
+}
+function info_onlyifknown_isvisible()
+{
+    var vis = 'inherit';
+    var arr = $('info').getElementsByClassName('friend_id');
+    var obj = null;
+
+    for (var k = 0 ; k < arr.length ; k++) {
+        if (arr[k].checked == true) {
+            obj = arr[k];
+            break;
+        }
+    }
+    if (obj == null) {
+        return false;
+    }
+
+    if (obj.value == 'black' || obj.value == 'unknown') {
+        vis = 'hidden';
+    }
+    $('info').getElementsByClassName('onlyifknown_id')[0].style.visibility = vis;
+    return true;
 }

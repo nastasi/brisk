@@ -1401,14 +1401,19 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <td class="le info-opt data">Amico: <span class="friend_id"></span></td>
 <td class="le data">Fidato: <span class="bff_id"></span></td></tr>
 <tr><td class="le ri triple" colspan="3"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td>
-<td class="le data triple"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td></tr>
+<td class="le data triple"><input type="radio" name="friend" class="friend_id" value="black"
+    onclick="info_onlyifknown_isvisible();">Da evitare</td></tr>
 <tr>
-<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="unknown">Sconosciuto</td>
-<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="test">In prova</td>
-<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td>
-<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="bff">Amico fidato</td>
+<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="unknown"
+    onclick="info_onlyifknown_isvisible();">Sconosciuto</td>
+<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="test"
+    onclick="info_onlyifknown_isvisible();">In prova</td>
+<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="friend"
+    onclick="info_onlyifknown_isvisible();">Amico</td>
+<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="bff"
+    onclick="info_onlyifknown_isvisible();">Amico fidato</td>
 </tr>
-<tr><td class="le"><b>Bravura:</b></td>
+<tr class="onlyifknown_id"><td class="le"><b>Bravura:</b></td>
 <td class="data">
     <table class="fiverank" style="margin: auto;">
        <tr><td class="c1t">1</td>
