@@ -41,5 +41,7 @@ DELETE FROM #PFX#users WHERE code = 10112;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10112, 'sino', md5('sino'), 'sino@pluto.com', CAST (X'00010000' as integer), 10103);
 DELETE FROM #PFX#users WHERE code = 10113;
 INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10113, 'doub', md5('boub'), 'doub@pluto.com', CAST (X'00010000' as integer), 10103);
+DELETE FROM #PFX#users WHERE code = 10114;
+INSERT INTO #PFX#users (code, login, pass, email, type, guar_code) VALUES (10114, 'selfguar', md5('self'), 'self@pluto.com', CAST (X'00010000' as integer), 10103);
 
-ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 10114;
+ALTER SEQUENCE #PFX#users_code_seq RESTART WITH 10115;

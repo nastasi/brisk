@@ -17,6 +17,7 @@ else {
 // 26 hours between 2 successive registration from this area
 $G_selfreg_mask = 0xfffff000;
 $G_selfreg_tout = 93600;
+$G_notguar_code = 10114;
 
 // G_dbasetype value can be "pgsql" or "file"
 $G_dbasetype="pgsql";

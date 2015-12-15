@@ -30,6 +30,22 @@ define('DIRECT_ST_WRITE', 2);
 
 declare(ticks = 1);
 
+/* this list is created with bin/get_globals.sh */
+$_globals_list = array(
+'G_admin_mail', 'G_alarm_passwd', 'G_all_points', 'G_ban_list', 'G_base',
+'G_black_list', 'G_brisk_version', 'G_btrace_pref_sub', 'G_cloud_smasher',
+'G_crypt_key', 'G_dbasetype', 'G_dbauth', 'G_dbpfx', 'G_doc_path',
+'G_domain', 'G_donors_all', 'G_donors_cur', 'G_is_local', 'G_lang', 'G_lng',
+'G_mail_seed', 'G_notguar_code', 'G_PG_cons', 'G_PG_cons_n', 'G_PG_vow',
+'G_PG_vow_n', 'G_poll_entries', 'G_poll_name', 'G_poll_title',
+'G_provider_proxy', 'G_proxy_white_list', 'G_room_about', 'G_room_help',
+'G_room_passwdhowto', 'G_room_roadmap', 'G_room_whysupport',
+'G_selfreg_mask', 'G_selfreg_tout', 'G_shutdown', 'G_sidebanner',
+'G_sidebanner_idx', 'G_splash_content', 'G_splash_contents',
+'G_splash_cont_idx', 'G_splash_h', 'G_splash_idx', 'G_splash_interval',
+'G_splash_timeout', 'G_splash_w', 'G_topbanner', 'G_tos_dthard',
+'G_tos_dtsoft', 'G_tos_fname', 'G_tos_idx', 'G_tos_vers', 'G_webbase');
+
 function global_dump()
 {
     GLOBAL $G_alarm_passwd, $G_ban_list, $G_black_list, $G_btrace_pref_sub, $G_dbauth;
@@ -629,6 +645,18 @@ class Sac_a_push {
         $this->app->users_cleanup();
     }
 
+    function check_globals()
+    {
+        GLOBAL $_globals_list;
+        foreach ($_globals_list as $g) {
+            if (!array_search($g, $GLOBALS) || !isset($GLOBALS[$g])) {
+                error_log(sprintf("Global [%s] not declared", $g));
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
+
     function run()
     {
         GLOBAL $DOCUMENT_ROOT, $HTTP_HOST;
@@ -644,6 +672,11 @@ class Sac_a_push {
         GLOBAL $G_with_splash, $G_sidebanner, $G_sidebanner_idx;
         GLOBAL $G_with_topbanner;
         GLOBAL $G_tos_vers, $G_tos_fname, $G_tos_dtsoft, $G_tos_dthard, $G_tos_idx, $G_doc_path;
+
+        if (!$this->check_globals()) {
+            fprintf(STDERR, "Take a look to the phplog file, GLOBALS missing!\n");
+            sleep(10);
+        }
 
         if ($this->main_loop) {
             return (FALSE);
@@ -816,6 +849,10 @@ class Sac_a_push {
                                     $this->reload(FALSE, $G_provider_proxy);
                                     $this->app->reload(FALSE, $G_ban_list, $G_black_list,
                                                        $G_cloud_smasher);
+                                    if (!$this->check_globals()) {
+                                        fprintf(STDERR, "Take a look to the phplog file, GLOBALS missing!\n");
+                                        sleep(10);
+                                    }
                                     global_dump();
                                 }
                                 else if ($line == "shutdown" || $line == "sd") {

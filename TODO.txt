@@ -5,7 +5,7 @@
  ------+
    DONE - Not sequence of 3 same chars
    DONE   . check server side with test
-   - Global vars checker
+   DONE - Global vars checker
    <release>
    - usermgmt: add user delete
    DONE - 10002 message when already clicked
