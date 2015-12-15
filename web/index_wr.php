@@ -228,9 +228,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
             echo show_notify(str_replace("\n", " ", placings_show(FALSE)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
         }
-        else if ($argz[0] == 'whysupport') {
-            echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
-        }
         else if ($argz[0] == 'apprentice') {
             if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
                 $cli_name = "";
@@ -756,14 +753,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         else if ($argz[0] == 'roadmap') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
             $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
-
-            log_wr($user->comm[$user->step % COMM_N]);
-            $user->step_inc();
-
-        }
-        else if ($argz[0] == 'whysupport') {
-            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
 
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();

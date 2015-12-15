@@ -734,11 +734,6 @@ google_color_url = "000000";
    alt="'.$mlang_room['tit_cook'][$G_lang].'">'.$mlang_room['itm_cook'][$G_lang].'</a><br>
 <hr>
 
-<!--
-<a href="#"
-   onmouseover="menu_hide(0,1);"
-   title="perché supportare brisk?" onclick="act_whysupport();">supportare?</a><br>
--->
 <a href="#"
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_placing();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>

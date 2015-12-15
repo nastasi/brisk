@@ -430,11 +430,6 @@ function act_roadmap()
     send_mesg("roadmap");
 }
 
-function act_whysupport()
-{
-    send_mesg("whysupport");
-}
-
 function act_lascio()
 {
     send_mesg("lascio");

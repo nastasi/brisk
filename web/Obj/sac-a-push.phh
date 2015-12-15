@@ -39,7 +39,7 @@ $_globals_list = array(
 'G_mail_seed', 'G_notguar_code', 'G_PG_cons', 'G_PG_cons_n', 'G_PG_vow',
 'G_PG_vow_n', 'G_poll_entries', 'G_poll_name', 'G_poll_title',
 'G_provider_proxy', 'G_proxy_white_list', 'G_room_about', 'G_room_help',
-'G_room_passwdhowto', 'G_room_roadmap', 'G_room_whysupport',
+'G_room_passwdhowto', 'G_room_roadmap',
 'G_selfreg_mask', 'G_selfreg_tout', 'G_shutdown', 'G_sidebanner',
 'G_sidebanner_idx', 'G_splash_content', 'G_splash_contents',
 'G_splash_cont_idx', 'G_splash_h', 'G_splash_idx', 'G_splash_interval',
