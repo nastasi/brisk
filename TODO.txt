@@ -25,7 +25,8 @@
      DONE - enhance info interface
        DONE . SQL to show current evaluation
        DONE . disable parts of interface
-       . add title to items
+       WIP . add title to items
+       . fix SELECT 
      <release>
      - minisplash at end of the match
      - differentiate table authorization

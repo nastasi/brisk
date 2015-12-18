@@ -518,10 +518,18 @@ table.info td.triple {
     border-top: 2px solid #000000;
 }
 
+table.info td.head span.title {
+    cursor: help;
+}
+
+table.info td.head span {
+    font-weight: bold;
+}
+
 table.info td.data {
     background-color: white;
 }
-table.info span {
+table.info td.data span {
     text-align: left;
     font-style: italic;
 }

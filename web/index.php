@@ -228,18 +228,30 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Send a message to the administrator:'),
                      'mesgtoadm_sub'=> array('it' => 'soggetto:',
                                              'en' => 'subject:'),
-                     'info_login' => array('it' => 'Utente:',
-                                          'en' => 'User:'),
-                     'info_state' => array('it' => 'Stato:',
-                                          'en' => 'State:'),
-                     'info_guar' => array('it' => 'Garante:',
-                                          'en' => 'Guarantee:'),
-                     'info_match' => array('it' => '<span title="Partite giocate ai tavoli riservati.">Partite:</span>',
-                                           'en' => 'Matches:'),
-                     'info_game' => array('it' => '<span title="Mani giocate ai tavoli riservati.">Mani:</span>',
-                                          'en' => 'Hands:'),
+                     'info_login' => array('it' => 'Utente',
+                                          'en' => 'User'),
+                     'info_status' => array('it' => 'Stato',
+                                          'en' => 'Status'),
+                     'info_status_tit' => array('it' => 'Stato dell\' utente.',
+                                          'en' => 'User status.'),
+                     'info_guar' => array('it' => 'Garante',
+                                          'en' => 'Guarantee'),
+                     'info_match' => array('it' => 'Partite',
+                                           'en' => 'Matches'),
+                     'info_match_tit' => array('it' => 'Partite giocate ai tavoli riservati.',
+                                           'en' => 'Matches played at reserved tables.'),
+                     'info_game' => array('it' => 'Mani',
+                                          'en' => 'Hands'),
+                     'info_game_tit' => array('it' => 'Mani giocate ai tavoli riservati.',
+                                              'en' => 'Hands played at reserved tables.'),
                      'info_frie' => array('it' => 'Conoscenza:',
                                           'en' => 'Friendship:'),
+                     'info_repfrie' => array('it' => 'Cosa ne pensano gli amici degli amici',
+                                             'en' => 'Friends reputation'),
+                     'info_repbff' => array('it' => 'Cosa ne pensano gli amici',
+                                            'en' => 'Best friends reputation'),
+                     'info_skill' => array('it' => 'Bravura',
+                                            'en' => 'Skill')
                      );
 
 require_once("briskin5/Obj/briskin5.phh");
@@ -1375,21 +1387,40 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 
 <div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
 <table class="info">
-<tr><td><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri b-right data"><span class="login_id"></span></td>
-<td><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri data"><span class="state_id"></span></td></tr>
-<tr><td><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri b-right data"><span class="guar_id"></span></td><td></td><td></td></tr>
-<tr><td><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri b-right data"><span class="match_id"></span></td>
-<td><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri data"><span class="game_id"></span></td></tr>
-<tr class="widefriend_id"><td colspan="3"><b>Cosa ne pensano gli amici:</b></td>
-<td class="le data">Bravura: <span class="skill_id"></span></td></tr>
+
+<tr>
+<td class="head"><span><?php echo $mlang_room['info_login'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="login_id"></span></td>
+<td class="head"><span><?php echo $mlang_room['info_status'][$G_lang]; ?>:</span></td>
+<td class="ri data"><span class="state_id"></span></td>
+</tr>
+
+<tr>
+<td class="head"><span><?php echo $mlang_room['info_guar'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="guar_id"></span></td>
+<td></td><td></td>
+</tr>
+
+<tr>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_match_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_match'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="match_id"></span></td>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_game_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_game'][$G_lang]; ?>:</span></td>
+<td class="ri data"><span class="game_id"></span></td>
+</tr>
+
+<tr class="widefriend_id">
+<td colspan="3" class="head"><span><?php echo $mlang_room['info_repfrie'][$G_lang]; ?>:</span></td>
+<td class="le data"><?php echo $mlang_room['info_skill'][$G_lang]; ?>: <span class="skill_id"></span></td>
+</tr>
 
 <tr class="widefriend_id"><td class="le info-opt data">Da evitare: <span class="black_id"></span></td>
 <td class="le info-opt data">In prova: <span class="test_id"></span></td>
 <td class="le info-opt data">Amico: <span class="friend_id"></span></td>
 <td class="le data">Fidato: <span class="bff_id"></span></td></tr>
 
-<tr class="narrowfriend_id"><td colspan="3"><b>Cosa ne pensano gli amici fidati:</b></td>
-<td class="le data">Bravura: <span class="skill_id"></span></td></tr>
+<tr class="narrowfriend_id">
+<td colspan="3" class="head"><span><?php echo $mlang_room['info_repbff'][$G_lang]; ?>:</span></td>
+<td class="le data"><?php echo $mlang_room['info_skill'][$G_lang]; ?>: <span class="skill_id"></span></td></tr>
 
 <tr class="narrowfriend_id"><td class="le info-opt data">Da evitare: <span class="black_id"></span></td>
 <td class="le info-opt data">In prova: <span class="test_id"></span></td>
@@ -1408,7 +1439,8 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="bff"
     onclick="info_onlyifknown_isvisible();">Amico fidato</td>
 </tr>
-<tr class="onlyifknown_id"><td class="le"><b>Bravura:</b></td>
+<tr class="onlyifknown_id">
+<td class="le head"><span><?php echo $mlang_room['info_skill'][$G_lang]; ?>:</span></td>
 <td class="data">
     <table class="fiverank" style="margin: auto;">
        <tr><td class="c1t">1</td>
@@ -1440,7 +1472,6 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
        </tr>
     </table>
 </td></tr>
-<!-- <tr><td colspan="4" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr> -->
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>
