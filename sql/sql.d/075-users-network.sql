@@ -41,7 +41,8 @@ DROP VIEW #PFX#usersnet_wideskill;
 CREATE VIEW #PFX#usersnet_wideskill
     AS SELECT un.owner, ur.target, SUM(ur.skill * un.trust) / SUM(un.trust) as skill, count(*) as count
         FROM #PFX#usersnet AS un, #PFX#usersnet AS ur
-        WHERE un.target = ur.owner AND un.friend >= 4  -- 'un' is, at least, our friend
+        WHERE un.target = ur.owner AND un.friend >= 4   -- 'un' is, at least, our friend
+            AND ur.friend > 2
         GROUP BY un.owner, ur.target;
 
 DROP VIEW #PFX#usersnet_narrowskill;
