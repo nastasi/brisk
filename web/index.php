@@ -240,6 +240,10 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                            'en' => 'Matches'),
                      'info_match_tit' => array('it' => 'Partite giocate ai tavoli riservati.',
                                            'en' => 'Matches played at reserved tables.'),
+                     'info_party' => array('it' => 'Party',
+                                           'en' => 'Party'),
+                     'info_party_tit' => array('it' => 'Bravura calcolata in base ad amici, agli amici fidati e agli amici degli amici fidati in base alla credibilità degli amici fidati.',
+                                           'en' => 'Skill calculated with party rules.'),
                      'info_game' => array('it' => 'Mani',
                                           'en' => 'Hands'),
                      'info_game_tit' => array('it' => 'Mani giocate ai tavoli riservati.',
@@ -1398,12 +1402,13 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <tr>
 <td class="head"><span><?php echo $mlang_room['info_guar'][$G_lang]; ?>:</span></td>
 <td class="ri b-right data"><span class="guar_id"></span></td>
-<td></td><td></td>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_match_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_match'][$G_lang]; ?>:</span></td>
+<td class="ri data"><span class="match_id"></span></td>
 </tr>
 
 <tr>
-<td class="head"><span class="title" title="<?php echo $mlang_room['info_match_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_match'][$G_lang]; ?>:</span></td>
-<td class="ri b-right data"><span class="match_id"></span></td>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_party_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_party'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="party_id"></span></td>
 <td class="head"><span class="title" title="<?php echo $mlang_room['info_game_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_game'][$G_lang]; ?>:</span></td>
 <td class="ri data"><span class="game_id"></span></td>
 </tr>

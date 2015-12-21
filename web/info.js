@@ -46,6 +46,7 @@ function info_fld(dobj)
                                                          } },
                    match: { type: 'value', perms: 'ro' },
                    game: { type: 'value', perms: 'ro' },
+                   party: { type: 'value', perms: 'ro' },
                    friend: { type: 'radio' },
                    skill: { type: 'radio' },
                    trust: { type: 'radio' }

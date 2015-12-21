@@ -942,6 +942,27 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return ($narrowskill);
     }
 
+    function usersnet_partyskill($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $partyskill = "non disponibile";
+
+        $pskl_sql = sprintf("SELECT * FROM %susersnet_party WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($pskl_pg  = $this->query($pskl_sql)) == FALSE) {
+            return ($partyskill);
+        }
+
+        if (pg_numrows($pskl_pg) > 0) {
+            $pskl_obj = pg_fetch_object($pskl_pg, 0);
+            // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
+            // if ($wskl_obj->count >= 3)
+            $partyskill = sprintf("%3.2f", $pskl_obj->skill);
+        }
+        return ($partyskill);
+    }
+
     function usersnet_bycode($owner, $target, $widefriend, $narrowfriend)
     {
         GLOBAL $G_dbpfx;

@@ -1693,6 +1693,8 @@ class Brisk
           }
           $user_tos_vers = $user_item->tos_vers_get();
 
+          $partyskill = $bdb->usersnet_partyskill($user->code, $user_item->code);
+
           $widefriend = $bdb->usersnet_widefriend($user->code, $user_item->code);
           $widefriend['skill'] = $bdb->usersnet_wideskill($user->code, $user_item->code);
           $narrowfriend = $bdb->usersnet_narrowfriend($user->code, $user_item->code);
@@ -1731,6 +1733,7 @@ class Brisk
                                        "Normale" : "Stato sconosciuto"))),
                                     "guar" => ($user_item->type & USER_FLAG_TY_APPR ?
                                                "" : $guar_login),
+                                    "party" => $partyskill,
                                     "match" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->match_cnt) ,
                                     "game" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->game_cnt),
                                     "friend" => usersnet_friend_getlabel($usersnet_item->friend),
