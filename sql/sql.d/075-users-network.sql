@@ -47,19 +47,34 @@ CREATE VIEW #PFX#usersnet_wideskill
 
 DROP VIEW #PFX#usersnet_narrowskill;
 CREATE VIEW #PFX#usersnet_narrowskill
-    AS SELECT un.owner AS owner, ur.target AS target, SUM(ur.skill * un.trust) / SUM(un.trust) AS skill,
-           COUNT(*) AS count,
-           SUM(CASE WHEN ur.friend = 1 THEN 1 ELSE 0 END) AS black  -- count number of friend
-                                                                    -- blacklisting the target
-           FROM #PFX#usersnet AS un, #PFX#usersnet as ur
-           WHERE un.target = ur.owner AND un.friend = 5             -- ur owner must be bbf of un.owner
-           GROUP BY un.owner, ur.target HAVING SUM(CASE WHEN ur.friend = 1 THEN 1 ELSE 0 END) = 0;
+    AS SELECT
+        un.owner AS owner
+        , ur.target AS target
+        , SUM(ur.skill * un.trust) / SUM(un.trust) AS skill
+        , COUNT(*) AS count
+        FROM #PFX#usersnet AS un, #PFX#usersnet as ur
+        WHERE un.target = ur.owner AND un.friend = 5    -- 'ur' owner must be bbf of un.owner
+            AND ur.friend > 2
+    GROUP BY un.owner, ur.target;
+
+DROP VIEW #PFX#usersnet_narrowblack;
+CREATE VIEW #PFX#usersnet_narrowblack
+    AS SELECT DISTINCT un.owner AS owner, ur.target AS target, 1 AS black_cnt
+        FROM #PFX#usersnet AS un, #PFX#usersnet as ur
+        WHERE un.target = ur.owner
+            AND un.friend = 5              -- ur owner must be bbf of un.owner
+            AND ur.friend = 1;             -- ur must be blacked
 
 DROP VIEW #PFX#usersnet_party;
 CREATE VIEW #PFX#usersnet_party
-    AS  (SELECT ns.* FROM #PFX#usersnet_narrowskill AS ns
-              -- all except targets managed directly by the owner
-              WHERE target NOT IN (SELECT target FROM #PFX#usersnet WHERE owner = ns.owner)
-          UNION ALL
-         (SELECT owner, target, skill, 1 AS count, 0 AS black FROM #PFX#usersnet
-             WHERE friend > 2)) ORDER BY target;
+    AS (SELECT ns.*, nb.black_cnt FROM #PFX#usersnet_narrowskill AS ns
+        LEFT JOIN #PFX#usersnet_narrowblack AS nb
+            USING (owner, target)
+            -- all except targets managed directly by the owner
+            WHERE black_cnt is null
+                AND target NOT IN (SELECT target FROM #PFX#usersnet AS du WHERE du.owner = ns.owner)
+        UNION ALL
+            (SELECT owner, target, skill, 1 AS count, null AS black_cnt
+                FROM #PFX#usersnet
+                WHERE friend > 2))
+        ORDER BY target;

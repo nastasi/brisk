@@ -63,9 +63,9 @@ SELECT owner, target, skill, 1 AS count, us.login as login  FROM #PFX#usersnet, 
 
 SELECT ns.*, us.login AS login FROM #PFX#usersnet_narrowskill as ns, #PFX#users AS us WHERE owner = 10101
        AND ns.target NOT IN (SELECT target FROM #PFX#usersnet WHERE owner = 10101)
-AND us.code = ns.target UNION SELECT owner, target, skill, 1 AS count, 0 AS black, us.login as login  FROM #PFX#usersnet, #PFX#users as us WHERE owner = 10101 AND us.code = target AND friend > 2 ORDER BY target;
-
-SELECT un.owner, ur.target, SUM(ur.skill * un.trust) AS num, SUM(un.trust) AS den, SUM(ur.skill * un.trust) / SUM(un.trust) AS skill, COUNT(*) AS count FROM #PFX#usersnet AS un, #PFX#usersnet as ur WHERE un.target = ur.owner AND un.friend = 5 AND ur.target NOT IN (SELECT target FROM #PFX#usersnet WHERE owner = un.owner) GROUP BY un.owner, ur.target;
+AND us.code = ns.target UNION SELECT owner, target, skill, 1 AS count
+-- , 0 AS black
+, us.login as login  FROM #PFX#usersnet, #PFX#users as us WHERE owner = 10101 AND us.code = target AND friend > 2 ORDER BY target;
 
 SELECT us.login, pa.* FROM #PFX#usersnet_party pa, #PFX#users as us WHERE pa.target = us.code AND pa.owner = 10101;
 
