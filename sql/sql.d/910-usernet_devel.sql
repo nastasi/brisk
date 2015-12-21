@@ -53,6 +53,10 @@ INSERT INTO  #PFX#usersnet (owner, target, friend, skill, trust) VALUES (10102, 
 DELETE FROM  #PFX#usersnet WHERE owner = 10103 AND target = 10112;
 INSERT INTO  #PFX#usersnet (owner, target, friend, skill, trust) VALUES (10103, 10112, 1, 2, 3);
 
+-- bonoonly
+DELETE FROM  #PFX#usersnet WHERE owner = 10103 AND target = 10115;
+INSERT INTO  #PFX#usersnet (owner, target, friend, skill, trust) VALUES (10103, 10115, 1, 0, 0);
+
 SELECT * FROM #PFX#usersnet WHERE owner = 10101 OR owner IN (10102, 10103, 10113) ORDER BY target;
 
 SELECT * FROM #PFX#usersnet_wideskill ORDER BY owner, target;
