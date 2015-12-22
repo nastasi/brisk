@@ -250,9 +250,9 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                               'en' => 'Hands played at reserved tables.'),
                      'info_frie' => array('it' => 'Conoscenza:',
                                           'en' => 'Friendship:'),
-                     'info_repfrie' => array('it' => 'Cosa ne pensano gli amici degli amici',
+                     'info_repfrie' => array('it' => 'Cosa ne pensano gli amici',
                                              'en' => 'Friends reputation'),
-                     'info_repbff' => array('it' => 'Cosa ne pensano gli amici',
+                     'info_repbff' => array('it' => 'Cosa ne pensano gli amici fidati',
                                             'en' => 'Best friends reputation'),
                      'info_skill' => array('it' => 'Bravura',
                                             'en' => 'Skill')
