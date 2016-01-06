@@ -1014,7 +1014,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                         USING %susers as us
                         WHERE owner = %d AND us.login = '%s' AND target = us.code;",
                                    $G_dbpfx, $G_dbpfx,
-                                   $owner_id, escsql($json->login));
+                                   $owner_id, escsql(strtolower($json->login)));
 
                 if (($net_pg = $this->query($net_sql)) == FALSE) {
                     $ret = 5;
@@ -1031,7 +1031,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                                    $G_dbpfx,
                                    $friend, $json->skill, $json->trust,
                                    $G_dbpfx,
-                                   $owner_id, escsql($json->login));
+                                   $owner_id, escsql(strtolower($json->login)));
                 if (($net_pg  = $this->query($net_sql)) == FALSE || pg_numrows($net_pg) == 0) {
                     $net_sql = sprintf("
                 INSERT INTO %susersnet SELECT %d AS owner, us.code as target,
@@ -1039,7 +1039,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                     FROM %susers as us WHERE us.login = '%s' RETURNING *;",
                                        $G_dbpfx, $owner_id,
                                        $friend, $json->skill, $json->trust,
-                                       $G_dbpfx, $json->login);
+                                       $G_dbpfx, escsql(strtolower($json->login)));
                     if (($net_pg  = $this->query($net_sql)) == FALSE) {
                         log_wr('insert query failed');
                         $ret = 2;

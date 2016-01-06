@@ -2433,7 +2433,7 @@ class Brisk
         $bdb->users_load();
         if ($pass != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
             log_auth("XXX", "auth2");
-            $authenticate = $bdb->login_verify(strtolower($name_new), $pass, $code);
+            $authenticate = $bdb->login_verify($name_new, $pass, $code);
             log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
 
             if ($authenticate != FALSE) {
