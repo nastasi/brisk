@@ -1444,7 +1444,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="bff"
     onclick="info_onlyifknown_isvisible();">Amico fidato</td>
 </tr>
-<tr class="onlyifknown_id">
+<tr class="onlyifknown_gid">
 <td class="le head"><span><?php echo $mlang_room['info_skill'][$G_lang]; ?>:</span></td>
 <td class="data">
     <table class="fiverank" style="margin: auto;">

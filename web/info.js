@@ -113,7 +113,7 @@ function info_save()
 function info_onlyifknown_isvisible()
 {
     var vis = 'inherit';
-    var arr = $('info').getElementsByClassName('friend_id');
+    var arr = fieldify_get_dom_element([$('info')], 'friend');
     var obj = null;
 
     for (var k = 0 ; k < arr.length ; k++) {
@@ -129,6 +129,6 @@ function info_onlyifknown_isvisible()
     if (obj.value == 'black' || obj.value == 'unknown') {
         vis = 'hidden';
     }
-    $('info').getElementsByClassName('onlyifknown_id')[0].style.visibility = vis;
+    $('info').getElementsByClassName('onlyifknown_gid')[0].style.visibility = vis;
     return true;
 }
