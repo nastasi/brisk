@@ -1923,7 +1923,7 @@ class Brisk
       return ($this->kickuser($user_out, $out_reas));
   }
 
-  function chatt_send($user, $mesg)
+  function chatt_send($user, $mesg, $mlang_indwr = NULL)
   {
     GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
@@ -2137,9 +2137,20 @@ class Brisk
       } while (0);
     } // nick chat command
     else if (strncmp($msg, "/info ", 6) == 0) {
-        $info_user = substr($msg, 6);
+        do {
+            if (! $user->is_auth()) {
+                if ($mlang_indwr) {
+                    $to_user = nickserv_msg($dt, $mlang_indwr['info_auth'][$G_lang]);
+                }
+                else {
+                    $to_user = nickserv_msg($dt, "error");
+                }
+                break;
+            }
+            $info_user = substr($msg, 6);
 
-        echo $this->info_show($user, urldecode($info_user), $dt);
+            echo $this->info_show($user, urldecode($info_user), $dt);
+        } while(0);
     }
     else if (strncmp($msg, "/st ", 4) == 0) {
       log_main("chatt_send BEGIN");

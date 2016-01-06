@@ -120,6 +120,8 @@ Ciò è necessario per ottenere la password.<br><br>
 Saluti e buone partite, mop.<br>',
                                            'en' => 'EN mhtml [%s] [%s]'),
                       'info_err' => array( 'it' => 'E\' occorso un errore (%d), riprova più tardi.',
+                                           'en' => 'Some error occurs (%d), retry later.'),
+                      'info_auth' => array('it' => 'Non essendo autenticato non puoi costruire una rete di preferenze.',
                                            'en' => 'Some error occurs (%d), retry later.')
                       );
 
@@ -359,16 +361,22 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         log_wr("PING RECEIVED");
     }
     else if ($argz[0] == 'info') {
-        if ($argz[1] == 'save') {
-            if (!isset($post['info'])) {
+        if ($user->is_auth()) {
+            if ($argz[1] == 'save') {
+                if (!isset($post['info'])) {
+                    return FALSE;
+                }
+                if (($ret = $brisk->info_save($user, $post['info'])) == 0) {
+                    echo "1";
+                    return TRUE;
+                }
+
+                printf($mlang_indwr['info_err'][$G_lang], $ret);
                 return FALSE;
             }
-            if (($ret = $brisk->info_save($user, $post['info'])) == 0) {
-                echo "1";
-                return TRUE;
-            }
-
-            printf($mlang_indwr['info_err'][$G_lang], $ret);
+        }
+        else {
+            printf($mlang_indwr['info_auth'][$G_lang]);
             return FALSE;
         }
     }
@@ -759,7 +767,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
         }
         else if ($argz[0] == 'chatt') {
-            $brisk->chatt_send(&$user, xcapemesg($mesg));
+            $brisk->chatt_send(&$user, xcapemesg($mesg), $mlang_indwr);
         }
         else if ($argz[0] == 'tosmgr') {
             // check IF is authnticated user, both terms of service versions matches

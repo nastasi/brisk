@@ -110,7 +110,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
             $user->step_inc();
         }
         else if ($argz[0] == 'chatt') {
-            $bin5->chatt_send(&$user,$mesg);
+            $bin5->chatt_send(&$user, $mesg);
         }
         else if ($argz[0] == 'preferences_update') {
             log_wr("PER DI PREFERENCES_UPDATE");
