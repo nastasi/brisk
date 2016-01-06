@@ -1,28 +1,63 @@
-function __fieldify_find_ancestors(objarr, name)
+function ends_with(s, suffix)
 {
-    var obj;
+    if (s.indexOf(suffix, s.length - suffix.length) !== -1) {
+        return true;
+    }
+    return false;
+}
+
+function __ffa_nav(obj, ret, name)
+{
+    var arr;
+
+    arr = obj.className.split(" ");
+    if (arr.indexOf(name + "_id") != -1) {
+        ret.push(obj);
+        return;
+    }
+
+    // check if the current element is a leaf or a node
+    // if it is then return
+    for (var i = 0 ; i < arr.length ; i++) {
+        if (ends_with(arr[i], "_id")) {
+            return;
+        }
+    }
+
+    for (var i = 0 ; i < obj.children.length ; i++) {
+        __ffa_nav(obj.children[i], ret, name);
+    }
+    return;
+}
+
+function fieldify_get_dom_element(objarr, name)
+{
+    var obj, ret = [];
 
     for (var i = 0 ; i < objarr.length ; i++) {
         obj = objarr[i];
-        var item = obj.getElementsByClassName(name + '_id');
-        if (item.length > 0) {
-            return (item);
+        for (var e = 0 ; e < obj.children.length ; e++) {
+            __ffa_nav(obj.children[e], ret, name);
         }
+    }
+
+    if (ret.length > 0) {
+        return ret;
     }
     return false;
 }
 
 // fieldsdescr = { name: { type: 'typename' }, ... }
-function Fieldify(ancestors, fieldsdescr)
+function Fieldify(dom_elements, fieldsdescr)
 {
     var item;
 
-    this.ancestors = ancestors;
+    this.dom_elements = dom_elements;
     this.field = new Array();
     for (k in fieldsdescr) {
         this.field[k] = fieldsdescr[k];
         if (this.field[k].type == 'fields') {
-            if (item = __fieldify_find_ancestors(this.ancestors, k)) {
+            if (item = fieldify_get_dom_element(this.dom_elements, k)) {
                 this.field[k].obj = new Fieldify(item, this.field[k].fields);
             }
         }
@@ -30,11 +65,11 @@ function Fieldify(ancestors, fieldsdescr)
 }
 
 Fieldify.prototype = {
-    ancestors: null,
+    dom_elements: null,
     field: null,
 
     visible: function(is_visible) {
-        this.ancestors[0].style.visibility = (is_visible ? "visible" : "hidden" );
+        this.dom_elements[0].style.visibility = (is_visible ? "visible" : "hidden" );
     },
 
     // { 'name': 'value' }
@@ -74,7 +109,7 @@ Fieldify.prototype = {
 
     fld_value_set: function(name, value)
     {
-        var item = __fieldify_find_ancestors(this.ancestors, name);
+        var item = fieldify_get_dom_element(this.dom_elements, name);
         if (item) {
             item[0].innerHTML = value;
         }
@@ -82,7 +117,7 @@ Fieldify.prototype = {
 
     fld_value_get: function(name)
     {
-        var item = __fieldify_find_ancestors(this.ancestors, name);
+        var item = fieldify_get_dom_element(this.dom_elements, name);
         if (item) {
             return (item[0].innerHTML);
         }
@@ -91,7 +126,7 @@ Fieldify.prototype = {
 
     fld_radio_set: function(name, value)
     {
-        var arr = __fieldify_find_ancestors(this.ancestors, name);
+        var arr = fieldify_get_dom_element(this.dom_elements, name);
         if (arr) {
             for (k in arr) {
                 if (arr[k].value == value)
@@ -105,7 +140,7 @@ Fieldify.prototype = {
     fld_radio_get: function(name)
     {
         var ret = null;
-        var arr = __fieldify_find_ancestors(this.ancestors, name);
+        var arr = fieldify_get_dom_element(this.dom_elements, name);
         if (arr) {
             for (k in arr) {
                 if (arr[k].checked == true) {

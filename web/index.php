@@ -772,7 +772,7 @@ google_color_url = "000000";
 
 <a href="http://it-it.facebook.com/event.php?eid=165523204539&index=1"
    target="_blank" onmouseover="menu_hide(0,2);"
-   title="1° Torneo-Meeting di Parma del 22/11/2009" <img style="display: inline;" class="nobo" src="img/coppa16.png">Parma 11/09</a><br>
+   title="1° Torneo-Meeting di Parma del 22/11/2009"><img style="display: inline;" class="nobo" src="img/coppa16.png">Parma 11/09</a><br>
 
 <a href="http://it-it.facebook.com/event.php?eid=105699129890&index=1"
    target="_blank" onmouseover="menu_hide(0,2);"
