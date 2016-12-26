@@ -1,4 +1,10 @@
 <?php
+foreach (array('isstream', 'f_test', 'f_trans', 'f_port', 'f_fback', 'sess', 'stat',
+               'subst', 'step', 'from', 'transp') as $i) {
+    if (isset($_REQUEST[$i])) {
+        $$i = $_REQUEST[$i];
+    }
+}
 
 $desc = array( "Semplice: da 1 a 9 ogni secondo, poi ricomincia (status sempre verde).",
                "Continuo: da 1 a N ogni secondo, ricomincia ogni 9 (status sempre verde).",
@@ -62,7 +68,8 @@ function headers_render($header, $len)
     return (TRUE);
 }
 
-$transs = array( "iframe", "websocket", "xhr", "htmlfile" );
+$transs = array( "iframe", "websocket", "websocketsec", "xhr", "htmlfile" );
+$trans_ports = array( "iframe"=>80, "websocket"=>80, "websocketsec"=>443, "xhr"=>80, "htmlfile"=>80 );
 if (!isset($f_trans))
     $f_trans = $transs[0];
 
@@ -70,7 +77,7 @@ if (!isset($f_test))
     $f_test = 1;
 
 if (!isset($f_port))
-    $f_port = 80;
+    $f_port = NULL;
 
 if (!isset($f_fback))
     $f_fback = 0;
@@ -102,11 +109,13 @@ function xcape($s)
 }
 
 if (isset($isstream) && $isstream == "true") {
-
     require_once("Obj/transports.phh");
 
     if (isset($transp) && $transp == "websocket") {
         $trobj = new Transport_websocket();
+    }
+    else if (isset($transp) && $transp == "websocketsec") {
+        $trobj = new Transport_websocket(TRUE);
     }
     else if (isset($transp) && $transp == "xhr") {
         $trobj = new Transport_xhr();
@@ -127,6 +136,7 @@ if (isset($isstream) && $isstream == "true") {
             $init_string .= chr(mt_rand(65, 90));
     }
     $headers_in = getallheaders();
+    // error_log(print_r($headers_in, TRUE));
     $headers = array();
     foreach ($headers_in as $header_in => $value) {
         $headers[mb_convert_case($header_in, MB_CASE_TITLE, 'UTF-8')] = $value;
@@ -149,7 +159,7 @@ if (isset($isstream) && $isstream == "true") {
         fclose($fp);
     }
 
-    if (isset($transp) && $transp == "websocket") {
+    if (isset($transp) && ($transp == "websocket" || $transp == "websocketsec")) {
         header_remove('Connection');
         header_remove('Content-Encoding');
         header_remove('Content-Type');
@@ -290,7 +300,8 @@ if (isset($isstream) && $isstream == "true") {
      var gst = new globst();
      window.onload = function() {
 
-         xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", <?php echo "$f_port";?>, <?php echo "$f_fback";?>, console, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
+         xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", <?php
+    echo ($f_port == NULL ? "${trans_ports[$f_trans]}" : "$f_port" );?>, <?php echo "$f_fback";?>, console, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      xstm.start();
  }
@@ -301,13 +312,13 @@ if (isset($isstream) && $isstream == "true") {
 <div>
 <?php
 
-
-
 printf("<table>");
 for ($test = 1 ; $test <= count($desc) ; $test++) {
     printf("<tr>");
     foreach ($transs as $trans) {
-        printf("<td style=\"padding: 8px; border: 1px solid black;\"><a href=\"?f_trans=%s&f_test=%d&f_port=%d&f_fback=%d\">Test %s %02d (port %d (fb %d))</a></td>", $trans, $test, $f_port, $f_fback, $trans, $test, $f_port, $f_fback);
+        printf("<td style=\"padding: 8px; border: 1px solid black;\"><a href=\"?f_trans=%s&f_test=%d%s&f_fback=%d\">Test %s %02d (port %d (fb %d))</a></td>", $trans, $test,
+               ($f_port == NULL ? "" : sprintf("&f_port=%d", $f_port)), $f_fback, $trans, $test,
+               ($f_port == NULL ? $trans_ports[$trans] : $f_port ), $f_fback);
     }
     printf("</tr>\n");
 }

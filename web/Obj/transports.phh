@@ -93,7 +93,7 @@ class Transport_template {
 class Transport_websocket {
     protected $magicGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-    function Transport_websocket() {
+    function Transport_websocket($secure = FALSE) {
         $this->headerOriginRequired                 = false;
         $this->headerSecWebSocketProtocolRequired   = false;
         $this->headerSecWebSocketExtensionsRequired = false;
@@ -386,15 +386,19 @@ class Transport_websocket {
         }
 
         if (!isset($headers['Host']) || !$this->checkHost($headers['Host'])) {
+            // error_log('bad 1');
             $headers_out['HTTP-Response'] = "400 Bad Request";
         }
         if (!isset($headers['Upgrade']) || strtolower($headers['Upgrade']) != 'websocket') {
+            // error_log('bad 2 ' . $headers['Upgrade']);
             $headers_out['HTTP-Response'] = "400 Bad Request";
         }
         if (!isset($headers['Connection']) || strpos(strtolower($headers['Connection']), 'upgrade') === FALSE) {
+            // error_log('bad 3');
             $headers_out['HTTP-Response'] = "400 Bad Request";
         }
         if (!isset($headers['Sec-Websocket-Key'])) {
+            // error_log('bad 4');
             $headers_out['HTTP-Response'] = "400 Bad Request";
         } else {
         }
@@ -410,11 +414,13 @@ class Transport_websocket {
         if ( ($this->headerSecWebSocketProtocolRequired && !isset($headers['Sec-Websocket-Protocol']))
              || ($this->headerSecWebSocketProtocolRequired &&
                  !$this->checkWebsocProtocol($headers['Sec-Websocket-Protocol']))) {
+            // error_log('bad 5');
             $headers_out['HTTP-Response'] = "400 Bad Request";
         }
         if ( ($this->headerSecWebSocketExtensionsRequired  && !isset($headers['Sec-Websocket-Extensions']))
              || ($this->headerSecWebSocketExtensionsRequired &&
                  !$this->checkWebsocExtensions($headers['Sec-Websocket-Extensions'])) ) {
+            // error_log('bad 6');
             $headers_out['HTTP-Response'] = "400 Bad Request";
         }
 

@@ -368,6 +368,10 @@ done
 for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
+
+# hardlink for nginx managed websocket files.
+ln "${web_path}__/xynt_test01.php" "${web_path}__/xynt_test01_wss.php"
+
 if [ "$test_add" = "TRUE" ]; then
     for i in $(find webtest -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^........//g'); do
         install -m 644 "webtest/$i" "${web_path}__/$i"

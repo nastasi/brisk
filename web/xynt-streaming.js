@@ -5,7 +5,16 @@
 //
 function transport_ws(doc, xynt_streaming, page)
 {
-    this.name = "WebSocket";
+    // if four arguments manage if WS or WSS connection
+    if (arguments.length > 3)
+        this.is_secure = arguments[3];
+    else
+        this.is_secure = false;
+
+    if (this.is_secure)
+        this.name = "WebSocketSecure";
+    else
+        this.name = "WebSocket";
     this.ctx_new = "";
     var self = this;
 
@@ -13,7 +22,7 @@ function transport_ws(doc, xynt_streaming, page)
     this.failed = false;
     this.xynt_streaming = xynt_streaming;
     try {
-this.xynt_streaming.log("PAGE: "+page);
+        this.xynt_streaming.log("PAGE: "+page);
         this.ws = new WebSocket(page);
         this.ws.onopen = function () {
             self.xynt_streaming.log("onopen");
@@ -631,15 +640,24 @@ xynt_streaming.prototype = {
             transp_port = this.transp_port;
         }
 
-        if (transp_type == "websocket") {
-            var end_proto, first_slash;
+        if (transp_type == "websocket" || transp_type == "websocketsec") {
+            var end_proto, first_slash, newpage;
 
             // change protocol
             this.log("precha ["+this.page+"]");
-            end_proto = this.page.indexOf("://");
-            first_slash = this.page.substring(end_proto+3).indexOf("/");
+            if (transp_type == "websocketsec") {
+                newpage = this.page.replace(/\.php$/g, "_wss.php").replace(/\.php\?/g, "_wss.php?");
+                }
+            else {
+                newpage = this.page;
+                }
+            end_proto = newpage.indexOf("://");
+            first_slash = newpage.substring(end_proto+3).indexOf("/");
 
-            page = "ws://" + this.page.substring(end_proto+3, end_proto+3+first_slash) + ":" + transp_port + this.page.substring(end_proto+3 + first_slash);
+            page = (transp_type == "websocketsec" ? "wss://" : "ws://")
+                + newpage.substring(end_proto+3, end_proto+3 + first_slash) + ":"
+                + transp_port + newpage.substring(end_proto+3 + first_slash);
+            // this.log("MOP WS: " + page);
         }
         else {
             page = this.page;
@@ -652,7 +670,11 @@ xynt_streaming.prototype = {
 
         try {
             // transport instantiation
-            if (transp_type == "websocket") {
+            if (transp_type == "websocketsec") {
+                page = url_append_args(page, "transp", "websocketsec");
+                this.transp = new transport_ws(this.doc, this, page, true);
+            }
+            else if (transp_type == "websocket") {
                 page = url_append_args(page, "transp", "websocket");
                 this.transp = new transport_ws(this.doc, this, page);
             }
