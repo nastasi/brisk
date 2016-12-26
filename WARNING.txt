@@ -2,10 +2,12 @@ APACHE2 CONFIGURATION IS CHANGED ! THIS IS A SAMPLE:
 
 ProxyPassMatch ^/brisk/.*\.(png|gif|jpg|css|js)$ !
     ProxyPass /brisk/briskin5/index_rd.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/briskin5/index_rd_wss.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/briskin5/index_wr.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/briskin5/briskin5/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/briskin5/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/index_rd.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/index_rd_wss.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/index_wr.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
     ProxyPass /brisk/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
 --------

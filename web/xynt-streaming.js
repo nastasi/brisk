@@ -631,8 +631,9 @@ xynt_streaming.prototype = {
         // page arrangement
         this.page = url_complete(this.win.location.href, this.page);
 
+        // DEFAULT TRANSPORT PROTOCOL HERE websocketsec, websocket
         if (this.transp_fback > 0) {
-            transp_type = "websocket";
+            transp_type = "websocketsec";
             transp_port = (this.transp_fback == 2 ? 80 : 8080);
         }
         else {

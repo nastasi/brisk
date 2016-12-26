@@ -1507,9 +1507,10 @@ class Bin5 {
 
             break;
         case "index_rd.php":
+        case "index_rd_wss.php":
             if (($transp  = gpcs_var('transp', $get, $post, $cookie)) === FALSE)
                 $transp = "iframe";
-            if ($transp == 'websocket')
+            if ($transp == 'websocket' || $transp == 'websocketsec')
                 $enc = 'plain';
 
             do {
