@@ -141,7 +141,7 @@ function main_file($curtime)
     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
       // echo $p." i) ".$i."<br>";
       $username = $ar[9+($i*2)];
-      if (($item = $bdb->getitem_bylogin($username, &$id)) == FALSE) {
+      if (($item = $bdb->getitem_bylogin($username, $id)) == FALSE) {
         echo "WARNING: the user [".$username."] NOT EXISTS!<br>";
         continue;
       }

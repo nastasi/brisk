@@ -555,7 +555,7 @@ class Sac_a_push {
 
     function pendpage_try_addcont(&$new_socket, $tout, $method, $header, $get, $post, $cookie, $path, $addr, $rest, $cont)
     {
-        $pendpage = PendingPage::pendingpage_continue(&$new_socket, $this->curtime, $tout, $method,
+        $pendpage = PendingPage::pendingpage_continue( $new_socket, $this->curtime, $tout, $method,
                                                            $header,           $get, $post, $cookie,
                                                              $path,          $addr, $rest, $cont);
 
@@ -996,7 +996,7 @@ class Sac_a_push {
                 return cmd_return(401, 'malformed cmd');
             }
             $idx = -1;
-            if (($user = $this->app->get_user($cmd['sess'], &$idx)) == FALSE)
+            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE)
                 return cmd_return(402, 'user not found');
 
             if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00)

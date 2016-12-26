@@ -166,7 +166,7 @@ class BriskDB {
                     }
                     
                     if ($chals->ismod()) {
-                        Challenges::save_data(&$chals);
+                        Challenges::save_data($chals);
                     }
                     
                     Challenges::unlock_data($a_sem);

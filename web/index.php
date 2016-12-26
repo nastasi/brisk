@@ -415,7 +415,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
             log_main("pre garbage_manager UNO");
             $brisk->garbage_manager(TRUE);
             log_main("post garbage_manager");
-            if (($user = &$brisk->get_user($sess, &$idx)) != FALSE) {
+            if (($user = $brisk->get_user($sess, $idx)) != FALSE) {
                 if ($user->the_end == FALSE) {
                     $brisk->sess_cur_set($user->sess);
                     log_main("user stat: ".$user->stat);
@@ -448,7 +448,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
             /* try login */
 
             if ($banned == FALSE &&
-                ($user = $brisk->add_user(&$sess, &$idx, $name, $pass_private,
+                ($user = $brisk->add_user($sess, $idx, $name, $pass_private,
                                           $remote_addr, $header, $cookie)) != FALSE) {
                 $brisk->sess_cur_set($user->sess);
                 $ACTION = "room";

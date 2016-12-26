@@ -160,7 +160,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     $curtime = time();
     $dt = date("H:i ", $curtime);
 
-    if (($user = $brisk->get_user($sess, &$idx)) == FALSE) {
+    if (($user = $brisk->get_user($sess, $idx)) == FALSE) {
         $argz = explode('|', xcapemesg($mesg));
 
         if ($argz[0] == 'getchallenge') {
@@ -190,7 +190,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                         echo '1|';
                     }
                     if ($chals->ismod()) {
-                        Challenges::save_data(&$chals);
+                        Challenges::save_data($chals);
                     }
                 }
 
@@ -392,7 +392,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         if ($user->subst == 'sitdown' || $user->stat == 'table')
             $brisk->room_wakeup($user);
         else if ($user->subst == 'standup')
-            $brisk->room_outstandup(&$user);
+            $brisk->room_outstandup($user);
         else {
             log_rd2("SHUTDOWN FROM WHAT ???");
         }
@@ -746,7 +746,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
         }
         else if ($argz[0] == 'chatt') {
-            $brisk->chatt_send(&$user, xcapemesg($mesg));
+            $brisk->chatt_send($user, xcapemesg($mesg));
         }
         else if ($argz[0] == 'tosmgr') {
             // check IF is authnticated user, both terms of service versions matches
@@ -898,7 +898,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                         $bin5_user_cur->trans_step = $user_cur->step + 1;
                         $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
                         $bin5_user_cur->step_inc();
-                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table(&$bin5,&$bin5_user_cur,$bin5_user_cur->step+1,TRUE,FALSE);
+                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table($bin5, $bin5_user_cur,
+                                                                                         $bin5_user_cur->step+1,
+                                                                                         TRUE, FALSE);
                         $bin5_user_cur->step_inc();
 
                         log_wr("TRY PRESAVE: ".$bin5_user_cur->step." TRANS STEP: ".$bin5_user_cur->trans_step);

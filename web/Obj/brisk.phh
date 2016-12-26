@@ -2796,7 +2796,7 @@ class Brisk
           $subs = "briskin5/";
           $subs_l = strlen($subs);
           if (!strncmp($path, $subs, $subs_l)) {
-              $ret = Bin5::request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, substr($path, $subs_l) , $addr, $get, $post, $cookie);
+              $ret = Bin5::request_mgr($s_a_p, $header, $header_out, $new_socket, substr($path, $subs_l) , $addr, $get, $post, $cookie);
               return ($ret);
           }
           break;

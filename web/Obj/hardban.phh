@@ -283,7 +283,7 @@ class Hardbans {
           }
         } // for (...
         if ($hban->ismod()) {
-          Hardbans::save_data(&$hban);
+          Hardbans::save_data($hban);
         }
       } // if (load_data
       Hardbans::unlock_data($a_sem);
@@ -305,7 +305,7 @@ class Hardbans {
         $hban->add_item($login, $ip, $session, $timeout);
 
         if ($hban->ismod()) {
-          Hardbans::save_data(&$hban);
+          Hardbans::save_data($hban);
         }
       } // if (load_data
       Hardbans::unlock_data($a_sem);
