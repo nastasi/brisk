@@ -636,7 +636,7 @@ google_color_text = "404040";
 google_color_url = "000000";
 //-->
 </script>
-<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
+<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
             $banner_top_right = carousel_top();
         }
         else {
@@ -655,7 +655,7 @@ google_color_text = "404040";
 google_color_url = "000000";
 //-->
 </script>
-<script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
+<script type="text/javascript" src="https://pagead2.googlesyndication.com/pagead/show_ads.js"></script>';
         }
     }
     else { // !$G_is_local
