@@ -46,9 +46,13 @@ $mlang_bin5_index = array( 'aucwin' => array( 'it' => 'Hai vinto l\'asta.<br> Sc
                            );
 
 
-function bin5_index_main($transp_type, &$header_out, $addr, $get, $post, $cookie)
+function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post, $cookie)
 {
     GLOBAL $G_lang, $mlang_bin5_index;
+
+    $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
+                     $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
+
     if (($table_idx = gpcs_var('table_idx', $get, $post, $cookie)) === FALSE)
         unset ($table_idx);
     if (($laststate = gpcs_var('laststate', $get, $post, $cookie)) === FALSE)
@@ -110,7 +114,7 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", 80, 2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
+  xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>,  2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
   
   window.onbeforeunload = onbeforeunload_cb;  

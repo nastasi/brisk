@@ -1393,7 +1393,6 @@ function url_complete(parent, url)
     }
 
     // alert("host: ["+host+"]  path: ["+path+"]");
-    console.log('URL: ' + url);
     if (url.substring(0,6) == 'http:/' || url.substring(0,7) == 'https:/' || url.substring(0,4) == 'ws:/' || url.substring(0,5) == 'wss:/') {
         return (url);
     }

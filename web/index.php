@@ -344,6 +344,9 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
 
+    $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
+                     $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
+
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         $sess = "";
     if (($name = gpcs_var('name', $get, $post, $cookie)) === FALSE)
@@ -1234,7 +1237,7 @@ cookie_law(null);
         sidebanners_init($G_sidebanner_idx);
 ?>
      sess = "<?php echo "$sess"; ?>";
-xstm = new xynt_streaming(window, "<?php echo "$transp_type"; ?>", 80, 2, null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
+xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>, 2, null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;

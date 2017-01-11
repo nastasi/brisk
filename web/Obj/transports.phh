@@ -609,8 +609,8 @@ class Transport {
 
     static function create($transp)
     {
-        if ($transp == 'websocket') {
-            return new Transport_websocket();
+        if ($transp == 'websocket' || $transp == 'websocketsec') {
+            return new Transport_websocket($transp == 'websocketsec');
         }
         else if ($transp == 'xhr') {
             return new Transport_xhr();

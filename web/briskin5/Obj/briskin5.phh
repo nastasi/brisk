@@ -1479,7 +1479,7 @@ class Bin5 {
         case "":
         case "index.php":
             ob_start();
-            bin5_index_main($transp_type, $header_out, $addr, $get, $post, $cookie);
+            bin5_index_main($transp_type, $header, $header_out, $addr, $get, $post, $cookie);
             $content = ob_get_contents();
             ob_end_clean();
 
