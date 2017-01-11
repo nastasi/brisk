@@ -359,6 +359,8 @@ if [ "$web_only" = "FALSE" ]; then
     done
     chmod -R 777 ${proxy_path}/bin5
 
+    mkdir -p "${legal_path}"
+    chmod 777 "${legal_path}"
 fi
 install -d ${web_path}__
 for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
