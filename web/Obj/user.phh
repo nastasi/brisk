@@ -923,5 +923,39 @@ function chunked_fini()
 
 } // end class User
 
+define('USERSNET_FRIEND_BLACK', 1);
+define('USERSNET_FRIEND_UNKNOWN', 2);
+define('USERSNET_FRIEND_TEST', 3);
+define('USERSNET_FRIEND_FRIEND', 4);
+define('USERSNET_FRIEND_BFF', 5);
 
+if (!isset($__usersnet_friend_map)) {
+    $__usersnet_friend_map = array("black", "unknown", "test", "friend", "bff");
+}
+
+function usersnet_friend_getlabel($id)
+{
+    GLOBAL $__usersnet_friend_map;
+
+    $id_i = intval($id);
+
+    if ($id_i < 1 || $id_i > count($__usersnet_friend_map)) {
+        return FALSE;
+    }
+    return ($__usersnet_friend_map[$id_i - 1]);
+}
+
+/* return index + 1 of friend label */
+function usersnet_friend_getid($label_in)
+{
+    GLOBAL $__usersnet_friend_map;
+
+    foreach ($__usersnet_friend_map as $id => $label) {
+        if ($label == $label_in) {
+            return ($id + 1);
+        }
+    }
+
+    return FALSE;
+}
 ?>

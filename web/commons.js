@@ -430,11 +430,6 @@ function act_roadmap()
     send_mesg("roadmap");
 }
 
-function act_whysupport()
-{
-    send_mesg("whysupport");
-}
-
 function act_lascio()
 {
     send_mesg("lascio");
@@ -1038,7 +1033,7 @@ function user_decorator(user, is_real)
 
     for (i = 0 ; i < 4 ; i++) {
         if (flags & (1 << i)) {
-            cl += sp + "au" + i;
+            cl += sp + "au" + i + (is_real ? "" : "_off");
             sp = " ";
         }
     }

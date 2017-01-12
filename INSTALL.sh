@@ -9,7 +9,8 @@ apache_conf="/etc/apache2/sites-available/default"
 card_hand=3
 players_n=3
 tables_n=44
-tables_auth_n=12
+tables_appr_n=12
+tables_auth_n=8
 tables_cert_n=4
 brisk_auth_conf="brisk_spu_auth.conf.pho"
 brisk_debug="0x0400"
@@ -31,7 +32,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -40,6 +41,7 @@ function usage () {
     echo "  -c number cards in hand         - def. $card_hand"
     echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
+    echo "  -r number of appr-only tables   - def. $tables_appr_n"
     echo "  -T number of auth-only tables   - def. $tables_auth_n"
     echo "  -G number of cert-only tables   - def. $tables_cert_n"
     echo "  -a authorization file name      - def. \"$brisk_auth_conf\""
@@ -170,6 +172,7 @@ while [ $# -gt 0 ]; do
         -c*) card_hand="$(get_param "-c" "$1" "$2")"; sh=$?;;
         -n*) players_n="$(get_param "-n" "$1" "$2")"; sh=$?;;
         -t*) tables_n="$(get_param "-t" "$1" "$2")"; sh=$?;;
+        -r*) tables_appr_n="$(get_param "-r" "$1" "$2")"; sh=$?;;
         -T*) tables_auth_n="$(get_param "-T" "$1" "$2")"; sh=$?;;
         -G*) tables_cert_n="$(get_param "-G" "$1" "$2")"; sh=$?;;
         -a*) brisk_auth_conf="$(get_param "-a" "$1" "$2")"; sh=$?;;
@@ -207,6 +210,7 @@ echo "    apache_conf:\"$apache_conf\""
 echo "    card_hand:   $card_hand"
 echo "    players_n:   $players_n"
 echo "    tables_n:    $tables_n"
+echo "    tables_appr_n: $tables_appr_n"
 echo "    tables_auth_n: $tables_auth_n"
 echo "    tables_cert_n: $tables_cert_n"
 echo "    brisk_auth_conf: \"$brisk_auth_conf\""
@@ -231,6 +235,7 @@ if [ ! -z "$outconf" ]; then
     echo "card_hand=$card_hand"
     echo "players_n=$players_n"
     echo "tables_n=$tables_n"
+    echo "tables_appr_n=$tables_appr_n"
     echo "tables_auth_n=$tables_auth_n"
     echo "tables_cert_n=$tables_cert_n"
     echo "brisk_auth_conf=\"$brisk_auth_conf\""
@@ -411,6 +416,7 @@ s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len
 sed -i "s@define *( *'USOCK_PATH',[^)]*)@define('USOCK_PATH', \"$usock_path\")@g" ${web_path}__/spush/brisk-spush.phh
 
 sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g;
+s@define *( *'TABLES_APPR_N',[^)]*)@define('TABLES_APPR_N', $tables_appr_n)@g;
 s@define *( *'TABLES_AUTH_N',[^)]*)@define('TABLES_AUTH_N', $tables_auth_n)@g;
 s@define *( *'TABLES_CERT_N',[^)]*)@define('TABLES_CERT_N', $tables_cert_n)@g;
 s@define *( *'BRISK_DEBUG',[^)]*)@define('BRISK_DEBUG', $brisk_debug)@g;

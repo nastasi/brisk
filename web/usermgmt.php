@@ -512,13 +512,13 @@ SELECT usr.*, guar.login AS guar_login
             }
 
             $usr_n = pg_numrows($usr_pg);
-            $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Apprendice</th><th>Date</th></tr>";
+            $tab_lines = "<tr><th></th><th>User</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
                                       $usr_obj->code, ($nocheck ? "" : "CHECKED"),
-                                      eschtml($usr_obj->login), eschtml($usr_obj->guar_login),
+                                      eschtml($usr_obj->login), eschtml($usr_obj->email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
                                       $usr_obj->lintm);
             }

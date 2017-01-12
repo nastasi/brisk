@@ -1,9 +1,53 @@
  TODO |
 ------+
 
+  BUGS |
+ ------+
+   DONE - Not sequence of 3 same chars
+   DONE   . check server side with test
+   DONE - Global vars checker
+   <release>
+   - usermgmt: add user delete
+   DONE - 10002 message when already clicked
+   DONE - trim spaces in apprentice form
+   DONE - Remove books from chat
+   DONE - usermgmt: add email
+
+
   FEATURES |
  ----------+
-   - Global vars checker
+   WIP * inherited info
+   * Users Network construction
+     DONE - sql
+     DONE - dbase API
+     DONE - add apprentices tables
+     DONE - remove entry when set unknown
+     DONE - enhance info interface
+       DONE . SQL to show current evaluation
+       DONE . disable parts of interface
+       WIP . add title to items
+       . fix SELECT 
+     <release>
+     - minisplash at end of the match
+     - differentiate table authorization
+   * add new kind of isolation for apprentice
+
+   * Double click on chat to open preferences
+
+   * APPRENTICE
+     Phase2
+     DONE - match counters (part 2)
+       DONE . migration script for old users
+     - guarantee for apprentice
+
+
+
+---------
+   - APPRENTICE
+     Phase2
+     DONE - match counters (part 2)
+       DONE . migration script for old users
+
    - APPRENTICE
      Phase1
      DONE - correggere minuta giornaliera
@@ -30,11 +74,6 @@
          DONE - fix layout of tables
      DONE - aggiungere books.png
 
-     Phase2
-     - match counters (part 2)
-       . migration script for old users
-     - guarantee for apprentice
-   
     - MENTORS
      - listen all
 

@@ -28,7 +28,7 @@
 }
 
 body {
-    background-image: url('img/najole.png');
+    background-image: url('img/najole_wh.png');
     background-color: #fafafa;
     background-attachment: fixed;
     margin: 0px;
@@ -110,7 +110,7 @@ img.ib_nobo {
     -moz-border-radius: 8px;
     border-radius: 8px;
 
-    background-image: url('img/najole_light.png');
+    background-image: url('img/najole_wh_light.png');
     background-attachment: fixed;
 
     top: 0;
@@ -269,17 +269,27 @@ img.button:hover {
 span.au0 span {
     font-weight: bold;
 }
+span.au0_off span {
+    font-weight: bold;
+}
 
 span.au1 span {
     padding-left: 2px;
     padding-right: 4px;
     font-style: italic;
-/* orange   background-color: #ffd780; */
-/* red      background-color: #ffb0b0; */
+    background-color: #a1c8ff;
+}
+span.au1_off span {
+    padding-left: 2px;
+    padding-right: 4px;
+    font-style: italic;
     background-color: #a1c8ff;
 }
 
 span.au2 span {
+    background-color: #bafcba;
+}
+span.au2_off span {
     background-color: #bafcba;
 }
 
@@ -288,6 +298,12 @@ span.au3 {
     background-image: url('img/books.png');
     background-repeat: no-repeat;
     background-position: left center;
+}
+
+span.au3_off span {
+    background-color: transparent;
+}
+span.au3_off {
 }
 
 span.au3 span {

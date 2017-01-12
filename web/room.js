@@ -426,7 +426,7 @@ function j_stand_cont(ddata)
 
     var usr = $("standup").getElementsByClassName("id_usr");
     for (i = 0 ; i < usr.length ; i++) {
-        addEvent(usr[i], "click", click_update_cb);
+        addEvent(usr[i], "click", info_show_cb);
     }
 }
 
@@ -436,44 +436,6 @@ function esco_cb() {
     // nonunload = true;
     act_logout(0);
  };
-
-var g_user_info_target = "";
-
-function info_show(username)
-{
-    // ret = server_request('mesg', 'prefs|save','__POST__', 'prefs', JSON.stringify(g_prefs));
-    var info_in = JSON.parse(server_request('mesg', 'chatt|/info ' + username));
-    var info = null;
-
-    if (info_in.ret == 0) {
-        var fields = { login: { type: 'value' },
-                       state: { type: 'value' },
-                       guar: { type: 'value' },
-                       match: { type: 'value' },
-                       game: { type: 'value' },
-                       friend: { type: 'radio' } };
-
-        info = new Fieldify($('info'), fields);
-        info.populate(info_in);
-        info.visible(true);
-        }
-    else {
-        console.log("some error: open a dialog");
-    }
-    // FIXME: just to be finished
-    console.log(info);
-}
-
-function click_update_cb(e)
-{
-    if (g_user_info_target == e.target.innerHTML) {
-        g_user_info_target = "";
-        info_show(e.target.innerHTML);
-        }
-    else {
-        g_user_info_target = e.target.innerHTML;
-        }
-}
 
 function j_tab_cont(table_idx, data)
 {
@@ -488,7 +450,7 @@ function j_tab_cont(table_idx, data)
     $("table"+table_idx).innerHTML = content;
     var usr = $("table"+table_idx).getElementsByClassName("id_usr");
     for (i = 0 ; i < usr.length ; i++) {
-        addEvent(usr[i], "click", click_update_cb);
+        addEvent(usr[i], "click", info_show_cb);
     }
 }
 
@@ -497,6 +459,10 @@ function j_tab_act_cont(idx, act)
     if (act == 'sit') {
         // MLANG 1
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
+    }
+    else if (act == 'sitappr') {
+        // MLANG 1
+        $("table_act"+idx).innerHTML = '<input type="button" style="background-repeat: no-repeat; background-position: center; background-image: url(\'img/okappr.png\');" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');" title="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'" alt="'+(g_lang == 'en' ? "reserved table for authenticated and apprentice users only" : "tavolo riservato agli utenti registrati e agli apprendisti")+'">';
     }
     else if (act == 'sitreser') {
         // MLANG 1
@@ -538,13 +504,13 @@ function j_check_login(login, ret)
             (login[i] >= 'A' && login[i] <= 'Z')) {
             if (old_c != login[i]) {
                 old_c = login[i];
-                old_ct = 0;
+                old_ct = 1;
             }
             else {
-                if (old_ct > 3) {
+                if (old_ct > 2) {
                     // FIXME LANG
-                    ret.ret = (g_lang == 'en' ? "More than three contiguous '" + old_c + "' not allowed." :
-                               "Il nickname contiene più di tre caratteri '" + old_c + "' consecutivi.");
+                    ret.ret = (g_lang == 'en' ? "More than two contiguous '" + old_c + "' not allowed." :
+                               "Il nickname contiene più di 2 caratteri '" + old_c + "' consecutivi.");
                     return (false);
                 }
             }

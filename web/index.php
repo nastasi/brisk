@@ -228,18 +228,34 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'Send a message to the administrator:'),
                      'mesgtoadm_sub'=> array('it' => 'soggetto:',
                                              'en' => 'subject:'),
-                     'info_login' => array('it' => 'Utente:',
-                                          'en' => 'User:'),
-                     'info_state' => array('it' => 'Stato:',
-                                          'en' => 'State:'),
-                     'info_guar' => array('it' => 'Garante:',
-                                          'en' => 'Guarantee:'),
-                     'info_match' => array('it' => 'Partite:',
-                                           'en' => 'Matches:'),
-                     'info_game' => array('it' => 'Mani:',
-                                          'en' => 'Hands:'),
+                     'info_login' => array('it' => 'Utente',
+                                          'en' => 'User'),
+                     'info_status' => array('it' => 'Stato',
+                                          'en' => 'Status'),
+                     'info_status_tit' => array('it' => 'Stato dell\' utente.',
+                                          'en' => 'User status.'),
+                     'info_guar' => array('it' => 'Garante',
+                                          'en' => 'Guarantee'),
+                     'info_match' => array('it' => 'Partite',
+                                           'en' => 'Matches'),
+                     'info_match_tit' => array('it' => 'Partite giocate ai tavoli riservati.',
+                                           'en' => 'Matches played at reserved tables.'),
+                     'info_party' => array('it' => 'Party',
+                                           'en' => 'Party'),
+                     'info_party_tit' => array('it' => 'Bravura calcolata in base ad amici, agli amici fidati e agli amici degli amici fidati in base alla credibilità degli amici fidati.',
+                                           'en' => 'Skill calculated with party rules.'),
+                     'info_game' => array('it' => 'Mani',
+                                          'en' => 'Hands'),
+                     'info_game_tit' => array('it' => 'Mani giocate ai tavoli riservati.',
+                                              'en' => 'Hands played at reserved tables.'),
                      'info_frie' => array('it' => 'Conoscenza:',
                                           'en' => 'Friendship:'),
+                     'info_repfrie' => array('it' => 'Cosa ne pensano gli amici',
+                                             'en' => 'Friends reputation'),
+                     'info_repbff' => array('it' => 'Cosa ne pensano gli amici fidati',
+                                            'en' => 'Best friends reputation'),
+                     'info_skill' => array('it' => 'Bravura',
+                                            'en' => 'Skill')
                      );
 
 require_once("briskin5/Obj/briskin5.phh");
@@ -669,7 +685,7 @@ google_color_url = "000000";
 <table width="100%%" border="0" cols="3"><tr>
 <td align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
 <td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
-    <img class="nobo" src="img/brisk_logo64.png">
+    <!--<img class="nobo" src="img/brisk_logo64.png">--><img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao grrr">
     '.$mlang_room['headline'][$G_lang].'<br>
     </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>',
                                                                 ($G_with_topbanner ? $G_topbanner :
@@ -737,11 +753,6 @@ google_color_url = "000000";
    alt="'.$mlang_room['tit_cook'][$G_lang].'">'.$mlang_room['itm_cook'][$G_lang].'</a><br>
 <hr>
 
-<!--
-<a href="#"
-   onmouseover="menu_hide(0,1);"
-   title="perché supportare brisk?" onclick="act_whysupport();">supportare?</a><br>
--->
 <a href="#"
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_cla'][$G_lang].'" onclick="act_placing();">'.$mlang_room['itm_cla'][$G_lang].'</a><br>
@@ -764,7 +775,7 @@ google_color_url = "000000";
 
 <a href="http://it-it.facebook.com/event.php?eid=165523204539&index=1"
    target="_blank" onmouseover="menu_hide(0,2);"
-   title="1° Torneo-Meeting di Parma del 22/11/2009" <img style="display: inline;" class="nobo" src="img/coppa16.png">Parma 11/09</a><br>
+   title="1° Torneo-Meeting di Parma del 22/11/2009"><img style="display: inline;" class="nobo" src="img/coppa16.png">Parma 11/09</a><br>
 
 <a href="http://it-it.facebook.com/event.php?eid=105699129890&index=1"
    target="_blank" onmouseover="menu_hide(0,2);"
@@ -984,7 +995,7 @@ supported by:<br>
 <div style="position: absolute;">
 '.$altout_support_big.'
 </div>
-<a style="/* position: absolute; top: 40px; left: 6px;" */ target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
+<a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
@@ -1006,6 +1017,7 @@ supported by:<br>
 <script type="text/javascript" src="commons.js"></script>
 <script type="text/javascript" src="fieldify.js"></script>
 <script type="text/javascript" src="prefs.js"></script>
+<script type="text/javascript" src="info.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="heartbit.js"></script>
@@ -1026,6 +1038,7 @@ var g_debug = 0;
 var g_lang = "<? echo $G_lang; ?>";
 var g_lng = "<? echo $G_lng; ?>";
 var g_tables_n = <? echo TABLES_N; ?>;
+var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
 var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
 var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
 var g_prefs, g_prefs_new = null;
@@ -1174,6 +1187,7 @@ cookie_law(null);
 <script type="text/javascript" src="commons.js"></script>
 <script type="text/javascript" src="fieldify.js"></script>
 <script type="text/javascript" src="prefs.js"></script>
+<script type="text/javascript" src="info.js"></script>
 <!-- <script type="text/javascript" src="myconsole.js"></script> -->
 <script type="text/javascript" src="menu.js"></script>
 <script type="text/javascript" src="ticker.js"></script>
@@ -1194,6 +1208,7 @@ cookie_law(null);
    var g_lang = "<? echo $G_lang; ?>";
    var g_lng = "<? echo $G_lng; ?>";
    var g_tables_n = <? echo TABLES_N; ?>;
+   var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
    var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
    var g_prefs, g_prefs_new = null;
@@ -1377,22 +1392,64 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <div id="xhrdeltalog"></div>
 </div>
 
-<div id="info" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 340px; top: 150px; visibility: hidden;">
+<div id="info" class="notify" style="z-index: 200; width: 500px; margin-left: -250px; height: 340px; top: 150px; visibility: hidden;">
 <table class="info">
-<tr><td class="le"><b><?php echo $mlang_room['info_login'][$G_lang]; ?></b></td><td class="ri"><span class="login_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_state'][$G_lang]; ?></b></td><td class="ri"><span class="state_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_guar'][$G_lang]; ?></b></td><td class="ri"><span class="guar_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_match'][$G_lang]; ?></b></td><td class="ri"><span class="match_id"></span></td></tr>
-<tr><td class="le"><b><?php echo $mlang_room['info_game'][$G_lang]; ?></b></td><td class="ri"><span class="game_id"></span></td></tr>
-<tr><td colspan="2" style="background-color: pink;">di seguito le opzioni che verranno attivate successivamente:</td></tr>
-<tr><td class="le ri" colspan="2"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td></tr>
-<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="black">Da evitare</td>
-    <td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="friend">Amico</td></tr>
-<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="unknown">Sconosciuto</td>
-<td class="ri info-opt"><input type="radio" name="friend" class="friend_id" value="bff">Amico fidato</td></tr>
-<tr><td class="le info-opt"><input type="radio" name="friend" class="friend_id" value="test">In prova</td></tr>
-<tr><td class="le"><b>Bravura:</b></td><td class="le"><b>Credibilità:</b></td></tr>
-<tr><td class="info-opt">
+
+<tr>
+<td class="head"><span><?php echo $mlang_room['info_login'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="login_id"></span></td>
+<td class="head"><span><?php echo $mlang_room['info_status'][$G_lang]; ?>:</span></td>
+<td class="ri data"><span class="state_id"></span></td>
+</tr>
+
+<tr>
+<td class="head"><span><?php echo $mlang_room['info_guar'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="guar_id"></span></td>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_match_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_match'][$G_lang]; ?>:</span></td>
+<td class="ri data"><span class="match_id"></span></td>
+</tr>
+
+<tr>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_party_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_party'][$G_lang]; ?>:</span></td>
+<td class="ri b-right data"><span class="party_id"></span></td>
+<td class="head"><span class="title" title="<?php echo $mlang_room['info_game_tit'][$G_lang]; ?>"><?php echo $mlang_room['info_game'][$G_lang]; ?>:</span></td>
+<td class="ri data"><span class="game_id"></span></td>
+</tr>
+
+<tr class="widefriend_id">
+<td colspan="3" class="head"><span><?php echo $mlang_room['info_repfrie'][$G_lang]; ?>:</span></td>
+<td class="le data"><?php echo $mlang_room['info_skill'][$G_lang]; ?>: <span class="skill_id"></span></td>
+</tr>
+
+<tr class="widefriend_id"><td class="le info-opt data">Da evitare: <span class="black_id"></span></td>
+<td class="le info-opt data">In prova: <span class="test_id"></span></td>
+<td class="le info-opt data">Amico: <span class="friend_id"></span></td>
+<td class="le data">Fidato: <span class="bff_id"></span></td></tr>
+
+<tr class="narrowfriend_id">
+<td colspan="3" class="head"><span><?php echo $mlang_room['info_repbff'][$G_lang]; ?>:</span></td>
+<td class="le data"><?php echo $mlang_room['info_skill'][$G_lang]; ?>: <span class="skill_id"></span></td></tr>
+
+<tr class="narrowfriend_id"><td class="le info-opt data">Da evitare: <span class="black_id"></span></td>
+<td class="le info-opt data">In prova: <span class="test_id"></span></td>
+<td class="le info-opt data">Amico: <span class="friend_id"></span></td>
+<td class="le data">Fidato: <span class="bff_id"></span></td></tr>
+<tr><td class="le ri triple" colspan="3"><b><?php echo $mlang_room['info_frie'][$G_lang]; ?></b></td>
+<td class="le data triple"><input type="radio" name="friend" class="friend_id" value="black"
+    onclick="info_onlyifknown_isvisible();">Da evitare</td></tr>
+<tr>
+<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="unknown"
+    onclick="info_onlyifknown_isvisible();">Sconosciuto</td>
+<td class="le info-opt data"><input type="radio" name="friend" class="friend_id" value="test"
+    onclick="info_onlyifknown_isvisible();">In prova</td>
+<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="friend"
+    onclick="info_onlyifknown_isvisible();">Amico</td>
+<td class="ri info-opt data"><input type="radio" name="friend" class="friend_id" value="bff"
+    onclick="info_onlyifknown_isvisible();">Amico fidato</td>
+</tr>
+<tr class="onlyifknown_gid">
+<td class="le head"><span><?php echo $mlang_room['info_skill'][$G_lang]; ?>:</span></td>
+<td class="data">
     <table class="fiverank" style="margin: auto;">
        <tr><td class="c1t">1</td>
            <td class="c2t">2</td>
@@ -1406,26 +1463,28 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
            <td class="c5b"><input type="radio" name="skill" class="skill_id" value="5"></td>
        </tr>
     </table>
-</td><td class="info-opt">
+</td>
+<td class="le"><b>Credibilità:</b></td>
+<td class="data">
     <table class="fiverank" style="margin: auto;">
        <tr><td class="c1t">1</td>
            <td class="c2t">2</td>
            <td class="c3t">3</td>
            <td class="c4t">4</td>
            <td class="c5t">5</td></tr>
-       <tr><td class="c1b"><input type="radio" name="credib" class="credib_id" value="1"></td>
-           <td class="c2b"><input type="radio" name="credib" class="credib_id" value="2"></td>
-           <td class="c3b"><input type="radio" name="credib" class="credib_id" value="3"></td>
-           <td class="c4b"><input type="radio" name="credib" class="credib_id" value="4"></td>
-           <td class="c5b"><input type="radio" name="credib" class="credib_id" value="5"></td>
+       <tr><td class="c1b"><input type="radio" name="trust" class="trust_id" value="1"></td>
+           <td class="c2b"><input type="radio" name="trust" class="trust_id" value="2"></td>
+           <td class="c3b"><input type="radio" name="trust" class="trust_id" value="3"></td>
+           <td class="c4b"><input type="radio" name="trust" class="trust_id" value="4"></td>
+           <td class="c5b"><input type="radio" name="trust" class="trust_id" value="5"></td>
        </tr>
     </table>
 </td></tr>
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>
-<!-- <input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_reset();" value="<?php echo $mlang_room['btn_reset'][$G_lang]; ?>"/>
-<input type="submit" class="input_sub" style="bottom: 4px;" onclick="prefs_save();" value="<?php echo $mlang_room['btn_save'][$G_lang]; ?>"/> -->
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="info_reset();" value="<?php echo $mlang_room['btn_reset'][$G_lang]; ?>"/>
+<input type="submit" class="input_sub" style="bottom: 4px;" onclick="info_save();" value="<?php echo $mlang_room['btn_save'][$G_lang]; ?>"/>
 </div>
 
 </div>

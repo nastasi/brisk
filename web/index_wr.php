@@ -42,6 +42,8 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                            'en' => 'To send a message to the administrator you have to be authenticated'),
                       'shutmsg'  => array( 'it' => '<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>',
                                            'en' => '<b>The server is going to be rebooted, new games are not allowed.</b>'),
+                      'mustappr' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica o apprendistato.</b>',
+                                           'en' => '<b>The table where you want to sit require authentication or apprentice</b>'),
                       'mustauth' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica.</b>',
                                            'en' => '<b>The table where you want to sit require authentication</b>'),
                       'mustcert' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica e certificazione.</b>',
@@ -117,6 +119,10 @@ Ti sei registrato col nickname \'%s\',<br>
 Ciò è necessario per ottenere la password.<br><br>
 Saluti e buone partite, mop.<br>',
                                            'en' => 'EN mhtml [%s] [%s]'),
+                      'info_err' => array( 'it' => 'E\' occorso un errore (%d), riprova più tardi.',
+                                           'en' => 'Some error occurs (%d), retry later.'),
+                      'info_auth' => array('it' => 'Non essendo autenticato non puoi costruire una rete di preferenze.',
+                                           'en' => 'Some error occurs (%d), retry later.')
                       );
 
 define('LICMGR_CHO_ACCEPT', 0);
@@ -224,9 +230,6 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
             echo show_notify(str_replace("\n", " ", placings_show(FALSE)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
         }
-        else if ($argz[0] == 'whysupport') {
-            echo show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lng], 400, 200);
-        }
         else if ($argz[0] == 'apprentice') {
             if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
                 $cli_name = "";
@@ -239,6 +242,12 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             // check existence of username or email
             $is_trans = FALSE;
             do {
+                error_log($cli_name);
+                if (login_consistency($cli_name) == FALSE) {
+                    $mesg_to_user = "Il nickname non è conforme alle regole per la sua costruzione.";
+                    break;
+                }
+
                 if (($bdb = BriskDB::create()) == FALSE) {
                     $mesg_to_user = "Connessione al database fallita";
                     break;
@@ -351,6 +360,26 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     if ($argz[0] == 'ping') {
         log_wr("PING RECEIVED");
     }
+    else if ($argz[0] == 'info') {
+        if ($user->is_auth()) {
+            if ($argz[1] == 'save') {
+                if (!isset($post['info'])) {
+                    return FALSE;
+                }
+                if (($ret = $brisk->info_save($user, $post['info'])) == 0) {
+                    echo "1";
+                    return TRUE;
+                }
+
+                printf($mlang_indwr['info_err'][$G_lang], $ret);
+                return FALSE;
+            }
+        }
+        else {
+            printf($mlang_indwr['info_auth'][$G_lang]);
+            return FALSE;
+        }
+    }
     else if ($argz[0] == 'prefs') {
         if ($argz[1] == 'save') {
             if (!isset($post['prefs'])) {
@@ -412,7 +441,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                     if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
-                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(urldecode($cli_name)), xcapelt(urldecode($cli_email))));
+                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(trim(urldecode($cli_name))), xcapelt(trim(urldecode($cli_email)))));
                         fclose($fp);
                     }
                     Warrant::unlock_data($wa_lock);
@@ -434,8 +463,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     if (($bdb = BriskDB::create()) == FALSE)
                         break;
 
-                    $cli_name = urldecode($cli_name);
-                    $cli_email = urldecode($cli_email);
+                    $cli_name = trim(urldecode($cli_name));
+                    $cli_email = trim(urldecode($cli_email));
 
                     // check for already used fields
                     if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
@@ -737,16 +766,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             $user->step_inc();
 
         }
-        else if ($argz[0] == 'whysupport') {
-            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_whysupport[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
-
-            log_wr($user->comm[$user->step % COMM_N]);
-            $user->step_inc();
-
-        }
         else if ($argz[0] == 'chatt') {
-            $brisk->chatt_send($user, xcapemesg($mesg));
+            $brisk->chatt_send($user, xcapemesg($mesg), $mlang_indwr);
         }
         else if ($argz[0] == 'tosmgr') {
             // check IF is authnticated user, both terms of service versions matches
@@ -810,6 +831,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 else if ( $table->auth_type == TABLE_AUTH_TY_AUTH &&
                           (!$user->is_auth() || $user->is_appr()) ) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustauth'][$G_lang]);
+                }
+                else if ( $table->auth_type == TABLE_AUTH_TY_APPR &&
+                          (!$user->is_auth()) ) {
+                    $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustappr'][$G_lang]);
                 }
                 else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustfirst'][$G_lang]);

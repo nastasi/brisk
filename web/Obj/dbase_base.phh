@@ -3,7 +3,7 @@
    *  brisk - dbase_base.phh
    *
    *  Copyright (C) 2011-2012 Matteo Nastasi
-   *                          mailto: nastasi@alternativeoutput.it 
+   *                          mailto: nastasi@alternativeoutput.it
    *                                  matteo.nastasi@milug.org
    *                          web: http://www.alternativeoutput.it
    *
@@ -56,7 +56,7 @@ class LoginDBItem {
 
     static function LoginDBItemFromRecord($rec)
     {
-        $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass, 
+        $ret = new LoginDBItem($rec->code, $rec->login, $rec->pass,
                                $rec->email, $rec->type, $rec->last_dona,
                                $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code,
                                $rec->match_cnt, $rec->game_cnt);
@@ -73,7 +73,7 @@ class LoginDBItem {
     {
         return $this->login;
     }
-    
+
     function pass_get()
     {
         return $this->pass;
@@ -181,4 +181,53 @@ class MailDBItem {
         return $bdb->mail_add_fromitem($this);
     }
 }
+
+define('USERSNET_DEF_FRIEND', 2);
+define('USERSNET_DEF_SKILL', 2);
+define('USERSNET_DEF_TRUST', 2);
+
+class UsersNetItem {
+    var $owner;
+    var $target;
+    var $friend;
+    var $skill;
+    var $trust;
+
+    var $from_db;
+
+    function UsersNetItem($owner, $target, $friend, $skill, $trust,
+                          $widefriend, $narrowfriend, $from_db)
+    {
+        $this->owner = $owner;
+        $this->target = $target;
+        $this->friend = $friend;
+        $this->skill = $skill;
+        $this->trust = $trust;
+        $this->widefriend = $widefriend;
+        $this->narrowfriend = $narrowfriend;
+
+        $this->from_db = $from_db;
+    }
+
+    static function UsersNetItemFromRecord($rec, $widefriend, $narrowfriend)
+    {
+        $ret = new UsersNetItem($rec->owner, $rec->target, $rec->friend,
+                               $rec->skill, $rec->trust,
+                                $widefriend, $narrowfriend, TRUE);
+
+        return ($ret);
+    }
+
+    static function UsersNetItemDefaults($owner, $target, $widefriend, $narrowfriend)
+    {
+        $ret = new UsersNetItem($owner, $target, USERSNET_DEF_FRIEND,
+                                USERSNET_DEF_SKILL, USERSNET_DEF_TRUST,
+                                $widefriend, $narrowfriend, FALSE);
+
+        return ($ret);
+    }
+
+
+}
+
 ?>

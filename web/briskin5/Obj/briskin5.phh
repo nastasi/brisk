@@ -1353,7 +1353,7 @@ class Bin5 {
     }
 
 
-    function chatt_send($user, $mesg)
+    function chatt_send($user, $mesg, $mlang_indwr = NULL)
     {
         GLOBAL $mlang_brisk, $G_lang;
 

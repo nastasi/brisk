@@ -28,6 +28,7 @@ define('FTOK_PATH', "/var/lib/brisk");
 define('LEGAL_PATH', "/tmp/legal_brisk");
 define('PROXY_PATH', "/var/lib/brisk_proxy");
 define('TABLES_N', 36);
+define('TABLES_APPR_N', 12);
 define('TABLES_AUTH_N', 8);
 define('TABLES_CERT_N', 4);
 define('PLAYERS_N', 3);
@@ -152,13 +153,14 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "5.1.3";
+$G_brisk_version = "5.2.1";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: comando /info e doppio click sugli utenti registrati, nuovi utenti apprendisti, info su numero di mani e di partite.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: puoi creare la tua rete di amicizie con /info, vedere cosa pensano i tuoi amici degli altri utenti e ci sono i nuovi tavoli riservati per registrati e apprendisti, corretti alcuni errori.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
-                       'en' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NEWS</b>: ENcomando /info e doppio click sugli utenti registrati, nuovi utenti apprendisti.',
-                                       'If you want to subscribe our <a target="_blank" href="ml-briscola+subscribe@milug.org">Mailing List</a>, click it!' ) );
+                       'en' => array ( 'EN Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: puoi creare la tua rete di amicizie con /info,',
+                                       'vedere cosa pensano i tuoi amici degli altri utenti e tavoli riservati per registrati e apprendisti.',
+                                       'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ) );
 
 $G_room_help = array( 'it' => '
 <div style=\\"text-align: left; padding: 8px;\\">
@@ -634,8 +636,9 @@ class Vect {
 }
 
 define('TABLE_AUTH_TY_PUBL', 0);
-define('TABLE_AUTH_TY_AUTH', 1);
-define('TABLE_AUTH_TY_CERT', 2);
+define('TABLE_AUTH_TY_APPR', 1);
+define('TABLE_AUTH_TY_AUTH', 2);
+define('TABLE_AUTH_TY_CERT', 3);
 
 
 class Table {
@@ -671,6 +674,8 @@ class Table {
         $thiz->auth_type =   TABLE_AUTH_TY_CERT;
     else if ($idx < TABLES_AUTH_N)
         $thiz->auth_type =   TABLE_AUTH_TY_AUTH;
+    else if ($idx < TABLES_APPR_N)
+        $thiz->auth_type =   TABLE_AUTH_TY_APPR;
     else
         $thiz->auth_type =   TABLE_AUTH_TY_PUBL;
 
@@ -822,6 +827,12 @@ class Table {
           case TABLE_AUTH_TY_AUTH:
               if ($user->is_auth() && !$user->is_appr())
                   $act = "sitreser";
+              else
+                  $act = 'reserved';
+              break;
+          case TABLE_AUTH_TY_APPR:
+              if ($user->is_auth())
+                  $act = "sitappr";
               else
                   $act = 'reserved';
               break;
@@ -1643,7 +1654,13 @@ class Brisk
     }
   }
 
-  function info_show($user, $user_login, $dt)
+  /*
+    function info_show($user, $target, $dt)
+
+    if success return assoc. array with "ret" => 0 and other fields
+    else return an assoc. array with "ret: != 0 and "mesg" with an error description
+  */
+  function info_show($user, $target, $dt)
   {
       GLOBAL $G_lang, $mlang_brisk, $G_base;
 
@@ -1652,7 +1669,7 @@ class Brisk
       $ret = 0;
 
       do {
-          if ($user_login == "") {
+          if ($target == "") {
               $ret = 1;
               break;
           }
@@ -1660,13 +1677,13 @@ class Brisk
               $ret = 2;
               break;
           }
-          if (($user_item = $bdb->getitem_bylogin($user_login, $user_code)) == FALSE) {
+          if ($target == $user->name) {
               $ret = 3;
+              $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
           }
-          if ($user_login == $user->name) {
+          if (($user_item = $bdb->getitem_bylogin($target, $user_code)) == FALSE) {
               $ret = 4;
-              $mesg = sprintf($mlang_brisk['inf_self'][$G_lang]);
               break;
           }
           if (($guar_item = $bdb->getitem_bycode($user_item->guar_code_get())) != FALSE) {
@@ -1677,11 +1694,24 @@ class Brisk
           }
           $user_tos_vers = $user_item->tos_vers_get();
 
+          $partyskill = $bdb->usersnet_partyskill($user->code, $user_item->code);
+
+          $widefriend = $bdb->usersnet_widefriend($user->code, $user_item->code);
+          $widefriend['skill'] = $bdb->usersnet_wideskill($user->code, $user_item->code);
+          $narrowfriend = $bdb->usersnet_narrowfriend($user->code, $user_item->code);
+          $narrowfriend['skill'] = $bdb->usersnet_narrowskill($user->code, $user_item->code);
+
+          if (($usersnet_item = $bdb->usersnet_bycode($user->code, $user_item->code,
+                                                      $widefriend, $narrowfriend)) == FALSE) {
+              $usersnet_item = $bdb->usersnet_default($user->code, $user_item->code,
+                                                      $widefriend, $narrowfriend);
+          }
+
           if (versions_cmp($user_tos_vers, "1.2") < 0) {
-              $mesg = sprintf($mlang_brisk['tos_old'][$G_lang], xcape($user_login));
+              $mesg = sprintf($mlang_brisk['tos_old'][$G_lang], xcape($target));
           }
           else if ($guar_login == "") {
-              $mesg = sprintf($mlang_brisk['inf_nfd'][$G_lang], xcape($user_login));
+              $mesg = sprintf($mlang_brisk['inf_nfd'][$G_lang], xcape($target));
           }
       } while (0);
 
@@ -1695,7 +1725,7 @@ class Brisk
       else {
           $jret = json_encode(array("ret" => 0,
                                     "mesg" => "",
-                                    "login" => $user_login,
+                                    "login" => $target,
                                     // FIXME: state internationalization
                                     "state" =>
                                     ($user_item->type & USER_FLAG_TY_APPR ? "Apprendista" :
@@ -1704,12 +1734,47 @@ class Brisk
                                        "Normale" : "Stato sconosciuto"))),
                                     "guar" => ($user_item->type & USER_FLAG_TY_APPR ?
                                                "" : $guar_login),
+                                    "party" => $partyskill,
                                     "match" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->match_cnt) ,
                                     "game" => (versions_cmp($user_tos_vers, "1.4") < 0 ? "non autorizzato" : $user_item->game_cnt),
-                                    "friend" => "unknown"));
+                                    "friend" => usersnet_friend_getlabel($usersnet_item->friend),
+                                    "skill" => $usersnet_item->skill,
+                                    "trust"  => $usersnet_item->trust,
+                                    "widefriend" => $usersnet_item->widefriend,
+                                    "narrowfriend" => $usersnet_item->narrowfriend
+                                    ));
       }
 
       return $jret;
+  }
+
+  function info_save($user, $json_s)
+  {
+      GLOBAL $G_lang, $mlang_brisk, $G_base;
+
+      $mesg = "";
+      $user_code = -1;
+      $ret = 0;
+      $subret = 0;
+
+      do {
+          if (($json = json_decode($json_s)) == FALSE) {
+              $ret = 1;
+              break;
+          }
+
+          if (($bdb = BriskDB::create()) == FALSE) {
+              $ret = 2;
+              break;
+          }
+
+          if (($subret = $bdb->usersnet_save($user->code, $json)) != 0) {
+              $ret = 4000 + $subret;
+              break;
+          }
+      } while(0);
+
+      return ($ret);
   }
 
   function room_outstandup($user)
@@ -1858,7 +1923,7 @@ class Brisk
       return ($this->kickuser($user_out, $out_reas));
   }
 
-  function chatt_send($user, $mesg)
+  function chatt_send($user, $mesg, $mlang_indwr = NULL)
   {
     GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
@@ -2059,7 +2124,7 @@ class Brisk
             if (($bdb = BriskDB::create()) != FALSE) {
                 $bdb->users_load();
                 /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-                if ($bdb->login_exists($name_new)) {
+                if ($bdb->login_exists(strtolower($name_new))) {
                     $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
                     $to_user .= nickserv_msg($dt, $prestr);
                 }
@@ -2072,10 +2137,20 @@ class Brisk
       } while (0);
     } // nick chat command
     else if (strncmp($msg, "/info ", 6) == 0) {
-        $guar_user = substr($msg, 6);
+        do {
+            if (! $user->is_auth()) {
+                if ($mlang_indwr) {
+                    $to_user = nickserv_msg($dt, $mlang_indwr['info_auth'][$G_lang]);
+                }
+                else {
+                    $to_user = nickserv_msg($dt, "error");
+                }
+                break;
+            }
+            $info_user = substr($msg, 6);
 
-        error_log("here [" . $guar_user."]");
-        echo $this->info_show($user, $guar_user, $dt);
+            echo $this->info_show($user, urldecode($info_user), $dt);
+        } while(0);
     }
     else if (strncmp($msg, "/st ", 4) == 0) {
       log_main("chatt_send BEGIN");
@@ -2370,7 +2445,7 @@ class Brisk
             }
         }
         else {
-            $login_exists =  $bdb->login_exists($name_new);
+            $login_exists =  $bdb->login_exists(strtolower($name_new));
         }
     }
     else {
@@ -3466,5 +3541,31 @@ function carousel_top()
     }
 }
 
+function login_consistency($name)
+{
+    $old_c = '';
+    if (($len = mb_strlen($name)) > 12) {
+        return FALSE;
+    }
 
+    for ($i = 0 ; $i < mb_strlen($name) ; $i++) {
+        $c = mb_substr($name, $i, 1);
+        if (mb_ereg_match ("[a-zA-Z0-9]", $c)) {
+            if ($old_c != $c) {
+                $old_c = $c;
+                $old_ct = 1;
+            }
+            else {
+                $old_ct++;
+                if ($old_ct > 2) {
+                    return (FALSE);
+                }
+            }
+        }
+        else {
+            return (FALSE);
+        }
+    }
+    return (TRUE);
+}
 ?>

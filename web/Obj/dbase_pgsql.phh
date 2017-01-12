@@ -25,7 +25,7 @@
 require_once("${G_base}Obj/dbase_base.phh");
 
 $escsql_from = array( "\\",   "'"   );
-$escsql_to   = array( "\\\\", "\\'" );
+$escsql_to   = array( "\\\\", "''" );
 
 function escsql($s)
 {
@@ -62,8 +62,9 @@ class DBConn
     static function destroy()
     {
         if (DBConn::$dbcnnx != FALSE) {
+            $ret = pg_close(DBConn::$dbcnnx);
             DBConn::$dbcnnx = FALSE;
-            return (pg_close(DBConn::$dbcnnx));
+            return ($ret);
         }
         return TRUE;
     }
@@ -112,11 +113,17 @@ class BriskDB
 
     function query($sql)
     {
-        if (($res = pg_query($this->dbconn->db(), $sql)) == FALSE) {
+        if (!$this->dbconn)
+            if (($this->dbconn = DBConn::recover()) == FALSE)
+                return FALSE;
+
+        if (($res = @pg_query($this->dbconn->db(), $sql)) == FALSE) {
+            error_log('pg_result_status: ' .  pg_result_status($res));
+            error_log('pg_connection_status: ' .  pg_connection_status($this->dbconn->db()));
             // try to recover the connection
             if (($this->dbconn = DBConn::recover()) == FALSE)
                 return FALSE;
-            return (pg_query($this->dbconn->db(), $sql));
+            return (@pg_query($this->dbconn->db(), $sql));
         }
 
         return ($res);
@@ -138,7 +145,7 @@ class BriskDB
         /* check the existence of the nick in the BriskDB */
         log_main("login_exists: ".$login);
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s')",
+        $user_sql = sprintf("SELECT * FROM %susers WHERE login = '%s'",
                             $G_dbpfx, escsql($login));
         if (($user_pg = $this->query($user_sql)) != FALSE)
             if (pg_numrows($user_pg) == 1)
@@ -199,10 +206,6 @@ class BriskDB
         GLOBAL $G_dbpfx, $G_selfreg_tout, $G_selfreg_mask;
 
         $sere_sql = sprintf("DELETE from %sselfreg_chk WHERE atime < now();", $G_dbpfx);
-        if (($sere_pg = $this->query($sere_sql)) == FALSE) {
-            return (FALSE);
-        }
-
         if (($sere_pg = $this->query($sere_sql)) == FALSE) {
             return (FALSE);
         }
@@ -352,11 +355,9 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (type, supp_comp) = (%d, '%s') WHERE code = %d;",
                             $G_dbpfx, $flags, escsql($supp_comp), $code);
-        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
-        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }
@@ -367,11 +368,9 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (type, disa_reas) = (%d, %d) WHERE code = %d;",
                             $G_dbpfx, $flags, $disa_reas, $code);
-        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
-        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }
@@ -382,11 +381,9 @@ class BriskDB
 
         $user_sql = sprintf("UPDATE %susers SET (tos_vers) = ('%s') WHERE code = %d;",
                             $G_dbpfx, escsql($tos_vers), $code);
-        fprintf(STDERR, "REQUEST [%s]\n", $user_sql);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
         }
-        fprintf(STDERR, "REQUEST GOOD [%s]\n", $user_sql);
 
         return TRUE;
     }
@@ -855,7 +852,222 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         return (TRUE);
     }
 
+    function friendship_default()
+    {
+        return (array(usersnet_friend_getlabel(1) => "0",
+                      usersnet_friend_getlabel(2) => "0",
+                      usersnet_friend_getlabel(3) => "0",
+                      usersnet_friend_getlabel(4) => "0",
+                      usersnet_friend_getlabel(5) => "0"));
+    }
 
+    function usersnet_widefriend($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $widefriend = $this->friendship_default();
+
+        $wfri_sql = sprintf("SELECT * FROM %susersnet_widefriend WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($wfri_pg  = $this->query($wfri_sql)) == FALSE) {
+            return ($widefriend);
+        }
+
+        for ($i = 0 ; $i < pg_numrows($wfri_pg) ; $i++) {
+            $wfri_obj = pg_fetch_object($wfri_pg, $i);
+            $widefriend[usersnet_friend_getlabel(intval($wfri_obj->friend))] = $wfri_obj->count;
+        }
+
+        return ($widefriend);
+    }
+
+    function usersnet_wideskill($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $wideskill = "//";
+
+        $wskl_sql = sprintf("SELECT * FROM %susersnet_wideskill WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($wskl_pg  = $this->query($wskl_sql)) == FALSE) {
+            return ($wideskill);
+        }
+
+        if (pg_numrows($wskl_pg) > 0) {
+            $wskl_obj = pg_fetch_object($wskl_pg, 0);
+            // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
+            // if ($wskl_obj->count >= 3)
+            $wideskill = sprintf("%3.2f", $wskl_obj->skill);
+        }
+        return ($wideskill);
+    }
+
+    function usersnet_narrowfriend($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $narrowfriend = $this->friendship_default();
+
+        $nfri_sql = sprintf("SELECT * FROM %susersnet_narrowfriend WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($nfri_pg  = $this->query($nfri_sql)) == FALSE) {
+            return $narrowfriend;
+        }
+
+        for ($i = 0 ; $i < pg_numrows($nfri_pg) ; $i++) {
+            $nfri_obj = pg_fetch_object($nfri_pg, $i);
+            $narrowfriend[usersnet_friend_getlabel(intval($nfri_obj->friend))] = $nfri_obj->count;
+        }
+        return ($narrowfriend);
+    }
+
+    function usersnet_narrowskill($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $narrowskill = "//";
+
+        $nskl_sql = sprintf("SELECT * FROM %susersnet_narrowskill WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($nskl_pg = $this->query($nskl_sql)) == FALSE) {
+            return ($narrowskill);
+        }
+
+        if (pg_numrows($nskl_pg) > 0) {
+            $nskl_obj = pg_fetch_object($nskl_pg, 0);
+            // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
+            // if ($nskl_obj->count >= 3)
+            $narrowskill = sprintf("%3.2f", $nskl_obj->skill);
+        }
+        return ($narrowskill);
+    }
+
+    function usersnet_partyskill($owner, $target)
+    {
+        GLOBAL $G_dbpfx;
+
+        $partyskill = "non disponibile";
+
+        $pskl_sql = sprintf("SELECT * FROM %susersnet_party WHERE owner = %d AND target = %d;",
+                            $G_dbpfx, $owner, $target);
+        if (($pskl_pg  = $this->query($pskl_sql)) == FALSE) {
+            return ($partyskill);
+        }
+
+        if (pg_numrows($pskl_pg) > 0) {
+            $pskl_obj = pg_fetch_object($pskl_pg, 0);
+            // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
+            // if ($wskl_obj->count >= 3)
+            $partyskill = sprintf("%3.2f", $pskl_obj->skill);
+        }
+        return ($partyskill);
+    }
+
+    function usersnet_bycode($owner, $target, $widefriend, $narrowfriend)
+    {
+        GLOBAL $G_dbpfx;
+        $ret = FALSE;
+
+        $net_sql = sprintf("SELECT * FROM %susersnet WHERE owner = %d AND target = %d;",
+                           $G_dbpfx, $owner, $target);
+        if (($net_pg  = $this->query($net_sql)) == FALSE)
+            return FALSE;
+
+        if (pg_numrows($net_pg) != 1)
+            return FALSE;
+
+        $net_obj = pg_fetch_object($net_pg, 0);
+
+        return (UsersNetItem::UsersNetItemFromRecord($net_obj, $widefriend, $narrowfriend));
+    }
+
+    function usersnet_default($owner, $target, $widefriend, $narrowfriend)
+    {
+        return (UsersNetItem::UsersNetItemDefaults($owner, $target, $widefriend, $narrowfriend));
+    }
+
+    function usersnet_save($owner_id, $json)
+    {
+        GLOBAL $G_dbpfx;
+        $ret = 99999;
+        $trans = FALSE;
+
+        do {
+            $friend = usersnet_friend_getid($json->friend);
+
+            $json->skill = intval($json->skill);
+            $json->trust = intval($json->trust);
+
+            if ($json->skill < 1 || $json->skill > 5 ||
+                $json->trust < 1 || $json->trust > 5 ||
+                $friend == FALSE) {
+                $ret = 1;
+                break;
+            }
+            $this->transaction('BEGIN');
+            $trans = TRUE;
+
+            if ($friend == USERSNET_FRIEND_UNKNOWN) {
+               // try to update
+                $net_sql = sprintf("
+                    DELETE FROM %susersnet
+                        USING %susers as us
+                        WHERE owner = %d AND us.login = '%s' AND target = us.code;",
+                                   $G_dbpfx, $G_dbpfx,
+                                   $owner_id, escsql(strtolower($json->login)));
+
+                if (($net_pg = $this->query($net_sql)) == FALSE) {
+                    $ret = 5;
+                    break;
+                }
+             }
+            else { // if ($friend == USERSNET_FRIEND_UNKNOWN
+                // try to update
+                $net_sql = sprintf("
+                    UPDATE %susersnet SET (friend, skill, trust, mtime) =
+                        (%d, %d, %d, now())
+                        FROM %susers as us
+                        WHERE owner = %d AND us.login = '%s' AND target = us.code RETURNING *;",
+                                   $G_dbpfx,
+                                   $friend, $json->skill, $json->trust,
+                                   $G_dbpfx,
+                                   $owner_id, escsql(strtolower($json->login)));
+                if (($net_pg  = $this->query($net_sql)) == FALSE || pg_numrows($net_pg) == 0) {
+                    $net_sql = sprintf("
+                INSERT INTO %susersnet SELECT %d AS owner, us.code as target,
+                        %d as friend, %d as skill, %d as trust
+                    FROM %susers as us WHERE us.login = '%s' RETURNING *;",
+                                       $G_dbpfx, $owner_id,
+                                       $friend, $json->skill, $json->trust,
+                                       $G_dbpfx, escsql(strtolower($json->login)));
+                    if (($net_pg  = $this->query($net_sql)) == FALSE) {
+                        log_wr('insert query failed');
+                        $ret = 2;
+                        break;
+                    }
+                    if (pg_numrows($net_pg) != 1) {
+                        log_wr(sprintf('insert numrow failed [%s] [%d]', $net_sql, pg_numrows($net_pg)));
+                        $ret = 3;
+                        break;
+                    }
+                }
+                else {
+                    if (pg_numrows($net_pg) != 1) {
+                        log_wr('update numrow failed');
+                        $ret = 4;
+                        break;
+                    }
+                }
+            }
+            $this->transaction('COMMIT');
+            return (0);
+        } while (0);
+
+        if ($trans)
+            $this->transaction('ROLLBACK');
+
+        return ($ret);
+    }
 } // End class BriskDB
 
 class LoginDBOld
