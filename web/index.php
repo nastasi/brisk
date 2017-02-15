@@ -682,8 +682,9 @@ google_color_url = "000000";
 <table width="100%%" border="0" cols="3"><tr>
 <td align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
 <td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
-    <!--<img class="nobo" src="img/brisk_logo64.png">--><img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao grrr">
-    '.$mlang_room['headline'][$G_lang].'<br>
+ <img class="nobo" src="img/brisk_logo64.png">'
+/*    <img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao Prof" alt="ciao Prof">' */
+    .$mlang_room['headline'][$G_lang].'<br>
     </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>',
                                                                 ($G_with_topbanner ? $G_topbanner :
 "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>

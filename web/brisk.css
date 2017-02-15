@@ -28,7 +28,7 @@
 }
 
 body {
-    background-image: url('img/najole_wh.png');
+    background-image: url('img/lines.png');
     background-color: #fafafa;
     background-attachment: fixed;
     margin: 0px;
@@ -110,7 +110,7 @@ img.ib_nobo {
     -moz-border-radius: 8px;
     border-radius: 8px;
 
-    background-image: url('img/najole_wh_light.png');
+    background-image: url('img/lines_light.png');
     background-attachment: fixed;
 
     top: 0;

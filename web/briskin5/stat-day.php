@@ -422,7 +422,8 @@ SELECT p.pts AS pts
 
                         fprintf($fpexp, "<%s class='%s'>%d</%s>",
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"),
-                                $cla_nam, pow(2,$gam_obj->mult) * $pts,
+                                $cla_nam,
+                                pow(2,$gam_obj->mult) * $pts,
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
