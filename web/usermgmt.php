@@ -233,7 +233,8 @@ SELECT usr.*, guar.login AS guar_login
                     break;
                 }
             }
-        }
+        } // else if ($action == "accept") {
+
 
         do {
             if (($bdb = BriskDB::create()) == FALSE) {
@@ -488,6 +489,108 @@ SELECT usr.*, guar.login AS guar_login
                 }
             }
             exit;
+        }
+
+
+        else if ($action == "delete") {
+            foreach($_POST as $key => $value) {
+                if (substr($key, 0, 9) != "f_newuser")
+                    continue;
+
+                $id = (int)substr($key, 9);
+                if ($id <= 0)
+                    continue;
+
+                // check existence of username or email
+                $is_trans = FALSE;
+                $res = FALSE;
+                do {
+                    if (($bdb = BriskDB::create()) == FALSE)
+                        break;
+
+                    // retrieve list added users
+                    $usr_sql = sprintf("
+SELECT usr.*, guar.login AS guar_login
+     FROM %susers AS usr
+     JOIN %susers AS guar ON guar.code = usr.guar_code
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
+         AND usr.disa_reas = %d AND usr.code = %d;",
+                               $G_dbpfx, $G_dbpfx,
+                                       USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                                       USER_DIS_REA_NU_TOBECHK, $id);
+
+
+                    if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
+                        log_crit("stat-day: select from tournaments failed");
+                        break;
+                    }
+                    $usr_n = pg_numrows($usr_pg);
+                    if ($usr_n != 1) {
+                        $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
+                                          $id, $usr_n);
+                        break;
+                    }
+
+                    $usr_obj = pg_fetch_object($usr_pg, 0);
+
+                    $bdb->transaction('BEGIN');
+                    $is_trans = TRUE;
+
+                    $del_sql = sprintf("DELETE FROM %susers WHERE code = %d;",
+                                       $G_dbpfx, $usr_obj->code);
+
+                    if (($del_pg = pg_query($bdb->dbconn->db(), $del_sql)) == FALSE) {
+                        log_crit("stat-day: select from tournaments failed");
+                        break;
+                    }
+
+                    // FIXME: add to index_wr.php strings
+                    $subj = "Brisk: nickname rifiutato";
+                    // the same for both cases:
+                    //  if (($usr_obj->type & USER_FLAG_TY_APPR) == USER_FLAG_TY_APPR) {
+                        $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
+
+Ti volevo segnalare che il nickname \'%s\' con cui ti volevi registrare
+non ha superato la fase di verifica manuale; il motivo può essere
+la sua illeggibilità per gli altri utenti o il contenuto poco ortodosso
+o troppo aggressivo o o ci sono troppe cifre consecutive o qualcosa del genere.
+
+La procedura di registrazione va ripetuta.
+
+Saluti e buone partite, mop.', $usr_obj->login);
+
+                        $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
+Ti volevo segnalare che il nickname \'%s\' con cui ti volevi registrare
+non ha superato la fase di verifica manuale; il motivo può essere
+la sua illeggibilità per gli altri utenti o il contenuto poco ortodosso
+o troppo aggressivo o o ci sono troppe cifre consecutive o qualcosa del genere.<br><br>
+La procedura di registrazione va ripetuta.<br><br>
+Saluti e buone partite, mop.', $usr_obj->login);
+                    /* } */
+                    /* else { */
+                    /*     $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang], */
+                    /*                         $usr_obj->guar_login, $usr_obj->login, $confirm_page); */
+                    /*     $body_htm = sprintf($mlang_indwr['nu_mhtml'][$G_lang], */
+                    /*                         $usr_obj->guar_login, $usr_obj->login, $confirm_page); */
+                    /* } */
+
+                    if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                        // mail error
+                        fprintf(STDERR, "ERROR: mail send FAILED\n");
+                        break;
+                    }
+                    $status .= sprintf("user delete for %s: SUCCESS<br>", $usr_obj->login);
+                    $bdb->transaction('COMMIT');
+                    $res = TRUE;
+                } while(FALSE);
+                if ($res == FALSE) {
+                    $status .= sprintf("Error occurred during accept action<br>");
+                    if ($is_trans)
+                        $bdb->transaction('ROLLBACK');
+                    break;
+                }
+                printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, $usr_obj->login);
+            }
         }
         else {
             do {
