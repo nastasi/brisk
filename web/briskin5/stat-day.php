@@ -434,7 +434,7 @@ SELECT p.pts AS pts
                                                         $gam_obj->friend,
                                                         ($gam_obj->friend != -1 ?
                                                          $users[$gam_obj->friend]['login'] : ""),
-                                                        $gam_obj->pnt, $gam_obj->asta_pnt) )
+                                                        $gam_obj->pnt, $gam_obj->asta_pnt, $gam_obj->tourn_pts) )
                                 );
                     }
                     fprintf($fpexp, "</tr>\n");

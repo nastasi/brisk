@@ -42,8 +42,8 @@ $mlang_bin5_bin5 = array(
                          'info_curr' => array( 'it' => '%3$smano corrente%4$s',
                                                'en' => '%3$scurrent hand%4$s'),
                          // br, hr, b, /b, win, fri
-                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
-                                               'en' => 'The declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
+                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s (punti torneo %7$d), il socio era %3$s%6$s%4$s,%1$s',
+                                               'en' => 'The declarer was %3$s%5$s%4$s (tournment points %7$d), the partner was %3$s%6$s%4$s,%1$s'),
                          // br, hr, b, /b
                          'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
                                                'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
@@ -62,8 +62,8 @@ $mlang_bin5_bin5 = array(
                                                'en' => 'lost'),
 
                          // br, hr, b, /b, win_name
-                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano,%1$s',
-                                               'en' => '%3$s%5$s%4$s play alone against each other,%1$s'),
+                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano (punti torneo %6$d),%1$s',
+                                               'en' => '%3$s%5$s%4$s play alone against each other (tournment points %6$d),%1$s'),
                          // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
                          'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %3$s%7$s%4$s.%1$s',
                                                'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
@@ -185,6 +185,7 @@ class Bin5_table extends Table {
 
     var $asta_win;          // the caller idx position at table
     var $briscola;
+    var $tourn_pts;         // points in the caller hand
     var $friend;            // the callee idx position at table
 
     var $match_id;          // the id of the match on the database (-1 == just not saved)
@@ -197,6 +198,8 @@ class Bin5_table extends Table {
     var $old_pnt;           // points made by caller and callee
     var $old_asta_win;      // the old caller idx position at table
     var $old_friend;        // the old callee idx position at table
+
+    var $old_tourn_pts;     // the old tournment computed points in the hand of caller
 
     function Bin5_table()
     {
@@ -223,6 +226,7 @@ class Bin5_table extends Table {
        $thiz->total     =   array( 0, 0, 0, 0, 0);
        $thiz->asta_win  =  -1;
        $thiz->briscola  =  -1;
+       $thiz->tourn_pts =  -1;
        $thiz->friend    =  -1;
        $thiz->turn      =   0;
 
@@ -266,6 +270,7 @@ class Bin5_table extends Table {
 
        $thiz->asta_win     = $from->asta_win;
        $thiz->briscola     = $from->briscola;
+       $thiz->tourn_pts    = $from->tourn_pts;
        $thiz->friend       = $from->friend;
 
        $thiz->match_id     = $from->match_id;
@@ -436,6 +441,7 @@ class Bin5_table extends Table {
         $this->asta_pnt  = 60;
         $this->asta_win  = -1;
         $this->briscola  = -1;
+        $this->tourn_pts = -1;
         $this->friend    = -1;
         $this->turn      =  0;
 
@@ -638,6 +644,8 @@ class Bin5_table extends Table {
         // $this->old_mult, $this->old_pnt, $this->old_reason and $this->old_asta_win are specific
 
         $this->old_friend = $this->friend;
+        $this->old_tourn_pts = $this->tourn_pts;
+
         $this->old_reason = game_description($action, 'html', $this->old_mult,
                                              $this->old_asta_win,
                                              ($this->old_asta_win != -1 ?
@@ -645,7 +653,7 @@ class Bin5_table extends Table {
                                              $this->old_friend,
                                              ($this->old_friend != -1 ?
                                               $bri->user[$this->player[$this->old_friend]]->name : ""),
-                                             $this->old_pnt, $this->old_asta_pnt);
+                                             $this->old_pnt, $this->old_asta_pnt, $this->old_tourn_pts);
 
 
         if ($user->table_orig < TABLES_AUTH_N) {
@@ -2004,7 +2012,7 @@ function log_points($remote_addr, $curtime, $user, $where, $mesg)
 }
 
 function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", $fri = -1, $fri_name = "?2?",
-                          $old_pnt = -1, $old_asta_pnt = -1)
+                          $old_pnt = -1, $old_asta_pnt = -1, $old_tourn_pts = -1)
 {
     GLOBAL $G_lang, $mlang_bin5_bin5;
 
@@ -2046,7 +2054,8 @@ function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", 
             $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
                              $tg_br, $tg_hr, $tg_bo, $tg_bc,
                              $win_name,
-                             $fri_name);
+                             $fri_name,
+                             $old_tourn_pts);
             if ($old_pnt == 120) {
                 $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang],
                                  $tg_br, $tg_hr, $tg_bo, $tg_bc );
@@ -2073,7 +2082,8 @@ function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", 
         else {
             $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
                              $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                             $win_name);
+                             $win_name,
+                             $old_tourn_pts);
             if ($old_pnt == 120) {
                 $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang],
                                  $tg_br, $tg_hr, $tg_bo, $tg_bc);

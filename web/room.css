@@ -149,8 +149,14 @@ table.placing {
 
 table.placing th {
     border: 1px solid gray;
-    text-align: center;
-    padding: 4px;
+    text-align: right;
+    padding: 8px;
+    min-width: 50px;
+}
+
+table.placing th span {
+    font-weight: normal;
+    float: left;
 }
 
 table.placing td {

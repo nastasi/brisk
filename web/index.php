@@ -992,7 +992,7 @@ supported by:<br>
 <div style="position: absolute;">
 '.$altout_support_big.'
 </div>
-<a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
+<a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="https://www.facebook.com/groups/59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>

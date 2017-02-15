@@ -366,6 +366,16 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     $a_brisco = $argz[1];
                     if ($a_brisco >= 0 && $a_brisco < (BIN5_CARD_HAND * BIN5_PLAYERS_N)) {
                         $table->briscola = $a_brisco;
+
+                        $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+                        $table->tourn_pts = 0;
+                        $seed = $a_brisco - ($a_brisco % 10);
+                        for ($i = $seed ; $i < ($seed + 10) ; $i++) {
+                            if ($table->card[$i]->owner == $table->asta_win) {
+                                $table->tourn_pts += $tourn_values[$i - $seed];
+                            }
+                        }
+
                         $table->friend   = $table->card[$a_brisco]->owner;
                         log_wr("GSTART 2");
                         $table->gstart = ($table->mazzo+1) % BIN5_PLAYERS_N;

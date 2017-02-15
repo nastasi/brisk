@@ -707,7 +707,8 @@ class User {
                       }
                   }
               }
-              if ($G_with_splash &&
+              // if ($G_with_splash &&
+              if ($this->is_auth() && (! $this->is_appr()) && $G_with_splash &&
                   ($splashdate < $curtime - $G_splash_interval ||
                    $splashdate > $curtime)) {
                   $is_super = $this->flags & USER_FLAG_TY_SUPER;
