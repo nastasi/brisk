@@ -40,8 +40,14 @@ curl -d "pazz=$BRISK_PASS" "http://$BRISK_SITE/briskin5/stat-day.php?from=$(date
 
 $G_base = "../";
 
-$mlang_stat_day = array( 'normal match'=> array( 'it' => 'Partite normali',
-                                                 'en' => 'Normal matches' ),
+// SYNC WITH bin5_tournaments table
+$mlang_stat_day = array(
+                         'old rules: with draw'=> array( 'it' => 'Partite vecchie (con il pareggio)',
+                                                         'en' => 'Old matches (with draw)' ),
+
+                         'new rules: without draw' => array( 'it' => 'Partite nuove (senza pareggio)',
+                                                             'en' => 'New matches (without draw)'),
+
                          'special match' => array( 'it' => 'Partite speciali',
                                                    'en' => 'Special matches'),
 
@@ -427,8 +433,10 @@ SELECT p.pts AS pts
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
+                        // FIXME
+                        $rules_name = "Rules_old_rules";
                         fprintf($fpexp, "<td>%s</td><td>%s</td>", $users[$gam_obj->mazzo]['login'],
-                                xcape( game_description($gam_obj->act, 'plain', $gam_obj->mult,
+                                xcape( ${rules_name}::game_description($gam_obj->act, 'plain', $gam_obj->mult,
                                                         $gam_obj->asta_win,
                                                         ($gam_obj->asta_win != -1 ?
                                                          $users[$gam_obj->asta_win]['login'] : ""),
@@ -471,7 +479,7 @@ SELECT sum(p.pts * (2^g.mult)) AS pts
             }
         }
         if ($t < $trn_n) {
-            log_crit("stat-day: t < trn_n");
+            log_crit(sprintf("stat-day: t < trn_n (%d, %d)", $t, $trn_n));
             break;
         }
         $ret = (TRUE);

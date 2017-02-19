@@ -198,7 +198,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 
                 /* $table->game_init(&$bin5->user); */
 
-                if ($table->rules_engine(&$bin5, $curtime, BIN5_RULES_ABANDON, $user)) {
+                if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ABANDON, $user)) {
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $user_cur = &$bin5->user[$table->player[$i]];
 
@@ -302,7 +302,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                         else if ($table->asta_pla_n == 0) {
                             log_wr("PASSANO TUTTI!");
 
-                            if ($table->rules_engine(&$bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
+                            if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
                                 for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                                     $user_cur = &$bin5->user[$table->player[$i]];
 
@@ -370,7 +370,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                         $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
                         $table->tourn_pts = 0;
                         $seed = $a_brisco - ($a_brisco % 10);
-                        for ($i = $seed ; $i < ($seed + 10) ; $i++) {
+                        for ($i = $seed ; $i < ($seed + min(10, BIN5_CARD_HAND * BIN5_PLAYERS_N)) ; $i++) {
                             if ($table->card[$i]->owner == $table->asta_win) {
                                 $table->tourn_pts += $tourn_values[$i - $seed];
                             }
@@ -500,7 +500,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     if ($table->turn == (BIN5_PLAYERS_N * BIN5_CARD_HAND)) { /* game finished */
                         log_wr(sprintf("GIOCO FINITO !!!"));
 
-                        if ($table->rules_engine(&$bin5, $curtime, BIN5_RULES_FINISH, $user)) {
+                        if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_FINISH, $user)) {
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                                 $user_cur = &$bin5->user[$table->player[$i]];
                                 $retar[$i] .= show_table(&$bin5,&$user_cur,$user_cur->step+1,TRUE, TRUE);

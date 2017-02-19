@@ -628,7 +628,9 @@ class BriskDB
         }
         $gam_obj = pg_fetch_object($gam_pg, 0);
 
-        $table->old_reason = game_description($gam_obj->act, 'html', $gam_obj->mult,
+        // FIXME
+        $rules_name = "Rules_old_rules";
+        $table->old_reason = ${rules_name}::game_description($gam_obj->act, 'html', $gam_obj->mult,
                                               $gam_obj->asta_win, ($gam_obj->asta_win != -1 ?
                                                                    $users[$gam_obj->asta_win]['login'] : ""),
                                               $gam_obj->friend, ($gam_obj->friend != -1 ?
@@ -712,8 +714,9 @@ class BriskDB
             if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
 
                 // match not exists, insert it
-                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next) VALUES ('%s', %d, %d, %d) RETURNING *;",
-                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult);
+                // , BIN5_TOURNAMENT_NO_DRAW
+                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next, tcode) VALUES ('%s', %d, %d, %d, %d) RETURNING *;",
+                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult, BIN5_TOURNAMENT_OLDRULES);
                 if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_affected_rows($mtc_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
                     break;

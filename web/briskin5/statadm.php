@@ -30,8 +30,6 @@
 
 $G_base = "../";
 
-define('BIN5_TOURNAMENT_NORMAL', 1);
-
 ini_set("max_execution_time",  "240");
 
 require_once("../Obj/brisk.phh");
