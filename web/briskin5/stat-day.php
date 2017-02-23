@@ -306,7 +306,7 @@ SELECT m.code AS code, m.mazzo_next as minus_one_is_old
                 break;
             }
             printf("[Tournament [%s]], number of matches: %d\n", $mlang_stat_day[$trn_obj->name][$G_lang], $tmt_n);
-            fprintf($fpexp, "<h3>%s</h3>", $mlang_stat_day[$trn_obj->name][$G_lang]);
+            fprintf($fpexp, "<h2 style=\"padding: 8px; background-color: pink;\">%s</h2>", $mlang_stat_day[$trn_obj->name][$G_lang]);
 
             // loop on matches
             for ($m = 0 ; $m < $tmt_n ; $m++) {

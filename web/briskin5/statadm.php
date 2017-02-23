@@ -232,8 +232,8 @@ function main_pgsql($curtime)
         
         $mtc_sql = sprintf("CREATE TEMPORARY TABLE %sbin5_temp_matches ON COMMIT DROP AS SELECT m.code, max(g.tstamp) AS tstamp 
                             FROM %sbin5_matches as m, %sbin5_games as g 
-                            WHERE m.tcode = %d AND m.code = g.mcode GROUP BY m.code, m.ttok",
-                           $G_dbpfx, $G_dbpfx, $G_dbpfx, BIN5_TOURNAMENT_NORMAL);
+                            WHERE (m.tcode = %d OR m.tcode = %d) AND m.code = g.mcode GROUP BY m.code, m.ttok",
+                           $G_dbpfx, $G_dbpfx, $G_dbpfx, BIN5_TOURNAMENT_OLDRULES, BIN5_TOURNAMENT_NO_DRAW);
         if (pg_query($bdb->dbconn->db(), $mtc_sql) == FALSE) {
             log_crit("statadm: temporary matches table creation [$mtc_sql] failed");
             break;
@@ -267,7 +267,8 @@ function main_pgsql($curtime)
                 }
                 $mtc_obj = pg_fetch_object($mtc_pg, 0);
                 
-                if (fwrite($fp, sprintf("M|%d|%s|%d|\n", $mtc_obj->code, xcapelt($mtc_obj->ttok), $mtc_obj->tidx)) == FALSE) {
+                if (fwrite($fp, sprintf("M|%d|%s|%d|%d|\n", $mtc_obj->code, xcapelt($mtc_obj->ttok),
+                                        $mtc_obj->tidx, $mtc_obj->tcode)) == FALSE) {
                     log_crit("statadm: log file [$fname] write match failed");
                     break;
                 }
@@ -337,7 +338,7 @@ function main_pgsql($curtime)
             // TAG: POINTS_MANAGEMENT
             $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.login as login
                                 FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers as u 
-                                WHERE m.tcode = %d AND m.code = g.mcode AND
+                                WHERE (m.tcode = %d OR m.tcode = %d) AND m.code = g.mcode AND
                                       ( (u.type & (CAST (X'ff0000' as integer))) <> (CAST (X'800000' as integer)) ) AND
                                       g.tstamp > to_timestamp(%d) AND g.tstamp <= to_timestamp(%d) AND
                                       p.ucode = u.code AND p.gcode = g.code AND
@@ -345,7 +346,8 @@ function main_pgsql($curtime)
                                 GROUP BY u.code, u.login
                                 ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) DESC, 
                                          count(p.pts) DESC",
-                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, BIN5_TOURNAMENT_NORMAL,
+                               $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,
+                               BIN5_TOURNAMENT_OLDRULES, BIN5_TOURNAMENT_NO_DRAW,
                                $curtime - $limi[$dtime], $curtime);
 
             // log_crit("statadm: INFO: [$pla_sql]");
