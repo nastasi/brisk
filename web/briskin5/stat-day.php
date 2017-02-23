@@ -258,10 +258,10 @@ function main_pgsql($from, $to)
             break;
         }
 
-        if (pg_query($bdb->dbconn->db(), "BEGIN") == FALSE) {
-            log_crit("stat-day: begin failed");
-            break;
-        }
+        //if ($bdb->transaction("BEGIN") == FALSE) {
+        //    log_crit("stat-day: begin failed");
+        //    break;
+        //}
 
         // retrieve list of active tournaments
         $trn_sql = sprintf("SELECT * FROM %sbin5_tournaments WHERE active = 1;", $G_dbpfx);
@@ -482,12 +482,15 @@ SELECT sum(p.pts * (2^g.mult)) AS pts
             log_crit(sprintf("stat-day: t < trn_n (%d, %d)", $t, $trn_n));
             break;
         }
+        // if ($bdb->transaction("COMMIT") == FALSE) {
+        //     break;
+        // }
         $ret = (TRUE);
     } while (0);
 
-    if ($ret == FALSE) {
-        pg_query($bdb->dbconn->db(), "ROLLBACK");
-    }
+    // if ($ret == FALSE) {
+    //    $bdb->transaction("ROLLBACK");
+    // }
     if ($fpexp != FALSE) {
         fclose($fpexp);
     }

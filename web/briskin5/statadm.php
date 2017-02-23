@@ -225,7 +225,7 @@ function main_pgsql($curtime)
     $maxg = array( TRI_MAX_GAMES, MON_MAX_GAMES, WEE_MAX_GAMES );
 
     do {
-        if (pg_query($bdb->dbconn->db(), "BEGIN") == FALSE) {
+        if ($bdb->transaction("BEGIN") == FALSE) {
             log_crit("statadm: begin failed");
             break;
         }
@@ -400,13 +400,13 @@ function main_pgsql($curtime)
             break;                        
         }
         
-        if (pg_query($bdb->dbconn->db(), "COMMIT") == FALSE) {
+        if ($bdb->transaction("COMMIT") == FALSE) {
             break;
         }
         return (TRUE);
     } while (0);
 
-    pg_query($bdb->dbconn->db(), "ROLLBACK");
+    $bdb->transaction("ROLLBACK");
 
     return (FALSE);
 }
