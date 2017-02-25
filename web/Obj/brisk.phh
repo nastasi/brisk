@@ -156,7 +156,7 @@ $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
 $G_brisk_version = "5.3.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
-$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: puoi creare la tua rete di amicizie con /info, vedere cosa pensano i tuoi amici degli altri utenti e ci sono i nuovi tavoli riservati per registrati e apprendisti, corretti alcuni errori.',
+$root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: nuovo regolamento, il chiamante e il suo compagno o fanno 61 o perdono.',
                                        'Se vuoi iscriverti alla <a target="_blank" href="mailto:ml-briscola+subscribe@milug.org">Mailing List</a>, cliccala!' ),
                        'en' => array ( 'EN Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: puoi creare la tua rete di amicizie con /info,',
                                        'vedere cosa pensano i tuoi amici degli altri utenti e tavoli riservati per registrati e apprendisti.',
