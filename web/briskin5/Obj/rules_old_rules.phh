@@ -270,11 +270,11 @@ class Rules_old_rules extends Rules {
             return ("");
         }
         else if ($act == BIN5_RULES_ALLPASS) {
-            return (sprintf($mlang_bin5_bin5['info_alpa'][$G_lang],
+            return (sprintf($mlang_bin5_rules['info_alpa'][$G_lang],
                             $tg_br, $tg_hr, $tg_bo, $tg_bc));
         }
         else if ($act == BIN5_RULES_ABANDON) {
-            return (sprintf($mlang_bin5_bin5['info_aban'][$G_lang],
+            return (sprintf($mlang_bin5_rules['info_aban'][$G_lang],
                             $tg_br, $tg_hr, $tg_bo, $tg_bc,
                             $win_name));
         }
@@ -286,59 +286,59 @@ class Rules_old_rules extends Rules {
             if ($win != $fri) { // not alone case
                 /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
 
-                $noty .= sprintf($mlang_bin5_bin5['info_part'][$G_lang],
+                $noty .= sprintf($mlang_bin5_rules['info_part'][$G_lang],
                                  $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                  $win_name,
                                  $fri_name,
                                  $old_tourn_pts);
                 if ($old_pnt == 120) {
-                    $noty .= sprintf($mlang_bin5_bin5['info_capp'][$G_lang],
+                    $noty .= sprintf($mlang_bin5_rules['info_capp'][$G_lang],
                                      $tg_br, $tg_hr, $tg_bo, $tg_bc );
                 }
                 else {
                     if ($old_asta_pnt > 61) {
-                        $noty .= sprintf($mlang_bin5_bin5['info_alea'][$G_lang],
+                        $noty .= sprintf($mlang_bin5_rules['info_alea'][$G_lang],
                                          $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                          $old_asta_pnt, $old_pnt,
-                                         ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                          ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                           $mlang_bin5_bin5['info_lost'][$G_lang])));
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
                     }
                     else {
-                        $noty .= sprintf($mlang_bin5_bin5['info_more'][$G_lang],
+                        $noty .= sprintf($mlang_bin5_rules['info_more'][$G_lang],
                                          $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                          $old_pnt,
-                                         ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                          ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                           $mlang_bin5_bin5['info_lost'][$G_lang])));
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
                     } // else of if ($old_asta_pnt > 61) {
                 } // else of if ($old_pnt == 120) {
             } // if ($win != $fri) { // not alone case
             else {
-                $noty .= sprintf($mlang_bin5_bin5['info_alon'][$G_lang],
+                $noty .= sprintf($mlang_bin5_rules['info_alon'][$G_lang],
                                  $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                  $win_name,
                                  $old_tourn_pts);
                 if ($old_pnt == 120) {
-                    $noty .= sprintf($mlang_bin5_bin5['info_acap'][$G_lang],
+                    $noty .= sprintf($mlang_bin5_rules['info_acap'][$G_lang],
                                      $tg_br, $tg_hr, $tg_bo, $tg_bc);
                 }
                 else {
                     if ($old_asta_pnt > 61) {
-                        $noty .= sprintf($mlang_bin5_bin5['info_aleaa'][$G_lang],
+                        $noty .= sprintf($mlang_bin5_rules['info_aleaa'][$G_lang],
                                          $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                          $old_asta_pnt, $old_pnt,
-                                         ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                          ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                           $mlang_bin5_bin5['info_lost'][$G_lang])));
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
                     }
                     else {
-                        $noty .= sprintf($mlang_bin5_bin5['info_morea'][$G_lang],
+                        $noty .= sprintf($mlang_bin5_rules['info_morea'][$G_lang],
                                          $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                          $old_pnt,
-                                         ($wol == 1 ? $mlang_bin5_bin5['info_win'][$G_lang] :
-                                          ($wol == 0 ? $mlang_bin5_bin5['info_peer'][$G_lang] :
-                                           $mlang_bin5_bin5['info_lost'][$G_lang])));
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
                     }
                 }
             }
@@ -346,7 +346,7 @@ class Rules_old_rules extends Rules {
 
         $old_multer = static::s_multer($old_mult, $old_asta_pnt);
         if ($old_multer > 1) {
-            $noty .= sprintf($mlang_bin5_bin5['info_omul'][$G_lang],
+            $noty .= sprintf($mlang_bin5_rules['info_omul'][$G_lang],
                              $tg_br, $tg_hr, $tg_bo, $tg_bc,
                              multoval($old_multer));
         }
