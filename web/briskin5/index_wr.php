@@ -50,14 +50,10 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 
     log_wr('COMM: '.$mesg);
 
-
     if (($CO_bin5_pref_ring_endauct = gpcs_var('CO_bin5_pref_ring_endauct', $get, $post, $cookie)) === FALSE)
         $CO_bin5_pref_ring_endauct = "";
 
-
-
     log_wr(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
-
 
     if (($user = &$bin5->get_user($sess, &$idx)) == FALSE) {
         echo "Get User Error";
@@ -172,32 +168,6 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
         }
         else if ($user->subst == 'asta') {
             if ($argz[0] == 'lascio') {
-                //  && $user->handpt <= 2) {
-                /* $index_cur = $table->gstart % BIN5_PLAYERS_N; */
-
-                /* log_wr(sprintf("GIOCO FINITO !!!")); */
-
-                /* $table->mult += 1;  */
-                /* $table->old_reason = sprintf("Ha lasciato %s perché aveva al massimo 2 punti.", xcape($user->name)); */
-
-                /* // Non si cambia mazzo se si abbandona la partita */
-                /* $table->game_next(0); */
-
-                /* if ($user->table_orig < TABLES_AUTH_N) { */
-                /*     require_once("../Obj/dbase_".$G_dbasetype.".phh"); */
-
-                /*     if (($bdb = BriskDB::create()) != FALSE) { */
-                /*         $bdb->bin5_points_save($curtime, $table, $user->table_orig, $ucodes, $pt_cur); */
-                /*         unset($bdb); */
-                /*     } */
-                /*     else { */
-                /*         log_points($remote_addr, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", "DATABASE CONNECTION FAILED"); */
-                /*     } */
-                /*     log_points($curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist); */
-                /* } */
-
-                /* $table->game_init(&$bin5->user); */
-
                 if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ABANDON, $user)) {
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $user_cur = &$bin5->user[$table->player[$i]];
