@@ -85,13 +85,25 @@ class Rules_old_rules extends Rules {
         }
     }
 
-    function engine(&$bri, $curtime, $action, $user)
+    function rules_asta(&$bri, $curtime, $action, $user, &$ret_s, $a_card, $a_pnt) {
+        if ($a_card >= 0 && $a_card < 9 && $a_card > $this->table->asta_card)
+            return TRUE;
+        else if ($a_card == 9 && $a_pnt > ($this->table->asta_pnt >= 61 ? $this->table->asta_pnt : 60) && $a_pnt <= 120)
+            return TRUE;
+
+        return FALSE;
+    }
+
+    function engine(&$bri, $curtime, $action, $user, &$opt1 = NULL, &$opt2 = NULL, &$opt3 = NULL)
     {
         GLOBAL $G_all_points, $G_dbasetype;
 
         $table = $this->table;
         $pnts_sav = array();
 
+        if ($action == BIN5_RULES_ASTA) {
+            return ($this->rules_asta($bri, $curtime, $action, $user, &$opt1, $opt2, $opt3));
+        }
         if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
             $table->old_act = $action;
             $table->old_asta_win = -1;

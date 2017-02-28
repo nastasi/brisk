@@ -34,6 +34,7 @@ require_once("Obj/briskin5.phh");
 function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_base, $G_dbasetype, $G_ban_list, $G_black_list;
+    GLOBAL $mlang_indwr, $G_lang;
 
     $remote_addr = addrtoipv4($remote_addr_full);
 
@@ -199,11 +200,10 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                         $again = FALSE;
                     }
                     else if ($a_card <= 9) {
-                        if ($a_card >= 0 && $a_card < 9 && $a_card > $table->asta_card)
+                        $ret_s = "";
+                        if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user, $ret_s, $a_card, $a_pnt)) {
                             $again = FALSE;
-                        else if ($a_card == 9 && $a_pnt > ($table->asta_pnt >= 61 ? $table->asta_pnt : 60) && $a_pnt <= 120)
-                            $again = FALSE;
-
+                        }
 
                         if ($again == FALSE) {
                             log_wr("NUOVI ORZI.");
@@ -219,6 +219,9 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     if ($again) { // Qualcosa non andato bene, rifare
                         $ret = sprintf('gst.st = %d; asta_pnt_set(%d);', $user->step+1,
                                        ($table->asta_pnt > 60 ? $table->asta_pnt + 1 : 61) );
+                        if ($ret_s != "") {
+                            $ret .= show_notify($ret_s, 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
+                        }
                         $user->comm[$user->step % COMM_N] = $ret;
                         $user->step_inc();
 
