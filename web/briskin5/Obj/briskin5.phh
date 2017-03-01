@@ -114,16 +114,6 @@ $mlang_bin5_bin5 = array(
 $table_wellarr = Array( 'it' => Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.'),
                         'en' => Array ( 'EN Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.') );
 
-function rules_id2name($id)
-{
-    if ($id == 1)
-        return 'Rules_old_rules';
-    else if ($id == 2)
-        return 'Rules_no_draw';
-
-    return 'Rules_unknown';
-}
-
 function multoval($mult)
 {
     GLOBAL $G_lang;
@@ -138,6 +128,10 @@ function multoval($mult)
         return (sprintf(($G_lang == 'en' ? "%d-ple" : "%d-plo"), $mult));
 }
 
+function dom_select_rules()
+{
+    printf("<select id='select_rules'><option value='1'>Vecchie regole: con pareggio</option><option value='2'>Nuove regole: senza pareggio</option><option value='4'>torneo \"insieme per gioco\"</option></select>");
+}
 
 class Card {
     var $value; /* 0 - 39 card value */
@@ -738,7 +732,7 @@ class Bin5_table extends Table {
             /* reload of the page with the new layout */
             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                 $user_cur = &$bri->user[$this->player[$i]];
-                $user_cur->continue_set(BIN5_USER_CONTINUE_ALREADY);
+                $user_cur->continue_set(BIN5_USER_CONTINUE_INIT);
 
                 $user_cur->trans_step = $user_cur->step + 1;
                 $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("index.php");|', $user_cur->step+1);
@@ -774,6 +768,7 @@ class Bin5_table extends Table {
 define('BIN5_USER_FLAG_RING_ENDAUCT', 0x01);
 define('BIN5_USER_CONTINUE_INIT', -1);
 
+define('BIN5_USER_RULES_INIT', -1);
 class Bin5_user extends User {
     var $asta_card;  //
     var $asta_pnt;   //
@@ -782,7 +777,7 @@ class Bin5_user extends User {
     var $privflags;  // Flags for briskin5 only
 
     var $continue;   // Id of the match that the user would continue
-
+    var $rules;      // Id of rules required by user
     const BASE = "../";
 
     function User() {
@@ -799,6 +794,7 @@ class Bin5_user extends User {
        $thiz->exitislock = TRUE;
        $thiz->privflags = 0;
        $thiz->continue = BIN5_USER_CONTINUE_INIT;
+       $thiz->rules = BIN5_USER_RULES_INIT;
 
        return ($thiz);
        }
@@ -819,6 +815,7 @@ class Bin5_user extends User {
         $this->exitislock = $from->exitislock;
         $this->privflags  = $from->privflags;
         $this->continue   = $from->continue;
+        $this->rules      = $from->rules;
     }
 
     /* CLONE NOT USED
@@ -854,6 +851,7 @@ class Bin5_user extends User {
         $thiz->handpt     = -1;
         $thiz->exitislock = TRUE;
         $thiz->continue   = BIN5_USER_CONTINUE_INIT;
+        $thiz->rules      = BIN5_USER_RULES_INIT;
 
         log_wr("Bin5 constructor");
 
@@ -1100,6 +1098,15 @@ class Bin5_user extends User {
         return ($this->continue);
     }
 
+    function rules_set($rules_id)
+    {
+        $this->rules = $rules_id;
+    }
+
+    function rules_get() {
+        return ($this->rules);
+    }
+
 } // end class Bin5_user
 
 
@@ -1344,6 +1351,12 @@ class Bin5 {
 
             $match_id = substr($user_mesg, 6);
             $table->match_continue($this, $user, $match_id);
+        }
+        else if (strncmp($user_mesg, "/rules ", 7) == 0) {
+            log_main($user->sess." chatt_send BEGIN");
+
+            $rules_id = substr($user_mesg, 7);
+            $table->rules_change($this, $user, $rules_id);
         }
         else {
             for ($i = 0 ; $i < ($user->stat == 'room' ? BIN5_MAX_PLAYERS : BIN5_PLAYERS_N) ; $i++) {

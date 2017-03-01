@@ -3,6 +3,12 @@
 
   BUGS |
  ------+
+   - cache data structure for tournments
+     . reload on SIGHUP
+   - new rules for 'together for fun' turnment
+   - select tournment dropdown menu (send a 'cont' like message for each change)
+   - show current rules
+
    DONE - Not sequence of 3 same chars
    DONE   . check server side with test
    DONE - Global vars checker

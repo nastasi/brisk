@@ -353,3 +353,8 @@ function preferences_showhide()
     else
         $('preferences').style.visibility = 'hidden';
 }
+
+function act_select_rules(rule_id)
+{
+    send_mesg("/rules " + rule_id);
+}

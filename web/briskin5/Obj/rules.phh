@@ -34,6 +34,30 @@ define('BIN5_RULES_ASTA',       3);
 require_once("rules_base.phh");
 require_once("rules_old_rules.phh");
 require_once("rules_no_draw.phh");
+require_once("rules_together17.phh");
 
+function rules_id2name($id)
+{
+    if ($id == 1)
+        return 'Rules_old_rules';
+    else if ($id == 2)
+        return 'Rules_no_draw';
+    else if ($id == 4)
+        return 'Rules_together17';
+
+    return 'Rules_unknown';
+}
+
+function rules_id2descr($id)
+{
+    if ($id == 1)
+        return 'regole vecchie con pareggio';
+    else if ($id == 2)
+        return 'regole nuove senza pareggio';
+    else if ($id == 4)
+        return 'regole del torneo "insieme per gioco"';
+
+    return 'Regole sconosciute';
+}
 
 ?>
