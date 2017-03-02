@@ -73,6 +73,7 @@ $mlang_bin5_rules = array(
 
 abstract class Rules {
     var $table;
+    var $id;
 
     abstract function engine(&$bri, $curtime, $action, $user);
 
@@ -80,6 +81,22 @@ abstract class Rules {
     {
         $this->table = $table;
     }
+
+    function id_get()
+    {
+        return ($this->id);
+    }
+
+    function tourn_points(&$user, $i)
+    {
+        return;
+    }
+
+    function tourn_points_max($user)
+    {
+        return 0;
+    }
+
 }
 
 ?>

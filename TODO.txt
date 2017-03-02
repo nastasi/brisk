@@ -3,12 +3,7 @@
 
   BUGS |
  ------+
-   - cache data structure for tournments
-     . reload on SIGHUP
-   - new rules for 'together for fun' turnment
-   - select tournment dropdown menu (send a 'cont' like message for each change)
-   - show current rules
-
+   - /cont and /rules just during 'bidding' phase
    DONE - Not sequence of 3 same chars
    DONE   . check server side with test
    DONE - Global vars checker
@@ -22,6 +17,17 @@
 
   FEATURES |
  ----------+
+   * multiple rules
+     DONE - show current rules
+     DONE - select tournment dropdown menu (send a 'cont' like message for each change)
+     - increase constraint for rules change
+     - check of max points
+     - check of suit at the end of bet
+     - new rules for 'together for fun' turnment
+     - cache data structure for tournments
+       . reload on SIGHUP
+     - select rules dropdown 'selected' to the current rule
+
    WIP * inherited info
    * Users Network construction
      DONE - sql

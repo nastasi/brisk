@@ -356,5 +356,5 @@ function preferences_showhide()
 
 function act_select_rules(rule_id)
 {
-    send_mesg("/rules " + rule_id);
+    send_mesg("chatt|/rules " + rule_id);
 }

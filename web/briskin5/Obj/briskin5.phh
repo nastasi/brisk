@@ -130,7 +130,7 @@ function multoval($mult)
 
 function dom_select_rules()
 {
-    printf("<select id='select_rules'><option value='1'>Vecchie regole: con pareggio</option><option value='2'>Nuove regole: senza pareggio</option><option value='4'>torneo \"insieme per gioco\"</option></select>");
+    printf("<select id='select_rules'><option value='1'>Vecchie regole: con pareggio</option><option value='2' selected>Nuove regole: senza pareggio</option><option value='4'>torneo \"insieme per gioco\"</option></select>");
 }
 
 class Card {
@@ -426,6 +426,7 @@ class Bin5_table extends Table {
             $user_cur->asta_card = -2;
             $user_cur->asta_pnt  = -1;
             $user_cur->handpt = $this->hand_points($i);
+            $this->rules->tourn_points($user_cur, $i);
         }
         log_rd2("GEND 4");
     }
@@ -613,7 +614,6 @@ class Bin5_table extends Table {
             /* reload of the page with the new layout */
             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                 $user_cur = &$bri->user[$this->player[$i]];
-                $user_cur->continue_set(BIN5_USER_CONTINUE_INIT);
 
                 $user_cur->trans_step = $user_cur->step + 1;
                 $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("index.php");|', $user_cur->step+1);
@@ -641,7 +641,7 @@ class Bin5_table extends Table {
         }
     }
 
-    function rules_change(&$bri, $user, $rules_code_s)
+    function rules_change(&$bri, $user, $rules_id_s)
     {
         //
         //  Rules: update version following loaded tcode
@@ -650,39 +650,57 @@ class Bin5_table extends Table {
         $curtime = time();
 
         do {
-            /* - verify if match_id and user are both valid to accept
-               the match_continue request - */
-            $rules_id = (int)$match_code_s;
+            if ($this->match_id != -1) {
+                $msg = sprintf("Stai già giocando la partita con codice %d.", $this->match_id);
+                break;
+            }
+
+            $rules_id = (int)$rules_id_s;
             // FIXME: from dynamic rules list
             if ($rules_id != 1 && $rules_id != 2 && $rules_id != 4) {
                 $msg = "queste regole non esistono o non sono attive";
                 break;
             }
 
-            if ($this->match_id != -1) {
-                $msg = "Non si possono cambiare regole dopo che si è già ultimata una mano.";
+            if ($user->rules_get() == $rules_id) {
+                $msg = "hai già richiesto di usare queste regole";
+                break;
+            }
+
+            /* - the user is in the list, add the match_id to his profile
+               and check if he is the N'th to require continue - */
+
+            $rules_tot = 0;
+            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                $user_cur = &$bri->user[$this->player[$i]];
+
+                if ($user == $user_cur) {
+                    $rules_tot += 1;
+                    continue;
+                }
+
+                if ($user_cur->rules_get() == BIN5_USER_CONTINUE_INIT)
+                    continue;
+
+                if ($user_cur->rules_get() != $rules_id)
+                    break;
+                $rules_tot += 1;
+            }
+            if ($i < BIN5_PLAYERS_N) {
+                // FIXME_LANG
+                $msg = sprintf("<b>L'utente <i>%s</i> voleva già usare le %s.</b>",
+                               xcape($user_cur->name), xcape(rules_id2descr($user_cur->rules_get())));
                 break;
             }
 
             // set the match_id for the current user
             $user->rules_set($rules_id);
 
-            // XXXXXXXXXXX
-            $tot_sel_rules = 0;
-            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                if ($bri->user[$this->player[$i]]->rules_get() == BIN5_USER_RULES_INIT) {
-                    continue;
-                }
-
-                if ($bri->user[$this->player[$i]]->rules_get() != $rules_id) {
-                    break;
-                }
-                $tot_sel_rules++;
-            }
             $ret = TRUE;
             // not all players set the continue match than we exit
-            if ($i < BIN5_PLAYERS_N) {
-                $msg = sprintf("<b>L'utente <i>%s</i> vorrebbe utilizzare le %s.</b>",
+            if ($rules_tot < BIN5_PLAYERS_N) {
+                // FIXME_LANG
+                $msg = sprintf("<b>L'utente <i>%s</i> vorrebbe usare le %s.</b>",
                                xcape($user->name), xcape(rules_id2descr($rules_id)));
                 break;
             }
@@ -690,50 +708,18 @@ class Bin5_table extends Table {
             /* - all users decide to continue the same match, update all infos and rearrange users
                to the right positions on the table - */
 
-            /*  reset users table order */
-            for ($i = 0 ; $i < BIN5_PLAYERS_N - 1 ; $i++) {
-                if ($bri->user[$this->player[$i]]->code == $ucodes[$i]) {
-                    continue;
-                }
-                for ($e = $i + 1 ; $e < BIN5_PLAYERS_N ; $e++) {
-                    if ($bri->user[$this->player[$e]]->code == $ucodes[$i]) {
-                        $swap = $this->player[$i];
-                        $this->player[$i] = $this->player[$e];
-                        $this->player[$e] = $swap;
-                        $bri->user[$this->player[$i]]->table_pos = $i;
-                        $bri->user[$this->player[$e]]->table_pos = $e;
-                    }
-                }
-            }
-            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                fprintf(STDERR, "USERZ: [%s]\n", $bri->user[$this->player[$i]]->name);
-            }
-
-            // update database info to be aligned with current table (ttok and table_idx
-            if (($bdb = BriskDB::create()) != FALSE) {
-                if ($bdb->match_continue($match_id, $this, $user->table_orig) == FALSE) {
-                    unset($bdb);
-                    $msg = "aggiornamento dei dati della partita fallito";
-                    break;
-                }
-                unset($bdb);
-            }
-
             /* update rules engine */
-            $rules_name = rules_id2name($match_data['tcode']);
+            $rules_name = rules_id2name($rules_id);
             $this->rules = new $rules_name($this);
 
-            /* bunch and multiplier status set */
-            $this->mazzo = $match_data['mazzo_next'];
-            $this->mult  = $match_data['mult_next'];
-            $this->match_id = $match_id;
-            $this->game_init(&$bri->user);
+            // $this->game_init(&$bri->user);
 
             /* reload of the page with the new layout */
             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                 $user_cur = &$bri->user[$this->player[$i]];
-                $user_cur->continue_set(BIN5_USER_CONTINUE_INIT);
+                $this->rules->tourn_points($user_cur, $i);
 
+                $user_cur->rules_set(BIN5_USER_CONTINUE_INIT);
                 $user_cur->trans_step = $user_cur->step + 1;
                 $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("index.php");|', $user_cur->step+1);
                 $user_cur->step_inc();
@@ -758,8 +744,7 @@ class Bin5_table extends Table {
             $user_cur->comm[$user_cur->step % COMM_N] .= nickserv_msg($dt, $msg);
             $user_cur->step_inc();
         }
-    }
-
+    } // end function rules_change
 } // end class Bin5_table
 
 
@@ -778,6 +763,9 @@ class Bin5_user extends User {
 
     var $continue;   // Id of the match that the user would continue
     var $rules;      // Id of rules required by user
+
+    var $asta_tourn_pts;    // array with tournment points for each suit
+
     const BASE = "../";
 
     function User() {
@@ -1632,7 +1620,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
     if (!$is_again)
         $ret .= table_welcome($user);
 
-    if ($is_transition && !$is_again) { // appena seduti al tavolo, play della mucca
+    if ($is_transition && !$is_again) { // just sit, play cow
         $ret .= playsound("cow.mp3");
     }
 
@@ -1830,7 +1818,8 @@ function show_table_info(&$bri, &$table, $table_pos)
 
     // TAG: POINTS_MANAGEMENT
     $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
-    $noty = sprintf('<table class=\"points\"><tr><th></th>');
+    $noty = sprintf('<p>%s.</p>\n', xcape(ucfirst(rules_id2descr($table->rules->id_get()))));
+    $noty .= sprintf('<table class=\"points\"><tr><th></th>');
 
     // Names.
     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++)

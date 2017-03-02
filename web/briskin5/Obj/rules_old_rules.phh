@@ -29,6 +29,7 @@ class Rules_old_rules extends Rules {
     function __construct($table)
     {
         parent::__construct($table);
+        $this->id = 1;
     }
 
     static function asta2mult($asta_pnt)

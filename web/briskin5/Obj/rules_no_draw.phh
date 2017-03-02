@@ -29,6 +29,7 @@ class Rules_no_draw extends Rules_old_rules {
     function __construct($table)
     {
         parent::__construct($table);
+        $this->id = 2;
     }
 
     static function game_result($asta_pnt, $pnt)
