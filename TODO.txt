@@ -21,6 +21,7 @@
      DONE - show current rules
      DONE - select tournment dropdown menu (send a 'cont' like message for each change)
      - increase constraint for rules change
+     - strange 4 abandoned rule for auction
      - check of max points
      - check of suit at the end of bet
      - new rules for 'together for fun' turnment

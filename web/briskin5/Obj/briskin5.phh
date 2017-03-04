@@ -1720,6 +1720,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
                             $table->asta_card);
         }
         else {
+            // FIXME - RULES to be able to abandon table
             /* show auction */
             if ($table_pos == ($table->gstart % BIN5_PLAYERS_N) &&
                 $table->asta_win == -1)

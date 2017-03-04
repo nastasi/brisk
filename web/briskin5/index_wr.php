@@ -181,11 +181,17 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                 }
             }
             else if ($argz[0] == 'asta') {
-                $again = TRUE;
-
+                $success = FALSE;
                 $index_cur = $table->gstart % BIN5_PLAYERS_N;
-                if ($user->table_pos == $index_cur &&
-                    $table->asta_pla[$index_cur]) {
+                do {
+                    $ret_s = '';
+
+                    if ($user->table_pos != $index_cur ||
+                        !$table->asta_pla[$index_cur]) {
+                        $ret_s = 'grave inconsistenza';
+                        break;
+                    }
+
                     $a_card = $argz[1];
                     $a_pnt  = $argz[2];
 
@@ -197,139 +203,127 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                         $table->asta_pla[$index_cur] = FALSE;
                         $user->asta_card  = -1;
                         $table->asta_pla_n--;
-                        $again = FALSE;
                     }
                     else if ($a_card <= 9) {
-                        $ret_s = "";
-                        if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user, $ret_s, $a_card, $a_pnt)) {
-                            $again = FALSE;
+                        if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user, $ret_s, $a_card, $a_pnt)) {
+                            break;
+                        }
+                    }
+                    else {
+                        break;
+                    }
+
+                    /* next step */
+                    $showst = "show_astat(";
+                    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                        $user_cur = &$bin5->user[$table->player[$i]];
+                        $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "),
+                                           ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
+                    }
+                    if (BIN5_PLAYERS_N == 3)
+                        $showst .= ",-2,-2";
+                    $showst .= ");";
+
+                    $maxcard = -2;
+                    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                        $user_cur = &$bin5->user[$table->player[$i]];
+                        if ($maxcard < $user_cur->asta_card)
+                            $maxcard = $user_cur->asta_card;
+                    }
+
+                    if (($table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
+                        !($table->asta_card == 9 && $table->asta_pnt == 120)) {
+                        log_wr("ALLOPPA QUI");
+                        for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
+                            $index_next = ($table->gstart + $i) % BIN5_PLAYERS_N;
+                            if ($table->asta_pla[$index_next]) {
+                                log_wr("GSTART 1");
+                                $table->gstart += $i;
+                                break;
+                            }
                         }
 
-                        if ($again == FALSE) {
-                            log_wr("NUOVI ORZI.");
-                            $user->asta_card  = $a_card;
-                            $table->asta_card = $a_card;
-                            if ($a_card == 9) {
-                                $user->asta_pnt   = $a_pnt;
-                                $table->asta_pnt  = $a_pnt;
+
+                        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                            $user_cur = &$bin5->user[$table->player[$i]];
+                            $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
+                            if ($user_cur->table_pos == ($table->gstart % BIN5_PLAYERS_N))
+                                $ret .= sprintf('dispose_asta(%d,%d, %s); remark_on();',
+                                                $table->asta_card + 1, $table->asta_pnt+1, ($user_cur->handpt <= 2 ? "true" : "false"));
+                            else
+                                $ret .= sprintf('dispose_asta(%d,%d, %s); remark_off();',
+                                                $table->asta_card + 1, -($table->asta_pnt+1), ($user_cur->handpt <= 2 ? "true" : "false"));
+                            $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+                            $user_cur->step_inc();
+                        }
+                    }
+                    else if ($table->asta_pla_n == 0) {
+                        log_wr("PASSANO TUTTI!");
+
+                        if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
+                            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                                $user_cur = &$bin5->user[$table->player[$i]];
+
+                                $ret = sprintf('gst.st = %d;', $user_cur->step+1);
+                                $ret .= show_table(&$bin5,&$user_cur,$user_cur->step+1, TRUE, TRUE);
+                                $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+                                $user_cur->step_inc();
                             }
                         }
                     }
-
-                    if ($again) { // Qualcosa non andato bene, rifare
-                        $ret = sprintf('gst.st = %d; asta_pnt_set(%d);', $user->step+1,
-                                       ($table->asta_pnt > 60 ? $table->asta_pnt + 1 : 61) );
-                        if ($ret_s != "") {
-                            $ret .= show_notify($ret_s, 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
-                        }
-                        $user->comm[$user->step % COMM_N] = $ret;
-                        $user->step_inc();
-
-                        log_wr("Ripetere.");
-                    }
                     else {
-                        /* next step */
-                        $showst = "show_astat(";
-                        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                            $user_cur = &$bin5->user[$table->player[$i]];
-                            $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "),
-                                               ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
+                        log_wr("FINITA !");
+                        // if a_pnt == 120 supergame ! else abbandono
+                        if ($a_pnt == 120 || $user->asta_card != -1) {
+                            $chooser = $index_cur;
+                            for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++)
+                                if ($i != $chooser)
+                                    $table->asta_pla[$i] = FALSE;
                         }
-                        if (BIN5_PLAYERS_N == 3)
-                            $showst .= ",-2,-2";
-                        $showst .= ");";
-
-                        $maxcard = -2;
-                        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                            $user_cur = &$bin5->user[$table->player[$i]];
-                            if ($maxcard < $user_cur->asta_card)
-                                $maxcard = $user_cur->asta_card;
-                        }
-
-                        if (($table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
-                            !($table->asta_card == 9 && $table->asta_pnt == 120)) {
-                            log_wr("ALLOPPA QUI");
+                        else {
+                            /*
+                              $user->comm[$user->step % COMM_N] = sprintf( "gst.st = %d; dispose_asta(%d, %d, false); remark_off();",
+                              $user->step+1, $table->asta_card + 1,-($table->asta_pnt));
+                              $user->step_inc();
+                            */
                             for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                $index_next = ($table->gstart + $i) % BIN5_PLAYERS_N;
-                                if ($table->asta_pla[$index_next]) {
-                                    log_wr("GSTART 1");
-                                    $table->gstart += $i;
+                                $chooser = ($table->gstart + $i) % BIN5_PLAYERS_N;
+                                if ($table->asta_pla[$chooser]) {
                                     break;
                                 }
                             }
-
-
-                            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                $user_cur = &$bin5->user[$table->player[$i]];
-                                $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);
-                                if ($user_cur->table_pos == ($table->gstart % BIN5_PLAYERS_N))
-                                    $ret .= sprintf('dispose_asta(%d,%d, %s); remark_on();',
-                                                    $table->asta_card + 1, $table->asta_pnt+1, ($user_cur->handpt <= 2 ? "true" : "false"));
-                                else
-                                    $ret .= sprintf('dispose_asta(%d,%d, %s); remark_off();',
-                                                    $table->asta_card + 1, -($table->asta_pnt+1), ($user_cur->handpt <= 2 ? "true" : "false"));
-                                $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-                                $user_cur->step_inc();
-                            }
                         }
-                        else if ($table->asta_pla_n == 0) {
-                            log_wr("PASSANO TUTTI!");
+                        $table->asta_win = $chooser;
 
-                            if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
-                                for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                    $user_cur = &$bin5->user[$table->player[$i]];
+                        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                            $user_cur = &$bin5->user[$table->player[$i]];
+                            $ret = sprintf('gst.st = %d; %s dispose_asta(%d, %d, false);', $user_cur->step+1, $showst,
+                                           $table->asta_card + 1,-($table->asta_pnt));
 
-                                    $ret = sprintf('gst.st = %d;', $user_cur->step+1);
-                                    $ret .= show_table(&$bin5,&$user_cur,$user_cur->step+1, TRUE, TRUE);
-                                    $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-                                    $user_cur->step_inc();
-                                }
-                            }
-                        }
-                        else {
-                            log_wr("FINITA !");
-                            // if a_pnt == 120 supergame ! else abbandono
-                            if ($a_pnt == 120 || $user->asta_card != -1) {
-                                $chooser = $index_cur;
-                                for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++)
-                                    if ($i != $chooser)
-                                        $table->asta_pla[$i] = FALSE;
+                            if ($i == $chooser) {
+                                $ret .= "choose_seed(". $table->asta_card."); remark_on();";
                             }
                             else {
-                                /*
-                                  $user->comm[$user->step % COMM_N] = sprintf( "gst.st = %d; dispose_asta(%d, %d, false); remark_off();",
-                                  $user->step+1, $table->asta_card + 1,-($table->asta_pnt));
-                                  $user->step_inc();
-                                */
-                                for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                    $chooser = ($table->gstart + $i) % BIN5_PLAYERS_N;
-                                    if ($table->asta_pla[$chooser]) {
-                                        break;
-                                    }
-                                }
+                                $ret .= "remark_off();";
                             }
-                            $table->asta_win = $chooser;
 
-                            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                                $user_cur = &$bin5->user[$table->player[$i]];
-                                $ret = sprintf('gst.st = %d; %s dispose_asta(%d, %d, false);', $user_cur->step+1, $showst,
-                                               $table->asta_card + 1,-($table->asta_pnt));
-
-                                if ($i == $chooser) {
-                                    $ret .= "choose_seed(". $table->asta_card."); remark_on();";
-                                }
-                                else {
-                                    $ret .= "remark_off();";
-                                }
-
-                                $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-                                $user_cur->step_inc();
-                            }
+                            $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+                            $user_cur->step_inc();
                         }
                     }
-                }
-                else {
-                    log_wr("NON CI SIAMO");
+                    $success = TRUE;
+                } while(FALSE);
+
+                if (!$success) {
+                    $ret = sprintf('gst.st = %d; asta_pnt_set(%d);', $user->step+1,
+                                   ($table->asta_pnt > 60 ? $table->asta_pnt + 1 : 61) );
+                    if ($ret_s != "") {
+                        $ret .= show_notify($ret_s, 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
+                    }
+                    $user->comm[$user->step % COMM_N] = $ret;
+                    $user->step_inc();
+
+                    log_wr("Ripetere.");
                 }
             }
             /*  asta::choose */
