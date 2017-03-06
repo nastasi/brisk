@@ -262,7 +262,7 @@ class Rules_old_rules extends Rules {
     static function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", $fri = -1, $fri_name = "?2?",
                               $old_pnt = -1, $old_asta_pnt = -1, $old_tourn_pts = -1)
     {
-        GLOBAL $G_lang, $mlang_bin5_bin5;
+        GLOBAL $G_lang, $mlang_bin5_rules;
 
         if ($form == 'html') {
             $tg_br = "<br>";
