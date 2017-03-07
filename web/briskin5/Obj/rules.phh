@@ -30,6 +30,7 @@ define('BIN5_RULES_FINISH',     0);
 define('BIN5_RULES_ABANDON',    1);
 define('BIN5_RULES_ALLPASS',    2);
 define('BIN5_RULES_ASTA',       3);
+define('BIN5_RULES_NEXTAUCT',   4);
 
 require_once("rules_base.phh");
 require_once("rules_old_rules.phh");

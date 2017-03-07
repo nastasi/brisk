@@ -174,19 +174,19 @@ class Card {
 } // end class Card
 
 class Bin5_table extends Table {
-    var $card;       // il mazzo di carte
-    var $mazzo;      // chi e' di mazzo
-    var $gstart;
-    var $turn;
+    var $card;              // il mazzo di carte
+    var $mazzo;             // chi e' di mazzo
+    var $gstart;            // first player of the current game
+    var $turn;              // turn in the game (absolute, not modularized)
 
-    var $asta_pla;
-    var $asta_pla_n;
-    var $asta_card;
-    var $asta_pnt;
+    var $asta_pla;          // array(); TRUE: in auction, FALSE: out of the auction
+    var $asta_pla_n;        // number of players in auction
+    var $asta_card;         // current card for auction
+    var $asta_pnt;          // current point for auction
 
     var $mult;
-    var $points;    // points array
-    var $points_n;  // number of row of points
+    var $points;            // points array
+    var $points_n;          // number of row of points
     var $total;
 
     var $asta_win;          // the caller idx position at table

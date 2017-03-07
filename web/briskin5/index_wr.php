@@ -188,6 +188,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 
                     if ($user->table_pos != $index_cur ||
                         !$table->asta_pla[$index_cur]) {
+                        // FIXME_LANG
                         $ret_s = 'grave inconsistenza';
                         break;
                     }
@@ -197,18 +198,19 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 
                     log_wr("CI SIAMO  a_card ".$a_card."  asta_card ".$table->asta_card);
 
-                    // Abbandono dell'asta
+                    /* user action management */
                     if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user,
                                                $ret_s, $a_card, $a_pnt)) {
-                            break;
-                        }
+                        break;
+                    }
 
                     /* next step */
                     $showst = "show_astat(";
                     for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                         $user_cur = &$bin5->user[$table->player[$i]];
                         $showst .= sprintf("%s%d", ($i == 0 ? "" : ", "),
-                                           ($user_cur->asta_card < 9 ? $user_cur->asta_card : $user_cur->asta_pnt));
+                                           ($user_cur->asta_card < 9 ? $user_cur->asta_card :
+                                            $user_cur->asta_pnt));
                     }
                     if (BIN5_PLAYERS_N == 3)
                         $showst .= ",-2,-2";
@@ -221,9 +223,14 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                             $maxcard = $user_cur->asta_card;
                     }
 
-                    if (($table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
-                        !($table->asta_card == 9 && $table->asta_pnt == 120)) {
-                        log_wr("ALLOPPA QUI");
+                    /*
+                     *  IF not max points AND
+                     *  (asta_pla_n > 1 if someone bet OR
+                     *   asta_pla_n > 0 if someone NOT bet)
+                     *  THEN advance auction
+                     */
+                    if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_NEXTAUCT, $maxcard)) {
+                        /* search the next player in auction and put it in gstart field */
                         for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
                             $index_next = ($table->gstart + $i) % BIN5_PLAYERS_N;
                             if ($table->asta_pla[$index_next]) {
@@ -233,7 +240,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                             }
                         }
 
-
+                        /* set client side view */
                         for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                             $user_cur = &$bin5->user[$table->player[$i]];
                             $ret = sprintf('gst.st = %d; %s', $user_cur->step+1, $showst);

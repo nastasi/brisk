@@ -125,6 +125,18 @@ class Rules_old_rules extends Rules {
         return FALSE;
     }
 
+    function rules_nextauct(&$bri, $curtime, $action, $user, $maxcard)
+    {
+        if (($this->table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
+            !($this->table->asta_card == 9 && $this->table->asta_pnt == 120)) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+
+    }
+
     function engine(&$bri, $curtime, $action, $user, &$opt1 = NULL, &$opt2 = NULL, &$opt3 = NULL)
     {
         GLOBAL $G_all_points, $G_dbasetype;
@@ -135,7 +147,10 @@ class Rules_old_rules extends Rules {
         if ($action == BIN5_RULES_ASTA) {
             return ($this->rules_asta($bri, $curtime, $action, $user, &$opt1, $opt2, $opt3));
         }
-        if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
+        else if ($action == BIN5_RULES_NEXTAUCT) {
+            return ($this->rules_nextauct($bri, $curtime, $action, $user, $opt1));
+        }
+        else if ($action == BIN5_RULES_ALLPASS) { // return TRUE if all correct
             $table->old_act = $action;
             $table->old_asta_win = -1;
             $table->old_pnt = 0;

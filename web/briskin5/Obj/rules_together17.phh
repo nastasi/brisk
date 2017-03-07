@@ -49,7 +49,6 @@ class Rules_together17 extends Rules_no_draw {
 
     function tourn_points_max($user)
     {
-
         $mx = 0;
         for ($i = 0 ; $i < 4 ; $i++) {
             error_log("tourn_pts_max ");
