@@ -88,6 +88,8 @@ class Rules_old_rules extends Rules {
 
     function rules_asta(&$bri, $curtime, $action, $user, &$ret_s, $a_card, $a_pnt)
     {
+        $index_cur = $this->table->gstart % BIN5_PLAYERS_N;
+
         // Abbandono dell'asta
         if ($a_card <= -1) {
             log_wr("Abbandona l'asta.");

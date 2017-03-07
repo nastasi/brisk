@@ -198,20 +198,10 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     log_wr("CI SIAMO  a_card ".$a_card."  asta_card ".$table->asta_card);
 
                     // Abbandono dell'asta
-                    if ($a_card <= -1) {
-                        log_wr("Abbandona l'asta.");
-                        $table->asta_pla[$index_cur] = FALSE;
-                        $user->asta_card  = -1;
-                        $table->asta_pla_n--;
-                    }
-                    else if ($a_card <= 9) {
-                        if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user, $ret_s, $a_card, $a_pnt)) {
+                    if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user,
+                                               $ret_s, $a_card, $a_pnt)) {
                             break;
                         }
-                    }
-                    else {
-                        break;
-                    }
 
                     /* next step */
                     $showst = "show_astat(";
