@@ -229,7 +229,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                      *   asta_pla_n > 0 if someone NOT bet)
                      *  THEN advance auction
                      */
-                    if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_NEXTAUCT, $maxcard)) {
+                    if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_NEXTAUCT, $user, $maxcard)) {
                         /* search the next player in auction and put it in gstart field */
                         for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
                             $index_next = ($table->gstart + $i) % BIN5_PLAYERS_N;
@@ -331,7 +331,11 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     if ($a_brisco >= 0 && $a_brisco < (BIN5_CARD_HAND * BIN5_PLAYERS_N)) {
                         $table->briscola = $a_brisco;
 
-                        $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+                        if (BIN5_CARD_HAND == 8)
+                            $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+                        else
+                            $tourn_values = array(33, 30, 12,9,6, 3,3,3,3,3);
+
                         $table->tourn_pts = 0;
                         $seed = $a_brisco - ($a_brisco % 10);
                         for ($i = $seed ; $i < ($seed + min(10, BIN5_CARD_HAND * BIN5_PLAYERS_N)) ; $i++) {

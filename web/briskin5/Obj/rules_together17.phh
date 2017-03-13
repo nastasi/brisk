@@ -37,7 +37,10 @@ class Rules_together17 extends Rules_no_draw {
         $card = $this->table->card;
         unset($user->asta_tourn_pts);
         $user->asta_tourn_pts = array(0, 0, 0, 0);
-        $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+        if (BIN5_CARD_HAND == 8)
+            $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+        else
+            $tourn_values = array(33, 30, 12,9,6, 3,3,3,3,3);
 
         for ($i = 0 ; $i < BIN5_PLAYERS_N * BIN5_CARD_HAND ; $i++) {
 
@@ -84,6 +87,13 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
             $user->asta_card  = -1;
             $this->table->asta_pla_n--;
 
+            if ($this->table->asta_card == -1 && $this->table->asta_pla_n == 1) {
+                error_log('table_asta_card: ' . $this->table->asta_card);
+                // all abandon auction except one => move next bid to two and 71 points
+                $this->table->asta_card = 9;
+                $this->table->asta_pnt = 70;
+            }
+
             return TRUE;
         }
         else if ($a_card <= 9) {
@@ -91,7 +101,7 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
 
             do {
                 if ($a_card >= 0 && $a_card < 9 && $a_card > $this->table->asta_card) {
-                    return TRUE;
+                    ;
                 }
                 else if ($a_card == 9 &&
                          $a_pnt > ($this->table->asta_pnt >= 61 ? $this->table->asta_pnt : 60)
@@ -131,6 +141,18 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
         }
 
         return FALSE;
+    }
+
+    function rules_nextauct(&$bri, $curtime, $action, $user, $maxcard)
+    {
+        if (($this->table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
+            !($this->table->asta_card == 9 && $this->table->asta_pnt == 120)) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+
     }
 
 } // class Rules_no_draw
