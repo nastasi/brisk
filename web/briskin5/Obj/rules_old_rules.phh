@@ -125,6 +125,18 @@ class Rules_old_rules extends Rules {
         return FALSE;
     }
 
+    function rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)
+    {
+        if ( !($a_brisco >= 0 && $a_brisco < 40)) // (BIN5_CARD_HAND * BIN5_PLAYERS_N)) )
+            return FALSE;
+
+        if ( !($this->table->asta_win > -1 &&
+               $user->table_pos == $this->table->asta_win) )
+            return FALSE;
+
+        return TRUE;
+    }
+
     function rules_nextauct(&$bri, $curtime, $action, $user, $maxcard)
     {
         if (($this->table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
@@ -145,7 +157,7 @@ class Rules_old_rules extends Rules {
         $pnts_sav = array();
 
         if ($action == BIN5_RULES_ASTA) {
-            return ($this->rules_asta($bri, $curtime, $action, $user, &$opt1, $opt2, $opt3));
+            return ($this->rules_asta($bri, $curtime, $action, $user, $opt1, $opt2, $opt3));
         }
         else if ($action == BIN5_RULES_NEXTAUCT) {
             return ($this->rules_nextauct($bri, $curtime, $action, $user, $opt1));
@@ -181,6 +193,9 @@ class Rules_old_rules extends Rules {
             $game_delta = 0;
             // $table->game_next(0);
             $table->game_init(&$bri->user);
+        }
+        else if ($action == BIN5_RULES_CHECKCHOOSE) {
+            return ($this->rules_checkchoose($bri, $curtime, $action, $user, $opt1, $opt2));
         }
         else if ($action == BIN5_RULES_FINISH) { // return TRUE if all correct
             $table->old_act = $action;

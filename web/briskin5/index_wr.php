@@ -325,62 +325,77 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
             }
             /*  asta::choose */
             else if ($argz[0] == 'choose') {
-                if ($table->asta_win > -1 &&
-                    $user->table_pos == $table->asta_win) {
+                $success = FALSE;
+                do {
                     $a_brisco = $argz[1];
-                    if ($a_brisco >= 0 && $a_brisco < (BIN5_CARD_HAND * BIN5_PLAYERS_N)) {
-                        $table->briscola = $a_brisco;
 
-                        if (BIN5_CARD_HAND == 8)
-                            $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
-                        else
-                            $tourn_values = array(33, 30, 12,9,6, 3,3,3,3,3);
-
-                        $table->tourn_pts = 0;
-                        $seed = $a_brisco - ($a_brisco % 10);
-                        for ($i = $seed ; $i < ($seed + min(10, BIN5_CARD_HAND * BIN5_PLAYERS_N)) ; $i++) {
-                            if ($table->card[$i]->owner == $table->asta_win) {
-                                $table->tourn_pts += $tourn_values[$i - $seed];
-                            }
-                        }
-
-                        $table->friend   = $table->card[$a_brisco]->owner;
-                        log_wr("GSTART 2");
-                        $table->gstart = ($table->mazzo+1) % BIN5_PLAYERS_N;
-                        log_wr("Setta la briscola a ".$a_brisco);
-
-                        $chooser = $table->asta_win;
-                        $user_chooser = &$bin5->user[$table->player[$chooser]];
-                        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-                            $user_cur = &$bin5->user[$table->player[$i]];
-                            $user_cur->subst = 'game';
-                            $ret = sprintf('gst.st = %d; subst = "game";', $user_cur->step+1);
-
-                            if ($user_cur->privflags & BIN5_USER_FLAG_RING_ENDAUCT) {
-                                // $ret .= "var de_che= 33;";
-                                $ret .= playsound("ringbell.mp3");
-                            }
-                            $ret .= sprintf('document.title = "Brisk - Tavolo %d";', $user->table_orig);
-
-                            /* bg of caller cell */
-                            $ret .= briscola_show($bin5, $table, $user_cur);
-
-                            /* first gamer */
-                            if ($i == ($table->gstart % BIN5_PLAYERS_N))
-                                $ret .= "is_my_time = true; remark_on();";
-                            else
-                                $ret .= "is_my_time = false; remark_off();";
-
-                            $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-                            $user_cur->step_inc();
-                        }
-                        /*
-                          TUTTE LE VARIABILI DI STATO PER PASSARE A GIOCARE E LE
-                          VAR PER PASSARE ALLA FASE DI GIOCO
-                        */
-
+                    if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_CHECKCHOOSE, $user, $ret_s, $a_brisco)) {
+                        break;
                     }
+
+                    $table->briscola = $a_brisco;
+
+                    if (BIN5_CARD_HAND == 8)
+                        $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+                    else
+                        $tourn_values = array(33, 30, 12,9,6, 3,3,3,3,3);
+
+                    $table->tourn_pts = 0;
+                    $seed = $a_brisco - ($a_brisco % 10);
+                    for ($i = $seed ; $i < ($seed + min(10, BIN5_CARD_HAND * BIN5_PLAYERS_N)) ; $i++) {
+                        if ($table->card[$i]->owner == $table->asta_win) {
+                            $table->tourn_pts += $tourn_values[$i - $seed];
+                        }
+                    }
+
+                    $table->friend   = $table->card[$a_brisco]->owner;
+                    log_wr("GSTART 2");
+                    $table->gstart = ($table->mazzo+1) % BIN5_PLAYERS_N;
+                    log_wr("Setta la briscola a ".$a_brisco);
+
+                    $chooser = $table->asta_win;
+                    $user_chooser = &$bin5->user[$table->player[$chooser]];
+                    for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                        $user_cur = &$bin5->user[$table->player[$i]];
+                        $user_cur->subst = 'game';
+                        $ret = sprintf('gst.st = %d; subst = "game";', $user_cur->step+1);
+
+                        if ($user_cur->privflags & BIN5_USER_FLAG_RING_ENDAUCT) {
+                            // $ret .= "var de_che= 33;";
+                            $ret .= playsound("ringbell.mp3");
+                        }
+                        $ret .= sprintf('document.title = "Brisk - Tavolo %d";', $user->table_orig);
+
+                        /* bg of caller cell */
+                        $ret .= briscola_show($bin5, $table, $user_cur);
+
+                        /* first gamer */
+                        if ($i == ($table->gstart % BIN5_PLAYERS_N))
+                            $ret .= "is_my_time = true; remark_on();";
+                        else
+                            $ret .= "is_my_time = false; remark_off();";
+
+                        $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+                        $user_cur->step_inc();
+                    }
+                    /*
+                      TUTTE LE VARIABILI DI STATO PER PASSARE A GIOCARE E LE
+                      VAR PER PASSARE ALLA FASE DI GIOCO
+                    */
+                    $success = TRUE;
+                } while (0);
+
+                if (!$success) {
+                    $ret = "";
+                    if ($ret_s != "") {
+                        $ret = show_notify($ret_s, 0, $mlang_indwr['btn_close'][$G_lang], 400, 150);
+                    }
+                    $user->comm[$user->step % COMM_N] = $ret;
+                    $user->step_inc();
+
+                    log_wr("Ripetere.");
                 }
+
             }
         }
         else if ($user->subst == 'game') {

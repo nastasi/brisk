@@ -32,7 +32,9 @@ define('BIN5_PROXY_PATH', PROXY_PATH."/bin5");
 
 require_once('rules.phh');
 
-define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_NO_DRAW);
+// FIXME: JUST FOR DEVELOP
+// define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_NO_DRAW);
+define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_TOGETHER17);
 
 $mlang_bin5_bin5 = array(
                          // br, hr, b, /b, win, fri

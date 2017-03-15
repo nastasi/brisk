@@ -54,14 +54,41 @@ class Rules_together17 extends Rules_no_draw {
     {
         $mx = 0;
         for ($i = 0 ; $i < 4 ; $i++) {
-            error_log("tourn_pts_max ");
-            error_log(print_r($user->asta_tourn_pts, TRUE));
             if ($user->asta_tourn_pts[$i] > $mx) {
                 $mx = $user->asta_tourn_pts[$i];
             }
         }
 
         return $mx;
+    }
+
+    function min_tourn_points($a_pnt)
+    {
+        if ($a_pnt < 71)
+            $min_pts = 13;
+        else if ($a_pnt < 80)
+            $min_pts = 19;
+        else if ($a_pnt < 90)
+            $min_pts = 23;
+        else if ($a_pnt < 100)
+            $min_pts = 25;
+        else
+            $min_pts = 28;
+
+        return $min_pts;
+    }
+
+    function check_tourn_points($hand_pts, $a_pnt, $a_seed, &$ret_s) {
+        $min_pts = $this->min_tourn_points($a_pnt);
+
+        if ($hand_pts < $min_pts) {
+            // FIXME_LANG
+            $seeds = array('coppe', 'ori', 'spade', 'bastoni');
+            $ret_s = sprintf("Hai chiamato un due di %s a %d ma in mano per quel seme hai %d punti-torneo, non puoi.",
+                             $seeds[$a_seed], $a_pnt, $hand_pts);
+            return FALSE;
+        }
+        return TRUE;
     }
 
     function rules_asta(&$bri, $curtime, $action, $user, &$ret_s, $a_card, $a_pnt) {
@@ -88,7 +115,6 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
             $this->table->asta_pla_n--;
 
             if ($this->table->asta_card == -1 && $this->table->asta_pla_n == 1) {
-                error_log('table_asta_card: ' . $this->table->asta_card);
                 // all abandon auction except one => move next bid to two and 71 points
                 $this->table->asta_card = 9;
                 $this->table->asta_pnt = 70;
@@ -106,16 +132,7 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
                 else if ($a_card == 9 &&
                          $a_pnt > ($this->table->asta_pnt >= 61 ? $this->table->asta_pnt : 60)
                          && $a_pnt <= 120) {
-                    if ($a_pnt < 71)
-                        $min_pts = 13;
-                    else if ($a_pnt < 80)
-                        $min_pts = 19;
-                    else if ($a_pnt < 90)
-                        $min_pts = 23;
-                    else if ($a_pnt < 100)
-                        $min_pts = 25;
-                    else
-                        $min_pts = 28;
+                    $min_pts = $this->min_tourn_points($a_pnt);
 
                     $max_hand_pts = $this->tourn_points_max($user);
                     if ($max_hand_pts < $min_pts) {
@@ -155,6 +172,20 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
 
     }
 
+    function rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)
+    {
+        if (! parent::rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)) {
+            return FALSE;
+        }
+
+        if ($this->table->asta_card == 9) {
+            $bri_seed = (int)($a_brisco / 10);
+            return $this->check_tourn_points($user->asta_tourn_pts[$bri_seed],
+                                             $this->table->asta_pnt, $bri_seed, $ret_s);
+        }
+
+        return TRUE;
+    }
 } // class Rules_no_draw
 
 ?>

@@ -20,14 +20,15 @@
    * multiple rules
      DONE - show current rules
      DONE - select tournment dropdown menu (send a 'cont' like message for each change)
+     WIP - new rules for 'together for fun' turnment
+       DONE . strange 4 abandoned rule for auction
+       DONE . check of max points
+       DONE . check of suit at the end of bet
+
+     - select rules dropdown 'selected' to the current rule or the current
      - increase constraint for rules change
-     - strange 4 abandoned rule for auction
-     - check of max points
-     - check of suit at the end of bet
-     - new rules for 'together for fun' turnment
      - cache data structure for tournments
        . reload on SIGHUP
-     - select rules dropdown 'selected' to the current rule
 
    WIP * inherited info
    * Users Network construction
