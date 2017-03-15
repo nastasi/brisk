@@ -25,10 +25,13 @@
        DONE . check of max points
        DONE . check of suit at the end of bet
 
-     - select rules dropdown 'selected' to the current rule or the current
-     - increase constraint for rules change
-     - cache data structure for tournments
-       . reload on SIGHUP
+     DONE - increase constraint for rules change
+     DONE - select rules dropdown 'selected' to the current rule or the current
+
+     POSTPONED - no points multiplication for abandon
+     POSTPONED - cache data structure for tournments
+     POSTPONED   . reload on SIGHUP
+
 
    WIP * inherited info
    * Users Network construction

@@ -358,3 +358,8 @@ function act_select_rules(rule_id)
 {
     send_mesg("chatt|/rules " + rule_id);
 }
+
+function rules_set(id)
+{
+    $('select_rules').value = id;
+}

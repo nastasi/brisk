@@ -32,9 +32,7 @@ define('BIN5_PROXY_PATH', PROXY_PATH."/bin5");
 
 require_once('rules.phh');
 
-// FIXME: JUST FOR DEVELOP
-// define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_NO_DRAW);
-define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_TOGETHER17);
+define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_NO_DRAW);
 
 $mlang_bin5_bin5 = array(
                          // br, hr, b, /b, win, fri
@@ -132,7 +130,14 @@ function multoval($mult)
 
 function dom_select_rules()
 {
-    printf("<select id='select_rules'><option value='1'>Vecchie regole: con pareggio</option><option value='2' selected>Nuove regole: senza pareggio</option><option value='4'>torneo \"insieme per gioco\"</option></select>");
+    $ret = "<select id='select_rules'>\n";
+    foreach (rules_keys() as $key) {
+        $value = rules_id2descr($key);
+        $ret .= sprintf("<option value='%d'>%s</option>\n", $key, $value);
+    }
+    $ret .= "</select>\n";
+
+    echo "$ret";
 }
 
 class Card {
@@ -653,18 +658,26 @@ class Bin5_table extends Table {
 
         do {
             if ($this->match_id != -1) {
+                // FIXME_LANG
                 $msg = sprintf("Stai già giocando la partita con codice %d.", $this->match_id);
                 break;
             }
 
+            if ($this->asta_card != -1 || $this->asta_pla_n < BIN5_PLAYERS_N) {
+                // FIXME_LANG
+                $msg = sprintf("La partita è già stata avviata.");
+                break;
+            }
+
             $rules_id = (int)$rules_id_s;
-            // FIXME: from dynamic rules list
-            if ($rules_id != 1 && $rules_id != 2 && $rules_id != 4) {
+            if (! in_array($rules_id, rules_keys())) {
+                // FIXME_LANG
                 $msg = "queste regole non esistono o non sono attive";
                 break;
             }
 
             if ($user->rules_get() == $rules_id) {
+                // FIXME_LANG
                 $msg = "hai già richiesto di usare queste regole";
                 break;
             }
@@ -738,13 +751,20 @@ class Bin5_table extends Table {
         } while (FALSE);
 
         $dt = date("H:i ", $curtime);
-        for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
-            if ($ret == FALSE && $this->player[$i] != $user->idx)
-                continue;
-            $user_cur = &$bri->user[$this->player[$i]];
-            $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-            $user_cur->comm[$user_cur->step % COMM_N] .= nickserv_msg($dt, $msg);
-            $user_cur->step_inc();
+        if ($ret == TRUE) {
+            for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
+                $user_cur = &$bri->user[$this->player[$i]];
+                $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+                $user_cur->comm[$user_cur->step % COMM_N] .= nickserv_msg($dt, $msg);
+                $user_cur->step_inc();
+            }
+        }
+        else {
+            $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+            $user->comm[$user->step % COMM_N] = xcape(sprintf("rules_set(%d);",
+                                                              $this->rules->id));
+            $user->comm[$user->step % COMM_N] .= nickserv_msg($dt, $msg);
+            $user->step_inc();
         }
     } // end function rules_change
 } // end class Bin5_table
@@ -1585,8 +1605,10 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
     $ret .= $table->exitlock_show(&$bri->user, $table_pos);
     if (!$is_again) {
         /* GENERAL STATUS */
-        $ret .= sprintf( 'gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;',
-                         $sendstep, $user->stat, $user->subst, $table_pos);
+        $user_rules = $user->rules_get();
+        $ret .= sprintf('gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d; rules_set(%d);',
+                        $sendstep, $user->stat, $user->subst, $table_pos,
+                        ($user_rules == BIN5_USER_CONTINUE_INIT ? $table->rules->id_get() : $user_rules));
 
         log_rd(sprintf( 'SHOW_TABLE: gst.st = %d; stat = "%s"; subst = "%s"; table_pos = %d;', $sendstep, $user->stat, $user->subst, $table_pos));
 

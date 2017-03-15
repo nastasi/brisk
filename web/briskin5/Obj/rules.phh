@@ -39,6 +39,12 @@ require_once("rules_old_rules.phh");
 require_once("rules_no_draw.phh");
 require_once("rules_together17.phh");
 
+// FIXME - DYNAMIC WITH CACHE AND RELOAD FROM DB
+function rules_keys()
+{
+    return array(1,2,4);
+}
+
 function rules_id2name($id)
 {
     if ($id == 1)
