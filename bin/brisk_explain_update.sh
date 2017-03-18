@@ -25,10 +25,11 @@ fi
 
 # now="$(date -d '2014-01-21 23:56:00' +%s)"
 now="$(date +%s)"
+delta="0"
 
-to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "($now / 86400) * 86400 + 7200 " | bc))"
-from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "($now / 86400) * 86400 + 7200 - (86400)" | bc))"
-# to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now + 7200 " | bc))"
-# from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now - 9200 " | bc))"
+to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "($now / 86400) * 86400 + 7200 + $delta" | bc))"
+from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "($now / 86400) * 86400 + 7200 - (86400) + $delta" | bc))"
+# to="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now + 7200 + $delta" | bc))"
+# from="$(date +"%Y-%m-%d+%H:%M:%S" -d @$(echo "$now - 9200 + $delta" | bc))"
 
 curl -d "pazz=$admin_password" "$web_url/briskin5/stat-day.php?from=$from&to=$to"
