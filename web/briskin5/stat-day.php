@@ -42,15 +42,6 @@ $G_base = "../";
 
 // SYNC WITH bin5_tournaments table
 $mlang_stat_day = array(
-                         'old rules: with draw'=> array( 'it' => 'Partite vecchie (con il pareggio)',
-                                                         'en' => 'Old matches (with draw)' ),
-
-                         'new rules: without draw' => array( 'it' => 'Partite nuove (senza pareggio)',
-                                                             'en' => 'New matches (without draw)'),
-
-                         'special match' => array( 'it' => 'Partite speciali',
-                                                   'en' => 'Special matches'),
-
                          'info_total'=> array( 'it' => 'totali',
                                                'en' => 'En totali')
                          );
@@ -129,12 +120,8 @@ SELECT m.code AS code, m.mazzo_next as minus_one_is_old
             if ($tmt_n == 0)
                 continue;
 
-            if (!isset($mlang_stat_day[$trn_obj->name][$G_lang])) {
-                log_crit("stat-day: tournament name not found in array");
-                break;
-            }
-            printf("[Tournament [%s]], number of matches: %d\n", $mlang_stat_day[$trn_obj->name][$G_lang], $tmt_n);
-            fprintf($fpexp, "<h2 style=\"padding: 8px; background-color: pink;\">%s</h2>", $mlang_stat_day[$trn_obj->name][$G_lang]);
+            printf("[Tournament [%s]], number of matches: %d\n", rules_id2descr($trn_obj->code, $G_lang), $tmt_n);
+            fprintf($fpexp, "<h2 style=\"padding: 8px; background-color: pink;\">%s</h2>", xcape(ucfirst(rules_id2descr($trn_obj->code, $G_lang))));
 
             // loop on matches
             for ($m = 0 ; $m < $tmt_n ; $m++) {

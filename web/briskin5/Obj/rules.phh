@@ -57,12 +57,12 @@ function rules_id2name($id)
     return 'Rules_unknown';
 }
 
-function rules_id2descr($id)
+function rules_id2descr($id, $lang)
 {
     if ($id == 1)
-        return 'regole vecchie con pareggio';
+        return 'regole vecchie (con pareggio)';
     else if ($id == 2)
-        return 'regole nuove senza pareggio';
+        return 'regole nuove (senza pareggio)';
     else if ($id == 4)
         return 'regole del torneo "insieme per gioco"';
 

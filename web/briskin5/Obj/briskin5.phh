@@ -83,9 +83,11 @@ function multoval($mult)
 
 function dom_select_rules()
 {
+    GLOBAL $G_lang;
+
     $ret = "<select id='select_rules'>\n";
     foreach (rules_keys() as $key) {
-        $value = rules_id2descr($key);
+        $value = rules_id2descr($key, $G_lang);
         $ret .= sprintf("<option value='%d'>%s</option>\n", $key, $value);
     }
     $ret .= "</select>\n";
@@ -262,6 +264,7 @@ class Bin5_table extends Table {
 
     function spawn(&$from)
     {
+        GLOBAL $G_lang;
         if (($thiz =& new Bin5_table()) == FALSE)
             return (FALSE);
 
@@ -603,6 +606,8 @@ class Bin5_table extends Table {
 
     function rules_change(&$bri, $user, $rules_id_s)
     {
+        GLOBAL $G_lang;
+
         //
         //  Rules: update version following loaded tcode
         //
@@ -657,7 +662,7 @@ class Bin5_table extends Table {
             if ($i < BIN5_PLAYERS_N) {
                 // FIXME_LANG
                 $msg = sprintf("<b>L'utente <i>%s</i> voleva già usare le %s.</b>",
-                               xcape($user_cur->name), xcape(rules_id2descr($user_cur->rules_get())));
+                               xcape($user_cur->name), xcape(rules_id2descr($user_cur->rules_get(), $G_lang)));
                 break;
             }
 
@@ -669,7 +674,7 @@ class Bin5_table extends Table {
             if ($rules_tot < BIN5_PLAYERS_N) {
                 // FIXME_LANG
                 $msg = sprintf("<b>L'utente <i>%s</i> vorrebbe usare le %s.</b>",
-                               xcape($user->name), xcape(rules_id2descr($rules_id)));
+                               xcape($user->name), xcape(rules_id2descr($rules_id, $G_lang)));
                 break;
             }
 
@@ -1796,7 +1801,7 @@ function show_table_info(&$bri, &$table, $table_pos)
 
     // TAG: POINTS_MANAGEMENT
     $pnt_min = $table->points_n - MAX_POINTS < 0 ? 0 : $table->points_n - MAX_POINTS;
-    $noty = sprintf('<p>%s.</p>\n', xcape(ucfirst(rules_id2descr($table->rules->id_get()))));
+    $noty = sprintf('<p>%s.</p>\n', xcape(ucfirst(rules_id2descr($table->rules->id_get(), $G_lang))));
     $noty .= sprintf('<table class=\"points\"><tr><th></th>');
 
     // Names.
