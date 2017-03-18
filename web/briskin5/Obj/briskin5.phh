@@ -53,53 +53,6 @@ $mlang_bin5_bin5 = array(
                          'info_match'=> array( 'it' => 'Il codice della partita è <b>%d</b>.',
                                                'en' => 'Match code is <b>%d</b>.'),
 
-
-
-                         // br, hr, b, /b, win, fri
-                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s (punti torneo %7$d), il socio era %3$s%6$s%4$s,%1$s',
-                                               'en' => 'The declarer was %3$s%5$s%4$s (tournment points %7$d), the partner was %3$s%6$s%4$s,%1$s'),
-                         // br, hr, b, /b
-                         'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
-                                               'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
-
-                         // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
-                         'info_alea' => array( 'it' => 'dovevano fare %3$salmeno %5$d%4$s punti e ne hanno fatti %3$s%6$d%4$s: hanno %7$s.%1$s',
-                                               'en' => 'they had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: they have %7$s.%1$s'),
-                         // br, hr, b, /b, old_pnt, winornot
-                         'info_more' => array( 'it' => 'dovevano fare %3$spiù di 60%4$s punti e ne hanno fatti %3$s%5$d%4$s: hanno %6$s.%1$s',
-                                               'en' => 'they had to do %3$sover 60%4$s points and they had made %3$s%5$d%4$s: they have %3$s%6$s%4$s.%1$s'),
-                         'info_win'  => array( 'it' => 'vinto',
-                                               'en' => 'win'),
-                         'info_peer' => array( 'it' => 'pareggiato',
-                                               'en' => 'drew'),
-                         'info_lost' => array( 'it' => 'perso',
-                                               'en' => 'lost'),
-
-                         // br, hr, b, /b, win_name
-                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano (punti torneo %6$d),%1$s',
-                                               'en' => '%3$s%5$s%4$s play alone against each other (tournment points %6$d),%1$s'),
-                         // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
-                         'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %3$s%7$s%4$s.%1$s',
-                                               'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
-                         // br, hr, b, /b, old_pnt, winornot
-                         'info_morea' => array( 'it' => 'doveva fare %3$spiù di 60%4$s punti e ne ha fatti %3$s%5$d%4$s: ha %3$s%6$s%4$s.%1$s',
-                                                'en' => 'he/she had to do %3$smore than 60%4$s points and they had made %3$s%5$d%4$s: he/she had %3$s%6$s%4$s.%1$s'),
-                         // br, hr, b, /b
-                         'info_acap' => array( 'it' => 'ha fatto %3$scappotto%4$s EBBRAVO!.%1$s',
-                                               'en' => 'and he/she made %3$scapot%4$s WELL DONE!.%1$s'),
-
-                         // br, hr, b, /b
-                         'info_omul' => array( 'it' => '%1$sLa partita valeva %3$s%5$s%4$s.%1$s',
-                                               'en' => '%1$sEN: The game was worth %3$s%5$s%4$s.%1$s' ),
-
-                         // br, hr, b, /b
-                         'info_alpa' => array( 'it' => '%1$sHanno passato %3$stutti%4$s.%1$s',
-                                               'en' => '%1$sEN: Hanno passato %3$stutti%4$s.%1$s' ),
-
-                         // br, hr, b, /b, aband-name
-                         'info_aban' => array( 'it' => ' Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.',
-                                               'en' => ' EN: Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.'),
-
                          'btn_bkgame'=> array( 'it' => 'torna alla partita',
                                                'en' => 'back to the game'),
                          'call_wptn' => array( 'it' => '<br>con %d punti',
