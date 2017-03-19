@@ -75,7 +75,9 @@ class Rules_together17 extends Rules_no_draw {
 
     function min_tourn_points($a_pnt)
     {
-        if ($a_pnt < 71)
+        if ($a_pnt < 62)
+            $min_pts = 0;
+        else if ($a_pnt < 71)
             $min_pts = 13;
         else if ($a_pnt < 80)
             $min_pts = 19;
