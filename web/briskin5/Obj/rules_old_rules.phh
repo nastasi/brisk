@@ -362,8 +362,7 @@ class Rules_old_rules extends Rules {
                 $noty .= sprintf($mlang_bin5_rules['info_part'][$G_lang],
                                  $tg_br, $tg_hr, $tg_bo, $tg_bc,
                                  $win_name,
-                                 $fri_name,
-                                 $old_tourn_pts);
+                                 $fri_name);
                 if ($old_pnt == 120) {
                     $noty .= sprintf($mlang_bin5_rules['info_capp'][$G_lang],
                                      $tg_br, $tg_hr, $tg_bo, $tg_bc );
@@ -390,8 +389,7 @@ class Rules_old_rules extends Rules {
             else {
                 $noty .= sprintf($mlang_bin5_rules['info_alon'][$G_lang],
                                  $tg_br, $tg_hr, $tg_bo, $tg_bc,
-                                 $win_name,
-                                 $old_tourn_pts);
+                                 $win_name);
                 if ($old_pnt == 120) {
                     $noty .= sprintf($mlang_bin5_rules['info_acap'][$G_lang],
                                      $tg_br, $tg_hr, $tg_bo, $tg_bc);

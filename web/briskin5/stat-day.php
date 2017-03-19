@@ -248,8 +248,7 @@ SELECT p.pts AS pts
                                 ($tmt_obj->minus_one_is_old == -1 ? "td" : "th"));
                     }
                     if ($tmt_obj->minus_one_is_old != -1) {
-                        // FIXME
-                        $rules_name = "Rules_old_rules";
+                        $rules_name = rules_id2name($trn_obj->code);
                         fprintf($fpexp, "<td>%s</td><td>%s</td>", $users[$gam_obj->mazzo]['login'],
                                 xcape( ${rules_name}::game_description($gam_obj->act, 'plain', $gam_obj->mult,
                                                         $gam_obj->asta_win,

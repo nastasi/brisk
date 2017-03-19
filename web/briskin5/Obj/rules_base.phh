@@ -26,8 +26,8 @@ require_once("briskin5.phh");
 
 $mlang_bin5_rules = array(
                          // br, hr, b, /b, win, fri
-                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s (punti torneo %7$d), il socio era %3$s%6$s%4$s,%1$s',
-                                               'en' => 'The declarer was %3$s%5$s%4$s (tournment points %7$d), the partner was %3$s%6$s%4$s,%1$s'),
+                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
+                                               'en' => 'The declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
                          // br, hr, b, /b
                          'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
                                                'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
@@ -46,8 +46,8 @@ $mlang_bin5_rules = array(
                                                'en' => 'lost'),
 
                          // br, hr, b, /b, win_name
-                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano (punti torneo %6$d),%1$s',
-                                               'en' => '%3$s%5$s%4$s play alone against each other (tournment points %6$d),%1$s'),
+                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano,%1$s',
+                                               'en' => '%3$s%5$s%4$s play alone against each other,%1$s'),
                          // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
                          'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %3$s%7$s%4$s.%1$s',
                                                'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
