@@ -138,7 +138,7 @@ table.placings td
 }
 
 table.placing {
-    background-image: url('img/najole_wh_light.png');
+    background-image: url('img/lines_light.png');
     background-attachment: fixed;
 
     border: 1px solid gray;
@@ -149,8 +149,14 @@ table.placing {
 
 table.placing th {
     border: 1px solid gray;
-    text-align: center;
-    padding: 4px;
+    text-align: right;
+    padding: 8px;
+    min-width: 50px;
+}
+
+table.placing th span {
+    font-weight: normal;
+    float: left;
 }
 
 table.placing td {
@@ -196,7 +202,7 @@ table.room_tab td {
     -moz-border-radius: 8px;
     border-radius: 8px;
 
-    background-image: url('img/najole_wh_light.png');
+    background-image: url('img/lines_light.png');
     background-attachment: fixed;
 
     width: 25%;
@@ -244,7 +250,7 @@ table.room_standup {
     border-spacing: 0px;
     padding: 0px;
 
-    background-image: url('img/najole_wh_light.png');
+    background-image: url('img/lines_light.png');
     background-attachment: fixed;
 }
 
@@ -264,7 +270,7 @@ table.login {
     border: 1px solid gray;
     margin-top: 8px;
 
-    background-image: url('img/najole_wh_light.png');
+    background-image: url('img/lines_light.png');
     background-attachment: fixed;
  }
 
@@ -316,7 +322,7 @@ div.esco {
     -moz-border-radius: 4px;
     border-radius: 4px;
 
-    background-image: url('img/najole_wh_light.png');
+    background-image: url('img/lines_light.png');
     background-attachment: fixed;
 }
 

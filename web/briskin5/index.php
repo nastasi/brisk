@@ -121,6 +121,8 @@ window.onload = function() {
   window.onunload = onunload_cb;  
 
   xstm.start();
+
+  addEvent($('select_rules'), "change", function() { act_select_rules(this.value); } );
   // FIXME: add this setTimeout(preload_images into data stream to avoid
   // race on opened socket
   // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct);
@@ -305,6 +307,9 @@ window.onload = function() {
 <div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
 <br><br>
 <input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php echo $mlang_bin5_index['itm_ringauc'][$G_lang] ?>
+    <div>
+        <label>Regole:</label><?php dom_select_rules();?>
+    </div>
 </div>
 
 

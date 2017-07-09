@@ -628,13 +628,6 @@ class BriskDB
         }
         $gam_obj = pg_fetch_object($gam_pg, 0);
 
-        $table->old_reason = game_description($gam_obj->act, 'html', $gam_obj->mult,
-                                              $gam_obj->asta_win, ($gam_obj->asta_win != -1 ?
-                                                                   $users[$gam_obj->asta_win]['login'] : ""),
-                                              $gam_obj->friend, ($gam_obj->friend != -1 ?
-                                                                 $users[$gam_obj->friend]['login'] : ""),
-                                              $gam_obj->pnt, $gam_obj->asta_pnt);
-
         // update matches with new ttok and table idx
         $mtc_sql = sprintf("UPDATE %sbin5_matches SET (ttok, tidx) = ('%s', %d) WHERE code = %d RETURNING *;",
                            $G_dbpfx, $sql_ttok, $tidx, $match_code);
@@ -642,6 +635,20 @@ class BriskDB
             log_crit(sprintf("%s::%s: update matches table failed", __CLASS__, __FUNCTION__));
             return (FALSE);
         }
+        $mtc_obj = pg_fetch_object($mtc_pg, 0);
+
+        $old_rules = $table->rules;
+        $rules_name = rules_id2name($mtc_obj->tcode);
+        $table->rules = new $rules_name($table);
+        unset($old_rules);
+
+        $table->old_reason = ${rules_name}::game_description($gam_obj->act, 'html', $gam_obj->mult,
+                                              $gam_obj->asta_win, ($gam_obj->asta_win != -1 ?
+                                                                   $users[$gam_obj->asta_win]['login'] : ""),
+                                              $gam_obj->friend, ($gam_obj->friend != -1 ?
+                                                                 $users[$gam_obj->friend]['login'] : ""),
+                                              $gam_obj->pnt, $gam_obj->asta_pnt, $gam_obj->tourn_pts);
+
 
         return (TRUE);
     }
@@ -712,8 +719,9 @@ class BriskDB
             if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
 
                 // match not exists, insert it
-                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next) VALUES ('%s', %d, %d, %d) RETURNING *;",
-                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult);
+                // , BIN5_TOURNAMENT_NO_DRAW
+                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next, tcode) VALUES ('%s', %d, %d, %d, %d) RETURNING *;",
+                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult, $table->rules->id_get());
                 if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_affected_rows($mtc_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
                     break;
@@ -760,13 +768,14 @@ class BriskDB
             /*
              * games management
              */
-            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp, act, asta_pnt, pnt, asta_win, friend, mazzo, mult)
-                                               VALUES (%d, to_timestamp(%d), %d, %d, %d, %d, %d, %d, %d) RETURNING *;",
+            $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp, act, asta_pnt, pnt, asta_win, friend, mazzo, mult, tourn_pts)
+                                               VALUES (%d, to_timestamp(%d), %d, %d, %d, %d, %d, %d, %d, %d) RETURNING *;",
                                $G_dbpfx, $mtc_obj->code, $date, $action,
                                $table->old_asta_pnt, $table->old_pnt,
                                $table->old_asta_win,
                                $table->old_friend,
-                               $table->old_mazzo, $table->old_mult);
+                               $table->old_mazzo, $table->old_mult,
+                               $table->old_tourn_pts);
             if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_affected_rows($gam_pg) != 1) {
                 log_crit(sprintf("bin5_points_save: failed at insert game [%s]", $gam_sql));
                 break;

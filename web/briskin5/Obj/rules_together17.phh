@@ -1,0 +1,314 @@
+<?php
+/*
+ *  brisk - rules_together17.phh
+ *
+ *  Copyright (C) 2017 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+require_once("briskin5.phh");
+require_once("rules_base.phh");
+
+
+$mlang_bin5_toge17_rules =
+    array(
+          // br, hr, b, /b, win, fri
+          'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s (punti torneo %7$d), il socio era %3$s%6$s%4$s,%1$s',
+                                'en' => 'The declarer was %3$s%5$s%4$s (tournment points %7$d), the partner was %3$s%6$s%4$s,%1$s'),
+          // br, hr, b, /b, win_name
+          'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano (punti torneo %6$d),%1$s',
+                                'en' => '%3$s%5$s%4$s play alone against each other (tournment points %6$d),%1$s')
+          );
+
+class Rules_together17 extends Rules_no_draw {
+    function __construct($table)
+    {
+        parent::__construct($table);
+        $this->id = 4;
+    }
+
+    function tourn_points(&$user, $user_pos)
+    {
+        $card = $this->table->card;
+        unset($user->asta_tourn_pts);
+        $user->asta_tourn_pts = array(0, 0, 0, 0);
+        if (BIN5_CARD_HAND == 8)
+            $tourn_values = array(11, 10, 4,3,2, 1,1,1,1,1);
+        else
+            $tourn_values = array(33, 30, 12,9,6, 3,3,3,3,3);
+
+        for ($i = 0 ; $i < BIN5_PLAYERS_N * BIN5_CARD_HAND ; $i++) {
+
+            if ($card[$i]->owner == $user_pos) {
+                $user->asta_tourn_pts[(int)($i / 10)] += $tourn_values[$i % 10];
+            }
+        }
+    }
+
+    function tourn_points_max($user)
+    {
+        $mx = 0;
+        for ($i = 0 ; $i < 4 ; $i++) {
+            if ($user->asta_tourn_pts[$i] > $mx) {
+                $mx = $user->asta_tourn_pts[$i];
+            }
+        }
+
+        return $mx;
+    }
+
+    function min_tourn_points($a_pnt)
+    {
+        if ($a_pnt < 62)
+            $min_pts = 0;
+        else if ($a_pnt < 71)
+            $min_pts = 13;
+        else if ($a_pnt < 80)
+            $min_pts = 19;
+        else if ($a_pnt < 90)
+            $min_pts = 23;
+        else if ($a_pnt < 100)
+            $min_pts = 25;
+        else
+            $min_pts = 28;
+
+        return $min_pts;
+    }
+
+    function check_tourn_points($hand_pts, $a_pnt, $a_seed, &$ret_s) {
+        $min_pts = $this->min_tourn_points($a_pnt);
+
+        if ($hand_pts < $min_pts) {
+            // FIXME_LANG
+            $seeds = array('coppe', 'ori', 'spade', 'bastoni');
+            $ret_s = sprintf("Hai chiamato un due di %s a %d ma in mano per quel seme hai %d punti-torneo, non puoi.",
+                             $seeds[$a_seed], $a_pnt, $hand_pts);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    function rules_asta(&$bri, $curtime, $action, $user, &$ret_s, $a_card, $a_pnt) {
+        /*
+Per le chiamate da 62 a 70 bisognerà avere 13 punti ( esempi.: asso e fante oppure tre
+e cavallo oppure re, cavallo, fante, sette, sei, cinque, quattro) ;
+Per chiamate da 71 ad 80 bisognerà avere 19 punti ( esempi.: asso, re, cavallo e 6
+oppure tre, re, fante, 7, 6 e 5 );
+Per chiamate da 81 a 90 bisognerà avere 23 punti ( esempi.: asso, tre e fante oppure
+asso, re, cavallo, fante, 6, 5 e 4);
+Per chiamate da 91 a 100 bisognerà avere 25 punti ( esempi.: asso, tre, re e 7 oppure
+asso, tre, cavallo e fante );
+Per chiamate da 101 a 120 bisognerà avere 28 punti ( esempi.:asso, tre, re e cavallo
+oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
+        */
+
+        $index_cur = $this->table->gstart % BIN5_PLAYERS_N;
+
+        // Abbandono dell'asta
+        if ($a_card <= -1) {
+            log_wr("Abbandona l'asta.");
+            $this->table->asta_pla[$index_cur] = FALSE;
+            $user->asta_card  = -1;
+            $this->table->asta_pla_n--;
+
+            if ($this->table->asta_card == -1 && $this->table->asta_pla_n == 1) {
+                // all abandon auction except one => move next bid to two and 71 points
+                $this->table->asta_card = 9;
+                $this->table->asta_pnt = 70;
+            }
+
+            return TRUE;
+        }
+        else if ($a_card <= 9) {
+            $ret_s = "";
+
+            do {
+                if ($a_card >= 0 && $a_card < 9 && $a_card > $this->table->asta_card) {
+                    ;
+                }
+                else if ($a_card == 9 &&
+                         $a_pnt > ($this->table->asta_pnt >= 61 ? $this->table->asta_pnt : 60)
+                         && $a_pnt <= 120) {
+                    $min_pts = $this->min_tourn_points($a_pnt);
+
+                    $max_hand_pts = $this->tourn_points_max($user);
+                    if ($max_hand_pts < $min_pts) {
+                        // FIXME_LANG
+                        $ret_s = sprintf("Hai chiamato un due a %d ma in mano hai al massimo %d punti-torneo, non puoi.",
+                                         $a_pnt, $max_hand_pts);
+                        break;
+                    }
+                }
+                else {
+                    break;
+                }
+
+                $user->asta_card  = $a_card;
+                $this->table->asta_card = $a_card;
+                if ($a_card == 9) {
+                    $user->asta_pnt   = $a_pnt;
+                    $this->table->asta_pnt  = $a_pnt;
+                }
+
+                return TRUE;
+            } while (0);
+        }
+
+        return FALSE;
+    }
+
+    function rules_nextauct(&$bri, $curtime, $action, $user, $maxcard)
+    {
+        if (($this->table->asta_pla_n > ($maxcard > -1 ? 1 : 0)) &&
+            !($this->table->asta_card == 9 && $this->table->asta_pnt == 120)) {
+            return TRUE;
+        }
+        else {
+            return FALSE;
+        }
+
+    }
+
+    function rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)
+    {
+        if (! parent::rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)) {
+            return FALSE;
+        }
+
+        if ($this->table->asta_card == 9) {
+            $bri_seed = (int)($a_brisco / 10);
+            return $this->check_tourn_points($user->asta_tourn_pts[$bri_seed],
+                                             $this->table->asta_pnt, $bri_seed, $ret_s);
+        }
+
+        return TRUE;
+    }
+
+
+    static function game_description($act, $form, $old_mult, $win = -1, $win_name = "?1?", $fri = -1, $fri_name = "?2?",
+                              $old_pnt = -1, $old_asta_pnt = -1, $old_tourn_pts = -1)
+    {
+        GLOBAL $G_lang, $mlang_bin5_rules, $mlang_bin5_toge17_rules;
+
+        if ($form == 'html') {
+            $tg_br = "<br>";
+            $tg_hr = "<hr>";
+            $tg_bo = "<b>";
+            $tg_bc = "</b>";
+            $win_name = xcape($win_name);
+            $fri_name = xcape($fri_name);
+        }
+        else {
+            $tg_br = " ";
+            $tg_hr = " ";
+            $tg_bo = "";
+            $tg_bc = "";
+        }
+
+        if ($act == BIN5_RULES_OLDSCHEMA) {
+            return ("");
+        }
+        else if ($act == BIN5_RULES_ALLPASS) {
+            return (sprintf($mlang_bin5_rules['info_alpa'][$G_lang],
+                            $tg_br, $tg_hr, $tg_bo, $tg_bc));
+        }
+        else if ($act == BIN5_RULES_ABANDON) {
+            return (sprintf($mlang_bin5_rules['info_aban'][$G_lang],
+                            $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                            $win_name));
+        }
+        else {
+            $wol = static::game_result($old_asta_pnt, $old_pnt);
+
+            $noty = "";
+
+            if ($win != $fri) { // not alone case
+                /* MLANG: "<hr>Nell'ultima mano ha chiamato <b>%s</b>, il socio era <b>%s</b>,<br>", "hanno fatto <b>cappotto</b> EBBRAVI!.<hr>", "dovevano fare <b>%s</b> punti e ne hanno fatti <b>%d</b>: hanno <b>%s</b>.<hr>", "<hr>Nell'ultima mano <b>%s</b> si &egrave; chiamato in mano,<br>", "ha fatto <b>cappotto</b> EBBRAVO!.<hr>", "doveva fare <b>%s</b> punti e ne ha fatti <b>%d</b>: ha <b>%s</b>.<hr>", ($table->old_asta_pnt > 61 ? "almeno ".$table->old_asta_pnt : 'pi&ugrave; di 60'), $table->old_pnt, ($wol == 1 ? "vinto" : ($wol == 0 ? "pareggiato" : "perso" */
+
+                $noty .= sprintf($mlang_bin5_toge17_rules['info_part'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                 $win_name,
+                                 $fri_name,
+                                 $old_tourn_pts);
+                if ($old_pnt == 120) {
+                    $noty .= sprintf($mlang_bin5_rules['info_capp'][$G_lang],
+                                     $tg_br, $tg_hr, $tg_bo, $tg_bc );
+                }
+                else {
+                    if ($old_asta_pnt > 61) {
+                        $noty .= sprintf($mlang_bin5_rules['info_alea'][$G_lang],
+                                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                         $old_asta_pnt, $old_pnt,
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
+                    }
+                    else {
+                        $noty .= sprintf($mlang_bin5_rules['info_more'][$G_lang],
+                                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                         $old_pnt,
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
+                    } // else of if ($old_asta_pnt > 61) {
+                } // else of if ($old_pnt == 120) {
+            } // if ($win != $fri) { // not alone case
+            else {
+                $noty .= sprintf($mlang_bin5_toge17_rules['info_alon'][$G_lang],
+                                 $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                 $win_name,
+                                 $old_tourn_pts);
+                if ($old_pnt == 120) {
+                    $noty .= sprintf($mlang_bin5_rules['info_acap'][$G_lang],
+                                     $tg_br, $tg_hr, $tg_bo, $tg_bc);
+                }
+                else {
+                    if ($old_asta_pnt > 61) {
+                        $noty .= sprintf($mlang_bin5_rules['info_aleaa'][$G_lang],
+                                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                         $old_asta_pnt, $old_pnt,
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
+                    }
+                    else {
+                        $noty .= sprintf($mlang_bin5_rules['info_morea'][$G_lang],
+                                         $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                                         $old_pnt,
+                                         ($wol == 1 ? $mlang_bin5_rules['info_win'][$G_lang] :
+                                          ($wol == 0 ? $mlang_bin5_rules['info_peer'][$G_lang] :
+                                           $mlang_bin5_rules['info_lost'][$G_lang])));
+                    }
+                }
+            }
+        }
+
+        $old_multer = static::s_multer($old_mult, $old_asta_pnt);
+        if ($old_multer > 1) {
+            $noty .= sprintf($mlang_bin5_rules['info_omul'][$G_lang],
+                             $tg_br, $tg_hr, $tg_bo, $tg_bc,
+                             multoval($old_multer));
+        }
+        $noty .= sprintf('%2$s', $tg_br, $tg_hr);
+
+        return ($noty);
+    }
+} // class Rules_no_draw
+
+?>

@@ -685,8 +685,9 @@ google_color_url = "000000";
 <table width="100%%" border="0" cols="3"><tr>
 <td align="left"><div style="padding-left: 8px;">'.$banner_top_left.'</div></td>
 <td align="center">'.(($G_with_topbanner || $G_with_donors) ? '<table><tr><td>' : '').'<div style="text-align: center;">
-    <!--<img class="nobo" src="img/brisk_logo64.png">--><img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao grrr">
-    '.$mlang_room['headline'][$G_lang].'<br>
+ <img class="nobo" src="img/brisk_logo64.png">'
+/*    <img class="nobo" src="img/brisk_logo64_blackribbon.png" title="ciao Prof" alt="ciao Prof">' */
+    .$mlang_room['headline'][$G_lang].'<br>
     </div>'.( ($G_with_topbanner || $G_with_donors) ? sprintf('</td><td>%s</td></tr></table>',
                                                                 ($G_with_topbanner ? $G_topbanner :
 "<div style='background-color: #ffd780; border: 1px solid black; text-align: center;'><img class='nobo' src=\"donometer.php?c=".$G_donors_cur."&a=".$G_donors_all."\"><div style='padding: 1px; background-color: white;'><b>donatori</b></div></div>") ) : '').'</td>
@@ -995,7 +996,7 @@ supported by:<br>
 <div style="position: absolute;">
 '.$altout_support_big.'
 </div>
-<a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="http://it-it.facebook.com/group.php?gid=59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
+<a style="/* position: absolute; top: 40px; left: 6px; */" target="_blank" href="https://www.facebook.com/groups/59742820791"><img class="nobo" id="btn_facebook" src="img/facebook_btn.png" title="unisciti al gruppo \'quelli della brisk\'"></a>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>

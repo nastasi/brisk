@@ -639,7 +639,7 @@ function mesgtoadm_formtext_hilite(form)
 
 function j_check_email(email, ret)
 {
-    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,10})+$/.test(email))
+    if (/^\w+([\.-]*\w+)*@\w+([\.-]*\w+)*(\.\w{2,10})+$/.test(email))
         return (true);
     ret.ret += (g_lang == 'en' ? "Invalid email address. " :
                 "Indirizzo e-mail non valido.");

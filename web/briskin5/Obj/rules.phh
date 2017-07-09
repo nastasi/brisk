@@ -1,0 +1,72 @@
+<?php
+/*
+ *  brisk - rules.phh
+ *
+ *  Copyright (C) 2017 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+define('BIN5_TOURNAMENT_OLDRULES', 1);
+define('BIN5_TOURNAMENT_NO_DRAW',  2);
+define('BIN5_TOURNAMENT_TOGETHER17',  4);
+
+define('BIN5_RULES_OLDSCHEMA', -1);
+define('BIN5_RULES_FINISH',     0);
+define('BIN5_RULES_ABANDON',    1);
+define('BIN5_RULES_ALLPASS',    2);
+define('BIN5_RULES_ASTA',       3);
+define('BIN5_RULES_NEXTAUCT',   4);
+define('BIN5_RULES_CHECKCHOOSE',5);
+
+require_once("rules_base.phh");
+require_once("rules_old_rules.phh");
+require_once("rules_no_draw.phh");
+require_once("rules_together17.phh");
+
+// FIXME - DYNAMIC WITH CACHE AND RELOAD FROM DB
+function rules_keys()
+{
+    return array(1,2,4);
+}
+
+function rules_id2name($id)
+{
+    if ($id == 1)
+        return 'Rules_old_rules';
+    else if ($id == 2)
+        return 'Rules_no_draw';
+    else if ($id == 4)
+        return 'Rules_together17';
+
+    return 'Rules_unknown';
+}
+
+function rules_id2descr($id, $lang)
+{
+    if ($id == 1)
+        return 'regole vecchie (con pareggio)';
+    else if ($id == 2)
+        return 'regole nuove (senza pareggio)';
+    else if ($id == 4)
+        return 'regole del torneo "insieme per gioco"';
+
+    return 'Regole sconosciute';
+}
+
+?>

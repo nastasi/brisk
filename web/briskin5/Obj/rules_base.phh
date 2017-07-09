@@ -1,0 +1,102 @@
+<?php
+/*
+ *  brisk - rules.phh
+ *
+ *  Copyright (C) 2017 Matteo Nastasi
+ *                          mailto: nastasi@alternativeoutput.it
+ *                                  matteo.nastasi@milug.org
+ *                          web: http://www.alternativeoutput.it
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+require_once("briskin5.phh");
+
+$mlang_bin5_rules = array(
+                         // br, hr, b, /b, win, fri
+                         'info_part' => array( 'it' => 'Ha chiamato %3$s%5$s%4$s, il socio era %3$s%6$s%4$s,%1$s',
+                                               'en' => 'The declarer was %3$s%5$s%4$s, the partner was %3$s%6$s%4$s,%1$s'),
+                         // br, hr, b, /b
+                         'info_capp' => array( 'it' => 'hanno fatto %3$scappotto%4$s EBBRAVI!.%1$s',
+                                               'en' => 'and they made %3Dscapot%4$s WELL DONE!.%1$s'),
+
+                         // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
+                         'info_alea' => array( 'it' => 'dovevano fare %3$salmeno %5$d%4$s punti e ne hanno fatti %3$s%6$d%4$s: hanno %7$s.%1$s',
+                                               'en' => 'they had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: they have %7$s.%1$s'),
+                         // br, hr, b, /b, old_pnt, winornot
+                         'info_more' => array( 'it' => 'dovevano fare %3$spiù di 60%4$s punti e ne hanno fatti %3$s%5$d%4$s: hanno %6$s.%1$s',
+                                               'en' => 'they had to do %3$sover 60%4$s points and they had made %3$s%5$d%4$s: they have %3$s%6$s%4$s.%1$s'),
+                         'info_win'  => array( 'it' => 'vinto',
+                                               'en' => 'win'),
+                         'info_peer' => array( 'it' => 'pareggiato',
+                                               'en' => 'drew'),
+                         'info_lost' => array( 'it' => 'perso',
+                                               'en' => 'lost'),
+
+                         // br, hr, b, /b, win_name
+                         'info_alon' => array( 'it' => '%3$s%5$s%4$s si è chiamato in mano,%1$s',
+                                               'en' => '%3$s%5$s%4$s play alone against each other,%1$s'),
+                         // br, hr, b, /b, old_asta_pnt, old_pnt, winornot
+                         'info_aleaa' => array( 'it' => 'doveva fare %3$salmeno %5$d%4$s punti e ne ha fatti %3$s%6$d%4$s: ha %3$s%7$s%4$s.%1$s',
+                                               'en' => 'he/she had to do %3$sat least %5$d%4$s points and they had made %3$s%6$d%4$s: he/she had %3$s%7$s%4$s.%1$s'),
+                         // br, hr, b, /b, old_pnt, winornot
+                         'info_morea' => array( 'it' => 'doveva fare %3$spiù di 60%4$s punti e ne ha fatti %3$s%5$d%4$s: ha %3$s%6$s%4$s.%1$s',
+                                                'en' => 'he/she had to do %3$smore than 60%4$s points and they had made %3$s%5$d%4$s: he/she had %3$s%6$s%4$s.%1$s'),
+                         // br, hr, b, /b
+                         'info_acap' => array( 'it' => 'ha fatto %3$scappotto%4$s EBBRAVO!.%1$s',
+                                               'en' => 'and he/she made %3$scapot%4$s WELL DONE!.%1$s'),
+
+                         // br, hr, b, /b
+                         'info_omul' => array( 'it' => '%1$sLa partita valeva %3$s%5$s%4$s.%1$s',
+                                               'en' => '%1$sEN: The game was worth %3$s%5$s%4$s.%1$s' ),
+
+                         // br, hr, b, /b
+                         'info_alpa' => array( 'it' => '%1$sHanno passato %3$stutti%4$s.%1$s',
+                                               'en' => '%1$sEN: Hanno passato %3$stutti%4$s.%1$s' ),
+
+                         // br, hr, b, /b, aband-name
+                         'info_aban' => array( 'it' => ' Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.',
+                                               'en' => ' EN: Ha lasciato %3$s%5$s%4$s perché aveva al massimo %3$s2 punti%4$s.')
+                          );
+
+abstract class Rules {
+    var $table;
+    var $id;
+
+    abstract function engine(&$bri, $curtime, $action, $user);
+
+    function __construct($table)
+    {
+        $this->table = $table;
+    }
+
+    function id_get()
+    {
+        return ($this->id);
+    }
+
+    function tourn_points(&$user, $i)
+    {
+        return;
+    }
+
+    function tourn_points_max($user)
+    {
+        return 0;
+    }
+
+}
+
+?>

@@ -85,7 +85,7 @@ function searchetc() {
         fi
         pp="$(dirname "$pp")"
     done
-    
+
     return 1
 }
 
@@ -227,7 +227,7 @@ echo "    web_only:   \"$web_only\""
 echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
-  ( 
+  (
     echo "#"
     echo "#  Produced automatically by brisk::INSTALL.sh"
     echo "#"
@@ -324,7 +324,7 @@ if [ "$web_only" = "FALSE" ]; then
 	exit 3
     fi
     rm $ftokk_path/spy.txt
-    
+
     # create the fs subtree to enable ftok-ing
     touch ${ftokk_path}/main
     chmod 666 ${ftokk_path}/main
@@ -369,7 +369,7 @@ if [ "$web_only" = "FALSE" ]; then
 fi
 install -d ${web_path}__
 for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
-    install -d ${web_path}__/$i 
+    install -d ${web_path}__/$i
 done
 
 for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^....//g'); do
