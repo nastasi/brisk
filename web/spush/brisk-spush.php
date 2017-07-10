@@ -40,6 +40,25 @@ require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/index.php");
 require_once($G_base."briskin5/index_wr.php");
 
+if (FALSE) {
+function my_e($number, $msg, $file, $line, $vars) {
+    print_r(debug_backtrace());
+    die();
+}
+
+function my_for_fatal()
+{
+    // $error = error_get_last();
+    // if ( $error["type"] == E_ERROR ) {
+        print_r(debug_backtrace());
+        die();
+        // }
+    //   log_error( $error["type"], $error["message"], $error["file"], $error["line"] );
+}
+
+register_shutdown_function( "my_for_fatal" );
+set_error_handler('my_e');
+}
 
 function main($argv)
 {
