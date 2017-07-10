@@ -192,7 +192,7 @@ class Rules_old_rules extends Rules {
             // Non si cambia mazzo se si abbandona la partita
             $game_delta = 0;
             // $table->game_next(0);
-            $table->game_init(&$bri->user);
+            $table->game_init($bri->user);
         }
         else if ($action == BIN5_RULES_CHECKCHOOSE) {
             return ($this->rules_checkchoose($bri, $curtime, $action, $user, $opt1, $opt2));
@@ -314,7 +314,7 @@ class Rules_old_rules extends Rules {
             log_points($user->ip, $curtime, $user, "STAT:BRISKIN5:FINISH_GAME", $plist);
         }
 
-        $table->game_init(&$bri->user);
+        $table->game_init($bri->user);
 
         return (TRUE);
     }
