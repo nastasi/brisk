@@ -187,7 +187,7 @@ oppure asso, tre, cavallo, 7, 6, 5 e 4 ).
 
     function rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)
     {
-        if (! parent::rules_checkchoose(&$bri, $curtime, $action, $user, &$ret_s, $a_brisco)) {
+        if (! parent::rules_checkchoose($bri, $curtime, $action, $user, &$ret_s, $a_brisco)) {
             return FALSE;
         }
 
