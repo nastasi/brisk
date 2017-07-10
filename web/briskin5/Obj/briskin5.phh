@@ -685,7 +685,7 @@ class Bin5_table extends Table {
             $rules_name = rules_id2name($rules_id);
             $this->rules = new $rules_name($this);
 
-            // $this->game_init(&$bri->user);
+            // $this->game_init($bri->user);
 
             /* reload of the page with the new layout */
             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
@@ -702,7 +702,7 @@ class Bin5_table extends Table {
                 $user_cur->comm[$user_cur->step % COMM_N] = "";
                 $user_cur->step_inc();
 
-                $user_cur->comm[$user_cur->step % COMM_N] = show_table(&$bri, &$user_cur, $user_cur->step+1, TRUE, FALSE);
+                $user_cur->comm[$user_cur->step % COMM_N] = show_table($bri, $user_cur, $user_cur->step+1, TRUE, FALSE);
                 $user_cur->step_inc();
             }
             return (TRUE);
