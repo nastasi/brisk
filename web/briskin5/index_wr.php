@@ -199,7 +199,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     log_wr("CI SIAMO  a_card ".$a_card."  asta_card ".$table->asta_card);
 
                     /* user action management */
-                    if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_ASTA, $user,
+                    if (!$table->rules->engine($bin5, $curtime, BIN5_RULES_ASTA, $user,
                                                $ret_s, $a_card, $a_pnt)) {
                         break;
                     }
@@ -229,7 +229,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                      *   asta_pla_n > 0 if someone NOT bet)
                      *  THEN advance auction
                      */
-                    if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_NEXTAUCT, $user, $maxcard)) {
+                    if ($table->rules->engine($bin5, $curtime, BIN5_RULES_NEXTAUCT, $user, $maxcard)) {
                         /* search the next player in auction and put it in gstart field */
                         for ($i = 1 ; $i < BIN5_PLAYERS_N ; $i++) {
                             $index_next = ($table->gstart + $i) % BIN5_PLAYERS_N;
@@ -257,12 +257,12 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     else if ($table->asta_pla_n == 0) {
                         log_wr("PASSANO TUTTI!");
 
-                        if ($table->rules->engine(&$bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
+                        if ($table->rules->engine($bin5, $curtime, BIN5_RULES_ALLPASS, $user)) {
                             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                                 $user_cur = &$bin5->user[$table->player[$i]];
 
                                 $ret = sprintf('gst.st = %d;', $user_cur->step+1);
-                                $ret .= show_table(&$bin5,&$user_cur,$user_cur->step+1, TRUE, TRUE);
+                                $ret .= show_table($bin5, $user_cur, $user_cur->step+1, TRUE, TRUE);
                                 $user_cur->comm[$user_cur->step % COMM_N] = $ret;
                                 $user_cur->step_inc();
                             }
@@ -329,7 +329,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                 do {
                     $a_brisco = $argz[1];
 
-                    if (!$table->rules->engine(&$bin5, $curtime, BIN5_RULES_CHECKCHOOSE, $user, $ret_s, $a_brisco)) {
+                    if (!$table->rules->engine($bin5, $curtime, BIN5_RULES_CHECKCHOOSE, $user, $ret_s, $a_brisco)) {
                         break;
                     }
 
