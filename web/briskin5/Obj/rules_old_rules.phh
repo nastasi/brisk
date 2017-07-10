@@ -173,7 +173,7 @@ class Rules_old_rules extends Rules {
 
             $game_delta = 1;
             // $table->game_next(1);
-            $table->game_init(&$bri->user);
+            $table->game_init($bri->user);
         }
         else if ($action == BIN5_RULES_ABANDON) { // return TRUE if all correct
             if (!($user->handpt <= 2)) {
