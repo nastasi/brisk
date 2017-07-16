@@ -189,7 +189,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
                     if ($user->table_pos != $index_cur ||
                         !$table->asta_pla[$index_cur]) {
                         // FIXME_LANG
-                        $ret_s = 'grave inconsistenza';
+                        // $ret_s = 'grave inconsistenza';
                         break;
                     }
 
