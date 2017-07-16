@@ -634,7 +634,8 @@ xynt_streaming.prototype = {
         // DEFAULT TRANSPORT PROTOCOL HERE websocketsec, websocket
         if (this.transp_fback > 0) {
             transp_type = "websocketsec";
-            transp_port = (this.transp_fback == 2 ? 443 : 8080);
+            // transp_port = (this.transp_fback == 2 ? 443 : 8080);
+            transp_port = 443;
         }
         else {
             transp_type = this.transp_type;

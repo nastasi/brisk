@@ -138,7 +138,7 @@ table.placings td
 }
 
 table.placing {
-    background-image: url('img/lines_light.png');
+    background-image: url('img/beta_light.png');
     background-attachment: fixed;
 
     border: 1px solid gray;
@@ -202,7 +202,7 @@ table.room_tab td {
     -moz-border-radius: 8px;
     border-radius: 8px;
 
-    background-image: url('img/lines_light.png');
+    background-image: url('img/beta_light.png');
     background-attachment: fixed;
 
     width: 25%;
@@ -250,7 +250,7 @@ table.room_standup {
     border-spacing: 0px;
     padding: 0px;
 
-    background-image: url('img/lines_light.png');
+    background-image: url('img/beta_light.png');
     background-attachment: fixed;
 }
 
@@ -270,7 +270,7 @@ table.login {
     border: 1px solid gray;
     margin-top: 8px;
 
-    background-image: url('img/lines_light.png');
+    background-image: url('img/beta_light.png');
     background-attachment: fixed;
  }
 
@@ -322,7 +322,7 @@ div.esco {
     -moz-border-radius: 4px;
     border-radius: 4px;
 
-    background-image: url('img/lines_light.png');
+    background-image: url('img/beta_light.png');
     background-attachment: fixed;
 }
 
