@@ -956,16 +956,13 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             }
             else if ($argz[0] == 'logout') {
                 $brisk->ghost_sess->push($curtime, $user->sess, GHOST_SESS_REAS_LOUT);
-                $user->the_end = TRUE;
 
-                if ($user->subst == 'sitdown') {
-                    log_load("ROOM WAKEUP");
-                    $brisk->room_wakeup($user);
-                }
-                else if ($user->subst == 'standup')
-                    $brisk->room_outstandup($user);
-                else
-                    log_rd2("LOGOUT FROM WHAT ???");
+                $user->the_end = TRUE;
+                $brisk->room_outstandup($user);
+
+                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+                $user->comm[$user->step % COMM_N] .=  sprintf('gst.st_loc++; xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");');
+                $user->step_inc();
             }
         }
         /**********************
@@ -984,9 +981,13 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             }
             else if ($argz[0] == 'logout') {
                 $brisk->ghost_sess->push($curtime, $user->sess, GHOST_SESS_REAS_LOUT);
-                $user->the_end = TRUE;
 
+                $user->the_end = TRUE;
                 $brisk->room_wakeup($user);
+
+                $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
+                $user->comm[$user->step % COMM_N] .=  sprintf('gst.st_loc++; xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("index.php");');
+                $user->step_inc();
             }
         }
     }

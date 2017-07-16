@@ -431,7 +431,7 @@ sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$prefix_path\";@
 sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path}__/xynt-streaming.js
 
 document_root="$(grep DocumentRoot "${apache_conf}"  | grep -v '^[ 	]*#' | awk '{ print $2 }')"
-sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph*
+sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph* ${web_path}__/donometer.php
 
 if [ -d ../brisk-img ]; then
     cd ../brisk-img

@@ -631,14 +631,18 @@ class Sac_a_push {
         foreach ($this->socks as $k => $sock) {
             $id = intval($sock);
             if (isset($this->s2u[$id])) {
-                if ($this->s2u[$id]->the_end) {
-                    if ($this->s2u[$id]->rd_socket_get() != NULL) {
-                        $this->s2u[$id]->rd_socket_set(NULL);
+                $user = $this->s2u[$id];
+                if ($user->the_end) {
+                    if (($user->rd_toflush == FALSE && $user->rd_step == $user->step)
+                        || $user->rd_endtime_is_expired($this->curtime)) {
+                        if ($user->rd_socket_get() != NULL) {
+                            $user->rd_socket_set(NULL);
+                        }
+                        unset($this->socks[$id]);
+                        unset($this->s2u[$id]);
+                        fclose($sock);
+                        printf("CLOSE ON GARBAGE MANAGER\n");
                     }
-                    unset($this->socks[$id]);
-                    unset($this->s2u[$id]);
-                    fclose($sock);
-                    printf("CLOSE ON GARBAGE MANAGER\n");
                 }
             }
         }
