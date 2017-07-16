@@ -23,6 +23,7 @@
  */
 
 $G_base = "";
+$DOCUMENT_ROOT="";
 
 require_once("Obj/brisk.phh");
 

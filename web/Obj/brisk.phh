@@ -1226,10 +1226,15 @@ class Brisk
 
     function users_cleanup()
     {
+        $curtime = time();
         for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
             $user_cur = $this->user[$i];
 
-            if ($user_cur->the_end) {
+            if ($user_cur->the_end
+                && (($user_cur->rd_toflush == FALSE
+                     && $user_cur->rd_step == $user_cur->step)
+                    || $user_cur->rd_endtime_is_expired($curtime))
+                ) {
                 $user_cur->reset(); // users_cleanup, OK
             }
         }
