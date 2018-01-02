@@ -38,6 +38,24 @@ curl -d "pazz=$BRISK_PASS" "http://$BRISK_SITE/briskin5/stat-day.php?from=$(date
 
 */
 
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
+foreach (array("pazz") as $i) {
+    if (isset($_POST[$i])) {
+        $$i = $_POST[$i];
+        }
+    }
+
+foreach (array("from", "to") as $i) {
+    if (isset($_GET[$i])) {
+        $$i = $_GET[$i];
+        }
+    }
+
 $G_base = "../";
 
 // SYNC WITH bin5_tournaments table
@@ -98,11 +116,11 @@ function main_pgsql($from, $to)
             $trn_obj = pg_fetch_object($trn_pg, $t);
 
             $tmt_sql = sprintf("
-SELECT m.code AS code, m.mazzo_next as minus_one_is_old
-    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t
-    WHERE t.code = m.tcode AND m.code = g.mcode
-        AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s'
-    GROUP BY m.code, minus_one_is_old
+SELECT m.code AS code, m.mazzo_next as minus_one_is_old 
+    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t 
+    WHERE t.code = m.tcode AND m.code = g.mcode 
+        AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' 
+    GROUP BY m.code, minus_one_is_old 
     ORDER BY m.code, minus_one_is_old DESC;",
                                $G_dbpfx, $G_dbpfx, $G_dbpfx, $trn_obj->code, $from, $to);
 
@@ -250,7 +268,7 @@ SELECT p.pts AS pts
                     if ($tmt_obj->minus_one_is_old != -1) {
                         $rules_name = rules_id2name($trn_obj->code);
                         fprintf($fpexp, "<td>%s</td><td>%s</td>", $users[$gam_obj->mazzo]['login'],
-                                xcape( ${rules_name}::game_description($gam_obj->act, 'plain', $gam_obj->mult,
+                                xcape( $rules_name::game_description($gam_obj->act, 'plain', $gam_obj->mult,
                                                         $gam_obj->asta_win,
                                                         ($gam_obj->asta_win != -1 ?
                                                          $users[$gam_obj->asta_win]['login'] : ""),

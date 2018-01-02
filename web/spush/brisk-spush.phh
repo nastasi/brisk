@@ -160,11 +160,11 @@ class PendingPage {
 
       if ($this->kalive < $curtime) {
           printf("TRY FLUSH CLOSE 1\n");
-          fclose($this->socket);
+          @fclose($this->socket);
           return TRUE;
       }   
 
-      $wret = fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
+      $wret = @fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
       if ($wret == FALSE && $wret !== FALSE) {
           printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
       }

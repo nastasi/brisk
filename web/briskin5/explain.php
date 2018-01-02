@@ -28,6 +28,12 @@
    
 */
 
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
 $G_base = "../";
 
 ini_set("max_execution_time",  "240");
