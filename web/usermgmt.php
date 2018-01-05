@@ -22,6 +22,30 @@
  *
  */
 
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
+foreach (array("pazz") as $i) {
+    if (isset($_POST[$i])) {
+        $$i = $_POST[$i];
+        }
+    }
+
+foreach (array("sess") as $i) {
+    if (isset($_COOKIE[$i])) {
+        $$i = $_COOKIE[$i];
+        }
+    }
+
+foreach (array("sess") as $i) {
+    if (isset($_COOKIE[$i])) {
+        $$i = $_COOKIE[$i];
+        }
+    }
+
 $G_base = "";
 
 $mlang_umgmt = array( 'nu_psubj' => array( 'it' => 'Brisk: credenziali di accesso.',
