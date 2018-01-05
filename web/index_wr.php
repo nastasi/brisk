@@ -131,7 +131,7 @@ define('LICMGR_CHO_AFTER',  2);
 
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
-    GLOBAL $G_domain, $G_webbase, $G_mail_seed, $G_notguar_code;
+    GLOBAL $G_proto, $G_domain, $G_webbase, $G_mail_seed, $G_notguar_code;
     GLOBAL $G_shutdown, $G_alarm_passwd, $G_ban_list, $G_black_list, $G_lang, $G_room_help, $G_room_about;
     GLOBAL $G_room_passwdhowto, $mlang_indwr;
     GLOBAL $G_tos_vers;
@@ -289,8 +289,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
                 $hash = md5($curtime . $G_alarm_passwd . $cli_name . $cli_email);
 
-                $confirm_page = sprintf("http://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
-                                        $G_domain, $G_webbase, $mail_code, $hash);
+                $confirm_page = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
+                                        $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
                 $subj = $mlang_indwr['nu_msubj'][$G_lang];
                 $body_txt = sprintf($mlang_indwr['ap_mtext'][$G_lang],
                                     $cli_name, $confirm_page);
@@ -488,8 +488,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     }
                     $hash = md5($curtime . $G_alarm_passwd . $cli_name . $cli_email);
 
-                    $confirm_page = sprintf("http://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
-                                            $G_domain, $G_webbase, $mail_code, $hash);
+                    $confirm_page = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
+                                            $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
                     $subj = $mlang_indwr['nu_msubj'][$G_lang];
                     $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
                                         $user->name, $cli_name, $confirm_page);

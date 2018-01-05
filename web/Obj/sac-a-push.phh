@@ -35,7 +35,7 @@ $_globals_list = array(
 'G_admin_mail', 'G_alarm_passwd', 'G_all_points', 'G_ban_list', 'G_base',
 'G_black_list', 'G_brisk_version', 'G_btrace_pref_sub', 'G_cloud_smasher',
 'G_crypt_key', 'G_dbasetype', 'G_dbauth', 'G_dbpfx', 'G_doc_path',
-'G_domain', 'G_donors_all', 'G_donors_cur', 'G_is_local', 'G_lang', 'G_lng',
+'G_proto', 'G_domain', 'G_donors_all', 'G_donors_cur', 'G_is_local', 'G_lang', 'G_lng',
 'G_mail_seed', 'G_notguar_code', 'G_PG_cons', 'G_PG_cons_n', 'G_PG_vow',
 'G_PG_vow_n', 'G_poll_entries', 'G_poll_name', 'G_poll_title',
 'G_provider_proxy', 'G_proxy_white_list', 'G_room_about', 'G_room_help',

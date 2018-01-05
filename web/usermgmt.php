@@ -132,7 +132,7 @@ $s_style = "
 </style>";
 
 function main() {
-    GLOBAL $s_style, $G_dbpfx, $G_lang, $G_alarm_passwd, $G_domain, $G_webbase;
+    GLOBAL $s_style, $G_dbpfx, $G_lang, $G_alarm_passwd, $G_proto, $G_domain, $G_webbase;
     GLOBAL $mlang_umgmt, $mlang_indwr, $f_mailusers, $sess, $_POST, $_SERVER;
 
 
@@ -216,8 +216,8 @@ SELECT usr.*, guar.login AS guar_login
                     }
                     $hash = md5($curtime . $G_alarm_passwd . $usr_obj->login . $usr_obj->email);
 
-                    $confirm_page = sprintf("http://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
-                                            $G_domain, $G_webbase, $mail_code, $hash);
+                    $confirm_page = sprintf("%s://%s/%s/mailmgr.php?f_act=checkmail&f_code=%d&f_hash=%s",
+                                            $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
                     $subj = $mlang_indwr['nu_msubj'][$G_lang];
                     if (($usr_obj->type & USER_FLAG_TY_APPR) == USER_FLAG_TY_APPR) {
                         $body_txt = sprintf($mlang_indwr['ap_mtext'][$G_lang],
@@ -577,7 +577,7 @@ SELECT usr.*, guar.login AS guar_login
 Ti volevo segnalare che il nickname \'%s\' con cui ti volevi registrare
 non ha superato la fase di verifica manuale; il motivo può essere
 la sua illeggibilità per gli altri utenti o il contenuto poco ortodosso
-o troppo aggressivo o o ci sono troppe cifre consecutive o qualcosa del genere.
+o troppo aggressivo o ci sono troppe cifre consecutive o qualcosa del genere.
 
 La procedura di registrazione va ripetuta.
 
@@ -587,7 +587,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
 Ti volevo segnalare che il nickname \'%s\' con cui ti volevi registrare
 non ha superato la fase di verifica manuale; il motivo può essere
 la sua illeggibilità per gli altri utenti o il contenuto poco ortodosso
-o troppo aggressivo o o ci sono troppe cifre consecutive o qualcosa del genere.<br><br>
+o troppo aggressivo o ci sono troppe cifre consecutive o qualcosa del genere.<br><br>
 La procedura di registrazione va ripetuta.<br><br>
 Saluti e buone partite, mop.', $usr_obj->login);
                     /* } */

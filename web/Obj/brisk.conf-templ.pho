@@ -25,6 +25,7 @@ $G_dbasetype="pgsql";
 $G_dbauth = "host=... port=... user=... password=... dbname=... options='--client_encoding=UTF8'";
 $G_dbpfx = "bsk_";
 
+$G_proto      = "https";
 $G_domain     = "brisk.example.com";
 $G_webbase    = "brisk";
 $G_admin_mail = "admin@$G_domain";
