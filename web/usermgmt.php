@@ -84,7 +84,12 @@ function check_auth()
 
     $socket = FALSE;
     $ret = FALSE;
-    $ip = $_SERVER["REMOTE_ADDR"];
+    if (array_key_exists("HTTP_X_REAL_IP", $_SERVER)) {
+        $ip = $_SERVER["HTTP_X_REAL_IP"];
+    }
+    else {
+        $ip = $_SERVER["REMOTE_ADDR"];
+    }
     $stp = 0;
     $private = md5($G_alarm_passwd.$ip.$sess);
     $cmd = array ("cmd" => "userauth", "sess" => $sess, "private" => $private, "the_end" => "true");

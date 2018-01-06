@@ -750,15 +750,25 @@ class Sac_a_push {
                         if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
                             printf("NEW_SOCKET: %d\n", intval($new_socket));
                             stream_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
-                            printf("RECEIVED HEADER:\n%s", $stream_info);
+                            // error_log(sprintf("RECEIVED HEADER:\n%s", $stream_info));
                             if (($path = spu_process_info($stream_info, $method, $header,
                                                           $get, $post, $cookie, $rest, $cont))
                                 == FALSE) {
                                 fprintf(STDERR, "TODO: fix wrong header management\n");
                             }
-                            $addr_full = stream_socket_get_name($new_socket, TRUE);
+
+                            // We try to get real IP from header (passed by proxy) and then fallback to direct connection IP
+                            // error_log(sprintf("addr: [%s]", $addr));
+                            // error_log(sprintf("X-Real-Ip: [%s]", array_key_exists('X-Real-Ip', $header) ? $header['X-Real-Ip'] : "Not exists"));
+                            if (array_key_exists('X-Real-Ip', $header)) {
+                                $addr = $header['X-Real-Ip'];
+                            }
+                            else {
+                                $addr = addrtoipv4(stream_socket_get_name($new_socket, TRUE));
+                            }
+
                             // FOR TEST $header['X-Forwarded-For'] = '154.155.22.33';
-                            $addr = $this->pproxy_realip($header, addrtoipv4($addr_full));
+                            $addr = $this->pproxy_realip($header, $addr);
 
                             printf("PATH: [%s] [%s]\n", $path, print_r($header, TRUE));
                             if ($method == "POST" && $rest > 0) {
