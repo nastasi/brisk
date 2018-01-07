@@ -1604,7 +1604,7 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
         $ret .= table_welcome($user);
 
     if ($is_transition && !$is_again) { // just sit, play cow
-        $ret .= playsound("cow.mp3");
+        $ret .= playsound("cow");
     }
 
 

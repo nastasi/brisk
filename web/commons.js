@@ -2,7 +2,7 @@
  *  brisk - commons.js
  *
  *  Copyright (C) 2006-2015 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -27,7 +27,7 @@ var cookiepath = "/brisk/";
 
 var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                       'en' : 'Loaded images ' },
-                      'imgload_b' : { 'it' : '%.', 
+                      'imgload_b' : { 'it' : '%.',
                                       'en' : '%.' },
                       'gamleav'   : { 'it' : 'Sei sicuro di volere lasciare questa mano?' ,
                                       'en' : 'Are you sure to leave this game?' },
@@ -64,7 +64,7 @@ function dec2hex(d, padding)
     return hex;
 }
 
-function getStyle(x,IEstyleProp, MozStyleProp) 
+function getStyle(x,IEstyleProp, MozStyleProp)
 {
     if (x.currentStyle) {
 	var y = x.currentStyle[IEstyleProp];
@@ -91,14 +91,14 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 		param[i-2] =  arguments[i];
 	    }	
 	}
-	
+
 	if(typeof(fn)=='function') {
-	    
+
 	    return (function (fn,ms,param) {
 		var fo = function () {								
 		    fn.apply(window,param);
 		};			
-		return nativeSetInterval(fo,ms); 
+		return nativeSetInterval(fo,ms);
 	    })(fn,ms,param);
 	}
 	else if(typeof(fn)=='string')
@@ -123,9 +123,9 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 		param[i-2] =  arguments[i];
 	    }	
 	}
-	
+
 	if(typeof(fn)=='function') {
-	    
+
 	    return (function (fn,ms,param) {
 		var fo = function () {								
 		    fn.apply(window,param);
@@ -235,7 +235,7 @@ function update_images()
 function preload_images(arr,idx)
 {
     var im = new Image;
-    
+
     // $("imgct").innerHTML = "Stiamo caricando "+arr[idx]+"%.<br>";
     im.onload =   update_images;
     im.onerror =  error_images;
@@ -268,7 +268,7 @@ function send_mesg(mesg)
 {
     var xhr_wr = createXMLHttpRequest();
     var is_conn = (sess == "not_connected" ? false : true);
-    
+
     // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
     xhr_wr.open('GET', 'index_wr.php?&'+(is_conn ? 'sess='+sess : '')+'&stp='+gst.st+'&mesg='+mesg, (is_conn ? true : false));
     xhr_wr.setRequestHeader("If-Modified-Since", new Date().toUTCString());
@@ -315,7 +315,7 @@ function server_request()
     // alert("Args: "+arguments.length);
 
     var is_conn = (sess == "not_connected" ? false : true);
-    
+
     // console.log("server_request:preresp: "+xhr_wr.responseText);
 
     if (is_post) {
@@ -327,7 +327,7 @@ function server_request()
     }
     xhr_wr.onreadystatechange = function() { return; };
     xhr_wr.send(post_collect);
-    
+
     if (xhr_wr.responseText != null) {
         // console.log("server_request:resp: "+xhr_wr.responseText);
         return (xhr_wr.responseText);
@@ -572,18 +572,18 @@ slowimg.prototype = {
     tout: 0,
     action: null,
     srcend: null,
-    
+
     setstart: function(x0,y0)
     {
 	this.x0 = x0;
 	this.y0 = y0;
     },
-    
+
     setaction: function(act)
     {
 	this.action = act;
     },
-    
+
 
     settime: function(time) 
     {
@@ -598,17 +598,17 @@ slowimg.prototype = {
             this.step_free = parseInt(this.step_n * this.free);
         }
     },
-    
+
     start: function(st)
     {
 	// $("logz").innerHTML += "               xxxxxxxxxxxxxxxxxxxxxSTART<br>";
 	this.st = st;
 	this.st.st_loc_new++;
-	
+
 	this.img.style.visibility = "visible";
 	setTimeout(function(obj){ obj.animate(); }, this.deltat, this);
     },
-    
+
     animate: function()
     {
 	// $("log").innerHTML = "Val " + this.step_cur + " N: " + this.step_n + "<br>";
@@ -825,11 +825,11 @@ function notify_ex(st, text, tout, butt, w, h, is_opa, block_time)
 {
     var clo, box;
     var t = this;
-    
+
     this.st = st;
 
     this.ancestor = document.body;
-    
+
     this.st.st_loc_new++;
 
     clo = document.createElement("input");
@@ -878,9 +878,9 @@ function notify_ex(st, text, tout, butt, w, h, is_opa, block_time)
     box.style.visibility = "visible";
 
     this.notitag = box;
-    
+
     this.ancestor.appendChild(box);
-    
+
     this.toutid = setTimeout(function(obj){ obj.unblock(); }, tout, this);
 
     if (block_time != 0) {
@@ -910,7 +910,7 @@ notify_ex.prototype = {
 	    this.st.st_loc++;
 	}
     },
-    
+
     hide: function()
     {
 	clearTimeout(this.toutid);
@@ -929,7 +929,7 @@ function notify(st, text, tout, butt, w, h)
 {
     notify_ex.call(this, st, text, tout, butt, w, h, false, 0);
 }
-	
+
 function globst() {
     this.st = -1;
     this.st_loc = -1;
@@ -964,7 +964,7 @@ globst.prototype = {
 function remark_step()
 {
     var ct = $("remark").l_remct;
-    
+
     if (ct != 0) {
 	ct++;
 	if (ct > 2)
@@ -975,7 +975,7 @@ function remark_step()
     }
     else
 	$("remark").className = "remark0";
-    
+
     return;
 }
 
@@ -1057,7 +1057,7 @@ function user_dec_and_state(el)
 
     content = user_decorator(el, true);
     content += state_add(el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
-    
+
     return (content);
 }
 
@@ -1092,7 +1092,7 @@ function chatt_sub(dt,data,str)
     }
     // $("txt").innerHTML;
 
-    
+
     if (must_scroll) {
         $("txt").scrollTop = 10000000;
     }
@@ -1134,12 +1134,12 @@ function onbeforeunload_cb () {
 }
 
 function onunload_cb () {
-    
+
     if (typeof(xstm) != "undefined")
         xstm.the_end = true;
 
     act_shutdown();
-    
+
     return(false);
 }
 
@@ -1189,7 +1189,7 @@ function  unescapeHTML(cont) {
                 var length = div.childNodes.length, results = new Array(length);
             while (length--)
                 results[length] = div.childNodes[length];
-                
+
             for (i=0 ; i<results.length ; i++)
 	        memo = memo + results[i].nodeValue;
             }
@@ -1205,16 +1205,49 @@ function  unescapeHTML(cont) {
     }
 }
 
-function playsound(tag, sound) {
-   // g_withflash is a global var
-   if (g_withflash) {
-      $(tag).innerHTML = '<OBJECT classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '+
-'codebase="http://active.macromedia.com/flash2/cabs/swflash.cab#version=4,0,0,0" id="mysound" WIDTH=1 HEIGHT=1>' +
-'<PARAM NAME="movie" VALUE="../playsound.swf"><PARAM NAME="PLAY" VALUE="true"><PARAM NAME="LOOP" VALUE="false">' +
-'<PARAM NAME=FlashVars VALUE="streamUrl='+sound+'">' +
-'<EMBED swliveconnect="true" name="mysound" src="../playsound.swf" FlashVars="streamUrl='+sound+'" PLAY="true" LOOP="false" '+
-' WIDTH=1 HEIGHT=1 TYPE="application/x-shockwave-flash" PLUGINSPAGE="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"></OBJECT>';
-   }
+/*
+   samples = [{'name': <name>, 'file': <file>}, ... ]
+*/
+function jukebox(samples)
+{
+    var source, a;
+    this.enable = false;
+    this.audio = {};
+
+    var pro_audio_el = document.createElement('audio');
+    this.enable = !!(pro_audio_el.canPlayType && pro_audio_el.canPlayType('audio/mpeg;').replace(/no/, ''));
+    if (this.enable) {
+        for (i in samples) {
+            sample = samples[i];
+
+            this.audio[sample['name']] = a = document.createElement('audio');
+
+            source = document.createElement('source');
+            source.setAttribute('src', sample['file']);
+            source.setAttribute('type', 'audio/mpeg');
+            a.appendChild(source);
+            a.load();
+        }
+    }
+}
+
+jukebox.prototype = {
+    is_enabled: function() {
+        return this.enable;
+    },
+
+    play: function(name) {
+        var a;
+        if (! this.enable)
+            return;
+
+        if (!(name in this.audio)) {
+            return false;
+        }
+        a = this.audio[name];
+        a.currentTime = 0;
+        a.play();
+    }
 }
 
 function topbanner_init()

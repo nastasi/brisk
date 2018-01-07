@@ -3441,9 +3441,9 @@ function validate_name($name)
   return (FALSE);
 }
 
-function playsound($filename)
+function playsound($name)
 {
-  return (sprintf('playsound("flasou", "%s");', $filename));
+  return (sprintf('g_jukebox.play("%s");', $name));
 }
 
 function secstoword($secs)

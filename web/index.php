@@ -1000,7 +1000,7 @@ supported by:<br>
 ' . ( /* NOTE: here facebook or fake facebook */
 (!$G_is_local && $_cookie_law_3party == 'true') ?
 '<div class="fb-like" style="margin-top: 4px;" data-href="https://www.facebook.com/pages/Brisk-briscola-chiamata-in-salsa-ajax/716026558416911" data-share="false" data-send="true" data-width="70" data-show-faces="false" data-colorscheme="dark" layout="button_count"></div>
-' : '' ) . '<div id="proflashext" class="proflashext"><div id="proflash" class="proflash"></div></div>
+' : '' ) . '<div id="proaudioext" class="proaudioext"><div id="proaudio" class="proaudio"></div></div>
 <img id="stm_stat" class="nobo" style="margin-top: 4px;" src="img/line-status_b.png">
 %s
 %s
@@ -1044,7 +1044,7 @@ var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
 var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
 var g_prefs, g_prefs_new = null;
 var g_listen;
-var g_withflash = false;
+var g_jukebox = null;
 var g_is_spawn = 0;
 var g_nd = null;
 var g_brow = null;
@@ -1071,12 +1071,13 @@ window.onload = function() {
     sidebanners_init($G_sidebanner_idx);
     ?>
 
-    g_withflash = DetectFlashVer(6,0,0);
-    if (g_withflash == false) {
-        $("proflash").innerHTML = 'Audio con Flash.<br><a href="http://www.macromedia.com/"><img class="nobo" style="padding: 4px; width:73; height: 19;" src="img/download_now_flash.gif"></a>';
+    g_jukebox = new jukebox([]);
+    if (g_jukebox.is_enabled() == false) {
+        $("proaudio").innerHTML = 'Audio HTML5 non supportato.';
     }
-    else
-        $("proflashext").innerHTML = "";
+    else {
+        $("proaudioext").innerHTML = "";
+    }
     $("nameid").focus();
 }
 //-->
@@ -1215,7 +1216,7 @@ cookie_law(null);
    var g_prefs, g_prefs_new = null;
    var g_listen;
    var g_is_spawn = 0;
-   var g_withflash = false;
+   var g_jukebox = null;
    var g_imgct = 0;
    var g_imgtot = g_preload_img_arr.length;
    var g_brow = null;
@@ -1253,17 +1254,18 @@ cookie_law(null);
         sidebanners_init($G_sidebanner_idx);
 ?>
      sess = "<?php echo "$sess"; ?>";
-xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>, 2, null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
+     xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>, 2, null /* console */, gst, 'index_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      tra = new train($('room_tit'));
      window.onunload = onunload_cb;
      window.onbeforeunload = onbeforeunload_cb;
-     g_withflash = DetectFlashVer(6,0,0);
-     if (g_withflash == false) {
-       $("proflash").innerHTML = 'Audio con Flash.<br><a href="http://www.macromedia.com/"><img class="nobo" style="padding: 4px; width:73; height: 19;" src="img/download_now_flash.gif"></a>';
+     g_jukebox = new jukebox([]);
+     if (g_jukebox.is_enabled() == false) {
+         $("proaudio").innerHTML = 'Audio HTML5 non supportato.';
      }
-     else
-       $("proflashext").innerHTML = "";
+     else {
+         $("proaudioext").innerHTML = "";
+     }
 
      // console.log("session from main: "+sess);
      xstm.start();

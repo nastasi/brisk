@@ -64,6 +64,7 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
     ?>
 <html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
 <script type="text/javascript" src="../commons.js"></script> 
@@ -85,7 +86,7 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
    var stat = "table";
    var subst = "none";
    var table_pos = "";
-   var g_withflash = false;
+   var g_jukebox = null;
 
    var asta_ptr;
    var area_ptr;
@@ -107,7 +108,9 @@ var g_imgtot = g_preload_img_arr.length;
 var g_exitlock = 0;
 
 window.onload = function() {
-  g_withflash = DetectFlashVer(6,0,0);
+  g_jukebox = new jukebox([{'name': 'cow', 'file': 'cow.mp3'},
+                           {'name': 'rooster', 'file': 'rooster.mp3'},
+                           {'name': 'ringbell', 'file': 'ringbell.mp3'}]);
   remark_off();
 
   preferences_init();

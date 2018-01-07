@@ -362,7 +362,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 
                         if ($user_cur->privflags & BIN5_USER_FLAG_RING_ENDAUCT) {
                             // $ret .= "var de_che= 33;";
-                            $ret .= playsound("ringbell.mp3");
+                            $ret .= playsound("ringbell");
                         }
                         $ret .= sprintf('document.title = "Brisk - Tavolo %d";', $user->table_orig);
 
