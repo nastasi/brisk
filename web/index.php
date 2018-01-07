@@ -1024,7 +1024,6 @@ supported by:<br>
 <script type="text/javascript" src="heartbit.js"></script>
 <script type="text/javascript" src="xynt-streaming.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
-<script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="md5.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
@@ -1197,7 +1196,6 @@ cookie_law(null);
 <script type="text/javascript" src="xynt-streaming.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
-<script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
 <script type="text/javascript" src="json2.js"></script>
 <script type="text/javascript" src="/cookie_law.js"></script>

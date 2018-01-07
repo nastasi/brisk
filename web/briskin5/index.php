@@ -74,7 +74,6 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <script type="text/javascript" src="dom-drag.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
 <script type="text/javascript" src="briskin5.js"></script>
-<script type="text/javascript" src="../AC_OETags.js"></script>
 <link rel="stylesheet" type="text/css" href="../brisk.css">
 <link rel="stylesheet" type="text/css" href="briskin5.css">
 </head>

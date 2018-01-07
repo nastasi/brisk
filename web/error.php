@@ -55,7 +55,6 @@ $redir_meta = sprintf('<META HTTP-EQUIV="refresh" CONTENT="%d;URL=\'%s\'">', $re
 <script type="text/javascript" src="heartbit.js"></script>
 <script type="text/javascript" src="xynt-streaming.js"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
-<script type="text/javascript" src="AC_OETags.js"></script>
 <script type="text/javascript" src="room.js"></script>
 <script type="text/javascript" src="md5.js"></script>
 <script type="text/javascript" src="probrowser.js"></script>
