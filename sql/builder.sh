@@ -8,7 +8,7 @@ DATECUR="$(date +%s)"
 #  functions
 usage () {
     echo " USAGE"
-    echo "   $0 <command> [-d|--dryrun] [<-a|--allfiles>|<-p|--devfiles>] [-s|--short] ..."
+    echo "   $0 <command> [-c|--config <override_file>] [-d|--dryrun] [<-a|--allfiles>|<-p|--devfiles>] [-s|--short] ..."
     echo "   $0 <-h|--help|help>"
     echo "   commands are:"
     echo "       create"
@@ -77,6 +77,10 @@ shift
 
 while [ $# -gt 0 ]; do
     case $1 in
+        -c|--config)
+            CONFIG_FILE=$2
+            shift
+            ;;
         -d|--dryrun)
             DRY_RUN=y
             psql () {
@@ -115,6 +119,10 @@ fi
 
 if [ -f $HOME/.brisk_install ]; then
     source $HOME/.brisk_install
+fi
+
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
 fi
 
 pg_args=""
