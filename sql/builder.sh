@@ -7,9 +7,10 @@ DATECUR="$(date +%s)"
 
 #  functions
 usage () {
+    local _v
     echo " USAGE"
     echo "   $0 <command> [-c|--config <override_file>] [-d|--dryrun] [<-a|--allfiles>|<-p|--devfiles>] [-s|--short] ..."
-    echo "   $0 <-h|--help|help>"
+    echo "   $0 [-c|--config <override_file>] <-h|--help|help>"
     echo "   commands are:"
     echo "       create"
     echo "       destroy"
@@ -29,6 +30,15 @@ usage () {
     echo "  [$MATCH_DROP]"
     echo "NOTE: to invert normal 'del' rules add '--MF' (move forward) suffix to each line"
     echo "      to invert normal 'add' rules add '--MB' (move backward) suffix to each line"
+    echo
+    echo "ENVIRONMENT"
+    for _v in \
+apache_conf card_hand players_n tables_n tables_appr_n tables_auth_n tables_cert_n \
+brisk_auth_conf brisk_debug web_path ftok_path proxy_path legal_path prefix_path \
+brisk_conf usock_path sys_user web_only test_add \
+DBHOST DBUSER DBPORT DBBASE DBPASS PFX ; do
+        echo "    $_v=${!_v}"
+    done
 
     exit $1
 }
@@ -71,9 +81,10 @@ one_or_all() {
 #
 #  MAIN
 #
-
-CMD=$1
-shift
+if [ "${1:0:1}" != "-" ]; then
+    CMD=$1
+    shift
+fi
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -96,6 +107,9 @@ while [ $# -gt 0 ]; do
             ;;
         -s|--short)
             SHORT=y
+            ;;
+        -h|--help|help)
+            CMD=help
             ;;
         *)
             break
