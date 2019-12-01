@@ -37,6 +37,7 @@ var Drag = {
 	init : function(o, mouseup_cb, oRoot, minX, maxX, minY, maxY, bSwapHorzRef, bSwapVertRef, fXMapper, fYMapper)
 	{
 		o.onmousedown	= Drag.start;
+		o.ontouchstart	= Drag.start;
 		o.mouseup_cb    = mouseup_cb;
 
 		/*  		alert("agnulla"+o.style.left); */
@@ -92,40 +93,76 @@ var Drag = {
 
 		var y = parseInt(o.vmode ? o.root.style.top  : o.root.style.bottom);
 		var x = parseInt(o.hmode ? o.root.style.left : o.root.style.right );
-		o.root.onDragStart(x, y);
 
-		o.lastMouseX	= e.clientX;
-		o.lastMouseY	= e.clientY;
+                var clientX = 0;
+                var clientY = 0;
+
+                if (e.type == 'mousedown') {
+		    o.root.onDragStart(x, y);
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                else {
+                    var touch = event.targetTouches[0];
+		    clientX = touch.pageX;
+	 	    clientY = touch.pageY;
+                }
+		o.lastMouseX	= clientX;
+		o.lastMouseY	= clientY;
 
 		if (o.hmode) {
-			if (o.minX != null)	o.minMouseX	= e.clientX - x + o.minX;
+			if (o.minX != null)	o.minMouseX	= clientX - x + o.minX;
 			if (o.maxX != null)	o.maxMouseX	= o.minMouseX + o.maxX - o.minX;
 		} else {
-			if (o.minX != null) o.maxMouseX = -o.minX + e.clientX + x;
-			if (o.maxX != null) o.minMouseX = -o.maxX + e.clientX + x;
+			if (o.minX != null) o.maxMouseX = -o.minX + clientX + x;
+			if (o.maxX != null) o.minMouseX = -o.maxX + clientX + x;
 		}
 
 		if (o.vmode) {
-			if (o.minY != null)	o.minMouseY	= e.clientY - y + o.minY;
+			if (o.minY != null)	o.minMouseY	= clientY - y + o.minY;
 			if (o.maxY != null)	o.maxMouseY	= o.minMouseY + o.maxY - o.minY;
 		} else {
-			if (o.minY != null) o.maxMouseY = -o.minY + e.clientY + y;
-			if (o.maxY != null) o.minMouseY = -o.maxY + e.clientY + y;
+			if (o.minY != null) o.maxMouseY = -o.minY + clientY + y;
+			if (o.maxY != null) o.minMouseY = -o.maxY + clientY + y;
 		}
 
-		document.onmousemove	= Drag.drag;
-		document.onmouseup	= Drag.end;
+          if (e.type == 'mousedown') {
+            console.log('here assign mouse move');
+	    document.onmousemove = Drag.drag;
+	    document.onmouseup	= Drag.end;
+          }
+          else {
+            console.log('here assign touch move');
+                   document.ontouchmove = Drag.drag;
+                   document.ontouchend = Drag.end;
+                }
 
-		return false;
+          //if (e.type != 'mousedown') {
+          //          e.preventDefault();
+          //      }
+	  return false;
 	},
 
 	drag : function(e)
-	{
+  {
+    console.log('drag: begin');
+    
 		e = Drag.fixE(e);
 		var o = Drag.obj;
 
-		var ey	= e.clientY;
-		var ex	= e.clientX;
+                var ex = 0;
+		var ey = 0;
+    
+    if (e.type == 'mousemove') {
+      ex = e.clientX;
+      ey = e.clientY;
+    }
+    else {
+      var touch = event.targetTouches[0];
+      ex = touch.pageX;
+      ey = touch.pageY;
+    }
+
 		var y = parseInt(o.vmode ? o.root.style.top  : o.root.style.bottom);
 		var x = parseInt(o.hmode ? o.root.style.left : o.root.style.right );
 		var nx, ny;
@@ -159,14 +196,17 @@ var Drag = {
 		// alert("END");
 		if (o.mouseup_cb != null) {
 		    if (o.mouseup_cb(o) == 1) {
-			o.onmousedown = null;
+		      o.onmousedown = null;
+                      o.ontouchstart = null;
 		    }
 		}
 
 		document.onmousemove = null;
 		document.onmouseup   = null;
-		Drag.obj.root.onDragEnd(	parseInt(Drag.obj.root.style[Drag.obj.hmode ? "left" : "right"]), 
-									parseInt(Drag.obj.root.style[Drag.obj.vmode ? "top" : "bottom"]));
+		document.ontouchmove = null;
+		document.ontouchend  = null;
+		Drag.obj.root.onDragEnd(parseInt(Drag.obj.root.style[Drag.obj.hmode ? "left" : "right"]), 
+					parseInt(Drag.obj.root.style[Drag.obj.vmode ? "top" : "bottom"]));
 		Drag.obj = null;
 	},
 
