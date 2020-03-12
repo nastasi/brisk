@@ -206,6 +206,10 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                               'en' => 'cookie policy'),
                      'itm_cook'      => array('it' => 'cookie',
                                               'en' => 'cookie'),
+                     'tit_dtmg'      => array('it' => 'trattamento dati personali',
+                                              'en' => 'personal data management'),
+                     'itm_dtmg'      => array('it' => 'dati personali',
+                                              'en' => 'personal data'),
                      'tit_cla'      => array('it' => 'classifiche degli utenti',
                                              'en' => 'user\'s placings'),
                      'itm_cla'      => array('it' => 'classifiche',
@@ -752,6 +756,11 @@ google_color_url = "000000";
    onmouseover="menu_hide(0,1);"
    title="'.$mlang_room['tit_cook'][$G_lang].'"
    alt="'.$mlang_room['tit_cook'][$G_lang].'">'.$mlang_room['itm_cook'][$G_lang].'</a><br>
+
+<a target="_blank" href="http://www.alternativeoutput.it/personal_data.php"
+   onmouseover="menu_hide(0,1);"
+   title="'.$mlang_room['tit_dtmg'][$G_lang].'"
+   alt="'.$mlang_room['tit_dtmg'][$G_lang].'">'.$mlang_room['itm_dtmg'][$G_lang].'</a><br>
 <hr>
 
 <a href="#"

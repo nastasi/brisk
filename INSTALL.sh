@@ -185,7 +185,7 @@ while [ $# -gt 0 ]; do
         -l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
         -U*) usock_path="$(get_param "-U" "$1" "$2")"; sh=$?;;
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
-        system) action=system;;
+        system) action=system ; sh=1;;
         -W) web_only="TRUE";;
         -x) test_add="TRUE";;
         -h) usage $0; exit 0;;

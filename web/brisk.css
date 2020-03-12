@@ -28,7 +28,7 @@
 }
 
 body {
-    background-image: url('img/beta.png');
+    background-image: url('img/brisk-bg.png');
     background-color: #fafafa;
     background-attachment: fixed;
     margin: 0px;
@@ -110,7 +110,7 @@ img.ib_nobo {
     -moz-border-radius: 8px;
     border-radius: 8px;
 
-    background-image: url('img/beta_light.png');
+    background-image: url('img/brisk-bg-light.png');
     background-attachment: fixed;
 
     top: 0;

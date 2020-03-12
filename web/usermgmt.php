@@ -226,9 +226,9 @@ SELECT usr.*, guar.login AS guar_login
                     $subj = $mlang_indwr['nu_msubj'][$G_lang];
                     if (($usr_obj->type & USER_FLAG_TY_APPR) == USER_FLAG_TY_APPR) {
                         $body_txt = sprintf($mlang_indwr['ap_mtext'][$G_lang],
-                                            $cli_name, $confirm_page);
+                                            $usr_obj->login, $confirm_page);
                         $body_htm = sprintf($mlang_indwr['ap_mhtml'][$G_lang],
-                                            $cli_name, $confirm_page);
+                                            $usr_obj->login, $confirm_page);
                     }
                     else {
                         $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
