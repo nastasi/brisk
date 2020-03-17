@@ -623,7 +623,7 @@ class User {
       // log_rd2("page_sync:".var_export(debug_backtrace()));
       
       log_rd2("PAGE_SYNC");
-      printf("xXx USER::PAGE_SYNC [%s]\n", get_class($this));
+      // printf("xXx USER::PAGE_SYNC [%s]\n", get_class($this));
       return (sprintf('createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("%s");', $table_idx, $table_token, $page));
   }
 
@@ -653,7 +653,7 @@ class User {
       
       log_rd2("do other cur_stat[".$this->rd_stat."] user->stat[".$this->stat."] cur_step[".$this->rd_step."] user_step[".$this->step."]");
       
-      fprintf(STDERR, "ASYNC: %d %d\n", $this->rd_step, $this->pend_async);
+      // fprintf(STDERR, "ASYNC: %d %d\n", $this->rd_step, $this->pend_async);
       if ($this->rd_step == -1 && $this->pend_async == 0) {
           /*  if $this->rd_step == -1 load the current state from the main struct  */
           $S_load_stat['wR_minusone']++;
@@ -736,7 +736,7 @@ class User {
            ***************/
           else if ($this->stat == 'table') {
               log_load("RESYNC");
-              printf("xXx USER::MAINCHECK1 [%s]\n", get_class($this));
+              // printf("xXx USER::MAINCHECK1 [%s]\n", get_class($this));
 
               return ($this->page_sync($this->sess, "briskin5/index.php", $this->table, $this->table_token));
           }
@@ -751,7 +751,7 @@ class User {
                       if (($this->rd_stat != $this->stat)) {
                           $to_stat = $this->stat;
                           log_load("RESYNC");
-                          printf("xXx USER::MAINCHECK2 [%s]\n", get_class($this));
+                          // printf("xXx USER::MAINCHECK2 [%s]\n", get_class($this));
                           return ($this->page_sync($this->sess, ($to_stat == "table" ? "briskin5/index.php" : "index.php"), $this->table, $this->table_token));
                       }
                       log_rd2("lost history, refresh from scratch");
@@ -789,7 +789,7 @@ class User {
 
   public static function stream_fini($transp, $init_string, $is_unrecoverable)
 {
-    printf("xXx user::stream_fini\n");
+    // printf("xXx user::stream_fini\n");
 
     // FIXME: dynamic "Transport_" type
     $trans_class = Transport::gettype($transp);
@@ -814,7 +814,7 @@ function stream_init($init_string, $enc, $header, &$header_out, &$body, $get, $p
 {
     $curtime = time();
     
-    printf("CLASS: [%s] base: [%s]\n", get_class($this), self::base_get());
+    // printf("CLASS: [%s] base: [%s]\n", get_class($this), self::base_get());
 
     log_load("index_rd_init.php");
     
@@ -849,12 +849,12 @@ function stream_main(&$body, $get, $post, $cookie)
     
     $pre_main = gettimeofday(TRUE);
     
-    printf("xXx PRE : rd_step %d\n", $this->rd_step);
+    // printf("xXx PRE : rd_step %d\n", $this->rd_step);
     if (($ret = $this->maincheck($get, $post, $cookie)) != FALSE) {
         $body .= $this->rd_transp->chunk( $this->rd_scristp++, $ret);
         log_rd2(0, 'index_rd.php: after mop_flush (begin: '.sprintf("%f", $pre_main).')');
     }
-    printf("xXx POST: rd_step %d\n", $this->rd_step);
+    // printf("xXx POST: rd_step %d\n", $this->rd_step);
 
     return TRUE;
 }
@@ -872,7 +872,7 @@ function stream_close()
 static function base_get()
 {
     $c = get_called_class();
-    printf("CALLED_CLASS: [%s]\n", $c);
+    // printf("CALLED_CLASS: [%s]\n", $c);
     return $c::BASE;
 }
 

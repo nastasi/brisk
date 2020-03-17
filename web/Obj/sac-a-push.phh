@@ -22,7 +22,7 @@
  *
  */
 
-define('SITE_PREFIX', '/brisk/');
+define('SITE_PREFIX', "/brisk/");
 define('SITE_PREFIX_LEN', 7);
 
 define('DIRECT_ST_READ',  1);
@@ -139,7 +139,7 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
     $post = array();
     $rest = 0;
     foreach(preg_split("/(\r?\n)/", $stream_info) as $line) {
-        printf("LINE: [%s]\n", $line);
+        // printf("LINE: [%s]\n", $line);
         if ($check_post) {
             if (!isset($header['The-Request'])) {
                 return FALSE;
@@ -173,7 +173,7 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
             $path = $get_vars[0];
             if (count($get_vars) > 1) {
                 $a = explode('&', $get_vars[1]);
-                printf("A COUNT: [%s] %d\n", $a[0], count($a));
+                // printf("A COUNT: [%s] %d\n", $a[0], count($a));
                 for ($i = 0 ; $i < count($a) ; $i++) {
                     $b = explode('=', $a[$i]);
                     if ($b[0] == "")
@@ -195,7 +195,7 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
                     return FALSE;
                 }
                 $post_len = mb_strlen($line, "ASCII");
-                printf("INFO: postlen: %d\n", $post_len);
+                // printf("INFO: postlen: %d\n", $post_len);
                 $rest = (int)($header['Content-Length']) - $post_len;
 
                 if ($rest == 0) {
@@ -577,7 +577,7 @@ class Sac_a_push {
 
         $pendpage->try_flush($this->curtime);
         // Add $pendpage to the pendpage array (in any case)
-        fprintf(STDERR, "IMPORTANT: Pendadd: %d\n", $pendpage->status);
+        // fprintf(STDERR, "IMPORTANT: Pendadd: %d\n", $pendpage->status);
         $this->pendpage_add($pendpage);
     }
 
@@ -641,7 +641,7 @@ class Sac_a_push {
                         unset($this->socks[$id]);
                         unset($this->s2u[$id]);
                         fclose($sock);
-                        printf("CLOSE ON GARBAGE MANAGER\n");
+                        // printf("CLOSE ON GARBAGE MANAGER\n");
                     }
                 }
             }
@@ -688,10 +688,14 @@ class Sac_a_push {
         
         $this->main_loop = TRUE;
         
+        $lastime = 0;
+        $dump_users = TRUE;
         while ($this->main_loop) {
             $this->app->sess_cur_set(FALSE);
             $this->curtime = time();
-            fprintf(STDERR, "IN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
+            if ($lastime != ($this->curtime >> 2)) {
+                fprintf(STDERR, "\nIN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
+            }
             
             /* Prepare the read array */
             /* // when we manage it ... */
@@ -718,10 +722,13 @@ class Sac_a_push {
             $num_changed_sockets = @stream_select($read, $write, $except, 0, 500000);
         
             if ($num_changed_sockets == 0) {
-                printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
+                // printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
+                ;
             } 
             else if ($num_changed_sockets > 0) {
-                printf("num sock %d num_of_socket: %d\n", $num_changed_sockets, count($read));
+                if ($lastime != ($this->curtime >> 2)) {
+                    printf("num sock %d num_of_socket: %d\n", $num_changed_sockets, count($read));
+                }
                 if ($this->debug > 1) {
                     print_r($read);
                 }
@@ -735,7 +742,7 @@ class Sac_a_push {
                         continue;
                     }
                     if ($sock === $this->list_web) {
-                        printf("NUOVA CONNEX\n");
+                        // printf("NUOVA CONNEX\n");
                         if (($new_unix = stream_socket_accept($this->list_web)) == FALSE) {
                             printf("SOCKET_ACCEPT FAILED\n");
                             continue;
@@ -748,7 +755,7 @@ class Sac_a_push {
                         $rest        = 0;
                         $cont        = "";
                         if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
-                            printf("NEW_SOCKET: %d\n", intval($new_socket));
+                            // printf("NEW_SOCKET: %d\n", intval($new_socket));
                             stream_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
                             // error_log(sprintf("RECEIVED HEADER:\n%s", $stream_info));
                             if (($path = spu_process_info($stream_info, $method, $header,
@@ -770,10 +777,10 @@ class Sac_a_push {
                             // FOR TEST $header['X-Forwarded-For'] = '154.155.22.33';
                             $addr = $this->pproxy_realip($header, $addr);
 
-                            printf("PATH: [%s] [%s]\n", $path, print_r($header, TRUE));
+                            // printf("PATH: [%s] [%s]\n", $path, print_r($header, TRUE));
                             if ($method == "POST" && $rest > 0) {
                                 if (isset($header['Expect']) && $header['Expect'] == '100-continue') {
-                                    fprintf(STDERR, "\nPOSTA DE CHE\n\n");
+                                    // fprintf(STDERR, "\nPOSTA DE CHE\n\n");
                                     $this->pendpage_try_addcont($new_socket, 20,
                                                                 $method, $header, $get, $post, $cookie,
                                                                 $path, $addr, $rest, $cont);
@@ -788,14 +795,14 @@ class Sac_a_push {
                                 $manage_page = TRUE;
                             }
 
-                            printf("number of sockets after %d\n", count($this->socks));
+                            // printf("number of sockets after %d\n", count($this->socks));
                         }
                         else {
                             printf("WARNING: ancillary_getstream failed\n");
                         }
                     }
                     else if ($sock === $this->list_cmd) {
-                        printf("NUOVA DIRECT CONNEX\n");
+                        // printf("NUOVA DIRECT CONNEX\n");
                         if (($new_unix = stream_socket_accept($this->list_cmd)) == FALSE) {
                             printf("SOCKET_ACCEPT FAILED\n");
                             continue;
@@ -809,18 +816,19 @@ class Sac_a_push {
                         if ($buf == FALSE || feof($sock)) {
                             // close socket case
                             if ($buf == FALSE) {
-                                printf("INFO: read return false\n");
+                                // printf("INFO: read return false\n");
+                                ;
                             }
                             if ($sock === $this->list_web) {
-                                printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
+                                // printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
                                 return(21);
                             }
                             else if ($sock === $this->list_cmd) {
-                                printf("Arrivati %d bytes da list_cmd\n", mb_strlen($buf, "ASCII"));
+                                // printf("Arrivati %d bytes da list_cmd\n", mb_strlen($buf, "ASCII"));
                                 return(23);
                             }
                             else if ($sock === $this->in || $sock === static::$cnt_slave) {
-                                printf("Arrivati %d bytes da stdin\n", mb_strlen($buf, "ASCII"));
+                                // printf("Arrivati %d bytes da stdin\n", mb_strlen($buf, "ASCII"));
                                 return(22);
                             }
                             else {
@@ -838,7 +846,7 @@ class Sac_a_push {
                                 }
                             }
                             fclose($sock);
-                            printf("CLOSE ON READ\n");
+                            // printf("CLOSE ON READ\n");
 
                             if ($this->debug > 1) {
                                 printf("post unset\n");
@@ -850,13 +858,15 @@ class Sac_a_push {
                                 print_r($read);
                             }
                             if ($sock === $this->list_web) {
-                                printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
+                                // printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
+                                ;
                             }
                             else if ($sock === $this->list_cmd) {
-                                printf("Arrivati %d bytes da list_cmd\n", mb_strlen($buf, "ASCII"));
+                                // printf("Arrivati %d bytes da list_cmd\n", mb_strlen($buf, "ASCII"));
+                                ;
                             }
                             else if ($sock === $this->in || $sock === static::$cnt_slave) {
-                                printf("Arrivati %d bytes da stdin\n", mb_strlen($buf, "ASCII"));
+                                // printf("Arrivati %d bytes da stdin\n", mb_strlen($buf, "ASCII"));
                                 $line = trim($buf);
                                 if ($line == "reload") {
                                     require("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
@@ -869,6 +879,9 @@ class Sac_a_push {
                                     }
                                     global_dump();
                                 }
+                                else if ($line == "dump") {
+                                    $dump_users = TRUE;
+                                }
                                 else if ($line == "shutdown" || $line == "sd") {
                                     if ($this->app->dump_data()) {
                                         return(0);
@@ -880,7 +893,7 @@ class Sac_a_push {
                             }
                             else {  // data arrived from not special socket
                                 $key = array_search("$sock", $this->socks);
-                                fprintf(STDERR, "Arrivati %d bytes dalla socket n. %d\n", mb_strlen($buf, "ASCII"), $key);
+                                // fprintf(STDERR, "Arrivati %d bytes dalla socket n. %d\n", mb_strlen($buf, "ASCII"), $key);
                                 if (isset($this->s2p[$id])) {
                                     $this->s2p[$id]->rest -= mb_strlen($buf, "ASCII");
                                     $this->s2p[$id]->cont .= $buf;
@@ -900,6 +913,7 @@ class Sac_a_push {
                     }
 
                     if ($manage_page == TRUE) {
+                        /*
                         printf("M: %s\nHEADER:\n", $method);
                         print_r($header);
                         printf("GET:\n");
@@ -908,6 +922,7 @@ class Sac_a_push {
                         print_r($post);
                         printf("COOKIE:\n");
                         print_r($cookie);
+                        */
 
                         $header_out = array();
                         // TODO: MOVE DOWN request_mgr to factorize new_sockets and POST closed
@@ -964,7 +979,9 @@ class Sac_a_push {
                     if ($response == "") {
                         $content = "";
                         $user->stream_main($content, $get, $post, $cookie);
-                        printf("[%s] [%d] [%d]\n", $user->name, $user->lacc, $this->curtime);
+                        if ($dump_users) {
+                           printf("[%s] [%d] [%d]\n", $user->name, $user->lacc, $this->curtime);
+                        }
                         if ($do_ping && $user->ping_req == FALSE) {
                             $content .= $user->stream_keepalive(TRUE);
                             $user->ping_req = TRUE;
@@ -1007,14 +1024,16 @@ class Sac_a_push {
                         $clo_l = mb_strlen($clo, "ASCII");
                         @fwrite($sock, $clo, $clo_l);
                         fclose($sock);
-                        printf("CLOSE ON LOOP\n");
+                        // printf("CLOSE ON LOOP\n");
                     }
                 }  // if (isset($this->s2u[$id]...
             }  // foreach ($this->socks...
-            printf("\n");
+            $dump_users = FALSE;
+            printf("#");
             if (defined('CURL_DE_SAC_VERS')) {
                 $this->app->cds->process();
             }
+            $lastime = ($this->curtime >> 2);
         }  // while (...
     }  // function run(...
 

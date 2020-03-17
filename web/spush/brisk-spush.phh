@@ -52,7 +52,7 @@ class PendingPage {
   function PendingPage($socket, $curtime, $kalive)
   {
       $this->socket = $socket;
-      fprintf(STDERR, "SOCKET ADD: %s\n", $this->socket);
+      // fprintf(STDERR, "SOCKET ADD: %s\n", $this->socket);
       $this->kalive = $curtime + $kalive;
   }
 
@@ -81,7 +81,7 @@ class PendingPage {
 
   function to_continuing()
   {
-      printf("TRY FLUSH CREATE\n");
+      // printf("TRY FLUSH CREATE\n");
       $header = array();
       $header['HTTP-Response'] = "100 Continue";
       $hea = headers_render($header, 0);
@@ -136,7 +136,7 @@ class PendingPage {
 
   function to_flushing($enc, &$header_out, $body)
   {
-      printf("TRY FLUSH CREATE: enc[%s]\n", $enc);
+      // printf("TRY FLUSH CREATE: enc[%s]\n", $enc);
       $body_out = ZLibStream::compress($enc, $body);
       if ($enc != 'plain')
           $header_out['Content-Encoding'] = $enc;
@@ -147,26 +147,26 @@ class PendingPage {
       $this->status = PENDINGPAGE_FLUSH;
       $this->msg    = $hea.$body_out;
       $this->msg_sz = $hea_sz + $body_out_sz;
-      printf("TRY FLUSH CREATE: enc[%s]\n", $enc);
+      // printf("TRY FLUSH CREATE: enc[%s]\n", $enc);
   }
 
   /* return TRUE if is removable from it's list */
   function try_flush($curtime)
   {
-      fprintf(STDERR, "IMPORTANT: TRY_FLUSH: start %d\n", $this->status);
+      // fprintf(STDERR, "IMPORTANT: TRY_FLUSH: start %d\n", $this->status);
       if ($this->status != PENDINGPAGE_FLUSH &&
           $this->status != PENDINGPAGE_CONTINUE)
           return (FALSE);
 
       if ($this->kalive < $curtime) {
-          printf("TRY FLUSH CLOSE 1\n");
+          // printf("TRY FLUSH CLOSE 1\n");
           @fclose($this->socket);
           return TRUE;
       }   
 
       $wret = @fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
       if ($wret == FALSE && $wret !== FALSE) {
-          printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
+          // printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
       }
       if ($wret == $this->msg_sz) {
           if ($this->status == PENDINGPAGE_CONTINUE) {
@@ -174,7 +174,7 @@ class PendingPage {
               return FALSE;
           }
           else {
-              printf("TRY FLUSH CLOSE 2\n");
+              // printf("TRY FLUSH CLOSE 2\n");
               fclose($this->socket);
               return TRUE;
           }
@@ -182,7 +182,7 @@ class PendingPage {
       $this->msg_sz -= $wret;
       $this->msg    = mb_substr($this->msg, $wret, $this->msg_sz, "ASCII");
 
-      printf("TRY FLUSH RETURN FALSE\n");
+      // printf("TRY FLUSH RETURN FALSE\n");
 
       return FALSE;
   }

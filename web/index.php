@@ -493,7 +493,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
                 }
             }
             else {
-                fprintf(STDERR, "POST CHECK QUI\n");
+                // fprintf(STDERR, "POST CHECK QUI\n");
                 /* Login Rendering */
                 switch($idx) {
                 case -4:

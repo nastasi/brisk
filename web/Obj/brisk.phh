@@ -59,7 +59,7 @@ define('EXPIRE_TIME_SMAMMA', 360);
 define('EXPIRE_TIME_WAG', 10);
 define('WAKEUP_TIME', 12);
 // BAN_TIME da allineare anche in commons.js
-define('BAN_TIME', 3600);
+define('BAN_TIME', 900);
 define('GARBAGE_TIMEOUT', 5);
 define('NICKSERV', "BriskServ");
 
@@ -153,7 +153,7 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "5.4.2";
+$G_brisk_version = "5.5.0";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITA\'</b>: uscita più veloce dal sito.',
@@ -183,7 +183,7 @@ Durante la partita, se vorrete ricaricare la pagina, usate l\'apposito bottone \
 Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri giocatori di sbloccarla cliccando sul lucchetto. Se non si segue questa prassi, una volta usciti, non vi potrete sedere a nessun tavolo per '.floor(BAN_TIME/60).' minuti.
 <dl>
 <dt><b>Comandi della chat</b>
-<dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname
+<!-- <dd><b>/nick <i>&lt;nuovo_nickname&gt;</i></b> - cambio di nickname -->
 <dd><b>/tav <i>&lt;frase di invito&gt;</i></b> - invito per gli altri giocatori al tavolo dove si &egrave; seduti
 <dd><b>/st <i>&lt;stato&gt;</i></b> - cambia l\'icona associata al tuo user; <i>stato</i> pu&ograve; valere: \\"normale\\", \\"fuori\\", \\"pausa\\", \\"cibo\\", \\"cane\\", \\"lavoro\\", \\"presente\\" oppure \\"sigaretta\\"
 <dd><b>/cont <i>&lt;id partita&gt;</i></b> - quando si è a un tavolo per garantiti, permette di proseguire una partita giocata in precedenza con gli stessi giocatori
@@ -938,7 +938,7 @@ class Client_prefs {
 
     function user_load($user)
     {
-        fprintf(STDERR, "QQ %s: %x\n", __FUNCTION__, $user->flags);
+        // fprintf(STDERR, "QQ %s: %x\n", __FUNCTION__, $user->flags);
         $this->listen = ($user->flags & USER_FLAG_MAP_AUTH) >> 2;
         if ($user->rec != FALSE) {
             $this->supp_comp = $user->rec->supp_comp_get();
@@ -947,7 +947,7 @@ class Client_prefs {
             $this->supp_comp = "000000000000";
         }
 
-        fprintf(STDERR, "QQ %s: LISTEN: %d\n", __FUNCTION__, $this->listen);
+        // fprintf(STDERR, "QQ %s: LISTEN: %d\n", __FUNCTION__, $this->listen);
     }
 
     function json_load($json_s)
@@ -987,11 +987,11 @@ class Client_prefs {
     function store($user, $is_save)
     {
         // save into DB
-        fprintf(STDERR, "QQ %s::%s PRE: %x\n", __CLASS__, __FUNCTION__,
-                $user->flags & (~USER_FLAG_S_ALL & ~USER_FLAG_AUTH));
+        // fprintf(STDERR, "QQ %s::%s PRE: %x\n", __CLASS__, __FUNCTION__,
+        //         $user->flags & (~USER_FLAG_S_ALL & ~USER_FLAG_AUTH));
         $user->flags_set(($this->listen << 2), USER_FLAG_MAP_AUTH);
-        fprintf(STDERR, "QQ %s::%s %x\n", __CLASS__, __FUNCTION__,
-                $user->flags);
+        // fprintf(STDERR, "QQ %s::%s %x\n", __CLASS__, __FUNCTION__,
+        //         $user->flags);
         if ($user->is_supp_custom()) {
             $user->rec->supp_comp_set($this->supp_comp);
         }
@@ -1933,7 +1933,7 @@ class Brisk
     GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
     $only_you = FALSE;
 
-    fprintf(STDERR, "WE ARE HERE: [%s]\n", $mesg);
+    // fprintf(STDERR, "WE ARE HERE: [%s]\n", $mesg);
 
     // common settings
     $msg = mb_substr($mesg, 6, 128, "UTF-8");
@@ -2558,7 +2558,7 @@ class Brisk
               $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
 
               if (isset($cookie['CO_list'])) {
-                  fprintf(STDERR, "QQ: %s CO_list: [%s]\n", __FUNCTION__, $cookie['CO_list']);
+                  // fprintf(STDERR, "QQ: %s CO_list: [%s]\n", __FUNCTION__, $cookie['CO_list']);
                   if (strcmp($cookie['CO_list'], "auth") == 0) {
                       $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
                       $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
@@ -2572,11 +2572,11 @@ class Brisk
                   }
               }
           }
-          else {
-              fprintf(STDERR, "QQ: CO_list not set flags: %x\n", __FUNCTION__, $this->user[$idx]->flags);
-          }
+          // else {
+          //    fprintf(STDERR, "QQ: CO_list not set flags: %x\n", __FUNCTION__, $this->user[$idx]->flags);
+          // }
       }
-      fprintf(STDERR, "QQ %s: flag %x\n", __FUNCTION__, $this->user[$idx]->flags);
+      // fprintf(STDERR, "QQ %s: flag %x\n", __FUNCTION__, $this->user[$idx]->flags);
       if ($ghost > -1) {
         log_main("ghost: rename!");
         $ghost_user = $this->user[$ghost];
@@ -2750,12 +2750,12 @@ class Brisk
   {
       GLOBAL $G_ban_list, $G_black_list, $G_cloud_smasher;
 
-      printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
+      // printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
 
-      fprintf(STDERR, "\n\n\n PRE_BLACK [%s]\n\n\n", $addr);
+      // fprintf(STDERR, "\n\n\n PRE_BLACK [%s]\n\n\n", $addr);
       if ($this->black_check($addr)) {
           // TODO: waiting async 5 sec before close
-          fprintf(STDERR, "\n\n\n BLACK CHECK\n\n\n");
+          // fprintf(STDERR, "\n\n\n BLACK CHECK\n\n\n");
           return (FALSE);
       }
       if ($path != "" && $path != "index.php") {
@@ -2830,7 +2830,7 @@ class Brisk
               if (($prev = $user->rd_socket_get()) != NULL) {
                   $s_a_p->socks_unset($user->rd_socket_get());
                   fclose($user->rd_socket_get());
-                  printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
+                  // printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
                   $user->rd_socket_set(NULL);
               }
 
@@ -2852,7 +2852,7 @@ class Brisk
 
               $s_a_p->socks_set($new_socket, $user, NULL);
               $user->rd_socket_set($new_socket);
-              printf(" - qui ci siamo - ");
+              // printf(" - qui ci siamo - ");
               return TRUE;
           } while (FALSE);
 

@@ -82,7 +82,7 @@ class ProviderProxy
 
     function realip(&$header, $ip)
     {
-        fprintf(STDERR, "PP realip: [%d]\n", count($this->pp));
+        // fprintf(STDERR, "PP realip: [%d]\n", count($this->pp));
         if ($this->pp != NULL) {
             foreach ($this->pp as $pp_name => $pp_item) {
                 // fprintf(STDERR, "PP loop: [%s][%s]\n", $pp_name, $ip);

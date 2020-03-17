@@ -322,7 +322,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
 
                 $bdb->transaction('COMMIT');
-                fprintf(STDERR, "REMOTE: %d\n", $remote_ip);
+                // fprintf(STDERR, "REMOTE: %d\n", $remote_ip);
                 echo "1";
                 return TRUE;
             } while(FALSE);
