@@ -274,8 +274,16 @@ function send_mesg(mesg, content)
         }
         var target = window.location.href.substring(0,
             window.location.href.lastIndexOf('/') + 1) + 'index_wr.php';
-        var ws_msg = JSON.stringify({target: target, mesg: mesg, stp:gst.st, sess:sess});
-        console.log(ws_msg);
+        var ws_msg = JSON.stringify({
+            target: target,
+            mesg: mesg,
+            stp:gst.st,
+            sess:sess,
+            table_idx: readCookie("table_idx"),
+            table_token: readCookie("table_token"),
+            lang: readCookie("lang")
+            });
+        // console.log(ws_msg);
         xstm.transp.ws.send(ws_msg);
     }
     else {
