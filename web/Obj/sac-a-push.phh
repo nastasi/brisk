@@ -896,6 +896,12 @@ class Sac_a_push {
                                 // fprintf(STDERR, "Arrivati %d bytes dalla socket n. %d\n", mb_strlen($buf, "ASCII"), $key);
 
                                 if (isset($this->s2u[$id])) {
+                                    //
+                                    //  TODO:
+                                    //     fix $addr
+                                    //     fix $this->pendpage_try_addflush below (probably not required)
+                                    //
+                                    $addr = "127.0.0.1";
                                     $user = $this->s2u[$id];
 
                                     // fprintf(STDERR, 'POST USER');
@@ -904,15 +910,44 @@ class Sac_a_push {
                                         $clie_cmd = json_decode($clie_cmd, TRUE);
                                         // fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", print_r($clie_cmd, TRUE));
 
-                                        ob_start();
-                                        // complete: index_wr_main($this->app, $addr, $get, $post, $cookie);
-                                        index_wr_main($this->app, $addr, $clie_cmd, NULL, NULL);
-                                        $content = ob_get_contents();
-                                        ob_end_clean();
+                                        $wr_addr = substr(parse_url($clie_cmd["target"])["path"], strlen(SITE_PREFIX));
+                                        if ($wr_addr == "index_wr.php") {
+                                            ob_start();
+                                            // complete: index_wr_main($this->app, $addr, $get, $post, $cookie);
+                                            index_wr_main($this->app, $addr, $clie_cmd, NULL, NULL);
+                                            $content = ob_get_contents();
+                                            ob_end_clean();
+                                        }
+                                        else if ($wr_addr == "briskin5/index_wr.php") {
+                                            $table_idx = $clie_cmd['table_idx'];
+                                            $table_token = $clie_cmd['table_token'];
 
-                                        // $this->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
-                                        // FIXME ^
-                                        // fprintf(STDERR, "RETURNED CONTENT [%s]\n", $content);
+                                            if (($bri = $this->app->match_get($table_idx, $table_token)) != FALSE) {
+                                                ob_start();
+                                                bin5_index_wr_main($bri, $addr, $clie_get, NULL, NULL);
+                                                $content = ob_get_contents();
+                                                ob_end_clean();
+                                            }
+                                        }
+                                        /*
+                                          briskin5/index_wr.php
+
+                                          if (isset($table_idx) && isset($table_token)) {
+                                          if (($bri = $s_a_p->app->match_get($table_idx, $table_token)) != FALSE) {
+                                          ob_start();
+                                          bin5_index_wr_main($bri, $addr, $get, $post, $cookie);
+                                          $content = ob_get_contents();
+                                          ob_end_clean();
+                                          }
+                                          else {
+                                          $content = "Bin5 Load data error";
+                                          }
+                                          }
+                                          else {
+                                          $content = "Bin5 Load data error";
+                                          }
+                                          $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
+                                        */
                                     }
                                 }
                                 else {
