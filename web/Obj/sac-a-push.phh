@@ -954,18 +954,6 @@ class Sac_a_push {
                                     fprintf(STDERR, "User associated with ID: %s not found\n", $id);
                                 }
 
-                                if (isset($this->s2u[$id])) {
-                                    $user = $this->s2u[$id];
-
-                                    fprintf(STDERR, 'POST USER');
-                                    if ($user && $user->rd_transp && strpos($user->rd_transp->type, "websocket") !== FALSE) {
-                                        fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", $user->rd_transp->deframe($buf));
-
-                                    }
-                                }
-                                else {
-                                    fprintf(STDERR, "REC ID: %s\n", $id);
-                                }
                                 if (isset($this->s2p[$id])) {
                                     $this->s2p[$id]->rest -= mb_strlen($buf, "ASCII");
                                     $this->s2p[$id]->cont .= $buf;
