@@ -924,7 +924,7 @@ class Sac_a_push {
 
                                             if (($bri = $this->app->match_get($table_idx, $table_token)) != FALSE) {
                                                 ob_start();
-                                                bin5_index_wr_main($bri, $addr, $clie_get, NULL, NULL);
+                                                bin5_index_wr_main($bri, $addr, $clie_cmd, NULL, NULL);
                                                 $content = ob_get_contents();
                                                 ob_end_clean();
                                             }
