@@ -99,8 +99,6 @@ class Transport_websocket {
         $this->headerSecWebSocketProtocolRequired   = false;
         $this->headerSecWebSocketExtensionsRequired = false;
 
-        $this->handlingPartialPacket = false;
-
         $this->sendingContinuous = false;
 
         $this->handlingPartialPacket = false;
