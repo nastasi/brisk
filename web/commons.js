@@ -266,23 +266,32 @@ function createXMLHttpRequest() {
 
 function send_mesg(mesg)
 {
-    var xhr_wr = createXMLHttpRequest();
     var is_conn = (sess == "not_connected" ? false : true);
 
-    // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
-    xhr_wr.open('GET', 'index_wr.php?&'+(is_conn ? 'sess='+sess : '')+'&stp='+gst.st+'&mesg='+mesg, (is_conn ? true : false));
-    xhr_wr.setRequestHeader("If-Modified-Since", new Date().toUTCString());
-    xhr_wr.onreadystatechange = function() { return; };
-    if (typeof(g_debug) == 'number' && g_debug > 0
-        && typeof(console) == 'object' && typeof(console.log) == 'function') {
+    if (is_conn && xstm && xstm.transp_type.startsWith('websocket')) {
+        var target = window.location.href.substring(
+            0, window.location.href.lastIndexOf('/') + 1) + 'index_wr.php'; 
+        var ws_msg = {target: target, mesg: mesg, stp:gst.st, sess:sess};
+        xstm.transp.ws.send(ws_msg);
+    }
+    else {
+        var xhr_wr = createXMLHttpRequest();
+        
+        // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
+        xhr_wr.open('GET', 'index_wr.php?&'+(is_conn ? 'sess='+sess : '')+'&stp='+gst.st+'&mesg='+mesg, (is_conn ? true : false));
+        xhr_wr.setRequestHeader("If-Modified-Since", new Date().toUTCString());
+        xhr_wr.onreadystatechange = function() { return; };
+        if (typeof(g_debug) == 'number' && g_debug > 0
+            && typeof(console) == 'object' && typeof(console.log) == 'function') {
             var ldate = new Date();
             console.log(ldate.getTime()+':MESG:'+mesg);
-    }
-    xhr_wr.send(null);
-
-    if (!is_conn) {
-        if (xhr_wr.responseText != null) {
-            eval(xhr_wr.responseText);
+        }
+        xhr_wr.send(null);
+        
+        if (!is_conn) {
+            if (xhr_wr.responseText != null) {
+                eval(xhr_wr.responseText);
+            }
         }
     }
 }
