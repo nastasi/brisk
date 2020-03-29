@@ -32,6 +32,7 @@ define('BIN5_PROXY_PATH', PROXY_PATH."/bin5");
 
 require_once('rules.phh');
 
+// FOR TORNEO TURN IT TO BIN5_TOURNAMENT_TOGETHER17
 define('BIN5_TOURNAMENT_CURRENT', BIN5_TOURNAMENT_NO_DRAW);
 
 $mlang_bin5_bin5 = array(
@@ -88,7 +89,7 @@ function dom_select_rules()
     $ret = "<select id='select_rules'>\n";
     foreach (rules_keys() as $key) {
         $value = rules_id2descr($key, $G_lang);
-        $ret .= sprintf("<option value='%d'>%s</option>\n", $key, $value);
+        $ret .= sprintf("<option value='%d'%s>%s</option>\n", $key, ($key == BIN5_TOURNAMENT_CURRENT ? " selected='selected'" : ""), $value);
     }
     $ret .= "</select>\n";
 

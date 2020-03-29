@@ -130,7 +130,7 @@ function getStyle(x,IEstyleProp, MozStyleProp)
 		var fo = function () {								
 		    fn.apply(window,param);
 		};			
-		return nativeSetTimeout(fo,ms); 
+		return nativeSetTimeout(fo,ms);
 	    })(fn,ms,param);
 	}
 	else if(typeof(fn)=='string')
@@ -264,35 +264,42 @@ function createXMLHttpRequest() {
     return null;
 }
 
-function send_mesg(mesg)
+function send_mesg(mesg, content)
 {
     var is_conn = (sess == "not_connected" ? false : true);
 
     if (is_conn && xstm && xstm.transp_type.startsWith('websocket')) {
-        var target = window.location.href.substring(
-            0, window.location.href.lastIndexOf('/') + 1) + 'index_wr.php'; 
-        var ws_msg = {target: target, mesg: mesg, stp:gst.st, sess:sess};
+        if (typeof(content) != 'undefined') {
+            mesg = mesg + content;
+        }
+        var target = window.location.href.substring(0,
+            window.location.href.lastIndexOf('/') + 1) + 'index_wr.php';
+        var ws_msg = JSON.stringify({target: target, mesg: mesg, stp:gst.st, sess:sess});
+        console.log(ws_msg);
         xstm.transp.ws.send(ws_msg);
     }
     else {
-        var xhr_wr = createXMLHttpRequest();
-        
-        // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
-        xhr_wr.open('GET', 'index_wr.php?&'+(is_conn ? 'sess='+sess : '')+'&stp='+gst.st+'&mesg='+mesg, (is_conn ? true : false));
-        xhr_wr.setRequestHeader("If-Modified-Since", new Date().toUTCString());
-        xhr_wr.onreadystatechange = function() { return; };
-        if (typeof(g_debug) == 'number' && g_debug > 0
-            && typeof(console) == 'object' && typeof(console.log) == 'function') {
+    var xhr_wr = createXMLHttpRequest();
+
+    if (typeof(content) != 'undefined') {
+        mesg = mesg + encodeURIComponent(content);
+    }
+    // alert("xhr_wr: "+xhr_wr+"  is_conn: "+is_conn);
+    xhr_wr.open('GET', 'index_wr.php?&'+(is_conn ? 'sess='+sess : '')+'&stp='+gst.st+'&mesg='+mesg, (is_conn ? true : false));
+    xhr_wr.setRequestHeader("If-Modified-Since", new Date().toUTCString());
+    xhr_wr.onreadystatechange = function() { return; };
+    if (typeof(g_debug) == 'number' && g_debug > 0
+        && typeof(console) == 'object' && typeof(console.log) == 'function') {
             var ldate = new Date();
             console.log(ldate.getTime()+':MESG:'+mesg);
+    }
+    xhr_wr.send(null);
+
+    if (!is_conn) {
+        if (xhr_wr.responseText != null) {
+            eval(xhr_wr.responseText);
         }
-        xhr_wr.send(null);
-        
-        if (!is_conn) {
-            if (xhr_wr.responseText != null) {
-                eval(xhr_wr.responseText);
-            }
-        }
+    }
     }
 }
 
@@ -340,7 +347,7 @@ function server_request()
     if (xhr_wr.responseText != null) {
         // console.log("server_request:resp: "+xhr_wr.responseText);
         return (xhr_wr.responseText);
-    } 
+    }
     else
         return (null);
 }
@@ -371,7 +378,7 @@ function act_chatt(value)
         info_show(value.substring(6));
     }
     else {
-        send_mesg("chatt|"+encodeURIComponent(value));
+        send_mesg("chatt|", value);
     }
     /*
     obj.disabled = true;
@@ -420,7 +427,7 @@ function act_mesgtoadm()
 
 function act_tav()
 {
-    act_chatt('/tav '+$('txt_in').value); 
+    act_chatt('/tav '+$('txt_in').value);
     $('txt_in').value = '';
 }
 
@@ -477,7 +484,7 @@ function act_shutdown()
 function postact_logout()
 {
     // alert("postact_logout");
-    try { 
+    try {
 	xstm.abort();
     } catch (e) {}
 
@@ -564,7 +571,7 @@ function slowimg(img,x1,y1,deltat,free,action,srcend) {
 }
 
 slowimg.prototype = {
-    img: null, 
+    img: null,
     st: null,
     x0: 0,
     y0: 0,
@@ -594,7 +601,7 @@ slowimg.prototype = {
     },
 
 
-    settime: function(time) 
+    settime: function(time)
     {
 	this.time = (time < this.deltat ? this.deltat : time);
 	this.step_n = parseInt(this.time / this.deltat);
@@ -909,7 +916,7 @@ notify_ex.prototype = {
     notitag: null,
     toutid: null,
     clo: null,
-    clodiv: null, 
+    clodiv: null,
     butt: null,
     tblkid: null,
 
@@ -1006,7 +1013,7 @@ function remark_off()
 function italizer(ga)
 {
     var pre, pos;
-    if (ga[0] & 2) 
+    if (ga[0] & 2)
         return "<i>"+ga[1]+"</i>";
     else
         return ga[1];
@@ -1155,12 +1162,12 @@ function onunload_cb () {
 function room_checkspace(emme,tables,inpe)
 {
     nome = "<b>";
-    for (i = 0 ; i < emme ; i++) 
+    for (i = 0 ; i < emme ; i++)
 	nome += "m";
     nome += "</b>";
 
     alta = "";
-    for (i = 0 ; i < 5 ; i++) 
+    for (i = 0 ; i < 5 ; i++)
 	alta += nome+"<br>";
 
     for (i = 0 ; i < tables ; i++) {

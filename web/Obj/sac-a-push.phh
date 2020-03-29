@@ -3,7 +3,7 @@
  *  brisk - Obj/sac-a-push.phh
  *
  *  Copyright (C) 2012-2014 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -190,7 +190,7 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
                 // if (content-type is wrong || content-length isn't set)
                 //     return false
 
-                if ($header['Content-Type'] != 'application/x-www-form-urlencoded' 
+                if ($header['Content-Type'] != 'application/x-www-form-urlencoded'
                     || !isset($header['Content-Length'])) {
                     return FALSE;
                 }
@@ -220,13 +220,13 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
 
 function gpcs_var($name, $get, $post, $cookie)
 {
-    if (isset($GLOBALS[$name])) 
+    if (isset($GLOBALS[$name]))
         return FALSE;
-    else if (isset($cookie[$name])) 
+    else if (isset($cookie[$name]))
         return ($cookie[$name]);
-    else if (isset($post[$name])) 
+    else if (isset($post[$name]))
         return ($post[$name]);
-    else if (isset($get[$name])) 
+    else if (isset($get[$name]))
         return ($get[$name]);
 
     return FALSE;
@@ -423,7 +423,7 @@ class Sac_a_push {
     static $cnt_slave  = NULL;
 
     var $provider_proxy; // list of provider/browser that offer proxy service
-    
+
     var $file_socket;
     var $unix_socket;
     var $direct_socket;   // socket where read direct commands
@@ -466,7 +466,7 @@ class Sac_a_push {
                 exit(1);
             }
             break;
-        case SIGHUP: 
+        case SIGHUP:
             if (static::$cnt_master != NULL) {
                 fwrite(static::$cnt_master, "\nreload\n");
                 fflush(static::$cnt_master);
@@ -476,9 +476,9 @@ class Sac_a_push {
     }
 
     static function create(&$app, $sockname, $debug, $blocking_mode, $provider_proxy, $argv)
-    {        
+    {
         $thiz = new Sac_a_push();
-        
+
         $thiz->app = $app;
 
         $thiz->provider_proxy = ProviderProxy::create();
@@ -518,14 +518,14 @@ class Sac_a_push {
             else
                 $thiz->rndstr .= chr(mt_rand(65, 90));
         }
-        
+
         if (file_exists($thiz->file_socket)) {
             unlink($thiz->file_socket);
         }
         if (file_exists($thiz->file_socket."2")) {
             unlink($thiz->file_socket."2");
         }
-    
+
         $old_umask = umask(0);
         if (($thiz->list_web = stream_socket_server($thiz->unix_socket, $err, $errs)) === FALSE) {
             return (FALSE);
@@ -685,9 +685,9 @@ class Sac_a_push {
         if ($this->main_loop) {
             return (FALSE);
         }
-        
+
         $this->main_loop = TRUE;
-        
+
         $lastime = 0;
         $dump_users = TRUE;
         while ($this->main_loop) {
@@ -696,7 +696,7 @@ class Sac_a_push {
             if ($lastime != ($this->curtime >> 2)) {
                 fprintf(STDERR, "\nIN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
             }
-            
+
             /* Prepare the read array */
             /* // when we manage it ... */
             /* if ($shutdown)  */
@@ -712,7 +712,7 @@ class Sac_a_push {
             else {
                 $read = $pre_read;
             }
-            
+
             if ($this->debug > 1) {
                 printf("PRE_SELECT\n");
                 print_r($read);
@@ -720,11 +720,11 @@ class Sac_a_push {
             $write  = NULL;
             $except = NULL;
             $num_changed_sockets = @stream_select($read, $write, $except, 0, 500000);
-        
+
             if ($num_changed_sockets == 0) {
                 // printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
                 ;
-            } 
+            }
             else if ($num_changed_sockets > 0) {
                 if ($lastime != ($this->curtime >> 2)) {
                     printf("num sock %d num_of_socket: %d\n", $num_changed_sockets, count($read));
@@ -894,6 +894,43 @@ class Sac_a_push {
                             else {  // data arrived from not special socket
                                 $key = array_search("$sock", $this->socks);
                                 // fprintf(STDERR, "Arrivati %d bytes dalla socket n. %d\n", mb_strlen($buf, "ASCII"), $key);
+
+                                if (isset($this->s2u[$id])) {
+                                    $user = $this->s2u[$id];
+
+                                    // fprintf(STDERR, 'POST USER');
+                                    if ($user && $user->rd_transp && strpos($user->rd_transp->type, "websocket") !== FALSE) {
+                                        $clie_cmd = $user->rd_transp->unchunk($buf);
+                                        $clie_cmd = json_decode($clie_cmd, TRUE);
+                                        // fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", print_r($clie_cmd, TRUE));
+
+                                        ob_start();
+                                        // complete: index_wr_main($this->app, $addr, $get, $post, $cookie);
+                                        index_wr_main($this->app, $addr, $clie_cmd, NULL, NULL);
+                                        $content = ob_get_contents();
+                                        ob_end_clean();
+
+                                        // $this->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
+                                        // FIXME ^
+                                        // fprintf(STDERR, "RETURNED CONTENT [%s]\n", $content);
+                                    }
+                                }
+                                else {
+                                    fprintf(STDERR, "User associated with ID: %s not found\n", $id);
+                                }
+
+                                if (isset($this->s2u[$id])) {
+                                    $user = $this->s2u[$id];
+
+                                    fprintf(STDERR, 'POST USER');
+                                    if ($user && $user->rd_transp && strpos($user->rd_transp->type, "websocket") !== FALSE) {
+                                        fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", $user->rd_transp->deframe($buf));
+
+                                    }
+                                }
+                                else {
+                                    fprintf(STDERR, "REC ID: %s\n", $id);
+                                }
                                 if (isset($this->s2p[$id])) {
                                     $this->s2p[$id]->rest -= mb_strlen($buf, "ASCII");
                                     $this->s2p[$id]->cont .= $buf;
@@ -948,7 +985,7 @@ class Sac_a_push {
                     unset($this->pending_pages[$k]);
                 }
             }
-            
+
             /*
                $response:                        raw stream data not sent
                $content:                         html consistent data (<script bla bla>)
@@ -993,7 +1030,7 @@ class Sac_a_push {
                             $response = $user->chunked_content($content);
                         }
                     }
-                    
+
                     if ($response != "") {
                         // echo "SPIA: [".substr($response, 0, 60)."...]\n";
                         // echo "SPIA: [".$response."]\n";
@@ -1012,7 +1049,7 @@ class Sac_a_push {
                         }
                         $user->rd_kalive_reset($this->curtime);
                     }
-                    
+
                     // close socket after a while to prevent client memory consumption
                     if ($user->rd_endtime_is_expired($this->curtime)) {
                         if ($this->s2u[$id]->rd_socket_get() != NULL) {

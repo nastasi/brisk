@@ -94,15 +94,19 @@ class Transport_websocket {
     protected $magicGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
     function Transport_websocket($secure = FALSE) {
+        $this->type = ($secure == FALSE ? "websocket" : "websocketsec");
         $this->headerOriginRequired                 = false;
         $this->headerSecWebSocketProtocolRequired   = false;
         $this->headerSecWebSocketExtensionsRequired = false;
 
-        $this->sendingContinuous = false;
-	$this->sendingContinuous = false;
-	$this->partialMessage = "";
+        $this->handlingPartialPacket = false;
 
-	$this->hasSentClose = false;
+        $this->sendingContinuous = false;
+
+        $this->handlingPartialPacket = false;
+        $this->partialMessage = "";
+
+        $this->hasSentClose = false;
     }
 
     protected function extractHeaders($message) {
@@ -199,6 +203,12 @@ class Transport_websocket {
             }
         }
         return $strout . "\n";
+    }
+
+    function unchunk($cont)
+    {
+        // fprintf(STDERR, "CHUNK: [%s]\n", $cont);
+        return $this->deframe($cont);
     }
 
     function chunk($step, $cont)
@@ -483,6 +493,7 @@ class Transport_websocket {
 class Transport_xhr {
 
     function Transport_xhr() {
+        $this->type = 'xhr';
     }
 
     function init($enc, $header, &$header_out, $init_string, $base, $step)
@@ -523,6 +534,7 @@ class Transport_xhr {
 class Transport_iframe {
 
     function Transport_iframe() {
+        $this->type = 'iframe';
     }
 
     function init($enc, $header, &$header_out, $init_string, $base, $step)
@@ -600,6 +612,9 @@ push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
 }
 
 class Transport_htmlfile extends Transport_iframe {
+    function Transport_htmlfile() {
+        $this->type = 'htmlfile';
+    }
 }
 
 class Transport {

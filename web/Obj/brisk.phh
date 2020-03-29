@@ -2451,6 +2451,14 @@ class Brisk
         }
         else {
             $login_exists =  $bdb->login_exists(strtolower($name_new));
+/*
+TO ENABLE USER-LOGIN ONLY
+-            $login_exists =  $bdb->login_exists(strtolower($name_new));
++            // $login_exists =  $bdb->login_exists(strtolower($name_new));
++            // Force access with login and password
++            $idx = -3;
++            return (FALSE);
+*/
         }
     }
     else {
