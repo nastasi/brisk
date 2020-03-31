@@ -1201,7 +1201,7 @@ class Bin5 {
                     ($user_cur->stat == 'table' && ($user_cur->subst == 'shutdowned' || $user_cur->subst == 'shutdowner')))
                     continue;
 
-                if ($user_cur->lacc + EXPIRE_TIME_RD < ($curtime - $delta)) { // Auto logout dell'utente
+                if ($user_cur->lacc + (($user_cur->ping_req ? 1.5 : 1.0) * EXPIRE_TIME_RD) < ($curtime - $delta)) { // Auto logout dell'utente
                     log_rd2($user_cur->sess." bin5 AUTO LOGOUT.");
 
                     if ($user_cur->stat == 'table') {

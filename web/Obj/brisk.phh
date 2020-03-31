@@ -1373,7 +1373,7 @@ class Brisk
         if ($user_cur->is_active() == FALSE)
             continue;
 
-        if ($user_cur->lacc + (($user_cur->ping_req ? 2 : 1) * EXPIRE_TIME_RD) < ($curtime - $delta)) {
+        if ($user_cur->lacc + (($user_cur->ping_req ? 1.5 : 1.0) * EXPIRE_TIME_RD) < ($curtime - $delta)) {
             // Auto logout dell'utente
             log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
 
