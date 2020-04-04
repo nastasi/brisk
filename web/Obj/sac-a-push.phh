@@ -706,7 +706,9 @@ class Sac_a_push {
 
         $lastime = 0;
         $dump_users = TRUE;
+        $sock_shard_cur = -1;
         while ($this->main_loop) {
+            $sock_shard_cur = ($sock_shard_cur + 1) % SOCK_SHARD_N;
             $this->app->sess_cur_set(FALSE);
             $this->curtime = time();
             if ($lastime != ($this->curtime >> 2)) {
@@ -828,7 +830,7 @@ class Sac_a_push {
                         stream_set_blocking($new_unix, $this->blocking_mode);
                         $this->direct_mgmt($new_unix);
                     } // not socket_list nor socket_list_cmd
-                    else {  // already opened socket
+                    else if ($id % SOCK_SHARD_N == $sock_shard_cur) {  // already opened socket
                         $buf = fread($sock, 4096);
                         // if socket is closed
                         if ($buf == FALSE || feof($sock)) {

@@ -26,6 +26,7 @@ $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH_PFX', "/tmp/brisk");
 define('USOCK_POOL_N', 10);
+define('SOCK_SHARD_N', 2);
 
 define('PENDINGPAGE_CONTINUE', 0);
 define('PENDINGPAGE_WAITDATA', 1);
