@@ -485,7 +485,7 @@ class Sac_a_push {
 
         $thiz->file_socket_pfx = $sockname_pfx;
         $thiz->unix_socket_pfx = "unix://$sockname_pfx";
-        $thiz->direct_socket = "unix://${sockname}_admin.sock";
+        $thiz->direct_socket = "unix://${sockname_pfx}_admin.sock";
         $thiz->debug = $debug;
         $thiz->list_web = array();
         $thiz->socks = array();
