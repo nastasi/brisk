@@ -18,7 +18,7 @@ brisk_debug="0x0400"
 web_path="/home/nastasi/web/brisk"
 ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
 proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
-usock_path="/home/nastasi/brisk-priv/brisk.sock"
+usock_path_pfx="/home/nastasi/brisk-priv/brisk"
 sys_user="www-data"
 legal_path="/home/nastasi/brisk-priv/brisk"
 prefix_path="/brisk/"
@@ -32,7 +32,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -52,7 +52,7 @@ function usage () {
     echo "  -y dir where place proxy files  - def. \"$proxy_path\""
     echo "  -P prefix path                  - def. \"$prefix_path\""
     echo "  -C config filename              - def. \"$brisk_conf\""
-    echo "  -U unix socket path             - def. \"$usock_path\""
+    echo "  -U unix socket path prefix      - def. \"$usock_path_pfx\""
     echo "  -u system user to run brisk dae - def. \"$sys_user\""
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
@@ -183,7 +183,7 @@ while [ $# -gt 0 ]; do
         -P*) prefix_path="$(get_param "-P" "$1" "$2")"; sh=$?;;
         -C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
         -l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
-        -U*) usock_path="$(get_param "-U" "$1" "$2")"; sh=$?;;
+        -U*) usock_path_pfx="$(get_param "-U" "$1" "$2")"; sh=$?;;
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
         -W) web_only="TRUE";;
@@ -221,7 +221,7 @@ echo "    legal_path: \"$legal_path\""
 echo "    proxy_path: \"$proxy_path\""
 echo "    prefix_path:\"$prefix_path\""
 echo "    brisk_conf: \"$brisk_conf\""
-echo "    usock_path: \"$usock_path\""
+echo "    usock_path_pfx: \"$usock_path_pfx\""
 echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
 echo "    test_add:   \"$test_add\""
@@ -246,7 +246,7 @@ if [ ! -z "$outconf" ]; then
     echo "legal_path=\"$legal_path\""
     echo "prefix_path=\"$prefix_path\""
     echo "brisk_conf=\"$brisk_conf\""
-    echo "usock_path=\"$usock_path\""
+    echo "usock_path_pfx=\"$usock_path_pfx\""
     echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
     echo "test_add=\"$test_add\""
@@ -413,7 +413,7 @@ sed -i "s@define *( *'FTOK_PATH',[^)]*)@define('FTOK_PATH', \"$ftok_path\")@g" $
 sed -i "s@define *( *'SITE_PREFIX',[^)]*)@define('SITE_PREFIX', \"$prefix_path\")@g;
 s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len)@g" ${web_path}__/Obj/sac-a-push.phh
 
-sed -i "s@define *( *'USOCK_PATH',[^)]*)@define('USOCK_PATH', \"$usock_path\")@g" ${web_path}__/spush/brisk-spush.phh
+sed -i "s@define *( *'USOCK_PATH_PFX',[^)]*)@define('USOCK_PATH_PFX', \"$usock_path_pfx\")@g" ${web_path}__/spush/brisk-spush.phh
 
 sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g;
 s@define *( *'TABLES_APPR_N',[^)]*)@define('TABLES_APPR_N', $tables_appr_n)@g;

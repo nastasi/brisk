@@ -97,7 +97,7 @@ function check_auth()
     $cmd_len = mb_strlen($cmd_ser, "ASCII");
 
     do {
-        if (($socket = stream_socket_client("unix://".USOCK_PATH."2")) == FALSE)
+        if (($socket = stream_socket_client('unix://'.USOCK_PATH_PFX.'_admin.sock')) == FALSE)
             break;
         $stp = 1;
         if (($rwr = fwrite($socket, $cmd_ser, $cmd_len)) == FALSE
