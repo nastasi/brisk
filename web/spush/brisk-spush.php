@@ -72,7 +72,7 @@ function main($argv)
             break;
         }
 
-        if (($s_a_p = Sac_a_push::create($brisk, USOCK_PATH, 0, 0, $G_provider_proxy, $argv)) === FALSE) {
+        if (($s_a_p = Sac_a_push::create($brisk, USOCK_PATH_PFX, 0, 0, $G_provider_proxy, $argv)) === FALSE) {
             $ret = 2;
             break;
         }

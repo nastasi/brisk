@@ -424,8 +424,8 @@ class Sac_a_push {
 
     var $provider_proxy; // list of provider/browser that offer proxy service
 
-    var $file_socket;
-    var $unix_socket;
+    var $file_socket_pfx;
+    var $unix_socket_pfx;
     var $direct_socket;   // socket where read direct commands
     var $socks;
     var $s2u;             // user associated with input socket
@@ -475,7 +475,7 @@ class Sac_a_push {
         }
     }
 
-    static function create(&$app, $sockname, $debug, $blocking_mode, $provider_proxy, $argv)
+    static function create(&$app, $sockname_pfx, $debug, $blocking_mode, $provider_proxy, $argv)
     {
         $thiz = new Sac_a_push();
 
@@ -483,10 +483,11 @@ class Sac_a_push {
 
         $thiz->provider_proxy = ProviderProxy::create();
 
-        $thiz->file_socket = $sockname;
-        $thiz->unix_socket = "unix://$sockname";
-        $thiz->direct_socket = "unix://${sockname}2";
+        $thiz->file_socket_pfx = $sockname_pfx;
+        $thiz->unix_socket_pfx = "unix://$sockname_pfx";
+        $thiz->direct_socket = "unix://${sockname_pfx}_admin.sock";
         $thiz->debug = $debug;
+        $thiz->list_web = array();
         $thiz->socks = array();
         $thiz->s2u  = array();
         $thiz->s2p  = array();
@@ -519,22 +520,32 @@ class Sac_a_push {
                 $thiz->rndstr .= chr(mt_rand(65, 90));
         }
 
-        if (file_exists($thiz->file_socket)) {
-            unlink($thiz->file_socket);
+        for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
+            $file_socket = $thiz->file_socket_pfx . sprintf("%d.sock", $i);
+            if (file_exists($file_socket)) {
+                unlink($file_socket);
+            }
         }
-        if (file_exists($thiz->file_socket."2")) {
-            unlink($thiz->file_socket."2");
+        $file_socket_admin = $thiz->file_socket_pfx . "_admin.sock";
+        if (file_exists($file_socket_admin)) {
+            unlink($file_socket_admin);
         }
 
         $old_umask = umask(0);
-        if (($thiz->list_web = stream_socket_server($thiz->unix_socket, $err, $errs)) === FALSE) {
-            return (FALSE);
+        for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
+            $unix_socket = sprintf("%s%d.sock", $thiz->unix_socket_pfx, $i);
+            if (($list_sock = stream_socket_server($unix_socket, $err, $errs)) === FALSE) {
+                return (FALSE);
+            }
+            array_push($thiz->list_web, $list_sock);
         }
         if (($thiz->list_cmd = stream_socket_server($thiz->direct_socket, $err, $errs)) === FALSE) {
             return (FALSE);
         }
         umask($old_umask);
-        stream_set_blocking($thiz->list_web, $thiz->blocking_mode); # Set the stream to non-blocking
+        for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
+            stream_set_blocking($thiz->list_web[$i], $thiz->blocking_mode); # Set the stream to non-blocking
+        }
         stream_set_blocking($thiz->list_cmd, $thiz->blocking_mode); # Set the stream to non-blocking
 
         if (($thiz->in = fopen("php://stdin", "r")) === FALSE) {
@@ -688,9 +699,16 @@ class Sac_a_push {
 
         $this->main_loop = TRUE;
 
+        $list_web_arr = array();
+        for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
+            $list_web_arr[intval($this->list_web[$i])] = $this->list_web[$i];
+        }
+
         $lastime = 0;
         $dump_users = TRUE;
+        $sock_shard_cur = -1;
         while ($this->main_loop) {
+            $sock_shard_cur = ($sock_shard_cur + 1) % SOCK_SHARD_N;
             $this->app->sess_cur_set(FALSE);
             $this->curtime = time();
             if ($lastime != ($this->curtime >> 2)) {
@@ -702,10 +720,10 @@ class Sac_a_push {
             /* if ($shutdown)  */
             /*     $read   = array_merge(array("$in" => $in), $socks); */
             /* else */
-            $pre_read = array_merge(array(intval($this->list_web) => $this->list_web,
-                                          intval($this->list_cmd) => $this->list_cmd,
-                                          intval(static::$cnt_slave) => static::$cnt_slave),
-                                    $this->socks);
+            $pre_read = array_merge($list_web_arr, array(
+                intval($this->list_cmd) => $this->list_cmd,
+                intval(static::$cnt_slave) => static::$cnt_slave),
+            $this->socks);
             if ($this->is_daemon == FALSE) {
                 $read = array_merge($pre_read, array(intval($this->in) => $this->in));
             }
@@ -741,9 +759,11 @@ class Sac_a_push {
                     if (!is_resource($sock)) {
                         continue;
                     }
-                    if ($sock === $this->list_web) {
+                    $list_web_idx = array_search($sock, $this->list_web, TRUE);
+                    if ($list_web_idx !== FALSE) {
+                        $list_web_usock = $this->list_web[$list_web_idx];
                         // printf("NUOVA CONNEX\n");
-                        if (($new_unix = stream_socket_accept($this->list_web)) == FALSE) {
+                        if (($new_unix = stream_socket_accept($list_web_usock)) == FALSE) {
                             printf("SOCKET_ACCEPT FAILED\n");
                             continue;
                         }
@@ -810,7 +830,7 @@ class Sac_a_push {
                         stream_set_blocking($new_unix, $this->blocking_mode);
                         $this->direct_mgmt($new_unix);
                     } // not socket_list nor socket_list_cmd
-                    else {  // already opened socket
+                    else if ($id % SOCK_SHARD_N == $sock_shard_cur) {  // already opened socket
                         $buf = fread($sock, 4096);
                         // if socket is closed
                         if ($buf == FALSE || feof($sock)) {
@@ -819,7 +839,7 @@ class Sac_a_push {
                                 // printf("INFO: read return false\n");
                                 ;
                             }
-                            if ($sock === $this->list_web) {
+                            if (array_search($sock, $this->list_web, TRUE) !== FALSE) {
                                 // printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
                                 return(21);
                             }
@@ -857,7 +877,7 @@ class Sac_a_push {
                             if ($this->debug > 1) {
                                 print_r($read);
                             }
-                            if ($sock === $this->list_web) {
+                            if (array_search($sock, $this->list_web, TRUE) !== FALSE) {
                                 // printf("Arrivati %d bytes da list\n", mb_strlen($buf, "ASCII"));
                                 ;
                             }
@@ -1185,7 +1205,8 @@ class Sac_a_push {
                     return TRUE;
                 }
             }
-            usleep(10000);
+            // probably not needed
+            // usleep(10000);
         }
 
         fclose($socket);
