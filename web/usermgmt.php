@@ -263,6 +263,73 @@ SELECT usr.*, guar.login AS guar_login
                 }
             }
         } // else if ($action == "accept") {
+        else if ($action == "delete") {
+            foreach($_POST as $key => $value) {
+                if (substr($key, 0, 9) != "f_newuser")
+                    continue;
+
+                $id = (int)substr($key, 9);
+                if ($id <= 0)
+                    continue;
+
+                // check existence of username or email
+                $is_trans = FALSE;
+                $res = FALSE;
+                do {
+                    if (($bdb = BriskDB::create()) == FALSE)
+                        break;
+
+                    // retrieve list added users
+                    $usr_sql = sprintf("
+SELECT usr.*, guar.login AS guar_login
+     FROM %susers AS usr
+     JOIN %susers AS guar ON guar.code = usr.guar_code
+     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
+         AND usr.disa_reas = %d AND usr.code = %d;",
+                               $G_dbpfx, $G_dbpfx,
+                               USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                               USER_DIS_REA_NU_ADDED, $id);
+                    if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
+                        log_crit("stat-day: select from tournaments failed");
+                        break;
+                    }
+                    $usr_n = pg_numrows($usr_pg);
+                    if ($usr_n != 1) {
+                        $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
+                                          $id, $usr_n);
+                        break;
+                    }
+
+                    $usr_obj = pg_fetch_object($usr_pg, 0);
+
+                    $bdb->transaction('BEGIN');
+                    $is_trans = TRUE;
+
+                    // retrieve list added users
+                    $usr_sql = sprintf("
+                         DELETE FROM %susers
+                             WHERE (type & (CAST (X'%x' as integer))) = (CAST (X'%x' as integer))
+                               AND disa_reas = %d AND code = %d;",
+                               $G_dbpfx, USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                               USER_DIS_REA_NU_ADDED, $id);
+                    if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
+                        log_crit(sprintf("Delete of user %d failed", $id));
+                        break;
+                    }
+
+                    $status .= sprintf("User %s removed: SUCCESS<br>", $usr_obj->login);
+                    $bdb->transaction('COMMIT');
+                    $res = TRUE;
+                } while(FALSE);
+                if ($res == FALSE) {
+                    $status .= sprintf("Error occurred during delete action<br>");
+                    if ($is_trans)
+                        $bdb->transaction('ROLLBACK');
+                    break;
+                }
+            }
+        } // else if ($action == "accept") {
+
 
 
         do {
@@ -519,8 +586,6 @@ SELECT usr.*, guar.login AS guar_login
             }
             exit;
         }
-
-
         else if ($action == "delete") {
             foreach($_POST as $key => $value) {
                 if (substr($key, 0, 9) != "f_newuser")
@@ -569,7 +634,7 @@ SELECT usr.*, guar.login AS guar_login
                                        $G_dbpfx, $usr_obj->code);
 
                     if (($del_pg = pg_query($bdb->dbconn->db(), $del_sql)) == FALSE) {
-                        log_crit("stat-day: select from tournaments failed");
+                        log_crit(sprintf("Delete user %d failed", $usr_obj->code));
                         break;
                     }
 

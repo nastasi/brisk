@@ -284,7 +284,16 @@ function send_mesg(mesg, content)
             lang: readCookie("lang")
             });
         // console.log(ws_msg);
-        xstm.transp.ws.send(ws_msg);
+        xstm.send(ws_msg);
+        /*
+        if (xstm.transp.ws.readyState == 1) {
+            xstm.transp.ws.send(ws_msg);
+        }
+        else {
+            xstm.transp.out_queue.push(ws_msg);
+        }
+        */
+
     }
     else {
     var xhr_wr = createXMLHttpRequest();

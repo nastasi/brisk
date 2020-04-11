@@ -869,6 +869,11 @@ function stream_close()
     return ($this->rd_transp->close());
 }
 
+function stream_postclose_get($sock, $curtime)
+{
+    return ($this->rd_transp->postclose_get($sock, $curtime));
+}
+
 static function base_get()
 {
     $c = get_called_class();

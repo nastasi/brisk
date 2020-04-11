@@ -430,6 +430,7 @@ class Sac_a_push {
     var $socks;
     var $s2u;             // user associated with input socket
     var $s2p;             // pending page associated with input socket
+    var $s2c;             // ws sockets in closing phase
     var $pending_pages;
     var $is_daemon;
 
@@ -491,6 +492,7 @@ class Sac_a_push {
         $thiz->socks = array();
         $thiz->s2u  = array();
         $thiz->s2p  = array();
+        $thiz->s2c  = array();
         $thiz->pending_pages = array();
         $thiz->is_daemon = FALSE;
 
@@ -558,15 +560,17 @@ class Sac_a_push {
         return ($thiz);
     }
 
-    function socks_set($sock, $user, $pendpage)
+    function socks_set($sock, $user, $pendpage, $postclose = NULL)
     {
         $id = intval($sock);
 
         $this->socks[$id] = $sock;
         if ($user != NULL)
-            $this->s2u[$id]   = $user;
+            $this->s2u[$id] = $user;
         if ($pendpage != NULL)
-            $this->s2p[$id]   = $pendpage;
+            $this->s2p[$id] = $pendpage;
+        if ($postclose != NULL)
+            $this->s2c[$id] = $postclose;
     }
 
     function socks_unset($sock)
@@ -577,6 +581,8 @@ class Sac_a_push {
             unset($this->s2u[$id]);
         if (isset($this->s2p[$id]))
             unset($this->s2p[$id]);
+        if (isset($this->s2c[$id]))
+            unset($this->s2c[$id]);
         unset($this->socks[$id]);
     }
 
@@ -641,7 +647,14 @@ class Sac_a_push {
 
         foreach ($this->socks as $k => $sock) {
             $id = intval($sock);
-            if (isset($this->s2u[$id])) {
+            if (isset($this->s2c[$id])) {
+                $postclose = $this->s2c[$id];
+                if ($postclose->read('', $this->curtime) == 0) {
+                    fclose($sock);
+                    $this->socks_unset($sock);
+                }
+            }
+            else if (isset($this->s2u[$id])) {
                 $user = $this->s2u[$id];
                 if ($user->the_end) {
                     if (($user->rd_toflush == FALSE && $user->rd_step == $user->step)
@@ -834,6 +847,7 @@ class Sac_a_push {
                         $buf = fread($sock, 4096);
                         // if socket is closed
                         if ($buf == FALSE || feof($sock)) {
+                            $postclose = NULL;
                             // close socket case
                             if ($buf == FALSE) {
                                 // printf("INFO: read return false\n");
@@ -858,6 +872,7 @@ class Sac_a_push {
                                     if ($this->s2u[$id]->rd_socket_get() != NULL) {
                                         // try to send close frame (for websocket)
                                         $clo = $this->s2u[$id]->stream_close();
+                                        $postclose = $user->stream_postclose_get($sock, $this->curtime);
                                         $clo_l = mb_strlen($clo, "ASCII");
                                         @fwrite($sock, $clo, $clo_l);
                                         $this->s2u[$id]->rd_socket_set(NULL);
@@ -865,7 +880,13 @@ class Sac_a_push {
                                     unset($this->s2u[$id]);
                                 }
                             }
-                            fclose($sock);
+                            if ($postclose != NULL) {
+                                // print("POSTCLOSE found!");
+                                $this->socks_set($sock, NULL, NULL, $postclose);
+                            }
+                            else {
+                                fclose($sock);
+                            }
                             // printf("CLOSE ON READ\n");
 
                             if ($this->debug > 1) {
@@ -926,7 +947,7 @@ class Sac_a_push {
 
                                     // fprintf(STDERR, 'POST USER');
                                     if ($user && $user->rd_transp && strpos($user->rd_transp->type, "websocket") !== FALSE) {
-                                        $clie_cmd = $user->rd_transp->unchunk($buf);
+                                        $clie_cmd = $user->rd_transp->unchunk($buf, $sock);
                                         $clie_cmd = json_decode($clie_cmd, TRUE);
                                         // fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", print_r($clie_cmd, TRUE));
 
@@ -948,6 +969,9 @@ class Sac_a_push {
                                                 $content = ob_get_contents();
                                                 ob_end_clean();
                                             }
+                                        }
+                                        else {
+                                            fprintf(STDERR, "Unknown page [%s]\n", $wr_addr);
                                         }
                                         /*
                                           briskin5/index_wr.php
@@ -988,6 +1012,17 @@ class Sac_a_push {
                                         $manage_page = TRUE;
                                     }
                                 }
+
+                                // postclose case
+                                if (isset($this->s2c[$id])) {
+                                    $postclose = $this->s2c[$id];
+                                    // printf("POSTCLOSE: found pc in s2c list\n");
+                                    if ($postclose->read($buf, $this->curtime) == 0) {
+                                        printf("POSTCLOSE: received end opcode, close\n");
+                                        fclose($sock);
+                                        $this->socks_unset($sock);
+                                    }
+                                }
                             }
                         }
                     }
@@ -1012,7 +1047,7 @@ class Sac_a_push {
                         }
                         if ($rret == FALSE) {
                             // FIXME: manage 404 !!!
-                            printf("TODO: fix unknown page\n");
+                            printf("TODO: fix unknown page: %s\n", $path);
                             fclose($new_socket);
                         }
                     }
@@ -1095,15 +1130,21 @@ class Sac_a_push {
 
                     // close socket after a while to prevent client memory consumption
                     if ($user->rd_endtime_is_expired($this->curtime)) {
-                        if ($this->s2u[$id]->rd_socket_get() != NULL) {
-                            $this->s2u[$id]->rd_socket_set(NULL);
+                        $postclose = $user->stream_postclose_get($sock, $this->curtime);
+                        if ($user->rd_socket_get() != NULL) {
+                            $user->rd_socket_set(NULL);
                         }
                         unset($this->socks[$id]);
                         unset($this->s2u[$id]);
                         $clo = $user->stream_close();
                         $clo_l = mb_strlen($clo, "ASCII");
                         @fwrite($sock, $clo, $clo_l);
-                        fclose($sock);
+                        if ($postclose) {
+                            $this->socks_set($sock, NULL, NULL, $postclose);
+                        }
+                        else {
+                            fclose($sock);
+                        }
                         // printf("CLOSE ON LOOP\n");
                     }
                 }  // if (isset($this->s2u[$id]...
