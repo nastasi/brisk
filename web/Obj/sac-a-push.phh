@@ -846,7 +846,7 @@ class Sac_a_push {
                     else if ($id % SOCK_SHARD_N == $sock_shard_cur) {  // already opened socket
                         $buf = fread($sock, 4096);
                         // if socket is closed
-                        if ($buf == FALSE || feof($sock)) {
+                        if ($buf == FALSE || mb_strlen($buf, "ASCII") == 0 || feof($sock)) {
                             $postclose = NULL;
                             // close socket case
                             if ($buf == FALSE) {
