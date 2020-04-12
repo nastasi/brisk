@@ -16,7 +16,6 @@ function transport_ws(doc, xynt_streaming, page)
     else
         this.name = "WebSocket";
     this.ctx_new = "";
-    this.out_queue = [];
     var self = this;
 
     this.doc = doc;
@@ -73,7 +72,6 @@ transport_ws.prototype = {
     name: null,
     xynt_streaming: "ready",
     ws: null,
-    out_queue: null,
     stopped: true,
     failed: false,
 
@@ -115,21 +113,23 @@ this.xynt_streaming.log("DEC: "+this.xynt_streaming.transp_fback);
     },
 
     flush_out_queue: function() {
-        var l_out = this.out_queue.length;
+        var l_out = this.xynt_streaming.out_queue.length;
+
         if (l_out == 0)
             return;
 
+        console.log('flush_out_queue: ' + l_out);
         for (var i = 0 ; i < l_out ; i++) {
             if (this.ws.readyState != 1) {
                 break;
             }
-            var item = this.out_queue.shift();
+            var item = this.xynt_streaming.out_queue.shift();
             var sent = true;
             try {
                 this.ws.send(item);
             }
             catch (ex) {
-                this.out_queue.unshift(item);
+                this.xynt_streaming.out_queue.unshift(item);
                 break;
             }
         }
@@ -146,12 +146,12 @@ this.xynt_streaming.log("DEC: "+this.xynt_streaming.transp_fback);
             }
             catch (ex) {
                 console.log(' ... catched exception');
-                this.flush_out.push(msg);
+                this.xynt_streaming.out_queue.push(msg);
             }
         }
         else {
-            console.log('ws not ready: push into flush_out');
-            this.flush_out.push(msg);
+            console.log('ws not ready: push into out_queue');
+            this.xynt_streaming.out_queue.push(msg);
         }
     },
 
@@ -584,6 +584,7 @@ function xynt_streaming(win, transp_type, transp_port, transp_fback, console, gs
     this.doc = win.document;
     this.keepalive_old = -1;
     this.keepalive_new = -1;
+    this.out_queue = [];
 
     this.mon_errtime = this.keepalives_eq_max * this.watchdog_checktm * this.watchdog_timeout;
     this.mon_wrntime = this.mon_errtime / 2;
@@ -629,6 +630,7 @@ xynt_streaming.prototype = {
     comm_match:        /_*@BEGIN@(.*?)@END@/g,
     comm_clean:        /_*@BEGIN@(.*?)@END@/,
     stream:            "",
+    out_queue:         null,
     the_end:           false,
 
     mon_time:         -1,
