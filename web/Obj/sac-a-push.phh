@@ -40,7 +40,7 @@ $_globals_list = array(
 'G_PG_vow_n', 'G_poll_entries', 'G_poll_name', 'G_poll_title',
 'G_provider_proxy', 'G_proxy_white_list', 'G_room_about', 'G_room_help',
 'G_room_passwdhowto', 'G_room_roadmap',
-'G_selfreg_mask', 'G_selfreg_tout', 'G_shutdown', 'G_sidebanner',
+'G_selfreg_mask', 'G_selfreg_tout', 'G_shutdown', 'G_profile', 'G_sidebanner',
 'G_sidebanner_idx', 'G_splash_content', 'G_splash_contents',
 'G_splash_cont_idx', 'G_splash_h', 'G_splash_idx', 'G_splash_interval',
 'G_splash_timeout', 'G_splash_w', 'G_topbanner', 'G_tos_dthard',
@@ -51,7 +51,7 @@ function global_dump()
     GLOBAL $G_alarm_passwd, $G_ban_list, $G_black_list, $G_btrace_pref_sub, $G_dbauth;
     GLOBAL $G_dbpfx, $G_donors_all, $G_donors_cur, $G_is_local, $G_lang;
     GLOBAL $G_poll_entries, $G_poll_name, $G_poll_title, $G_proxy_white_list;
-    GLOBAL $G_room_roadmap, $G_shutdown;
+    GLOBAL $G_room_roadmap, $G_shutdown, $G_profile;
     GLOBAL $G_splash_content, $G_splash_contents, $G_splash_cont_idx;
     GLOBAL $G_splash_h, $G_splash_idx, $G_splash_interval, $G_splash_timeout;
     GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
@@ -74,6 +74,7 @@ function global_dump()
     fprintf(STDERR, "G_proxy_white_list = [%s]\n", print_r($G_proxy_white_list, TRUE));
     fprintf(STDERR, "G_room_roadmap = [%s]\n", print_r($G_room_roadmap, TRUE));
     fprintf(STDERR, "G_shutdown = [%s]\n", print_r($G_shutdown, TRUE));
+    fprintf(STDERR, "G_profile = [%s]\n", print_r($G_profile, TRUE));
     fprintf(STDERR, "G_splash_content = [%s]\n", print_r($G_splash_content, TRUE));
     fprintf(STDERR, "G_splash_contents = [%s]\n", print_r($G_splash_contents, TRUE));
     fprintf(STDERR, "G_splash_cont_idx = [%s]\n", print_r($G_splash_cont_idx, TRUE));
@@ -693,7 +694,7 @@ class Sac_a_push {
         GLOBAL $G_btrace_pref_sub, $G_dbauth;
         GLOBAL $G_dbpfx, $G_donors_all, $G_donors_cur, $G_is_local, $G_lang;
         GLOBAL $G_poll_entries, $G_poll_name, $G_poll_title, $G_proxy_white_list;
-        GLOBAL $G_room_roadmap, $G_shutdown;
+        GLOBAL $G_room_roadmap, $G_shutdown, $G_profile;
         GLOBAL $G_splash_content, $G_splash_contents, $G_splash_cont_idx;
         GLOBAL $G_splash_h, $G_splash_idx, $G_splash_interval, $G_splash_timeout;
         GLOBAL $G_splash_w, $G_topbanner, $G_with_donors, $G_with_poll;
@@ -717,14 +718,45 @@ class Sac_a_push {
             $list_web_arr[intval($this->list_web[$i])] = $this->list_web[$i];
         }
 
+        log_legal(time(), '127.0.0.1', 'BRISK', 'MAIN', 'LOG:START');
+
         $lastime = 0;
         $dump_users = TRUE;
         $sock_shard_cur = -1;
+
+        $mtime_start = microtime(TRUE);
+        $mtsum_idle = 0.0;
+        $mtsum_read = 0.0;
+        $mtsum_garb = 0.0;
+        $mtsum_unfi = 0.0;
+        $mtsum_mana = 0.0;
+
         while ($this->main_loop) {
+            $mtime_begin = microtime(TRUE);
             $sock_shard_cur = ($sock_shard_cur + 1) % SOCK_SHARD_N;
             $this->app->sess_cur_set(FALSE);
             $this->curtime = time();
             if ($lastime != ($this->curtime >> 2)) {
+                if ($G_profile == TRUE) {
+                    $mtime_finish = microtime(TRUE);
+                    $mtime_diff = ($mtime_finish - $mtime_start);
+                    $mtime_idle = 100.0 * $mtsum_idle / $mtime_diff;
+                    $mtime_read = 100.0 * $mtsum_read / $mtime_diff;
+                    $mtime_garb = 100.0 * $mtsum_garb / $mtime_diff;
+                    $mtime_unfi = 100.0 * $mtsum_unfi / $mtime_diff;
+                    $mtime_mana = 100.0 * $mtsum_mana / $mtime_diff;
+
+                    log_legal(time(), '127.0.0.1', 'BRISK', 'MAIN',
+                    sprintf('LOG:PROF: tot(%.3f) idle: %.2f  read: %.2f  garb: %.2f  unfi: %.2f  mana: %.2f',
+                    $mtime_diff, $mtime_idle, $mtime_read, $mtime_garb, $mtime_unfi, $mtime_mana
+                    ));
+                    $mtsum_idle = 0.0;
+                    $mtsum_read = 0.0;
+                    $mtsum_garb = 0.0;
+                    $mtsum_unfi = 0.0;
+                    $mtsum_mana = 0.0;
+                    $mtime_begin = $mtime_end;
+                }
                 fprintf(STDERR, "\nIN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
             }
 
@@ -752,6 +784,10 @@ class Sac_a_push {
             $except = NULL;
             $num_changed_sockets = @stream_select($read, $write, $except, 0, 500000);
 
+            if ($G_profile) {
+                $mtime_idle = microtime(TRUE);
+                $mtsum_idle += $mtime_idle - $mtime_begin;
+            }
             if ($num_changed_sockets == 0) {
                 // printf(" no data in 5 secs, splash [%d]\n", $G_with_splash);
                 ;
@@ -1053,8 +1089,17 @@ class Sac_a_push {
                     }
                 }
             }
+            if ($G_profile) {
+                $mtime_read = microtime(TRUE);
+                $mtsum_read += $mtime_read - $mtime_idle;
+            }
 
             $this->garbage_manager(FALSE);
+
+            if ($G_profile) {
+                $mtime_garb = microtime(TRUE);
+                $mtsum_garb += $mtime_garb - $mtime_read;
+            }
 
             /* manage unfinished pages */
             foreach ($this->pending_pages as $k => $pendpage) {
@@ -1062,6 +1107,11 @@ class Sac_a_push {
                 if ($pendpage->try_flush($this->curtime) == TRUE) {
                     unset($this->pending_pages[$k]);
                 }
+            }
+
+            if ($G_profile) {
+                $mtime_unfi = microtime(TRUE);
+                $mtsum_unfi += $mtime_unfi - $mtime_garb;
             }
 
             /*
@@ -1149,6 +1199,10 @@ class Sac_a_push {
                     }
                 }  // if (isset($this->s2u[$id]...
             }  // foreach ($this->socks...
+            if ($G_profile) {
+                $mtime_mana = microtime(TRUE);
+                $mtsum_mana += $mtime_mana - $mtime_unfi;
+            }
             $dump_users = FALSE;
             printf("#");
             if (defined('CURL_DE_SAC_VERS')) {
