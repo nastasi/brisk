@@ -567,54 +567,54 @@ function langtolng($lang)
 
 function csplitter($in, $sep)
 {
-  $st = 0;
-  $id = 0;
-  $out = array();
-  $out[$id] = "";
-  for ($i = 0 ; $i < strlen($in) ; $i++) {
-    $ini = substr($in, $i, 1);
-    if ($st == 0) {
-      if ($ini == '\\')
-        $st = 1;
-      else if ($ini == $sep) {
-        $id++;
-        $out[$id] = "";
-      }
-      else {
-        $out[$id] .= $ini;
-      }
+    $st = 0;
+    $id = 0;
+    $out = array();
+    $out[$id] = "";
+    for ($i = 0 ; $i < strlen($in) ; $i++) {
+        $ini = substr($in, $i, 1);
+        if ($st == 0) {
+            if ($ini == '\\')
+                $st = 1;
+            else if ($ini == $sep) {
+                $id++;
+                $out[$id] = "";
+            }
+            else {
+                $out[$id] .= $ini;
+            }
+        }
+        else if ($st == 1) {
+            $out[$id] .= $ini;
+            $st = 0;
+        }
     }
-    else if ($st == 1) {
-      $out[$id] .= $ini;
-      $st = 0;
-    }
-  }
 
-  return ($out);
+    return ($out);
 }
 
 function xcape($s)
 {
-  $from = array (   '\\',     '@',        '|' );
-  $to   = array ( '\\\\', '&#64;', '&brvbar;' );
+    $from = array (   '\\',     '@',        '|' );
+    $to   = array ( '\\\\', '&#64;', '&brvbar;' );
 
-  return (str_replace($from, $to, htmlentities($s,ENT_COMPAT,"UTF-8")));
+    return (str_replace($from, $to, htmlentities($s,ENT_COMPAT,"UTF-8")));
 }
 
 function xcapelt($s)
 {
-  $from = array (   '\\',     '|',  "\t",  "\n");
-  $to   = array ( '\\\\',   '\\|', "\\t", "\\n");
+    $from = array (   '\\',     '|',  "\t",  "\n");
+    $to   = array ( '\\\\',   '\\|', "\\t", "\\n");
 
-  return (str_replace($from, $to, $s));
+    return (str_replace($from, $to, $s));
 }
 
 function xcapemesg($s)
 {
-  $from = array (  "\n");
-  $to   = array ( "\\n");
+    $from = array (  "\n");
+    $to   = array ( "\\n");
 
-  return (str_replace($from, $to, $s));
+    return (str_replace($from, $to, $s));
 }
 
 
@@ -642,221 +642,221 @@ define('TABLE_AUTH_TY_CERT', 3);
 
 
 class Table {
-  var $idx;
-  var $player;
-  var $player_n;
+    var $idx;
+    var $player;
+    var $player_n;
 
-  var $auth_type;     // required authorization to sit down
+    var $auth_type;     // required authorization to sit down
 
-  var $wag_own;
-  var $wag_com;
-  var $wag_tout;
+    var $wag_own;
+    var $wag_com;
+    var $wag_tout;
 
-  var $table_token;
-  var $table_start;   // information field
+    var $table_token;
+    var $table_start;   // information field
 
-  var $wakeup_time;
+    var $wakeup_time;
 
-  function Table()
-  {
-  }
-
-  function create($idx)
-  {
-    if (($thiz = new Table()) == FALSE)
-      return (FALSE);
-
-    $thiz->idx       =   $idx;
-    $thiz->player    =   array();
-    $thiz->player_n  =   0;
-
-    if ($idx < TABLES_CERT_N)
-        $thiz->auth_type =   TABLE_AUTH_TY_CERT;
-    else if ($idx < TABLES_AUTH_N)
-        $thiz->auth_type =   TABLE_AUTH_TY_AUTH;
-    else if ($idx < TABLES_APPR_N)
-        $thiz->auth_type =   TABLE_AUTH_TY_APPR;
-    else
-        $thiz->auth_type =   TABLE_AUTH_TY_PUBL;
-
-    $thiz->wag_own   =  -1;
-    $thiz->wag_com   =  "";
-    $thiz->wag_tout   =  0;
-
-    $thiz->table_token  = "";
-    $thiz->table_start  = 0;
-
-    $thiz->wakeup_time = 0;
-
-    return ($thiz);
-  }
-
-  function copy($from)
-  {
-    $this->idx = $from->idx;
-    $this->player = array();
-    for ($i = 0 ; $i < $from->player_n ; $i++)
-      $this->player[$i] = $from->player[$i];
-    $this->player_n = $from->player_n;
-
-    log_main("PLAYER_N - parent::copy.".$this->player_n);
-
-    $this->auth_type =  $from->auth_type;
-
-    $this->wag_own   =  $from->wag_own;
-    $this->wag_com   =  $from->wag_com;
-    $this->wag_tout  =  $from->wag_tout;
-
-    $this->table_token  = $from->table_token;
-    $this->table_start  = $from->table_start;
-
-    $this->wakeup_time = $from->wakeup_time;
-  }
-
-  function myclone($from)
-  {
-    if (($thiz = new Table()) == FALSE)
-      return (FALSE);
-
-    $this->copy($from);
-
-    return ($thiz);
-  }
-
-  function spawn($from)
-  {
-    if (($thiz = new Table()) == FALSE)
-      return (FALSE);
-
-    $thiz->idx = $from->idx;
-    $thiz->player = array();
-    for ($i = 0 ; $i < $from->player_n ; $i++)
-      $thiz->player[$i] = $i;
-    $thiz->player_n = $from->player_n;
-
-    $thiz->auth_type =  $from->auth_type;
-
-    $thiz->wag_own = $from->wag_own;
-    $thiz->wag_com = $from->wag_com;
-    $thiz->wag_tout  =  $from->wag_tout;
-
-    $thiz->table_token  = $from->table_token;
-    $thiz->table_start  = $from->table_start;
-
-    $thiz->wakeup_time = $from->wakeup_time;
-
-    return ($thiz);
-  }
-
-  function wag_set($user_idx, $mesg)
-  {
-    log_main("WAG_SET");
-
-    $this->wag_own  =  $user_idx;
-    $this->wag_com  =  $mesg;
-    $this->wag_tout =  0;
-  }
-
-  function wag_reset($timeout)
-  {
-    log_main("WAG_RESET");
-
-    unset($this->wag_own);
-    $this->wag_own  = -1;
-    $this->wag_com  = "";
-    $this->wag_tout = $timeout;
-  }
-
-  function player_get($idx)
-  {
-    return ($this->player[$idx]);
-  }
-
-  function player_set($idx, $player)
-  {
-    $this->player[$idx] = $player;
-  }
-
-  function user_add($idx)
-  {
-    $this->player[$this->player_n] = $idx;
-    $this->player_n++;
-
-    return ($this->player_n - 1);
-  }
-
-  function user_rem($brisk, $user)
-  {
-    $tabpos = $user->table_pos;
-
-    /* verifico la consistenza dei dati */
-    if ($brisk->user[$this->player[$tabpos]] == $user) {
-
-      /* aggiorna l'array dei giocatori al tavolo. */
-      for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
-        $this->player[$i] = $this->player[$i+1];
-        $user_cur = $brisk->user[$this->player[$i]];
-        $user_cur->table_pos = $i;
-      }
-      $this->player_n--;
-    }
-    else {
-      log_main("INCONSISTENCY ON TABLE.");
-    }
-  }
-
-  // Table->act_content - return 'id' of type of output required for table button
-  function act_content($user)
-  {
-    $ret = "";
-    $isstanding = ($user->subst == 'standup');
-    $sitted = $this->player_n;
-    $table = $this->idx;
-    $cur_table = $user->table;
-    $allowed = TRUE;
-
-    if ($isstanding) {
-      if ($sitted < PLAYERS_N) {
-          switch ($this->auth_type) {
-          case TABLE_AUTH_TY_CERT:
-              if ($user->is_cert() && !$user->is_appr())
-                  $act = "sitcert";
-              else
-                  $act = 'resercert';
-              break;
-          case TABLE_AUTH_TY_AUTH:
-              if ($user->is_auth() && !$user->is_appr())
-                  $act = "sitreser";
-              else
-                  $act = 'reserved';
-              break;
-          case TABLE_AUTH_TY_APPR:
-              if ($user->is_auth())
-                  $act = "sitappr";
-              else
-                  $act = 'reserved';
-              break;
-          default:
-              $act = 'sit';
-              break;
-          }
-      }
-      else {
-        $act = 'none';
-      }
-    }
-    else {
-      if ($table == $cur_table)
-        $act = 'wake';
-      else
-        $act = 'none';
+    function Table()
+    {
     }
 
-    if ($act != '')
-      $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
+    function create($idx)
+    {
+        if (($thiz = new Table()) == FALSE)
+            return (FALSE);
 
-    return ($ret);
-  }
+        $thiz->idx       =   $idx;
+        $thiz->player    =   array();
+        $thiz->player_n  =   0;
+
+        if ($idx < TABLES_CERT_N)
+            $thiz->auth_type =   TABLE_AUTH_TY_CERT;
+        else if ($idx < TABLES_AUTH_N)
+            $thiz->auth_type =   TABLE_AUTH_TY_AUTH;
+        else if ($idx < TABLES_APPR_N)
+            $thiz->auth_type =   TABLE_AUTH_TY_APPR;
+        else
+            $thiz->auth_type =   TABLE_AUTH_TY_PUBL;
+
+        $thiz->wag_own   =  -1;
+        $thiz->wag_com   =  "";
+        $thiz->wag_tout   =  0;
+
+        $thiz->table_token  = "";
+        $thiz->table_start  = 0;
+
+        $thiz->wakeup_time = 0;
+
+        return ($thiz);
+    }
+
+    function copy($from)
+    {
+        $this->idx = $from->idx;
+        $this->player = array();
+        for ($i = 0 ; $i < $from->player_n ; $i++)
+            $this->player[$i] = $from->player[$i];
+        $this->player_n = $from->player_n;
+
+        log_main("PLAYER_N - parent::copy.".$this->player_n);
+
+        $this->auth_type =  $from->auth_type;
+
+        $this->wag_own   =  $from->wag_own;
+        $this->wag_com   =  $from->wag_com;
+        $this->wag_tout  =  $from->wag_tout;
+
+        $this->table_token  = $from->table_token;
+        $this->table_start  = $from->table_start;
+
+        $this->wakeup_time = $from->wakeup_time;
+    }
+
+    function myclone($from)
+    {
+        if (($thiz = new Table()) == FALSE)
+            return (FALSE);
+
+        $this->copy($from);
+
+        return ($thiz);
+    }
+
+    function spawn($from)
+    {
+        if (($thiz = new Table()) == FALSE)
+            return (FALSE);
+
+        $thiz->idx = $from->idx;
+        $thiz->player = array();
+        for ($i = 0 ; $i < $from->player_n ; $i++)
+            $thiz->player[$i] = $i;
+        $thiz->player_n = $from->player_n;
+
+        $thiz->auth_type =  $from->auth_type;
+
+        $thiz->wag_own = $from->wag_own;
+        $thiz->wag_com = $from->wag_com;
+        $thiz->wag_tout  =  $from->wag_tout;
+
+        $thiz->table_token  = $from->table_token;
+        $thiz->table_start  = $from->table_start;
+
+        $thiz->wakeup_time = $from->wakeup_time;
+
+        return ($thiz);
+    }
+
+    function wag_set($user_idx, $mesg)
+    {
+        log_main("WAG_SET");
+
+        $this->wag_own  =  $user_idx;
+        $this->wag_com  =  $mesg;
+        $this->wag_tout =  0;
+    }
+
+    function wag_reset($timeout)
+    {
+        log_main("WAG_RESET");
+
+        unset($this->wag_own);
+        $this->wag_own  = -1;
+        $this->wag_com  = "";
+        $this->wag_tout = $timeout;
+    }
+
+    function player_get($idx)
+    {
+        return ($this->player[$idx]);
+    }
+
+    function player_set($idx, $player)
+    {
+        $this->player[$idx] = $player;
+    }
+
+    function user_add($idx)
+    {
+        $this->player[$this->player_n] = $idx;
+        $this->player_n++;
+
+        return ($this->player_n - 1);
+    }
+
+    function user_rem($brisk, $user)
+    {
+        $tabpos = $user->table_pos;
+
+        /* verifico la consistenza dei dati */
+        if ($brisk->user[$this->player[$tabpos]] == $user) {
+
+            /* aggiorna l'array dei giocatori al tavolo. */
+            for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
+                $this->player[$i] = $this->player[$i+1];
+                $user_cur = $brisk->user[$this->player[$i]];
+                $user_cur->table_pos = $i;
+            }
+            $this->player_n--;
+        }
+        else {
+            log_main("INCONSISTENCY ON TABLE.");
+        }
+    }
+
+    // Table->act_content - return 'id' of type of output required for table button
+    function act_content($user)
+    {
+        $ret = "";
+        $isstanding = ($user->subst == 'standup');
+        $sitted = $this->player_n;
+        $table = $this->idx;
+        $cur_table = $user->table;
+        $allowed = TRUE;
+
+        if ($isstanding) {
+            if ($sitted < PLAYERS_N) {
+                switch ($this->auth_type) {
+                case TABLE_AUTH_TY_CERT:
+                    if ($user->is_cert() && !$user->is_appr())
+                        $act = "sitcert";
+                    else
+                        $act = 'resercert';
+                    break;
+                case TABLE_AUTH_TY_AUTH:
+                    if ($user->is_auth() && !$user->is_appr())
+                        $act = "sitreser";
+                    else
+                        $act = 'reserved';
+                    break;
+                case TABLE_AUTH_TY_APPR:
+                    if ($user->is_auth())
+                        $act = "sitappr";
+                    else
+                        $act = 'reserved';
+                    break;
+                default:
+                    $act = 'sit';
+                    break;
+                }
+            }
+            else {
+                $act = 'none';
+            }
+        }
+        else {
+            if ($table == $cur_table)
+                $act = 'wake';
+            else
+                $act = 'none';
+        }
+
+        if ($act != '')
+            $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
+
+        return ($ret);
+    }
 } // end class Table
 
 
@@ -1240,424 +1240,424 @@ class Brisk
         }
     }
 
-  function garbage_manager($force)
-  {
-    GLOBAL $G_lang, $mlang_brisk, $G_base;
+    function garbage_manager($force)
+    {
+        GLOBAL $G_lang, $mlang_brisk, $G_base;
 
-    $ismod = FALSE;
+        $ismod = FALSE;
 
-    log_rd2("garbage_manager START");
+        log_rd2("garbage_manager START");
 
-    /* Garbage collector degli utenti in timeout */
-    $curtime = microtime(TRUE);
+        /* Garbage collector degli utenti in timeout */
+        $curtime = microtime(TRUE);
 
-    $delta = $this->delay_mgr->delta_get($curtime);
+        $delta = $this->delay_mgr->delta_get($curtime);
 
-    if (!$force && !($this->garbage_timeout < $curtime)) {
+        if (!$force && !($this->garbage_timeout < $curtime)) {
+            $this->delay_mgr->lastcheck_set($curtime);
+            return ($ismod);
+        }
+
+        // Before all align times with table timeout
+        for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+            $table_cur = $this->table[$table_idx];
+            // if the table is complete and exists its shared mem we get the info about users lacc
+
+            if ($table_cur->player_n == PLAYERS_N) {
+                log_main("PLAYERS == N TABLE ".$table_idx);
+
+
+                $no_recovery = FALSE;
+                if (isset($this->match[$table_idx])) {
+                    $bin5 = $this->match[$table_idx];
+
+                    if ($table_cur->table_token != $bin5->table_token) {
+                        log_main("ERROR: not matching table_token. Brisk: ".$table_cur->table_token."  Table: ".$bin5->table_token);
+                        log_main("ERROR: not matching table_start. Brisk: ".$table_cur->table_start."  Table: ".$bin5->table_start);
+                        $no_recovery = TRUE;
+                        $bin5 = FALSE;
+                    }
+
+                    if ($bin5 != FALSE) {
+                        //
+                        //  SPAWN: JOIN
+                        //
+                        log_main("garbage_manager: bri loaded successfully.");
+                        $bin5->garbage_manager(TRUE);
+
+                        $bin5_table = $bin5->table[0];
+
+                        // is the end of the table
+
+                        if ($bin5->the_end == TRUE) {
+                            /*
+                             *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
+                             */
+                            log_main("garbage_manager: INSIDE THE END.");
+
+                            $plist = "$table_cur->table_token|$table_cur->idx|$table_cur->player_n";
+                            for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                                $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+                            }
+
+                            for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
+                                // stat must be "table" by definition
+                                $user_cur = $this->user[$table_cur->player[$i]];
+                                $bin5_user = $bin5->user[$i];
+
+                                $user_cur->subst      = $bin5_user->subst;
+                                $user_cur->rd_step    = $bin5_user->rd_step;
+                                $user_cur->step       = $bin5_user->step;
+                                $user_cur->lacc       = $bin5_user->lacc;
+                                $user_cur->laccwr     = $bin5_user->lacc;
+                                $user_cur->bantime    = $bin5_user->bantime;
+                                $user_cur->the_end    = $bin5_user->the_end;
+                                if ($user_cur->the_end) {
+                                    $this->ghost_sess->push($curtime, $user_cur->sess, GHOST_SESS_REAS_TTOT);
+                                }
+                            }
+
+                            log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
+
+                            $this->room_join_wakeup($user_cur, FALSE, 0);
+                            $table_cur->table_token = "";
+                            $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
+
+                            $this->match_del($table_idx);
+                        }
+                        else {
+                            log_main("gm:: save_data");
+
+                            for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
+                                $this->user[$table_cur->player[$i]]->lacc = $bin5->user[$i]->lacc;
+                            }
+                        }
+                    } // if ($bin5 == FALSE
+                    else if ($no_recovery == FALSE) {
+                        log_crit("ERROR: table ".$table_idx." unrecoverable join");
+
+                        for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                            $user_cur = $this->user[$table_cur->player[$i]];
+                            $user_cur->subst = "shutdowner";
+                            $user_cur->step_inc();
+
+                            $ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
+                            $ret .= "gst.st = ".($user_cur->step+1)."; ";
+                            // MLANG <br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>
+                            $prestr = sprintf($mlang_brisk['tabincon'][$G_lang], $user_cur->table);
+                            $ret .= show_notify($prestr, 2000, $mlang_brisk['btn_close'][$G_lang], 400, 110);
+                            $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+                            $user_cur->step_inc();
+                        }
+
+                        $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
+                        for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
+                            $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
+                        }
+                        log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
+
+                        $this->room_join_wakeup($user_cur, TRUE, -2);
+                        $table_cur->table_token = "";
+                    }
+                }
+            } //  if ($table_cur->player_n == PLAYERS_N) {
+        } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+
+        log_rd2("out new loop.");
+
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+
+            log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
+
+            if ($user_cur->is_active() == FALSE)
+                continue;
+
+            if ($user_cur->lacc + (($user_cur->ping_req ? 1.5 : 1.0) * EXPIRE_TIME_RD) < ($curtime - $delta)) {
+                // Auto logout dell'utente
+                log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
+
+                $this->ghost_sess->push($curtime, $user_cur->sess, GHOST_SESS_REAS_TOUT);
+                $user_cur->the_end = TRUE;
+
+                log_rd2("AUTO LOGOUT.");
+                if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
+                    log_auth($user_cur->sess, "Autologout session.");
+
+                    if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
+                        $this->room_wakeup($user_cur);
+                    else if ($user_cur->subst == 'standup')
+                        $this->room_outstandup($user_cur);
+                    else
+                        log_rd2("LOGOUT FROM WHAT ???");
+                }
+            }
+
+            if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < ($curtime - $delta)) { // lo rimettiamo in piedi
+                if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
+                    $this->room_wakeup($user_cur);
+                    $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
+                    /* MLANG: <br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", "torna ai tavoli" */
+                    $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
+                    $user_cur->step_inc();
+                }
+            }
+        }
+        log_rd2("GARBAGE UPDATED!");
+
+        $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
+        $ismod = TRUE;
+
+        $this->ghost_sess->garbage_manager($curtime);
+
         $this->delay_mgr->lastcheck_set($curtime);
         return ($ismod);
     }
 
-    // Before all align times with table timeout
-    for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-        $table_cur = $this->table[$table_idx];
-        // if the table is complete and exists its shared mem we get the info about users lacc
+    function show_room($user_step, $user)
+    {
+        GLOBAL $G_lang, $mlang_brisk;
+        log_main("show_room: username: ".$user->name);
 
-        if ($table_cur->player_n == PLAYERS_N) {
-            log_main("PLAYERS == N TABLE ".$table_idx);
+        $ret = sprintf('gst.st = %d; ',  $user_step);
 
+        $prefs = Client_prefs::from_user($user);
+        $ret .= sprintf('prefs_load(\'%s\', false, false);', json_encode($prefs));
 
-            $no_recovery = FALSE;
-            if (isset($this->match[$table_idx])) {
-                $bin5 = $this->match[$table_idx];
-
-                if ($table_cur->table_token != $bin5->table_token) {
-                    log_main("ERROR: not matching table_token. Brisk: ".$table_cur->table_token."  Table: ".$bin5->table_token);
-                    log_main("ERROR: not matching table_start. Brisk: ".$table_cur->table_start."  Table: ".$bin5->table_start);
-                    $no_recovery = TRUE;
-                    $bin5 = FALSE;
-                }
-
-                if ($bin5 != FALSE) {
-                    //
-                    //  SPAWN: JOIN
-                    //
-                    log_main("garbage_manager: bri loaded successfully.");
-                    $bin5->garbage_manager(TRUE);
-
-                    $bin5_table = $bin5->table[0];
-
-                    // is the end of the table
-
-                    if ($bin5->the_end == TRUE) {
-                        /*
-                         *  DESTROY OF FINISHED TABLE && MOVE PLAYER TO ROOM AGAIN
-                         */
-                        log_main("garbage_manager: INSIDE THE END.");
-
-                        $plist = "$table_cur->table_token|$table_cur->idx|$table_cur->player_n";
-                        for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-                            $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
-                        }
-
-                        for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
-                            // stat must be "table" by definition
-                            $user_cur = $this->user[$table_cur->player[$i]];
-                            $bin5_user = $bin5->user[$i];
-
-                            $user_cur->subst      = $bin5_user->subst;
-                            $user_cur->rd_step    = $bin5_user->rd_step;
-                            $user_cur->step       = $bin5_user->step;
-                            $user_cur->lacc       = $bin5_user->lacc;
-                            $user_cur->laccwr     = $bin5_user->lacc;
-                            $user_cur->bantime    = $bin5_user->bantime;
-                            $user_cur->the_end    = $bin5_user->the_end;
-                            if ($user_cur->the_end) {
-                                $this->ghost_sess->push($curtime, $user_cur->sess, GHOST_SESS_REAS_TTOT);
-                            }
-                        }
-
-                        log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME", $plist);
-
-                        $this->room_join_wakeup($user_cur, FALSE, 0);
-                        $table_cur->table_token = "";
-                        $table_cur->wakeup_time = $curtime + WAKEUP_TIME;
-
-                        $this->match_del($table_idx);
-                    }
-                    else {
-                        log_main("gm:: save_data");
-
-                        for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
-                            $this->user[$table_cur->player[$i]]->lacc = $bin5->user[$i]->lacc;
-                        }
-                    }
-                } // if ($bin5 == FALSE
-                else if ($no_recovery == FALSE) {
-                    log_crit("ERROR: table ".$table_idx." unrecoverable join");
-
-                    for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-                        $user_cur = $this->user[$table_cur->player[$i]];
-                        $user_cur->subst = "shutdowner";
-                        $user_cur->step_inc();
-
-                        $ret = sprintf('stat = "%s"; subst = "%s";',  $user_cur->stat, $user_cur->subst);
-                        $ret .= "gst.st = ".($user_cur->step+1)."; ";
-                        // MLANG <br>I dati del tavolo n&deg; ".$user_cur->table." sono inconsistenti, verranno resettati.<br><br>Torni in piedi.<br><br>
-                        $prestr = sprintf($mlang_brisk['tabincon'][$G_lang], $user_cur->table);
-                        $ret .= show_notify($prestr, 2000, $mlang_brisk['btn_close'][$G_lang], 400, 110);
-                        $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-                        $user_cur->step_inc();
-                    }
-
-                    $plist = "$table_cur->table_token|$user_cur->table|$table_cur->player_n";
-                    for ($i = 0 ; $i < $table_cur->player_n ; $i++) {
-                        $plist .= '|'.$this->user[$table_cur->player[$i]]->sess;
-                    }
-                    log_legal($curtime, $user_cur->ip, $user_cur, "STAT:DESTROY_GAME(RECOVERY)", $plist);
-
-                    $this->room_join_wakeup($user_cur, TRUE, -2);
-                    $table_cur->table_token = "";
-                }
+        if(false) {
+            if ($user->flags & USER_FLAG_ISOLAUTH) {
+                $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';
             }
-        } //  if ($table_cur->player_n == PLAYERS_N) {
-    } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-
-    log_rd2("out new loop.");
-
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        $user_cur = $this->user[$i];
-
-        log_rd2("User: ".$user_cur->name."  stat: ".$user_cur->stat."  subst: ".$user_cur->subst);
-
-        if ($user_cur->is_active() == FALSE)
-            continue;
-
-        if ($user_cur->lacc + (($user_cur->ping_req ? 1.5 : 1.0) * EXPIRE_TIME_RD) < ($curtime - $delta)) {
-            // Auto logout dell'utente
-            log_rd2("AUTO LOGOUT.".($user_cur->lacc + EXPIRE_TIME_RD)." curtime - delta ".($curtime - $delta));
-
-            $this->ghost_sess->push($curtime, $user_cur->sess, GHOST_SESS_REAS_TOUT);
-            $user_cur->the_end = TRUE;
-
-            log_rd2("AUTO LOGOUT.");
-            if ($user_cur->stat == 'table' || $user_cur->stat == 'room') {
-                log_auth($user_cur->sess, "Autologout session.");
-
-                if ($user_cur->subst == 'sitdown' || $user_cur->stat == 'table')
-                    $this->room_wakeup($user_cur);
-                else if ($user_cur->subst == 'standup')
-                    $this->room_outstandup($user_cur);
-                else
-                    log_rd2("LOGOUT FROM WHAT ???");
+            else if ($user->flags & USER_FLAG_LISTAUTH) {
+                $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
+            }
+            else {
+                $ret .= 'list_set(\'all\', false, \'\' ); ';
             }
         }
 
-        if ($user_cur->laccwr + EXPIRE_TIME_SMAMMA < ($curtime - $delta)) { // lo rimettiamo in piedi
-            if ($user_cur->stat == 'room' && $user_cur->subst == 'sitdown') {
-                $this->room_wakeup($user_cur);
-                $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
-                /* MLANG: <br>Sei stato inattivo per ".(EXPIRE_TIME_SMAMMA/60.0)." minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.", "torna ai tavoli" */
-                $user_cur->comm[$user_cur->step % COMM_N] .=  show_notify($mlang_brisk['tabtout_a'][$G_lang].(EXPIRE_TIME_SMAMMA/60.0).$mlang_brisk['tabtout_b'][$G_lang], 0, $mlang_brisk['btn_backstand'][$G_lang], 400, 100);
-                $user_cur->step_inc();
-            }
+        if ($user->subst == 'standup')
+            $ret .= "tra.show(); ";
+        else
+            $ret .= "tra.hide(); ";
+
+        $ret .= sprintf('stat = "%s";',  $user->stat);
+
+        $ret .= root_welcome($user);
+        if ($user->flags & USER_FLAG_DBFAILED) {
+            $ret .= "gst.st = ".($user->step+1)."; ";
+            $ret .= show_notify($mlang_brisk['db_failed'][$G_lang], 0, $mlang_brisk['btn_close'][$G_lang], 400, 140);
         }
+
+        $ret .= sprintf('subst = "%s";', $user->subst);
+        $ret .= $user->myname_innerHTML();
+
+        for ($i = 0 ; $i < TABLES_N ; $i++) {
+
+            $ret .= $this->table_content($user, $i);
+
+            $ret .=  $this->table[$i]->act_content($user);
+            if ($this->table[$i]->wag_own != -1)
+                $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
+            else
+                $ret .= sprintf('tra.rem(%d); ', $i);
+        }
+        $ret .= $this->standup_content($user);
+        $ret .= "setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); ";
+
+        return ($ret);
     }
-    log_rd2("GARBAGE UPDATED!");
 
-    $this->garbage_timeout = $curtime + GARBAGE_TIMEOUT;
-    $ismod = TRUE;
+    function room_wakeup($user)
+    {
+        $table_idx = $user->table;
+        $table = $this->table[$table_idx];
 
-    $this->ghost_sess->garbage_manager($curtime);
+        log_main("WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
-    $this->delay_mgr->lastcheck_set($curtime);
-    return ($ismod);
-  }
+        $curtime = time();
 
-  function show_room($user_step, $user)
-  {
-    GLOBAL $G_lang, $mlang_brisk;
-    log_main("show_room: username: ".$user->name);
+        $from_table = ($user->stat == "table");
+        if ($from_table) {
+            log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
-    $ret = sprintf('gst.st = %d; ',  $user_step);
+            for ($i = 0 ; $i < $table->player_n ; $i++) {
+                $user_cur = $this->user[$table->player[$i]];
+                log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
 
-    $prefs = Client_prefs::from_user($user);
-    $ret .= sprintf('prefs_load(\'%s\', false, false);', json_encode($prefs));
-
-    if(false) {
-        if ($user->flags & USER_FLAG_ISOLAUTH) {
-            $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';
-        }
-        else if ($user->flags & USER_FLAG_LISTAUTH) {
-            $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
+                if ($user->idx_get() != $table->player[$i]) {
+                    $user_cur->stat_set("room");
+                    $user_cur->subst = "sitdown";
+                    $user_cur->laccwr = $curtime;
+                }
+                else if ($user->is_active()) {
+                    $user_cur->stat_set("room");
+                    $user_cur->subst = "standup";
+                    $user_cur->laccwr = $curtime;
+                    $user_cur->table = -1;
+                }
+            }
         }
         else {
-            $ret .= 'list_set(\'all\', false, \'\' ); ';
+            $user->stat_set("room");
+            $user->subst = "standup";
+            $user->laccwr = $curtime;
+        }
+
+        $remove_wagon = FALSE;
+        if($table->wag_own == $user->idx_get()) {
+            $table->wag_reset($curtime);
+            $remove_wagon = TRUE;
+        }
+
+        /* aggiorna l'array dei giocatori al tavolo. */
+        $table->user_rem($this, $user);
+
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            $user_cur = $this->user[$i];
+            if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
+                continue;
+
+            // log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
+
+            $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
+            if ($from_table && ($user_cur->table == $table_idx || $user->idx_get() == $i)) {
+                $ret .= 'gst.st_loc++; xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
+                // $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
+                log_main("DOCUMENT.index.php: from table");
+            }
+            else if ($user_cur->stat == "room") {
+                log_main("DOCUMENT.index.php: from table");
+
+                $ret .= $this->table_content($user_cur, $table_idx);
+                $ret .= $this->standup_content($user_cur);
+
+                // $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
+                $ret .= $table->act_content($user);
+
+                if ($user->idx_get() == $i) {
+                    // set the new status
+                    $ret .=  'subst = "standup"; tra.show(); ';
+                    // clean the action buttons in other tables
+                    for ($e = 0 ; $e < TABLES_N ; $e++) {
+                        if ($this->table[$e]->player_n < PLAYERS_N) {
+                            $ret .= $this->table[$e]->act_content($user);
+                        }
+                    }
+                }
+                else {
+                    $ret .= $table->act_content($user_cur);
+                }
+            }
+            log_wr("ROOM_WAKEUP: ".$ret);
+            $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+            $user_cur->step_inc();
         }
     }
 
-    if ($user->subst == 'standup')
-      $ret .= "tra.show(); ";
-    else
-      $ret .= "tra.hide(); ";
+    function room_join_wakeup($user, $update_lacc = FALSE, $trans_delta)
+    {
+        $table_idx = $user->table;
+        $table = $this->table[$table_idx];
 
-    $ret .= sprintf('stat = "%s";',  $user->stat);
+        log_main("JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
 
-    $ret .= root_welcome($user);
-    if ($user->flags & USER_FLAG_DBFAILED) {
-        $ret .= "gst.st = ".($user->step+1)."; ";
-        $ret .= show_notify($mlang_brisk['db_failed'][$G_lang], 0, $mlang_brisk['btn_close'][$G_lang], 400, 140);
-    }
-
-    $ret .= sprintf('subst = "%s";', $user->subst);
-    $ret .= $user->myname_innerHTML();
-
-    for ($i = 0 ; $i < TABLES_N ; $i++) {
-
-      $ret .= $this->table_content($user, $i);
-
-      $ret .=  $this->table[$i]->act_content($user);
-      if ($this->table[$i]->wag_own != -1)
-        $ret .= sprintf('tra.add(%d, "%s: %s"); ', $i,  $this->user[$this->table[$i]->wag_own]->name, $this->table[$i]->wag_com);
-      else
-        $ret .= sprintf('tra.rem(%d); ', $i);
-    }
-    $ret .= $this->standup_content($user);
-    $ret .= "setTimeout(preload_images, 0, g_preload_img_arr, g_imgct); ";
-
-    return ($ret);
-  }
-
-  function room_wakeup($user)
-  {
-    $table_idx = $user->table;
-    $table = $this->table[$table_idx];
-
-    log_main("WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
-
-    $curtime = time();
-
-    $from_table = ($user->stat == "table");
-    if ($from_table) {
-        log_main("WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+        $curtime = time();
+        $user_wup = array();
+        $user_wup_n = 0;
+        $user_tab = array();
+        $user_tab_n = 0;
+        log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
 
         for ($i = 0 ; $i < $table->player_n ; $i++) {
             $user_cur = $this->user[$table->player[$i]];
-            log_main("PREIMPOST: INLOOP name: ".$user_cur->name);
-
-            if ($user->idx_get() != $table->player[$i]) {
+            log_main("PREIMPOST INLOOP name: ".$user_cur->name);
+            if ($user_cur->is_empty()) {
+                continue;
+            }
+            if ($update_lacc == TRUE) {
+                $user_cur->laccwr = $curtime;
+            }
+            log_main("cur: ".$user_cur->name."  subst: ".$user_cur->subst);
+            if ($user_cur->subst == "shutdowned") {
                 $user_cur->stat_set("room");
                 $user_cur->subst = "sitdown";
-                $user_cur->laccwr = $curtime;
             }
-            else if ($user->is_active()) {
+            else if ($user_cur->subst == "shutdowner") {
                 $user_cur->stat_set("room");
                 $user_cur->subst = "standup";
-                $user_cur->laccwr = $curtime;
                 $user_cur->table = -1;
+                $user_wup[$user_wup_n++] = $user_cur;
+
+                $remove_wagon = FALSE;
+                if($table->wag_own == $table->player[$i]) {
+                    $remove_wagon = TRUE;
+                    $table->wag_reset($curtime);
+                }
             }
+            $user_tab[$user_tab_n++] = $table->player[$i];
         }
-    }
-    else {
-        $user->stat_set("room");
-        $user->subst = "standup";
-        $user->laccwr = $curtime;
-    }
 
-    $remove_wagon = FALSE;
-    if($table->wag_own == $user->idx_get()) {
-        $table->wag_reset($curtime);
-        $remove_wagon = TRUE;
-    }
+        for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
+            $table->user_rem($this, $user_wup[$wup_idx]);
 
-    /* aggiorna l'array dei giocatori al tavolo. */
-    $table->user_rem($this, $user);
+        /* aggiorna l'array dei giocatori al tavolo. */
 
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $user_cur = $this->user[$i];
-      if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
-        continue;
-
-      // log_main("VALORI: name: ".$user_cur->name."from_table: ".$from_table."  tab: ".$user_cur->table." taix: ".$table_idx."  ucur: ".$user_cur."  us: ".$user);
-
-      $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
-      if ($from_table && ($user_cur->table == $table_idx || $user->idx_get() == $i)) {
-        $ret .= 'gst.st_loc++; xstm.stop(); window.onunload = null; window.onbeforeunload = null; document.location.assign("index.php");|';
-        // $ret .= 'gst.st_loc++; document.location.assign("index.php");|';
-        log_main("DOCUMENT.index.php: from table");
-      }
-      else if ($user_cur->stat == "room") {
-        log_main("DOCUMENT.index.php: from table");
-
-        $ret .= $this->table_content($user_cur, $table_idx);
-        $ret .= $this->standup_content($user_cur);
-
-        // $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
-        $ret .= $table->act_content($user);
-
-        if ($user->idx_get() == $i) {
-          // set the new status
-          $ret .=  'subst = "standup"; tra.show(); ';
-          // clean the action buttons in other tables
-          for ($e = 0 ; $e < TABLES_N ; $e++) {
-            if ($this->table[$e]->player_n < PLAYERS_N) {
-              $ret .= $this->table[$e]->act_content($user);
+        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+            log_main("START LOOP");
+            $user_cur = $this->user[$i];
+            if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') { // is not active user or the stat isn't 'room'
+                log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
+                continue;
             }
-          }
-        }
-        else {
-          $ret .= $table->act_content($user_cur);
-        }
-      }
-      log_wr("ROOM_WAKEUP: ".$ret);
-      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
-    }
-  }
 
-  function room_join_wakeup($user, $update_lacc = FALSE, $trans_delta)
-  {
-    $table_idx = $user->table;
-    $table = $this->table[$table_idx];
+            log_main("___");
+            log_main("VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx);
 
-    log_main("JOIN_WAKEUP: begin function table:".$table_idx."  stat: ".$user->stat."  subst: ".$user->subst);
+            $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
+            if ($user_cur->stat == "room") {
+                log_main("DOCUMENT.index.php from table");
 
-    $curtime = time();
-    $user_wup = array();
-    $user_wup_n = 0;
-    $user_tab = array();
-    $user_tab_n = 0;
-    log_main("JOIN WAKEUP: from table [".$user->table."] nplayers_n: ".$this->table[$user->table]->player_n);
+                $ret .= $this->table_content($user_cur, $table_idx);
+                $ret .= $this->standup_content($user_cur);
 
-    for ($i = 0 ; $i < $table->player_n ; $i++) {
-        $user_cur = $this->user[$table->player[$i]];
-        log_main("PREIMPOST INLOOP name: ".$user_cur->name);
-        if ($user_cur->is_empty()) {
-            continue;
-        }
-        if ($update_lacc == TRUE) {
-            $user_cur->laccwr = $curtime;
-        }
-        log_main("cur: ".$user_cur->name."  subst: ".$user_cur->subst);
-        if ($user_cur->subst == "shutdowned") {
-            $user_cur->stat_set("room");
-            $user_cur->subst = "sitdown";
-        }
-        else if ($user_cur->subst == "shutdowner") {
-            $user_cur->stat_set("room");
-            $user_cur->subst = "standup";
-            $user_cur->table = -1;
-            $user_wup[$user_wup_n++] = $user_cur;
-
-            $remove_wagon = FALSE;
-            if($table->wag_own == $table->player[$i]) {
-                $remove_wagon = TRUE;
-                $table->wag_reset($curtime);
-            }
-        }
-        $user_tab[$user_tab_n++] = $table->player[$i];
-    }
-
-    for ($wup_idx = 0 ; $wup_idx < $user_wup_n  ; $wup_idx++)
-      $table->user_rem($this, $user_wup[$wup_idx]);
-
-    /* aggiorna l'array dei giocatori al tavolo. */
-
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      log_main("START LOOP");
-      $user_cur = $this->user[$i];
-      if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') { // is not active user or the stat isn't 'room'
-        log_main("name: ".$user_cur->name."skip   subst: ".$user_cur->subst);
-        continue;
-      }
-
-      log_main("___");
-      log_main("VALORI name: ".$user_cur->name."  tab: ".$user_cur->table." taix: ".$table_idx);
-
-      $ret = "gst.st = ".($user_cur->step+1)."; ".($remove_wagon ? sprintf("tra.rem(%d);",$table_idx) : "");
-      if ($user_cur->stat == "room") {
-        log_main("DOCUMENT.index.php from table");
-
-        $ret .= $this->table_content($user_cur, $table_idx);
-        $ret .= $this->standup_content($user_cur);
-
-        $ret .= $table->act_content($user_cur);
+                $ret .= $table->act_content($user_cur);
 
 
-        for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
-            if ($user_tab[$tab_idx] == $i)
-                break;
+                for ($tab_idx = 0 ; $tab_idx < $user_tab_n  ; $tab_idx++)
+                    if ($user_tab[$tab_idx] == $i)
+                        break;
 
-        // for users that wakeup the room will be reconstructed by index_rd.php
-        if ($tab_idx < $user_tab_n) {
-          log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
+                // for users that wakeup the room will be reconstructed by index_rd.php
+                if ($tab_idx < $user_tab_n) {
+                    log_main("PRE show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
 //        ARRAY_POP DISABLED
 //           if ($trans_delta == 0)
 //             while (array_pop($user_cur->comm) != NULL);
 
-          $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
-          $user_cur->comm[$user_cur->step % COMM_N] = "";
-          $user_cur->step_inc();
-          $user_cur->comm[$user_cur->step % COMM_N] = $this->show_room(($user_cur->step + 1), $user_cur);
-          $user_cur->step_inc();
-          log_main("POST show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
+                    $user_cur->trans_step = $user_cur->step + 1 + $trans_delta;
+                    $user_cur->comm[$user_cur->step % COMM_N] = "";
+                    $user_cur->step_inc();
+                    $user_cur->comm[$user_cur->step % COMM_N] = $this->show_room(($user_cur->step + 1), $user_cur);
+                    $user_cur->step_inc();
+                    log_main("POST show_room username: ".$user_cur->name."  STEP: ".$user_cur->step);
 
-          continue;
+                    continue;
+                }
+                log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
+
+                log_main("JOIN_WAKEUP more");
+
+                $ret .= $table->act_content($user_cur);
+
+                log_main("JOIN_WAKEUP end more");
+            }
+            log_wr("ROOM_JOIN_WAKEUP: ".$ret);
+            $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+            $user_cur->step_inc();
         }
-        log_main("JOIN_WAKEUP wup_idx ".$wup_idx."  wup_n ".$user_wup_n);
-
-        log_main("JOIN_WAKEUP more");
-
-        $ret .= $table->act_content($user_cur);
-
-        log_main("JOIN_WAKEUP end more");
-      }
-      log_wr("ROOM_JOIN_WAKEUP: ".$ret);
-      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
     }
-  }
 
   /*
     function info_show($user, $target, $dt)
@@ -1784,36 +1784,36 @@ class Brisk
 
   function room_outstandup($user)
   {
-    $this->room_sitdown($user, -1);
+      $this->room_sitdown($user, -1);
   }
 
   function table_update($user)
   {
-    log_main("table_update: pre - USER: ".$user->name);
+      log_main("table_update: pre - USER: ".$user->name);
 
-    $table_idx = $user->table;
+      $table_idx = $user->table;
 
-    if ($table_idx > -1)
-      $table = $this->table[$table_idx];
-
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $ret = "";
-      $user_cur = $this->user[$i];
-      if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
-          continue;
-
-      $ret = "gst.st = ".($user_cur->step+1)."; ";
       if ($table_idx > -1)
-        $ret .= $this->table_content($user_cur, $table_idx);
+          $table = $this->table[$table_idx];
 
-      if ($user->idx_get() == $i) {
-          $ret .= $user->myname_innerHTML();
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          $ret = "";
+          $user_cur = $this->user[$i];
+          if ($user_cur->is_active() == FALSE || $user_cur->stat != 'room') // is not active user or the stat isn't 'room'
+              continue;
+
+          $ret = "gst.st = ".($user_cur->step+1)."; ";
+          if ($table_idx > -1)
+              $ret .= $this->table_content($user_cur, $table_idx);
+
+          if ($user->idx_get() == $i) {
+              $ret .= $user->myname_innerHTML();
+          }
+          $user_cur->comm[$user_cur->step % COMM_N] = $ret;
+          $user_cur->step_inc();
       }
-      $user_cur->comm[$user_cur->step % COMM_N] = $ret;
-      $user_cur->step_inc();
-    }
 
-    log_main("table_update: post");
+      log_main("table_update: post");
   }
 
   function room_sitdown($user, $table_idx)
@@ -1930,443 +1930,443 @@ class Brisk
 
   function chatt_send($user, $mesg, $mlang_indwr = NULL)
   {
-    GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
-    $only_you = FALSE;
+      GLOBAL $G_base, $G_alarm_passwd, $mlang_brisk, $G_lang;
+      $only_you = FALSE;
 
-    // fprintf(STDERR, "WE ARE HERE: [%s]\n", $mesg);
+      // fprintf(STDERR, "WE ARE HERE: [%s]\n", $mesg);
 
-    // common settings
-    $msg = mb_substr($mesg, 6, 128, "UTF-8");
-    $curtime = time();
-    $dt = date("H:i ", $curtime);
-    $target = "";
+      // common settings
+      $msg = mb_substr($mesg, 6, 128, "UTF-8");
+      $curtime = time();
+      $dt = date("H:i ", $curtime);
+      $target = "";
 
-    //
-    //  Compute actions
-    //
+      //
+      //  Compute actions
+      //
 
-    $to_user     = FALSE;
-    $to_all      = FALSE;
-    $to_room     = FALSE;
-    $to_tabl     = FALSE;
-    $is_normchat = FALSE;
-    /* for old isolation management $is_ticker   = FALSE; */
-    $update_room = FALSE;
+      $to_user     = FALSE;
+      $to_all      = FALSE;
+      $to_room     = FALSE;
+      $to_tabl     = FALSE;
+      $is_normchat = FALSE;
+      /* for old isolation management $is_ticker   = FALSE; */
+      $update_room = FALSE;
 
-    if (strcmp($msg,  "/tav") == 0 ||
-        strncmp($msg, "/tav ", 5) == 0) {
-      do {
-        if ($user->stat != 'room' || $user->subst != 'sitdown') {
-          /* MLANG: "<br>Per attivare il messaggio di segnalazione del tavolo occorre essere seduti.<br><br>", "<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>", "<br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>" */
-          $msg = $mlang_brisk['tickmust'][$G_lang];
-          $to_user = show_notify($msg, 0, "chiudi", 400, 100);
+      if (strcmp($msg,  "/tav") == 0 ||
+      strncmp($msg, "/tav ", 5) == 0) {
+          do {
+              if ($user->stat != 'room' || $user->subst != 'sitdown') {
+                  /* MLANG: "<br>Per attivare il messaggio di segnalazione del tavolo occorre essere seduti.<br><br>", "<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>", "<br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>" */
+                  $msg = $mlang_brisk['tickmust'][$G_lang];
+                  $to_user = show_notify($msg, 0, "chiudi", 400, 100);
 
-          break;
-        }
-
-        $table = $this->table[$user->table];
-
-        if ($table->wag_own != -1) {
-          // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>
-          $msg = $mlang_brisk['tickjust'][$G_lang];
-          $to_user = show_notify($msg, 0, "chiudi", 400, 100);
-
-          break;
-        }
-
-        $dtime = $curtime - $table->wag_tout;
-        if ($dtime  < EXPIRE_TIME_WAG) {
-          // MLANG - <br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>
-          $msg = sprintf($mlang_brisk['tickwait'][$G_lang],
-                         EXPIRE_TIME_WAG - $dtime, (EXPIRE_TIME_WAG - $dtime == 1 ? ($G_lang == 'en' ? "" : "o") : ($G_lang == 'en' ? "s" : "i")));
-          $to_user = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang] , 400, 100);
-
-          break;
-        }
-
-        $msg = substr($msg, 5);
-
-        $table->wag_set($user->idx_get(), $msg);
-        $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
-        $to_room = $to_user;
-        /* for old isolation management $is_ticker = TRUE; */
-      } while (0);
-    } // /tav chat command
-    // just for development use currently
-    else if (FALSE && strncmp($msg, "/out ", 5) == 0) {
-        fprintf(STDERR, "MOP OUT\n");
-        $target = substr($msg, 5);
-        $this->kickuser_by_name($target, GHOST_SESS_REAS_ANON);
-    }
-    else if (strncmp($msg, "/alarm ", 7) == 0) {
-      if (strncmp($msg, "/alarm to ", 10) == 0) {
-        $sp_pos = strpos($msg, " ", 10);
-        $target = substr($msg, 10, $sp_pos - 10);
-        $alarm_check = "/alarm to ".$target." ".$G_alarm_passwd." ";
-      }
-      else {
-        $target = "";
-        $alarm_check = "/alarm ".$G_alarm_passwd." ";
-      }
-      do {
-        if (strncmp($msg, $alarm_check, strlen($alarm_check)) != 0) {
-          /* MLANG: "<br>La password digitata non &egrave; corretta.<br><br>" */
-          $msg = $mlang_brisk['alarpass'][$G_lang];
-          $to_user = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 100);
-
-          break;
-        }
-
-        /* MLANG: "Alarm <b>%s</b> inviato a <b>%s</b>." */
-        $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))),
-                           ($target == "" ? $mlang_brisk['tit_all'][$G_lang] : xcape($target)) );
-        $to_user = nickserv_msg($dt, $prestr);
-
-        $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
-                       $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
-        /* MLANG: "chiudi" */
-        $to_all = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 120);
-      } while (0);
-    } // /alarm chat command
-    else if (strncmp($msg, "/listen ", 8) == 0) {
-      $arg = substr($msg, 8);
-
-      if (strcasecmp($arg, "isolation") == 0) {
-        $flags_old = 0;
-        if ($user->stat == 'room' && $user->subst == 'sitdown' &&
-            $user->table >= TABLES_AUTH_N) {
-          $to_user = nickserv_msg($dt, $mlang_brisk['listmust'][$G_lang]);
-
-        }
-        else {
-          $user->flags &= ~USER_FLAG_MAP_AUTH;
-          $user->flags |= USER_FLAG_ISOLAUTH;
-          $to_user = 'list_set(\'isolation\', true, \''.$mlang_brisk['tit_onisol'][$G_lang].'\'); ';
-        }
-      }
-      else if (strcasecmp($arg, "auth") == 0) {
-        $flags_old = $user->flags;
-        $user->flags &= ~USER_FLAG_MAP_AUTH;
-        $user->flags |= USER_FLAG_LISTAUTH;
-        $to_user = 'list_set(\'auth\', true, \''.$mlang_brisk['tit_onauth'][$G_lang].'\'); ';
-      }
-      else {
-        $flags_old = $user->flags;
-        $user->flags &= ~USER_FLAG_MAP_AUTH;
-        $to_user = 'list_set(\'all\', true, \'\'); ';
-
-      }
-      // if from isolation redraw standup area
-      if (($flags_old ^ $user->flags) & USER_FLAG_ISOLAUTH) {
-        $to_user .= 'standup_data_old = null; '.$this->standup_content($user);
-
-      }
-    }
-    else if (strcmp($msg, "/authreq") == 0) {
-        if ($user->is_cert()) {
-            $to_user = sprintf('authbox(300,200);');
-        }
-        else {
-            /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
-            $to_user = nickserv_msg($dt, $mlang_brisk['authmust'][$G_lang]);
-        }
-    }
-    else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
-        if ($user->is_auth()) {
-        $to_user = sprintf('mesgtoadmbox(500,300);');
-      }
-      else {
-        /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
-        $to_user = nickserv_msg($dt, $mlang_brisk['mesgmust'][$G_lang]);
-      }
-    }
-    else if (FALSE && strncmp($msg, "/nick ", 6) == 0) {
-      log_main("chatt_send BEGIN");
-
-      do {
-        if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
-          $to_user = nickserv_msg($dt, $mlang_brisk['nickmust'][$G_lang]);
-          break;
-        }
-
-        $msg = "COMMAND ".$msg;
-        for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-          $user_cur = $this->user[$i];
-
-          if ($user_cur->is_active() == FALSE)
-            continue;
-          if (strcasecmp($user_cur->name,$name_new) == 0)
-            break;
-          }
-        if ($i <  MAX_PLAYERS) {
-          $prestr = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
-          $to_user = nickserv_msg($dt, $prestr);
-          break;
-        }
-
-        /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-        if ($user->is_auth()) {
-          if (strcasecmp($user->name,$name_new) != 0) {
-             if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
-                ($user->subst == 'standup' ||
-                 ($user->subst != 'standup' && $this->table[$user->table]->auth_type == TABLE_AUTH_TY_PUBL)
-                 )
-                ) {
-              $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL); // Remove auth if name changed
-              for ($i = 0 ; $i < TABLES_N ; $i++) {
-                $to_user .= $this->table[$i]->act_content($user);
+                  break;
               }
-            }
-            else {
-              $to_user = nickserv_msg($dt, $mlang_brisk['authchan'][$G_lang]);
-              break;
-            }
-          }
-        }
-        $user->name = $name_new; // OK - nick changed
-        /* se nome gia' in uso, segnala cosa potrebbe capitare */
-        if ( ! $user->is_auth() ) {
-            if (($bdb = BriskDB::create()) != FALSE) {
-                $bdb->users_load();
-                /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
-                if ($bdb->login_exists(strtolower($name_new))) {
-                    $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
-                    $to_user .= nickserv_msg($dt, $prestr);
-                }
-            }
-        }
 
-        log_main("chatt_send start set");
+              $table = $this->table[$user->table];
 
-        $update_room = TRUE;
-      } while (0);
-    } // nick chat command
-    else if (strncmp($msg, "/info ", 6) == 0) {
-        do {
-            if (! $user->is_auth()) {
-                if ($mlang_indwr) {
-                    $to_user = nickserv_msg($dt, $mlang_indwr['info_auth'][$G_lang]);
-                }
-                else {
-                    $to_user = nickserv_msg($dt, "error");
-                }
-                break;
-            }
-            $info_user = substr($msg, 6);
+              if ($table->wag_own != -1) {
+                  // MLANG <br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br>
+                  $msg = $mlang_brisk['tickjust'][$G_lang];
+                  $to_user = show_notify($msg, 0, "chiudi", 400, 100);
 
-            echo $this->info_show($user, urldecode($info_user), $dt);
-        } while(0);
-    }
-    else if (strncmp($msg, "/st ", 4) == 0) {
-      log_main("chatt_send BEGIN");
-
-      do {
-        $st_str = substr($msg, 4);
-
-        if (strcasecmp($st_str, "normale") == 0) {
-          $st = USER_FLAG_S_NORM;
-        }
-        else if (strcasecmp($st_str, "pausa") == 0) {
-          $st = USER_FLAG_S_PAU;
-        }
-        else if (strcasecmp($st_str, "fuori") == 0) {
-          $st = USER_FLAG_S_OUT;
-        }
-        else if (strcasecmp($st_str, "cane") == 0) {
-          $st = USER_FLAG_S_DOG;
-        }
-        else if (strcasecmp($st_str, "cibo") == 0) {
-          $st = USER_FLAG_S_EAT;
-        }
-        else if (strcasecmp($st_str, "lavoro") == 0) {
-          $st = USER_FLAG_S_WRK;
-        }
-        else if (strcasecmp($st_str, "sigaretta") == 0) {
-          $st = USER_FLAG_S_SMK;
-        }
-        else if (strcasecmp($st_str, "presente") == 0) {
-          $st = USER_FLAG_S_EYE;
-        }
-        else if (strcasecmp($st_str, "coniglio") == 0) {
-          $st = USER_FLAG_S_RABB;
-        }
-        else if (strcasecmp($st_str, "calcio") == 0) {
-          $st = USER_FLAG_S_SOCC;
-        }
-        else if (strcasecmp($st_str, "pupo") == 0) {
-          $st = USER_FLAG_S_BABY;
-        }
-        else if (strcasecmp($st_str, "pulizie") == 0) {
-          $st = USER_FLAG_S_MOP;
-        }
-        else if (strcasecmp($st_str, "babbo") == 0) {
-          $st = USER_FLAG_S_BABBO;
-        }
-        else if (strcasecmp($st_str, "renna") == 0) {
-          $st = USER_FLAG_S_RENNA;
-        }
-        else if (strcasecmp($st_str, "pupazzo") == 0) {
-          $st = USER_FLAG_S_PUPAZ;
-        }
-        else if (strcasecmp($st_str, "vischio") == 0) {
-          $st = USER_FLAG_S_VISCH;
-        }
-        else {
-          /* MLANG: "Questo stato non esiste." */
-          $to_user = nickserv_msg($dt, $mlang_brisk['statunkn'][$G_lang]);
-          break;
-        }
-
-        log_main("chatt_send start set");
-        if (($user->flags & USER_FLAG_S_ALL) != $st) {
-          $update_room = TRUE;
-          $user->flags = ($user->flags & ~USER_FLAG_S_ALL) | $st;
-        }
-      } while (0);
-    } // nick chat command
-
-    else { // normal chat line
-      $is_normchat = TRUE;
-      if (CHAT_ENABLED && $curtime < ($user->chat_ban + $user->chat_dlt)) {
-        $only_you = TRUE;
-        $user->chat_dlt = $user->chat_dlt * 2;
-        if ($user->chat_dlt > 120)
-          $user->chat_dlt = 120;
-      }
-      else if ($user->chat_lst == $msg)
-        $only_you = TRUE;
-      else if (CHAT_ENABLED && $curtime - $user->chattime[($user->chat_cur + 1) % CHAT_N] < CHAT_ILL_TIME) {
-        $user->chat_ban = $curtime;
-        $user->chat_dlt = 5;
-        $only_you = TRUE;
-      }
-      else {
-        $user->chat_ban = 0;
-        $user->chat_dlt = 0;
-      }
-
-      if ($only_you) {
-        $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
-      }
-      else {
-          // TEMPORARY DISABLED UNTIL test user option will be available
-          // if ( TRUE && (!$user->is_auth() || $user->is_appr()) ) {
-          if (!$user->is_auth()) {
-              $to_user = nickserv_msg($dt, xcape("Visto l'elevato numero di molestatori che ultimamente hanno preso dimora su Brisk abbiamo deciso"));
-              $to_user .= nickserv_msg($dt, xcape("di disattivare temporaneamente la chat in room per i non registrati, non ce ne vogliate e buone feste."));
-              if (FALSE) {
-                  $aug_head = array("Tanti", "Tantissimi", "Un enormità", "Un milione", "Un' esagerazione");
-                  $aug_body = array("a tutti gli utenti", "a tutti gli uomini", "a tutte le donne", "a tutti gli utenti");
-                  $aug_tail = array("di Brisk", "del sito", "della ciurma", "della comitiva", "del gruppo");
-
-                  $auguri = sprintf("%s auguri %s %s.",
-                                    $aug_head[mt_rand(0, count($aug_head)-1)],
-                                    $aug_body[mt_rand(0, count($aug_body)-1)],
-                                    $aug_tail[mt_rand(0, count($aug_tail)-1)]);
-
-                  $to_room = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name),
-                                     xcape($auguri));
+                  break;
               }
+
+              $dtime = $curtime - $table->wag_tout;
+              if ($dtime  < EXPIRE_TIME_WAG) {
+                  // MLANG - <br>Il messaggio di segnalazione del tavolo<br>&egrave; disattivato ancora per %d second%s.<br><br>
+                  $msg = sprintf($mlang_brisk['tickwait'][$G_lang],
+                  EXPIRE_TIME_WAG - $dtime, (EXPIRE_TIME_WAG - $dtime == 1 ? ($G_lang == 'en' ? "" : "o") : ($G_lang == 'en' ? "s" : "i")));
+                  $to_user = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang] , 400, 100);
+
+                  break;
+              }
+
+              $msg = substr($msg, 5);
+
+              $table->wag_set($user->idx_get(), $msg);
+              $to_user = sprintf('tra.add(%d, "%s");', $user->table, xcape(sprintf("%s: %s", $user->name, $msg)));
+              $to_room = $to_user;
+              /* for old isolation management $is_ticker = TRUE; */
+          } while (0);
+      } // /tav chat command
+      // just for development use currently
+      else if (FALSE && strncmp($msg, "/out ", 5) == 0) {
+          fprintf(STDERR, "MOP OUT\n");
+          $target = substr($msg, 5);
+          $this->kickuser_by_name($target, GHOST_SESS_REAS_ANON);
+      }
+      else if (strncmp($msg, "/alarm ", 7) == 0) {
+          if (strncmp($msg, "/alarm to ", 10) == 0) {
+              $sp_pos = strpos($msg, " ", 10);
+              $target = substr($msg, 10, $sp_pos - 10);
+              $alarm_check = "/alarm to ".$target." ".$G_alarm_passwd." ";
           }
           else {
-              $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
-              // temporary silentiation for troll (will became array check)
-              // if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
-              $to_room = $to_user;
+              $target = "";
+              $alarm_check = "/alarm ".$G_alarm_passwd." ";
           }
-      }
+          do {
+              if (strncmp($msg, $alarm_check, strlen($alarm_check)) != 0) {
+                  /* MLANG: "<br>La password digitata non &egrave; corretta.<br><br>" */
+                  $msg = $mlang_brisk['alarpass'][$G_lang];
+                  $to_user = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 100);
 
-      log_legal($curtime, $user->ip, $user,
-                ($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
+                  break;
+              }
 
-      $user->chat_lst = "$msg";
-      $user->chattime[$user->chat_cur % CHAT_N] = $curtime;
-      $user->chat_cur++;
-    }
+              /* MLANG: "Alarm <b>%s</b> inviato a <b>%s</b>." */
+              $prestr = sprintf($mlang_brisk['alarret'][$G_lang], xcape(substr($msg, strlen($alarm_check))),
+              ($target == "" ? $mlang_brisk['tit_all'][$G_lang] : xcape($target)) );
+              $to_user = nickserv_msg($dt, $prestr);
 
-    if ($to_all) {
-      $to_room = $to_all;
-      $to_tabl = $to_all;
-    }
+              $msg = sprintf("<br><b>%s<br><br>%s</b><br><br>",
+              $dt.NICKSERV, xcape(substr($msg, strlen($alarm_check))));
+              /* MLANG: "chiudi" */
+              $to_all = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 120);
+          } while (0);
+      } // /alarm chat command
+      else if (strncmp($msg, "/listen ", 8) == 0) {
+          $arg = substr($msg, 8);
 
-    //
-    //  Output to clients
-    //
+          if (strcasecmp($arg, "isolation") == 0) {
+              $flags_old = 0;
+              if ($user->stat == 'room' && $user->subst == 'sitdown' &&
+              $user->table >= TABLES_AUTH_N) {
+                  $to_user = nickserv_msg($dt, $mlang_brisk['listmust'][$G_lang]);
 
-    if ($to_user != FALSE) {
-      $user->comm[$user->step % COMM_N] =  "gst.st = ".($user->step+1)."; ";
-      $user->comm[$user->step % COMM_N] .= $to_user;
-      $user->step_inc();
-    }
-
-    if ($to_room != FALSE) {
-      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        $user_cur = $this->user[$i];
-        if ($target != "" && $user_cur->name != $target)
-          continue;
-        if ($user_cur->is_active() == FALSE // is not active user
-            || $user_cur->stat == 'table'   // or stat is 'table'
-            || $user->idx_get() == $i)      // or the $user idx is equal to current var
-          continue;
-
-        if ($is_normchat == TRUE) {
-          // use MAP_AUTH to check if auth or isolation
-          if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
-              if ( ! $user->is_auth() ) {
-                  continue;
+              }
+              else {
+                  $user->flags &= ~USER_FLAG_MAP_AUTH;
+                  $user->flags |= USER_FLAG_ISOLAUTH;
+                  $to_user = 'list_set(\'isolation\', true, \''.$mlang_brisk['tit_onisol'][$G_lang].'\'); ';
               }
           }
-        }
-        /*
-        else if ($is_ticker) {
-          if (($user_cur->flags & USER_FLAG_MAP_AUTH) == USER_FLAG_ISOLAUTH) {
-            if ($user->table >= TABLES_AUTH_N)
-              continue;
+          else if (strcasecmp($arg, "auth") == 0) {
+              $flags_old = $user->flags;
+              $user->flags &= ~USER_FLAG_MAP_AUTH;
+              $user->flags |= USER_FLAG_LISTAUTH;
+              $to_user = 'list_set(\'auth\', true, \''.$mlang_brisk['tit_onauth'][$G_lang].'\'); ';
           }
-        }
-        */
-        $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
-        $user_cur->comm[$user_cur->step % COMM_N] .= $to_room;
-        $user_cur->step_inc();
+          else {
+              $flags_old = $user->flags;
+              $user->flags &= ~USER_FLAG_MAP_AUTH;
+              $to_user = 'list_set(\'all\', true, \'\'); ';
+
+          }
+          // if from isolation redraw standup area
+          if (($flags_old ^ $user->flags) & USER_FLAG_ISOLAUTH) {
+              $to_user .= 'standup_data_old = null; '.$this->standup_content($user);
+
+          }
       }
-    }
+      else if (strcmp($msg, "/authreq") == 0) {
+          if ($user->is_cert()) {
+              $to_user = sprintf('authbox(300,200);');
+          }
+          else {
+              /* MLANG: "<b>Per autenticare qualcuno devi a tua volta essere autenticato.</b>", "Il nickname deve contenere almeno una lettera dell\'alfabeto o una cifra.", "Nickname <b>%s</b> gi&agrave; in uso." */
+              $to_user = nickserv_msg($dt, $mlang_brisk['authmust'][$G_lang]);
+          }
+      }
+      else if (strncmp($msg, "/mesgtoadm", 8) == 0) {
+          if ($user->is_auth()) {
+              $to_user = sprintf('mesgtoadmbox(500,300);');
+          }
+          else {
+              /* MLANG: "<b>Per inviare un messaggio devi essere autenticato.</b>" */
+              $to_user = nickserv_msg($dt, $mlang_brisk['mesgmust'][$G_lang]);
+          }
+      }
+      else if (FALSE && strncmp($msg, "/nick ", 6) == 0) {
+          log_main("chatt_send BEGIN");
 
-    if ($to_tabl) {
-        // FIXME BRISK4: include for each kind of table
-        require_once("${G_base}briskin5/Obj/briskin5.phh");
-        // Before all align times with table timeout
-        for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-            if (isset($this->match[$table_idx])) {
-                $bin5 = $this->match[$table_idx];
+          do {
+              if (($name_new = validate_name(substr($msg, 6))) == FALSE) {
+                  $to_user = nickserv_msg($dt, $mlang_brisk['nickmust'][$G_lang]);
+                  break;
+              }
 
-                $bin5_table = $bin5->table[0];
-                for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
-                    // stat must be "table" by definition
-                    $bin5_user = $bin5->user[$i];
+              $msg = "COMMAND ".$msg;
+              for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+                  $user_cur = $this->user[$i];
 
-                    if ($target != "" && $bin5_user->name != $target)
-                        continue;
-                    log_main("writa: ".$user_mesg);
-                    $bin5_user->comm[$bin5_user->step % COMM_N] = "gst.st = ".($bin5_user->step+1)."; ";
-                    $bin5_user->comm[$bin5_user->step % COMM_N] .= $to_tabl;
-                    $bin5_user->step_inc();
+                  if ($user_cur->is_active() == FALSE)
+                      continue;
+                  if (strcasecmp($user_cur->name,$name_new) == 0)
+                      break;
+              }
+              if ($i <  MAX_PLAYERS) {
+                  $prestr = sprintf($mlang_brisk['nickdupl'][$G_lang], xcape($name_new));
+                  $to_user = nickserv_msg($dt, $prestr);
+                  break;
+              }
+
+              /* MLANG: "<b>Non puoi cambiare nick a un tavolo per soli autenticati.</b>", "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
+              if ($user->is_auth()) {
+                  if (strcasecmp($user->name,$name_new) != 0) {
+                      if (( ($user->flags & USER_FLAG_MAP_AUTH) != USER_FLAG_ISOLAUTH) &&
+                      ($user->subst == 'standup' ||
+                      ($user->subst != 'standup' && $this->table[$user->table]->auth_type == TABLE_AUTH_TY_PUBL)
+                      )
+                      ) {
+                          $user->flags &= ~(USER_FLAG_AUTH | USER_FLAG_TY_ALL); // Remove auth if name changed
+                          for ($i = 0 ; $i < TABLES_N ; $i++) {
+                              $to_user .= $this->table[$i]->act_content($user);
+                          }
+                      }
+                      else {
+                          $to_user = nickserv_msg($dt, $mlang_brisk['authchan'][$G_lang]);
+                          break;
+                      }
+                  }
+              }
+              $user->name = $name_new; // OK - nick changed
+              /* se nome gia' in uso, segnala cosa potrebbe capitare */
+              if ( ! $user->is_auth() ) {
+                  if (($bdb = BriskDB::create()) != FALSE) {
+                      $bdb->users_load();
+                      /* MLANG: "Il nickname <b>\'%s\'</b> &egrave; gi&agrave; registrato, <b>se il suo proprietario si autentificher&agrave; verrai rinominato d\'ufficio come ghost<i>N</i>.</b>" */
+                      if ($bdb->login_exists(strtolower($name_new))) {
+                          $prestr = sprintf($mlang_brisk['nickjust'][$G_lang], xcape($name_new));
+                          $to_user .= nickserv_msg($dt, $prestr);
+                      }
+                  }
+              }
+
+              log_main("chatt_send start set");
+
+              $update_room = TRUE;
+          } while (0);
+      } // nick chat command
+      else if (strncmp($msg, "/info ", 6) == 0) {
+          do {
+              if (! $user->is_auth()) {
+                  if ($mlang_indwr) {
+                      $to_user = nickserv_msg($dt, $mlang_indwr['info_auth'][$G_lang]);
+                  }
+                  else {
+                      $to_user = nickserv_msg($dt, "error");
+                  }
+                  break;
+              }
+              $info_user = substr($msg, 6);
+
+              echo $this->info_show($user, urldecode($info_user), $dt);
+          } while(0);
+      }
+      else if (strncmp($msg, "/st ", 4) == 0) {
+          log_main("chatt_send BEGIN");
+
+          do {
+              $st_str = substr($msg, 4);
+
+              if (strcasecmp($st_str, "normale") == 0) {
+                  $st = USER_FLAG_S_NORM;
+              }
+              else if (strcasecmp($st_str, "pausa") == 0) {
+                  $st = USER_FLAG_S_PAU;
+              }
+              else if (strcasecmp($st_str, "fuori") == 0) {
+                  $st = USER_FLAG_S_OUT;
+              }
+              else if (strcasecmp($st_str, "cane") == 0) {
+                  $st = USER_FLAG_S_DOG;
+              }
+              else if (strcasecmp($st_str, "cibo") == 0) {
+                  $st = USER_FLAG_S_EAT;
+              }
+              else if (strcasecmp($st_str, "lavoro") == 0) {
+                  $st = USER_FLAG_S_WRK;
+              }
+              else if (strcasecmp($st_str, "sigaretta") == 0) {
+                  $st = USER_FLAG_S_SMK;
+              }
+              else if (strcasecmp($st_str, "presente") == 0) {
+                  $st = USER_FLAG_S_EYE;
+              }
+              else if (strcasecmp($st_str, "coniglio") == 0) {
+                  $st = USER_FLAG_S_RABB;
+              }
+              else if (strcasecmp($st_str, "calcio") == 0) {
+                  $st = USER_FLAG_S_SOCC;
+              }
+              else if (strcasecmp($st_str, "pupo") == 0) {
+                  $st = USER_FLAG_S_BABY;
+              }
+              else if (strcasecmp($st_str, "pulizie") == 0) {
+                  $st = USER_FLAG_S_MOP;
+              }
+              else if (strcasecmp($st_str, "babbo") == 0) {
+                  $st = USER_FLAG_S_BABBO;
+              }
+              else if (strcasecmp($st_str, "renna") == 0) {
+                  $st = USER_FLAG_S_RENNA;
+              }
+              else if (strcasecmp($st_str, "pupazzo") == 0) {
+                  $st = USER_FLAG_S_PUPAZ;
+              }
+              else if (strcasecmp($st_str, "vischio") == 0) {
+                  $st = USER_FLAG_S_VISCH;
+              }
+              else {
+                  /* MLANG: "Questo stato non esiste." */
+                  $to_user = nickserv_msg($dt, $mlang_brisk['statunkn'][$G_lang]);
+                  break;
+              }
+
+              log_main("chatt_send start set");
+              if (($user->flags & USER_FLAG_S_ALL) != $st) {
+                  $update_room = TRUE;
+                  $user->flags = ($user->flags & ~USER_FLAG_S_ALL) | $st;
+              }
+          } while (0);
+      } // nick chat command
+
+      else { // normal chat line
+          $is_normchat = TRUE;
+          if (CHAT_ENABLED && $curtime < ($user->chat_ban + $user->chat_dlt)) {
+              $only_you = TRUE;
+              $user->chat_dlt = $user->chat_dlt * 2;
+              if ($user->chat_dlt > 120)
+                  $user->chat_dlt = 120;
+          }
+          else if ($user->chat_lst == $msg)
+              $only_you = TRUE;
+          else if (CHAT_ENABLED && $curtime - $user->chattime[($user->chat_cur + 1) % CHAT_N] < CHAT_ILL_TIME) {
+              $user->chat_ban = $curtime;
+              $user->chat_dlt = 5;
+              $only_you = TRUE;
+          }
+          else {
+              $user->chat_ban = 0;
+              $user->chat_dlt = 0;
+          }
+
+          if ($only_you) {
+              $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape("== chat ban =="));
+          }
+          else {
+              // TEMPORARY DISABLED UNTIL test user option will be available
+              // if ( TRUE && (!$user->is_auth() || $user->is_appr()) ) {
+              if (!$user->is_auth()) {
+                  $to_user = nickserv_msg($dt, xcape("Visto l'elevato numero di molestatori che ultimamente hanno preso dimora su Brisk abbiamo deciso"));
+                  $to_user .= nickserv_msg($dt, xcape("di disattivare temporaneamente la chat in room per i non registrati, non ce ne vogliate e buone feste."));
+                  if (FALSE) {
+                      $aug_head = array("Tanti", "Tantissimi", "Un enormità", "Un milione", "Un' esagerazione");
+                      $aug_body = array("a tutti gli utenti", "a tutti gli uomini", "a tutte le donne", "a tutti gli utenti");
+                      $aug_tail = array("di Brisk", "del sito", "della ciurma", "della comitiva", "del gruppo");
+
+                      $auguri = sprintf("%s auguri %s %s.",
+                      $aug_head[mt_rand(0, count($aug_head)-1)],
+                      $aug_body[mt_rand(0, count($aug_body)-1)],
+                      $aug_tail[mt_rand(0, count($aug_tail)-1)]);
+
+                      $to_room = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name),
+                      xcape($auguri));
+                  }
+              }
+              else {
+                  $to_user = sprintf('chatt_sub("%s",[%d,"%s"],"%s");', $dt, $user->flags, xcape($user->name), xcape($msg));
+                  // temporary silentiation for troll (will became array check)
+                  // if (strcasecmp($user->name,'JackRokka') != 0 && $user->sess != '47ea653f602e8')
+                  $to_room = $to_user;
+              }
+          }
+
+          log_legal($curtime, $user->ip, $user,
+          ($user->stat == 'room' ? 'room' : 'table '.$user->table),$msg);
+
+          $user->chat_lst = "$msg";
+          $user->chattime[$user->chat_cur % CHAT_N] = $curtime;
+          $user->chat_cur++;
+      }
+
+      if ($to_all) {
+          $to_room = $to_all;
+          $to_tabl = $to_all;
+      }
+
+      //
+      //  Output to clients
+      //
+
+      if ($to_user != FALSE) {
+          $user->comm[$user->step % COMM_N] =  "gst.st = ".($user->step+1)."; ";
+          $user->comm[$user->step % COMM_N] .= $to_user;
+          $user->step_inc();
+      }
+
+      if ($to_room != FALSE) {
+          for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+              $user_cur = $this->user[$i];
+              if ($target != "" && $user_cur->name != $target)
+                  continue;
+              if ($user_cur->is_active() == FALSE // is not active user
+              || $user_cur->stat == 'table'   // or stat is 'table'
+              || $user->idx_get() == $i)      // or the $user idx is equal to current var
+                  continue;
+
+              if ($is_normchat == TRUE) {
+                  // use MAP_AUTH to check if auth or isolation
+                  if ($user_cur->flags & USER_FLAG_MAP_AUTH) {
+                      if ( ! $user->is_auth() ) {
+                          continue;
+                      }
+                  }
+              }
+              /*
+                else if ($is_ticker) {
+                if (($user_cur->flags & USER_FLAG_MAP_AUTH) == USER_FLAG_ISOLAUTH) {
+                if ($user->table >= TABLES_AUTH_N)
+                continue;
                 }
-            } // if (isset($this->match
-        } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
-    } // if ($to_tabl == true ...
-
-    if ($update_room) {
-      if ($user->stat == 'room' && $user->subst == 'standup') {
-        $this->standup_update($user);
+                }
+              */
+              $user_cur->comm[$user_cur->step % COMM_N] =  "gst.st = ".($user_cur->step+1)."; ";
+              $user_cur->comm[$user_cur->step % COMM_N] .= $to_room;
+              $user_cur->step_inc();
+          }
       }
-      else if ($user->stat == 'room' && $user->subst == 'sitdown') {
-        log_main("chatt_send pre table update");
-        $this->table_update($user);
-        log_main("chatt_send post table update");
-      }
-    } // if ($update_room ...
 
-    return;
+      if ($to_tabl) {
+          // FIXME BRISK4: include for each kind of table
+          require_once("${G_base}briskin5/Obj/briskin5.phh");
+          // Before all align times with table timeout
+          for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+              if (isset($this->match[$table_idx])) {
+                  $bin5 = $this->match[$table_idx];
+
+                  $bin5_table = $bin5->table[0];
+                  for ($i = 0 ; $i < $bin5_table->player_n ; $i++) {
+                      // stat must be "table" by definition
+                      $bin5_user = $bin5->user[$i];
+
+                      if ($target != "" && $bin5_user->name != $target)
+                          continue;
+                      log_main("writa: ".$user_mesg);
+                      $bin5_user->comm[$bin5_user->step % COMM_N] = "gst.st = ".($bin5_user->step+1)."; ";
+                      $bin5_user->comm[$bin5_user->step % COMM_N] .= $to_tabl;
+                      $bin5_user->step_inc();
+                  }
+              } // if (isset($this->match
+          } //  for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
+      } // if ($to_tabl == true ...
+
+      if ($update_room) {
+          if ($user->stat == 'room' && $user->subst == 'standup') {
+              $this->standup_update($user);
+          }
+          else if ($user->stat == 'room' && $user->subst == 'sitdown') {
+              log_main("chatt_send pre table update");
+              $this->table_update($user);
+              log_main("chatt_send post table update");
+          }
+      } // if ($update_room ...
+
+      return;
   } // function chatt_send( ...
 
   function get_user($sess, &$idx)
@@ -2409,255 +2409,255 @@ class Brisk
 
   function add_user(&$sess, &$idx, $name, $pass, $ip, $header, $cookie)
   {
-    GLOBAL $G_base;
+      GLOBAL $G_base;
 
-    $idx = 0;
+      $idx = 0;
 
-    $authenticate = FALSE;
-    $user_type    = 0;
-    $login_exists = FALSE;
-    $ghost = -1;
-    $ghost_auth = FALSE;
-    $idx = -1;
-    $idfree = -1;
-    $code = FALSE;
+      $authenticate = FALSE;
+      $user_type    = 0;
+      $login_exists = FALSE;
+      $ghost = -1;
+      $ghost_auth = FALSE;
+      $idx = -1;
+      $idfree = -1;
+      $code = FALSE;
 
-    if (($name_new = validate_name($name)) == FALSE) {
-      $idx = -2;
-      return (FALSE);
-    }
-
-    log_auth("XXX", sprintf("ARRIVA: [%s] pass:[%s]", $sess, ($pass == FALSE ? "FALSE" : $pass)));
-    if (validate_sess($sess) == FALSE)
-      $sess = "";
-
-    /* if pass != FALSE verify the login with pass */
-    log_auth("XXX", "auth1");
-
-    if (($bdb = BriskDB::create()) != FALSE) {
-        $bdb->users_load();
-        if ($pass != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
-            log_auth("XXX", "auth2");
-            $authenticate = $bdb->login_verify($name_new, $pass, $code);
-            log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
-
-            if ($authenticate != FALSE) {
-                $user_type = $authenticate->type_get();
-            }
-            else {
-                $idx = -3;
-                return (FALSE);
-            }
-        }
-        else {
-            $login_exists =  $bdb->login_exists(strtolower($name_new));
-/*
-TO ENABLE USER-LOGIN ONLY
--            $login_exists =  $bdb->login_exists(strtolower($name_new));
-+            // $login_exists =  $bdb->login_exists(strtolower($name_new));
-+            // Force access with login and password
-+            $idx = -3;
-+            return (FALSE);
-*/
-        }
-    }
-    else {
-        // if db is down, send a warning and verify only current users
-        // no actions at this moment
-    }
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-        /* free user ? */
-        if ($this->user[$i]->is_empty()) {
-            if ($idfree == -1) {
-                $idfree = $i;
-            }
-            continue;
-        }
-        if (strcmp($sess, $this->user[$i]->sess) == 0) {
-            if ($idx == -1) {
-                $idx = $i;
-            }
-        }
-        if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
-            if ($authenticate != FALSE) {
-                $ghost = $i;
-                $ghost_auth = $this->user[$i]->is_auth();
-            }
-            else {
-                $idx = $i;
-                break;
-            }
-        }
-    }
-    if ($idx == -1)
-      $idx = $idfree;
-
-    log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
-
-    /* there is another user logged with your account and you and him have authenticated => new user
-       get the session of the old user */
-    if ($ghost > -1 && $ghost_auth && ($authenticate != FALSE)) {
-      /* swap session */
-
-      $ghost_user = $this->user[$ghost];
-      $curtime = time();
-      $this->ghost_sess->push($curtime, $ghost_user->sess, GHOST_SESS_REAS_ANOT);
-      $ghost_user->comm[$ghost_user->step % COMM_N] = "";
-      $ghost_user->step_inc();
-      if ($sess == "") {
-        $sess = uniqid("");
-        $ghost_user->sess = $sess;
-      }
-      else {
-        $ghost_user->sess = $sess;
+      if (($name_new = validate_name($name)) == FALSE) {
+          $idx = -2;
+          return (FALSE);
       }
 
-      // If user at the table we need to update the table data too
-      $table_idx = $ghost_user->table;
-      if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
-          require_once("${G_base}briskin5/Obj/briskin5.phh");
-          if (isset($this->match[$table_idx])) {
-              $bin5 = $this->match[$table_idx];
+      log_auth("XXX", sprintf("ARRIVA: [%s] pass:[%s]", $sess, ($pass == FALSE ? "FALSE" : $pass)));
+      if (validate_sess($sess) == FALSE)
+          $sess = "";
 
-              if ($bin5->the_end != TRUE) {
-                  $bin5->user[$ghost_user->table_pos]->comm[$bin5->user[$ghost_user->table_pos]->step % COMM_N] = "";
-                  $bin5->user[$ghost_user->table_pos]->step_inc();
-                  $bin5->user[$ghost_user->table_pos]->sess = $sess;
+      /* if pass != FALSE verify the login with pass */
+      log_auth("XXX", "auth1");
+
+      if (($bdb = BriskDB::create()) != FALSE) {
+          $bdb->users_load();
+          if ($pass != FALSE) { // TODO: here add a method to $bdb to check if the db is available.
+              log_auth("XXX", "auth2");
+              $authenticate = $bdb->login_verify($name_new, $pass, $code);
+              log_auth("XXX", "authenticate: ".($authenticate != FALSE ? "TRUE" : "FALSE"));
+
+              if ($authenticate != FALSE) {
+                  $user_type = $authenticate->type_get();
               }
-          }
-      }
-
-      $idx = $ghost;
-      if (defined('CURL_DE_SAC_VERS')) {
-          brisk_cds_execute($this, $ghost, $idx, $sess, $ip, $authenticate, $header);
-      }
-      return ($this->user[$ghost]);
-    }
-    else if ($idx != -1 && $i == MAX_PLAYERS) {
-      /* SUCCESS */
-      $curtime = time();
-      if ($sess == "") {
-        $sess = uniqid("");
-        $this->user[$idx]->sess = $sess;
-      }
-      else {
-        $this->user[$idx]->sess = $sess;
-      }
-      $this->user[$idx]->name = $name_new; // OK - add new user
-      $this->user[$idx]->stat_set("room");
-      $this->user[$idx]->step_set(0);
-      while (array_pop($this->user[$idx]->comm) != NULL);
-      $this->user[$idx]->subst = "standup";
-      $this->user[$idx]->lacc =   $curtime;
-      $this->user[$idx]->laccwr = $curtime;
-      $this->user[$idx]->bantime = 0;
-      $this->user[$idx]->ip = $ip;
-
-      $this->user[$idx]->rec = $authenticate;
-      $this->user[$idx]->flags = $user_type;
-      $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
-      $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
-      log_auth("XXX", sprintf("FLAGS: [%x]", $this->user[$idx]->flags));
-
-      if ($authenticate != FALSE) {
-          $this->user[$idx]->code = $authenticate->code_get();
-          if (0 == 1) {
-              // all this part is included in the db server
-              $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
-
-              if (isset($cookie['CO_list'])) {
-                  // fprintf(STDERR, "QQ: %s CO_list: [%s]\n", __FUNCTION__, $cookie['CO_list']);
-                  if (strcmp($cookie['CO_list'], "auth") == 0) {
-                      $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-                      $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
-                  }
-                  if (strcmp($cookie['CO_list'], "isolation") == 0) {
-                      $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-                      $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
-                  }
-                  else {
-                      $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-                  }
+              else {
+                  $idx = -3;
+                  return (FALSE);
               }
-          }
-          // else {
-          //    fprintf(STDERR, "QQ: CO_list not set flags: %x\n", __FUNCTION__, $this->user[$idx]->flags);
-          // }
-      }
-      // fprintf(STDERR, "QQ %s: flag %x\n", __FUNCTION__, $this->user[$idx]->flags);
-      if ($ghost > -1) {
-        log_main("ghost: rename!");
-        $ghost_user = $this->user[$ghost];
-
-        if ($ghost_auth == FALSE) {
-          for ($sfx = 1 ; $sfx <= MAX_PLAYERS ; $sfx++) {
-            $ghostname = 'ghost'.$sfx;
-            for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-              if (strcmp("", $this->user[$i]->sess) == 0)
-                continue;
-
-              if (strcasecmp($this->user[$i]->name, $ghostname) == 0) {
-                $ghostname = '';
-                break;
-              }
-            }
-            if ($ghostname != '')
-              break;
-          }
-
-          $ghost_user->name = $ghostname;
-
-          if ($ghost_user->stat == 'room' && $ghost_user->subst == 'standup') {
-            $this->standup_update($ghost_user);
           }
           else {
-            log_main("chatt_send pre table update");
-            $this->table_update($ghost_user);
-          log_main("chatt_send post table update");
+              $login_exists =  $bdb->login_exists(strtolower($name_new));
+/*
+  TO ENABLE USER-LOGIN ONLY
+  -            $login_exists =  $bdb->login_exists(strtolower($name_new));
+  +            // $login_exists =  $bdb->login_exists(strtolower($name_new));
+  +            // Force access with login and password
+  +            $idx = -3;
+  +            return (FALSE);
+*/
           }
-        } // if ($ghost_auth == FALSE
-        else {
-          // FIXME: cacciare il vecchio utente room && table (if needed)
-          $ghost_user->the_end = TRUE;
-          $ghost_user->lacc = 0;
-          $this->garbage_manager(TRUE);
-        }
-      } //  if ($ghost > -1) {
-
-      $real_idx = $idx;
-      if ($login_exists)
-        $idx = -($idx + 1);
-      log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s] count [%d] name [%s] code [%s]", $idx, $sess, $name_new, count($this->user),$this->user[$real_idx]->name, $this->user[$real_idx]->code));
-
-      $ret = $this->user[$real_idx];
-      if (defined('CURL_DE_SAC_VERS')) {
-          brisk_cds_execute($this, $ghost, $real_idx, $sess, $ip, $authenticate, $header);
       }
-      return ($ret);
-    }
+      else {
+          // if db is down, send a warning and verify only current users
+          // no actions at this moment
+      }
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          /* free user ? */
+          if ($this->user[$i]->is_empty()) {
+              if ($idfree == -1) {
+                  $idfree = $i;
+              }
+              continue;
+          }
+          if (strcmp($sess, $this->user[$i]->sess) == 0) {
+              if ($idx == -1) {
+                  $idx = $i;
+              }
+          }
+          if (strcasecmp($this->user[$i]->name, $name_new) == 0) {
+              if ($authenticate != FALSE) {
+                  $ghost = $i;
+                  $ghost_auth = $this->user[$i]->is_auth();
+              }
+              else {
+                  $idx = $i;
+                  break;
+              }
+          }
+      }
+      if ($idx == -1)
+          $idx = $idfree;
 
-    return (FALSE);
+      log_auth("XXX", sprintf("TROVATO A QUESTO PUNTO [%d] sess [%s] name [%s]", $idx, $sess, $name_new));
+
+      /* there is another user logged with your account and you and him have authenticated => new user
+         get the session of the old user */
+      if ($ghost > -1 && $ghost_auth && ($authenticate != FALSE)) {
+          /* swap session */
+
+          $ghost_user = $this->user[$ghost];
+          $curtime = time();
+          $this->ghost_sess->push($curtime, $ghost_user->sess, GHOST_SESS_REAS_ANOT);
+          $ghost_user->comm[$ghost_user->step % COMM_N] = "";
+          $ghost_user->step_inc();
+          if ($sess == "") {
+              $sess = uniqid("");
+              $ghost_user->sess = $sess;
+          }
+          else {
+              $ghost_user->sess = $sess;
+          }
+
+          // If user at the table we need to update the table data too
+          $table_idx = $ghost_user->table;
+          if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
+              require_once("${G_base}briskin5/Obj/briskin5.phh");
+              if (isset($this->match[$table_idx])) {
+                  $bin5 = $this->match[$table_idx];
+
+                  if ($bin5->the_end != TRUE) {
+                      $bin5->user[$ghost_user->table_pos]->comm[$bin5->user[$ghost_user->table_pos]->step % COMM_N] = "";
+                      $bin5->user[$ghost_user->table_pos]->step_inc();
+                      $bin5->user[$ghost_user->table_pos]->sess = $sess;
+                  }
+              }
+          }
+
+          $idx = $ghost;
+          if (defined('CURL_DE_SAC_VERS')) {
+              brisk_cds_execute($this, $ghost, $idx, $sess, $ip, $authenticate, $header);
+          }
+          return ($this->user[$ghost]);
+      }
+      else if ($idx != -1 && $i == MAX_PLAYERS) {
+          /* SUCCESS */
+          $curtime = time();
+          if ($sess == "") {
+              $sess = uniqid("");
+              $this->user[$idx]->sess = $sess;
+          }
+          else {
+              $this->user[$idx]->sess = $sess;
+          }
+          $this->user[$idx]->name = $name_new; // OK - add new user
+          $this->user[$idx]->stat_set("room");
+          $this->user[$idx]->step_set(0);
+          while (array_pop($this->user[$idx]->comm) != NULL);
+          $this->user[$idx]->subst = "standup";
+          $this->user[$idx]->lacc =   $curtime;
+          $this->user[$idx]->laccwr = $curtime;
+          $this->user[$idx]->bantime = 0;
+          $this->user[$idx]->ip = $ip;
+
+          $this->user[$idx]->rec = $authenticate;
+          $this->user[$idx]->flags = $user_type;
+          $this->user[$idx]->flags |= ($authenticate != FALSE ? USER_FLAG_AUTH : 0x00);
+          $this->user[$idx]->flags |= ( ($pass != FALSE && $bdb == FALSE) ? USER_FLAG_DBFAILED : 0x00);
+          log_auth("XXX", sprintf("FLAGS: [%x]", $this->user[$idx]->flags));
+
+          if ($authenticate != FALSE) {
+              $this->user[$idx]->code = $authenticate->code_get();
+              if (0 == 1) {
+                  // all this part is included in the db server
+                  $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
+
+                  if (isset($cookie['CO_list'])) {
+                      // fprintf(STDERR, "QQ: %s CO_list: [%s]\n", __FUNCTION__, $cookie['CO_list']);
+                      if (strcmp($cookie['CO_list'], "auth") == 0) {
+                          $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+                          $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
+                      }
+                      if (strcmp($cookie['CO_list'], "isolation") == 0) {
+                          $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+                          $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
+                      }
+                      else {
+                          $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
+                      }
+                  }
+              }
+              // else {
+              //    fprintf(STDERR, "QQ: CO_list not set flags: %x\n", __FUNCTION__, $this->user[$idx]->flags);
+              // }
+          }
+          // fprintf(STDERR, "QQ %s: flag %x\n", __FUNCTION__, $this->user[$idx]->flags);
+          if ($ghost > -1) {
+              log_main("ghost: rename!");
+              $ghost_user = $this->user[$ghost];
+
+              if ($ghost_auth == FALSE) {
+                  for ($sfx = 1 ; $sfx <= MAX_PLAYERS ; $sfx++) {
+                      $ghostname = 'ghost'.$sfx;
+                      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+                          if (strcmp("", $this->user[$i]->sess) == 0)
+                              continue;
+
+                          if (strcasecmp($this->user[$i]->name, $ghostname) == 0) {
+                              $ghostname = '';
+                              break;
+                          }
+                      }
+                      if ($ghostname != '')
+                          break;
+                  }
+
+                  $ghost_user->name = $ghostname;
+
+                  if ($ghost_user->stat == 'room' && $ghost_user->subst == 'standup') {
+                      $this->standup_update($ghost_user);
+                  }
+                  else {
+                      log_main("chatt_send pre table update");
+                      $this->table_update($ghost_user);
+                      log_main("chatt_send post table update");
+                  }
+              } // if ($ghost_auth == FALSE
+              else {
+                  // FIXME: cacciare il vecchio utente room && table (if needed)
+                  $ghost_user->the_end = TRUE;
+                  $ghost_user->lacc = 0;
+                  $this->garbage_manager(TRUE);
+              }
+          } //  if ($ghost > -1) {
+
+          $real_idx = $idx;
+          if ($login_exists)
+              $idx = -($idx + 1);
+          log_main(sprintf("TROVATO LIBERO A [%d] sess [%s] name [%s] count [%d] name [%s] code [%s]", $idx, $sess, $name_new, count($this->user),$this->user[$real_idx]->name, $this->user[$real_idx]->code));
+
+          $ret = $this->user[$real_idx];
+          if (defined('CURL_DE_SAC_VERS')) {
+              brisk_cds_execute($this, $ghost, $real_idx, $sess, $ip, $authenticate, $header);
+          }
+          return ($ret);
+      }
+
+      return (FALSE);
   }
 
   function standup_update($user)
   {
-    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
-      $user_cur = $this->user[$i];
-      if ($user_cur->is_active() == FALSE)
-        continue;
+      for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+          $user_cur = $this->user[$i];
+          if ($user_cur->is_active() == FALSE)
+              continue;
 
-      log_main("STANDUP START: ".$user_cur->stat);
+          log_main("STANDUP START: ".$user_cur->stat);
 
-      if ($user_cur->stat == 'room') {
-        $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".$this->standup_content($user_cur);
-        if ($user->idx_get() == $i) {
-          $user_cur->comm[$user_cur->step % COMM_N] .= $user->myname_innerHTML();
-        }
-        log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
+          if ($user_cur->stat == 'room') {
+              $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ".$this->standup_content($user_cur);
+              if ($user->idx_get() == $i) {
+                  $user_cur->comm[$user_cur->step % COMM_N] .= $user->myname_innerHTML();
+              }
+              log_main("FROM STANDUP: NAME: ".$user_cur->name." SENDED: ".$user_cur->comm[$user_cur->step % COMM_N]);
 
-        $user_cur->step_inc();
+              $user_cur->step_inc();
+          }
       }
-    }
   }
 
   function dump_data()
@@ -2673,85 +2673,85 @@ TO ENABLE USER-LOGIN ONLY
 
   function standup_content($user)
   {
-    $ret = "";
+      $ret = "";
 
-    if ($user->stat != 'room')
-      return;
+      if ($user->stat != 'room')
+          return;
 
-    $content = ' j_stand_cont( [ ';
+      $content = ' j_stand_cont( [ ';
 
-    $user_cur_id = $user->idx_get();
-    for ($i = 0 , $ct = 0 ; $i < MAX_PLAYERS ; $i++) {
-        if ($this->user[$i]->is_active() == FALSE // is not active user
-            || $this->user[$i]->stat != "room"    // or the stat isn't 'room'
-            || $this->user[$i]->name == "")       // or the name is empty, happens when user is reset (TODO: check it)
-        continue;
+      $user_cur_id = $user->idx_get();
+      for ($i = 0 , $ct = 0 ; $i < MAX_PLAYERS ; $i++) {
+          if ($this->user[$i]->is_active() == FALSE // is not active user
+          || $this->user[$i]->stat != "room"    // or the stat isn't 'room'
+          || $this->user[$i]->name == "")       // or the name is empty, happens when user is reset (TODO: check it)
+              continue;
 
-      $flags = $this->user[$i]->flags;
+          $flags = $this->user[$i]->flags;
 
-      // sql record exists AND last donate > 2013-01-01
-      if ($this->user[$i]->is_supp_custom()) {
-          $supp_comp_s = sprintf(', "%s"', $this->user[$i]->rec->supp_comp_get());
-      }
-      else {
-          $supp_comp_s = '';
-      }
-
-      if ($this->user[$i]->subst == "standup") {
-          if ($user_cur_id == $i) {
-              $flags |= 1;
+          // sql record exists AND last donate > 2013-01-01
+          if ($this->user[$i]->is_supp_custom()) {
+              $supp_comp_s = sprintf(', "%s"', $this->user[$i]->rec->supp_comp_get());
+          }
+          else {
+              $supp_comp_s = '';
           }
 
-          $content .= sprintf('%s[ %d, "%s"%s ]',($ct > 0 ? ', ' : ''), $flags,
-                              xcape($this->user[$i]->name), $supp_comp_s);
-          $ct++;
-      }
-    }
-    $content .= ' ]);';
+          if ($this->user[$i]->subst == "standup") {
+              if ($user_cur_id == $i) {
+                  $flags |= 1;
+              }
 
-    return ($content);
+              $content .= sprintf('%s[ %d, "%s"%s ]',($ct > 0 ? ', ' : ''), $flags,
+              xcape($this->user[$i]->name), $supp_comp_s);
+              $ct++;
+          }
+      }
+      $content .= ' ]);';
+
+      return ($content);
   }
 
   function table_content($user, $table_idx)
   {
-    $content = "";
-    $ret = "";
-    // TODO
-    //
-    //   Si possono usare i dati nella classe table
-    //
+      $content = "";
+      $ret = "";
+      // TODO
+      //
+      //   Si possono usare i dati nella classe table
+      //
 
-    $sess = $user->sess;
-    $table = $this->table[$table_idx];
+      $sess = $user->sess;
+      $table = $this->table[$table_idx];
 
-    if ($user->stat != 'room')
-      return;
+      if ($user->stat != 'room')
+          return;
 
-    $user_cur_id = $user->idx_get();
-    $content = "[ ";
-    for ($i = 0 ; $i < $table->player_n ; $i++) {
-        $user_cur = $this->user[$table->player[$i]];
+      $user_cur_id = $user->idx_get();
+      $content = "[ ";
+      for ($i = 0 ; $i < $table->player_n ; $i++) {
+          $user_cur = $this->user[$table->player[$i]];
 
-        $flags = $user_cur->flags;
+          $flags = $user_cur->flags;
 
-        if ($user_cur_id == $table->player[$i])
-            $flags |= 1;
+          if ($user_cur_id == $table->player[$i])
+              $flags |= 1;
 
-        log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
-        if ($user_cur->is_supp_custom())
-            $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
-        else
-            $supp_comp_s = '';
+          log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
+          if ($user_cur->is_supp_custom())
+              $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
+          else
+              $supp_comp_s = '';
 
-        $content .= sprintf('%s[ %d, "%s"%s ]',($i == 0 ? '' : ', '), $flags,
-                            xcape($user_cur->name), $supp_comp_s);
-    }
+          $content .= sprintf('%s[ %d, "%s"%s ]',($i == 0 ? '' : ', '), $flags,
+          xcape($user_cur->name), $supp_comp_s);
+      }
 
-    $content .= ' ]';
+      $content .= ' ]';
 
-    $ret .= sprintf('j_tab_cont(%d, %s);', $table_idx, $content);
+      $ret .= sprintf('j_tab_cont(%d, %s);', $table_idx, $content);
 
-    return ($ret);
+      return ($ret);
   }
 
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
@@ -2927,8 +2927,8 @@ TO ENABLE USER-LOGIN ONLY
 
 function make_seed()
 {
-  list($usec, $sec) = explode(' ', microtime());
-  return (float) $sec + ((float) $usec * 100000);
+    list($usec, $sec) = explode(' ', microtime());
+    return (float) $sec + ((float) $usec * 100000);
 }
 
 function btrace_line($ar)
@@ -3351,195 +3351,194 @@ function log_shme($log)
 // function log_legal($curtime, $sess, $name, $where, $mesg)
 function log_legal($curtime, $addr, $user, $where, $mesg)
 {
-
-  if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {
-    /* Unix time | session | nickname | IP | where was | mesg */
-    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, ($user ? $user->sess : "NOSESS"),
-                        ($user ? ($user->is_auth() ? 'A' : 'N') : "U"),
-                        ($user ? $user->name : "NO-USER"), $addr, $where , $mesg));
-    fclose($fp);
-  }
+    if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {
+        /* Unix time | session | nickname | IP | where was | mesg */
+        fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, ($user ? $user->sess : "NOSESS"),
+        ($user ? ($user->is_auth() ? 'A' : 'N') : "U"),
+        ($user ? $user->name : "NO-USER"), $addr, $where , $mesg));
+        fclose($fp);
+    }
 }
 
 function table_act_content($isstanding, $sitted, $table, $cur_table, $allowed)
 {
-  $ret = "";
+    $ret = "";
 
-  if ($isstanding) {
-    if ($sitted < PLAYERS_N) {
-      if ($allowed)
-        $act = 'sit';
-      else
-        $act = 'reserved';
+    if ($isstanding) {
+        if ($sitted < PLAYERS_N) {
+            if ($allowed)
+                $act = 'sit';
+            else
+                $act = 'reserved';
+        }
     }
-  }
-  else {
-    if ($table == $cur_table)
-      $act = 'wake';
-    else
-      $act = 'none';
-  }
+    else {
+        if ($table == $cur_table)
+            $act = 'wake';
+        else
+            $act = 'none';
+    }
 
-  if ($act != '')
-    $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
+    if ($act != '')
+        $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
 
-  return ($ret);
+    return ($ret);
 }
 
 function show_notify($text, $tout, $butt, $w, $h)
 {
-  log_main("SHOW_NOTIFY: ".$text);
-  return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
+    log_main("SHOW_NOTIFY: ".$text);
+    return sprintf('var noti = new notify(gst,"%s",%d,"%s",%d,%d);', $text, $tout, $butt, $w, $h);
 }
 
 function show_notify_ex($text, $tout, $butt, $w, $h, $is_opaque, $block_time)
 {
-  log_main("SHOW_NOTIFY OPAQUE: ".$text);
-  return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, %s, %d);', $text, $tout, $butt, $w, $h, ($is_opaque ? "true" : "false"), $block_time);
+    log_main("SHOW_NOTIFY OPAQUE: ".$text);
+    return sprintf('var noti = new notify_ex(gst,"%s",%d,"%s",%d,%d, %s, %d);', $text, $tout, $butt, $w, $h, ($is_opaque ? "true" : "false"), $block_time);
 }
 
 function show_notify_document($text, $tout, $butt_arr, $confirm_func, $confirm_func_args, $w, $h, $is_opaque, $block_time)
 {
-  log_main("SHOW_NOTIFY OPAQUE: ".$text);
+    log_main("SHOW_NOTIFY OPAQUE: ".$text);
 
-  $butts = "";
-  for ($i = 0 ; $i < count($butt_arr) ; $i++) {
-      $butts .= sprintf("%s'%s'", ($i == 0 ? "" : ","), $butt_arr[$i]);
-  }
+    $butts = "";
+    for ($i = 0 ; $i < count($butt_arr) ; $i++) {
+        $butts .= sprintf("%s'%s'", ($i == 0 ? "" : ","), $butt_arr[$i]);
+    }
 
-  return sprintf('g_nd = new notify_document(gst, "%s", %d, [ %s ], %s, %s, %d, %d, %s, %d);|',
-                 escpush($text), $tout, $butts, ($confirm_func == NULL ? "null" : $confirm_func), (($confirm_func == NULL|| $confirm_func_args == NULL) ? "[]" : $confirm_func_args), $w, $h, ($is_opaque ? "true" : "false"), $block_time);
+    return sprintf('g_nd = new notify_document(gst, "%s", %d, [ %s ], %s, %s, %d, %d, %s, %d);|',
+    escpush($text), $tout, $butts, ($confirm_func == NULL ? "null" : $confirm_func), (($confirm_func == NULL|| $confirm_func_args == NULL) ? "[]" : $confirm_func_args), $w, $h, ($is_opaque ? "true" : "false"), $block_time);
 }
 
 
 function root_welcome($user)
 {
-  GLOBAL $root_wellarr, $G_lang;
-  $ret = "";
+    GLOBAL $root_wellarr, $G_lang;
+    $ret = "";
 
-  $curtime = time();
-  $dt = date("H:i ", $curtime);
+    $curtime = time();
+    $dt = date("H:i ", $curtime);
 
-  for ($i = 0 ; $i < count($root_wellarr[$G_lang]) ; $i++)
-      $ret .= nickserv_msg($dt, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
+    for ($i = 0 ; $i < count($root_wellarr[$G_lang]) ; $i++)
+        $ret .= nickserv_msg($dt, str_replace('"', '\"', $root_wellarr[$G_lang][$i]));
 
-  return ($ret);
+    return ($ret);
 }
 
 
 
 function validate_sess($sess)
 {
-  if (strlen($sess) == SESS_LEN)
-    return (TRUE);
-  else
-    return (FALSE);
+    if (strlen($sess) == SESS_LEN)
+        return (TRUE);
+    else
+        return (FALSE);
 }
 
 function validate_name($name)
 {
     $name_new = str_replace(' ', '_', mb_substr(trim($name),0,12, "UTF-8"));
 
-  for ($i = 0 ; $i < mb_strlen($name_new) ; $i++) {
-    $c = $name_new[$i];
-    if (($c >= "a" && $c <= "z") || ($c >= "A" && $c <= "Z") || ($c >= "0" && $c <= "9"))
-      return ($name_new);
-  }
+    for ($i = 0 ; $i < mb_strlen($name_new) ; $i++) {
+        $c = $name_new[$i];
+        if (($c >= "a" && $c <= "z") || ($c >= "A" && $c <= "Z") || ($c >= "0" && $c <= "9"))
+            return ($name_new);
+    }
 
-  return (FALSE);
+    return (FALSE);
 }
 
 function playsound($name)
 {
-  return (sprintf('g_jukebox.play("%s");', $name));
+    return (sprintf('g_jukebox.play("%s");', $name));
 }
 
 function secstoword($secs)
 {
-  GLOBAL $G_lang;
+    GLOBAL $G_lang;
 
-  $ret = "";
+    $ret = "";
 
-  $mins = floor($secs / 60);
-  $secs = $secs % 60;
-  if ($G_lang == 'en') {
-    if ($mins > 0)
-      $ret = sprintf("%d minute%s%s", $mins, ($mins > 1 ? "s" : ""), ($secs > 0 ? " and " : ""));
+    $mins = floor($secs / 60);
+    $secs = $secs % 60;
+    if ($G_lang == 'en') {
+        if ($mins > 0)
+            $ret = sprintf("%d minute%s%s", $mins, ($mins > 1 ? "s" : ""), ($secs > 0 ? " and " : ""));
 
-    if ($secs > 0)
-      $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "s" : ""));
-  }
-  else {
-    if ($mins > 0)
-      $ret = sprintf("%d minut%s%s", $mins, ($mins > 1 ? "i" : "o"), ($secs > 0 ? " e " : ""));
+        if ($secs > 0)
+            $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "s" : ""));
+    }
+    else {
+        if ($mins > 0)
+            $ret = sprintf("%d minut%s%s", $mins, ($mins > 1 ? "i" : "o"), ($secs > 0 ? " e " : ""));
 
-    if ($secs > 0)
-      $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "i" : "o"));
-  }
-  return ($ret);
+        if ($secs > 0)
+            $ret .= sprintf("%d second%s", $secs, ($secs > 1 ? "i" : "o"));
+    }
+    return ($ret);
 }
 
 function sharedmem_sz($tok)
 {
-  if (($shm_id = @shmop_open($tok, 'a', 0, 0)) == FALSE) {
-    log_main("shmop_open failed");
-    return (-1);
-  }
-  $shm_sz = shmop_size($shm_id);
-  shmop_close($shm_id);
+    if (($shm_id = @shmop_open($tok, 'a', 0, 0)) == FALSE) {
+        log_main("shmop_open failed");
+        return (-1);
+    }
+    $shm_sz = shmop_size($shm_id);
+    shmop_close($shm_id);
 
-  // log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
-  return ($shm_sz);
+    // log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
+    return ($shm_sz);
 }
 
 class Warrant {
     static $delta_t;
 
-  static function lock_data($is_exclusive)
-  {
-      if (($res = file_lock(FTOK_PATH."/warrant", $is_exclusive)) != FALSE) {
-          self::$delta_t = microtime(TRUE);
-          log_lock("LOCK   warrant      [".self::$delta_t."]");
+    static function lock_data($is_exclusive)
+    {
+        if (($res = file_lock(FTOK_PATH."/warrant", $is_exclusive)) != FALSE) {
+            self::$delta_t = microtime(TRUE);
+            log_lock("LOCK   warrant      [".self::$delta_t."]");
 
-          return ($res);
-      }
+            return ($res);
+        }
 
-      return (FALSE);
-  }
+        return (FALSE);
+    }
 
-  static function unlock_data($res)
-  {
-    GLOBAL $sess;
+    static function unlock_data($res)
+    {
+        GLOBAL $sess;
 
-    log_lock("UNLOCK warrant      [".(microtime(TRUE) - (self::$delta_t))."]");
+        log_lock("UNLOCK warrant      [".(microtime(TRUE) - (self::$delta_t))."]");
 
-    file_unlock($res);
-  }
+        file_unlock($res);
+    }
 }
 
 class Poll {
     static $delta_t;
 
-  static function lock_data($is_exclusive)
-  {
-      if (($res = file_lock(FTOK_PATH."/poll", $is_exclusive)) != FALSE) {
-          self::$delta_t = microtime(TRUE);
-          log_lock("LOCK   poll         [".self::$delta_t."]");
+    static function lock_data($is_exclusive)
+    {
+        if (($res = file_lock(FTOK_PATH."/poll", $is_exclusive)) != FALSE) {
+            self::$delta_t = microtime(TRUE);
+            log_lock("LOCK   poll         [".self::$delta_t."]");
 
-          return ($res);
-      }
+            return ($res);
+        }
 
-      return (FALSE);
-  }
+        return (FALSE);
+    }
 
-  static function unlock_data($res)
-  {
-    GLOBAL $sess;
+    static function unlock_data($res)
+    {
+        GLOBAL $sess;
 
-    log_lock("UNLOCK poll         [".(microtime(TRUE) - (self::$delta_t))."]");
+        log_lock("UNLOCK poll         [".(microtime(TRUE) - (self::$delta_t))."]");
 
-    file_unlock($res);
-  }
+        file_unlock($res);
+    }
 }
 
 function carousel_top()
