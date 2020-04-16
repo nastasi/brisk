@@ -37,6 +37,9 @@ $G_crypt_key = "cryptkey";
 
 $G_shutdown = FALSE;
 
+// Enable basic profiling
+$G_profile = FALSE;
+
 // list of allowed proxies IP address (strings)
 $G_proxy_white_list = array();
 
