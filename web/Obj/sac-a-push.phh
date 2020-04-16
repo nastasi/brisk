@@ -718,7 +718,7 @@ class Sac_a_push {
             $list_web_arr[intval($this->list_web[$i])] = $this->list_web[$i];
         }
 
-        log_legal(time(), '127.0.0.1', 'BRISK', 'MAIN', 'LOG:START');
+        log_legal(time(), '127.0.0.1', FALSE, 'MAIN', 'LOG:START');
 
         $lastime = 0;
         $dump_users = TRUE;
@@ -746,7 +746,7 @@ class Sac_a_push {
                     $mtime_unfi = 100.0 * $mtsum_unfi / $mtime_diff;
                     $mtime_mana = 100.0 * $mtsum_mana / $mtime_diff;
 
-                    log_legal(time(), '127.0.0.1', 'BRISK', 'MAIN',
+                    log_legal(time(), '127.0.0.1', FALSE, 'MAIN',
                     sprintf('LOG:PROF: tot(%.3f) idle: %.2f  read: %.2f  garb: %.2f  unfi: %.2f  mana: %.2f',
                     $mtime_diff, $mtime_idle, $mtime_read, $mtime_garb, $mtime_unfi, $mtime_mana
                     ));
@@ -755,7 +755,7 @@ class Sac_a_push {
                     $mtsum_garb = 0.0;
                     $mtsum_unfi = 0.0;
                     $mtsum_mana = 0.0;
-                    $mtime_begin = $mtime_end;
+                    $mtime_start = $mtime_finish;
                 }
                 fprintf(STDERR, "\nIN LOOP: Current opened: %d  pending_pages: %d\n", count($this->socks), count($this->pending_pages));
             }

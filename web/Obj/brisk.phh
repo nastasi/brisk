@@ -3354,9 +3354,9 @@ function log_legal($curtime, $addr, $user, $where, $mesg)
 
   if (($fp = @fopen(LEGAL_PATH."/legal.log", 'a')) != FALSE) {
     /* Unix time | session | nickname | IP | where was | mesg */
-    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, $user->sess,
-                        ($user->is_auth() ? 'A' : 'N'),
-                        $user->name, $addr, $where , $mesg));
+    fwrite($fp, sprintf("%ld|%s|%s|%s|%s|%s|%s|\n", $curtime, ($user ? $user->sess : "NOSESS"),
+                        ($user ? ($user->is_auth() ? 'A' : 'N') : "U"),
+                        ($user ? $user->name : "NO-USER"), $addr, $where , $mesg));
     fclose($fp);
   }
 }
