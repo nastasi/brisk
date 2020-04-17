@@ -1043,6 +1043,7 @@ supported by:<br>
 <link rel="stylesheet" type="text/css" href="room.css">
 
 <script type="text/javascript"><!--
+var myname = null;
 var g_debug = 0;
 var g_lang = "<? echo $G_lang; ?>";
 var g_lng = "<? echo $G_lng; ?>";

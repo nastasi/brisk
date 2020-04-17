@@ -605,8 +605,9 @@ class User {
               $sp = " ";
           }
       }
-      return (sprintf('$("myname").innerHTML = "<span class=\"%s\">%s</span>";', $cl,
-                      xcape($this->name,ENT_COMPAT,"UTF-8")));
+      $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
+      return (sprintf('window.myname = "%s"; $("myname").innerHTML = "<span class=\"%s\">%s</span>";',
+                      $myname, $cl, $myname));
   }
 
   /* INDEX_RD PORT */

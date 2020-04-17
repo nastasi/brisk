@@ -79,6 +79,7 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 </head>
 <body>
 <SCRIPT type="text/javascript">
+   var myname = null;
    var sess = "not_connected";
    var xstm = null;
    var g_lang = "<?php echo "$G_lang"; ?>";
@@ -105,6 +106,7 @@ var g_is_spawn=1;
 var g_imgct= 0;
 var g_imgtot = g_preload_img_arr.length;
 var g_exitlock = 0;
+
 
 window.onload = function() {
   g_jukebox = new jukebox([{'name': 'cow', 'file': 'cow.mp3'},
