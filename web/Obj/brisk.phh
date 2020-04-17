@@ -2698,10 +2698,6 @@ class Brisk
           }
 
           if ($this->user[$i]->subst == "standup") {
-              if ($user_cur_id == $i) {
-                  $flags |= 1;
-              }
-
               $content .= sprintf('%s[ %d, "%s"%s ]',($ct > 0 ? ', ' : ''), $flags,
               xcape($this->user[$i]->name), $supp_comp_s);
               $ct++;
