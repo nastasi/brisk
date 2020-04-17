@@ -278,6 +278,9 @@ function j_stand_cont(ddata)
         data = new Array();
 
         for (i = 0, ii = 0 ; ii < ddata.length ; ii++) {
+            if (ddata[ii][1] == window.myname) {
+                ddata[ii][0] |= 1;
+            }
             if ((ddata[ii][0] & 0x02) == 0) {
                 continue;
             }
