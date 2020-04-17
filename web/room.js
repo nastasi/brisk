@@ -443,6 +443,9 @@ function j_tab_cont(table_idx, data)
     var content = '';
 
     for (i = 0 ; i < data.length ; i++) {
+        if (data[i][1] == window.myname) {
+            data[i][0] |= 1;
+        }
         content += j_stand_tdcont(data[i]);
 
         content += '<br>';
