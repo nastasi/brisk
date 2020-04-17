@@ -2734,9 +2734,6 @@ class Brisk
 
           $flags = $user_cur->flags;
 
-          if ($user_cur_id == $table->player[$i])
-              $flags |= 1;
-
           log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
           if ($user_cur->is_supp_custom())
               $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
