@@ -278,9 +278,6 @@ function j_stand_cont(ddata)
         data = new Array();
 
         for (i = 0, ii = 0 ; ii < ddata.length ; ii++) {
-            if (ddata[ii][1] == window.myname) {
-                ddata[ii][0] |= 1;
-            }
             if ((ddata[ii][0] & 0x02) == 0) {
                 continue;
             }
@@ -297,6 +294,9 @@ function j_stand_cont(ddata)
     if (standup_data_old == null || data.length < 4) {
         content = '<table cols="'+(data.length < 4 ? data.length : 4)+'" class="table_standup">';
         for (i = 0 ; i < data.length ; i++) {
+            if (ddata[i][1] == window.myname) {
+                ddata[i][0] |= 1;
+            }
             if ((i % 4) == 0)
                 content += '<tr>';
             content += '<td id="'+i+'" class="room_standup">';
