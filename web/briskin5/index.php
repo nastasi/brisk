@@ -67,15 +67,15 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
-<script type="text/javascript" src="../commons.js"></script> 
-<script type="text/javascript" src="../heartbit.js"></script>
-<script type="text/javascript" src="../xynt-streaming.js"></script>
-<script type="text/javascript" src="dnd.js"></script>
-<script type="text/javascript" src="dom-drag.js"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
-<script type="text/javascript" src="briskin5.js"></script>
-<link rel="stylesheet" type="text/css" href="../brisk.css">
-<link rel="stylesheet" type="text/css" href="briskin5.css">
+<script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script> 
+<script type="text/javascript" src="../heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="dnd.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="dom-drag.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="briskin5.js?v=<? echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="../brisk.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="briskin5.css?v=<? echo BSK_BUSTING; ?>">
 </head>
 <body>
 <SCRIPT type="text/javascript">

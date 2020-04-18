@@ -595,10 +595,10 @@ class Transport_iframe {
 
         $ret .= sprintf("<html>
 <head>
-<script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%scommons.js?v=%s\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js?v=%s\"></script>
 <script type=\"text/javascript\">
-var xynt_streaming = \"ready\";", $base, $base);
+var xynt_streaming = \"ready\";", $base, BSK_BUSTING, $base, BSK_BUSTING);
         if ($step > 0)
             $ret .= sprintf("last_clean = %d;\n", ($step-1));
         $ret .= sprintf("
@@ -626,10 +626,10 @@ window.onload = function () { try { if (xynt_streaming != \"ready\") { xynt_stre
         $ret = "";
         $ret .= sprintf("<html>
 <head>
-<script type=\"text/javascript\" src=\"%scommons.js\"></script>
-<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js\"></script>
+<script type=\"text/javascript\" src=\"%scommons.js?v=%s\"></script>
+<script type=\"text/javascript\" src=\"%sxynt-streaming-ifra.js?v=%s\"></script>
 <script type=\"text/javascript\">
-var xynt_streaming = \"ready\";", $base, $base);
+var xynt_streaming = \"ready\";", $base, BSK_BUSTING, $base, BSK_BUSTING);
         $ret .= sprintf("
 window.onload = function () { try { if (xynt_streaming != \"ready\") { xynt_streaming.reload(); } } catch(e) { /* console.log(\"catcha\"); */ } };
 </script>

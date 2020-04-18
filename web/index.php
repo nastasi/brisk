@@ -1024,23 +1024,23 @@ supported by:<br>
 <title>Brisk</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
-<script type="text/javascript" src="commons.js"></script>
-<script type="text/javascript" src="fieldify.js"></script>
-<script type="text/javascript" src="prefs.js"></script>
-<script type="text/javascript" src="info.js"></script>
-<!-- <script type="text/javascript" src="myconsole.js"></script> -->
-<script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript" src="heartbit.js"></script>
-<script type="text/javascript" src="xynt-streaming.js"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
-<script type="text/javascript" src="room.js"></script>
-<script type="text/javascript" src="md5.js"></script>
-<script type="text/javascript" src="probrowser.js"></script>
-<script type="text/javascript" src="json2.js"></script>
-<script type="text/javascript" src="/cookie_law.js"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css">
-<link rel="stylesheet" type="text/css" href="brisk.css">
-<link rel="stylesheet" type="text/css" href="room.css">
+<script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="info.js?v=<? echo BSK_BUSTING; ?>"></script>
+<!-- <script type="text/javascript" src="myconsole.js?v=<? echo BSK_BUSTING; ?>"></script> -->
+<script type="text/javascript" src="menu.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="room.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="md5.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
 
 <script type="text/javascript"><!--
 var myname = null;
@@ -1194,23 +1194,23 @@ cookie_law(null);
 <title>Brisk</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
-<script type="text/javascript" src="commons.js"></script>
-<script type="text/javascript" src="fieldify.js"></script>
-<script type="text/javascript" src="prefs.js"></script>
-<script type="text/javascript" src="info.js"></script>
-<!-- <script type="text/javascript" src="myconsole.js"></script> -->
-<script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript" src="ticker.js"></script>
-<script type="text/javascript" src="heartbit.js"></script>
-<script type="text/javascript" src="xynt-streaming.js"></script>
-<script type="text/javascript" src="room.js"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js"></script>
-<script type="text/javascript" src="probrowser.js"></script>
-<script type="text/javascript" src="json2.js"></script>
-<script type="text/javascript" src="/cookie_law.js"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css">
-<link rel="stylesheet" type="text/css" href="brisk.css">
-<link rel="stylesheet" type="text/css" href="room.css">
+<script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="info.js?v=<? echo BSK_BUSTING; ?>"></script>
+<!-- <script type="text/javascript" src="myconsole.js?v=<? echo BSK_BUSTING; ?>"></script> -->
+<script type="text/javascript" src="menu.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="ticker.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="room.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
 <script type="text/javascript"><!--
    var sess = "not_connected";
    var g_debug = 0;
