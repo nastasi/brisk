@@ -524,24 +524,33 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     if ($ACTION == "room") {
         $tables .= '<div class="room_tab">';
         $tables .= '<table class="room_tab">';
+
+        $direct = ($user->is_auth() && !$user->is_appr());
         for ($ii = 0 ; $ii < TABLES_N ; $ii++) {
-            if ($user->is_auth() && !$user->is_appr())
+            if ($direct)
                 $i = $ii;
             else
                 $i = TABLES_N - $ii - 1;
 
             if ($ii % 4 == 0) {
-                $tables .= '<tr id = "tr_noauth'.$ii.'">';
+                if ($direct) {
+                    $noauth_class = ($i + 3 < TABLES_APPR_N ? "" : "noauth");
+                }
+                else {
+                    $noauth_class = ($i < TABLES_APPR_N ? "" : "noauth");
+                }
+                $tables .= sprintf('<tr class="%s">', $noauth_class);
             }
-            if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $i < TABLES_APPR_N) {
-                $tables .= '<td id = "td_noauth'.$ii.'">';
 
-                $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
-                $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
-                $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
-                $tables .= '</div>';
-                $tables .= '</td>'."\n";
-            }
+            $noauth_class = ($i < TABLES_APPR_N ? "" : "noauth");
+            $tables .= sprintf('<td class="%s">', $noauth_class);
+
+            $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
+            $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
+            $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
+            $tables .= '</div>';
+            $tables .= '</td>'."\n";
+
             if ($ii % 4 == 3) {
                 $tables .= '</tr>';
             }

@@ -64,13 +64,9 @@ function prefs_apply(prefs_new, is_update, is_volat)
     }
 
     if (relo || !is_update) {
-        for (i = g_tables_appr_n ; i < g_tables_n ; i++) {
-            if (i % 4 == 0) {
-                $('tr_noauth'+i).style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
-            }
+        $('tr.noauth').style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
+        $('td.noauth').style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
 
-            $('td_noauth'+i).style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
-        }
         if (prefs_new.listen == l_list_isol) {
             tra.hide_noauth();
         }
@@ -205,14 +201,9 @@ function list_set(what, is_update, info)
 
 
     if (relo || !is_update) {
-        for (i = g_tables_appr_n ; i < g_tables_n ; i++) {
-            
-            if (i % 4 == 0) {
-                $('tr_noauth'+i).style.display = (what == 'isolation' ? 'none' : '');
-            }
-            
-            $('td_noauth'+i).style.display = (what == 'isolation' ? 'none' : '');
-        }
+        $('tr.noauth').style.display = (what == 'isolation' ? 'none' : '');
+        $('td.noauth').style.display = (what == 'isolation' ? 'none' : '');
+
         if (what == 'isolation') {
             tra.hide_noauth();
         }
