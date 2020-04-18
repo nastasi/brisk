@@ -134,7 +134,7 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'everybody'),
                      'listall_desc' => array('it' => 'visualizza tutti gli utenti collegati',
                                              'en' => 'visualize all connected users'),
-                     'tit_listisol'  => array('it' => 'solo user autenticati',
+                     'tit_listisol'  => array('it' => 'solo gli user autenticati',
                                              'en' => 'authenticated users only'),
                      'listisol_desc' => array('it' => 'visualizza solo gli user autenticati e i tavoli a loro riservati',
                                              'en' => 'visualize authenticated users only and reserved tables to them'),
@@ -1511,7 +1511,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 '"><span id="list_all">
 <?php echo $mlang_room['tit_listall'][$G_lang];?>
 </span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="prefs_update('listen');" title="'
+<tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="1" onclick="prefs_update('listen');" title="'
 <?php echo $mlang_room['listisol_desc'][$G_lang];?>
 '"><span id="list_isol">
 <?php echo $mlang_room['tit_listisol'][$G_lang];?>
