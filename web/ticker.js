@@ -345,7 +345,7 @@ function wagon(anc, table, title) {
     addEvent(this.box, "click",     function() { this.anc.cb_click(); }     );
 
     
-    if (g_listen & l_list_isol && table >= g_tables_auth_n) {
+    if (g_prefs.listen & l_list_isol && table >= g_tables_auth_n) {
         this.box.style.visibility = "hidden";
     }
     this.anc.box.appendChild(box);
