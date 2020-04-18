@@ -64,8 +64,8 @@ function prefs_apply(prefs_new, is_update, is_volat)
     }
 
     if (relo || !is_update) {
-        $('tr.noauth').css("display", (prefs_new.listen == l_list_isol ? 'none' : ''));
-        $('td.noauth').css("display", (prefs_new.listen == l_list_isol ? 'none' : ''));
+        $$('tr.noauth').css("display", (prefs_new.listen == l_list_isol ? 'none' : ''));
+        $$('td.noauth').css("display", (prefs_new.listen == l_list_isol ? 'none' : ''));
 
         if (prefs_new.listen == l_list_isol) {
             tra.hide_noauth();
@@ -201,8 +201,8 @@ function list_set(what, is_update, info)
 
 
     if (relo || !is_update) {
-        $('tr.noauth').css("display", (what == 'isolation' ? 'none' : ''));
-        $('td.noauth').css("display", (what == 'isolation' ? 'none' : ''));
+        $$('tr.noauth').css("display", (what == 'isolation' ? 'none' : ''));
+        $$('td.noauth').css("display", (what == 'isolation' ? 'none' : ''));
 
         if (what == 'isolation') {
             tra.hide_noauth();
