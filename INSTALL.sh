@@ -367,6 +367,16 @@ if [ "$web_only" = "FALSE" ]; then
     mkdir -p "${legal_path}"
     chmod 777 "${legal_path}"
 fi
+
+bsk_busting="$(git rev-parse --short HEAD 2>/dev/null|| true)"
+if [ "$bsk_busting" = "" ]; then
+    bsk_busting=$(grep '^\$G_brisk_version'  web/Obj/brisk.phh | sed 's/^[^"'"'"']*["'"'"']/v/g;s/["'"'"'].*//g')
+fi
+if [ "$bsk_busting" = "" ]; then
+    echo "Retreiving bsk_busting failed"
+    exit 1
+fi
+
 install -d ${web_path}__
 for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
     install -d ${web_path}__/$i
@@ -422,6 +432,7 @@ s@define *( *'TABLES_CERT_N',[^)]*)@define('TABLES_CERT_N', $tables_cert_n)@g;
 s@define *( *'BRISK_DEBUG',[^)]*)@define('BRISK_DEBUG', $brisk_debug)@g;
 s@define *( *'LEGAL_PATH',[^)]*)@define('LEGAL_PATH', \"$legal_path\")@g;
 s@define *( *'PROXY_PATH',[^)]*)@define('PROXY_PATH', \"$proxy_path\")@g;
+s@define *( *'BSK_BUSTING',[^)]*)@define('BSK_BUSTING', \"$bsk_busting\")@g;
 s@define *( *'BRISK_CONF',[^)]*)@define('BRISK_CONF', \"$brisk_conf\")@g;" ${web_path}__/Obj/brisk.phh
 
 sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
