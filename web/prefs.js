@@ -1,8 +1,7 @@
 var l_list_all  = 0x00;
-var l_list_auth = 0x01;
 var l_list_isol = 0x02;
-var l_prefs_list_idx = new Array( 0x00, 0x01, 0x02 );
-var l_prefs_list_id  = new Array( "all", "auth", "isol" );
+var l_prefs_list_idx = new Array( 0x00, 0x02 );
+var l_prefs_list_id  = new Array( "all", "isol" );
 var l_comps_name     = new Array('s_fg_r', 's_fg_g', 's_fg_b', 's_bg_r',  's_bg_g',  's_bg_b');
 
 
@@ -181,16 +180,7 @@ function list_set(what, is_update, info)
     var relo = false;
     var old_st = readCookie("CO_list");
     
-    if (what == 'auth') {
-        $('list_auth').style.color = 'red';
-        $('list_isol').style.color = 'black';
-        $('list_all').style.color = 'black';
-        if (old_st == 'isolation')
-            relo = true;
-        g_listen = l_list_auth;
-    }
-    else if (what == 'isolation') {
-        $('list_auth').style.color = 'black';
+    if (what == 'isolation') {
         $('list_isol').style.color = 'red';
         $('list_all').style.color = 'black';
         if (old_st != 'isolation')
@@ -198,7 +188,6 @@ function list_set(what, is_update, info)
         g_listen = l_list_isol;
     }
     else {
-        $('list_auth').style.color = 'black';
         $('list_isol').style.color = 'black';
         $('list_all').style.color = 'red';
         if (old_st == 'isolation')
@@ -206,7 +195,6 @@ function list_set(what, is_update, info)
         g_listen = l_list_all;
     }
 
-    set_checked_value($('ra_listen_auth'), what);
     set_checked_value($('ra_listen_isol'), what);
     set_checked_value($('ra_listen_all'),  what);
 
