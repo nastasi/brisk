@@ -135,10 +135,8 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                       'listmust' => array( 'it' => '<b>Per andare in isolamento non bisogna essere seduti a tavoli non riservati.</b>',
                                            'en' => '<b>To go to isolation you must don\'t stay on not reserved tables</b>'),
 
-                      'tit_onauth'=>array( 'it' => '(solo aut.)',
-                                           'en' => '(only aut.)'),
-                      'tit_onisol'=>array( 'it' => '(isolam.to)',
-                                           'en' => '(isolation)'),
+                      'tit_onisol'=>array( 'it' => '(autenticati)',
+                                           'en' => '(authenticated)'),
                       'db_failed' =>array('it'  => '<br>Il collegamento al database è fallito.<br>Temporaneamente tutte le autenticazioni verranno sospese, accederai a Brisk come un utente normale.<br><br>Ci scusiamo per il disagio.',
                                           'en'  => 'Connection to the database failed<br>All authentications are suspended temporarly, you login as normal user.<br>We are about the limitation'),
 
@@ -1430,9 +1428,6 @@ class Brisk
             if ($user->flags & USER_FLAG_ISOLAUTH) {
                 $ret .= 'list_set(\'isolation\', false, \''.$mlang_brisk['tit_onisol'][$G_lang].'\' ); ';
             }
-            else if ($user->flags & USER_FLAG_LISTAUTH) {
-                $ret .= 'list_set(\'auth\', false, \''.$mlang_brisk['tit_onauth'][$G_lang].'\' ); ';
-            }
             else {
                 $ret .= 'list_set(\'all\', false, \'\' ); ';
             }
@@ -2045,12 +2040,6 @@ class Brisk
                   $user->flags |= USER_FLAG_ISOLAUTH;
                   $to_user = 'list_set(\'isolation\', true, \''.$mlang_brisk['tit_onisol'][$G_lang].'\'); ';
               }
-          }
-          else if (strcasecmp($arg, "auth") == 0) {
-              $flags_old = $user->flags;
-              $user->flags &= ~USER_FLAG_MAP_AUTH;
-              $user->flags |= USER_FLAG_LISTAUTH;
-              $to_user = 'list_set(\'auth\', true, \''.$mlang_brisk['tit_onauth'][$G_lang].'\'); ';
           }
           else {
               $flags_old = $user->flags;

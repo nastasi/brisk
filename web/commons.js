@@ -41,10 +41,8 @@ var mlang_commons = { 'imgload_a' : { 'it' : 'Immagini caricate ',
                                       'en' : 'Exit.' },
                       'tit_list'  : { '0'  : { 'it' : '',
                                                'en' : '' },
-                                      '1'  : { 'it' : '(solo aut.)',
-                                               'en' : '(only aut.)' },
-                                      '2'  : { 'it' : '(isolam.to)',
-                                               'en' : '(isolation)' } },
+                                      '1'  : { 'it' : '(autenticati)',
+                                               'en' : '(authenticated)' } },
                       'tos_refu'  : { 'it' : 'Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere come utente registrato al sito, sei proprio sicuro di voler rifiutare le nuove condizioni d\'uso ?',
                                       'en' : 'EN Rifiutando di sottoscrivere i nuovi termini del servizio non ti sarà più possibile accedere come utente registrato al sito, sei proprio sicuro di voler rifiutare le nuove condizioni d\'uso ?'
                                     }

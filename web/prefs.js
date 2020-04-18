@@ -1,6 +1,6 @@
 var l_list_all  = 0x00;
-var l_list_isol = 0x02;
-var l_prefs_list_idx = new Array( 0x00, 0x02 );
+var l_list_isol = 0x01;
+var l_prefs_list_idx = new Array( 0x00, 0x01 );
 var l_prefs_list_id  = new Array( "all", "isol" );
 var l_comps_name     = new Array('s_fg_r', 's_fg_g', 's_fg_b', 's_bg_r',  's_bg_g',  's_bg_b');
 
