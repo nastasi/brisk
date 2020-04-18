@@ -65,7 +65,7 @@ function prefs_apply(prefs_new, is_update, is_volat)
     }
 
     if (relo || !is_update) {
-        for (i = g_tables_auth_n ; i < g_tables_n ; i++) {
+        for (i = g_tables_appr_n ; i < g_tables_n ; i++) {
             if (i % 4 == 0) {
                 $('tr_noauth'+i).style.display = (prefs_new.listen == l_list_isol ? 'none' : '');
             }
@@ -217,7 +217,7 @@ function list_set(what, is_update, info)
 
 
     if (relo || !is_update) {
-        for (i = g_tables_auth_n ; i < g_tables_n ; i++) {
+        for (i = g_tables_appr_n ; i < g_tables_n ; i++) {
             
             if (i % 4 == 0) {
                 $('tr_noauth'+i).style.display = (what == 'isolation' ? 'none' : '');

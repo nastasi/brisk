@@ -274,7 +274,7 @@ function j_stand_cont(ddata)
 
     var data;
 
-    if (g_listen & l_list_isol) {
+    if (g_prefs.listen & l_list_isol) {
         data = new Array();
 
         for (i = 0, ii = 0 ; ii < ddata.length ; ii++) {

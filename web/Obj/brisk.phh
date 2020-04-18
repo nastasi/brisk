@@ -190,7 +190,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/info <i>&lt;login&gt;</i></b> - mostra lo stato corrente dell\'utente passato come argomento e in che relazione siete
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
-<dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
+<!-- <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all) -->
 </dl>
 </div>
 ',
@@ -223,7 +223,7 @@ Dopo che &egrave; iniziata una partita per uscirne dovete chiedere agli altri gi
 <dd><b>/info <i>&lt;login&gt;</i></b> - mostra lo stato corrente dell\'utente passato come argomento e in che relazione siete
 <dd><b>/authreq</b> - se si &egrave; autenticati permette di garantire per un utente fidato
 <dd><b>/mesgtoadm</b> - se si &egrave; autenticati permette di lasciare un messaggio all\'amministratore del sito
-<dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all)
+<!-- <dd><b>/listen &lt;all or auth&gt;</b> - se si &egrave; autenticati permette leggere solo i messaggi degli altri autenticati (auth) o di tutti (all) -->
 </dl>
 </div>
 ');
@@ -2028,7 +2028,7 @@ class Brisk
               $to_all = show_notify($msg, 0, $mlang_brisk['btn_close'][$G_lang], 400, 120);
           } while (0);
       } // /alarm chat command
-      else if (strncmp($msg, "/listen ", 8) == 0) {
+      else if (FALSE && strncmp($msg, "/listen ", 8) == 0) {
           $arg = substr($msg, 8);
 
           if (strcasecmp($arg, "isolation") == 0) {

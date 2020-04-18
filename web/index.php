@@ -537,7 +537,7 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
             if ($ii % 4 == 0) {
                 $tables .= '<tr id = "tr_noauth'.$ii.'">';
             }
-            if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $ii < TABLES_AUTH_N) {
+            if (TRUE || !($user->flags & USER_FLAG_ISOLAUTH) || $i < TABLES_APPR_N) {
                 $tables .= '<td id = "td_noauth'.$ii.'">';
 
                 $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
@@ -1052,7 +1052,6 @@ var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
 var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
 var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
 var g_prefs, g_prefs_new = null;
-var g_listen;
 var g_jukebox = null;
 var g_is_spawn = 0;
 var g_nd = null;
@@ -1222,7 +1221,6 @@ cookie_law(null);
    var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
    var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
    var g_prefs, g_prefs_new = null;
-   var g_listen;
    var g_is_spawn = 0;
    var g_jukebox = null;
    var g_imgct = 0;
