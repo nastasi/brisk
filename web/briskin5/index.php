@@ -67,7 +67,7 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script> 
 <script type="text/javascript" src="../heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="../xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>

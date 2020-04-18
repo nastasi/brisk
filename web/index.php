@@ -1029,7 +1029,7 @@ supported by:<br>
 <title>Brisk</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
@@ -1202,7 +1202,7 @@ cookie_law(null);
 <title>Brisk</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
