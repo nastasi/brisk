@@ -2552,28 +2552,6 @@ class Brisk
 
           if ($authenticate != FALSE) {
               $this->user[$idx]->code = $authenticate->code_get();
-              if (0 == 1) {
-                  // all this part is included in the db server
-                  $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
-
-                  if (isset($cookie['CO_list'])) {
-                      // fprintf(STDERR, "QQ: %s CO_list: [%s]\n", __FUNCTION__, $cookie['CO_list']);
-                      if (strcmp($cookie['CO_list'], "auth") == 0) {
-                          $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-                          $this->user[$idx]->flags |= USER_FLAG_LISTAUTH;
-                      }
-                      if (strcmp($cookie['CO_list'], "isolation") == 0) {
-                          $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-                          $this->user[$idx]->flags |= USER_FLAG_ISOLAUTH;
-                      }
-                      else {
-                          $this->user[$idx]->flags &= ~USER_FLAG_MAP_AUTH;
-                      }
-                  }
-              }
-              // else {
-              //    fprintf(STDERR, "QQ: CO_list not set flags: %x\n", __FUNCTION__, $this->user[$idx]->flags);
-              // }
           }
           // fprintf(STDERR, "QQ %s: flag %x\n", __FUNCTION__, $this->user[$idx]->flags);
           if ($ghost > -1) {

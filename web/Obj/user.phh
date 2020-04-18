@@ -28,8 +28,8 @@ require_once("${G_base}Obj/transports.phh");
 define('USER_FLAG_AUTH',     0x02);
 
 define('USER_FLAG_MAP_AUTH', 0x0c);
-define('USER_FLAG_LISTAUTH', 0x04);
-define('USER_FLAG_ISOLAUTH', 0x08);
+// DISABLED define('USER_FLAG_LISTAUTH', 0x04);
+define('USER_FLAG_ISOLAUTH', 0x04);
 
 define('USER_FLAG_DBFAILED', 0x10);
 
