@@ -126,20 +126,20 @@ $mlang_room = array( 'userpassuse'  => array('it' => 'Il tuo nickname &egrave; g
                                              'en' => 'guarantee for a friend'),
                      'tit_warr'     => array('it' => 'Garantisci per un tuo conoscente.',
                                              'en' => 'Guarantee for a friend.'),
-                     'itm_list'     => array('it' => 'ascolta',
-                                             'en' => 'listen'),
+                     'itm_list'     => array('it' => 'visualizza',
+                                             'en' => 'visualize'),
                      'list_desc'    => array('it' => 'imposta le regole di ascolto',
                                              'en' => 'set the listen rules'),
                      'tit_listall'  => array('it' => 'tutti',
                                              'en' => 'everybody'),
-                     'listall_desc' => array('it' => 'leggi tutti i messaggi di tutti gli utenti collegati',
-                                             'en' => 'listen all messages from each user connected'),
+                     'listall_desc' => array('it' => 'visualizza tutti gli utenti collegati',
+                                             'en' => 'visualize all connected users'),
                      'tit_listaut'  => array('it' => 'solo autenticati',
                                              'en' => 'only authorized'),
-                     'tit_listisol'  => array('it' => 'isolamento',
-                                             'en' => 'isolation'),
-                     'listaut_desc' => array('it' => 'leggi soltanto i messaggi degli utenti con password',
-                                             'en' => 'listen messages only from authenticated users'),
+                     'tit_listisol'  => array('it' => 'visualizza solo gli utenti autenticati',
+                                             'en' => 'visualize authenticated users only'),
+                     'listaut_desc' => array('it' => 'visualizza solo gli utenti autenticati e i tavoli ad essi riservati',
+                                             'en' => 'visualize authenticated users only and reserved tables to them'),
                      'listisol_desc'=> array('it' => 'visualizza Brisk come se fosse solo per utenti con password',
                                             'en' => 'show Brisk like an authenticated user only site'),
                      'suppcomp_tit' =>  array('it' => 'personalizza la tua S',
@@ -1514,11 +1514,6 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 <?php echo $mlang_room['listall_desc'][$G_lang];?>
 '"><span id="list_all">
 <?php echo $mlang_room['tit_listall'][$G_lang];?>
-</span></td></tr>
-<tr><td><input style="vertical-align: bottom;" id="ra_listen_auth" type="radio" name="listen" value="1" onclick="prefs_update('listen');" title="'
-<?php echo $mlang_room['listaut_desc'][$G_lang];?>
-'"><span id="list_auth">
-<?php echo $mlang_room['tit_listaut'][$G_lang];?>
 </span></td></tr>
 <tr><td><input style="vertical-align: bottom;" id="ra_listen_isol" type="radio" name="listen" value="2" onclick="prefs_update('listen');" title="'
 <?php echo $mlang_room['listisol_desc'][$G_lang];?>
