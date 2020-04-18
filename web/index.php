@@ -1038,9 +1038,9 @@ supported by:<br>
 <script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css">
-<link rel="stylesheet" type="text/css" href="brisk.css">
-<link rel="stylesheet" type="text/css" href="room.css">
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
 
 <script type="text/javascript"><!--
 var g_debug = 0;
@@ -1208,9 +1208,9 @@ cookie_law(null);
 <script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css">
-<link rel="stylesheet" type="text/css" href="brisk.css">
-<link rel="stylesheet" type="text/css" href="room.css">
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
 <script type="text/javascript"><!--
    var sess = "not_connected";
    var g_debug = 0;
