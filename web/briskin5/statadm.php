@@ -184,7 +184,7 @@ function main_pgsql($curtime)
             // TAG: POINTS_MANAGEMENT
             $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.login as login
                                 FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers as u
-                                WHERE (m.tcode = %d OR m.tcode = %d) AND m.code = g.mcode AND
+                                WHERE m.ttype <= 2 AND (m.tcode = %d OR m.tcode = %d) AND m.code = g.mcode AND
                                       ( (u.type & (CAST (X'ff0000' as integer))) <> (CAST (X'800000' as integer)) ) AND
                                       g.tstamp > to_timestamp(%d) AND g.tstamp <= to_timestamp(%d) AND
                                       p.ucode = u.code AND p.gcode = g.code AND
