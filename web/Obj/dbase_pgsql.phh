@@ -720,8 +720,11 @@ class BriskDB
 
                 // match not exists, insert it
                 // , BIN5_TOURNAMENT_NO_DRAW
-                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx, mazzo_next, mult_next, tcode) VALUES ('%s', %d, %d, %d, %d) RETURNING *;",
-                                   $G_dbpfx, $sql_ttok, $tidx, $table->mazzo, $table->mult, $table->rules->id_get());
+                $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, ttype, tidx, mazzo_next, mult_next, tcode) VALUES ('%s', %d, %d, %d, %d, %d) RETURNING *;",
+                                   $G_dbpfx, $sql_ttok,
+                                   ($tidx < TABLES_CERT_N ? 1 : ($tidx < TABLES_AUTH_N ? 2 : (
+                                       $tidx < TABLES_APPR_N ? 3 : 4))),
+                                   $tidx, $table->mazzo, $table->mult, $table->rules->id_get());
                 if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_affected_rows($mtc_pg) != 1) {
                     log_crit(sprintf("bin5_points_save: failed at insert match [%s]", $mtc_sql));
                     break;

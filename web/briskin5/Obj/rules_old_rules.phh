@@ -301,7 +301,7 @@ class Rules_old_rules extends Rules {
                                              $table->old_pnt, $table->old_asta_pnt, $table->old_tourn_pts);
 
 
-        if ($user->table_orig < TABLES_AUTH_N) {
+        if ($user->table_orig < TABLES_APPR_N) {
             require_once("../Obj/dbase_".$G_dbasetype.".phh");
 
             if (($bdb = BriskDB::create()) != FALSE) {

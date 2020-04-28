@@ -116,8 +116,8 @@ function main_pgsql($from, $to)
             $trn_obj = pg_fetch_object($trn_pg, $t);
 
             $tmt_sql = sprintf("
-SELECT m.code AS code, m.mazzo_next as minus_one_is_old 
-    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments as t 
+SELECT m.code AS code, m.ttype AS ttype, m.mazzo_next AS minus_one_is_old 
+    FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_tournaments AS t 
     WHERE t.code = m.tcode AND m.code = g.mcode 
         AND t.code = %d AND g.tstamp >= '%s' AND g.tstamp < '%s' 
     GROUP BY m.code, minus_one_is_old 
@@ -167,7 +167,9 @@ SELECT g.* FROM %sbin5_tournaments AS t, %sbin5_matches AS m, %sbin5_games AS g
                 for ($u = 0 ; $u < count($users) ; $u++) {
                     // log_crit("stat-day: LOOP u");
                     if ($u == 0) {
-                        fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s</h3>\n", $tmt_obj->code, $users[$u]['first'], $users[$u]['last'], $users[$u]['tidx']);
+                        fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s%s</h3>\n",
+                        $tmt_obj->code, $users[$u]['first'], $users[$u]['last'], $users[$u]['tidx'],
+                        ($tmt_obj->ttype > 2 ? " (tavolo per apprendisti)" : ""));
                         fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
                     }
                     fprintf($fpexp, "<th>%s</th>", $users[$u]['login']);
