@@ -494,4 +494,7 @@ img.callerimg {
     top: 10px;
 }
 
-
+div#preferences_child div div {
+    text-align: center;
+    margin-bottom: 8px;
+}

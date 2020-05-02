@@ -3,7 +3,7 @@
  *  brisk - briskin5/index.php
  *
  *  Copyright (C) 2006-2012 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -60,6 +60,10 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
     if (($sess = gpcs_var('sess', $get, $post, $cookie)) === FALSE)
         unset ($sess);
 
+    fprintf(STDERR, "PREF_DECK SET %s", (isset($cookie['CO_bin5_pref_deck']) ? "YES" : "NO"));
+
+    $deck = (isset($cookie['CO_bin5_pref_deck']) ? $cookie['CO_bin5_pref_deck'] : 'xx');
+
 // header('Content-type: text/html; charset="utf-8"',true);
     ?>
 <html>
@@ -68,7 +72,7 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script> 
+<script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="../heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="../xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="dnd.js?v=<? echo BSK_BUSTING; ?>"></script>
@@ -90,12 +94,13 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
    var subst = "none";
    var table_pos = "";
    var g_jukebox = null;
+   var g_deck = "<?php echo "$deck"; ?>";
 
    var asta_ptr;
    var area_ptr;
 
    var gst  = new globst();
-   gst.st = <?php 
+   gst.st = <?php
    log_load("bin5/index.php");
 
    if (isset($laststate) == false) {
@@ -123,13 +128,14 @@ window.onload = function() {
   sess = "<?php echo "$sess"; ?>";
   xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>,  2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
-  
-  window.onbeforeunload = onbeforeunload_cb;  
-  window.onunload = onunload_cb;  
+
+  window.onbeforeunload = onbeforeunload_cb;
+  window.onunload = onunload_cb;
 
   xstm.start();
 
   addEvent($('select_rules'), "change", function() { act_select_rules(this.value); } );
+  addEvent($('select_deck'), "change", function() { act_select_deck(this.value); } );
   // FIXME: add this setTimeout(preload_images into data stream to avoid
   // race on opened socket
   // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct);
@@ -195,17 +201,17 @@ window.onload = function() {
   <img id="asta8" src="img/asta8.png" class="astacard">
   <img id="asta9" src="img/asta9.png" class="astacard">
   <div id="astaptdiv" class="punti">
-    <input class="puntifield" id="astapt" name="astapt" type="text" maxsize="3" size="3" value="61"> 
+    <input class="puntifield" id="astapt" name="astapt" type="text" maxsize="3" size="3" value="61">
   </div>
   <img  id="astaptsub" src="img/astaptsub_ro.png" class="astacard">
-  <img  id="astapasso" src="img/astapasso_ro.png" class="astacard"> 
-  <img  id="astalascio" src="img/astalascio_ro.png" class="astacard"> 
+  <img  id="astapasso" src="img/astapasso_ro.png" class="astacard">
+  <img  id="astalascio" src="img/astalascio_ro.png" class="astacard">
 </div>
 <div id="name" class="pubinfo"></div>
 <div id="public" class="public">
    <div class="vert_midfloat">
        <div id="pubasta" class="vert_innfloat_so">
-           <img id="pubacard" src="img/astapasso_ro.png" class="pubacard"> 
+           <img id="pubacard" src="img/astapasso_ro.png" class="pubacard">
            <div id="pubapnt"></div>
        </div>
    </div>
@@ -214,7 +220,7 @@ window.onload = function() {
 <div id="public_ea" class="public_ea">
    <div class="vert_midfloat">
       <div id="pubasta_ea" class="vert_innfloat">
-         <img id="pubacard_ea" src="img/astapasso_ro.png" class="pubacard_ea">  
+         <img id="pubacard_ea" src="img/astapasso_ro.png" class="pubacard_ea">
          <div id="pubapnt_ea"></div>
       </div>
    </div>
@@ -223,7 +229,7 @@ window.onload = function() {
 <div id="public_ne" class="public_ne">
    <div class="vert_midfloat">
       <div id="pubasta_ne" class="vert_innfloat">
-         <img id="pubacard_ne" src="img/astapasso_ro.png" class="pubacard_ne">  
+         <img id="pubacard_ne" src="img/astapasso_ro.png" class="pubacard_ne">
          <div id="pubapnt_ne"></div>
       </div>
    </div>
@@ -232,7 +238,7 @@ window.onload = function() {
 <div id="public_nw" class="public_nw">
    <div class="vert_midfloat">
       <div id="pubasta_nw" class="vert_innfloat">
-         <img id="pubacard_nw" src="img/astapasso_ro.png" class="pubacard_nw">  
+         <img id="pubacard_nw" src="img/astapasso_ro.png" class="pubacard_nw">
          <div id="pubapnt_nw"></div>
       </div>
    </div>
@@ -241,7 +247,7 @@ window.onload = function() {
 <div id="public_we" class="public_we">
    <div class="vert_midfloat">
       <div id="pubasta_we" class="vert_innfloat">
-         <img id="pubacard_we" src="img/astapasso_ro.png" class="pubacard_we">  
+         <img id="pubacard_we" src="img/astapasso_ro.png" class="pubacard_we">
          <div id="pubapnt_we"></div>
       </div>
    </div>
@@ -308,18 +314,19 @@ window.onload = function() {
 </div>
 
 <div id="preferences" class="notify" style="z-index: 200; width: 400px; margin-left: -200px; height: 200px; top: 126px; visibility: hidden;">
-<div id="preferences_child" style="border-bottom: 1px solid gray; overflow: auto; height: 170px;">
+<div id="preferences_child" style="border-bottom: 1px solid gray; overflow: auto; height: 170px; text-align: center">
 
 <h2><?php echo $mlang_bin5_index['tit_pref'][$G_lang]; ?></h2>
 <div style="width: 95%; /* background-color: red; */ margin: auto; text-align: left;">
-<br><br>
-<input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php echo $mlang_bin5_index['itm_ringauc'][$G_lang] ?>
     <div>
-        <label>Regole:</label><?php dom_select_rules();?>
+        <input type="checkbox" name="pref_ring_endauct" id="pref_ring_endauct" onclick="pref_ring_endauct_set(this);"><?php echo $mlang_bin5_index['itm_ringauc'][$G_lang] ?>
     </div>
-</div>
-
-
+    <div>
+        <label>Regole:</label> <?php dom_select_rules();?>
+    </div>
+    <div>
+      <label>Tipo di carte:</label> <?php dom_select_deck($deck);?>
+   </div>
 </div>
 <div class="notify_clo"><input type="submit" class="input_sub" style="bottom: 4px;" onclick="act_preferences_update();" value="<?php echo $mlang_bin5_index['btn_update'][$G_lang]; ?>"/></div>
 </div>

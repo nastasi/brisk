@@ -68,6 +68,23 @@ $mlang_bin5_bin5 = array(
 $table_wellarr = Array( 'it' => Array ( 'Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.'),
                         'en' => Array ( 'EN Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.') );
 
+
+// FIXME - DYNAMIC WITH CACHE AND RELOAD FROM DB
+function deck_keys()
+{
+    return array('xx', 'yy');
+}
+
+function deck_id2descr($id, $lang)
+{
+    if ($id == 'xx')
+        return 'carte originali';
+    else if ($id == 'yy')
+        return 'carte strette';
+
+    return 'carte sconosciute';
+}
+
 function multoval($mult)
 {
     GLOBAL $G_lang;
@@ -90,6 +107,20 @@ function dom_select_rules()
     foreach (rules_keys() as $key) {
         $value = rules_id2descr($key, $G_lang);
         $ret .= sprintf("<option value='%d'%s>%s</option>\n", $key, ($key == BIN5_TOURNAMENT_CURRENT ? " selected='selected'" : ""), $value);
+    }
+    $ret .= "</select>\n";
+
+    echo "$ret";
+}
+
+function dom_select_deck($cur_sel)
+{
+    GLOBAL $G_lang;
+
+    $ret = "<select id='select_deck'>\n";
+    foreach (deck_keys() as $key) {
+        $value = deck_id2descr($key, $G_lang);
+        $ret .= sprintf("<option value='%s'%s>%s</option>\n", $key, ($key == $cur_sel ? " selected='selected'" : ""), $value);
     }
     $ret .= "</select>\n";
 

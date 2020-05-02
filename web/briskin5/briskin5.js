@@ -24,6 +24,19 @@
 var mlang_briskin5 = { 'is_calling' : { 'it' : ' sta chiamando', 
                                         'en' : ' is calling' } }
 
+function Preferences(ring_endauct, deck, deck_old)
+{
+    this.ring_endauct = ring_endauct;
+    this.deck = deck;
+    this.deck_old = deck_old;
+}
+
+Preferences.prototype = {
+    ring_endauct: true,
+    deck: null,
+    deck_old: null
+}
+
 function background_set()
 {
     $("bg").style.backgroundImage = 'url("img/brisk_table_sand'+table_pos+'.jpg")'; 
@@ -301,35 +314,61 @@ function set_iscalling(idx)
     }
 }
 
+var preferences = new Preferences(true, 'xx', 'xx');
+// FIXME move it in the html dynamic generation scope
+var deck_list = { 'xx': 'Normal cards',
+                  'yy': 'Slim cards' }
 function preferences_init()
 {
     var rd;
 
     if ((rd = readCookie("CO_bin5_pref_ring_endauct")) != null) {
-        $('pref_ring_endauct').checked = (rd == "true" ? true : false);
+        preferences.ring_endauct = $('pref_ring_endauct').checked = (rd == "true" ? true : false);
     }
     else {
-        $('pref_ring_endauct').checked = false;
+        preferences.ring_endauct = $('pref_ring_endauct').checked = true;
     }
-    $('preferences').ring_endauct = $('pref_ring_endauct').checked;
+
+    if ((rd = readCookie("CO_bin5_pref_deck")) != null && rd in deck_list) {
+        $$('#pref_deck').val(rd);
+        preferences.deck = rd;
+        preferences.deck_old = rd;
+    }
+    else {
+        rd = 'xx';
+        $$('#pref_deck').val(rd);
+        preferences.deck = rd;
+        preferences.deck_old = rd;
+    }
 }
 
 function preferences_update()
 {
     var ret;
-    createCookie("CO_bin5_pref_ring_endauct", ($('preferences').ring_endauct ? "true" : "false"), 24*3650, cookiepath); 
+    createCookie("CO_bin5_pref_ring_endauct", (preferences.ring_endauct ? "true" : "false"), 24*3650, cookiepath);
+    createCookie("CO_bin5_pref_deck", preferences.deck, 24*3650, cookiepath);
     ret = server_request('mesg', 'preferences_update');
 }
 
 function act_preferences_update()
 {
-    preferences_update()
+    preferences_update();
+    if (preferences.deck != preferences.deck_old) {
+        // FIXME: with dynamic text
+        x = new notify(gst,'<br/>Per rendere visibile il nuovo mazzo di carte<br/><br/>occorre fare reload della pagina.',
+                       0, "Close", 400, 110);
+    }
     preferences_showhide();
 }
 
 function pref_ring_endauct_set(obj)
 {
-    $('preferences').ring_endauct = obj.checked;
+    preferences.ring_endauct = obj.checked;
+}
+
+function pref_deck_set(obj)
+{
+    preferences.deck = $$(obj).val();
 }
 
 
@@ -357,6 +396,11 @@ function preferences_showhide()
 function act_select_rules(rule_id)
 {
     send_mesg("chatt|/rules " + rule_id);
+}
+
+function act_select_deck(deck_id)
+{
+    preferences.deck = deck_id;
 }
 
 function rules_set(id)
