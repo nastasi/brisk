@@ -548,7 +548,7 @@ function card_postplay_ea(card_pos)
 {
     var img = $("card_ea"+card_pos);
 
-    img.className = "";
+    // img.className = "";
     for (i = 0 ; i < cards_ea_n ; i++) {
 	if (cards_ea_pos[i] == card_pos) {
 	    for (e = i ; e < cards_ea_n-1 ; e++) {
@@ -584,8 +584,7 @@ function card_postplay_ne(obj,card_pos)
 {
     var img = $("card_ne"+card_pos);
 
-    img.className = "";
-
+    // img.className = "";
     for (i = 0 ; i < cards_ne_n ; i++) {
 	if (cards_ne_pos[i] == card_pos) {
 	    for (e = i ; e < cards_ne_n-1 ; e++) {
@@ -619,7 +618,7 @@ function card_postplay_nw(card_pos)
 {
     var img = $("card_nw"+card_pos);
 
-    img.className = "";
+    // img.className = "";
     for (i = 0 ; i < cards_nw_n ; i++) {
 	if (cards_nw_pos[i] == card_pos) {
 	    for (e = i ; e < cards_nw_n-1 ; e++) {
@@ -653,7 +652,7 @@ function card_postplay_we(card_pos)
 {
     var img = $("card_we"+card_pos);
 
-    img.className = "";
+    // img.className = "";
     for (i = 0 ; i < cards_we_n ; i++) {
 	if (cards_we_pos[i] == card_pos) {
 	    for (e = i ; e < cards_we_n-1 ; e++) {
