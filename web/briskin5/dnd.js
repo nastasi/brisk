@@ -46,11 +46,14 @@ var cards_we_n;
 var takes_we_n;
 
 /* width of images */
-var cards_width = 65;
+var cards_widths = {'xx': 65, 'yy': 54};
+var cards_heights = {'xx': 111, 'yy': 111};
+
+var cards_width = cards_widths[g_deck];
 var cards_width_d2 =  Math.ceil(cards_width / 2);
 
 /* height of images */
-var cards_height = 111;
+var cards_height = cards_heights[g_deck];;
 var cards_height_d2 =  Math.ceil(cards_height / 2);
 
 console.log('G_deck: ' + g_deck);
