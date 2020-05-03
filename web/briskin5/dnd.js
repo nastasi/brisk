@@ -46,24 +46,14 @@ var cards_we_n;
 var takes_we_n;
 
 /* width of images */
-/*
-var cards_width = 55 + 2;
-var cards_width_d2 =  27;
-*/
-
-/* height of images */
-/*
-var cards_height = 101 + 2;
-var cards_height_d2 =   51;
-*/
-
-/* width of images */
 var cards_width = 65;
-var cards_width_d2 =  33;
+var cards_width_d2 =  Math.ceil(cards_width / 2);
 
 /* height of images */
 var cards_height = 111;
-var cards_height_d2 =   56;
+var cards_height_d2 =  Math.ceil(cards_height / 2);
+
+console.log('G_deck: ' + g_deck);
 
 /* width of hands area */
 var hands_width = 400;
