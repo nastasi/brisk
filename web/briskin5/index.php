@@ -127,9 +127,7 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>,
-                            2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'),
-                           'index_rd.php', function(com){eval(com);});
+  xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>, 2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
 
   /* dynamic callerimg positioning */
