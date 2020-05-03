@@ -421,70 +421,74 @@ function card_mouseup_cb(o) {
 }
 
 /* CARD_SEND */
-function card_send_so(id,card,free,ct)
+function card_send_so(id, card, free, ct)
 {
     var img = $("card"+id);
-    img.src = getcard(-1,0);
+    img.setAttribute('data-card-id', getcard(-1,0));
     img.briskid = card;
 
     img.style.left = 400 - cards_width_d2;
     img.style.top  = 300 - cards_height_d2;
     img.style.zIndex = 100;
 
-    var movimg = new slowimg(img,400 - cards_width / 2,475 + (125 - cards_height)/2,25,free,"cards_dispose_so("+ct+", 0)",getcard(card,0));
+    var movimg = new slowimg(img, 400 - cards_width / 2,475 + (125 - cards_height)/2, 25,
+                             free, "cards_dispose_so(" + ct + ", 0)", getcard(card, 0));
     movimg.settime(G_send_time);
     movimg.start(gst);
 }
 
-function card_send_ea(id,card,free,ct)
+function card_send_ea(id, card, free, ct)
 {
     var img = $("card_ea"+id);
-    img.src = getcard(card,1);
+    img.setAttribute('data-card-id', getcard(card, 1));
     img.briskid = card;
 
     img.style.left = 400 - cards_height_d2;
     img.style.top  = 300 - cards_width_d2;
     img.style.zIndex = 100;
 
-    var movimg = new slowimg(img,686,296,25,free,"cards_dispose_ea("+ct+", 0);",getcard(card,1));
+    var movimg = new slowimg(img, 686, 296, 25,
+                             free, "cards_dispose_ea(" + ct + ", 0);", getcard(card, 1));
     movimg.settime(G_send_time);
     movimg.start(gst);
 }
 
-function card_send_ne(id,card,free,ct)
+function card_send_ne(id, card, free, ct)
 {
     var img = $("card_ne"+id);
-    img.src = getcard(card,2);
+    img.setAttribute('data-card-id', getcard(card, 2));
     img.briskid = card;
 
     img.style.left = 400 - cards_width_d2;
     img.style.top  = 300 - cards_height_d2;
     img.style.zIndex = 100;
 
-    var movimg = new slowimg(img,571,11,25,free,"cards_dispose_ne("+ct+", 0);",getcard(card,2));
+    var movimg = new slowimg(img, 571, 11, 25,
+                             free, "cards_dispose_ne(" + ct + ", 0);", getcard(card, 2));
     movimg.settime(G_send_time);
     movimg.start(gst);
 }
 
-function card_send_nw(id,card,free,ct)
+function card_send_nw(id, card, free, ct)
 {
     var img = $("card_nw"+id);
-    img.src = getcard(card,3);
+    img.setAttribute('data-card-id', getcard(card, 3));
     img.briskid = card;
 
     img.style.left = 400 - cards_width_d2;
     img.style.top  = 300 - cards_height_d2;
     img.style.zIndex = 100;
 
-    var movimg = new slowimg(img,171,11,25,free,"cards_dispose_nw("+ct+", 0);",getcard(card,3));
+    var movimg = new slowimg(img, 171, 11, 25,
+                             free, "cards_dispose_nw(" + ct + ", 0);", getcard(card, 3));
     movimg.settime(G_send_time);
     movimg.start(gst);
 }
 
-function card_send_we(id,card,free,ct)
+function card_send_we(id, card, free, ct)
 {
     var img = $("card_we"+id);
-    img.src = getcard(card,4);
+    img.setAttribute('data-card-id', getcard(card, 4));
     img.briskid = card;
 
     if (id < 0 || id > 39)
@@ -493,7 +497,8 @@ function card_send_we(id,card,free,ct)
     img.style.left = 400 - cards_height_d2;
     img.style.top  = 300 - cards_width_d2;
     img.style.zIndex = 100;
-    var movimg = new slowimg(img,11,296,25,free,"cards_dispose_we("+ct+", 0);",getcard(card,4));
+    var movimg = new slowimg(img, 11, 296, 25,
+                             free,"cards_dispose_we(" + ct + ", 0);", getcard(card, 4));
     movimg.settime(G_send_time);
     movimg.start(gst);
 }
@@ -502,27 +507,27 @@ var card_send_arr = new Array(card_send_so, card_send_ea,
 			      card_send_ne, card_send_nw,
 			      card_send_we);
 
-function card_send(player_pos,id,card,free,ct)
+function card_send(player_pos, id, card, free, ct)
 {
     var idx = (player_pos - table_pos + PLAYERS_N) % PLAYERS_N;
 
     card_send_arr[idx](id,card,free,ct);
 }
 
-function getcard(card,pos_id)
+function getcard(card, pos_id)
 {
     if (card < 0)
-	return ("img/cover"+sux[pos_id]+".png");
+	return ("cover" + sux[pos_id]);
     else if (card < 10)
-	return ("img/0"+card+sux[pos_id]+".png");
+	return ("0" + card+sux[pos_id]);
     else
-	return ("img/"+card+sux[pos_id]+".png");
+	return ("" + card + sux[pos_id]);
 }
 
-function card_setours(zer,uno,due,tre,qua,cin,sei,set)
+function card_setours(zer, uno, due, tre, qua, cin, sei, set)
 {
     var i;
-    var arg = new Array(zer,uno,due,tre,qua,cin,sei,set);
+    var arg = new Array(zer, uno, due, tre, qua, cin, sei, set);
 
     for (i = 0 ; i < CARD_HAND ; i++) {
         var id = (arg[i] < 10 ? '0' + arg[i] : '' + arg[i]);
@@ -705,7 +710,7 @@ function card_place_so(card_pos, card_idx, x, y)
     img.style.left = x;
     img.style.top  = y;
     img.style.visibility  = "visible";
-    img.src = getcard(card_idx,0);
+    img.setAttribute('data-card-id', getcard(card_idx, 0));
 }
 
 /* CARD_PLACE_EA */
@@ -718,7 +723,7 @@ function card_place_ea(card_pos, card_idx, x, y)
     img.style.left = 500 + ((y-250) * (125 - cards_height) / (200 - cards_height));
     img.style.top  = 450 - cards_width - (x - 300);
     img.style.visibility  = "visible";
-    img.src = getcard(card_idx,1);
+    img.setAttribute('data-card-id', getcard(card_idx, 1));
 }
 
 /* CARD_PLACE_NE */
@@ -731,7 +736,7 @@ function card_place_ne(card_pos, card_idx, x, y)
     img.style.left = 600 - cards_width - (x - 300);
     img.style.top  = 250 - cards_height - ((y-250) * (125 - cards_height) / (200 - cards_height));
     img.style.visibility  = "visible";
-    img.src = getcard(card_idx,2);
+    img.setAttribute('data-card-id', getcard(card_idx, 2));
 }
 
 /* CARD_PLACE_NW */
@@ -744,7 +749,7 @@ function card_place_nw(card_pos, card_idx, x, y)
     img.style.left = 400 - cards_width - (x - 300);
     img.style.top  = 250 - cards_height - ((y-250) * (125 - cards_height) / (200 - cards_height));
     img.style.visibility  = "visible";
-    img.src = getcard(card_idx,3);
+    img.setAttribute('data-card-id', getcard(card_idx, 3));
 }
 
 /* CARD_PLACE_WE */
@@ -757,7 +762,7 @@ function card_place_we(card_pos, card_idx, x, y)
     img.style.left = 300 - cards_height - ((y-250) * (125 - cards_height) / (200 - cards_height));
     img.style.top  = 250 + x - 300;
     img.style.visibility  = "visible";
-    img.src = getcard(card_idx,4);
+    img.setAttribute('data-card-id', getcard(card_idx, 4));
 }
 
 var card_place_arr = new Array( card_place_so, card_place_ea, card_place_ne, card_place_nw, card_place_we );

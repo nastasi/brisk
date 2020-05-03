@@ -569,7 +569,7 @@ function sleep(st, delay)
 	       delay, st);
 }
 
-function slowimg(img,x1,y1,deltat,free,action,srcend) {
+function slowimg(img, x1, y1, deltat, free, action, card_id_end) {
     this.img = img;
 
     // this.x0  = parseInt(document.defaultView.getComputedStyle(this.img, "").getPropertyValue("left"));
@@ -582,7 +582,7 @@ function slowimg(img,x1,y1,deltat,free,action,srcend) {
     this.deltat = deltat;
     this.free = free;
     this.action = action;
-    this.srcend = srcend;
+    this.card_id_end = card_id_end;
 }
 
 slowimg.prototype = {
@@ -602,7 +602,7 @@ slowimg.prototype = {
     deltat:   40,
     tout: 0,
     action: null,
-    srcend: null,
+    card_id_end: null,
 
     setstart: function(x0,y0)
     {
@@ -676,8 +676,8 @@ slowimg.prototype = {
 		this.st.st_loc++;
 		this.st = null;
 	    }
-	    if (this.srcend != null) {
-		this.img.src = this.srcend;
+	    if (this.card_id_end != null) {
+		this.img.setAttribute('data-card-id', this.card_id_end);
 	    }
 	}
     }
