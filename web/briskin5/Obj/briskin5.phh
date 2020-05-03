@@ -1950,7 +1950,7 @@ function briscola_show($bri, $table, $user)
 
     $ret .= sprintf('$("caller").style.backgroundImage = \'url("img/brisk_caller_sand%d.png")\';',
                     $table->asta_win);
-    $ret .= sprintf('$("callerimg").src = "img/%02d.png";', $table->briscola);
+    $ret .= sprintf('$("callerimg").setAttribute("data-card-id", "%02d"; ', $table->briscola);
     $ret .= sprintf('$("caller").style.visibility = "visible";');
     $ret .= sprintf('$("chooseed").style.visibility = "hidden";');
     $ret .= sprintf('$("astalascio").style.visibility = "";');
