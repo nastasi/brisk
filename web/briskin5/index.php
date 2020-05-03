@@ -145,54 +145,6 @@ window.onload = function() {
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
-<!--
-     <img id="card0" src="img/00.png" class="card">
-<img id="card1" src="img/01.png" class="card">
-<img id="card2" src="img/02.png" class="card">
-<img id="card3" src="img/03.png" class="card">
-<img id="card4" src="img/04.png" class="card">
-<img id="card5" src="img/05.png" class="card">
-<img id="card6" src="img/06.png" class="card">
-<img id="card7" src="img/07.png" class="card">
-<img id="takes" src="img/cover.png" class="cover">
-<img id="card_ne0" src="img/cover.png" class="cover">
-<img id="card_ne1" src="img/cover.png" class="cover">
-<img id="card_ne2" src="img/cover.png" class="cover">
-<img id="card_ne3" src="img/cover.png" class="cover">
-<img id="card_ne4" src="img/cover.png" class="cover">
-<img id="card_ne5" src="img/cover.png" class="cover">
-<img id="card_ne6" src="img/cover.png" class="cover">
-<img id="card_ne7" src="img/cover.png" class="cover">
-<img id="takes_ne" src="img/cover.png" class="cover">
-<img id="card_nw0" src="img/cover.png" class="cover">
-<img id="card_nw1" src="img/cover.png" class="cover">
-<img id="card_nw2" src="img/cover.png" class="cover">
-<img id="card_nw3" src="img/cover.png" class="cover">
-<img id="card_nw4" src="img/cover.png" class="cover">
-<img id="card_nw5" src="img/cover.png" class="cover">
-<img id="card_nw6" src="img/cover.png" class="cover">
-<img id="card_nw7" src="img/cover.png" class="cover">
-<img id="takes_nw" src="img/cover.png" class="cover">
-<img id="card_ea0" src="img/cover_ea.png" class="cover">
-<img id="card_ea1" src="img/cover_ea.png" class="cover">
-<img id="card_ea2" src="img/cover_ea.png" class="cover">
-<img id="card_ea3" src="img/cover_ea.png" class="cover">
-<img id="card_ea4" src="img/cover_ea.png" class="cover">
-<img id="card_ea5" src="img/cover_ea.png" class="cover">
-<img id="card_ea6" src="img/cover_ea.png" class="cover">
-<img id="card_ea7" src="img/cover_ea.png" class="cover">
-<img id="takes_ea" src="img/cover_ea.png" class="cover">
-<img id="card_we0" src="img/cover_we.png" class="cover">
-<img id="card_we1" src="img/cover_we.png" class="cover">
-<img id="card_we2" src="img/cover_we.png" class="cover">
-<img id="card_we3" src="img/cover_we.png" class="cover">
-<img id="card_we4" src="img/cover_we.png" class="cover">
-<img id="card_we5" src="img/cover_we.png" class="cover">
-<img id="card_we6" src="img/cover_we.png" class="cover">
-<img id="card_we7" src="img/cover_we.png" class="cover">
-<img id="takes_we" src="img/cover_we.png" class="cover">
--->
-
 <img id="card0" data-card-id="cover" src="img/cards_xx_empty.png" class="sp-card"/>
 <img id="card1" data-card-id="cover" src="img/cards_xx_empty.png" class="sp-card"/>
 <img id="card2" data-card-id="cover" src="img/cards_xx_empty.png" class="sp-card"/>
@@ -238,8 +190,6 @@ window.onload = function() {
 <img id="card_we6" data-card-id="cover_we" src="img/cards_xx_empty_we.png" class="sp-card"/>
 <img id="card_we7" data-card-id="cover_we" src="img/cards_xx_empty_we.png" class="sp-card"/>
 <img id="takes_we" data-card-id="cover_we" src="img/cards_xx_empty_we.png" class="sp-card"/>
-
-
 
 <div id="asta" class="asta">
   <img id="asta0" src="img/asta0.png" class="astacard">

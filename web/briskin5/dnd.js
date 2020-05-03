@@ -513,7 +513,8 @@ function card_setours(zer,uno,due,tre,qua,cin,sei,set)
     var arg = new Array(zer,uno,due,tre,qua,cin,sei,set);
 
     for (i = 0 ; i < CARD_HAND ; i++) {
-	$("card"+i).src = getcard(arg[i], 0);
+        var id = (arg[i] < 10 ? '0' + arg[i] : '' + arg[i]);
+	$("card"+i).setAttribute('data-card-id', id);
 	$("card"+i).briskid = arg[i];
     }
 }
