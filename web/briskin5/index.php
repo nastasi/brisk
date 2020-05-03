@@ -127,8 +127,14 @@ window.onload = function() {
   preferences_update();
 
   sess = "<?php echo "$sess"; ?>";
-  xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>,  2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'), 'index_rd.php', function(com){eval(com);});
+  xstm = new xynt_streaming(window, <?php printf("\"%s\", %d", $transp_type, $transp_port); ?>,
+                            2, null /* console */, gst, 'table_php', 'sess', sess, $('sandbox'),
+                           'index_rd.php', function(com){eval(com);});
   xstm.hbit_set(heartbit);
+
+  /* dynamic callerimg positioning */
+  $("callerimg").style.left = (160 - cards_width_d2) + "px";
+  $("callerimg").style.top = (60 - cards_height_d2) + "px";
 
   window.onbeforeunload = onbeforeunload_cb;
   window.onunload = onunload_cb;
@@ -263,7 +269,7 @@ window.onload = function() {
 </div>
 <div id="caller" class="caller">
 <div id="callerinfo" class="callerinfo">Info</div>
-<img id="callerimg" src="img/noimg.png" class="callerimg">
+<img id="callerimg" src="img/noimg.png" class="sp-card">
 </div>
 <div class="table_commands">
 <table>
