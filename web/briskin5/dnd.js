@@ -162,7 +162,7 @@ function cards_dispose_ne(car_n, tak_n) {
     list = "LIST: ";
     for (i = 0 ; i < car_n ; i++) {
 	$("card_ne" + cards_ne_pos[i]).style.left = start - ((car_n - i -1) * inter);
-	$("card_ne" + cards_ne_pos[i]).style.top  = (126 - cards_height)/2;
+	$("card_ne" + cards_ne_pos[i]).style.top  = (125 - cards_height)/2;
 	$("card_ne" + cards_ne_pos[i]).style.zIndex = 8-i;
 	$("card_ne" + cards_ne_pos[i]).style.visibility = "visible";
     }
