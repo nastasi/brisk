@@ -158,7 +158,7 @@ img[data-card-id="39"] {
     background: url('img/cards_xx.png') -525px -484px;
 }
 
-img[data-card-id="40"] {
+img[data-card-id="cover"] {
     background: url('img/cards_xx.png') -600px -0px;
 }
 
@@ -322,7 +322,7 @@ img[data-card-id="39_ea"] {
     background: url('img/cards_xx_ea.png') -847px -300px;
 }
 
-img[data-card-id="40_ea"] {
+img[data-card-id="cover_ea"] {
     background: url('img/cards_xx_ea.png') -968px -0px;
 }
 
@@ -486,7 +486,7 @@ img[data-card-id="39_we"] {
     background: url('img/cards_xx_we.png') -847px -300px;
 }
 
-img[data-card-id="40_we"] {
+img[data-card-id="cover_we"] {
     background: url('img/cards_xx_we.png') -968px -0px;
 }
 
