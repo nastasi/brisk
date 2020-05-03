@@ -494,6 +494,11 @@ div.table_commands {
     height: 65px;
 }
 
+img.callerimg {
+    position:     absolute;
+    border: 0px;
+}
+
 div#preferences_child div div {
     text-align: center;
     margin-bottom: 8px;
