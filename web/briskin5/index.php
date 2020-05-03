@@ -131,8 +131,8 @@ window.onload = function() {
   xstm.hbit_set(heartbit);
 
   /* dynamic callerimg positioning */
-  $("callerimg").style.left = (160 - cards_width_d2);
-  $("callerimg").style.top = (60 - cards_height_d2);
+  $("callerimg").style.left = (160 - cards_width_d2) + "px";
+  $("callerimg").style.top = (60 - cards_height_d2) + "px";
 
   window.onbeforeunload = onbeforeunload_cb;
   window.onunload = onunload_cb;
