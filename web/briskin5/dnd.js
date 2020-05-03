@@ -58,12 +58,12 @@ var cards_height_d2 =   51;
 */
 
 /* width of images */
-var cards_width = 75;
-var cards_width_d2 =  37;
+var cards_width = 65;
+var cards_width_d2 =  33;
 
 /* height of images */
-var cards_height = 121;
-var cards_height_d2 =   61;
+var cards_height = 111;
+var cards_height_d2 =   56;
 
 /* width of hands area */
 var hands_width = 400;
