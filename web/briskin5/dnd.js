@@ -2,7 +2,7 @@
  *  brisk - dnd.js
  *
  *  Copyright (C) 2006-2012 Matteo Nastasi
- *                          mailto: nastasi@alternativeoutput.it 
+ *                          mailto: nastasi@alternativeoutput.it
  *                                  matteo.nastasi@milug.org
  *                          web: http://www.alternativeoutput.it
  *
@@ -47,23 +47,23 @@ var takes_we_n;
 
 /* width of images */
 /*
-var cards_width = 55 + 2; 
-var cards_width_d2 =  27; 
+var cards_width = 55 + 2;
+var cards_width_d2 =  27;
 */
 
 /* height of images */
 /*
-var cards_height = 101 + 2; 
-var cards_height_d2 =   51; 
+var cards_height = 101 + 2;
+var cards_height_d2 =   51;
 */
 
 /* width of images */
-var cards_width = 75 + 2; 
-var cards_width_d2 =  37; 
+var cards_width = 75;
+var cards_width_d2 =  37;
 
 /* height of images */
-var cards_height = 121 + 2; 
-var cards_height_d2 =   61; 
+var cards_height = 121;
+var cards_height_d2 =   61;
 
 /* width of hands area */
 var hands_width = 400;
@@ -132,7 +132,7 @@ function cards_dispose_so(car_n, tak_n)
     takes_n = tak_n;
 
     return (0);
-} 
+}
 
 function cards_dispose_ne(car_n, tak_n) {
     // tak_n = 2;
@@ -171,7 +171,7 @@ function cards_dispose_ne(car_n, tak_n) {
     takes_ne_n = tak_n;
 
     return (0);
-} 
+}
 
 function cards_dispose_nw(car_n, tak_n) {
     // tak_n = 2;
@@ -212,7 +212,7 @@ function cards_dispose_nw(car_n, tak_n) {
     takes_nw_n = tak_n;
 
     return (0);
-} 
+}
 
 function cards_dispose_ea(car_n, tak_n) {
     if (tak_n > 0) {
@@ -250,9 +250,9 @@ function cards_dispose_ea(car_n, tak_n) {
     takes_ea_n = tak_n;
 
     return (0);
-} 
+}
 
-function cards_dispose_we(car_n, tak_n) 
+function cards_dispose_we(car_n, tak_n)
 {
     if (tak_n > 0) {
 	delta = 80;
@@ -295,7 +295,7 @@ function cards_dispose_we(car_n, tak_n)
     takes_we_n = tak_n;
 
     return (0);
-} 
+}
 
 var cards_dispose_arr = new Array(cards_dispose_so, cards_dispose_ea,
 				  cards_dispose_ne, cards_dispose_nw,
@@ -322,20 +322,20 @@ function card_mouseup_cb(o) {
     /* case swap in the group */
 
     // alert("mouseup");
-    if (parseInt(o.style.top) > 475 && 
+    if (parseInt(o.style.top) > 475 &&
 	parseInt(o.style.left) >= 200 && parseInt(o.style.left) < 600) {
 	/* Rearrange cards */
 	
 	// $("sandbox3").innerHTML = "REARRANGE: "+idx;
 
-	if (takes_n > 0) 
+	if (takes_n > 0)
 	    delta = 80;
 	else
 	    delta = 0;
 	
 	/* found the associated index of the current card. */
-	for (i = 0 ; i < cards_n ; i++) 
-	    if (cards_pos[i] == idx) 
+	for (i = 0 ; i < cards_n ; i++)
+	    if (cards_pos[i] == idx)
 		break;
 	old_idx = i;
 
@@ -361,7 +361,7 @@ function card_mouseup_cb(o) {
 	    if (tst) {
 		// $("sandbox2").innerHTML = "old: " +old_idx+ " i: " +i+ "left: " + parseInt(o.style.left) + "comp: " + (start + (cards_width / 2) + (i * (cards_width / 2)));
 
-		if (i == old_idx) 
+		if (i == old_idx)
 		    break;
 		if (i > old_idx) {
 		    /* moved to right */
@@ -382,10 +382,10 @@ function card_mouseup_cb(o) {
 
 	return (0);
     }
-    else if (is_my_time && 
-	     parseInt(o.style.top) >= 250 && 
+    else if (is_my_time &&
+	     parseInt(o.style.top) >= 250 &&
 	     parseInt(o.style.top) + cards_height < 450 &&
-	     parseInt(o.style.left) >= 300 && 
+	     parseInt(o.style.left) >= 300 &&
 	     (parseInt(o.style.left) + cards_width) < 500) {
 	/* Played card */
 
@@ -398,7 +398,7 @@ function card_mouseup_cb(o) {
 		    cards_pos[e] = cards_pos[e+1];
 		}
 		cards_pos[cards_n-1] = idx;
-		cards_n--; 
+		cards_n--;
 		cards_dispose_so(cards_n, takes_n);
 
 		is_my_time = false;
@@ -489,7 +489,7 @@ function card_send_we(id,card,free,ct)
 
     if (id < 0 || id > 39)
 	alert("ID ERRATO"+id);
-    
+
     img.style.left = 400 - cards_height_d2;
     img.style.top  = 300 - cards_width_d2;
     img.style.zIndex = 100;
@@ -498,7 +498,7 @@ function card_send_we(id,card,free,ct)
     movimg.start(gst);
 }
 
-var card_send_arr = new Array(card_send_so, card_send_ea, 
+var card_send_arr = new Array(card_send_so, card_send_ea,
 			      card_send_ne, card_send_nw,
 			      card_send_we);
 
@@ -515,7 +515,7 @@ function getcard(card,pos_id)
 	return ("img/cover"+sux[pos_id]+".png");
     else if (card < 10)
 	return ("img/0"+card+sux[pos_id]+".png");
-    else 
+    else
 	return ("img/"+card+sux[pos_id]+".png");
 }
 
@@ -542,7 +542,7 @@ function card_play_so(card_idx, x, y)
 function card_postplay_ea(card_pos)
 {
     var img = $("card_ea"+card_pos);
-    
+
     img.className = "";
     for (i = 0 ; i < cards_ea_n ; i++) {
 	if (cards_ea_pos[i] == card_pos) {
@@ -550,7 +550,7 @@ function card_postplay_ea(card_pos)
 		cards_ea_pos[e] = cards_ea_pos[e+1];
 	    }
 	    cards_ea_pos[cards_ea_n-1] = card_pos;
-	    cards_ea_n--; 
+	    cards_ea_n--;
 	    cards_dispose_ea(cards_ea_n, takes_ea_n);
 	    break;
 	}
@@ -567,7 +567,7 @@ function card_play_ea(card_idx, x, y)
     var x1, y1;
 
     x1 = 500 + ((y-250) * (125 - cards_height) / (200 - cards_height));
-    y1 = 450 - cards_width - (x - 300);    
+    y1 = 450 - cards_width - (x - 300);
 
     var movimg = new slowimg(img, x1, y1, 25, 1, "card_postplay_ea("+cards_ea_pos[card_pos]+");", newname);
     movimg.settime(G_play_time);
@@ -578,7 +578,7 @@ function card_play_ea(card_idx, x, y)
 function card_postplay_ne(obj,card_pos)
 {
     var img = $("card_ne"+card_pos);
-    
+
     img.className = "";
 
     for (i = 0 ; i < cards_ne_n ; i++) {
@@ -587,7 +587,7 @@ function card_postplay_ne(obj,card_pos)
 		cards_ne_pos[e] = cards_ne_pos[e+1];
 	    }
 	    cards_ne_pos[cards_ne_n-1] = card_pos;
-	    cards_ne_n--; 
+	    cards_ne_n--;
 	    cards_dispose_ne(cards_ne_n, takes_ne_n);
 	    break;
 	}
@@ -601,7 +601,7 @@ function card_play_ne(card_idx, x, y)
     var newname = getcard(card_idx,2);
     var x1, y1;
 
-    x1 = 600 - cards_width - (x - 300);    
+    x1 = 600 - cards_width - (x - 300);
     y1 = 250 - cards_height - ((y-250) * (125 - cards_height) / (200 - cards_height));
 
     var movimg = new slowimg(img, x1, y1, 25, 1, "card_postplay_ne(this,"+cards_ne_pos[card_pos]+");", newname);
@@ -613,7 +613,7 @@ function card_play_ne(card_idx, x, y)
 function card_postplay_nw(card_pos)
 {
     var img = $("card_nw"+card_pos);
-    
+
     img.className = "";
     for (i = 0 ; i < cards_nw_n ; i++) {
 	if (cards_nw_pos[i] == card_pos) {
@@ -621,7 +621,7 @@ function card_postplay_nw(card_pos)
 		cards_nw_pos[e] = cards_nw_pos[e+1];
 	    }
 	    cards_nw_pos[cards_nw_n-1] = card_pos;
-	    cards_nw_n--; 
+	    cards_nw_n--;
 	    cards_dispose_nw(cards_nw_n, takes_nw_n);
 	    break;
 	}
@@ -635,7 +635,7 @@ function card_play_nw(card_idx, x, y)
     var newname = getcard(card_idx,3);
     var x1, y1;
 
-    x1 = 400 - cards_width - (x - 300);    
+    x1 = 400 - cards_width - (x - 300);
     y1 = 250 - cards_height - ((y-250) * (125 - cards_height) / (200 - cards_height));
 
     var movimg = new slowimg(img, x1, y1, 25, 1, "card_postplay_nw("+cards_nw_pos[card_pos]+");", newname);
@@ -647,7 +647,7 @@ function card_play_nw(card_idx, x, y)
 function card_postplay_we(card_pos)
 {
     var img = $("card_we"+card_pos);
-    
+
     img.className = "";
     for (i = 0 ; i < cards_we_n ; i++) {
 	if (cards_we_pos[i] == card_pos) {
@@ -655,7 +655,7 @@ function card_postplay_we(card_pos)
 		cards_we_pos[e] = cards_we_pos[e+1];
 	    }
 	    cards_we_pos[cards_we_n-1] = card_pos;
-	    cards_we_n--; 
+	    cards_we_n--;
 	    cards_dispose_we(cards_we_n, takes_we_n);
 	    break;
 	}
@@ -670,7 +670,7 @@ function card_play_we(card_idx, x, y)
     var x1, y1;
 
     x1 = 300 - cards_height - ((y-250) * (125 - cards_height) / (200 - cards_height));
-    y1 = 250 + x - 300;    
+    y1 = 250 + x - 300;
 
     var movimg = new slowimg(img, x1, y1, 25, 1, "card_postplay_we("+cards_we_pos[card_pos]+");", newname);
     movimg.settime(G_play_time);
@@ -832,7 +832,7 @@ function cards_take(win)
     }
 
     var img = $("card"+cards_pos[cards_n]);
-    var movimg = new slowimg(img, 
+    var movimg = new slowimg(img,
 			     take_x[taker] - cards_width_d2,
 			     take_y[taker] - cards_height_d2,
 			     25, 0, "card_post_take("+cards_pos[cards_n]+");", null);
@@ -840,7 +840,7 @@ function cards_take(win)
     movimg.start(gst);
 
     var img = $("card_ea"+cards_ea_pos[cards_ea_n]);
-    var movimg = new slowimg(img, 
+    var movimg = new slowimg(img,
 			     take_x[taker] - cards_height_d2,
 			     take_y[taker] - cards_width_d2,
 			     25, 0, "card_ea_post_take("+cards_ea_pos[cards_ea_n]+");", null);
@@ -856,7 +856,7 @@ function cards_take(win)
     movimg.start(gst);
     if (PLAYERS_N > 3) {
 	var img = $("card_nw"+cards_nw_pos[cards_nw_n]);
-	var movimg = new slowimg(img, 
+	var movimg = new slowimg(img,
 				 take_x[taker] - cards_width_d2,
 				 take_y[taker] - cards_height_d2,
 				 25, 0, "card_nw_post_take("+cards_nw_pos[cards_nw_n]+");", null);
@@ -864,7 +864,7 @@ function cards_take(win)
 	movimg.start(gst);
 	
 	var img = $("card_we"+cards_we_pos[cards_we_n]);
-	var movimg = new slowimg(img, 
+	var movimg = new slowimg(img,
 				 take_x[taker] - cards_height_d2,
 				 take_y[taker] - cards_width_d2,
 				 25, 1, "card_we_post_take("+cards_we_pos[cards_we_n]+");", null);
