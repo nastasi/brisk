@@ -201,12 +201,12 @@ div.table_commands {
 
 .remark1 {
     position:     absolute;
-    width:  199px !important;
-    width:  207px;
-    height: 200px !important;
-    height: 208px;
-    left: 296;
-    top:  246;
+    width:  198px !important;
+    width:  206px;
+    height: 198px !important;
+    height: 206px;
+    left: 297px;
+    top:  247px;
     border-style: solid;
     border-width: 4px;
     border-color: green;
@@ -215,12 +215,12 @@ div.table_commands {
 
 .remark2 {
     position:     absolute;
-    width:  199px !important;
-    width:  203px;
-    height: 200px !important;
-    height: 204px;
-    left: 298;
-    top:  248;
+    width:  198px !important;
+    width:  202px;
+    height: 198px !important;
+    height: 202px;
+    left: 299px;
+    top:  249px;
     border-style: solid;
     border-width: 2px;
     border-color: green;
@@ -328,19 +328,6 @@ div.table_commands {
     height: 125px;
 }
 
-.pubinfo_nw_iscalling {
-    color: gray;
-    visibility: visible;
-    position: absolute;
-    top: 125px;
-    left: 200px;
-    width:  196px !important;
-    width:  200px;
-    height: 121px !important;
-    height: 125px;
-    border: 2px solid #66bbff;
-}
-
 .public_nw {
     visibility: hidden;
     position: absolute;
@@ -350,6 +337,19 @@ div.table_commands {
     width:  200px;
     height: 125px;
     overflow: hidden;
+}
+
+.pubinfo_nw_iscalling {
+    color: gray;
+    visibility: visible;
+    position: absolute;
+    top: 124px;
+    left: 200px;
+    width:  197px !important;
+    width:  201px;
+    height: 123px !important;
+    height: 127px;
+    border: 2px solid #66bbff;
 }
 
 .pubinfo_ne {
@@ -366,12 +366,12 @@ div.table_commands {
     color: gray;
     visibility: visible;
     position: absolute;
-    top: 125px;
+    top: 124px;
     left: 400px;
-    width:  196px !important;
-    width:  200px;
-    height: 121px !important;
-    height: 125px;
+    width:  197px !important;
+    width:  201px;
+    height: 123px !important;
+    height: 127px;
     border: 2px solid #66bbff;
 }
 
