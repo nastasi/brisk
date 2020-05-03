@@ -45,12 +45,14 @@ var takes_nw_n;
 var cards_we_n;
 var takes_we_n;
 
-/*
 /* width of images */
+/*
 var cards_width = 55 + 2; 
 var cards_width_d2 =  27; 
+*/
 
 /* height of images */
+/*
 var cards_height = 101 + 2; 
 var cards_height_d2 =   51; 
 */
@@ -61,7 +63,7 @@ var cards_width_d2 =  37;
 
 /* height of images */
 var cards_height = 121 + 2; 
-var cards_height_d2 =   61;
+var cards_height_d2 =   61; 
 
 /* width of hands area */
 var hands_width = 400;
