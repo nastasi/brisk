@@ -71,6 +71,12 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
+<link rel="stylesheet" type="text/css" href="../brisk.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="briskin5.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="cards_<? echo $deck; ?>.css?v=<? echo BSK_BUSTING; ?>">
+<script type="text/javascript">
+   var g_deck = "<?php echo "$deck"; ?>";
+</script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="../heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
@@ -79,12 +85,7 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <script type="text/javascript" src="dom-drag.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="briskin5.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="../brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="briskin5.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="cards_<? echo $deck; ?>.css?v=<? echo BSK_BUSTING; ?>">
-</head>
-<body>
-<SCRIPT type="text/javascript">
+<script type="text/javascript">
    var $$ = jQuery.noConflict();
 
    var myname = null;
@@ -95,7 +96,6 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
    var subst = "none";
    var table_pos = "";
    var g_jukebox = null;
-   var g_deck = "<?php echo "$deck"; ?>";
 
    var asta_ptr;
    var area_ptr;
@@ -145,7 +145,9 @@ window.onload = function() {
   // race on opened socket
   // setTimeout(preload_images, 0, g_preload_img_arr, g_imgct);
 }
-</SCRIPT>
+</script>
+</head>
+<body>
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
