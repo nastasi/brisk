@@ -102,7 +102,7 @@ function cards_dispose_so(car_n, tak_n)
     if (tak_n > 0) {
 	delta = 80;
 	$("takes").style.left = 200 + 400 - 90 + ((90 - cards_width) /  2);
-	$("takes").style.top  = 475 + (125 - cards_height)/2;
+	$("takes").style.top  = 475 + (126 - cards_height)/2;
 	$("takes").style.zIndex = 1;
 	$("takes").style.visibility = "visible";
     }
@@ -123,7 +123,7 @@ function cards_dispose_so(car_n, tak_n)
 
     for (i = 0 ; i < car_n ; i++) {
 	$("card" + cards_pos[i]).style.left = start + (i * inter);
-	$("card" + cards_pos[i]).style.top  = 475 + (125 - cards_height)/2;
+	$("card" + cards_pos[i]).style.top  = 475 + (126 - cards_height)/2;
 	$("card" + cards_pos[i]).style.zIndex = CARD_HAND - i;
 	$("card" + cards_pos[i]).style.visibility = "visible";
     }
@@ -140,7 +140,7 @@ function cards_dispose_ne(car_n, tak_n) {
     if (tak_n > 0) {
 	delta = 80;
 	$("takes_ne").style.left = 800 - cards_width - 400 + 90 - ((90 - cards_width) /  2);
-	$("takes_ne").style.top  = (125 - cards_height)/2;
+	$("takes_ne").style.top  = (126 - cards_height)/2;
 	$("takes_ne").style.zIndex = 1;
 	$("takes_ne").style.visibility = "visible";
     }
@@ -162,7 +162,7 @@ function cards_dispose_ne(car_n, tak_n) {
     list = "LIST: ";
     for (i = 0 ; i < car_n ; i++) {
 	$("card_ne" + cards_ne_pos[i]).style.left = start - ((car_n - i -1) * inter);
-	$("card_ne" + cards_ne_pos[i]).style.top  = (125 - cards_height)/2;
+	$("card_ne" + cards_ne_pos[i]).style.top  = (126 - cards_height)/2;
 	$("card_ne" + cards_ne_pos[i]).style.zIndex = 8-i;
 	$("card_ne" + cards_ne_pos[i]).style.visibility = "visible";
     }
@@ -179,7 +179,7 @@ function cards_dispose_nw(car_n, tak_n) {
     if (tak_n > 0) {
 	delta = 80;
 	$("takes_nw").style.left = 400 - cards_width - 400 + 90 - ((90 - cards_width) /  2);
-	$("takes_nw").style.top  = (125 - cards_height)/2;
+	$("takes_nw").style.top  = (126 - cards_height)/2;
 	$("takes_nw").style.zIndex = 1;
 	$("takes_nw").style.visibility = "visible";
     }
@@ -217,7 +217,7 @@ function cards_dispose_nw(car_n, tak_n) {
 function cards_dispose_ea(car_n, tak_n) {
     if (tak_n > 0) {
 	delta = 80;
-	$("takes_ea").style.left = 675 + (125 - cards_height)/2;
+	$("takes_ea").style.left = 675 + (126 - cards_height)/2;
 	$("takes_ea").style.top  = 125 + ((90 - cards_width) /  2);
 	$("takes_ea").style.zIndex = 1;
 	$("takes_ea").style.visibility = "visible";
@@ -239,7 +239,7 @@ function cards_dispose_ea(car_n, tak_n) {
     list = "LIST: ";
     // console.log(car_n);
     for (i = 0 ; i < car_n ; i++) {
-	$("card_ea" + cards_ea_pos[i]).style.left = 675 + (125 - cards_height)/2;
+	$("card_ea" + cards_ea_pos[i]).style.left = 675 + (126 - cards_height)/2;
 	$("card_ea" + cards_ea_pos[i]).style.top  = start + (i * inter);
 	$("card_ea" + cards_ea_pos[i]).style.zIndex = CARD_HAND - i;
 	$("card_ea" + cards_ea_pos[i]).style.visibility = "visible";
