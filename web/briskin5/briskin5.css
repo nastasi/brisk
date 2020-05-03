@@ -494,8 +494,8 @@ div.table_commands {
     height: 65px;
 }
 
-img.callerimg {
-    position:     absolute;
+img#callerimg {
+    position: absolute;
     border: 0px;
 }
 
