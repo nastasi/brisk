@@ -267,7 +267,7 @@ window.onload = function() {
 </div>
 <div id="caller" class="caller">
 <div id="callerinfo" class="callerinfo">Info</div>
-<img id="callerimg" src="img/noimg.png" class="sp-card">
+<img id="callerimg" data-card-id="cover" src="img/cards_xx_empty.png" class="sp-card">
 </div>
 <div class="table_commands">
 <table>
