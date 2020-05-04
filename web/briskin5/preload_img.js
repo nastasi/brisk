@@ -1,4 +1,7 @@
-var g_preload_img_arr = new Array( 
+var g_preload_img_arr = new Array();
+var g_preload_imgsz_arr = new Array();
+
+var g_preload_img_arr_old = new Array( 
             "img/33_ea.png", "img/33_we.png",
             "img/31_we.png", "img/35_ea.png",
             "img/35_we.png", "img/31_ea.png",
@@ -59,7 +62,7 @@ var g_preload_img_arr = new Array(
             "img/15_ea.png", "img/15_we.png",
             "img/29_we.png", "img/29_ea.png",
             "img/29.png", "img/15.png");
-var g_preload_imgsz_arr = new Array( 
+var g_preload_imgsz_arr_old = new Array( 
             "1.0", "2.0", "3.0", "4.0", "4.9", "5.9", "6.9", "7.9",
             "8.9", "9.9", "10.8", "11.8", "12.8", "13.7", "14.7", "15.6",
             "16.5", "17.5", "18.4", "19.3", "20.2", "21.2", "22.1", "23.0",
