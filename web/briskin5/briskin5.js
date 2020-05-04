@@ -360,7 +360,7 @@ function act_preferences_update()
     preferences_update();
     if (preferences.deck != preferences.deck_old) {
         // FIXME: with dynamic text
-        x = new notify(gst, mlang_briskin5['deckreload'],
+        x = new notify(gst, mlang_briskin5['deckreload'][g_lang],
                        0, mlang_briskin5['close_btn'][g_lang], 400, 110);
     }
     preferences_showhide();
