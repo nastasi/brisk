@@ -262,10 +262,10 @@ window.onload = function() {
 </div>
 <div id="chooseed" class="chooseed">
                            <?php echo $mlang_bin5_index['aucwin'][$G_lang]; ?>
-<img id="seed0" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card" class="seed0"/>
-<img id="seed1" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card" class="seed1"/>
-<img id="seed2" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card" class="seed2"/>
-<img id="seed3" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card" class="seed3"/>
+<img id="seed0" src="img/cards_<? echo $deck; ?>_empty.png" class="seed0"/>
+<img id="seed1" src="img/cards_<? echo $deck; ?>_empty.png" class="seed1"/>
+<img id="seed2" src="img/cards_<? echo $deck; ?>_empty.png" class="seed2"/>
+<img id="seed3" src="img/cards_<? echo $deck; ?>_empty.png" class="seed3"/>
 
                            
 </div>
