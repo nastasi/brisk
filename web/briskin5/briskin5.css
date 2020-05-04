@@ -115,11 +115,13 @@ img.cover {
     z-index: 10;
 }
 
+/* FIXME: dynamic seeds position */
 img.seed0 {
     position:     absolute;
     left: 0px;
     top: 55px;
     cursor: pointer;
+    border: 0;
 }
 
 img.seed1 {
@@ -127,6 +129,7 @@ img.seed1 {
     left: 43px;
     top: 55px;
     cursor: pointer;
+    border: 0;
 }
 
 img.seed2 {
@@ -134,6 +137,7 @@ img.seed2 {
     left: 93px;
     top: 55px;
     cursor: pointer;
+    border: 0;
 }
 
 img.seed3 {
@@ -141,6 +145,7 @@ img.seed3 {
     left: 143px;
     top: 55px;
     cursor: pointer;
+    border: 0;
 }
 
 .area {

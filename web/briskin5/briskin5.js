@@ -172,7 +172,7 @@ function choose_seed(card)
     $("astalascio").style.visibility = "hidden"; 
     $("chooseed").style.visibility = "visible";
     for (i = 0 ; i < 4 ; i++) {
-	$("seed"+i).src = "img/"+i+""+card+".png";
+	$("seed"+i).setAttribute('data-card-id', '' + i + card);
 	seed=$("seed"+i);
 	eval("seed.onclick = function () { act_choose("+i+""+card+"); };");
     }
