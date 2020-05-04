@@ -41,7 +41,7 @@ function imglist_fla () {
     wrex="$4"
     ret=""
 #    for i in $(find "$pname" -maxdepth 1 -type f -name '*.jpg' -o -name '*.png' -o -name '*.gif' | grep -v '/src_' | sort); do
-    for i in $(find "$pname" -maxdepth 1 -type f -name '[0-9][0-9]*.png' -o -name 'st_*.png' | grep -v '/src_' | sort); do
+    for i in $(find "$pname" -maxdepth 1 -type f -name 'asta*.png' -o -name 'st_*.png' | grep -v '/src_' | sort); do
         if [ "$rex" != "" ]; then
             echo "$i" | grep -q "$rex"
             rt=$?
@@ -82,7 +82,8 @@ function imglist () {
     if [ "$1" = "" ]; then
         ls -Sd $( imglist_fla "$abspa" "$2" ) | grep -v '^\.$'
     elif [ "$1" = "briskin5/" ]; then
-        rex='/[0-9][0-9][^/]*$'
+        # rex='/[0-9][0-9][^/]*$'
+        rex=''
         ls -Sd $( imglist_fla "$abspa" "$2" "$rex" "y" ) | grep -v '^\.$'
         ls -Sd $( imglist_fla "$abspa" "$2" "$rex" "n" ) | grep -v '^\.$'
     fi
