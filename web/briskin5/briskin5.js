@@ -22,7 +22,12 @@
  */
 
 var mlang_briskin5 = { 'is_calling' : { 'it' : ' sta chiamando', 
-                                        'en' : ' is calling' } }
+                                        'en' : ' is calling' },
+                       'deckreload' : { 'it' : '<br/>Per rendere visibile il nuovo mazzo di carte<br/><br/>occorre fare reload della pagina.',
+                                        'en' : '<br/>EN: Per rendere visibile il nuovo mazzo di carte<br/><br/>occorre fare reload della pagina.'},
+                       'close_btn':   { 'it' : 'Chiudi',
+                                        'en' : 'Close'}
+                     }
 
 function Preferences(ring_endauct, deck, deck_old)
 {
@@ -355,8 +360,8 @@ function act_preferences_update()
     preferences_update();
     if (preferences.deck != preferences.deck_old) {
         // FIXME: with dynamic text
-        x = new notify(gst,'<br/>Per rendere visibile il nuovo mazzo di carte<br/><br/>occorre fare reload della pagina.',
-                       0, "Chiudi", 400, 110);
+        x = new notify(gst, mlang_briskin5['deckreload'],
+                       0, mlang_briskin5['close_btn'][g_lang], 400, 110);
     }
     preferences_showhide();
 }
