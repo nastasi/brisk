@@ -356,7 +356,7 @@ function act_preferences_update()
     if (preferences.deck != preferences.deck_old) {
         // FIXME: with dynamic text
         x = new notify(gst,'<br/>Per rendere visibile il nuovo mazzo di carte<br/><br/>occorre fare reload della pagina.',
-                       0, "Close", 400, 110);
+                       0, "Chiudi", 400, 110);
     }
     preferences_showhide();
 }
