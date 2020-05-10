@@ -69,16 +69,19 @@ $table_wellarr = Array( 'it' => Array ( 'Benvenuto al tavolo. Se almeno tre gioc
                         'en' => Array ( 'EN Benvenuto al tavolo. Se almeno tre giocatori non sbloccano l\'uscita cliccando il lucchetto, chi esce non pu&ograve; risedersi a un qualunque tavolo per '.floor(BAN_TIME/60).' minuti.') );
 
 
-// FIXME - DYNAMIC WITH CACHE AND RELOAD FROM DB
+// DECK STUFF - FIXME - DYNAMIC WITH CACHE AND RELOAD FROM DB
 function deck_keys()
 {
-    return array('xx', 'yy');
+    return array('xx', 'nb', 'yy');
 }
 
+// DECK STUFF
 function deck_id2descr($id, $lang)
 {
     if ($id == 'xx')
         return 'carte originali';
+    else if ($id == 'nb')
+        return 'carte senza bordi';
     else if ($id == 'yy')
         return 'carte strette';
 
