@@ -1,4 +1,16 @@
 <?php
+/* =========================================================
+   FILE PHP ATTIVO DEL MOTORE BRISK
+   MODIFICARE QUI PER I TEST REALI
+   PERCORSO ATTIVO: /var/www/html/brisk/Obj/
+
+   ATTENZIONE:
+   NON USARE come riferimento operativo la copia:
+   /home/davide/brisk/brisk/web/Obj/
+
+   Se fai modifiche solo lì, il sito attivo non le usa.
+   ========================================================= */
+
 /*
  *  brisk - brisk.phh
  *
@@ -27,11 +39,11 @@ define('BRISK_CONF', "brisk.conf.pho");
 define('FTOK_PATH', "/var/lib/brisk");
 define('LEGAL_PATH', "/tmp/legal_brisk");
 define('PROXY_PATH', "/var/lib/brisk_proxy");
-define('TABLES_N', 36);
-define('TABLES_APPR_N', 12);
+define('TABLES_N', 44);
+define('TABLES_APPR_N', 8);
 define('TABLES_AUTH_N', 8);
-define('TABLES_CERT_N', 4);
-define('PLAYERS_N', 3);
+define('TABLES_CERT_N', 0);
+define('PLAYERS_N', 5);
 define('MAX_POINTS', 5);
 define('MAX_PLAYERS', (20 + (PLAYERS_N * TABLES_N)));
 define('SHM_DIMS_MIN', (50000 + 10000 * TABLES_N + 15000 * MAX_PLAYERS));
@@ -59,7 +71,7 @@ define('EXPIRE_TIME_SMAMMA', 360);
 define('EXPIRE_TIME_WAG', 10);
 define('WAKEUP_TIME', 12);
 // BAN_TIME da allineare anche in commons.js
-define('BAN_TIME', 900);
+define('BAN_TIME', 720);
 define('GARBAGE_TIMEOUT', 5);
 define('NICKSERV', "BriskServ");
 
@@ -91,6 +103,9 @@ define('DEBUGGING', "no-debugging");
 
 define('BSK_BUSTING', "dev");
 
+if (!isset($DOCUMENT_ROOT) || $DOCUMENT_ROOT == "") {
+    $DOCUMENT_ROOT = dirname(__FILE__) . "/..";
+}
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 require_once("${G_base}Obj/ipclass.phh");
 
@@ -687,6 +702,7 @@ class Table {
         $thiz->table_start  = 0;
 
         $thiz->wakeup_time = 0;
+$thiz->captain_ban = array();
 
         return ($thiz);
     }
@@ -711,6 +727,7 @@ class Table {
         $this->table_start  = $from->table_start;
 
         $this->wakeup_time = $from->wakeup_time;
+$this->captain_ban = $from->captain_ban;
     }
 
     function myclone($from)
@@ -744,6 +761,7 @@ class Table {
         $thiz->table_start  = $from->table_start;
 
         $thiz->wakeup_time = $from->wakeup_time;
+$thiz->captain = $from->captain;
 
         return ($thiz);
     }
@@ -777,86 +795,119 @@ class Table {
         $this->player[$idx] = $player;
     }
 
-    function user_add($idx)
-    {
-        $this->player[$this->player_n] = $idx;
-        $this->player_n++;
+function user_add($idx)
+{
+    $this->player[$this->player_n] = $idx;
+    $this->player_n++;
 
-        return ($this->player_n - 1);
+    if ($this->player_n == 1) {
+        $this->captain = $idx;
     }
 
-    function user_rem($brisk, $user)
-    {
-        $tabpos = $user->table_pos;
+    return ($this->player_n - 1);
+}
 
-        /* verifico la consistenza dei dati */
-        if ($brisk->user[$this->player[$tabpos]] == $user) {
 
-            /* aggiorna l'array dei giocatori al tavolo. */
-            for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
-                $this->player[$i] = $this->player[$i+1];
-                $user_cur = $brisk->user[$this->player[$i]];
-                $user_cur->table_pos = $i;
-            }
-            $this->player_n--;
+function user_rem($brisk, $user)
+{
+    $tabpos = $user->table_pos;
+
+    /* verifico la consistenza dei dati */
+    if ($brisk->user[$this->player[$tabpos]] == $user) {
+
+        $removed_idx = $this->player[$tabpos];
+        $was_captain = (isset($this->captain) && $this->captain == $removed_idx);
+
+        /* aggiorna l'array dei giocatori al tavolo. */
+        for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
+            $this->player[$i] = $this->player[$i+1];
+            $user_cur = $brisk->user[$this->player[$i]];
+            $user_cur->table_pos = $i;
         }
-        else {
-            log_main("INCONSISTENCY ON TABLE.");
-        }
+        $this->player_n--;
+
+if ($this->player_n <= 0) {
+    $this->captain = -1;
+    $this->captain_ban = array();
+    log_captain("RESET BAN table=".$this->idx." empty table");
+}
+else if ($was_captain) {
+    $this->captain = $this->player[0];
+    $this->captain_ban = array();
+    log_captain("RESET BAN table=".$this->idx." new_captain=".$this->captain);
+}
+
     }
+    else {
+        log_main("INCONSISTENCY ON TABLE.");
+    }
+}
+
 
     // Table->act_content - return 'id' of type of output required for table button
-    function act_content($user)
-    {
-        $ret = "";
-        $isstanding = ($user->subst == 'standup');
-        $sitted = $this->player_n;
-        $table = $this->idx;
-        $cur_table = $user->table;
-        $allowed = TRUE;
+  
+function act_content($user)
+{
+    $ret = "";
+    $isstanding = ($user->subst == 'standup');
+    $sitted = $this->player_n;
+    $table = $this->idx;
+    $cur_table = $user->table;
+    $allowed = TRUE;
 
-        if ($isstanding) {
-            if ($sitted < PLAYERS_N) {
-                switch ($this->auth_type) {
-                case TABLE_AUTH_TY_CERT:
-                    if ($user->is_cert() && !$user->is_appr())
-                        $act = "sitcert";
-                    else
-                        $act = 'resercert';
-                    break;
-                case TABLE_AUTH_TY_AUTH:
-                    if ($user->is_auth() && !$user->is_appr())
-                        $act = "sitreser";
-                    else
-                        $act = 'reserved';
-                    break;
-                case TABLE_AUTH_TY_APPR:
-                    if ($user->is_auth())
-                        $act = "sitappr";
-                    else
-                        $act = 'reserved';
-                    break;
-                default:
-                    $act = 'sit';
-                    break;
-                }
-            }
-            else {
-                $act = 'none';
+    log_main("ACT_CONTENT table=".$table." user=".$user->name." idx=".$user->idx_get()." table_pos=".$user->table_pos." captain=".(isset($this->captain) ? $this->captain : "NULL")." player_n=".$this->player_n." cur_table=".$cur_table);
+    @file_put_contents('/tmp/legal_brisk/act_content_debug.log', "user=".$user->name." idx=".$user->idx_get()." table=".$user->table." table_pos=".$user->table_pos." captain=".(isset($this->captain)?$this->captain:'NULL')." player0=".(isset($this->player[0])?$this->player[0]:'NULL')." player1=".(isset($this->player[1])?$this->player[1]:'NULL')." player2=".(isset($this->player[2])?$this->player[2]:'NULL')." player3=".(isset($this->player[3])?$this->player[3]:'NULL')." player4=".(isset($this->player[4])?$this->player[4]:'NULL')."\n", FILE_APPEND);
+
+    if ($isstanding) {
+        if ($sitted < PLAYERS_N) {
+            switch ($this->auth_type) {
+            case TABLE_AUTH_TY_CERT:
+                if ($user->is_cert() && !$user->is_appr())
+                    $act = "sitcert";
+                else
+                    $act = 'resercert';
+                break;
+            case TABLE_AUTH_TY_AUTH:
+                if ($user->is_auth() && !$user->is_appr())
+                    $act = "sitreser";
+                else
+                    $act = 'reserved';
+                break;
+            case TABLE_AUTH_TY_APPR:
+                if ($user->is_auth())
+                    $act = "sitappr";
+                else
+                    $act = 'reserved';
+                break;
+            default:
+                $act = 'sit';
+                break;
             }
         }
         else {
-            if ($table == $cur_table)
-                $act = 'wake';
-            else
-                $act = 'none';
+            $act = 'none';
         }
-
-        if ($act != '')
-            $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
-
-        return ($ret);
     }
+    else {
+        if ($table == $cur_table) {
+            if ($user->table_pos == 0 && $this->player_n == PLAYERS_N) {
+                $act = 'captstart';
+            }
+            else {
+                $act = 'wake';
+            }
+        }
+        else {
+            $act = 'none';
+        }
+    }
+
+    if ($act != '')
+        $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
+
+    return ($ret);
+}
+
 } // end class Table
 
 
@@ -1530,7 +1581,7 @@ class Brisk
                 $ret .= $this->standup_content($user_cur);
 
                 // $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
-                $ret .= $table->act_content($user);
+$ret .= $table->act_content($user_cur);                
 
                 if ($user->idx_get() == $i) {
                     // set the new status
@@ -1538,7 +1589,7 @@ class Brisk
                     // clean the action buttons in other tables
                     for ($e = 0 ; $e < TABLES_N ; $e++) {
                         if ($this->table[$e]->player_n < PLAYERS_N) {
-                            $ret .= $this->table[$e]->act_content($user);
+$ret .= $this->table[$e]->act_content($user_cur);                    
                         }
                     }
                 }
@@ -2114,8 +2165,71 @@ class Brisk
                       }
                   }
               }
+              // LIMITA CAMBI NICK: max 2 in 30 minuti per sessione
+              $nicklimit_file = '/tmp/brisk_nickchange_limit.log';
+              $nicklimit_window = 1800; // 30 minuti
+              $nicklimit_max = 2;
+              $nick_entries = array();
+              $nick_key = $user->sess;
+              $now = time();
+
+              if (file_exists($nicklimit_file)) {
+                  $nick_lines = file($nicklimit_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                  foreach ($nick_lines as $nick_line) {
+                      $parts = explode('|', $nick_line, 3);
+                      if (count($parts) == 3) {
+                          list($t, $saved_key, $saved_name) = $parts;
+                          if ($now - intval($t) <= $nicklimit_window) {
+                              $nick_entries[] = intval($t) . "|" . $saved_key . "|" . $saved_name;
+                          }
+                      }
+                  }
+              }
+
+              $nick_names = array();
+              foreach ($nick_entries as $nick_line) {
+                  $parts = explode('|', $nick_line, 3);
+                  if (count($parts) == 3) {
+                      list($t, $saved_key, $saved_name) = $parts;
+                      if ($saved_key == $nick_key) {
+                          $nick_names[$saved_name] = true;
+                      }
+                  }
+              }
+
+              if (count($nick_names) >= $nicklimit_max && !isset($nick_names[$name_new])) {
+                  $oldest_time = $now;
+
+                  foreach ($nick_entries as $nick_line) {
+                      $parts = explode('|', $nick_line, 3);
+                      if (count($parts) == 3) {
+                          list($t, $saved_key, $saved_name) = $parts;
+                          if ($saved_key == $nick_key && intval($t) < $oldest_time) {
+                              $oldest_time = intval($t);
+                          }
+                      }
+                  }
+
+                  $remaining_seconds = $nicklimit_window - ($now - $oldest_time);
+                  if ($remaining_seconds < 0) {
+                      $remaining_seconds = 0;
+                  }
+
+                  $remaining_minutes = ceil($remaining_seconds / 60);
+                  if ($remaining_minutes < 1) {
+                      $remaining_minutes = 1;
+                  }
+
+                  $unit = ($remaining_minutes == 1) ? 'minuto' : 'minuti';
+                  $to_user = nickserv_msg($dt, 'Hai cambiato troppi nickname. Riprova tra ' . $remaining_minutes . ' ' . $unit . '.');
+                  break;
+              }
+
+              $nick_entries[] = $now . "|" . $nick_key . "|" . $name_new;
+              file_put_contents($nicklimit_file, implode("\n", $nick_entries) . "\n");
               $user->name = $name_new; // OK - nick changed
-              /* se nome gia' in uso, segnala cosa potrebbe capitare */
+file_put_contents('/tmp/brisk_nickchange_debug.log', "PASSO QUI\n", FILE_APPEND);              
+/* se nome gia' in uso, segnala cosa potrebbe capitare */
               if ( ! $user->is_auth() ) {
                   if (($bdb = BriskDB::create()) != FALSE) {
                       $bdb->users_load();
@@ -2700,13 +2814,41 @@ class Brisk
           $flags = $user_cur->flags;
 
           log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
-          if ($user_cur->is_supp_custom())
-              $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
-          else
-              $supp_comp_s = '';
 
-          $content .= sprintf('%s[ %d, "%s"%s ]',($i == 0 ? '' : ', '), $flags,
-          xcape($user_cur->name), $supp_comp_s);
+if ($user_cur->is_supp_custom())
+    $supp_comp_val = $user_cur->rec->supp_comp_get();
+else
+    $supp_comp_val = "";
+
+$can_kick = 0;
+$captain_can_kick = (
+    ($user->flags & USER_FLAG_TY_NORM) ||
+    ($user->flags & USER_FLAG_TY_CERT) ||
+    ($user->flags & USER_FLAG_TY_APPR)
+);
+
+if ($captain_can_kick &&
+    $user->stat == 'room' &&
+    $user->table == $table_idx &&
+    $user->subst == 'sitdown' &&
+    is_captain_table($table_idx) &&
+    isset($table->captain) &&
+    $table->captain == $user->idx_get() &&
+    $table->table_token == "" &&
+    $user_cur->idx_get() != $user->idx_get()) {
+    $can_kick = 1;
+}
+
+$content .= sprintf('%s[ %d, "%s", "%s", %d, %d, %d ]',
+    ($i == 0 ? '' : ', '),
+    $flags,
+    xcape($user_cur->name),
+    xcape($supp_comp_val),
+    $user_cur->idx_get(),
+    $can_kick,
+    $table_idx
+);
+
       }
 
       $content .= ' ]';
@@ -3232,6 +3374,18 @@ function log_wr($log)
         $btrace = "";
     if (($fp = @fopen(LEGAL_PATH."/brisk.log", 'a')) != FALSE) {
         fwrite($fp, sprintf("WRIT: [%s] [%s] [%s]\n", $ssess, $log, $btrace));
+        fclose($fp);
+    }
+}
+
+function log_captain($log)
+{
+    $sess = Brisk::sess_cur_get();
+    if (!isset($sess) || $sess == FALSE)
+        $sess = "XXXX";
+
+if (($fp = @fopen("/var/www/html/brisk/tmp/captain.log", 'a')) != FALSE) {
+        fwrite($fp, sprintf("[%s] [%s] %s\n", date("Y-m-d H:i:s"), $sess, $log));
         fclose($fp);
     }
 }

@@ -1,4 +1,17 @@
 <?php
+/* =========================================================
+   FILE ATTIVO DEL SITO / CLONE IN USO
+   MODIFICARE QUI PER I TEST REALI
+   PERCORSO ATTIVO: /var/www/html/brisk/
+
+   ATTENZIONE:
+   NON USARE come riferimento operativo la copia:
+   /home/davide/brisk/brisk/web/
+
+   Se fai modifiche lì, il browser potrebbe non vederle.
+   ========================================================= */
+
+
 /*
  *  brisk - index_wr.php
  *
@@ -21,6 +34,8 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  */
+
+/* REAL_BACKEND_BRISK_OK */
 
 $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                                 'en' => 'unknown error'),
@@ -128,6 +143,20 @@ Saluti e buone partite, mop.<br>',
 define('LICMGR_CHO_ACCEPT', 0);
 define('LICMGR_CHO_REFUSE', 1);
 define('LICMGR_CHO_AFTER',  2);
+
+$G_enable_captain_mode = true;
+$G_captain_tables = array(0,1,2,3,40,41,42,43);    // abilitati 4 cert e 4 liberi per test
+
+function is_captain_table($table_idx)
+{
+    global $G_enable_captain_mode, $G_captain_tables;
+
+    if (!$G_enable_captain_mode) {
+        return false;
+    }
+
+    return in_array((int)$table_idx, $G_captain_tables);
+}
 
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
@@ -259,6 +288,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     break;
                 }
 
+
                 $cli_name = urldecode($cli_name);
                 $cli_email = urldecode($cli_email);
 
@@ -275,12 +305,34 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 //   insert the new user disabled with reason NU_MAILED
                 // FIXME: move 'no-guaran' user into configuration file
                 if (($usr_obj = $bdb->user_add($cli_name, 'THE_PASS', $cli_email,
-                                               USER_FLAG_TY_DISABLE | USER_FLAG_TY_APPR,
-                                               USER_DIS_REA_NU_MAILED, $G_notguar_code)) == FALSE) {
+USER_FLAG_TY_APPR,
+                               USER_DIS_REA_NONE, $G_notguar_code)) == FALSE) {                                               
                     fprintf(STDERR, "ERROR: user_add FAILED\n");
                     $mesg_to_user = "Fallito inserimento nel database.";
                     break;
                 }
+
+/* ===== PASSWORD AUTO FOR TEST MODE ===== */
+$plain_pass = substr(md5(uniqid(rand(), true)), 0, 8);
+$hash_pass  = md5($plain_pass);
+
+$dbconn = $bdb->getdbconn();
+
+$pwd_sql = "UPDATE bsk_users SET pass = '{$hash_pass}' WHERE code = {$usr_obj->code}";
+$pwd_ret = pg_query($dbconn->db(), $pwd_sql);
+
+if ($pwd_ret == FALSE) {
+    fprintf(STDERR, "ERROR: password update FAILED SQL=[%s] PGERR=[%s]\n",
+        $pwd_sql, pg_last_error($dbconn->db()));
+    $mesg_to_user = "Fallito salvataggio password.";
+    break;
+}
+
+$cred_log = "/tmp/brisk_credentials.log";
+$cred_row = date("Y-m-d H:i:s") . " | nick=" . $cli_name . " | email=" . $cli_email . " | password=" . $plain_pass . "\n";
+@file_put_contents($cred_log, $cred_row, FILE_APPEND);
+/* ===== END PASSWORD AUTO ===== */
+
 
                 if (($mail_code = $bdb->mail_reserve_code()) == FALSE) {
                     fprintf(STDERR, "ERROR: mail reserve code FAILED\n");
@@ -314,12 +366,31 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     break;
                 }
 
-                if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
-                    // mail error
-                    fprintf(STDERR, "ERROR: mail send FAILED\n");
-                    $mesg_to_user = "Fallito invio email.";
-                    break;
-                }
+/* ===== TEST MODE APPRENTICE REGISTRATION ===== */
+$TEST_MODE_APPRENTICE = true;
+
+if ($TEST_MODE_APPRENTICE) {
+
+    $test_log = "/tmp/brisk_apprentice_links.log";
+    $log_row = date("Y-m-d H:i:s") . " | nick=" . $cli_name . " | email=" . $cli_email . " | link=" . $confirm_page . "\n";
+
+    if (@file_put_contents($test_log, $log_row, FILE_APPEND) === FALSE) {
+        fprintf(STDERR, "ERROR: apprentice link log FAILED\n");
+        $mesg_to_user = "Fallito salvataggio link di conferma.";
+        break;
+    }
+
+} else {
+
+    if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+        // mail error
+        fprintf(STDERR, "ERROR: mail send FAILED\n");
+        $mesg_to_user = "Fallito invio email.";
+        break;
+    }
+
+}
+/* ===== END TEST MODE ===== */
 
                 $bdb->transaction('COMMIT');
                 // fprintf(STDERR, "REMOTE: %d\n", $remote_ip);
@@ -839,6 +910,19 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustfirst'][$G_lang]);
                 }
+else if (is_captain_table($table_idx) &&
+         isset($table->captain_ban[$idx]) &&
+         $table->captain_ban[$idx] > $curtime) {
+    $wait_sec = $table->captain_ban[$idx] - $curtime;
+log_captain("BLOCK table=".$table_idx." user=".$user->name." wait=".$wait_sec);    
+$not_allowed_msg = show_notify(
+        "Sei stata esclusa temporaneamente da questo tavolo. Riprova tra ".secstoword($wait_sec).".",
+        3000,
+        $mlang_indwr['btn_stays'][$G_lang],
+        420,
+        160
+    );
+}
                 if ($not_allowed_msg != "") {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$not_allowed_msg;
                     $user->step_inc();
@@ -875,12 +959,16 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                 log_wr("MOP before");
 
-                if ($table->player_n == PLAYERS_N) {
-                    require_once("briskin5/Obj/briskin5.phh");
-                    log_wr("MOP inall");
+if ($table->player_n == PLAYERS_N) {
+    if (is_captain_table($table_idx)) {
+        log_wr("CAPTAIN MODE: autostart bloccato sul tavolo ".$table_idx);
+    }
+    else {
+        require_once("briskin5/Obj/briskin5.phh");
+        log_wr("MOP inall");
 
-                    // Start game for this table.
-                    log_wr("Start game!");
+        // Start game for this table.
+        log_wr("Start game!");
 	
                     //
                     //  START THE SPAWN HERE!!!!
@@ -949,6 +1037,13 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $brisk->match_add($table_idx, $bin5);
                     log_wr("postsave bri");
                 }
+ }
+
+ if (is_captain_table($table_idx) && $table->player_n == PLAYERS_N) {
+$user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$brisk->table[$table_idx]->act_content($user);
+                    $user->step_inc();
+                }
+
                 // change room
                 $brisk->room_sitdown($user, $table_idx);
 
@@ -976,10 +1071,169 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 return FALSE;
             }
 
-            if ($argz[0] == 'wakeup') {
-                $brisk->room_wakeup($user);
-            }
-            else if ($argz[0] == 'logout') {
+if ($argz[0] == 'wakeup') {
+    $brisk->room_wakeup($user);
+}
+else if ($argz[0] == 'captstart') {
+    $table_idx = $user->table;
+    $table = $brisk->table[$table_idx];
+
+    log_wr("CAPTSTART begin table=".$table_idx." user=".$user->name);
+log_captain("CAPTSTART begin table=".$table_idx." user=".$user->name);
+
+    if ($user->subst != 'sitdown') {
+        log_wr("CAPTSTART abort: user subst=".$user->subst);
+log_captain("CAPTSTART abort: user subst=".$user->subst);        
+return FALSE;
+    }
+
+    if ($table_idx < 0 || !is_captain_table($table_idx)) {
+        log_wr("CAPTSTART abort: tavolo non valido o non captain");
+log_captain("CAPTSTART abort: tavolo non valido o non captain");
+  return FALSE;
+    }
+
+    if ($table->player_n != PLAYERS_N) {
+        log_wr("CAPTSTART abort: tavolo non pieno");
+log_captain("CAPTSTART abort: tavolo non pieno");
+
+    return FALSE;
+    }
+
+    if (!isset($table->captain) || $table->captain != $user->idx_get()) {
+        log_wr("CAPTSTART abort: utente non capotavolo");
+log_captain("CAPTSTART abort: utente non capotavolo");
+        return FALSE;
+    }
+
+    require_once("briskin5/Obj/briskin5.phh");
+    log_wr("CAPTSTART Start game!");
+
+    $table_token = uniqid("");
+    $brisk->table[$table_idx]->table_token = $table_token;
+    $brisk->table[$table_idx]->table_start = $curtime;
+
+    $plist = "$table_token|$user->table|$table->player_n";
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+        $plist .= '|'.$brisk->user[$table->player[$i]]->sess;
+    }
+    log_legal($curtime, $user->ip, $user, "STAT:CREATE_GAME", $plist);
+
+    log_wr("CAPTSTART pre new Bin5");
+    if (($bin5 = new Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie)) == FALSE) {
+        log_wr("CAPTSTART bin5 create FALSE");
+        return FALSE;
+    }
+    else {
+        log_wr("CAPTSTART bin5 create OK");
+    }
+
+    log_wr("CAPTSTART pre init table");
+    $bin5_table = $bin5->table[0];
+    $bin5_table->init($bin5->user);
+    $bin5_table->game_init($bin5->user);
+    log_wr("CAPTSTART game_init after");
+
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+        $bin5_user_cur = $bin5->user[$i];
+        $user_cur = $brisk->user[$table->player[$i]];
+
+        $bin5_user_cur->laccwr = $curtime;
+        $bin5_user_cur->trans_step = $user_cur->step + 1;
+        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
+        $bin5_user_cur->step_inc();
+        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table($bin5, $bin5_user_cur,
+                                                                         $bin5_user_cur->step+1,
+                                                                         TRUE, FALSE);
+        $bin5_user_cur->step_inc();
+
+        while (array_pop($user_cur->comm) != NULL);
+
+        $user_cur->trans_step = $user_cur->step + 1;
+        $user_cur->comm[$user_cur->step % COMM_N] = sprintf(
+            'gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|',
+            $user_cur->step+1, $table_idx, $table_token, $G_lang
+        );
+
+        $user_cur->stat_set('table');
+        $user_cur->subst = 'asta';
+        $user_cur->laccwr = $curtime;
+        $user_cur->step_inc();
+    }
+
+    log_wr("CAPTSTART presave bri");
+    $brisk->match_add($table_idx, $bin5);
+    log_wr("CAPTSTART postsave bri");
+log_captain("CAPTSTART OK table=".$table_idx." token=".$table_token);
+
+    return FALSE;
+}
+
+else if ($argz[0] == 'captexpel') {
+
+    $table_idx = $user->table;
+    $table = $brisk->table[$table_idx];
+
+$target_idx = (isset($argz[1]) ? (int)$argz[1] : -1);
+
+$captain_can_kick = (
+        ($user->flags & USER_FLAG_TY_NORM) ||
+        ($user->flags & USER_FLAG_TY_CERT) ||
+        ($user->flags & USER_FLAG_TY_APPR)
+    );
+
+    if (!$captain_can_kick) {
+        return "KO";
+    }
+
+log_captain("CAPTEXPEL begin table=".$table_idx." captain=".$user->name." target=".$target_idx);
+
+    if ($target_idx < 0) {
+        return "ERRORE: target assente";
+    }
+
+    if ($user->subst != 'sitdown') {
+        return "ERRORE: utente non seduto";
+    }
+
+    if ($table_idx < 0 || !is_captain_table($table_idx)) {
+        return "ERRORE: tavolo non captain";
+    }
+
+    if ($table->table_token != "") {
+        return "ERRORE: partita già iniziata";
+    }
+
+    if (!isset($table->captain) || $table->captain != $user->idx_get()) {
+        return "ERRORE: non sei il capotavolo";
+    }
+
+    $target_user = FALSE;
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+        if ($table->player[$i] == $target_idx) {
+            $target_user = $brisk->user[$target_idx];
+            break;
+        }
+    }
+
+    if ($target_user === FALSE) {
+        return "ERRORE: target non trovato al tavolo";
+    }
+
+    if ($target_user->idx_get() == $user->idx_get()) {
+        return "ERRORE: non puoi espellere te stessa";
+    }
+
+$table->captain_ban[$target_idx] = $curtime + 120;
+log_captain("BAN table=".$table_idx." target=".$target_idx." until=".($curtime + 120));
+    $brisk->room_wakeup($target_user);
+
+log_captain("CAPTEXPEL OK table=".$table_idx." target=".$target_user->name);
+    return "OK";
+}
+
+else if ($argz[0] == 'logout') {
+
                 $brisk->ghost_sess->push($curtime, $user->sess, GHOST_SESS_REAS_LOUT);
 
                 $user->the_end = TRUE;
