@@ -294,20 +294,21 @@ span.au2_off span {
 }
 
 span.au3 {
-    padding-left: 24px;
-    background-image: url('img/books.png');
-    background-repeat: no-repeat;
-    background-position: left center;
 }
 
-span.au3_off span {
-    background-color: transparent;
-}
 span.au3_off {
 }
 
 span.au3 span {
-    background-color: transparent;
+    padding-left: 2px;
+    padding-right: 4px;
+    background-color: #ffd780;
+}
+
+span.au3_off span {
+    padding-left: 2px;
+    padding-right: 4px;
+    background-color: #ffd780;
 }
 
 div.bye_msg {
