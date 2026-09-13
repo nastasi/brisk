@@ -186,7 +186,7 @@ class Challenges {
                     if ($chals == FALSE) {
                         log_only("INIT CHALLENGES DATA");
 	  
-                        $chals =& Challenges::create();
+                        $chals = Challenges::create();
                         if (@shm_put_var($shm, $tok, $chals) == FALSE) {
                             log_only("PUT_VAR FALLITA ".strlen(serialize($chals)));
                             log_only(serialize($chals));

@@ -56,7 +56,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
 
     log_wr(0, 'bin::index_wr.php: COMM: '.xcapemesg($mesg));
 
-    if (($user = &$bin5->get_user($sess, $idx)) == FALSE) {
+    if (($user = $bin5->get_user($sess, $idx)) == FALSE) {
         echo "Get User Error";
         log_wr("Get User Error");
         return FALSE;

@@ -179,7 +179,7 @@ class Hardbans {
 	if ($hban == FALSE) {
 	  log_only("INIT HARDBAN DATA");
 	  
-	  $hban =& Hardbans::create();
+	  $hban = Hardbans::create();
 	  if (@shm_put_var($shm, $tok, $hban) == FALSE) {
 	    log_only("PUT_VAR FALLITA ".strlen(serialize($hban)));
 	    log_only(serialize($hban));
