@@ -37,7 +37,14 @@ class ZLibStream {
             $thiz->head = "\037\213\010\000\000\000\000\000\000\003";
         }
         else if ($type  == 'deflate') {
-            if (($thiz->filter = stream_filter_append($thiz->s[1], "zlib.deflate", STREAM_FILTER_READ)) == FALSE) {
+            /* The window has to be stated: left to itself the filter emits a
+               raw deflate stream (no 78 9c header), while Content-Encoding:
+               deflate promises the zlib wrapper of RFC 1950. A positive window
+               asks for that wrapper; gzip above asks for the raw stream with a
+               negative one, and prepends its own header by hand. */
+            $params = array('level' => 6, 'window' => 15, 'memory' => 9);
+
+            if (($thiz->filter = stream_filter_append($thiz->s[1], "zlib.deflate", STREAM_FILTER_READ, $params)) == FALSE) {
                 return (FALSE);
             }
         }

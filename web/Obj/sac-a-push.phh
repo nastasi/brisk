@@ -342,9 +342,13 @@ function headers_render($header, $len)
             if (!isset($hset['expires'])) {
                 $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
             }
-            if (!isset($hset['content-encoding'])) {
-                $s .= "Content-Encoding: chunked\r\n";
-            }
+            /* No Content-Encoding here: "chunked" is not a content coding
+               but a transfer coding, and it used to be emitted whenever the
+               client asked for no compression. Apache rewrote the response and
+               it went unnoticed; nginx forwards it as it stands, and a browser
+               that meets a content coding it does not know refuses the whole
+               body (ERR_CONTENT_DECODING_FAILED). The line below states the
+               transfer coding, which is the one that is really in use. */
             $s .= "Transfer-Encoding: chunked\r\n";
         }
         $s .= $cookies;
@@ -374,7 +378,24 @@ function get_encoding($header)
 {
     $enc = "plain";
     if (isset($header['Accept-Encoding'])) {
-        $acc = explode(',', $header['Accept-Encoding']);
+        /* "gzip, deflate, br" splits into tokens that carry a leading space
+           and may carry a quality: comparing them as they come made every
+           coding but the first one unreachable, and let through a coding the
+           client had refused with q=0. */
+        $acc = array();
+        foreach (explode(',', $header['Accept-Encoding']) as $tok) {
+            $par = explode(';', $tok);
+            $name = strtolower(trim($par[0]));
+            $qual = 1.0;
+            for ($i = 1 ; $i < count($par) ; $i++) {
+                if (preg_match('/^\s*q\s*=\s*([0-9.]+)\s*$/', $par[$i], $m)) {
+                    $qual = floatval($m[1]);
+                }
+            }
+            if ($qual > 0.0) {
+                $acc[] = $name;
+            }
+        }
 
         if (array_search('gzip', $acc) !== FALSE) {
             $enc = 'gzip';
