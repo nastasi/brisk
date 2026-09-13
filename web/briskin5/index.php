@@ -71,20 +71,20 @@ function bin5_index_main($transp_type, $header, &$header_out, $addr, $get, $post
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Brisk - Tavolo <?php echo "$table_idx";?></title>
 <link rel="shortcut icon" href="../img/brisk_ico.png">
-<link rel="stylesheet" type="text/css" href="../brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="briskin5.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="cards_<? echo $deck; ?>.css?v=<? echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="../brisk.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="briskin5.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="cards_<?php echo $deck; ?>.css?v=<?php echo BSK_BUSTING; ?>">
 <script type="text/javascript">
    var g_deck = "<?php echo "$deck"; ?>";
 </script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="../commons.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="../heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="../xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="dnd.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="dom-drag.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="briskin5.js?v=<? echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../commons.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="../xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="dnd.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="dom-drag.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="briskin5.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript">
    var $$ = jQuery.noConflict();
 
@@ -151,51 +151,51 @@ window.onload = function() {
 <div id="bg" class="area">
 
 <div id="remark" class="remark0"></div>
-<img id="card0" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card1" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card2" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card3" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card4" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card5" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card6" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card7" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="takes" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne0" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne1" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne2" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne3" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne4" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne5" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne6" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ne7" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="takes_ne" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw0" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw1" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw2" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw3" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw4" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw5" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw6" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_nw7" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="takes_nw" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png" class="sp-card"/>
-<img id="card_ea0" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea1" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea2" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea3" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea4" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea5" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea6" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_ea7" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="takes_ea" data-card-id="cover_ea" src="img/cards_<? echo $deck; ?>_empty_ea.png" class="sp-card"/>
-<img id="card_we0" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we1" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we2" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we3" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we4" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we5" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we6" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="card_we7" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
-<img id="takes_we" data-card-id="cover_we" src="img/cards_<? echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card3" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card4" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card5" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card6" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card7" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="takes" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne3" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne4" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne5" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne6" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ne7" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="takes_ne" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw0" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw1" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw2" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw3" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw4" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw5" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw6" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_nw7" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="takes_nw" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png" class="sp-card"/>
+<img id="card_ea0" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea1" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea2" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea3" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea4" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea5" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea6" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_ea7" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="takes_ea" data-card-id="cover_ea" src="img/cards_<?php echo $deck; ?>_empty_ea.png" class="sp-card"/>
+<img id="card_we0" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we1" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we2" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we3" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we4" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we5" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we6" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="card_we7" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
+<img id="takes_we" data-card-id="cover_we" src="img/cards_<?php echo $deck; ?>_empty_we.png" class="sp-card"/>
 
 <div id="asta" class="asta">
   <img id="asta0" src="img/asta0.png" class="astacard">
@@ -262,17 +262,17 @@ window.onload = function() {
 </div>
 <div id="chooseed" class="chooseed">
                            <?php echo $mlang_bin5_index['aucwin'][$G_lang]; ?>
-<img id="seed0" src="img/cards_<? echo $deck; ?>_empty.png" class="seed0"/>
-<img id="seed1" src="img/cards_<? echo $deck; ?>_empty.png" class="seed1"/>
-<img id="seed2" src="img/cards_<? echo $deck; ?>_empty.png" class="seed2"/>
-<img id="seed3" src="img/cards_<? echo $deck; ?>_empty.png" class="seed3"/>
+<img id="seed0" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed0"/>
+<img id="seed1" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed1"/>
+<img id="seed2" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed2"/>
+<img id="seed3" src="img/cards_<?php echo $deck; ?>_empty.png" class="seed3"/>
 
                            
 </div>
 <div id="caller" class="caller">
 <div id="callerinfo" class="callerinfo">Info</div>
                            <!-- probably FIXME -->
-<img id="callerimg" data-card-id="cover" src="img/cards_<? echo $deck; ?>_empty.png">
+<img id="callerimg" data-card-id="cover" src="img/cards_<?php echo $deck; ?>_empty.png">
 </div>
 <div class="table_commands">
 <table>

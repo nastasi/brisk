@@ -1030,35 +1030,36 @@ supported by:<br>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="info.js?v=<? echo BSK_BUSTING; ?>"></script>
-<!-- <script type="text/javascript" src="myconsole.js?v=<? echo BSK_BUSTING; ?>"></script> -->
-<script type="text/javascript" src="menu.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="room.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="md5.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
+<script type="text/javascript" src="commons.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="fieldify.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="prefs.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="info.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<!-- <script type="text/javascript" src="myconsole.js?v=<?php echo BSK_BUSTING; ?>"></script> -->
+<script type="text/javascript" src="menu.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="custom.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="md5.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="json2.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="/cookie_law.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<?php echo BSK_BUSTING; ?>">
 
 <script type="text/javascript"><!--
 var $$ = jQuery.noConflict();
 
 var myname = null;
 var g_debug = 0;
-var g_lang = "<? echo $G_lang; ?>";
-var g_lng = "<? echo $G_lng; ?>";
-var g_tables_n = <? echo TABLES_N; ?>;
-var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
-var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
-var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
+var g_lang = "<?php echo $G_lang; ?>";
+var g_lng = "<?php echo $G_lng; ?>";
+var g_tables_n = <?php echo TABLES_N; ?>;
+var g_tables_appr_n = <?php echo TABLES_APPR_N; ?>;
+var g_tables_auth_n = <?php echo TABLES_AUTH_N; ?>;
+var g_tables_cert_n = <?php echo TABLES_CERT_N; ?>;
 var g_prefs, g_prefs_new = null;
 var g_jukebox = null;
 var g_is_spawn = 0;
@@ -1122,7 +1123,7 @@ window.onload = function() {
         }
         printf($brisk_header_form);
         printf("<table class=\"floaty\"><tr><td class=\"floatyleft\">\n");
-        printf($brisk_vertical_menu, '', '');
+        printf($brisk_vertical_menu, '', $brisk_donate);
 
         sidebanners_render($G_sidebanner, $G_sidebanner_idx);
         printf("</td><td>");
@@ -1203,34 +1204,35 @@ cookie_law(null);
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="shortcut icon" href="img/brisk_ico.png">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script type="text/javascript" src="commons.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="fieldify.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="prefs.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="info.js?v=<? echo BSK_BUSTING; ?>"></script>
-<!-- <script type="text/javascript" src="myconsole.js?v=<? echo BSK_BUSTING; ?>"></script> -->
-<script type="text/javascript" src="menu.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="ticker.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="heartbit.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="xynt-streaming.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="room.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="probrowser.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="json2.js?v=<? echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="/cookie_law.js?v=<? echo BSK_BUSTING; ?>"></script>
-<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="brisk.css?v=<? echo BSK_BUSTING; ?>">
-<link rel="stylesheet" type="text/css" href="room.css?v=<? echo BSK_BUSTING; ?>">
+<script type="text/javascript" src="commons.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="fieldify.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="prefs.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="info.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<!-- <script type="text/javascript" src="myconsole.js?v=<?php echo BSK_BUSTING; ?>"></script> -->
+<script type="text/javascript" src="menu.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="ticker.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="custom.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="json2.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="/cookie_law.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<link rel="stylesheet" type="text/css" href="/cookie_law.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="brisk.css?v=<?php echo BSK_BUSTING; ?>">
+<link rel="stylesheet" type="text/css" href="room.css?v=<?php echo BSK_BUSTING; ?>">
 <script type="text/javascript"><!--
    var $$ = jQuery.noConflict();
 
    var sess = "not_connected";
    var g_debug = 0;
-   var g_lang = "<? echo $G_lang; ?>";
-   var g_lng = "<? echo $G_lng; ?>";
-   var g_tables_n = <? echo TABLES_N; ?>;
-   var g_tables_appr_n = <? echo TABLES_APPR_N; ?>;
-   var g_tables_auth_n = <? echo TABLES_AUTH_N; ?>;
-   var g_tables_cert_n = <? echo TABLES_CERT_N; ?>;
+   var g_lang = "<?php echo $G_lang; ?>";
+   var g_lng = "<?php echo $G_lng; ?>";
+   var g_tables_n = <?php echo TABLES_N; ?>;
+   var g_tables_appr_n = <?php echo TABLES_APPR_N; ?>;
+   var g_tables_auth_n = <?php echo TABLES_AUTH_N; ?>;
+   var g_tables_cert_n = <?php echo TABLES_CERT_N; ?>;
    var g_prefs, g_prefs_new = null;
    var g_is_spawn = 0;
    var g_jukebox = null;
