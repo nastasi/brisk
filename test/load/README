@@ -95,6 +95,13 @@ slowprobe.py    slow client: it connects and stops reading while a burst
                 arrives, to see whether the message queue overflows.
 burst.py        burst of simultaneous connections on the unix sockets: it
                 measures how many the backlog queues before refusing.
+partial.py      forces a short write on the daemon and checks what comes out
+                of it: it talks to a daemon socket directly with a tiny
+                SO_RCVBUF and stops reading, then validates the chunked
+                framing and the @BEGIN@/@END@ blocks. A chunk shorter than
+                its declared length, or one without its terminator, is the
+                resumption after the short write going wrong.
+                  partial.py [user] [socket] [rcvbuf] [pause]
 
 
 At the end of a session
