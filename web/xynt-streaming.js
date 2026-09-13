@@ -866,11 +866,39 @@ xynt_streaming.prototype = {
             }
 
             if (this.keepalives_equal >= this.keepalives_eq_max) {
-                this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
-                this.reload();
-                // alert("watchdog return reload");
-                this.hbit_status();
-                return;
+                /* The keepalive counter only moves forward when the client
+                   manages to consume the incoming data. If it is stuck it can
+                   mean two very different things: that nothing arrives any
+                   more (the connection is gone) or that it does arrive but we
+                   are late in processing it, for instance because the browser
+                   is busy redrawing the list of a crowded room.
+                   In the second case reloading the page throws the work away
+                   for nothing, and the user gets the splash back.
+                   So, before declaring it dead, we look at whether there is
+                   still something left to consume. */
+                var to_consume = 0;
+                try {
+                    if (this.transp.ctx_new_is_set() && this.transp.ctx_old_len_is_set()) {
+                        to_consume = this.transp.ctx_new_curlen_get() - this.transp.ctx_old_len_get();
+                    }
+                }
+                catch (b) {
+                    to_consume = 0;
+                }
+                if (to_consume > 0 || this.gst.comms.length > 0
+                    || this.gst.st_loc < this.gst.st_loc_new) {
+                    this.log("hs::watchdog: still to consume ("+to_consume
+                             +" bytes, "+this.gst.comms.length
+                             +" commands): the connection is alive, not reloading");
+                    this.keepalives_equal = 0;
+                }
+                else {
+                    this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
+                    this.reload();
+                    // alert("watchdog return reload");
+                    this.hbit_status();
+                    return;
+                }
             }
         }
 
