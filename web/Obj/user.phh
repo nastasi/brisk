@@ -880,7 +880,23 @@ function stream_keepalive($with_ping)
 
 function stream_close()
 {
-    return ($this->rd_transp->close());
+    $clo = $this->rd_transp->close();
+
+    /* Streaming responses declare Transfer-Encoding: chunked (see
+       headers_render) and the data goes out framed by chunked_content(), but
+       the final chunk was missing on close: whoever sits in the middle sees
+       the connection drop halfway through the response. With apache it went
+       unnoticed, because the daemon owned the client socket; nginx instead
+       parses the response and logs "upstream prematurely closed connection"
+       for every stream that renews itself. */
+    if ($this->is_chunked()) {
+        if ($clo != "") {
+            $clo = sprintf("%X\r\n", mb_strlen($clo, "ASCII")).$clo."\r\n";
+        }
+        $clo .= "0\r\n\r\n";
+    }
+
+    return ($clo);
 }
 
 function stream_postclose_get($sock, $curtime)
