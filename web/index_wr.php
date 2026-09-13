@@ -333,7 +333,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
         else {
             log_wr("Get User Error");
-            echo "Get User Error:" + $argz[0];
+            /* php8: it used to be "+", a javascript style concatenation. On php5/7
+               it evaluated to 0+0 with a warning; since php 8 "string + string"
+               on non numeric strings is a fatal TypeError, and here it killed
+               the daemon. */
+            echo "Get User Error:" . $argz[0];
             return FALSE;
         }
         return TRUE;
