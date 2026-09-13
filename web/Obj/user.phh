@@ -993,7 +993,11 @@ function chunked_content($content)
 
 function chunked_fini()
 {
-    return sprintf("0\r\n");
+    /* The last chunk is "0" CRLF plus the CRLF that closes the (empty)
+       trailer section: without the second one the response stays open and
+       whoever parses it downstream waits for a continuation that never
+       comes. See stream_close(), which emits the same sequence. */
+    return sprintf("0\r\n\r\n");
 }
 
 

@@ -2876,7 +2876,14 @@ class Brisk
               $wret = @fwrite($new_socket, $response, $response_l);
               if ($wret < $response_l) {
                   printf("TROUBLES WITH FWRITE: %d\n", $wret);
-                  $user->rd_cache_set(mb_substr($content, $wret, $response_l - $wret, "ASCII"));
+                  /* The remainder has to be sliced out of $response, not of $content:
+                     $wret is an offset into $response, which carries the http headers
+                     and the chunk framing ahead of the content (and, on a compressed
+                     stream, the deflated bytes instead of the plain ones). Resuming
+                     from $content dropped the header bytes and left the chunk shorter
+                     than its declared length and without its terminator, which is what
+                     made the javascript parser lose the framing for good. */
+                  $user->rd_cache_set(mb_substr($response, $wret, $response_l - $wret, "ASCII"));
               }
               else {
                   $user->rd_cache_set("");
