@@ -1,0 +1,101 @@
+Load test bench
+===============
+
+Tools used to check the port to php 8.4 on debian 13. They exercise the daemon
+with many players connected and reproduce the corner cases of the transport
+(duplicate sessions, expired sessions, full queues).
+
+They are not part of the application: they are laboratory tools, meant to run
+on a test machine, never in production.
+
+
+What is needed first
+--------------------
+
+Test users in the database. The authenticated scripts use names of the form
+loadNNN with the password equal to the name:
+
+  insert into bsk_users (code, login, pass, email, type, tos_vers, guar_code)
+  select 20000+i, 'load'||to_char(i,'FM000'), md5('load'||to_char(i,'FM000')),
+         'load'||to_char(i,'FM000')||'@example.invalid', 65536, '1.4', <guarantor>
+  from generate_series(1,400) i;
+
+where <guarantor> is the code of a user that already exists: the guar_code
+column has a foreign key constraint and the default value (-1) violates it.
+
+tos_vers has to be set to the current version, otherwise every login opens the
+dialog to accept the terms of service and pollutes the measurements.
+
+game.sh and hand.sh instead use the five users uno/due/tre/qua/cin with the
+passwords one/two/thr/for/fiv.
+
+The paths and ports are those of the test container (/home/brisk, 8444 for
+https): they have to be adapted elsewhere.
+
+
+The load
+--------
+
+brisk_load.py    generator: N players that come in, keep the comet stream open
+                 and write in the chat. A single process, asyncio, because the
+                 generator has to be cheap: it runs on the same machine as the
+                 daemon. It measures the write latency (p50/p95/p99), the
+                 messages broadcast and how well the streams hold.
+                   --clients N --base N --auth --silent --period S --port P
+
+brisk_step.sh    one complete step: restarts the daemon so as to start from an
+                 empty room, launches the generator and samples the resources.
+
+brisk_sample.sh  sampler: cpu and memory of the daemon and of the frontend,
+                 open descriptors, connections towards the sockets of the pool.
+
+ramp_probe.sh    measures what a client receives while N others come into the
+                 room: it weighs the cost of the protocol (every entry sends
+                 everybody the complete list of the people present).
+
+
+A real game
+-----------
+
+game.sh [table] [port]   five players come in, sit down, the table forms; they
+                         stay connected.
+hand.sh [table] [port]   plays the hand: auction, call and forty cards.
+
+sit4.sh                  four automatic players waiting for a fifth, human one
+play_human.sh            drives the four while the fifth plays from the browser
+
+
+The corner cases of the transport
+---------------------------------
+
+wsprobe.py      opens a real websocket and counts the frames: it tells a server
+                defect apart from the state of one browser tab.
+takeover.py     two streams on the same session: the first one must be
+                dismissed, not closed in silence.
+ghostswap.py    second access by the same user from another session: the first
+                one must go back to the login, where ghost_sess explains why.
+slowprobe.py    slow client: it connects and stops reading while a burst
+                arrives, to see whether the message queue overflows.
+burst.py        burst of simultaneous connections on the unix sockets: it
+                measures how many the backlog queues before refusing.
+
+
+At the end of a session
+-----------------------
+
+  ./stop.sh
+
+It shuts everything down and prints the state: running scripts, running curls,
+descriptors of the daemon, disk space, load. To be run ALWAYS.
+
+The scripts that start background loops carry a trap that kills their own
+process group. Without it the loops outlive their parent and are left spinning
+for nothing: that happened for two days, with eighty processes alive and the
+machine load at 19.
+
+stop.sh does not use "pkill -f": the pattern would end up in the command line
+of the script itself, which would kill itself and leave the targets alive.
+
+The working files (auth.txt, tok.txt, mani.txt, *.stream) are created in the
+working directory of the scripts and can grow large: the read streams grow all
+the time. stop.sh deletes them.
