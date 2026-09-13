@@ -13,6 +13,10 @@ PPATH="xx/home/nastasi/brisk-priv"
 # screen suffix
 SSUFF="xxbrisk"
 BUSER="xxwww-data"
+# NOTE: the two "su" below pass "-s /bin/bash". The system user that runs the
+# daemon usually has /usr/sbin/nologin as its shell (that is the case for
+# www-data on debian), and without this "su - www-data" answers "This account
+# is currently not available" and the daemon does not start.
 # seconds to wait exit of the process
 WAITLOOP_MAX=5
 
@@ -48,11 +52,11 @@ case "$1" in
         ;;
 
     devstart)
-        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; ./brisk-spush.php'
+        su -s /bin/bash - ${BUSER} -c 'cd '"$BPATH"'/spush ; ./brisk-spush.php'
         ;;
 
     start)
-        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
+        su -s /bin/bash - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
         ;;
     restart)
         $0 stop
