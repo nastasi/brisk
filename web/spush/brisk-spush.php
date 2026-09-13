@@ -64,7 +64,9 @@ function main($argv)
 {
     GLOBAL $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy;
 
-    pid_save();
+    if (pid_save() == FALSE) {
+        exit(3);
+    }
     do {
         if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list, $G_cloud_smasher)) == FALSE) {
             log_crit("Brisk::create failed");

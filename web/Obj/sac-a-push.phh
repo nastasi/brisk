@@ -96,24 +96,60 @@ function global_dump()
 
 }
 
+$G_pid_fp = FALSE;
+
 function pid_save()
 {
-    $pid = getmypid();
+    GLOBAL $G_pid_fp;
+
     $fname = LEGAL_PATH."/brisk.pid";
 
-    if (file_exists($fname)) {
-        log_crit("WARN: brisk.pid already exists");
+    if (($fp = @fopen($fname, 'c+')) == FALSE) {
+        log_crit("REFUSING TO START: cannot open ".$fname);
+        fprintf(STDERR, "REFUSING TO START: cannot open %s\n", $fname);
+        return (FALSE);
     }
-    file_put_contents($fname, sprintf("%d\n", $pid));
+
+    /* The lock is taken for the whole life of the daemon and the kernel drops
+       it when the process dies, however it dies. It is the only check that
+       neither a stale file left by a crash nor two instances starting in the
+       same instant can fool, and both used to get through: the newcomer would
+       unlink the socket files and bind its own, taking every new connection
+       while the first one stayed alive, orphaned, on its own shared memory. */
+    if (flock($fp, LOCK_EX | LOCK_NB) == FALSE) {
+        rewind($fp);
+        $old = intval(trim(stream_get_contents($fp)));
+        log_crit(sprintf("REFUSING TO START: %s is held by %d", $fname, $old));
+        fprintf(STDERR, "REFUSING TO START: %s is held by %d\n", $fname, $old);
+        fclose($fp);
+        return (FALSE);
+    }
+
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, sprintf("%d\n", getmypid()));
+    fflush($fp);
+
+    /* kept open on purpose: closing it would drop the lock */
+    $G_pid_fp = $fp;
+
+    return (TRUE);
 }
 
 function pid_remove()
 {
-    $fname = LEGAL_PATH."/brisk.pid";
+    GLOBAL $G_pid_fp;
 
-    if (file_exists($fname)) {
-        unlink($fname);
+    if ($G_pid_fp == FALSE) {
+        /* the file was never ours: leaving it alone is what keeps the daemon
+           that does own it recorded, and the init script able to stop it */
+        return;
     }
+
+    unlink(LEGAL_PATH."/brisk.pid");
+    flock($G_pid_fp, LOCK_UN);
+    fclose($G_pid_fp);
+    $G_pid_fp = FALSE;
 }
 
 function post_manage(&$post, $line)

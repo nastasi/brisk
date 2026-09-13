@@ -49,6 +49,18 @@ case "$1" in
                 kill -KILL $pid_old 2>/dev/null || true
             fi
         fi
+        #
+        #  Then close our screen sessions. Each one carries the loop that
+        #  respawns the daemon, so killing the process alone is not enough;
+        #  and a session left behind by a start that was refused, because the
+        #  daemon was already running, would wait there and take the daemon
+        #  over at the next stop. That is how the instances used to pile up.
+        su -s /bin/bash - ${BUSER} -c "screen -ls" 2>/dev/null \
+          | sed -n "s/^[[:space:]]*\([0-9][0-9]*\.${SSUFF}\)[[:space:]].*/\1/p" \
+          | while read scr ; do
+                su -s /bin/bash - ${BUSER} -c "screen -S $scr -X quit" >/dev/null 2>&1 || true
+            done
+        su -s /bin/bash - ${BUSER} -c "screen -wipe" >/dev/null 2>&1 || true
         ;;
 
     devstart)
@@ -56,7 +68,7 @@ case "$1" in
         ;;
 
     start)
-        su -s /bin/bash - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
+        su -s /bin/bash - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php | grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; sleep 1 ; done'"'"
         ;;
     restart)
         $0 stop
