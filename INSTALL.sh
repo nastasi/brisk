@@ -37,7 +37,8 @@ function usage () {
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
-    echo "  -A apache_conf                  - def. $apache_conf"
+    echo "  -A server conf (per DocumentRoot) - def. $apache_conf"
+    echo "  -R document_root                - def. ricavato da -w meno -P"
     echo "  -c number cards in hand         - def. $card_hand"
     echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
@@ -167,6 +168,7 @@ while [ $# -gt 0 ]; do
     conffile=""
     case $1 in
         -A*) apache_conf="$(get_param "-A" "$1" "$2")"; sh=$?;;
+        -R*) document_root_in="$(get_param "-R" "$1" "$2")"; sh=$?;;
         -f*) conffile="$(get_param "-f" "$1" "$2")"; sh=$?;;
         -p*) outconf="$(get_param "-p" "$1" "$2")"; sh=$?;;
         -c*) card_hand="$(get_param "-c" "$1" "$2")"; sh=$?;;
@@ -441,7 +443,35 @@ sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$prefix_path\";@
 
 sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path}__/xynt-streaming.js
 
-document_root="$(grep DocumentRoot "${apache_conf}"  | grep -v '^[ 	]*#' | awk '{ print $2 }')"
+# The root of the site is needed for two things: substituting
+# $DOCUMENT_ROOT in the sources and installing the files from docroot/. It
+# used to be derived by grepping DocumentRoot out of the apache configuration
+# file, which tied INSTALL.sh to apache (nginx uses "root", not
+# "DocumentRoot"), took the first match in any VirtualHost, and did not cope
+# with quotes.
+#
+# Now it is derived from the parameters already known: web_path ends with
+# prefix_path, so removing the latter from the former leaves the root. No
+# server to ask. An explicit value can still be forced with -R.
+if [ ! -z "$document_root_in" ]; then
+    document_root="$(echo "$document_root_in" | sed 's:/*$::')"
+else
+    _pfx="$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"    # brisk
+    _web="$(echo "$web_path"    | sed 's:/*$::')"            # .../web/brisk
+    document_root="$(echo "$_web" | sed "s:/*$_pfx\$::")"
+    if [ "$document_root" = "$_web" -o -z "$document_root" ]; then
+        # web_path does not end with prefix_path: fall back on the server
+        # configuration file, accepting both DocumentRoot and root
+        document_root="$(grep -iE '^[ \t]*(DocumentRoot|root)[ \t]' "${apache_conf}" 2>/dev/null \
+                         | grep -v '^[ \t]*#' | head -1 \
+                         | awk '{ print $2 }' | tr -d '";' | sed 's:/*$::')"
+    fi
+fi
+if [ -z "$document_root" ]; then
+    echo "Impossibile determinare la radice del sito: usa -R <document_root>"
+    exit 1
+fi
+echo "    document_root: \"$document_root\""
 sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph* ${web_path}__/donometer.php
 
 # The files under docroot/ belong in the root of the site, not in the
