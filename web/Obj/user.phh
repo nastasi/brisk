@@ -894,6 +894,18 @@ function stream_keepalive($with_ping)
     return ($this->rd_transp->chunk( $this->rd_scristp++, ($with_ping ? "act_ping();" : NULL)));
 }
 
+/* Farewell for the stream about to be replaced by another one: the message
+   is framed according to the transport of the OLD connection, which may differ
+   from the one of the new, and is followed by an orderly close. If the old
+   connection is already dead the write fails with no consequence. */
+function stream_bye($js)
+{
+    if ($this->rd_transp == NULL) {
+        return ("");
+    }
+    return ($this->chunked_content($this->rd_transp->chunk(0, $js)).$this->stream_close());
+}
+
 function stream_close()
 {
     $clo = $this->rd_transp->close();

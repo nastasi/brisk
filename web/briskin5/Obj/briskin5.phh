@@ -1463,6 +1463,7 @@ class Bin5 {
     static function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
     {
         GLOBAL $G_ban_list, $G_black_list;
+        GLOBAL $mlang_brisk, $G_lang;
 
         // printf("NEW_SOCKET (root): %d\n", intval($new_socket));
 
@@ -1548,8 +1549,16 @@ class Bin5 {
 
                 // close a previous opened index_read_ifra socket, if exists
                 if (($prev = $user->rd_socket_get()) != NULL) {
-                    $s_a_p->socks_unset($user->rd_socket_get());
-                    fclose($user->rd_socket_get());
+                    /* as in the room: the stream being replaced is told what
+                       happened to it, otherwise it reopens and displaces the
+                       new one in turn, forever. */
+                    $bye = $user->stream_bye('xstm.stop(); '
+                        .show_notify($mlang_brisk['sessmoved'][$G_lang], 0, "chiudi", 400, 120));
+                    if ($bye != "") {
+                        @fwrite($prev, $bye, mb_strlen($bye, "ASCII"));
+                    }
+                    $s_a_p->socks_unset($prev);
+                    fclose($prev);
                     // printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
                     $user->rd_socket_set(NULL);
                 }

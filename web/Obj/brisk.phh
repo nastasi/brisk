@@ -119,6 +119,8 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                            'en' => '<br>You are being idle for ' ),
                       'tabtout_b'=> array( 'it' => ' minuti. <br><br>Quindi ritorni tra i <b>Giocatori in piedi</b>.',
                                            'en' => ' minutes. <br><br>Then you return with the <b>standing players</b>.'),
+                      'sessmoved' => array( 'it' => '<br>Questa sessione &egrave; stata ripresa da un&#39;altra finestra o da un altro dispositivo.<br>Questa pagina non &egrave; pi&ugrave; collegata.<br><br>',
+                                            'en' => '<br>This session has been resumed from another window or device.<br>This page is no longer connected.<br><br>'),
                       'tickmust' => array( 'it' => '<br>Per attivare il messaggio di segnalazione del tavolo occorre essere seduti.<br><br>',
                                            'en' => '<br>To activate the signalling message of the table it\'s necessary to be sitting<br><br>'),
                       'tickjust' => array( 'it' => '<br>Il messaggio di segnalazione del tavolo &egrave; gi&agrave; attivato.<br><br> ',
@@ -2745,6 +2747,7 @@ class Brisk
   function request_mgr(&$s_a_p, $header, &$header_out, &$new_socket, $path, $addr, $get, $post, $cookie)
   {
       GLOBAL $G_ban_list, $G_black_list, $G_cloud_smasher;
+      GLOBAL $mlang_brisk, $G_lang;
 
       // printf("NEW_SOCKET (root): %d PATH [%s]\n", intval($new_socket), $path);
 
@@ -2825,8 +2828,24 @@ class Brisk
               $this->sess_cur_set($user->sess);
               // close a previous opened index_read_ifra socket, if exists
               if (($prev = $user->rd_socket_get()) != NULL) {
-                  $s_a_p->socks_unset($user->rd_socket_get());
-                  fclose($user->rd_socket_get());
+                  /* The previous stream is being replaced by this one. Up to
+                     now its socket was closed without a word, and the client on
+                     the other side reopened it, displacing the new one in turn:
+                     two windows open on the same session bounced each other
+                     forever, with a red indicator and no explanation. Now it is
+                     dismissed: it stops the stream and shows a notice. It is
+                     not sent back to the login, because the session is valid
+                     and it would come back in, starting the bouncing again.
+                     In the normal case - the same client reopening after having
+                     given the connection up for lost - the message ends up on a
+                     socket nobody reads any more, and does no harm. */
+                  $bye = $user->stream_bye('xstm.stop(); '
+                      .show_notify($mlang_brisk['sessmoved'][$G_lang], 0, "chiudi", 400, 120));
+                  if ($bye != "") {
+                      @fwrite($prev, $bye, mb_strlen($bye, "ASCII"));
+                  }
+                  $s_a_p->socks_unset($prev);
+                  fclose($prev);
                   // printf("CLOSE AND OPEN AGAIN ON IFRA2\n");
                   $user->rd_socket_set(NULL);
               }
