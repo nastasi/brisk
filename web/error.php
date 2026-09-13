@@ -24,6 +24,16 @@
 
 $G_base = "";
 
+/* Obj/brisk.phh needs $DOCUMENT_ROOT to find the configuration file under
+   Etc/. With mod_php it was not filled in by itself and this script failed;
+   it is taken from $_SERVER, as usermgmt.php, mailmgr.php and the others
+   already do. */
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
 require_once("Obj/brisk.phh");
 require_once("Obj/user.phh");
 require_once("Obj/auth.phh");
