@@ -514,11 +514,24 @@ if [ -d docroot ] && [ ! -z "$document_root" ]; then
     done
 fi
 
+# brisk-img carries every image of the site: the cards, the table, the icons.
+# Without it the tree installed here is complete as far as the code goes and
+# has no image at all, so the pages come up and every img answers 404. It used
+# to be skipped without a word, and a run that had quietly dropped the images
+# looked exactly like a good one.
 if [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__
     cd - >/dev/null 2>&1
+else
+    echo
+    echo "WARNING: ../brisk-img not found: INSTALLING A SITE WITHOUT IMAGES."
+    echo "         The cards and every other image will answer 404. Put the"
+    echo "         brisk-img repository beside this one and run again."
+    echo
 fi
+# curl-de-sac is optional: the code that uses it is guarded by
+# defined('CURL_DE_SAC_VERS'), so without it the feature is simply absent.
 if [ -d ../curl-de-sac ]; then
     cd ../curl-de-sac
     if [ ! -z "$conffile_in" ]; then
@@ -527,6 +540,8 @@ if [ -d ../curl-de-sac ]; then
         ./INSTALL.sh -w ${web_path}__
     fi
     cd - >/dev/null 2>&1
+else
+    echo "note: ../curl-de-sac not found, the site is installed without it"
 fi
 
 # config file installation or diff
