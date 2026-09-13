@@ -1,0 +1,29 @@
+function custom_bedge(username, name, flags) {
+   var supersfx = '';
+   var ret = {};
+
+   // console.log('custom_bedge: begin [' + flags + ']');
+   if ((flags & 0x06) == 0x00) {
+       return null;
+   }
+
+   if (username.toUpperCase() != 'BEGO' && username.toUpperCase() != 'PAOLO' && username.toUpperCase() != 'A') {
+       return null;
+   } 
+   // console.log('pass test');
+   if (name != "") {
+       supersfx = "_side";
+   }
+   ret['supername']  = 'img/coppa_cometa' + supersfx + '.png';
+   var socio = 'Adelina';
+   if (username.toUpperCase() == 'BEGO') {
+       socio = 'Paolo';
+   } 
+   else if (username.toUpperCase() == 'PAOLO') {
+       socio = 'Bego';
+   }
+   ret['supertit'] = 'Primo classificato con ' + socio + ' al 2° Torneo a Coppie - Insieme per ... gioco';
+   return (ret);
+}
+
+
