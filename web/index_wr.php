@@ -175,7 +175,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
                 log_main("chal lock data success");
 
-                if (($chals = &Challenges::load_data()) != FALSE) {
+                if (($chals = Challenges::load_data()) != FALSE) {
 
                     $token =  uniqid("");
                     // echo '2|'.$argz[1].'|'.$token.'|'.$remote_addr.'|'.$curtime.'|';
@@ -550,7 +550,16 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     if (($ema = $bdb->getmail($user->name)) != FALSE) {
                         //  mail("nastasi",
-                        mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
+                        /* php8: mbstring.func_overload was removed, so mail() is no
+                           longer remapped onto mb_send_mail(): the subject and
+                           the user name have to be encoded by hand, otherwise
+                           they end up as raw UTF-8 in the headers (forbidden by
+                           RFC 5322). */
+                        mail("brisk@alternativeoutput.it",
+                             mb_encode_mimeheader(urldecode($cli_subj), "UTF-8"),
+                             urldecode($cli_mesg),
+                             sprintf("From: %s <%s>\r\nContent-Type: text/plain; charset=UTF-8",
+                                     mb_encode_mimeheader($user->name, "UTF-8"), $ema));
                     }
 
                     if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {

@@ -21,7 +21,7 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  */
 
-require_once("${G_base}Obj/transports.phh");
+require_once("{$G_base}Obj/transports.phh");
 
 
 // User flags
@@ -106,40 +106,44 @@ $mlang_user = array(
                      );
 
 class User {
-  var $brisk;      // reference to the room where the user is registered
-  var $idx;        // index in the room users array when you are in game
-  var $idx_orig;   // index in the room table users array when you aren't in game
-  var $code;       // authentication code
-  var $name;       // name of the user
-  var $sess;       // session of the user
-  var $ip;         // ip of the user
-  var $lacc;       // last access (for the cleanup)
-  var $laccwr;     // last access (for the cleanup)
-  var $bantime;    // timeout to temporary ban
-  var $stat;       // status (outdoor, room, table, game, ...)
-  var $subst;      // substatus for each status   
-  var $step;       // step of the current status
-  var $trans_step; // step to enable transition between pages (disable == -1)
-  var $cl_step;    // current step returned by client
-  var $ping_req;   // ping is already requested ?
+  /* php8: the declaration said "$brisk" but the code always writes and reads
+     "$room" (create(), briskin5, and so on), so $room was a dynamic property,
+     deprecated since 8.2. Renamed: nobody reads $user->brisk, every "->brisk"
+     in the project is on a Bin5 object. */
+  public $room;       // reference to the room where the user is registered
+  public $idx;        // index in the room users array when you are in game
+  public $idx_orig;   // index in the room table users array when you aren't in game
+  public $code;       // authentication code
+  public $name;       // name of the user
+  public $sess;       // session of the user
+  public $ip;         // ip of the user
+  public $lacc;       // last access (for the cleanup)
+  public $laccwr;     // last access (for the cleanup)
+  public $bantime;    // timeout to temporary ban
+  public $stat;       // status (outdoor, room, table, game, ...)
+  public $subst;      // substatus for each status   
+  public $step;       // step of the current status
+  public $trans_step; // step to enable transition between pages (disable == -1)
+  public $cl_step;    // current step returned by client
+  public $ping_req;   // ping is already requested ?
 
-  var $pend_async; // number of async check that must be returned
+  public $pend_async; // number of async check that must be returned
 
-  var $rd_socket;  // socket handle of push stream
-  var $rd_endtime; // end time for push stream
-  var $rd_stat;    // actual status of push stream
-  var $rd_subst;   // actual substatus of push stream
-  var $rd_step;    // actual step of push stream
-  var $rd_from;    // referer
-  var $rd_scristp; // current script step (for each session) 
-  var $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
-  var $rd_cache;   // place where store failed fwrite data
-  var $rd_toflush; // bool to inform about unfflushed socket
-  var $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
-  var $rd_transp;  // class that define stream encapsulation type (iframe, xhr, ...)
-  var $rd_is_chunked; // is the transport chunked or not ?
+  public $rd_socket;  // socket handle of push stream
+  public $rd_endtime; // end time for push stream
+  public $rd_stat;    // actual status of push stream
+  public $rd_subst;   // actual substatus of push stream
+  public $rd_step;    // actual step of push stream
+  public $rd_from;    // referer
+  public $rd_scristp; // current script step (for each session) 
+  public $rd_kalive;  // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
+  public $rd_cache;   // place where store failed fwrite data
+  public $rd_toflush; // bool to inform about unfflushed socket
+  public $rd_zls;     // zlibstream object handle if compressed stream, else FALSE
+  public $rd_transp;  // class that define stream encapsulation type (iframe, xhr, ...)
+  public $rd_is_chunked; // is the transport chunked or not ?
 
-  var $comm;       // commands array
+  public $comm;       // commands array
   // var $asta_card;  // 
   // var $asta_pnt;   //
   // var $handpt;     // Total card points at the beginning of the current hand.
@@ -147,24 +151,33 @@ class User {
 
   // FIXME: the table_orig field must be removed after table field verify of index management (in spawned table
   //        it is allways ZERO
-  var $table;      // id of the current table when you are in game
-  var $table_orig; // id of the current table when you aren't in game
-  var $table_pos;  // idx on the table
-  var $table_token;// token that identify a game on a table
-  var $flags;      // Bitfield with: AUTHENTICATE: 0x02 
-  var $rec;        // field with user db record or FALSE
-  var $the_end;    // Flag to change the end of the session
+  public $table;      // id of the current table when you are in game
+  public $table_orig; // id of the current table when you aren't in game
+  public $table_pos;  // idx on the table
+  public $table_token;// token that identify a game on a table
+  public $flags;      // Bitfield with: AUTHENTICATE: 0x02 
+  public $rec;        // field with user db record or FALSE
+  public $the_end;    // Flag to change the end of the session
 
-  var $chat_lst;      // Last chat line
-  var $chattime;      // Array of chat times
-  var $chat_cur;      // Current chat line number
-  var $chat_ban;      // Time for ban chat
-  var $chat_dlt;      // Delta t for ban
-  var $shm_sz;
+  public $chat_lst;      // Last chat line
+  public $chattime;      // Array of chat times
+  public $chat_cur;      // Current chat line number
+  public $chat_ban;      // Time for ban chat
+  public $chat_dlt;      // Delta t for ban
+  public $shm_sz;
+
+  /* php8: declared, dynamic properties are deprecated since 8.2.
+     asta_card, asta_pnt, handpt and exitislock belong to Bin5_user (which
+     redeclares them) but are already set here by User::create(). */
+  public $td_toflush;
+  public $asta_card;
+  public $asta_pnt;
+  public $handpt;
+  public $exitislock;
 
   const BASE = "";    // basepath for absolute web references
 
-  function User() {
+  function __construct() {
   }
 
   static function create(&$brisk, $idx, $name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
@@ -692,7 +705,7 @@ class User {
                               $type = "soft";
                               $preface = sprintf("<div class='doc_alert'>%s</div>",
                                                  sprintf($mlang_user['toc_date_dscl'][$G_lang],
-                                                         strftime("%e/%m/%Y", $G_tos_dthard)));
+                                                         date("j/m/Y", $G_tos_dthard)));
                           }
                           else {
                               // call notify hard

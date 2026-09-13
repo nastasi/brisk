@@ -33,25 +33,25 @@ define('PENDINGPAGE_WAITDATA', 1);
 define('PENDINGPAGE_FLUSH',    2);
 
 class PendingPage {
-  var $socket; // socket handler of page stream
-  var $status; // status can be 0: waiting for data, 1: flush phase
+  public $socket; // socket handler of page stream
+  public $status; // status can be 0: waiting for data, 1: flush phase
 
-  var $kalive; // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
-  var $msg;    // place where store failed fwrite data
-  var $msg_sz; // size of content
+  public $kalive; // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
+  public $msg;    // place where store failed fwrite data
+  public $msg_sz; // size of content
 
-  var $method; // method used to request the page
-  var $header; // array of header fields
-  var $get;    // array of get args
-  var $post;   // array of post args
-  var $cookie; // array of cookie args
-  var $path;   // requested path
-  var $addr;   // source address
-  var $contsz; // expected content size
-  var $rest;   // number of missing bytes
-  var $cont;   // content of unfinished POST
+  public $method; // method used to request the page
+  public $header; // array of header fields
+  public $get;    // array of get args
+  public $post;   // array of post args
+  public $cookie; // array of cookie args
+  public $path;   // requested path
+  public $addr;   // source address
+  public $contsz; // expected content size
+  public $rest;   // number of missing bytes
+  public $cont;   // content of unfinished POST
 
-  function PendingPage($socket, $curtime, $kalive)
+  function __construct($socket, $curtime, $kalive)
   {
       $this->socket = $socket;
       // fprintf(STDERR, "SOCKET ADD: %s\n", $this->socket);

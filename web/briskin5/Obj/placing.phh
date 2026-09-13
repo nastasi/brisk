@@ -47,11 +47,11 @@ define('WEE_MAX_GAMES', 35);
 
 
 class Ptsgam {
-  var $username;
-  var $pts;
-  var $gam;
+  public $username;
+  public $pts;
+  public $gam;
   
-  function Ptsgam($username = "", $pts = 0, $gam = 0)
+  function __construct($username = "", $pts = 0, $gam = 0)
   {
     $this->username = $username;
     $this->pts = $pts;
@@ -160,7 +160,7 @@ function placing_time_pgsql()
     $mti_sql = sprintf("SELECT CAST(EXTRACT(EPOCH FROM mtime) AS INTEGER) as mtime 
                         FROM %sbin5_places_mtime WHERE code = 0;", $G_dbpfx);
 
-    if (($mti_pg  = pg_query($bdb->dbconn->db(), $mti_sql)) == FALSE || pg_numrows($mti_pg) == 0) {
+    if (($mti_pg  = pg_query($bdb->dbconn->db(), $mti_sql)) == FALSE || pg_num_rows($mti_pg) == 0) {
         // no point found, abort
         log_crit("placing: get placing mtime failed [$mti_sql]");
         return (FALSE);
@@ -175,7 +175,7 @@ function placing_time()
 {
     GLOBAL $G_dbasetype;
     
-    $fun_name = "placing_time_${G_dbasetype}";
+    $fun_name = "placing_time_{$G_dbasetype}";
     
     return ($fun_name());
 }
@@ -278,7 +278,7 @@ function placing_show_pgsql($user, $ty, $subty)
                            $G_dbpfx, ($ty * 2) + $subty, TOP_NUM);
     }
     
-    if (($pla_pg  = pg_query($bdb->dbconn->db(), $pla_sql)) == FALSE || pg_numrows($pla_pg) == 0) {
+    if (($pla_pg  = pg_query($bdb->dbconn->db(), $pla_sql)) == FALSE || pg_num_rows($pla_pg) == 0) {
         // no point found, abort
         log_crit("placing: get placing list failed [$pla_sql]");
         return ("");
@@ -287,7 +287,7 @@ function placing_show_pgsql($user, $ty, $subty)
     // MLANG
     $ret = sprintf("<table class='placing'><tr><th>Pos.</th><th>Utente</th><th>Score</th><th>(Punti/Partite)</th>");
 
-    for ($i = 0 ; $i < pg_numrows($pla_pg) ; $i++) {
+    for ($i = 0 ; $i < pg_num_rows($pla_pg) ; $i++) {
         $pla_obj = pg_fetch_object($pla_pg,$i);
         
         $ein = "";
@@ -317,7 +317,7 @@ function placing_show($user, $ty, $subty)
 {
     GLOBAL $G_dbasetype;
 
-    $fun_name = "placing_show_${G_dbasetype}";
+    $fun_name = "placing_show_{$G_dbasetype}";
     
     return ($fun_name($user, $ty, $subty));
 }

@@ -131,14 +131,15 @@ function dom_select_deck($cur_sel)
 }
 
 class Card {
-    var $value; /* 0 - 39 card value */
-    var $stat;  /* 'bunch', 'hand', 'table', 'take' */
-    var $owner; /* (table position 0-4) */
-    // var $pos;   /* Pos in hand. */
-    var $x;     /* When played the X position on the table of the owner. */
-    var $y;     /* When played the Y position on the table of the owner. */
+    public $value; /* 0 - 39 card value */
+    public $stat;  /* 'bunch', 'hand', 'table', 'take' */
+    public $owner; /* (table position 0-4) */
+    public $pos;   /* Pos in hand. */  // php8: riattivata, setpos() la scrive
+                                       // and dynamic properties are deprecated since 8.2
+    public $x;     /* When played the X position on the table of the owner. */
+    public $y;     /* When played the Y position on the table of the owner. */
 
-    function Card($value, $stat, $owner)
+    function __construct($value, $stat, $owner)
     {
         $this->value = $value;
         $this->stat  = $stat; // Card stat
@@ -171,41 +172,41 @@ class Card {
 } // end class Card
 
 class Bin5_table extends Table {
-    var $card;              // il mazzo di carte
-    var $mazzo;             // chi e' di mazzo
-    var $gstart;            // first player of the current game
-    var $turn;              // turn in the game (absolute, not modularized)
+    public $card;              // il mazzo di carte
+    public $mazzo;             // chi e' di mazzo
+    public $gstart;            // first player of the current game
+    public $turn;              // turn in the game (absolute, not modularized)
 
-    var $asta_pla;          // array(); TRUE: in auction, FALSE: out of the auction
-    var $asta_pla_n;        // number of players in auction
-    var $asta_card;         // current card for auction
-    var $asta_pnt;          // current point for auction
+    public $asta_pla;          // array(); TRUE: in auction, FALSE: out of the auction
+    public $asta_pla_n;        // number of players in auction
+    public $asta_card;         // current card for auction
+    public $asta_pnt;          // current point for auction
 
-    var $mult;
-    var $points;            // points array
-    var $points_n;          // number of row of points
-    var $total;
+    public $mult;
+    public $points;            // points array
+    public $points_n;          // number of row of points
+    public $total;
 
-    var $asta_win;          // the caller idx position at table
-    var $briscola;
-    var $tourn_pts;         // points in the caller hand
-    var $friend;            // the callee idx position at table
+    public $asta_win;          // the caller idx position at table
+    public $briscola;
+    public $tourn_pts;         // points in the caller hand
+    public $friend;            // the callee idx position at table
 
-    var $match_id;          // the id of the match on the database (-1 == just not saved)
+    public $match_id;          // the id of the match on the database (-1 == just not saved)
 
-    var $old_act;           // last action that trigs the end of the game
-    var $old_mazzo;
-    var $old_reason;
-    var $old_asta_pnt;
-    var $old_mult;
-    var $old_pnt;           // points made by caller and callee
-    var $old_asta_win;      // the old caller idx position at table
-    var $old_friend;        // the old callee idx position at table
+    public $old_act;           // last action that trigs the end of the game
+    public $old_mazzo;
+    public $old_reason;
+    public $old_asta_pnt;
+    public $old_mult;
+    public $old_pnt;           // points made by caller and callee
+    public $old_asta_win;      // the old caller idx position at table
+    public $old_friend;        // the old callee idx position at table
 
-    var $old_tourn_pts;     // the old tournment computed points in the hand of caller
-    var $rules;
+    public $old_tourn_pts;     // the old tournment computed points in the hand of caller
+    public $rules;
 
-    function Bin5_table()
+    function __construct()
     {
     }
 
@@ -213,7 +214,7 @@ class Bin5_table extends Table {
     /* CREATE() NOT USED
        function create($idx)
        {
-       if (($thiz =& new Bin5_table()) == FALSE)
+       if (($thiz = new Bin5_table()) == FALSE)
        return (FALSE);
 
        $thiz->create($idx);
@@ -252,7 +253,7 @@ class Bin5_table extends Table {
     /* CLONE() NOT USED
        function myclone(&$from)
        {
-       if (($thiz =& new Bin5_table()) == FALSE)
+       if (($thiz = new Bin5_table()) == FALSE)
        return (FALSE);
 
        parent::copy($from);
@@ -297,10 +298,14 @@ class Bin5_table extends Table {
         parent::copy($from);
     }
 
-    function spawn(&$from)
+    /* php8: the "&" was dropped because Table::spawn() takes $from by value and
+       an override cannot change by-reference passing (fatal). Here $from is
+       only read, and objects have been handles since php5, so the reference
+       was a php4 leftover with no effect. */
+    static function spawn($from)
     {
         GLOBAL $G_lang;
-        if (($thiz =& new Bin5_table()) == FALSE)
+        if (($thiz = new Bin5_table()) == FALSE)
             return (FALSE);
 
         $thiz->parentcopy($from);
@@ -339,7 +344,7 @@ class Bin5_table extends Table {
     //
     //     for ($i = 0 ; $i < (BIN5_CARD_HAND * BIN5_PLAYERS_N) ; $i++) {
     //       // for ($i = 0 ; $i < (BIN5_CARD_HAND * BIN5_PLAYERS_N) ; $i++) {
-    //       $ret[$i] =& new Card($i, 'bunch', 'no_owner');
+    //       $ret[$i] = new Card($i, 'bunch', 'no_owner');
     //     }
     //
     //     $oret = &$ret;
@@ -770,25 +775,25 @@ define('BIN5_USER_CONTINUE_INIT', -1);
 
 define('BIN5_USER_RULES_INIT', -1);
 class Bin5_user extends User {
-    var $asta_card;  //
-    var $asta_pnt;   //
-    var $handpt;     // Total card points at the beginning of the current hand.
-    var $exitislock; // Player can exit from the table ?
-    var $privflags;  // Flags for briskin5 only
+    public $asta_card;  //
+    public $asta_pnt;   //
+    public $handpt;     // Total card points at the beginning of the current hand.
+    public $exitislock; // Player can exit from the table ?
+    public $privflags;  // Flags for briskin5 only
 
-    var $continue;   // Id of the match that the user would continue
-    var $rules;      // Id of rules required by user
+    public $continue;   // Id of the match that the user would continue
+    public $rules;      // Id of rules required by user
 
-    var $asta_tourn_pts;    // array with tournment points for each suit
+    public $asta_tourn_pts;    // array with tournment points for each suit
 
     const BASE = "../";
 
-    function User() {
+    function __construct() {
     }
 
     /* CREATE NOT USED
        function create($name, $sess, $stat = "", $subst = "", $table = -1, $ip="0.0.0.0") {
-       if (($thiz =& new User()) == FALSE)
+       if (($thiz = new User()) == FALSE)
        return (FALSE);
 
        $thiz->asta_card = -2;
@@ -808,7 +813,8 @@ class Bin5_user extends User {
         parent::copy($from);
     }
 
-    function copy(&$from)
+    /* php8: "&" dropped, User::copy() takes $from by value (see spawn above). */
+    function copy($from)
     {
         $this->parentcopy($from);
 
@@ -824,7 +830,7 @@ class Bin5_user extends User {
     /* CLONE NOT USED
        function myclone(&$from)
        {
-       if (($thiz =& new User()) == FALSE)
+       if (($thiz = new User()) == FALSE)
        return (FALSE);
 
        $thiz->copy($from);
@@ -833,7 +839,13 @@ class Bin5_user extends User {
        }
     */
 
-    static function spawn($from, &$bri, $table, $table_pos, $get, $post, $cookie)
+    /* php8: signature reordered. User::spawn($from, $table, $table_pos) is the
+       parent, and an override may neither add mandatory parameters nor change
+       by-reference passing: it was a fatal. The three parent parameters now
+       come first and in the same order, the extra ones last with a default.
+       In practice they are all mandatory: the only caller
+       (Bin5::__construct) always passes them all. */
+    static function spawn($from, $table, $table_pos, $bri = NULL, $get = NULL, $post = NULL, $cookie = NULL)
     {
         if (($thiz = new Bin5_user()) == FALSE)
             return (FALSE);
@@ -884,7 +896,11 @@ class Bin5_user extends User {
         return (TRUE);
     }
 
-    static function load_step($tab_id, $sess)
+    /* php8: $sess moved first, as in User::load_step($sess); an override cannot
+       add mandatory parameters. $tab_id stays necessary in practice (it goes
+       into the path of the state file).
+       NOTE: this method has no callers, neither here nor in the base class. */
+    static function load_step($sess, $tab_id = -1)
     {
         $fp = FALSE;
         do {
@@ -934,7 +950,9 @@ class Bin5_user extends User {
         return (FALSE);
     }
 
-    static function unproxy_step($tab_id, $sess)
+    /* php8: $sess first, as in User::unproxy_step($sess), $tab_id last with a
+       default. In practice $tab_id is mandatory: the only caller passes it. */
+    static function unproxy_step($sess, $tab_id = -1)
     {
         log_rd2("UNPROXY: ".BIN5_PROXY_PATH."/table".$tab_id."/".$sess.".step");
         if (file_exists(BIN5_PROXY_PATH."/table".$tab_id) == FALSE)
@@ -979,7 +997,11 @@ class Bin5_user extends User {
         return (sprintf(($is_unrecoverable ? 'xstm.stop(); ' : '').'window.onbeforeunload = null; window.onunload = null; document.location.assign("../index.php");'));
     }
 
-    protected function page_sync($sess, $page)
+    /* php8: signature aligned with User::page_sync(): an override must accept at
+       least every parameter of the parent. $table_idx and $table_token are not
+       needed by this version, but the callers already pass both of them
+       (user.phh:742,756 and briskin5.phh:1078). */
+    protected function page_sync($sess, $page, $table_idx = -1, $table_token = "")
     {
         log_rd2("PAGE_SYNC");
         // printf("xXx BIN5_USER::PAGE_SYNC\n");
@@ -1115,24 +1137,24 @@ class Bin5_user extends User {
 
 class Bin5 {
     static $delta_t = array();
-    var $brisk;// room object reference
+    public $brisk;// room object reference
 
-    var $user;
-    var $table;
-    var $comm; // commands for many people
-    var $step; // current step of the comm array
-    var $garbage_timeout;
-    var $shm_sz;
+    public $user;
+    public $table;
+    public $comm; // commands for many people
+    public $step; // current step of the comm array
+    public $garbage_timeout;
+    public $shm_sz;
 
-    var $table_idx;
-    var $table_token;
+    public $table_idx;
+    public $table_token;
 
-    var $the_end;
-    var $tok;
+    public $the_end;
+    public $tok;
 
-    var $delay_mgr;
+    public $delay_mgr;
 
-    function Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie) {
+    function __construct($brisk, $table_idx, $table_token, $get, $post, $cookie) {
         $this->user = array();
         $this->table = array();
 
@@ -1150,7 +1172,10 @@ class Bin5 {
 
         for ($i = 0 ; $i < $table->player_n ; $i++) {
             $user[$table->player[$i]]->table_token = $table_token;
-            $this->user[$i] = Bin5_user::spawn($user[$table->player[$i]], $this, $table_idx, $i, $get, $post, $cookie);
+            /* php8: argument order adjusted to the new Bin5_user::spawn() signature:
+               $from, $table, $table_pos first as in the parent, then $bri and
+               the rest. */
+            $this->user[$i] = Bin5_user::spawn($user[$table->player[$i]], $table_idx, $i, $this, $get, $post, $cookie);
         }
         $this->table[0] = Bin5_table::spawn($table);
 
@@ -1247,7 +1272,7 @@ class Bin5 {
                         /* se gli altri utenti non erano d'accordo questo utente viene bannato */
                         $remcalc = $this->table[0]->exitlock_calc($this->user, $user_cur->table_pos);
                         if ($remcalc < 3) {
-                            require_once("${G_base}Obj/hardban.phh");
+                            require_once("{$G_base}Obj/hardban.phh");
                             Hardbans::add(($user_cur->is_auth() ? $user_cur->name : FALSE),
                                           $user_cur->ip, $user_cur->sess, $user_cur->laccwr + BAN_TIME);
                         }
@@ -1281,7 +1306,8 @@ class Bin5 {
             log_main("DESTROY2 BRISKIN5 DATA [".$this->table_idx."]");
             for ($i = 0 ; $i < BIN5_PLAYERS_N ; $i++) {
                 $this->user[$i]->destroy_data($this->table_idx);
-                Bin5_user::unproxy_step($this->table_idx, $this->user[$i]->sess);
+                /* php8: argomenti invertiti, vedi la nuova firma di unproxy_step(). */
+                Bin5_user::unproxy_step($this->user[$i]->sess, $this->table_idx);
             }
             if (($tok = @ftok(FTOK_PATH."/bin5/table".$this->table_idx."/table", "B")) == -1)
                 break;
@@ -1570,7 +1596,7 @@ function locshm_exists($tok)
         return (FALSE);
     }
     else {
-        shmop_close($id);
+        unset($id);   // php8: shmop_close() deprecata, il segmento si libera col refcount
         log_main($tok." SHM exists");
 
         return (TRUE);

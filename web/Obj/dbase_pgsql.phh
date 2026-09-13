@@ -22,7 +22,7 @@
    *
    */
 
-require_once("${G_base}Obj/dbase_base.phh");
+require_once("{$G_base}Obj/dbase_base.phh");
 
 $escsql_from = array( "\\",   "'"   );
 $escsql_to   = array( "\\\\", "''" );
@@ -37,9 +37,9 @@ function escsql($s)
 class DBConn
 {
     static $dbcnnx = FALSE;
-    var $db = FALSE;
+    public $db = FALSE;
 
-    function DBConn()
+    function __construct()
     {
         $this->db = DBConn::$dbcnnx;
     }
@@ -83,11 +83,11 @@ class DBConn
 
 class BriskDB
 {
-    var $dbconn;
-    var $item;
-    var $item_n;
+    public $dbconn;
+    public $item;
+    public $item_n;
 
-    function BriskDB($dbconn)
+    function __construct($dbconn)
     {
         $this->dbconn = $dbconn;
     }
@@ -118,7 +118,11 @@ class BriskDB
                 return FALSE;
 
         if (($res = @pg_query($this->dbconn->db(), $sql)) == FALSE) {
-            error_log('pg_result_status: ' .  pg_result_status($res));
+            /* php8: $res is FALSE here. Since 8.0 results are \PgSql\Result objects
+               and no longer resources, so pg_result_status(FALSE) is not a
+               warning any more but a fatal TypeError. The real error can be
+               read from the connection with pg_last_error() anyway. */
+            error_log('pg_query failed: ' .  pg_last_error($this->dbconn->db()));
             error_log('pg_connection_status: ' .  pg_connection_status($this->dbconn->db()));
             // try to recover the connection
             if (($this->dbconn = DBConn::recover()) == FALSE)
@@ -148,7 +152,7 @@ class BriskDB
         $user_sql = sprintf("SELECT * FROM %susers WHERE login = '%s'",
                             $G_dbpfx, escsql($login));
         if (($user_pg = $this->query($user_sql)) != FALSE)
-            if (pg_numrows($user_pg) == 1)
+            if (pg_num_rows($user_pg) == 1)
                 return TRUE;
 
         return FALSE;
@@ -161,7 +165,7 @@ class BriskDB
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
-        if (pg_numrows($user_pg) != 1)
+        if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
         $user_obj = pg_fetch_object($user_pg, 0);
@@ -216,7 +220,7 @@ class BriskDB
             return(FALSE);
         }
 
-        $ret = pg_numrows($sere_pg);
+        $ret = pg_num_rows($sere_pg);
 
         if ($ret === FALSE) {
             return(FALSE);
@@ -260,7 +264,7 @@ class BriskDB
         if (($mail_pg  = $this->query($mail_sql)) == FALSE) {
             return FALSE;
         }
-        if (pg_numrows($mail_pg) != 1)
+        if (pg_num_rows($mail_pg) != 1)
             return FALSE;
 
         $mail_obj = pg_fetch_object($mail_pg, 0);
@@ -281,7 +285,7 @@ class BriskDB
                 fprintf(STDERR, "QUERY [%s]_ FALSE", $user_sql);
                 return (3);
             }
-            if (pg_numrows($user_pg) == 1) {
+            if (pg_num_rows($user_pg) == 1) {
                 return ($i + 1);
             }
         }
@@ -296,7 +300,7 @@ class BriskDB
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
-        if (pg_numrows($user_pg) != 1)
+        if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
         $user_obj = pg_fetch_object($user_pg, 0);
@@ -411,7 +415,7 @@ class BriskDB
 
         /* if it exists check for a valid challenge */
         if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
-            if (($chals = &Challenges::load_data()) != FALSE) {
+            if (($chals = Challenges::load_data()) != FALSE) {
                 for ($e = 0 ; $e < $chals->item_n ; $e++) {
                     log_main("challenge[".$e."]: ".$chals->item[$e]->login);
                     if (strcmp($login, $chals->item[$e]->login) == 0) {
@@ -531,7 +535,7 @@ class BriskDB
             log_crit(sprintf("%s::%s: pg_query usr_sql failed [%s]", __CLASS__, __FUNCTION__, $usr_sql));
             return (FALSE);
         }
-        $usr_n = pg_numrows($usr_pg);
+        $usr_n = pg_num_rows($usr_pg);
         if ($usr_n != BIN5_PLAYERS_N) {
             log_crit(sprintf("%s::%s: wrong number of players [%s] %d", __CLASS__, __FUNCTION__, $usr_sql, $usr_n));
             return (FALSE);
@@ -565,7 +569,7 @@ class BriskDB
         }
 
         $num_sql = sprintf("SELECT count(*) AS points_n FROM %sbin5_games WHERE mcode = %d;", $G_dbpfx, $match_code);
-        if (($num_pg  = $this->query($num_sql)) == FALSE || pg_numrows($num_pg) != 1) {
+        if (($num_pg  = $this->query($num_sql)) == FALSE || pg_num_rows($num_pg) != 1) {
             log_crit(sprintf("%s::%s: get games number fails", __CLASS__, __FUNCTION__));
             return (FALSE);
         }
@@ -582,7 +586,7 @@ class BriskDB
                             ORDER BY o.pos;",
                            $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $match_code);
         if (($tot_pg  = pg_query($this->dbconn->db(), $tot_sql)) == FALSE
-            || pg_numrows($tot_pg) != BIN5_PLAYERS_N) {
+            || pg_num_rows($tot_pg) != BIN5_PLAYERS_N) {
             log_crit(sprintf("%s::%s: get games totals fails", __CLASS__, __FUNCTION__));
             return(FALSE);
         }
@@ -604,7 +608,7 @@ class BriskDB
                 log_crit(sprintf("%s::%s: get points fails", __CLASS__, __FUNCTION__));
                 return (FALSE);
             }
-            $pts_n = pg_numrows($pts_pg);
+            $pts_n = pg_num_rows($pts_pg);
             if ($pts_n > $table->points_n) {
                 // inconsistent scenario number of points great than number of games
                 log_crit(sprintf("%s::%s: number of points great than number of games", __CLASS__, __FUNCTION__));
@@ -622,7 +626,7 @@ class BriskDB
         }
 
         $gam_sql = sprintf("SELECT * FROM %sbin5_games WHERE mcode = %d ORDER BY tstamp DESC LIMIT 1;", $G_dbpfx, $match_code);
-        if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_numrows($gam_pg) != 1) {
+        if (($gam_pg  = $this->query($gam_sql)) == FALSE || pg_num_rows($gam_pg) != 1) {
             log_crit(sprintf("%s::%s: get last game fails", __CLASS__, __FUNCTION__));
             return (FALSE);
         }
@@ -631,7 +635,7 @@ class BriskDB
         // update matches with new ttok and table idx
         $mtc_sql = sprintf("UPDATE %sbin5_matches SET (ttok, tidx) = ('%s', %d) WHERE code = %d RETURNING *;",
                            $G_dbpfx, $sql_ttok, $tidx, $match_code);
-        if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+        if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_num_rows($mtc_pg) != 1) {
             log_crit(sprintf("%s::%s: update matches table failed", __CLASS__, __FUNCTION__));
             return (FALSE);
         }
@@ -642,7 +646,13 @@ class BriskDB
         $table->rules = new $rules_name($table);
         unset($old_rules);
 
-        $table->old_reason = ${rules_name}::game_description($gam_obj->act, 'html', $gam_obj->mult,
+        /* php8: this used to be ${rules_name}, a variable variable whose name came
+           from the undefined constant rules_name. On php5 the constant degraded
+           to the string "rules_name" with a notice, and the whole thing
+           resolved to $rules_name by accident; on php8 an undefined constant is
+           a fatal Error. The variable is now used directly, as on the line
+           above. */
+        $table->old_reason = $rules_name::game_description($gam_obj->act, 'html', $gam_obj->mult,
                                               $gam_obj->asta_win, ($gam_obj->asta_win != -1 ?
                                                                    $users[$gam_obj->asta_win]['login'] : ""),
                                               $gam_obj->friend, ($gam_obj->friend != -1 ?
@@ -660,7 +670,7 @@ class BriskDB
         $ord_sql = sprintf("SELECT ucode FROM %sbin5_table_orders WHERE mcode = %d ORDER BY pos ASC;",
                            $G_dbpfx, $match_code);
 
-        if (($ord_pg  = $this->query($ord_sql)) == FALSE || pg_numrows($ord_pg) != $exp_num) {
+        if (($ord_pg  = $this->query($ord_sql)) == FALSE || pg_num_rows($ord_pg) != $exp_num) {
             log_crit(sprintf("%s: fails for id or users number", __FUNCTION__));
             return (FALSE);
         }
@@ -675,7 +685,7 @@ class BriskDB
             $mtdt_sql = sprintf("SELECT * FROM %sbin5_matches WHERE code = %d;",
                                 $G_dbpfx, $match_code);
 
-            if (($mtdt_pg  = $this->query($mtdt_sql)) == FALSE || pg_numrows($mtdt_pg) != 1) {
+            if (($mtdt_pg  = $this->query($mtdt_sql)) == FALSE || pg_num_rows($mtdt_pg) != 1) {
                 log_crit(sprintf("%s: fails retrieve match_data values [%d]", __FUNCTION__, $match_code));
                 return (FALSE);
             }
@@ -716,7 +726,7 @@ class BriskDB
             $codes_where = "";
             $mtc_sql = sprintf("UPDATE %sbin5_matches SET (mazzo_next, mult_next) = (%d, %d) WHERE ttok = '%s' RETURNING *;",
                                $G_dbpfx, $table->mazzo, $table->mult, $sql_ttok);
-            if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+            if (($mtc_pg  = $this->query($mtc_sql)) == FALSE || pg_num_rows($mtc_pg) != 1) {
 
                 // match not exists, insert it
                 // , BIN5_TOURNAMENT_NO_DRAW
@@ -843,7 +853,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
 
         $mai_sql = sprintf("SELECT * FROM %smails WHERE code = %d AND type = %d AND hash = '%s';",
                            $G_dbpfx, $code, $type, escsql($hash));
-        if (($mai_pg  = $this->query($mai_sql)) == FALSE || pg_numrows($mai_pg) != 1) {
+        if (($mai_pg  = $this->query($mai_sql)) == FALSE || pg_num_rows($mai_pg) != 1) {
             // check failed
             return (FALSE);
         }
@@ -885,7 +895,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             return ($widefriend);
         }
 
-        for ($i = 0 ; $i < pg_numrows($wfri_pg) ; $i++) {
+        for ($i = 0 ; $i < pg_num_rows($wfri_pg) ; $i++) {
             $wfri_obj = pg_fetch_object($wfri_pg, $i);
             $widefriend[usersnet_friend_getlabel(intval($wfri_obj->friend))] = $wfri_obj->count;
         }
@@ -905,7 +915,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             return ($wideskill);
         }
 
-        if (pg_numrows($wskl_pg) > 0) {
+        if (pg_num_rows($wskl_pg) > 0) {
             $wskl_obj = pg_fetch_object($wskl_pg, 0);
             // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
             // if ($wskl_obj->count >= 3)
@@ -926,7 +936,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             return $narrowfriend;
         }
 
-        for ($i = 0 ; $i < pg_numrows($nfri_pg) ; $i++) {
+        for ($i = 0 ; $i < pg_num_rows($nfri_pg) ; $i++) {
             $nfri_obj = pg_fetch_object($nfri_pg, $i);
             $narrowfriend[usersnet_friend_getlabel(intval($nfri_obj->friend))] = $nfri_obj->count;
         }
@@ -945,7 +955,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             return ($narrowskill);
         }
 
-        if (pg_numrows($nskl_pg) > 0) {
+        if (pg_num_rows($nskl_pg) > 0) {
             $nskl_obj = pg_fetch_object($nskl_pg, 0);
             // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
             // if ($nskl_obj->count >= 3)
@@ -966,7 +976,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
             return ($partyskill);
         }
 
-        if (pg_numrows($pskl_pg) > 0) {
+        if (pg_num_rows($pskl_pg) > 0) {
             $pskl_obj = pg_fetch_object($pskl_pg, 0);
             // TODO: UNCOMMENT IF THE NETWORK WORKS VERY WELL
             // if ($wskl_obj->count >= 3)
@@ -985,7 +995,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
         if (($net_pg  = $this->query($net_sql)) == FALSE)
             return FALSE;
 
-        if (pg_numrows($net_pg) != 1)
+        if (pg_num_rows($net_pg) != 1)
             return FALSE;
 
         $net_obj = pg_fetch_object($net_pg, 0);
@@ -1044,7 +1054,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                                    $friend, $json->skill, $json->trust,
                                    $G_dbpfx,
                                    $owner_id, escsql(strtolower($json->login)));
-                if (($net_pg  = $this->query($net_sql)) == FALSE || pg_numrows($net_pg) == 0) {
+                if (($net_pg  = $this->query($net_sql)) == FALSE || pg_num_rows($net_pg) == 0) {
                     $net_sql = sprintf("
                 INSERT INTO %susersnet SELECT %d AS owner, us.code as target,
                         %d as friend, %d as skill, %d as trust
@@ -1057,14 +1067,14 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                         $ret = 2;
                         break;
                     }
-                    if (pg_numrows($net_pg) != 1) {
-                        log_wr(sprintf('insert numrow failed [%s] [%d]', $net_sql, pg_numrows($net_pg)));
+                    if (pg_num_rows($net_pg) != 1) {
+                        log_wr(sprintf('insert numrow failed [%s] [%d]', $net_sql, pg_num_rows($net_pg)));
                         $ret = 3;
                         break;
                     }
                 }
                 else {
-                    if (pg_numrows($net_pg) != 1) {
+                    if (pg_num_rows($net_pg) != 1) {
                         log_wr('update numrow failed');
                         $ret = 4;
                         break;
@@ -1084,10 +1094,10 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
 
 class LoginDBOld
 {
-    var $item;
-    var $item_n;
+    public $item;
+    public $item_n;
 
-    function LoginDBOld($filename)
+    function __construct($filename)
     {
         GLOBAL $DOCUMENT_ROOT;
         log_main("LoginDBOld create:start");

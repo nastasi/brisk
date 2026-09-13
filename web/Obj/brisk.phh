@@ -92,7 +92,7 @@ define('DEBUGGING', "no-debugging");
 define('BSK_BUSTING', "dev");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
-require_once("${G_base}Obj/ipclass.phh");
+require_once("{$G_base}Obj/ipclass.phh");
 
 $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                                'en' => 'back standing' ),
@@ -441,7 +441,7 @@ function cmd_deserialize($cmd)
     $a = explode('&', $cmd);
     $i = 0;
     while ($i < count($a)) {
-        $b = split('=', $a[$i]);
+        $b = explode('=', $a[$i]);
         $ret[urldecode($b[0])] = urldecode($b[1]);
         $i++;
     }
@@ -459,8 +459,8 @@ function versions_cmp($v1, $v2)
     if ($v1 == $v2)
         return 0;
 
-    $v1_ar = split('\.', $v1);
-    $v2_ar = split('\.', $v2);
+    $v1_ar = explode('.', $v1);
+    $v2_ar = explode('.', $v2);
 
     $v2_ct = count($v2_ar);
 
@@ -619,7 +619,10 @@ function xcapemesg($s)
 
 
 class Vect {
-    function Vect($a)
+    /* php8: declared, dynamic properties are deprecated since 8.2 */
+    public $el;
+
+    function __construct($a)
     {
         $this->el = $a;
     }
@@ -642,26 +645,26 @@ define('TABLE_AUTH_TY_CERT', 3);
 
 
 class Table {
-    var $idx;
-    var $player;
-    var $player_n;
+    public $idx;
+    public $player;
+    public $player_n;
 
-    var $auth_type;     // required authorization to sit down
+    public $auth_type;     // required authorization to sit down
 
-    var $wag_own;
-    var $wag_com;
-    var $wag_tout;
+    public $wag_own;
+    public $wag_com;
+    public $wag_tout;
 
-    var $table_token;
-    var $table_start;   // information field
+    public $table_token;
+    public $table_start;   // information field
 
-    var $wakeup_time;
+    public $wakeup_time;
 
-    function Table()
+    function __construct()
     {
     }
 
-    function create($idx)
+    static function create($idx)
     {
         if (($thiz = new Table()) == FALSE)
             return (FALSE);
@@ -723,7 +726,9 @@ class Table {
         return ($thiz);
     }
 
-    function spawn($from)
+    /* static like Bin5_table::spawn(), which overrides it: php does not let an
+       override change the staticness of the parent method. */
+    static function spawn($from)
     {
         if (($thiz = new Table()) == FALSE)
             return (FALSE);
@@ -862,11 +867,13 @@ class Table {
 
 class Delay_Manager
 {
-    var $delta;
-    var $lastckeck;
-    var $triglevel;
+    public $delta;
+    public $lastckeck;
+    public $triglevel;
+    /* php8: declared, dynamic properties are deprecated since 8.2 */
+    public $lastcheck;
 
-    function Delay_Manager($triglevel)
+    function __construct($triglevel)
     {
         $this->triglevel = $triglevel;
         $this->delta = array();
@@ -910,10 +917,10 @@ class Delay_Manager
 }
 
 class Client_prefs {
-    var $listen;
-    var $supp_comp;
+    public $listen;
+    public $supp_comp;
 
-    function Client_prefs()
+    function __construct()
     {
     }
 
@@ -1010,11 +1017,11 @@ define('GHOST_SESS_REAS_PROX', 6); // proxy access
 
 class GhostSessEl
 {
-    var $time;
-    var $sess;
-    var $reas;
+    public $time;
+    public $sess;
+    public $reas;
 
-    function GhostSessEl($time, $sess, $reas)
+    function __construct($time, $sess, $reas)
     {
         $this->time = $time + GHOST_SESS_TOUT;
         $this->sess = $sess;
@@ -1024,9 +1031,9 @@ class GhostSessEl
 
 class GhostSess
 {
-    var $gs;
+    public $gs;
 
-    function GhostSess()
+    function __construct()
     {
         $this->gs = array();
     }
@@ -1072,26 +1079,26 @@ class Brisk
 {
     static $delta_t;
 
-    var $crystal_filename;
-    var $user;
-    var $table;
-    var $match;
-    var $comm; // commands for many people
-    var $step; // current step of the comm array
-    var $garbage_timeout;
-    var $shm_sz;
+    public $crystal_filename;
+    public $user;
+    public $table;
+    public $match;
+    public $comm; // commands for many people
+    public $step; // current step of the comm array
+    public $garbage_timeout;
+    public $shm_sz;
 
-    var $ban_list;       // ban list (authized allowed)
-    var $black_list;     // black list (anti-dos, noone allowed)
-    var $cloud_smasher;  // list of cloud ip ranges to be rejected
-    var $ghost_sess;
-    var $delay_mgr;
+    public $ban_list;       // ban list (authized allowed)
+    public $black_list;     // black list (anti-dos, noone allowed)
+    public $cloud_smasher;  // list of cloud ip ranges to be rejected
+    public $ghost_sess;
+    public $delay_mgr;
 
-    var $cds;
+    public $cds;
 
     public static $sess_cur;
 
-    function Brisk()
+    function __construct()
     {
         $this->cds = NULL;
     }
@@ -1552,7 +1559,7 @@ class Brisk
         }
     }
 
-    function room_join_wakeup($user, $update_lacc = FALSE, $trans_delta)
+    function room_join_wakeup($user, $update_lacc, $trans_delta)
     {
         $table_idx = $user->table;
         $table = $this->table[$table_idx];
@@ -2324,7 +2331,7 @@ class Brisk
 
       if ($to_tabl) {
           // FIXME BRISK4: include for each kind of table
-          require_once("${G_base}briskin5/Obj/briskin5.phh");
+          require_once("{$G_base}briskin5/Obj/briskin5.phh");
           // Before all align times with table timeout
           for ($table_idx = 0 ; $table_idx < TABLES_N ; $table_idx++) {
               if (isset($this->match[$table_idx])) {
@@ -2506,7 +2513,7 @@ class Brisk
           // If user at the table we need to update the table data too
           $table_idx = $ghost_user->table;
           if ($ghost_user->stat == "table" && $this->table[$table_idx]->player_n == PLAYERS_N) {
-              require_once("${G_base}briskin5/Obj/briskin5.phh");
+              require_once("{$G_base}briskin5/Obj/briskin5.phh");
               if (isset($this->match[$table_idx])) {
                   $bin5 = $this->match[$table_idx];
 
@@ -3447,7 +3454,7 @@ function sharedmem_sz($tok)
         return (-1);
     }
     $shm_sz = shmop_size($shm_id);
-    shmop_close($shm_id);
+    unset($shm_id);   // php8: shmop_close() deprecata, il segmento si libera col refcount
 
     // log_main("shm_sz: ".$shm_sz."   SHM_DIMS: ".SHM_DIMS);
     return ($shm_sz);

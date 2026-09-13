@@ -99,7 +99,7 @@ if [ "$1" = "chk" ]; then
     IFS='
 '
     for i in $(find -name '*.pho' -o -name '*.phh' -o -name '*.php'); do
-        php5 -l $i
+        php -l $i
     done
 
     taggit="$(git describe --tags | sed 's/^v//g')"

@@ -11,7 +11,7 @@ require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_base.phh");
-require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
+require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/Obj/placing.phh");
 require_once($G_base."spush/brisk-spush.phh");

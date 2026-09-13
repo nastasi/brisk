@@ -25,7 +25,7 @@
 $G_base = "./";
 
 require_once($G_base."Obj/brisk.phh");
-require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
+require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 
 function succ($s)
 {
@@ -97,7 +97,7 @@ function main() {
             }
             succ($cmp_que);
 
-            for ($r = 0 ; $r < pg_numrows($cmp_pg) ; $r++) {
+            for ($r = 0 ; $r < pg_num_rows($cmp_pg) ; $r++) {
                 $cmp_obj = pg_fetch_object($cmp_pg, $r);
 
                 if ($ip_obj->ip & $msk != $cmp) {
@@ -118,7 +118,7 @@ function main() {
         }
         succ("SELECT * FROM test_ip");
 
-        for ($r = 0 ; $r < pg_numrows($ip_pg) ; $r++) {
+        for ($r = 0 ; $r < pg_num_rows($ip_pg) ; $r++) {
             $ip_obj = pg_fetch_object($ip_pg, $r);
 
             $v = int2ip($ip_obj->ip);

@@ -1,11 +1,11 @@
 <?php
 class ZLibStream {
-    var $s;
-    var $head;
-    var $type;
-    var $filter;
+    public $s;
+    public $head;
+    public $type;
+    public $filter;
 
-    function ZLibStream($type)
+    function __construct($type)
     {
         $this->type = $type;
         $this->s = array( FALSE, FALSE );

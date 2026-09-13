@@ -29,12 +29,12 @@ define('HBAN_VALID_TIME',      15);
 define('HBAN_GARBAGE_TIMEOUT',  5);
 
 class Hardban {
-  var $login;
-  var $ip;
-  var $session;
-  var $timeout;
+  public $login;
+  public $ip;
+  public $session;
+  public $timeout;
 
-  function Hardban($login, $ip, $session, $timeout)
+  function __construct($login, $ip, $session, $timeout)
   {
     $this->login  = $login;
     $this->ip     = $ip;
@@ -46,15 +46,15 @@ class Hardban {
 class Hardbans {
     static $delta_t;
 
-  var $item;
-  var $item_n;
-  var $mod;
-  var $shm_sz;
+  public $item;
+  public $item_n;
+  public $mod;
+  public $shm_sz;
 
-  var $garbage_timeout;
+  public $garbage_timeout;
 
 
-  function Hardbans()
+  function __construct()
   {
     $this->item = array();
     $this->item_n = 0;
@@ -147,14 +147,14 @@ class Hardbans {
   // Static functions
   static function create()
   {
-    $chal =& new Hardbans();
+    $chal = new Hardbans();
     
     $chal->mod = TRUE;
 
     return $chal;
   }
 
-  function load_data() 
+  static function load_data() 
   {
     GLOBAL $sess;
 
@@ -201,7 +201,7 @@ class Hardbans {
   }
   
 
-  function save_data($hban) 
+  static function save_data($hban) 
   {
     $shm =   FALSE;
     $oldmod = $hban->mod;
@@ -260,13 +260,13 @@ class Hardbans {
   }
 
 
-  function check($login, $ip, $session)
+  static function check($login, $ip, $session)
   {
     $bantime = -1;
     /* if it exists check for a valid challenge */
     if (($a_sem = Hardbans::lock_data(TRUE)) != FALSE) { 
       
-      if (($hban = &Hardbans::load_data()) != FALSE) {
+      if (($hban = Hardbans::load_data()) != FALSE) {
         for ($e = 0 ; $e < $hban->item_n ; $e++) {
           if ($login != FALSE) {
             if (strcasecmp($login, $hban->item[$e]->login) == 0 || $hban->item[$e]->session == $session) {
@@ -294,13 +294,13 @@ class Hardbans {
 
 
 
-  function add($login, $ip, $session, $timeout)
+  static function add($login, $ip, $session, $timeout)
   {
     $found = FALSE;
     /* if it exists check for a valid challenge */
     if (($a_sem = Hardbans::lock_data(TRUE)) != FALSE) { 
       
-      if (($hban = &Hardbans::load_data()) != FALSE) {
+      if (($hban = Hardbans::load_data()) != FALSE) {
 
         $hban->add_item($login, $ip, $session, $timeout);
 

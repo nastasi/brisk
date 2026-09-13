@@ -42,7 +42,7 @@ ini_set("max_execution_time", "240");
 require_once($G_base."Obj/brisk.phh");
 require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
-require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
+require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."Obj/singlemsg.phh");
 
 require_once($G_base."spush/brisk-spush.phh");

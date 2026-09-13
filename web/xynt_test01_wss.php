@@ -301,7 +301,7 @@ if (isset($isstream) && $isstream == "true") {
      window.onload = function() {
 
          xstm = new xynt_streaming(window, "<?php echo "$f_trans";?>", <?php
-    echo ($f_port == NULL ? "${trans_ports[$f_trans]}" : "$f_port" );?>, <?php echo "$f_fback";?>, console, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
+    echo ($f_port == NULL ? "{$trans_ports[$f_trans]}" : "$f_port" );?>, <?php echo "$f_fback";?>, console, gst, 'xynt_test01_php', 'sess', sess, null, 'xynt_test01.php?isstream=true&f_test=<?php echo "$f_test";?>', function(com){eval(com);});
      xstm.hbit_set(heartbit);
      xstm.start();
  }

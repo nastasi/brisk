@@ -22,7 +22,7 @@
    *
    */
 
-require_once("${G_base}Obj/dbase_${G_dbasetype}.phh");
+require_once("{$G_base}Obj/dbase_{$G_dbasetype}.phh");
 
 define('CHAL_SHM_DIMS_MIN', 16384);
 define('CHAL_SHM_DIMS_MAX', 65536);
@@ -32,12 +32,12 @@ define('CHAL_GARBAGE_TIMEOUT',  5);
 
 
 class Challenge {
-    var $login;
-    var $token;
-    var $ip;
-    var $tstamp;
+    public $login;
+    public $token;
+    public $ip;
+    public $tstamp;
     
-    function Challenge($login, $token, $ip, $tstamp)
+    function __construct($login, $token, $ip, $tstamp)
     {
         $this->login  = $login;
         $this->token  = $token;
@@ -49,15 +49,15 @@ class Challenge {
 class Challenges {
     static $delta_t;
 
-    var $item;
-    var $item_n;
-    var $mod;
-    var $shm_sz;
+    public $item;
+    public $item_n;
+    public $mod;
+    public $shm_sz;
     
-    var $garbage_timeout;
+    public $garbage_timeout;
     
     
-    function Challenges()
+    function __construct()
     {
         $this->item = array();
         $this->item_n = 0;
@@ -155,14 +155,14 @@ class Challenges {
     // Static functions
     static function create()
         {
-            $chal =& new Challenges();
+            $chal = new Challenges();
     
             $chal->mod = TRUE;
 
             return $chal;
         }
 
-    function load_data() 
+    static function load_data() 
         {
             GLOBAL $sess;
             do {
@@ -207,7 +207,7 @@ class Challenges {
         }
   
 
-    function save_data($chals) 
+    static function save_data($chals) 
     {
         $shm =   FALSE;
         $oldmod = $chals->mod;

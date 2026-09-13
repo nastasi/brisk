@@ -22,15 +22,15 @@
  *
  */
 
-require_once("${G_base}Obj/ipclass.phh");
+require_once("{$G_base}Obj/ipclass.phh");
 
 class ProviderProxyItem
 {
-    var $name;
-    var $headitem;
-    var $ipclass;
+    public $name;
+    public $headitem;
+    public $ipclass;
 
-    function ProviderProxyItem($pp_name, $pp_descr)
+    function __construct($pp_name, $pp_descr)
     {
         $this->name     = $pp_name;
         $this->headitem = $pp_descr['headitem'];
@@ -41,9 +41,9 @@ class ProviderProxyItem
 
 class ProviderProxy
 {
-    var $pp;
+    public $pp;
 
-    function ProviderProxy()
+    function __construct()
     {
         $this->pp = NULL;
     }

@@ -61,7 +61,7 @@
 
 class Transport_template {
 
-    function Transport_template() {
+    function __construct() {
     }
 
     // return string value is appended to the content of the returned page
@@ -98,7 +98,12 @@ class Transport_template {
 define("TRANSP_WS_CLOSE_TOUT", 5);
 
 class Transport_websocket_postclose {
-    function Transport_websocket_postclose($transp_ws, $sock, $curtime) {
+    /* php8: declared, dynamic properties are deprecated since 8.2 */
+    public $transp_ws;
+    public $sock;
+    public $start;
+
+    function __construct($transp_ws, $sock, $curtime) {
         printf("POSTCLOSE: Creation\n");
         $this->transp_ws = $transp_ws;
         $this->sock = $sock;
@@ -130,7 +135,21 @@ class Transport_websocket_postclose {
 class Transport_websocket {
     protected $magicGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
-    function Transport_websocket($secure = FALSE) {
+    /* php8: declared, dynamic properties are deprecated since 8.2.
+       $partialBuffer and $requestedResource are assigned later on
+       (in dataframe and handshake respectively), not in the constructor. */
+    public $type;
+    public $headerOriginRequired;
+    public $headerSecWebSocketProtocolRequired;
+    public $headerSecWebSocketExtensionsRequired;
+    public $sendingContinuous;
+    public $handlingPartialPacket;
+    public $partialMessage;
+    public $hasSentClose;
+    public $partialBuffer;
+    public $requestedResource;
+
+    function __construct($secure = FALSE) {
         $this->type = ($secure == FALSE ? "websocket" : "websocketsec");
         $this->headerOriginRequired                 = false;
         $this->headerSecWebSocketProtocolRequired   = false;
@@ -532,8 +551,10 @@ class Transport_websocket {
 }
 
 class Transport_xhr {
+    /* php8: declared, dynamic properties are deprecated since 8.2 */
+    public $type;
 
-    function Transport_xhr() {
+    function __construct() {
         $this->type = 'xhr';
     }
 
@@ -578,8 +599,11 @@ class Transport_xhr {
 }
 
 class Transport_iframe {
+    /* php8: declared, dynamic properties are deprecated since 8.2.
+       Transport_htmlfile inherits it too, and sets it to 'htmlfile'. */
+    public $type;
 
-    function Transport_iframe() {
+    function __construct() {
         $this->type = 'iframe';
     }
 
@@ -663,7 +687,7 @@ push(\"%s\");\n// -->\n</script>", $step, escpush($cont) );
 }
 
 class Transport_htmlfile extends Transport_iframe {
-    function Transport_htmlfile() {
+    function __construct() {
         $this->type = 'htmlfile';
     }
 
@@ -674,7 +698,7 @@ class Transport_htmlfile extends Transport_iframe {
 }
 
 class Transport {
-    function Transport()
+    function __construct()
     {
     }
 

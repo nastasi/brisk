@@ -319,10 +319,10 @@ function get_encoding($header)
 }
 
 class Cookie {
-    var $attr;
+    public $attr;
     // Set-Cookie: reg_fb_gate=deleted; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/; Domain=.foo.com; HttpOnly
     // string $name  [, string $value  [, int $expire = 0  [, string $path  [, string $domain  [, bool $secure = false  [, bool $httponly = false  ]]]]]] )
-    function Cookie()
+    function __construct()
     {
         $this->attr = array();
     }
@@ -388,9 +388,9 @@ class Cookie {
 }
 
 class Cookies {
-    var $cookies;
+    public $cookies;
 
-    function Cookies()
+    function __construct()
     {
         $this->cookies = array();
     }
@@ -423,33 +423,33 @@ class Sac_a_push {
     static $cnt_master = NULL;
     static $cnt_slave  = NULL;
 
-    var $provider_proxy; // list of provider/browser that offer proxy service
+    public $provider_proxy; // list of provider/browser that offer proxy service
 
-    var $file_socket_pfx;
-    var $unix_socket_pfx;
-    var $direct_socket;   // socket where read direct commands
-    var $socks;
-    var $s2u;             // user associated with input socket
-    var $s2p;             // pending page associated with input socket
-    var $s2c;             // ws sockets in closing phase
-    var $pending_pages;
-    var $is_daemon;
+    public $file_socket_pfx;
+    public $unix_socket_pfx;
+    public $direct_socket;   // socket where read direct commands
+    public $socks;
+    public $s2u;             // user associated with input socket
+    public $s2p;             // pending page associated with input socket
+    public $s2c;             // ws sockets in closing phase
+    public $pending_pages;
+    public $is_daemon;
 
-    var $list_web;
-    var $list_cmd;
-    var $in;
+    public $list_web;
+    public $list_cmd;
+    public $in;
 
-    var $debug;
-    var $blocking_mode;
+    public $debug;
+    public $blocking_mode;
 
-    var $app;
+    public $app;
 
-    var $curtime;
+    public $curtime;
 
-    var $rndstr;
-    var $main_loop;
+    public $rndstr;
+    public $main_loop;
 
-    function Sac_a_push()
+    function __construct()
     {
     }
 
@@ -487,7 +487,7 @@ class Sac_a_push {
 
         $thiz->file_socket_pfx = $sockname_pfx;
         $thiz->unix_socket_pfx = "unix://$sockname_pfx";
-        $thiz->direct_socket = "unix://${sockname_pfx}_admin.sock";
+        $thiz->direct_socket = "unix://{$sockname_pfx}_admin.sock";
         $thiz->debug = $debug;
         $thiz->list_web = array();
         $thiz->socks = array();

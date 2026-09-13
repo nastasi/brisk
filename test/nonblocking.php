@@ -43,7 +43,7 @@ function cmd_deserialize($cmd)
     $a = explode('&', $cmd);
     $i = 0;
     while ($i < count($a)) {
-        $b = split('=', $a[$i]);
+        $b = explode('=', $a[$i]);
         $ret[urldecode($b[0])] = urldecode($b[1]);
         $i++;
     }

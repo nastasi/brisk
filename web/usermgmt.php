@@ -72,7 +72,7 @@ require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_base.phh");
-require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
+require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/Obj/placing.phh");
 require_once($G_base."spush/brisk-spush.phh");
@@ -195,7 +195,7 @@ SELECT usr.*, guar.login AS guar_login
                         log_crit("stat-day: select from tournaments failed");
                         break;
                     }
-                    $usr_n = pg_numrows($usr_pg);
+                    $usr_n = pg_num_rows($usr_pg);
                     if ($usr_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $usr_n);
@@ -293,7 +293,7 @@ SELECT usr.*, guar.login AS guar_login
                         log_crit("stat-day: select from tournaments failed");
                         break;
                     }
-                    $usr_n = pg_numrows($usr_pg);
+                    $usr_n = pg_num_rows($usr_pg);
                     if ($usr_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $usr_n);
@@ -352,7 +352,7 @@ SELECT usr.*, guar.login AS guar_login
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
-            $usr_n = pg_numrows($usr_pg);
+            $usr_n = pg_num_rows($usr_pg);
             $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
@@ -429,7 +429,7 @@ SELECT mail.*, usr.email AS email
                         $status .= "2<br>";
                         break;
                     }
-                    $mai_n = pg_numrows($mai_pg);
+                    $mai_n = pg_num_rows($mai_pg);
                     if ($mai_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $mai_n);
@@ -472,7 +472,7 @@ SELECT usr.*, guar.login AS guar_login
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
-            $usr_n = pg_numrows($usr_pg);
+            $usr_n = pg_num_rows($usr_pg);
             $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
@@ -522,7 +522,12 @@ SELECT usr.*, guar.login AS guar_login
         if ($action == "accept") {
             if (($bdb = BriskDB::create()) == FALSE) {
                 log_crit("stat-day: database connection failed");
-                break;
+                /* php8: there used to be a "break" outside any loop or switch here.
+                   On php5 it was a runtime fatal (the script died if the db did
+                   not answer); since php7 it is a compile time fatal, so the
+                   whole of usermgmt.php was not even loaded any more.
+                   The block ends with exit anyway (see the foreach below). */
+                exit;
             }
 
             foreach($_POST as $key => $value) {
@@ -618,7 +623,7 @@ SELECT usr.*, guar.login AS guar_login
                         log_crit("stat-day: select from tournaments failed");
                         break;
                     }
-                    $usr_n = pg_numrows($usr_pg);
+                    $usr_n = pg_num_rows($usr_pg);
                     if ($usr_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $usr_n);
@@ -708,7 +713,7 @@ SELECT usr.*, guar.login AS guar_login
                 break;
             }
 
-            $usr_n = pg_numrows($usr_pg);
+            $usr_n = pg_num_rows($usr_pg);
             $tab_lines = "<tr><th></th><th>User</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
