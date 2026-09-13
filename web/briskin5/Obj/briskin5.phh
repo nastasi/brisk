@@ -1552,8 +1552,16 @@ class Bin5 {
                     /* as in the room: the stream being replaced is told what
                        happened to it, otherwise it reopens and displaces the
                        new one in turn, forever. */
-                    $bye = $user->stream_bye('xstm.stop(); '
-                        .show_notify($mlang_brisk['sessmoved'][$G_lang], 0, "chiudi", 400, 120));
+                    if ($user->rd_sess !== NULL && $user->rd_sess != $cookie['sess']) {
+                        /* as in the room: different session, the old one is
+                           orphaned and finds the explanation at the login */
+                        $bye = $user->stream_bye(sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%sindex.php");',
+                                                         Bin5_user::base_get()));
+                    }
+                    else {
+                        $bye = $user->stream_bye('xstm.stop(); '
+                            .show_notify($mlang_brisk['sessmoved'][$G_lang], 0, "chiudi", 400, 120));
+                    }
                     if ($bye != "") {
                         @fwrite($prev, $bye, mb_strlen($bye, "ASCII"));
                     }

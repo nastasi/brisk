@@ -2839,8 +2839,26 @@ class Brisk
                      In the normal case - the same client reopening after having
                      given the connection up for lost - the message ends up on a
                      socket nobody reads any more, and does no harm. */
-                  $bye = $user->stream_bye('xstm.stop(); '
-                      .show_notify($mlang_brisk['sessmoved'][$G_lang], 0, "chiudi", 400, 120));
+                  if ($user->rd_sess !== NULL && $user->rd_sess != $cookie['sess']) {
+                      /* The old stream belonged to another session, which is
+                         now orphaned: this is the "ghost swap" of add_user(),
+                         that is a new access with the same name from another
+                         browser. There it can be sent back to the login, where
+                         ghost_sess explains that the session was assigned to
+                         another browser, and since its old session is no longer
+                         valid it does not come back in. */
+                      $bye = $user->stream_bye(sprintf('xstm.stop(); window.onbeforeunload = null; window.onunload = null; document.location.assign("%sindex.php");',
+                                                       User::base_get()));
+                  }
+                  else {
+                      /* Same session, two windows: it cannot be sent to the
+                         login, because the session cookie is shared between the
+                         tabs of the same browser and it would come straight back
+                         in, taking the stream again, from the top. It is stopped
+                         and told why. */
+                      $bye = $user->stream_bye('xstm.stop(); '
+                          .show_notify($mlang_brisk['sessmoved'][$G_lang], 0, "chiudi", 400, 120));
+                  }
                   if ($bye != "") {
                       @fwrite($prev, $bye, mb_strlen($bye, "ASCII"));
                   }

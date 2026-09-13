@@ -130,6 +130,13 @@ class User {
   public $pend_async; // number of async check that must be returned
 
   public $rd_socket;  // socket handle of push stream
+  public $rd_sess;    // sessione con cui il flusso corrente e' stato aperto:
+                      // it tells apart the one displaced by another window on
+                      // the SAME session (which cannot go back to the login, the
+                      // cookie is shared and it would come back in) from the one
+                      // displaced by a new access with a different session
+                      // (which must go back to the login, and finds the
+                      // explanation there)
   public $rd_endtime; // end time for push stream
   public $rd_stat;    // actual status of push stream
   public $rd_subst;   // actual substatus of push stream
@@ -204,6 +211,7 @@ class User {
     $thiz->comm       = array();
 
     $thiz->rd_socket  = NULL;
+    $thiz->rd_sess    = NULL;
     $thiz->rd_endtime = -1;
     $thiz->rd_stat    = -1;
     $thiz->rd_subst   = "";
@@ -445,6 +453,10 @@ class User {
           }
       }
       $this->rd_socket = $sock;
+      /* the session the stream was opened with is recorded: when it gets
+         replaced, comparing it with the one of the newcomer tells whether it is
+         the same window-session or a different access */
+      $this->rd_sess = ($sock == NULL ? NULL : $this->sess);
   }
 
   function rd_kalive_get()
