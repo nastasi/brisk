@@ -453,7 +453,11 @@ class Sac_a_push {
     {
     }
 
-    function sig_handler($sig)
+    /* php8: registered with pcntl_signal() as array("Sac_a_push",
+       "sig_handler"), that is in static form. Not being declared static it is
+       no longer a valid callable and pcntl_signal() raises a TypeError when
+       the daemon starts. It does not use $this, only static::$cnt_master. */
+    static function sig_handler($sig)
     {
         switch ($sig) {
         case SIGINT:

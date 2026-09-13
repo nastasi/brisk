@@ -472,6 +472,26 @@ else
     cp  "${web_path}__""/Obj/brisk.conf-templ.pho" "$etc_path/$brisk_conf"
 fi
 
+# The Etc directory holds the configuration with the database credentials in
+# clear, and it falls inside the DocumentRoot: without this file
+# "$brisk_conf" can be downloaded as plain text, because the .pho extension
+# is not associated with php. Checked on apache 2.4.68: without the deny the
+# url /Etc/<conf> answers 200 with the content.
+# NOTE: nginx does not read .htaccess files, the same rule has to be written
+# in the server configuration.
+if [ ! -f "$etc_path/.htaccess" ]; then
+    echo "Protect $etc_path from the web."
+    cat > "$etc_path/.htaccess" <<'EOEOF'
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from All
+</IfModule>
+EOEOF
+fi
+
 if [ -d ${web_path} ]; then
     mv ${web_path} ${web_path}.old
 fi

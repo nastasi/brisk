@@ -1,18 +1,42 @@
 APACHE2 CONFIGURATION IS CHANGED ! THIS IS A SAMPLE:
 
-ProxyPassMatch ^/brisk/.*\.(png|gif|jpg|css|js)$ !
-    ProxyPass /brisk/briskin5/index_rd.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/briskin5/index_rd_wss.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/briskin5/index_wr.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/briskin5/briskin5/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/briskin5/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/index_rd.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/index_rd_wss.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/index_wr.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
-    ProxyPass /brisk/index.php fd:///var/www/brisk-priv/brisk.sock keepalive=Off connectiontimeout=5 timeout=30
+Replace <USOCK_PATH_PFX> with the value passed to INSTALL.sh with -U
+(default: /home/nastasi/brisk-priv/brisk).
+
+ProxyPassMatch ^/brisk/.*\.(png|gif|jpg|css|js|mp3|swf)$ !
+    ProxyPass /brisk/briskin5/index_rd.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/briskin5/index_rd_wss.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/briskin5/index_wr.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/briskin5/briskin5/index.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/briskin5/index.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/index_rd.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/index_rd_wss.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/index_wr.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
+    ProxyPass /brisk/index.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
 --------
 #
 # PLEASE, ADD THE ErrorDocument LINE TO APACHE CONF FILE.
 #
          ErrorLog ${APACHE_LOG_DIR}/error.log
 +        ErrorDocument 500 /error.php
+
+--------
+NOTES on the shape of the ProxyPass lines (checked on apache 2.4.68):
+
+1. "fd://localhost..." and not "fd://...": apache refuses a URL with an empty
+   authority at configuration time, with "ProxyPass URL must be absolute!".
+   The host is not used to reach the socket, it only gets past the check.
+   Requires an updated mod_proxy_fdpass2.
+
+2. The path is the PREFIX of the sockets, without ".sock": the module appends
+   "<N>.sock" to it, picking N at random in the pool. With
+   -U /home/brisk/priv/brisk the daemon listens on brisk0.sock..brisk9.sock
+   and the module contacts one of those. Earlier versions of this file
+   mentioned a single "brisk.sock", from before the pool existed.
+
+3. The first argument must be an EXACT path, not a prefix with a trailing
+   slash: with "ProxyPass /brisk/ ..." mod_proxy appends the rest of the
+   requested path to the backend URL and the socket name comes out wrong.
+
+Everything that is not in this list (the static pages, admin.php,
+usermgmt.php, the .css and the .js) is still served by apache.
