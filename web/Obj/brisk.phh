@@ -2814,7 +2814,8 @@ class Brisk
               if (!isset($cookie['sess'])
                   || (($user = $this->get_user($cookie['sess'], $idx)) == FALSE)) {
 
-                  $content = User::stream_fini($transp, $s_a_p->rndstr, TRUE);
+                  $content = User::stream_fini($transp, $s_a_p->rndstr, TRUE,
+                                               $header, $header_out, $enc);
 
                   $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
                   return TRUE;

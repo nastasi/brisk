@@ -1532,7 +1532,13 @@ class Bin5 {
                     || ($bri = $s_a_p->app->match_get($table_idx, $table_token)) == NULL
                     || (($user = $bri->get_user($cookie['sess'], $idx)) == FALSE)) {
 
-                    $content = Bin5_user::stream_fini($transp_type, $s_a_p->rndstr, TRUE);
+                    /* it used to be $transp_type, which here is not the
+                       requested transport: the right value is $transp, read
+                       from the query a few lines above. With the wrong one the
+                       client got its farewell in the format of another
+                       transport. */
+                    $content = Bin5_user::stream_fini($transp, $s_a_p->rndstr, TRUE,
+                                                      $header, $header_out, $enc);
                     $s_a_p->pendpage_try_addflush($new_socket, 20, $enc, $header_out, $content);
 
                     return TRUE;

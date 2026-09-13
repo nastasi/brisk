@@ -801,12 +801,28 @@ class User {
       return ($ret);
   }  //   function maincheck(...
 
-  public static function stream_fini($transp, $init_string, $is_unrecoverable)
+  /* $header and $header_out are only needed by the websocket transports: see
+     below. Whoever does not pass them gets the previous behaviour. */
+  public static function stream_fini($transp, $init_string, $is_unrecoverable,
+                                     $header = NULL, &$header_out = NULL, $enc = 'plain')
 {
     // printf("xXx user::stream_fini\n");
 
     // FIXME: dynamic "Transport_" type
     $trans_class = Transport::gettype($transp);
+
+    /* The client speaking websocket asked for an upgrade. Answering with an
+       ordinary http response, its API only sees a failure and cannot read the
+       content: it never learns that the session is not valid, so it does not
+       go back to the login and retries forever (red indicator and a loop of
+       reopenings). The handshake is therefore completed, so that the exit
+       command reaches it as a real message, and right after that the
+       connection is closed. */
+    if (($transp == 'websocket' || $transp == 'websocketsec') && $header !== NULL) {
+        $tr = Transport::create($transp);
+        $tr->init($enc, $header, $header_out, $init_string, self::base_get(), 0);
+    }
+
     $body = $trans_class::fini($init_string, self::base_get(), static::blocking_error($is_unrecoverable));
 
     // ELSE IF XHR THEN:

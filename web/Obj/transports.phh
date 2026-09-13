@@ -540,7 +540,13 @@ class Transport_websocket {
 
     static function fini($init_string, $base, $blockerr)
     {
-        return (sprintf('@BEGIN@ %s window.onbeforeunload = null; window.onunload = null; document.location.assign("%sindex.php"); @END@',  ($blockerr ? 'xstm.stop(); ' : ''), $base).self::close());
+        /* The message has to be framed as a websocket frame, exactly like
+           every other one: before it went out raw, and a client receiving it
+           would not have known what to do with it. */
+        $tr = new Transport_websocket();
+        return ($tr->chunk(0, sprintf(' %s window.onbeforeunload = null; window.onunload = null; document.location.assign("%sindex.php"); ',
+                                      ($blockerr ? 'xstm.stop(); ' : ''), $base))
+                . self::close());
     }
 
     function is_chunked()
@@ -719,6 +725,17 @@ class Transport {
     }
     static function gettype($transp)
     {
+        /* websocketsec is the encrypted variant of the same transport and
+           the class is Transport_websocket, which tells the two apart in its
+           constructor (see create() above, which indeed treats them
+           together). Missing from this list, every "websocketsec" fell back
+           on Transport_iframe, that is on an html page: the client that had
+           asked for a websocket upgrade got an html page in reply, which its
+           API cannot even read, and never learned it had to go back to the
+           login. */
+        if ($transp == 'websocketsec') {
+            return "Transport_websocket";
+        }
         if ($transp == 'websocket' || $transp == 'xhr' || $transp == 'htmlfile') {
             return "Transport_".$transp;
         }
