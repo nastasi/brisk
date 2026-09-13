@@ -360,7 +360,13 @@ function int2four($l)
     if (PHP_INT_SIZE == 4)
         return ($l);
 
-    return ( ($l & 0x80000000 ? 0xffffffff00000000 : 0x00) | $l );
+    /* php8.1: the literal 0xffffffff00000000 is above PHP_INT_MAX, so php treats
+       it as a float and the or converts it back to int, raising the
+       "Implicit conversion from float ... to int loses precision" deprecation
+       on every call. ~0xffffffff is the same bit pattern but stays an integer.
+       Identical values produced, checked on 0, 1, 0x7fffffff, 0x80000000,
+       0xc0a80001 and 0xffffffff. */
+    return ( ($l & 0x80000000) ? ($l | ~0xffffffff) : $l );
 }
 
 function four2int($s)

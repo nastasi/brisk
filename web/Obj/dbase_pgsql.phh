@@ -312,7 +312,10 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (lintm) = (date 'epoch' + %d * INTERVAL '1 second') WHERE code = %d;", $G_dbpfx, $lintm, $code);
+        /* pg10+: "SET (col) = (val)" on a SINGLE column is an error, because
+           (val) is not a ROW but a parenthesised expression. The multi column
+           form is still valid and is left as it is. */
+        $user_sql = sprintf("UPDATE %susers SET lintm = date 'epoch' + %d * INTERVAL '1 second' WHERE code = %d;", $G_dbpfx, $lintm, $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
@@ -343,7 +346,8 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (pass) = (md5('%s')) WHERE code = %d;",
+        /* pg10+: single column without parentheses, see user_update_login_time() */
+        $user_sql = sprintf("UPDATE %susers SET pass = md5('%s') WHERE code = %d;",
                             $G_dbpfx, $passwd, $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
@@ -383,7 +387,8 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET (tos_vers) = ('%s') WHERE code = %d;",
+        /* pg10+: single column without parentheses, see user_update_login_time() */
+        $user_sql = sprintf("UPDATE %susers SET tos_vers = '%s' WHERE code = %d;",
                             $G_dbpfx, escsql($tos_vers), $code);
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
@@ -768,8 +773,10 @@ class BriskDB
                 for ($i = 0 ; $i < $n ; $i++) {
                     $codes_where .= sprintf("%scode = %d", ($i == 0 ? "" : " OR "), $ucodes[$i]);
                 }
-                $cnt_sql = sprintf("UPDATE %susers SET (game_cnt)
-                                        = (game_cnt+1) WHERE %s;",
+                /* pg10+: single column without parentheses, see user_update_login_time().
+                   The one above is multi column and stays valid. */
+                $cnt_sql = sprintf("UPDATE %susers SET game_cnt
+                                        = game_cnt+1 WHERE %s;",
                                    $G_dbpfx, $codes_where);
                 error_log($cnt_sql);
                 if (($cnt_pg = $this->query($cnt_sql)) == FALSE || pg_affected_rows($cnt_pg) != $n) {
