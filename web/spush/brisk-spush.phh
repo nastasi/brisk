@@ -27,10 +27,26 @@ $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH_PFX', "/tmp/brisk");
 define('USOCK_POOL_N', 10);
 
-/* TRUE  = nginx speaks http directly on the unix socket (no ancillary
-           extension, no descriptor handover modules, no kTLS)
-   FALSE = historic behaviour: the frontend hands over the client descriptor */
-define('SPU_HTTP_DIRECT', FALSE);
+/* How the daemon gets the player connection.
+
+   TRUE  (direct mode, the default): the frontend opens an ordinary http
+         connection on one of the unix sockets of the pool and the daemon
+         reads the request from it. Neither the php ancillary extension nor a
+         descriptor handover module in the frontend (mod_proxy_fdpass2 for
+         apache, ngx_http_fdpass_module for nginx) are needed, nor kTLS: the
+         packaged nginx is enough. The frontend however stays in the middle
+         for the whole life of the connection, which in a comet application
+         is long. Sample configuration in system/nginx/.
+
+   FALSE (historic mode): the frontend reads the request, then hands the live
+         client descriptor to the daemon with SCM_RIGHTS and steps aside.
+         It requires the C components mentioned above. If the frontend
+         terminates the TLS and hands over the encrypted socket, kTLS is
+         needed as well.
+
+   The code for both modes is in Obj/sac-a-push.phh, in the branch that
+   accepts new connections. */
+define('SPU_HTTP_DIRECT', TRUE);
 define('SOCK_SHARD_N', 2);
 
 define('PENDINGPAGE_CONTINUE', 0);

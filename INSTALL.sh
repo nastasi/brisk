@@ -19,6 +19,7 @@ web_path="/home/nastasi/web/brisk"
 ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
 proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
 usock_path_pfx="/home/nastasi/brisk-priv/brisk"
+http_direct="TRUE"
 sys_user="www-data"
 legal_path="/home/nastasi/brisk-priv/brisk"
 prefix_path="/brisk/"
@@ -32,12 +33,12 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
-    echo "  -A server conf (per DocumentRoot) - def. $apache_conf"
+    echo "  -A server conf (for DocumentRoot) - def. $apache_conf"
     echo "  -R document_root                - def. ricavato da -w meno -P"
     echo "  -c number cards in hand         - def. $card_hand"
     echo "  -n number of players            - def. $players_n"
@@ -54,6 +55,8 @@ function usage () {
     echo "  -P prefix path                  - def. \"$prefix_path\""
     echo "  -C config filename              - def. \"$brisk_conf\""
     echo "  -U unix socket path prefix      - def. \"$usock_path_pfx\""
+    echo "  -D nginx speaks http with the daemon - def. \"$http_direct\""
+    echo "     (FALSE: the frontend hands over the descriptor, see WARNING.txt)"
     echo "  -u system user to run brisk dae - def. \"$sys_user\""
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
@@ -186,6 +189,7 @@ while [ $# -gt 0 ]; do
         -C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
         -l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
         -U*) usock_path_pfx="$(get_param "-U" "$1" "$2")"; sh=$?;;
+        -D*) http_direct="$(get_param "-D" "$1" "$2")"; sh=$?;;
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
         -W) web_only="TRUE";;
@@ -224,6 +228,7 @@ echo "    proxy_path: \"$proxy_path\""
 echo "    prefix_path:\"$prefix_path\""
 echo "    brisk_conf: \"$brisk_conf\""
 echo "    usock_path_pfx: \"$usock_path_pfx\""
+echo "    http_direct: \"$http_direct\""
 echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
 echo "    test_add:   \"$test_add\""
@@ -249,6 +254,7 @@ if [ ! -z "$outconf" ]; then
     echo "prefix_path=\"$prefix_path\""
     echo "brisk_conf=\"$brisk_conf\""
     echo "usock_path_pfx=\"$usock_path_pfx\""
+    echo "http_direct=\"$http_direct\""
     echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
     echo "test_add=\"$test_add\""
@@ -305,6 +311,11 @@ fi
 
 if [ $players_n -ne 3 -a $players_n -ne 5 ]; then
     echo "players_n ($players_n) out of range (3|5)"
+    exit 1
+fi
+
+if [ "$http_direct" != "TRUE" -a "$http_direct" != "FALSE" ]; then
+    echo "http_direct ($http_direct) out of range (TRUE|FALSE)"
     exit 1
 fi
 
@@ -425,7 +436,8 @@ sed -i "s@define *( *'FTOK_PATH',[^)]*)@define('FTOK_PATH', \"$ftok_path\")@g" $
 sed -i "s@define *( *'SITE_PREFIX',[^)]*)@define('SITE_PREFIX', \"$prefix_path\")@g;
 s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len)@g" ${web_path}__/Obj/sac-a-push.phh
 
-sed -i "s@define *( *'USOCK_PATH_PFX',[^)]*)@define('USOCK_PATH_PFX', \"$usock_path_pfx\")@g" ${web_path}__/spush/brisk-spush.phh
+sed -i "s@define *( *'USOCK_PATH_PFX',[^)]*)@define('USOCK_PATH_PFX', \"$usock_path_pfx\")@g;
+s@define *( *'SPU_HTTP_DIRECT',[^)]*)@define('SPU_HTTP_DIRECT', $http_direct)@g" ${web_path}__/spush/brisk-spush.phh
 
 sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g;
 s@define *( *'TABLES_APPR_N',[^)]*)@define('TABLES_APPR_N', $tables_appr_n)@g;
@@ -468,7 +480,7 @@ else
     fi
 fi
 if [ -z "$document_root" ]; then
-    echo "Impossibile determinare la radice del sito: usa -R <document_root>"
+    echo "Cannot determine the root of the site: use -R <document_root>"
     exit 1
 fi
 echo "    document_root: \"$document_root\""

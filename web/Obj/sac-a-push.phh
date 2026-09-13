@@ -698,7 +698,12 @@ class Sac_a_push {
             fprintf(STDERR, "WARNING: pendpage not found\n");
         }
         $this->socks_unset($sock);
-        fprintf(STDERR, "PP_REM: %d\n", intval($sock));
+        /* in direct http mode every request goes through a pending page:
+           this trace, occasional before, would become one log line for
+           every request of every player */
+        if ($this->debug > 1) {
+            fprintf(STDERR, "PP_REM: %d\n", intval($sock));
+        }
     }
 
 
@@ -1123,7 +1128,14 @@ class Sac_a_push {
                                         */
                                     }
                                 }
-                                else {
+                                else if (!isset($this->s2p[$id]) && !isset($this->s2c[$id])) {
+                                    /* the message only makes sense if the socket belongs
+                                       to none of the known lists. Pending pages
+                                       (s2p) and postcloses (s2c) are handled
+                                       further down and have no user attached: in
+                                       direct http mode the head of EVERY request
+                                       goes through here, and this branch filled
+                                       the log with errors that were not. */
                                     fprintf(STDERR, "User associated with ID: %s not found\n", $id);
                                 }
 

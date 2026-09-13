@@ -1,7 +1,51 @@
-APACHE2 CONFIGURATION IS CHANGED ! THIS IS A SAMPLE:
+THE WEB SERVER CONFIGURATION HAS CHANGED! READ BEFORE UPGRADING.
 
-Replace <USOCK_PATH_PFX> with the value passed to INSTALL.sh with -U
-(default: /home/nastasi/brisk-priv/brisk).
+The brisk-spush daemon can get the player connection in two ways, chosen
+with SPU_HTTP_DIRECT in spush/brisk-spush.phh (INSTALL.sh -D). From this
+version on, the default is the first one.
+
+
+==== 1. DIRECT MODE (default, -D TRUE) ====
+
+nginx opens an ordinary http connection on one of the unix sockets of the
+pool and the daemon reads the request from it. Nothing compiled by hand is
+needed: neither the php ancillary extension, nor mod_proxy_fdpass2 for
+apache, nor ngx_http_fdpass_module for nginx, nor kTLS. The debian nginx
+package plus php-fpm for the pages the daemon does not serve is enough.
+
+Sample configuration, ready to be adapted:
+
+    system/nginx/brisk.conf        -> /etc/nginx/sites-available/brisk
+    system/nginx/brisk-daemon.inc  -> /etc/nginx/brisk-daemon.inc
+
+The values to keep aligned with those passed to INSTALL.sh are listed at the
+top of brisk.conf: the root of the site, the url prefix and the path of the
+sockets (-U). The sockets are USOCK_POOL_N of them (10 by default), named
+<prefix><N>.sock.
+
+Three points that are easy to get wrong:
+
+  - max_fails=0 on every socket of the upstream: without it, at the first
+    restart of the daemon nginx marks all the sockets as dead and keeps
+    answering 502 "no live upstreams" even after the daemon is back.
+
+  - proxy_buffering off: brisk is a comet application, with buffering on the
+    response of index_rd.php stays inside nginx and the game never starts.
+
+  - nginx does not read the .htaccess files of the tree. The rules that
+    denied access to Etc/, Obj/, spush/ and to the .phh/.pho files have to be
+    rewritten in the server configuration (they are in brisk.conf). Without
+    them the configuration file holding the database credentials can be
+    downloaded as plain text, because the .pho extension is not associated
+    with php.
+
+
+==== 2. HISTORIC MODE, descriptor handover (-D FALSE) ====
+
+apache reads the request and hands the live client descriptor to the daemon
+with SCM_RIGHTS, stepping aside. It requires the php ancillary extension and
+mod_proxy_fdpass2. Replace <USOCK_PATH_PFX> with the value passed to
+INSTALL.sh with -U (default: /home/nastasi/brisk-priv/brisk).
 
 ProxyPassMatch ^/brisk/.*\.(png|gif|jpg|css|js|mp3|swf)$ !
     ProxyPass /brisk/briskin5/index_rd.php fd://localhost<USOCK_PATH_PFX> keepalive=Off connectiontimeout=5 timeout=30
