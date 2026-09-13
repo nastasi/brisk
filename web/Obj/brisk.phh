@@ -39,10 +39,23 @@ define('SHM_DIMS_MAX', SHM_DIMS_MIN + 1048576);
 define('SHM_DIMS_DLT', 65536);
 
 define('SHM_DIMS_U_MIN', 4096);
-define('SHM_DIMS_U_MAX', 65536);
+/* Ceiling of the shared memory per user. It has to stay generous with
+   respect to COMM_N: every queued room update carries the complete list of
+   the people present (see standup_content), which with a full room is of the
+   order of 3 KB. With COMM_N at 54 a full queue is about 180 KB, and the old
+   64 KB would have made shm_put_var fail. The segments grow by
+   SHM_DIMS_U_DLT at a time, so whoever does not fill the queue pays
+   nothing. */
+define('SHM_DIMS_U_MAX', 262144);
 define('SHM_DIMS_U_DLT', 4096);
 
-define('COMM_N', 18);
+/* Length of the message queue per user. If the client falls behind by more
+   than COMM_N messages the history is lost and it is sent back to the initial
+   page, splash included: that happens in bursts, for instance when the
+   garbage collector removes dozens of disconnected users at once and every
+   removal produces a room update. Raised from 18 to 54; see the
+   SHM_DIMS_U_MAX ceiling above, which has to grow together with this. */
+define('COMM_N', 54);
 define('COMM_GEN_N', 50);
 
 define('CHAT_N', 3);
