@@ -444,6 +444,16 @@ sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path
 document_root="$(grep DocumentRoot "${apache_conf}"  | grep -v '^[ 	]*#' | awk '{ print $2 }')"
 sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph* ${web_path}__/donometer.php
 
+# The files under docroot/ belong in the root of the site, not in the
+# subdirectory of the application: index.php references them with a leading
+# slash ("/cookie_law.js"), so the browser asks the DocumentRoot for them.
+if [ -d docroot ] && [ ! -z "$document_root" ]; then
+    for i in $(find docroot -maxdepth 1 -type f ! -name 'README'); do
+        install -m 644 "$i" "${document_root}/$(basename "$i")"
+        echo "  installato $(basename "$i") in ${document_root}"
+    done
+fi
+
 if [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__

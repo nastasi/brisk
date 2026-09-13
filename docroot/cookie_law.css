@@ -1,0 +1,27 @@
+div.coo_oudiv {
+    position: fixed;
+    top: 0px;
+    width: 100%;
+}
+
+div.coo_indiv {
+    font-size: 14px;
+    line-height: 18px;
+    margin: 8px;
+    margin-left: 32px;
+    margin-right: 32px;
+    padding: 16px;
+    background: black;
+    color: #ffffff;
+    text-align: center;
+}
+
+div.coo_indiv a {
+    color: white;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+div.coo_indiv button {
+    margin: 12px;
+}
