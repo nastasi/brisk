@@ -449,7 +449,16 @@ s@define *( *'PROXY_PATH',[^)]*)@define('PROXY_PATH', \"$proxy_path\")@g;
 s@define *( *'BSK_BUSTING',[^)]*)@define('BSK_BUSTING', \"$bsk_busting\")@g;
 s@define *( *'BRISK_CONF',[^)]*)@define('BRISK_CONF', \"$brisk_conf\")@g;" ${web_path}__/Obj/brisk.phh
 
-sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
+# The define is not in Obj/auth.phh, where this sed looked for it without
+# ever finding it and without saying so: -a was silently useless. It is in
+# Obj/dbase_file.phh. It is now looked for where it actually is, so that a
+# future move does not break the option again.
+auth_conf_file="$(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'BRISK_AUTH_CONF'" {} \;)"
+if [ -z "$auth_conf_file" ]; then
+    echo "WARNING: define BRISK_AUTH_CONF not found, -a not applied"
+else
+    sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" $auth_conf_file
+fi
 
 sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$prefix_path\";@g" ${web_path}__/commons.js
 
