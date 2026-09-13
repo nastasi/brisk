@@ -30,7 +30,34 @@ game.sh and hand.sh instead use the five users uno/due/tre/qua/cin with the
 passwords one/two/thr/for/fiv.
 
 The paths and ports are those of the test container (/home/brisk, 8444 for
-https): they have to be adapted elsewhere.
+https, 8082 for plain http): they have to be adapted elsewhere.
+
+
+How to run them
+---------------
+
+From this directory, straight out of the repository:
+
+  ./brisk_step.sh 150 90 3 --tls
+  ./stop.sh
+
+They used to be a copy kept in /root/load, run as root, with those paths
+written into them; the copy went stale more than once. Now every script finds
+its own directory and reads common.sh, which holds the three settings they all
+share:
+
+  BRISK_WORK    where the working files go.  Default /var/tmp/brisk-load.
+                NOT /tmp: that is a tmpfs here, and a restart of the container
+                wipes it in the middle of a session. Not this directory either,
+                or auth.txt and the captured streams would be left in the git
+                tree.
+  BRISK_LEGAL   where the daemon keeps its log and its pid file: the path
+                given to INSTALL.sh with -l.  Default /home/brisk/legal.
+  SUDO          the daemon runs as another user, so restarting the service and
+                reading its open descriptors need root while the bench itself
+                does not. Set SUDO= to empty when already running as root.
+
+Nothing here needs to run as root.
 
 
 The load
@@ -112,14 +139,27 @@ At the end of a session
 It shuts everything down and prints the state: running scripts, running curls,
 descriptors of the daemon, disk space, load. To be run ALWAYS.
 
-The scripts that start background loops carry a trap that kills their own
-process group. Without it the loops outlive their parent and are left spinning
-for nothing: that happened for two days, with eighty processes alive and the
-machine load at 19.
+The scripts that start background loops carry a trap, bench_reap, that kills
+their own descendants on the way out. Without it the loops outlive their
+parent and are left spinning for nothing: that happened for two days, with
+eighty processes alive and the machine load at 19.
 
-stop.sh does not use "pkill -f": the pattern would end up in the command line
-of the script itself, which would kill itself and leave the targets alive.
+It used to be "trap 'kill 0'", which signals the whole process group. That is
+almost always wider than the script: it killed the script itself, so the exit
+status was always a death by signal, and it reached whatever else shared the
+group - whoever launched it, or the other half of a pipeline, so that
+"brisk_step.sh | tail" printed nothing at all. Running everything through
+"incus exec" gave each script a session of its own and hid all of it.
 
-The working files (auth.txt, tok.txt, mani.txt, *.stream) are created in the
-working directory of the scripts and can grow large: the read streams grow all
-the time. stop.sh deletes them.
+Two traps of the same family, both of which have already cost time here:
+
+  - stop.sh does not use "pkill -f": the pattern would end up in the command
+    line of the script itself, which would kill itself and leave the targets
+    alive.
+  - when counting leftovers by hand, the grep matches its own command line.
+    Split the pattern ("ga""me.sh") or use "[g]ame.sh", otherwise a clean
+    machine looks busy and a busy one looks clean.
+
+The working files (auth.txt, tok.txt, mani.txt, *.stream) are created in
+BRISK_WORK and can grow large: the read streams grow all the time. stop.sh
+deletes them.

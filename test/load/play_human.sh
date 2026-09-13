@@ -5,8 +5,10 @@
 # When it is their turn they first try to pass; if after a second the turn is
 # still theirs it means the auction is over, and then they play the first card
 # the server accepts. That way there is no need to know which phase we are in.
-B="https://127.0.0.1:8444/brisk"; TAB="${1:-4}"; cd /tmp
+B="https://127.0.0.1:8444/brisk"; TAB="${1:-4}"
+. "$(dirname "$0")/common.sh"
 CURL="curl -sSk"
+cd "$BRISK_WORK"
 MAXWAIT="${2:-900}"
 
 echo "waiting for the table to form..."

@@ -7,7 +7,8 @@
 TAB="${1:-4}"; PORTA="${2:-8444}"
 B="https://127.0.0.1:${PORTA}/brisk"
 CURL="curl -sSk"
-cd /root/load
+. "$(dirname "$0")/common.sh"
+cd "$BRISK_WORK"
 TK=$(cat tok.txt)
 
 send() {

@@ -3,12 +3,16 @@
 # being with a real browser. They stay connected and keep their streams open,
 # so the table forms as soon as the human sits down.
 # Subprocess loops outlive their parent: without this they are left orphaned,
-# spinning for nothing (it happened: eighty loops alive for two days). kill 0
-# kills the process group, which setsid makes exclusive to this script.
-trap "kill 0" EXIT INT TERM
+# spinning for nothing (it happened: eighty loops alive for two days).
+#
+# bench_reap walks our descendants, so it reaches them without touching the
+# caller or the other half of a pipeline. See common.sh.
+. "$(dirname "$0")/common.sh"
+trap bench_reap EXIT INT TERM
 
-B="https://127.0.0.1:8444/brisk"; TAB="${1:-4}"; cd /tmp
+B="https://127.0.0.1:8444/brisk"; TAB="${1:-4}"
 CURL="curl -sSk"
+cd "$BRISK_WORK"
 rm -f auth.txt r?.stream k?.stream mani.txt tok.txt
 
 for u in load001 load002 load003 load004; do

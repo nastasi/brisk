@@ -4,17 +4,19 @@
 #
 # usage: game.sh [table] [port]
 #
-# It lives in /root/load and not in /tmp, which is tmpfs: a restart of the
-# container used to wipe the scripts.
 
 # Subprocess loops outlive their parent: without this they are left orphaned,
-# spinning for nothing. kill 0 kills the group, which setsid makes exclusive.
-trap "kill 0" EXIT INT TERM
+# spinning for nothing (it happened: eighty loops alive for two days).
+#
+# bench_reap walks our descendants, so it reaches them without touching the
+# caller or the other half of a pipeline. See common.sh.
+. "$(dirname "$0")/common.sh"
+trap bench_reap EXIT INT TERM
 
 TAB="${1:-4}"; PORTA="${2:-8444}"
 B="https://127.0.0.1:${PORTA}/brisk"
 CURL="curl -sSk"
-cd /root/load
+cd "$BRISK_WORK"
 rm -f auth.txt r?.stream k?.stream mani.txt tok.txt
 
 echo "== 1. login of five authenticated users =="

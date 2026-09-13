@@ -2,6 +2,7 @@
 # Samples the resources of daemon and frontend during a load test.
 # usage: brisk_sample.sh <seconds> <interval> <label>
 DUR="${1:-60}"; INT="${2:-5}"; TAG="${3:-x}"
+. "$(dirname "$0")/common.sh"
 
 dpid="$(pgrep -f 'php \./brisk-spush\.php' | head -1)"
 if [ -z "$dpid" ]; then echo "daemon not found"; exit 1; fi
@@ -20,7 +21,7 @@ end=$(( $(date +%s) + DUR ))
 while [ $(date +%s) -lt $end ]; do
     sleep "$INT"
     rss=$(awk '/VmRSS/{print $2}' /proc/$dpid/status 2>/dev/null || echo 0)
-    fd=$(ls /proc/$dpid/fd 2>/dev/null | wc -l)
+    fd=$($SUDO ls /proc/$dpid/fd 2>/dev/null | wc -l)
     conn=$(ss -x 2>/dev/null | grep -c 'brisk[0-9]*\.sock')
     [ "$rss" -gt "$maxrss" ] && maxrss=$rss
     [ "$fd" -gt "$maxfd" ] && maxfd=$fd
