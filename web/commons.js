@@ -1108,13 +1108,16 @@ function chatt_sub(dt,data,str)
 
     // alert("ARRIVA NAME: "+ name + "  STR:"+str);
     if (chatt_lines_n == CHATT_MAXLINES) {
-        $("txt").innerHTML = "";
+        /* shift by one line and rewrite the box once. Before, every line was
+           appended to innerHTML on its own, and each += forces the browser to
+           reserialise and reparse the whole content: that was
+           CHATT_MAXLINES+1 rebuilds of the DOM for every message received.
+           In a crowded room the browser grinds to a halt. */
         for (i = 0 ; i < (CHATT_MAXLINES - 1) ; i++) {
             chatt_lines[i] = chatt_lines[i+1];
-            $("txt").innerHTML += chatt_lines[i];
         }
         chatt_lines[i] = dt+name+": "+str+ "<br>";
-        $("txt").innerHTML += chatt_lines[i];
+        $("txt").innerHTML = chatt_lines.join("");
     }
     else {
         chatt_lines[chatt_lines_n] = dt+name+": "+str+ "<br>";
