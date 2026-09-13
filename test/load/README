@@ -42,6 +42,23 @@ brisk_load.py    generator: N players that come in, keep the comet stream open
                  daemon. It measures the write latency (p50/p95/p99), the
                  messages broadcast and how well the streams hold.
                    --clients N --base N --auth --silent --period S --port P
+                   --encoding plain|gzip|deflate
+
+                 With --encoding it asks for a content coding on the stream,
+                 walks the chunked framing by hand and inflates it, so it
+                 checks three things a plain reader cannot see: that every
+                 chunk is whole and closed by its CRLF, that the compressed
+                 stream inflates from beginning to end across all of them, and
+                 that the coding announced in the headers is the one that was
+                 asked for. They are counted in the "stream integrity" line;
+                 anything but zero means the stream is coming apart.
+
+                 Careful with what is read out of it: the write count and the
+                 bytes on the wire are steady from one run to the next, but the
+                 messages delivered swing by a factor of two at the same load
+                 and with the same coding. It is the readers draining at
+                 different rates, not a property of the coding: do not compare
+                 codings on that number.
 
 brisk_step.sh    one complete step: restarts the daemon so as to start from an
                  empty room, launches the generator and samples the resources.

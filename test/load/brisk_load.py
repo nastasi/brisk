@@ -19,6 +19,7 @@ import ssl
 import statistics
 import sys
 import time
+import zlib
 
 SESS_RE = re.compile(rb'sess = "([0-9a-f]+)"')
 
@@ -32,15 +33,60 @@ class Stats:
         self.stream_deliv = 0    # chat messages delivered to the readers
         self.stream_reconn = 0
         self.stream_err = 0
+        self.stream_raw = 0      # bytes on the wire, before inflating
+        self.framing_err = 0     # chunks that did not add up
+        self.inflate_err = 0     # compressed streams that did not inflate
+        self.enc_err = 0         # answers that did not carry the coding asked for
         self.http_err = {}       # status code -> count
 
     def http(self, code):
         self.http_err[code] = self.http_err.get(code, 0) + 1
 
 
+class Dechunker:
+    """Incremental reader of the chunked framing. It hands back only whole
+    chunks, and raises as soon as one does not add up: a chunk shorter than
+    its declared length, or one that is not closed by its CRLF, is the defect
+    this bench is here to catch."""
+
+    def __init__(self):
+        self.buf = b""
+        self.need = None
+        self.done = False
+
+    def feed(self, data):
+        self.buf += data
+        out = []
+        while not self.done:
+            if self.need is None:
+                i = self.buf.find(b"\r\n")
+                if i < 0:
+                    break
+                head = self.buf[:i].split(b";")[0]
+                try:
+                    n = int(head, 16)
+                except ValueError:
+                    raise ValueError("chunk length unreadable: %r" % head[:24])
+                self.buf = self.buf[i + 2:]
+                if n == 0:
+                    self.done = True
+                    break
+                self.need = n
+            if len(self.buf) < self.need + 2:
+                break
+            if self.buf[self.need:self.need + 2] != b"\r\n":
+                raise ValueError("chunk of %d bytes not closed by CRLF" % self.need)
+            out.append(self.buf[:self.need])
+            self.buf = self.buf[self.need + 2:]
+            self.need = None
+        return b"".join(out)
+
+
 class Client:
-    def __init__(self, idx, host, port, use_tls, prefix, stats, auth=False):
+    def __init__(self, idx, host, port, use_tls, prefix, stats, auth=False,
+                 encoding="plain"):
         self.idx = idx
+        self.encoding = encoding
         if auth:
             self.name = "load%03d" % idx
             self.passwd = self.name
@@ -127,17 +173,56 @@ class Client:
             try:
                 req = ("GET %sindex_rd.php?stat=&subst=&step=-1&from=index_php&transp=xhr"
                        " HTTP/1.1\r\nHost: %s\r\nCookie: sess=%s\r\n"
-                       "User-Agent: brisk-load\r\n\r\n" % (self.prefix, self.host, self.sess))
+                       "User-Agent: brisk-load\r\n" % (self.prefix, self.host, self.sess))
+                if self.encoding != "plain":
+                    req += "Accept-Encoding: %s\r\n" % self.encoding
+                req += "\r\n"
                 w.write(req.encode())
                 await w.drain()
+
+                head = b""
+                while b"\r\n\r\n" not in head:
+                    d = await asyncio.wait_for(r.read(65536), 120)
+                    if not d:
+                        raise EOFError("closed during the headers")
+                    self.st.stream_raw += len(d)
+                    head += d
+                head, _, rest = head.partition(b"\r\n\r\n")
+                low = head.lower()
+                if self.encoding == "plain":
+                    if b"content-encoding:" in low:
+                        self.st.enc_err += 1
+                elif ("content-encoding: %s" % self.encoding).encode() not in low:
+                    self.st.enc_err += 1
+
+                dech = Dechunker()
+                # gzip carries its own header, deflate the zlib wrapper of
+                # RFC 1950: the window tells them apart
+                inf = (zlib.decompressobj(zlib.MAX_WBITS | 16) if self.encoding == "gzip"
+                       else zlib.decompressobj(zlib.MAX_WBITS) if self.encoding == "deflate"
+                       else None)
+
+                def consume(raw):
+                    body = dech.feed(raw)
+                    if not body:
+                        return
+                    text = inf.decompress(body) if inf else body
+                    self.st.stream_bytes += len(text)
+                    self.st.stream_deliv += text.count(b"chatt_sub(")
+
+                consume(rest)
                 while not stop.is_set():
                     chunk = await asyncio.wait_for(r.read(65536), 120)
                     if not chunk:
                         break
-                    self.st.stream_bytes += len(chunk)
-                    self.st.stream_deliv += chunk.count(b"chatt_sub(")
+                    self.st.stream_raw += len(chunk)
+                    consume(chunk)
             except asyncio.TimeoutError:
                 self.st.stream_err += 1
+            except ValueError:
+                self.st.framing_err += 1
+            except zlib.error:
+                self.st.inflate_err += 1
             except Exception:
                 self.st.stream_err += 1
             finally:
@@ -176,7 +261,7 @@ async def run(args):
     st = Stats()
     stop = asyncio.Event()
     clients = [Client(args.base + i, args.host, args.port, args.tls, args.prefix, st,
-                      auth=args.auth)
+                      auth=args.auth, encoding=args.encoding)
                for i in range(args.clients)]
 
     # staggered entry: a wave of simultaneous logins would measure a transient,
@@ -204,12 +289,14 @@ async def run(args):
     st.write_lat.clear()          # the transient does not count
     st.write_err = 0
     base_bytes = st.stream_bytes
+    base_raw = st.stream_raw
     base_deliv = st.stream_deliv
     t1 = time.monotonic()
 
     await asyncio.sleep(args.duration)
     dur = time.monotonic() - t1
     st.stream_bytes -= base_bytes
+    st.stream_raw -= base_raw
     st.stream_deliv -= base_deliv
 
     stop.set()
@@ -234,6 +321,8 @@ def main():
     p.add_argument("--period", type=float, default=10)
     p.add_argument("--auth", action="store_true", help="registered users (load001...)")
     p.add_argument("--silent", action="store_true", help="streams only, no writes")
+    p.add_argument("--encoding", choices=("plain", "gzip", "deflate"), default="plain",
+                   help="content coding to ask for on the stream")
     args = p.parse_args()
 
     st, dur = asyncio.run(run(args))
@@ -252,6 +341,14 @@ def main():
     print("  streams: %.0f KB read (%.0f KB/s), %d messages delivered (%.0f/s), %d reopenings" % (
         st.stream_bytes / 1024.0, st.stream_bytes / 1024.0 / dur if dur else 0,
         st.stream_deliv, st.stream_deliv / dur if dur else 0, st.stream_reconn))
+    print("  coding %s: %.0f KB on the wire%s" % (
+        args.encoding, st.stream_raw / 1024.0,
+        "" if args.encoding == "plain" or not st.stream_raw
+        else " (%.1f%% of the %.0f KB inflated)" % (
+            100.0 * st.stream_raw / st.stream_bytes if st.stream_bytes else 0,
+            st.stream_bytes / 1024.0)))
+    print("  stream integrity: framing %d, inflate %d, coding announced %d" % (
+        st.framing_err, st.inflate_err, st.enc_err))
     if st.http_err:
         print("  unexpected responses: %s" % st.http_err)
     sys.stdout.flush()
