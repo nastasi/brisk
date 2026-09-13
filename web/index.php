@@ -631,8 +631,13 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
 
 
     /* NOTE: Brisk donate or donate fake if local */
-    if (!$G_is_local)
-        $brisk_donate = file_get_contents(FTOK_PATH."/brisk_donate.txt");
+    if (!$G_is_local) {
+        /* the file is optional, and an installation with no donation button
+           must not write a warning in the log on every page */
+        $brisk_donate_path = FTOK_PATH."/brisk_donate.txt";
+        $brisk_donate = (file_exists($brisk_donate_path) ?
+                         file_get_contents($brisk_donate_path) : FALSE);
+    }
     else
         $brisk_donate = '<div style="background-color: #ff0; height: 27px; margin-top: 4px;">BRISK_DONATE</div>';
 

@@ -377,6 +377,15 @@ if [ "$web_only" = "FALSE" ]; then
     done
     chmod -R 777 ${proxy_path}/bin5
 
+    # The donation button is a fragment of html that index.php reads from
+    # FTOK_PATH. It is installed only if it is not there already, so as not to
+    # overwrite the one of the installation: whoever does not want it simply
+    # does not put it there.
+    if [ -f data/brisk_donate.txt -a ! -f "${ftokk_path}/brisk_donate.txt" ]; then
+        install -m 644 data/brisk_donate.txt "${ftokk_path}/brisk_donate.txt"
+        echo "  installed brisk_donate.txt in ${ftok_path}"
+    fi
+
     mkdir -p "${legal_path}"
     chmod 777 "${legal_path}"
 fi
@@ -501,7 +510,7 @@ sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" $
 if [ -d docroot ] && [ ! -z "$document_root" ]; then
     for i in $(find docroot -maxdepth 1 -type f ! -name 'README'); do
         install -m 644 "$i" "${document_root}/$(basename "$i")"
-        echo "  installato $(basename "$i") in ${document_root}"
+        echo "  installed $(basename "$i") in ${document_root}"
     done
 fi
 
