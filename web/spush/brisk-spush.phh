@@ -26,11 +26,20 @@ $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH_PFX', "/tmp/brisk");
 define('USOCK_POOL_N', 10);
+
+/* TRUE  = nginx speaks http directly on the unix socket (no ancillary
+           extension, no descriptor handover modules, no kTLS)
+   FALSE = historic behaviour: the frontend hands over the client descriptor */
+define('SPU_HTTP_DIRECT', FALSE);
 define('SOCK_SHARD_N', 2);
 
 define('PENDINGPAGE_CONTINUE', 0);
 define('PENDINGPAGE_WAITDATA', 1);
 define('PENDINGPAGE_FLUSH',    2);
+/* waiting for the head of the http request: used only in SPU_HTTP_DIRECT
+   mode, where the daemon has to read it from the network and cannot do so by
+   blocking the event loop, which serves every player */
+define('PENDINGPAGE_WAITHEAD', 3);
 
 class PendingPage {
   public $socket; // socket handler of page stream
@@ -92,6 +101,17 @@ class PendingPage {
       $this->status = PENDINGPAGE_CONTINUE;
       $this->msg    = $hea;
       $this->msg_sz = $hea_sz;
+  }
+
+  /* page waiting for the head: nothing is known about the request yet,
+     bytes are accumulated in ->cont until the empty line arrives */
+  static function pendingpage_waithead($socket, $curtime, $kalive)
+  {
+      $thiz = new PendingPage($socket, $curtime, $kalive);
+      $thiz->status = PENDINGPAGE_WAITHEAD;
+      $thiz->cont   = "";
+      $thiz->rest   = 0;
+      return ($thiz);
   }
 
   static function pendingpage_waiting($socket, $curtime, $kalive, $method, $header,
