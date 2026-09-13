@@ -607,15 +607,26 @@ class Sac_a_push {
             unlink($file_socket_admin);
         }
 
+        /* The default listen queue (128) is short for a full room: if many
+           players come in at the same instant the frontend gets EAGAIN on the
+           connect and has to fall back on another socket of the pool.
+           Measured: with the default a single socket queues 111 of them and
+           refuses the rest. */
+        $ctx = stream_context_create(array('socket' => array('backlog' => USOCK_BACKLOG)));
+
         $old_umask = umask(0);
         for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
             $unix_socket = sprintf("%s%d.sock", $thiz->unix_socket_pfx, $i);
-            if (($list_sock = stream_socket_server($unix_socket, $err, $errs)) === FALSE) {
+            if (($list_sock = stream_socket_server($unix_socket, $err, $errs,
+                                                   STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
+                                                   $ctx)) === FALSE) {
                 return (FALSE);
             }
             array_push($thiz->list_web, $list_sock);
         }
-        if (($thiz->list_cmd = stream_socket_server($thiz->direct_socket, $err, $errs)) === FALSE) {
+        if (($thiz->list_cmd = stream_socket_server($thiz->direct_socket, $err, $errs,
+                                                    STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
+                                                    $ctx)) === FALSE) {
             return (FALSE);
         }
         umask($old_umask);

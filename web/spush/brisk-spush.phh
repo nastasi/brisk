@@ -26,6 +26,9 @@ $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH_PFX', "/tmp/brisk");
 define('USOCK_POOL_N', 10);
+/* length of the listen queue of every socket in the pool: with the php
+   default (128) a burst of simultaneous entries is partly refused */
+define('USOCK_BACKLOG', 511);
 
 /* How the daemon gets the player connection.
 
