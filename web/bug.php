@@ -7,7 +7,7 @@
 <script type="text/javascript" src="commons.js"></script>
 </head>
 <body>
-<img class="nobo" style="position: static;" src="img/bug_bannerbig93.png">
+<img class="nobo" style="position: static;" src="img/bug_bannerbig80.png">
 <div class="bug_cont">
 <br>
 <h3>Chi siamo.</h3>
