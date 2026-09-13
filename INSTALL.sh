@@ -382,7 +382,7 @@ for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
     install -d ${web_path}__/$i
 done
 
-for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^....//g'); do
+for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'LICENSE' -o -name 'VENDOR.txt' -o -name 'terms-of-service*' | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
 

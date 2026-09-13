@@ -1,0 +1,3 @@
+PHPMailer 7.1.1 (LGPL-2.1) - https://github.com/PHPMailer/PHPMailer
+Vendored from v7.1.1: src/ plus language/phpmailer.lang-it.php only.
+Replaces the old class.phpmailer.php 5.1 (2009), incompatible with php 8.

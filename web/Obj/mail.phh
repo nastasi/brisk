@@ -1,31 +1,54 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
+
 if (isset($argv) && __FILE__ == realpath($argv[0])) {
     $G_base = "web/";
 }
-require_once("${G_base}Obj/class.phpmailer.php");
+
+/* php8: the old class.phpmailer.php 5.1 (2009) used each(),
+   set_magic_quotes_runtime() and php4 constructors, all removed in php 8.
+   Replaced by PHPMailer 7.1.1, vendored in Obj/PHPMailer/ (see VENDOR.txt).
+   No autoloader: the three files are required by hand, like the rest of the
+   project. */
+require_once("{$G_base}Obj/PHPMailer/src/Exception.php");
+require_once("{$G_base}Obj/PHPMailer/src/PHPMailer.php");
+require_once("{$G_base}Obj/PHPMailer/src/SMTP.php");
 
 function brisk_mail($to, $subject, $text, $html)
 {
     GLOBAL $G_admin_mail;
 
-    $mail = new PHPMailer(TRUE);
-    $mail->CharSet = "UTF-8";
+    try {
+        $mail = new PHPMailer(TRUE);
+        $mail->CharSet = "UTF-8";
 
-    $mail->From = $G_admin_mail;
-    $mail->FromName = 'Brisk Admin';
-    $mail->addAddress($to);     // Add a recipient
-    $mail->addReplyTo($G_admin_mail, 'Brisk Admin');
+        $mail->setFrom($G_admin_mail, 'Brisk Admin');
+        $mail->addAddress($to);     // Add a recipient
+        $mail->addReplyTo($G_admin_mail, 'Brisk Admin');
 
-    $mail->Subject = $subject;
-    $mail->AltBody = $text;
+        $mail->Subject = $subject;
+        /* NOTE: msgHTML() overwrites AltBody with its own conversion of the
+           html, so $text is discarded. This was already the case with 5.1:
+           the behaviour is left untouched. To really use $text, move this
+           line after the msgHTML() call. */
+        $mail->AltBody = $text;
 
-    $body_html = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
-                             $subject, $html);
+        $body_html = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
+                                 $subject, $html);
 
-    $mail->MsgHTML($body_html);
+        $mail->msgHTML($body_html);
 
-
-    return ($mail->Send());
+        return ($mail->send());
+    }
+    catch (PHPMailerException $e) {
+        /* With exceptions=TRUE send() throws instead of returning FALSE, and
+           none of the callers catches: an exception here killed the spush
+           daemon. They all test for "== FALSE", so the error is reported
+           that way. */
+        error_log("brisk_mail: ".$e->getMessage());
+        return (FALSE);
+    }
 }
 
 
