@@ -28,7 +28,7 @@
 
 */
 
-function state_add(flags, comp)
+function state_add(username, flags, comp)
 {
     var content = "", supercont = "";
     var st, superst, name = "", supername = "", supersfx = "";
@@ -104,22 +104,35 @@ function state_add(flags, comp)
         }
     }
 
-    if ((flags & 0xf0000) != 0) {
-        superst = flags & 0x20000;
-        if (name != "") {
-            supersfx = "_side";
-        }
 
-        switch (superst) {
-        case 0x20000:
-            if (comp != null) {
-                supername = "suprend.php?comp="+comp+"&sfx="+supersfx;
+    var is_custom_bedge = false;
+    if (window.custom_bedge) {
+        var ret = window.custom_bedge(username, name, flags);
+        if (ret != null) {
+            supername = ret.supername;
+            supertit = ret.supertit;
+            // console.log(ret);
+            is_custom_bedge = true;
+        }
+    }
+    if (!is_custom_bedge) {
+        if ((flags & 0xf0000) != 0) {
+            superst = flags & 0x20000;
+            if (name != "") {
+                supersfx = "_side";
             }
-            else {
-                supername = "img/superuser"+supersfx+".png";
+
+            switch (superst) {
+            case 0x20000:
+                if (comp != null) {
+                    supername = "suprend.php?comp="+comp+"&sfx="+supersfx;
+                }
+                else {
+                    supername = "img/superuser"+supersfx+".png";
+                }
+                supertit = (g_lang == 'en' ? "Brisk Supporter" : "Brisk Supporter");
+                break;
             }
-            supertit = (g_lang == 'en' ? "Brisk Supporter" : "Brisk Supporter");
-            break;
         }
     }
 
