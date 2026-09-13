@@ -359,6 +359,15 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
     GLOBAL $G_with_poll;
     GLOBAL $G_lang, $G_lng, $mlang_room;
     GLOBAL $BRISK_SHOWHTML, $BRISK_DEBUG, $_SERVER, $_COOKIE;
+    GLOBAL $G_base;
+
+    /* custom.js is optional: it holds the customisations of the single site
+       and may not be distributed. The hook it uses (custom_bedge) is already
+       guarded in room.js, but without this check the browser would ask for a
+       file that does not exist on every page. */
+    $custom_js = (file_exists($G_base."custom.js") ?
+                  sprintf('<script type="text/javascript" src="custom.js?v=%s"></script>',
+                          BSK_BUSTING) : "");
 
     $transp_port = ((array_key_exists("X-Forwarded-Proto", $header) &&
                      $header["X-Forwarded-Proto"] == "https") ? 443 : 80);
@@ -1044,7 +1053,7 @@ supported by:<br>
 <script type="text/javascript" src="heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="custom.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<?php echo $custom_js; ?>
 <script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="md5.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
@@ -1218,7 +1227,7 @@ cookie_law(null);
 <script type="text/javascript" src="ticker.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="heartbit.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
-<script type="text/javascript" src="custom.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<?php echo $custom_js; ?>
 <script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
