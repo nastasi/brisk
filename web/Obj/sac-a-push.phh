@@ -237,6 +237,24 @@ function headers_render($header, $len)
 {
     $cookies = "";
 
+    /* Http header names are case insensitive, php array keys are not. The
+       transports set "Content-type" (lowercase t) while the code below
+       checked for "Content-Type": the check never saw it and the default was
+       added anyway, so two Content-Type headers went out in the same
+       response. Same story for Expires and Cache-Control, already set by
+       force_no_cache() and then added again unconditionally.
+       With apache this went unnoticed, because the daemon wrote the bytes
+       straight to the client and the browser applied the last value. A
+       reverse proxy instead parses the response, keeps the first one and
+       drops the second: the charset was lost, and an application/xml was
+       replaced by text/html.
+       Here a map of the normalised keys is built and used for every
+       check. */
+    $hset = array();
+    foreach ($header as $hk => $hv) {
+        $hset[strtolower($hk)] = TRUE;
+    }
+
     if (isset($header['cookies'])) {
         $cookies = $header['cookies']->render();
         unset($header['cookies']);
@@ -258,11 +276,11 @@ function headers_render($header, $len)
     else {
         $s = "HTTP/1.1 200 OK\r\n";
 
-        if (!isset($header['Date']))
+        if (!isset($hset['date']))
             $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
-        if (!isset($header['Connection']))
+        if (!isset($hset['connection']))
             $s .= "Connection: close\r\n";
-        if (!isset($header['Content-Type']))
+        if (!isset($hset['content-type']))
             $s .= "Content-Type: text/html\r\n";
         foreach($header as $key => $value) {
             $s .= sprintf("%s: %s\r\n", $key, $value);
@@ -271,9 +289,13 @@ function headers_render($header, $len)
             $s .= sprintf("Content-Length: %d\r\n", $len);
         }
         else {
-            $s .= "Cache-Control: no-cache, must-revalidate\r\n";
-            $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
-            if (!isset($header['Content-Encoding'])) {
+            if (!isset($hset['cache-control'])) {
+                $s .= "Cache-Control: no-cache, must-revalidate\r\n";
+            }
+            if (!isset($hset['expires'])) {
+                $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
+            }
+            if (!isset($hset['content-encoding'])) {
                 $s .= "Content-Encoding: chunked\r\n";
             }
             $s .= "Transfer-Encoding: chunked\r\n";
