@@ -26,6 +26,15 @@ prefix_path="/brisk/"
 brisk_conf="brisk_spu.conf.pho"
 web_only="FALSE"
 test_add="FALSE"
+# Which machine this installation is for. The daemon and the frontend can sit
+# on two different hosts: nginx terminates the tls and proxies the nine game
+# endpoints to the daemon over tcp, and serves everything else itself.
+#   full    one machine, as it has always been
+#   server  the machine that runs brisk-spush: the php the daemon executes,
+#           its private directories, no image and no static asset
+#   front   the machine that runs nginx and php-fpm: everything it serves,
+#           images included, and none of the daemon's private directories
+install_mode="full"
 #
 # functions
 function usage () {
@@ -54,10 +63,13 @@ function usage () {
     echo "  -y dir where place proxy files  - def. \"$proxy_path\""
     echo "  -P prefix path                  - def. \"$prefix_path\""
     echo "  -C config filename              - def. \"$brisk_conf\""
-    echo "  -U unix socket path prefix      - def. \"$usock_path_pfx\""
+    echo "  -U socket path prefix, or       - def. \"$usock_path_pfx\""
+    echo "     tcp://<host>:<port> to put the daemon on another machine"
     echo "  -D nginx speaks http with the daemon - def. \"$http_direct\""
     echo "     (FALSE: the frontend hands over the descriptor, see WARNING.txt)"
     echo "  -u system user to run brisk dae - def. \"$sys_user\""
+    echo "  -m machine role: full|server|front - def. \"$install_mode\""
+    echo "     (server: no images, no static; front: no private dirs)"
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
@@ -191,6 +203,7 @@ while [ $# -gt 0 ]; do
         -U*) usock_path_pfx="$(get_param "-U" "$1" "$2")"; sh=$?;;
         -D*) http_direct="$(get_param "-D" "$1" "$2")"; sh=$?;;
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
+        -m*) install_mode="$(get_param "-m" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
         -W) web_only="TRUE";;
         -x) test_add="TRUE";;
@@ -231,6 +244,7 @@ echo "    usock_path_pfx: \"$usock_path_pfx\""
 echo "    http_direct: \"$http_direct\""
 echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
+echo "    install_mode: \"$install_mode\""
 echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
@@ -257,6 +271,7 @@ if [ ! -z "$outconf" ]; then
     echo "http_direct=\"$http_direct\""
     echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
+    echo "install_mode=\"$install_mode\""
     echo "test_add=\"$test_add\""
   ) > "$outconf"
 fi
@@ -312,6 +327,17 @@ fi
 if [ $players_n -ne 3 -a $players_n -ne 5 ]; then
     echo "players_n ($players_n) out of range (3|5)"
     exit 1
+fi
+
+case "$install_mode" in
+    full|server|front) ;;
+    *) echo "install_mode (\"$install_mode\") must be full, server or front"; exit 1;;
+esac
+# The frontend machine has no daemon, so none of the private directories the
+# daemon needs - ftok, legal, proxy - makes sense there. That is exactly what
+# -W already meant, so "front" simply implies it.
+if [ "$install_mode" = "front" ]; then
+    web_only="TRUE"
 fi
 
 if [ "$http_direct" != "TRUE" -a "$http_direct" != "FALSE" ]; then
@@ -404,7 +430,22 @@ for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
     install -d ${web_path}__/$i
 done
 
-for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'LICENSE' -o -name 'VENDOR.txt' -o -name 'terms-of-service*' | sed 's/^....//g'); do
+# The php goes on both machines, and so do the .js. The frontend serves
+# admin.php, usermgmt.php and the others with php-fpm, and those include the
+# same Obj/ tree: usermgmt.php and mailmgr.php even reach spush/brisk-spush.phh
+# for USOCK_PATH_PFX. The .js are needed daemon side too, because index.php
+# decides whether to emit the custom.js tag by looking for the file on disk.
+#
+# What the daemon does not need is what only a browser ever asks for: the
+# stylesheets, the sounds and, further down, the images of brisk-img and the
+# files of docroot/.
+find_names=( -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho'
+             -o -name '*.js' -o -name 'LICENSE' -o -name 'VENDOR.txt'
+             -o -name 'terms-of-service*' )
+if [ "$install_mode" != "server" ]; then
+    find_names+=( -o -name '*.css' -o -name '*.mp3' -o -name '*.swf' )
+fi
+for i in $(find web "${find_names[@]}" | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
 
@@ -417,7 +458,14 @@ if [ "$test_add" = "TRUE" ]; then
     done
 fi
 
-chmod 755 "${web_path}__/spush/brisk-spush.php"
+# brisk-spush.php is the daemon itself: on the frontend it would be an entry
+# point that nothing there is meant to run. The .phh beside it stays, because
+# usermgmt.php and mailmgr.php include it for USOCK_PATH_PFX.
+if [ "$install_mode" = "front" ]; then
+    rm -f "${web_path}__/spush/brisk-spush.php"
+else
+    chmod 755 "${web_path}__/spush/brisk-spush.php"
+fi
 
 prefix_path_len=$(echo -n "$prefix_path" | wc -c)
 
@@ -507,11 +555,13 @@ sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" $
 # The files under docroot/ belong in the root of the site, not in the
 # subdirectory of the application: index.php references them with a leading
 # slash ("/cookie_law.js"), so the browser asks the DocumentRoot for them.
-if [ -d docroot ] && [ ! -z "$document_root" ]; then
+if [ -d docroot ] && [ ! -z "$document_root" ] && [ "$install_mode" != "server" ]; then
     for i in $(find docroot -maxdepth 1 -type f ! -name 'README'); do
         install -m 644 "$i" "${document_root}/$(basename "$i")"
         echo "  installed $(basename "$i") in ${document_root}"
     done
+elif [ "$install_mode" = "server" ]; then
+    echo "  docroot/ skipped: the browser asks the frontend for those files"
 fi
 
 # brisk-img carries every image of the site: the cards, the table, the icons.
@@ -519,7 +569,12 @@ fi
 # has no image at all, so the pages come up and every img answers 404. It used
 # to be skipped without a word, and a run that had quietly dropped the images
 # looked exactly like a good one.
-if [ -d ../brisk-img ]; then
+if [ "$install_mode" = "server" ]; then
+    # The daemon never serves an image: nginx answers for those off its own
+    # root. Pulling brisk-img in here would only copy 800 files nobody asks
+    # this machine for.
+    echo "  brisk-img skipped: the frontend serves the images"
+elif [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__
     cd - >/dev/null 2>&1
@@ -588,6 +643,21 @@ fi
 if [ "$web_only" = "FALSE" ]; then
     mv "$ftokk_path" "$ftok_path"
 fi
+case "$install_mode" in
+    server)
+        echo
+        echo "Installed the SERVER part in ${web_path}: the php the daemon runs and"
+        echo "its private directories. No image, no stylesheet, nothing from docroot/:"
+        echo "the machine running nginx answers for those. Install it there with -m front."
+        echo ;;
+    front)
+        echo
+        echo "Installed the FRONT part in ${web_path}: everything nginx and php-fpm"
+        echo "serve, images included. No ftok, legal or proxy directory and no daemon:"
+        echo "install those on the daemon machine with -m server."
+        echo ;;
+esac
+
 if [ -f WARNING.txt ]; then
     echo ; echo "    ==== WARNING ===="
     echo
