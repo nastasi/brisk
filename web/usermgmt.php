@@ -97,7 +97,9 @@ function check_auth()
     $cmd_len = mb_strlen($cmd_ser, "ASCII");
 
     do {
-        if (($socket = stream_socket_client('unix://'.USOCK_PATH_PFX.'_admin.sock')) == FALSE)
+        /* the control channel follows the daemon: a unix socket beside the
+           pool, or a port on the machine it runs on. See brisk-spush.phh. */
+        if (($socket = stream_socket_client(spu_admin_url(USOCK_PATH_PFX))) == FALSE)
             break;
         $stp = 1;
         if (($rwr = fwrite($socket, $cmd_ser, $cmd_len)) == FALSE

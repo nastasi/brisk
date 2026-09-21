@@ -552,7 +552,7 @@ class Sac_a_push {
     public $provider_proxy; // list of provider/browser that offer proxy service
 
     public $file_socket_pfx;
-    public $unix_socket_pfx;
+    public $is_inet;         // TRUE when the pool is tcp instead of unix sockets
     public $direct_socket;   // socket where read direct commands
     public $socks;
     public $s2u;             // user associated with input socket
@@ -615,9 +615,14 @@ class Sac_a_push {
 
         $thiz->provider_proxy = ProviderProxy::create();
 
+        /* The scheme is not written in here any more: spu_listen_url() in
+           spush/brisk-spush.phh turns the configured prefix into the url of
+           each socket of the pool, a unix path or a tcp address alike, so the
+           daemon can sit on a machine of its own. See the comment there for
+           what that costs. */
         $thiz->file_socket_pfx = $sockname_pfx;
-        $thiz->unix_socket_pfx = "unix://$sockname_pfx";
-        $thiz->direct_socket = "unix://{$sockname_pfx}_admin.sock";
+        $thiz->is_inet = spu_is_inet($sockname_pfx);
+        $thiz->direct_socket = spu_admin_url($sockname_pfx);
         $thiz->debug = $debug;
         $thiz->list_web = array();
         $thiz->socks = array();
@@ -653,15 +658,19 @@ class Sac_a_push {
                 $thiz->rndstr .= chr(mt_rand(65, 90));
         }
 
-        for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
-            $file_socket = $thiz->file_socket_pfx . sprintf("%d.sock", $i);
-            if (file_exists($file_socket)) {
-                unlink($file_socket);
+        /* A unix socket left behind by a previous run would make the bind
+           fail; a tcp port has no file to remove. */
+        if (!$thiz->is_inet) {
+            for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
+                $file_socket = $thiz->file_socket_pfx . sprintf("%d.sock", $i);
+                if (file_exists($file_socket)) {
+                    unlink($file_socket);
+                }
             }
-        }
-        $file_socket_admin = $thiz->file_socket_pfx . "_admin.sock";
-        if (file_exists($file_socket_admin)) {
-            unlink($file_socket_admin);
+            $file_socket_admin = $thiz->file_socket_pfx . "_admin.sock";
+            if (file_exists($file_socket_admin)) {
+                unlink($file_socket_admin);
+            }
         }
 
         /* The default listen queue (128) is short for a full room: if many
@@ -673,10 +682,11 @@ class Sac_a_push {
 
         $old_umask = umask(0);
         for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
-            $unix_socket = sprintf("%s%d.sock", $thiz->unix_socket_pfx, $i);
-            if (($list_sock = stream_socket_server($unix_socket, $err, $errs,
+            $listen_url = spu_listen_url($sockname_pfx, $i);
+            if (($list_sock = stream_socket_server($listen_url, $err, $errs,
                                                    STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
                                                    $ctx)) === FALSE) {
+                fprintf(STDERR, "listen on %s failed: %s\n", $listen_url, $err);
                 return (FALSE);
             }
             array_push($thiz->list_web, $list_sock);
@@ -684,6 +694,7 @@ class Sac_a_push {
         if (($thiz->list_cmd = stream_socket_server($thiz->direct_socket, $err, $errs,
                                                     STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
                                                     $ctx)) === FALSE) {
+            fprintf(STDERR, "listen on %s failed: %s\n", $thiz->direct_socket, $err);
             return (FALSE);
         }
         umask($old_umask);

@@ -30,6 +30,59 @@ define('USOCK_POOL_N', 10);
    default (128) a burst of simultaneous entries is partly refused */
 define('USOCK_BACKLOG', 511);
 
+/* Where the daemon listens, and where whoever wants to reach it connects.
+ *
+ * USOCK_PATH_PFX is a path by default, and the pool is the set of unix
+ * sockets <pfx>0.sock .. <pfx>(USOCK_POOL_N-1).sock, plus <pfx>_admin.sock
+ * for the control channel. That is what it has always been, and it requires
+ * the frontend and the daemon to share a filesystem.
+ *
+ * It can also be an address, "tcp://<host>:<port>", and then the pool is the
+ * ports <port> .. <port>+USOCK_POOL_N-1 on that host, with <port>+USOCK_POOL_N
+ * for the control channel. The frontend can then sit on another machine. The
+ * shape is deliberately the same: the daemon opens USOCK_POOL_N listening
+ * sockets to spread the accepts over the pool, and nginx lists them as that
+ * many upstream servers either way.
+ *
+ * Two things change with the address form, and neither is optional:
+ *
+ * - the daemon believes X-Real-Ip (see Sac_a_push::run), and that address is
+ *   what feeds the bans, the blacklist and the cloud check. Over a unix
+ *   socket only a local process could set it; over tcp anybody who reaches
+ *   the port can claim to be anybody, so a reachable port is a way around
+ *   every ban.
+ * - the daemon speaks plain http: it is nginx that terminates the tls. Between
+ *   the two machines the session cookies travel in clear.
+ *
+ * So bind it to an address only the frontend can reach, and keep the two ends
+ * on a segment you trust or inside a tunnel.
+ */
+function spu_is_inet($pfx)
+{
+    return (strpos($pfx, "://") !== FALSE);
+}
+
+function spu_listen_url($pfx, $idx)
+{
+    if (!spu_is_inet($pfx)) {
+        return (sprintf("unix://%s%d.sock", $pfx, $idx));
+    }
+
+    /* "tcp://host:port" -> "tcp://host:port+idx". The port is after the last
+       colon, which is also right for a bracketed ipv6 address. */
+    $i = strrpos($pfx, ":");
+    return (substr($pfx, 0, $i + 1) . (intval(substr($pfx, $i + 1)) + $idx));
+}
+
+function spu_admin_url($pfx)
+{
+    if (!spu_is_inet($pfx)) {
+        return ("unix://".$pfx."_admin.sock");
+    }
+
+    return (spu_listen_url($pfx, USOCK_POOL_N));
+}
+
 /* How the daemon gets the player connection.
 
    TRUE  (direct mode, the default): the frontend opens an ordinary http
