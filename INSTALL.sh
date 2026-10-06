@@ -35,6 +35,19 @@ test_add="FALSE"
 #   front   the machine that runs nginx and php-fpm: everything it serves,
 #           images included, and none of the daemon's private directories
 install_mode="full"
+# Which http server faces the browser. Only apache reads the .htaccess files:
+# with nginx they protect nothing, and the same rules live in
+# system/nginx/brisk.conf instead.
+#   apache  install the .htaccess files, as it has always done
+#   nginx   install none of them
+web_server="apache"
+# With -S nginx INSTALL.sh writes the nginx configuration of the site next to
+# the brisk configuration, in Etc. The pages the daemon does not serve go to
+# php-fpm: where it listens (anything fastcgi_pass accepts) and where the
+# tree is on that machine, which is not this one when php-fpm runs on the
+# daemon host. An empty fpm_root means the root of the site here.
+fpm_pass="unix:/run/php/php8.4-fpm.sock"
+fpm_root=""
 #
 # functions
 function usage () {
@@ -42,7 +55,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -70,6 +83,11 @@ function usage () {
     echo "  -u system user to run brisk dae - def. \"$sys_user\""
     echo "  -m machine role: full|server|front - def. \"$install_mode\""
     echo "     (server: no images, no static; front: no private dirs)"
+    echo "  -S http server: apache|nginx    - def. \"$web_server\""
+    echo "     (nginx: no .htaccess installed, nginx conf written in Etc)"
+    echo "  -F php-fpm address for nginx    - def. \"$fpm_pass\""
+    echo "     (e.g. 10.0.0.6:9000 when php-fpm runs on the daemon machine)"
+    echo "  -B site root on the php-fpm host - def. the root of the site here"
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
@@ -103,6 +121,215 @@ function searchetc() {
     done
 
     return 1
+}
+
+# Put a freshly generated file in place: left alone when nothing changed,
+# otherwise the previous version is kept as .old, because these files are
+# also the ones somebody may have touched by hand.
+function ngx_put() {
+    local tmp dst
+    tmp="$1"
+    dst="$2"
+
+    if [ -f "$dst" ] && cmp -s "$tmp" "$dst"; then
+        rm -f "$tmp"
+        echo "  $dst unchanged"
+    elif [ -f "$dst" ]; then
+        mv "$dst" "$dst.old"
+        mv "$tmp" "$dst"
+        echo "  $dst written, the previous one kept as $(basename "$dst").old"
+    else
+        mv "$tmp" "$dst"
+        echo "  $dst written"
+    fi
+}
+
+# The nginx configuration of the site, for direct mode (-D TRUE), written in
+# Etc beside the brisk configuration. system/nginx/brisk.conf is the same
+# thing as a commented template; this one comes out already aligned with the
+# parameters of the installation. Three files, because nginx wants their
+# parts in three different places:
+#
+#   nginx-<name>.conf         http level: the upgrade map and the upstream
+#   nginx-<name>-server.conf  inside the server {} that terminates the tls
+#   nginx-<name>-daemon.inc   included by each of the nine daemon urls
+#
+# <name> comes from the prefix, and so do the names of the map variable and
+# of the upstream: two installations, or another site with its own
+# $connection_upgrade, can share one nginx without a duplicate definition.
+function nginx_conf_gen() {
+    local name var pfx fpmr pool_n inet hp host port i f tmp
+    local http_f srv_f inc_f prbuf ngx ngx_ver etc_rel
+
+    name="$(echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;')"
+    var="$(echo "$name" | sed 's/[^A-Za-z0-9_]/_/g')"
+    pfx="/$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"
+    fpmr="$(echo "${fpm_root:-$document_root}" | sed 's:/*$::')"
+
+    http_f="$etc_path/nginx-${name}.conf"
+    srv_f="$etc_path/nginx-${name}-server.conf"
+    inc_f="$etc_path/nginx-${name}-daemon.inc"
+
+    pool_n="$(sed -n "s/^define('USOCK_POOL_N', *\([0-9]\+\)).*/\1/p" "${web_path}__/spush/brisk-spush.phh")"
+    if [ -z "$pool_n" ]; then
+        pool_n=10
+    fi
+
+    # proxy_request_buffering exists from nginx 1.7.11: older ones refuse
+    # the whole configuration with "unknown directive". When the nginx of
+    # this machine can be asked, the line is commented out for it.
+    prbuf="proxy_request_buffering off;"
+    for ngx in nginx /usr/sbin/nginx; do
+        if command -v "$ngx" >/dev/null 2>&1; then
+            ngx_ver="$("$ngx" -v 2>&1 | sed -n 's@.*nginx/\([0-9.]*\).*@\1@p')"
+            break
+        fi
+    done
+    if [ -n "$ngx_ver" ] && \
+       [ "$(printf '%s\n1.7.11\n' "$ngx_ver" | sort -V | head -1)" != "1.7.11" ]; then
+        prbuf="# proxy_request_buffering off;   # needs nginx >= 1.7.11, here $ngx_ver"
+    fi
+
+    # --- http level ---
+    tmp="$(mktemp)"
+    {
+        echo "# brisk ${pfx}/ - nginx, http level. Generated by INSTALL.sh, do not edit:"
+        echo "# run INSTALL.sh again instead. Include it at http level, for example"
+        echo "#   ln -s $http_f /etc/nginx/conf.d/"
+        echo
+        echo "map \$http_upgrade \$${var}_connection_upgrade {"
+        echo "    default upgrade;"
+        echo "    ''      close;"
+        echo "}"
+        echo
+        echo "# max_fails=0: when the daemon restarts nginx would mark every member"
+        echo "# as dead and answer 502 \"no live upstreams\" even after it is back."
+        echo "upstream ${var}_daemon {"
+        if echo "$usock_path_pfx" | grep -q '://'; then
+            hp="${usock_path_pfx#*://}"
+            host="${hp%:*}"
+            port="${hp##*:}"
+            for i in $(seq 0 $((pool_n - 1))); do
+                echo "    server ${host}:$((port + i)) max_fails=0;"
+            done
+        else
+            for i in $(seq 0 $((pool_n - 1))); do
+                echo "    server unix:${usock_path_pfx}${i}.sock max_fails=0;"
+            done
+        fi
+        echo "}"
+    } > "$tmp"
+    ngx_put "$tmp" "$http_f"
+
+    # --- the nine daemon urls ---
+    tmp="$(mktemp)"
+    cat > "$tmp" <<EOF
+# brisk ${pfx}/ - directives of every url served by the daemon.
+# Generated by INSTALL.sh, do not edit: run INSTALL.sh again instead.
+# brisk is a comet application: the response of index_rd.php is a stream
+# that stays open for hours, none of these lines is decorative.
+
+proxy_pass              http://${var}_daemon;
+proxy_http_version      1.1;
+# without this nginx buffers the response and the comet stream never arrives
+proxy_buffering         off;
+# the daemon reads the POST body by itself
+${prbuf}
+proxy_read_timeout      3600s;
+proxy_send_timeout      3600s;
+# the daemon already compresses by itself when the client says so
+gzip                    off;
+
+proxy_set_header        Host              \$host;
+# the daemon takes the player address from X-Real-Ip: bans and blacklist
+# are built on it
+proxy_set_header        X-Real-Ip         \$remote_addr;
+proxy_set_header        X-Forwarded-Proto \$scheme;
+proxy_set_header        Upgrade           \$http_upgrade;
+proxy_set_header        Connection        \$${var}_connection_upgrade;
+
+# the courtesy page when the daemon is down
+error_page              502 503 504 ${pfx}/error.php;
+EOF
+    ngx_put "$tmp" "$inc_f"
+
+    # --- inside the server {} ---
+    tmp="$(mktemp)"
+    {
+        echo "# brisk ${pfx}/ - nginx, inside the server {} that terminates the tls."
+        echo "# Generated by INSTALL.sh, do not edit: run INSTALL.sh again instead."
+        echo "#   server {"
+        echo "#       listen 443 ssl;"
+        echo "#       ..."
+        echo "#       include $srv_f;"
+        echo "#   }"
+        echo
+        echo "location = ${pfx} { return 301 ${pfx}/; }"
+        echo
+        echo "# the urls the daemon serves: exact matches, they win over everything"
+        for f in index.php index_wr.php index_rd.php index_rd_wss.php \
+                 briskin5/index.php briskin5/index_wr.php briskin5/index_rd.php \
+                 briskin5/index_rd_wss.php briskin5/briskin5/index.php; do
+            printf "location = %-38s { include %s; }\n" "${pfx}/$f" "$inc_f"
+        done
+        echo
+        echo "# ^~ : the regex locations of the rest of the site (a \"location ~ \\.php\$\""
+        echo "# of its own) must not take the requests of ${pfx}/"
+        echo "location ^~ ${pfx}/ {"
+        echo "    root  ${document_root};"
+        echo "    index index.php;"
+        echo
+        echo "    # nginx does not read .htaccess files: these replace them. Without"
+        echo "    # them the .phh/.pho, not associated with php, download as text."
+        echo "    location ^~ ${pfx}/Obj/          { return 404; }"
+        echo "    location ^~ ${pfx}/spush/        { return 404; }"
+        echo "    location ^~ ${pfx}/briskin5/Obj/ { return 404; }"
+        echo "    location ~ \\.(phh|pho)\$          { return 404; }"
+        echo "    location ~ /\\.                   { return 404; }"
+        echo
+        echo "    # every other php page"
+        echo "    location ~ \\.php\$ {"
+        echo "        include       fastcgi_params;"
+        echo "        fastcgi_pass  ${fpm_pass};"
+        echo "        fastcgi_param SCRIPT_FILENAME ${fpmr}\$fastcgi_script_name;"
+        echo "        fastcgi_param DOCUMENT_ROOT   ${fpmr};"
+        echo "    }"
+        echo
+        echo "    location ~* \\.(js|css)\$ {"
+        echo "        expires 1d;"
+        echo "        add_header Cache-Control \"public, must-revalidate\";"
+        echo "    }"
+        echo "    location ~* \\.(png|jpe?g|gif|mp3|swf)\$ {"
+        echo "        expires 4d;"
+        echo "    }"
+        echo "}"
+        # Etc holds the database credentials in clear: when it falls inside
+        # the root of the site it has to be denied explicitly.
+        case "$etc_path" in
+            "$document_root"/*)
+                etc_rel="${etc_path#$document_root}"
+                echo
+                echo "# the brisk configuration, with the database credentials in clear"
+                echo "location ^~ ${etc_rel}/ { return 404; }"
+                ;;
+        esac
+        # docroot/: index.php asks for these at the root of the site
+        if [ -d docroot ]; then
+            echo
+            echo "# index.php asks for these at the root of the site: they hold for the"
+            echo "# whole server {}, not only for ${pfx}/"
+            for f in $(find docroot -maxdepth 1 -type f ! -name 'README' | sort); do
+                echo "location = /$(basename "$f") { root ${document_root}; }"
+            done
+        fi
+    } > "$tmp"
+    ngx_put "$tmp" "$srv_f"
+
+    if [ -n "$ngx_ver" ]; then
+        echo "  written for the nginx found here, $ngx_ver: check it with nginx -t"
+    else
+        echo "  no nginx found here to ask the version: written for nginx >= 1.7.11"
+    fi
 }
 
 #
@@ -204,6 +431,9 @@ while [ $# -gt 0 ]; do
         -D*) http_direct="$(get_param "-D" "$1" "$2")"; sh=$?;;
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
         -m*) install_mode="$(get_param "-m" "$1" "$2")"; sh=$?;;
+        -S*) web_server="$(get_param "-S" "$1" "$2")"; sh=$?;;
+        -F*) fpm_pass="$(get_param "-F" "$1" "$2")"; sh=$?;;
+        -B*) fpm_root="$(get_param "-B" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
         -W) web_only="TRUE";;
         -x) test_add="TRUE";;
@@ -245,6 +475,9 @@ echo "    http_direct: \"$http_direct\""
 echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
 echo "    install_mode: \"$install_mode\""
+echo "    web_server: \"$web_server\""
+echo "    fpm_pass:   \"$fpm_pass\""
+echo "    fpm_root:   \"$fpm_root\""
 echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
@@ -272,6 +505,9 @@ if [ ! -z "$outconf" ]; then
     echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
     echo "install_mode=\"$install_mode\""
+    echo "web_server=\"$web_server\""
+    echo "fpm_pass=\"$fpm_pass\""
+    echo "fpm_root=\"$fpm_root\""
     echo "test_add=\"$test_add\""
   ) > "$outconf"
 fi
@@ -339,6 +575,11 @@ esac
 if [ "$install_mode" = "front" ]; then
     web_only="TRUE"
 fi
+
+case "$web_server" in
+    apache|nginx) ;;
+    *) echo "web_server (\"$web_server\") must be apache or nginx"; exit 1;;
+esac
 
 if [ "$http_direct" != "TRUE" -a "$http_direct" != "FALSE" ]; then
     echo "http_direct ($http_direct) out of range (TRUE|FALSE)"
@@ -599,6 +840,13 @@ else
     echo "note: ../curl-de-sac not found, the site is installed without it"
 fi
 
+# nginx never reads a .htaccess. They come not only from web/ and webtest/
+# but also from brisk-img and curl-de-sac, so they are dropped here, once the
+# whole tree is in place, rather than filtered out of each install.
+if [ "$web_server" = "nginx" ]; then
+    find "${web_path}__" -name '.htaccess' -type f -delete
+fi
+
 # config file installation or diff
 if [ -f "$etc_path/$brisk_conf" ]; then
     echo "Config file $etc_path/$brisk_conf exists."
@@ -619,7 +867,10 @@ fi
 # url /Etc/<conf> answers 200 with the content.
 # NOTE: nginx does not read .htaccess files, the same rule has to be written
 # in the server configuration.
-if [ ! -f "$etc_path/.htaccess" ]; then
+if [ "$web_server" = "nginx" ]; then
+    echo "Etc is NOT protected by a .htaccess with nginx: the nginx configuration"
+    echo "has to deny $etc_path itself (the one written by -m full|front does it)."
+elif [ ! -f "$etc_path/.htaccess" ]; then
     echo "Protect $etc_path from the web."
     cat > "$etc_path/.htaccess" <<'EOEOF'
 <IfModule mod_authz_core.c>
@@ -630,6 +881,21 @@ if [ ! -f "$etc_path/.htaccess" ]; then
     Deny from All
 </IfModule>
 EOEOF
+fi
+
+# nginx on the daemon machine of a split installation has nothing to do: the
+# configuration belongs to the front. And the historic mode needs a
+# descriptor handover module this configuration knows nothing about.
+if [ "$web_server" = "nginx" ]; then
+    if [ "$install_mode" = "server" ]; then
+        echo "nginx configuration not written: it goes on the front machine (-m front)."
+    elif [ "$http_direct" != "TRUE" ]; then
+        echo "nginx configuration not written: -D FALSE needs the descriptor handover"
+        echo "module, see WARNING.txt."
+    else
+        echo "nginx configuration:"
+        nginx_conf_gen
+    fi
 fi
 
 if [ -d ${web_path} ]; then

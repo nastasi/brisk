@@ -18,6 +18,12 @@ Sample configuration, ready to be adapted:
     system/nginx/brisk.conf        -> /etc/nginx/sites-available/brisk
     system/nginx/brisk-daemon.inc  -> /etc/nginx/brisk-daemon.inc
 
+Or let INSTALL.sh write it with -S nginx: three files in Etc, beside the
+brisk configuration, already aligned with -P, -U and the root of the site
+(nginx-<name>.conf at http level, nginx-<name>-server.conf inside the
+server {}, nginx-<name>-daemon.inc for the nine daemon urls). -F and -B say
+where php-fpm is when it does not run on the same machine.
+
 The values to keep aligned with those passed to INSTALL.sh are listed at the
 top of brisk.conf: the root of the site, the url prefix and the path of the
 sockets (-U). The sockets are USOCK_POOL_N of them (10 by default), named
