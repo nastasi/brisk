@@ -95,3 +95,37 @@ NOTES on the shape of the ProxyPass lines (checked on apache 2.4.68):
 
 Everything that is not in this list (the static pages, admin.php,
 usermgmt.php, the .css and the .js) is still served by apache.
+
+
+==== 3. STARTING THE DAEMON: SYSTEMD ====
+
+"INSTALL.sh system" used to write a sysv script into /etc/init.d. On debian
+13 that script is never run: the sysv compatibility generator of systemd is
+gone, so nothing turns it into a service and nothing starts it at boot.
+
+Where systemd is in charge, the action now writes a unit in Etc instead,
+<name>.service beside the other generated files, and leaves /etc/init.d
+alone. It is only written: copy it, reload, enable.
+
+    su -c 'cp <Etc>/brisk.service /etc/systemd/system/'
+    su -c 'systemctl daemon-reload'
+    su -c 'systemctl enable --now brisk'
+
+Without systemd nothing changes: the sysv script is installed as before.
+
+Two things the unit does that are easy to get wrong by hand:
+
+  - brisk-spush.php is started with -d. Without it the daemon keeps stdin
+    in its select set, and stdin being /dev/null under systemd it reads EOF
+    at once and exits with 22. The sysv script got away without it because
+    it wrapped the daemon in a screen session, which gave it a tty.
+
+  - the signal of the stop stays SIGTERM. On SIGTERM the daemon serializes
+    the room into <legal_path>/brisk-crystal.data and exits 0, and the next
+    start picks the room up from there, so a stop and a start do not throw
+    the games away. SIGINT exits without saving anything.
+
+Restart=on-failure, not always: a stop asked for exits 0 and stays stopped,
+while a crash or a SIGKILL comes back up. The screen session and the shell
+loop that respawned the daemon are both gone, and the output of the daemon
+goes to the journal.

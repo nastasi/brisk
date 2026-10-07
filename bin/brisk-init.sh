@@ -8,6 +8,11 @@
 # Short-Description: manage brisk daemon
 ### END INIT INFO
 
+# NOTE: this script is for machines without systemd. Where systemd is in
+# charge, "INSTALL.sh system" writes a unit in Etc instead and does not touch
+# /etc/init.d: debian 13 dropped the sysv compatibility generator, so this
+# script would simply never be run. See WARNING.txt.
+
 BPATH="xx/home/nastasi/web/brisk"
 PPATH="xx/home/nastasi/brisk-priv"
 # screen suffix
