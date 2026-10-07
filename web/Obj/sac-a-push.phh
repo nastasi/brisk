@@ -1468,23 +1468,30 @@ class Sac_a_push {
             if (!isset($cmd['sess']) || !isset($cmd['private'])) {
                 return cmd_return(401, 'malformed cmd');
             }
+            /* The reply goes back to whoever reached the control channel, so
+               the three refusals answer alike: telling them apart would let
+               anyone probing sessions learn which ones exist and which belong
+               to an admin. usermgmt.php only looks for 200. The reason goes
+               to the log, without the session, which is a credential, and
+               never with G_alarm_passwd, which is also the password of
+               admin.php and the key of the mail verification hashes.
+               hash_equals: a != stops at the first differing byte. */
             $idx = -1;
-            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE)
-                return cmd_return(402, 'user not found');
+            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE) {
+                fprintf(STDERR, "DIRECT: userauth refused: no such session\n");
+                return cmd_return(403, 'denied');
+            }
 
-            if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00)
-                return cmd_return(403, 'permission denied');
-
-            /* The reply goes back to whoever reached the control channel:
-               it must not carry G_alarm_passwd, which is also the password
-               of admin.php and the key of the mail verification hashes.
-               The failure goes to the log instead, without the session,
-               which is a credential too. hash_equals: a != stops at the
-               first differing byte. */
-            if (!hash_equals(md5($G_alarm_passwd.$user->ip.$user->sess), (string)$cmd['private'])) {
-                fprintf(STDERR, "DIRECT: userauth failed for admin [%s] from [%s]\n",
+            if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00) {
+                fprintf(STDERR, "DIRECT: userauth refused: [%s] from [%s] is not an admin\n",
                         $user->name, $user->ip);
-                return cmd_return(404, 'authentication failed');
+                return cmd_return(403, 'denied');
+            }
+
+            if (!hash_equals(md5($G_alarm_passwd.$user->ip.$user->sess), (string)$cmd['private'])) {
+                fprintf(STDERR, "DIRECT: userauth refused: wrong hash for admin [%s] from [%s]\n",
+                        $user->name, $user->ip);
+                return cmd_return(403, 'denied');
             }
 
             return cmd_return(200, 'success');
