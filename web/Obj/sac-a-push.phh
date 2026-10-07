@@ -1473,8 +1473,17 @@ class Sac_a_push {
             if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00)
                 return cmd_return(403, 'permission denied');
 
-            if (md5($G_alarm_passwd.$user->ip.$user->sess) != $cmd['private'])
-                return cmd_return(404, 'authentication failed ['.$cmd['private'].']['.$G_alarm_passwd.$user->ip.$user->sess.']');
+            /* The reply goes back to whoever reached the control channel:
+               it must not carry G_alarm_passwd, which is also the password
+               of admin.php and the key of the mail verification hashes.
+               The failure goes to the log instead, without the session,
+               which is a credential too. hash_equals: a != stops at the
+               first differing byte. */
+            if (!hash_equals(md5($G_alarm_passwd.$user->ip.$user->sess), (string)$cmd['private'])) {
+                fprintf(STDERR, "DIRECT: userauth failed for admin [%s] from [%s]\n",
+                        $user->name, $user->ip);
+                return cmd_return(404, 'authentication failed');
+            }
 
             return cmd_return(200, 'success');
         }
