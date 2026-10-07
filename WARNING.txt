@@ -113,9 +113,13 @@ Where systemd is in charge the action writes a unit instead, in Etc as
 <name>.service beside the other generated files, and leaves /etc/init.d
 alone. It is only written: copy it, reload, enable.
 
-    su -c 'cp <Etc>/brisk.service /etc/systemd/system/'
-    su -c 'systemctl daemon-reload'
-    su -c 'systemctl enable --now brisk'
+    sudo cp <Etc>/brisk.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now brisk
+
+(the action prints these with sudo where sudo is installed, with su -c where
+it is not: debian 13 installs sudo and leaves root without a password, so a
+su -c printed there is a command nobody can run)
 
 Without systemd nothing changes: the sysv script is installed as before.
 
