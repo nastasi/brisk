@@ -370,8 +370,10 @@ proxy_set_header        X-Forwarded-Proto \$scheme;
 proxy_set_header        Upgrade           \$http_upgrade;
 proxy_set_header        Connection        \$${var}_connection_upgrade;
 
-# the courtesy page when the daemon is down
-error_page              502 503 504 ${pfx}/error.php;
+# the courtesy page when the daemon cannot be reached: static, served from
+# this machine, because error.php needs php-fpm and the database, which may
+# be down together with the daemon
+error_page              502 503 504 ${pfx}/daemon-down.html;
 EOF
     ngx_put "$tmp" "$inc_f"
 
@@ -809,7 +811,8 @@ find_names=( -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho
              -o -name '*.js' -o -name 'LICENSE' -o -name 'VENDOR.txt'
              -o -name 'terms-of-service*' )
 if [ "$install_mode" != "server" ]; then
-    find_names+=( -o -name '*.css' -o -name '*.mp3' -o -name '*.swf' )
+    find_names+=( -o -name '*.css' -o -name '*.mp3' -o -name '*.swf'
+                  -o -name 'daemon-down.html' )
 fi
 for i in $(find web "${find_names[@]}" | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
@@ -884,6 +887,11 @@ else
 fi
 
 sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$prefix_path\";@g" ${web_path}__/commons.js
+
+# the courtesy page of nginx reaches its images and the room through <base>
+if [ -f "${web_path}__/daemon-down.html" ]; then
+    sed -i "s@<base href=\"[^\"]*\">@<base href=\"$prefix_path\">@" "${web_path}__/daemon-down.html"
+fi
 
 sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path}__/xynt-streaming.js
 

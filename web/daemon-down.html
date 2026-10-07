@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+  brisk - daemon-down.html
+
+  The courtesy page nginx answers with when the brisk-spush daemon cannot be
+  reached (error_page 502 503 504 in the configuration of the daemon urls).
+  It is static on purpose: error.php needs php-fpm and the database, and
+  when the front sends its php pages to the daemon machine those are down
+  together with the daemon.
+
+  nginx serves it with an internal redirect, so the browser still shows the
+  url it asked for, which may be <prefix>briskin5/index.php: every path
+  below goes through <base>, rewritten by INSTALL.sh with the prefix (-P).
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<base href="/brisk/">
+<title>Brisk: errore!</title>
+<!-- fallback for browsers without javascript -->
+<noscript><meta http-equiv="refresh" content="20;url=./"></noscript>
+<link rel="shortcut icon" href="img/brisk_ico.png">
+<style>
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-image: url('img/saddysunbg.png');
+    text-align: center;
+}
+.headline { padding-top: 16px; font-size: 16px; }
+.content  { padding: 160px 16px 0 16px; font-size: 18px; line-height: 1.5; }
+.en       { font-size: 15px; color: #404040; }
+</style>
+</head>
+<body>
+<div class="headline">
+  <img src="img/brisk_logo64.png" alt="brisk"><br>
+  briscola chiamata in salsa ajax
+</div>
+<div class="content">
+  C'è qualche problema sul server.<br><br>
+  Tra qualche istante questa pagina proverà a riconnettersi automaticamente.<br><br>
+  Ci dispiace del disagio.<br><br>
+  <span class="en">There is a problem on the server: this page will reconnect by itself in a few moments.</span>
+</div>
+<script>
+// between 15 and 25 seconds, as error.php does: when the daemon comes back
+// the players do not all knock in the same instant
+setTimeout(function () { window.location.href = document.baseURI; },
+           (15 + Math.floor(Math.random() * 11)) * 1000);
+</script>
+</body>
+</html>

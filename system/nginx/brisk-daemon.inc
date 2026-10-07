@@ -29,3 +29,7 @@ proxy_set_header        X-Real-Ip         $remote_addr;
 proxy_set_header        X-Forwarded-Proto $scheme;
 proxy_set_header        Upgrade           $http_upgrade;
 proxy_set_header        Connection        $connection_upgrade;
+
+# the courtesy page when the daemon cannot be reached: static, because
+# error.php needs php-fpm and the database, which may be down as well
+error_page              502 503 504 /brisk/daemon-down.html;
