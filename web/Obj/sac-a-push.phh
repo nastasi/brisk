@@ -58,11 +58,13 @@ function global_dump()
     GLOBAL $G_with_splash, $G_sidebanner, $G_sidebanner_idx;
     GLOBAL $G_with_topbanner, $G_selfreg_tout, $G_selfreg_mask;
 
-    fprintf(STDERR, "G_alarm_passwd = [%s]\n", print_r($G_alarm_passwd, TRUE));
+    /* the dump only has to show that the globals survived a reload: the two
+       secrets are reported as set or empty, never written to the log */
+    fprintf(STDERR, "G_alarm_passwd = [%s]\n", ($G_alarm_passwd == "" ? "(empty)" : "(set)"));
     fprintf(STDERR, "G_ban_list = [%s]\n", print_r($G_ban_list, TRUE));
     fprintf(STDERR, "G_black_list = [%s]\n", print_r($G_black_list, TRUE));
     fprintf(STDERR, "G_btrace_pref_sub = [%s]\n", print_r($G_btrace_pref_sub, TRUE));
-    fprintf(STDERR, "G_dbauth = [%s]\n", print_r($G_dbauth, TRUE));
+    fprintf(STDERR, "G_dbauth = [%s]\n", ($G_dbauth == "" ? "(empty)" : "(set)"));
     fprintf(STDERR, "G_dbpfx = [%s]\n", print_r($G_dbpfx, TRUE));
     fprintf(STDERR, "G_donors_all = [%s]\n", print_r($G_donors_all, TRUE));
     fprintf(STDERR, "G_donors_cur = [%s]\n", print_r($G_donors_cur, TRUE));
