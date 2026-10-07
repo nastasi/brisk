@@ -27,7 +27,11 @@ say where php-fpm is when it does not run on the same machine.
 With the daemon on a machine of its own (-m server -U tcp://...), pass -I
 with the address of the front and the same action writes in Etc <name>.nft,
 the nftables rules that leave the daemon ports, and php-fpm when it listens
-on tcp there, reachable by the front alone. Copy it into /etc/nftables.d/.
+on tcp there, reachable by the front alone. It has to be copied out of Etc,
+into /etc/nftables.d/: nftables.service runs with ProtectHome=true and reads
+nothing under /home. That directory is not part of the nftables package, so
+it has to be created and included from /etc/nftables.conf, with the include
+AFTER the "flush ruleset" that file begins with - as its last line, say.
 
 Everything that belongs to the machine rather than to the tree of the site -
 these files and the way the daemon is started - comes from that one action,
