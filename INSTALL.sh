@@ -41,15 +41,15 @@ install_mode="full"
 #   apache  install the .htaccess files, as it has always done
 #   nginx   install none of them
 web_server="apache"
-# With -S nginx INSTALL.sh writes the nginx configuration of the site next to
-# the brisk configuration, in Etc. The pages the daemon does not serve go to
+# With -S nginx the "system" action writes the nginx configuration of the site
+# next to the brisk configuration, in Etc. The pages the daemon does not serve go to
 # php-fpm: where it listens (anything fastcgi_pass accepts) and where the
 # tree is on that machine, which is not this one when php-fpm runs on the
 # daemon host. An empty fpm_root means the root of the site here.
 fpm_pass="unix:/run/php/php8.4-fpm.sock"
 fpm_root=""
-# With -m server and the daemon on tcp, INSTALL.sh writes in Etc the nftables
-# rules that let only the front reach the daemon ports - and php-fpm, when
+# With -m server and the daemon on tcp, the "system" action writes in Etc the
+# nftables rules that let only the front reach the daemon ports - and php-fpm, when
 # the php-fpm of this machine serves the front. front_ip is the address of the
 # front as this machine sees it; fpm_pool_glob is where the php-fpm pools are
 # looked for.
@@ -62,6 +62,8 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
+    echo "$1 system [same options]        - write in Etc the files of the machine:"
+    echo "                                 nginx conf, nftables rules, systemd unit."
     echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-I <front_ip>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
@@ -91,12 +93,12 @@ function usage () {
     echo "  -m machine role: full|server|front - def. \"$install_mode\""
     echo "     (server: no images, no static; front: no private dirs)"
     echo "  -S http server: apache|nginx    - def. \"$web_server\""
-    echo "     (nginx: no .htaccess installed, nginx conf written in Etc)"
+    echo "     (nginx: no .htaccess installed; \"system\" writes the nginx conf)"
     echo "  -F php-fpm address for nginx    - def. \"$fpm_pass\""
     echo "     (e.g. 10.0.0.6:9000 when php-fpm runs on the daemon machine)"
     echo "  -B site root on the php-fpm host - def. the root of the site here"
     echo "  -I address of the front machine - def. \"$front_ip\""
-    echo "     (-m server with -U tcp://: nftables rules written in Etc)"
+    echo "     (-m server with -U tcp://: \"system\" writes the nftables rules)"
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
@@ -164,11 +166,18 @@ function inst_var() {
     inst_name | sed 's/[^A-Za-z0-9_]/_/g'
 }
 
-# USOCK_POOL_N as the installed tree defines it
+# USOCK_POOL_N as the tree defines it. During an installation the tree being
+# built is the one to read; the "system" action runs on its own, with only the
+# installed tree to look at.
 function pool_size() {
-    local n
+    local f n
 
-    n="$(sed -n "s/^define('USOCK_POOL_N', *\([0-9]\+\)).*/\1/p" "${web_path}__/spush/brisk-spush.phh")"
+    for f in "${web_path}__/spush/brisk-spush.phh" "${web_path}/spush/brisk-spush.phh"; do
+        if [ -f "$f" ]; then
+            n="$(sed -n "s/^define('USOCK_POOL_N', *\([0-9]\+\)).*/\1/p" "$f")"
+            break
+        fi
+    done
     echo "${n:-10}"
 }
 
@@ -203,7 +212,8 @@ function has_systemd() {
     [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1
 }
 
-# The systemd unit of the daemon, written in Etc as <name>.service, to be
+# The systemd unit of the daemon, written in Etc as <name>.service by the
+# "system" action, to be
 # copied by hand into /etc/systemd/system/. It replaces bin/brisk-init.sh,
 # which wrapped the daemon in a screen session and respawned it with a shell
 # loop: Restart= is that loop, and the log goes to the journal instead of
@@ -337,7 +347,7 @@ function nft_conf_gen() {
         echo "  php-fpm serves the front from here (port ${fpm_ports}): included"
     else
         echo "  php-fpm does not listen on tcp here: only the daemon ports are covered."
-        echo "  Configure php-fpm first and run INSTALL.sh again if it has to serve the front."
+        echo "  Configure php-fpm first and run \"INSTALL.sh system\" again if it has to serve the front."
     fi
 }
 
@@ -713,15 +723,28 @@ fi
 
 max_players=$((40 + players_n * tables_n))
 
+# The "system" action writes every file that belongs to the machine rather
+# than to the tree of the site: the nginx configuration, the nftables rules
+# and the way the daemon is started. None of them is installed, because none
+# of their directories belongs to this user: they are written in Etc, beside
+# the brisk configuration, and the action says what to copy where.
+#
+# They are not written by an ordinary installation on purpose: an install is
+# run whenever the code changes, while these follow the shape of the machine,
+# which changes almost never.
 if [ "$action" = "system" ]; then
-    scrname="$(echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;')"
+    scrname="$(inst_name)"
     echo
     echo "script name:  [$scrname]"
     echo "brisk path:   [$web_path]"
     echo "private path: [$legal_path]"
     echo "system user:  [$sys_user]"
+    echo "machine role: [$install_mode]"
+    echo "http server:  [$web_server]"
     echo
-    if has_systemd; then
+    if [ "$install_mode" = "front" ]; then
+        echo "init system:  [-] no daemon on a front"
+    elif has_systemd; then
         echo "init system:  [systemd] -> a unit, written in Etc"
     else
         echo "init system:  [no systemd] -> the sysv script, in /etc/init.d"
@@ -729,39 +752,77 @@ if [ "$action" = "system" ]; then
     echo
     read -p "press enter to continue" sure
 
-    if has_systemd; then
-        # Etc is where the other generated files go; this action runs before
-        # the pre-check that looks it up, so it is looked up here.
-        etc_path="$(searchetc "$(dirname "$web_path")" Etc)"
-        if [ $? -ne 0 ]; then
-            echo "Etc directory not found above $(dirname "$web_path")"
-            exit 1
-        fi
-        echo "systemd unit:"
-        systemd_unit_gen
-        echo
-        echo "... DONE."
-        echo "DON'T FORGET: the unit is only written, not installed. Copy it, then:"
-        echo
-        echo "  su -c 'cp $etc_path/${scrname}.service /etc/systemd/system/'"
-        echo "  su -c 'systemctl daemon-reload'"
-        echo "  su -c 'systemctl enable --now ${scrname}'"
-        echo
-        exit 0
+    # Etc is where the generated files go. This action runs before the
+    # pre-check that looks it up, so it is looked up here.
+    etc_path="$(searchetc "$(dirname "$web_path")" Etc)"
+    if [ $? -ne 0 ]; then
+        echo "Etc directory not found above $(dirname "$web_path")"
+        exit 1
     fi
 
-    cp bin/brisk-init.sh brisk-init.sh.wrk
-    sed -i "s@^BPATH=.*@BPATH=\"${web_path}\"@g;s@^PPATH=.*@PPATH=\"${legal_path}\"@g;s@^SSUFF=.*@SSUFF=\"${scrname}\"@g;s@^BUSER=.*@BUSER=\"${sys_user}\"@g" brisk-init.sh.wrk
+    sys_todo=""
 
-    su -c "cp brisk-init.sh.wrk /etc/init.d/${scrname}"
+    # --- nginx ---
+    # The daemon machine of a split installation has no nginx: the
+    # configuration belongs to the front. And the historic mode needs a
+    # descriptor handover module this configuration knows nothing about.
+    if [ "$web_server" != "nginx" ]; then
+        echo "nginx configuration not written: -S apache."
+    elif [ "$install_mode" = "server" ]; then
+        echo "nginx configuration not written: it goes on the front machine (-m front)."
+    elif [ "$http_direct" != "TRUE" ]; then
+        echo "nginx configuration not written: -D FALSE needs the descriptor handover"
+        echo "module, see WARNING.txt."
+    else
+        echo "nginx configuration:"
+        nginx_conf_gen
+        sys_todo="${sys_todo}  su -c 'ln -s $etc_path/nginx-${scrname}.conf /etc/nginx/conf.d/'\n"
+        sys_todo="${sys_todo}  include $etc_path/nginx-${scrname}-server.conf  inside the server {} of the site\n"
+        sys_todo="${sys_todo}  su -c 'nginx -t' && su -c 'systemctl reload nginx'\n"
+    fi
 
-    rm brisk-init.sh.wrk
+    # --- nftables ---
+    # Over tcp the ports of the daemon have to be closed to everybody but
+    # the front, whatever the http server of the front is.
+    if [ "$install_mode" != "server" ] || ! echo "$usock_path_pfx" | grep -q '^tcp://'; then
+        :
+    elif [ -z "$front_ip" ]; then
+        echo "nftables rules not written: pass the address of the front with -I."
+    else
+        echo "nftables rules:"
+        nft_conf_gen
+        sys_todo="${sys_todo}  su -c 'cp $etc_path/${scrname}.nft /etc/nftables.d/'\n"
+        sys_todo="${sys_todo}  su -c 'nft -c -f /etc/nftables.d/${scrname}.nft' && su -c 'nft -f /etc/nftables.d/${scrname}.nft'\n"
+    fi
+
+    # --- how the daemon is started ---
+    if [ "$install_mode" = "front" ]; then
+        : # no daemon here
+    elif has_systemd; then
+        echo "systemd unit:"
+        systemd_unit_gen
+        sys_todo="${sys_todo}  su -c 'cp $etc_path/${scrname}.service /etc/systemd/system/'\n"
+        sys_todo="${sys_todo}  su -c 'systemctl daemon-reload'\n"
+        sys_todo="${sys_todo}  su -c 'systemctl enable --now ${scrname}'\n"
+    else
+        # No systemd: the sysv script is what starts the daemon, and this is
+        # the one file the action installs itself, as it always has.
+        cp bin/brisk-init.sh brisk-init.sh.wrk
+        sed -i "s@^BPATH=.*@BPATH=\"${web_path}\"@g;s@^PPATH=.*@PPATH=\"${legal_path}\"@g;s@^SSUFF=.*@SSUFF=\"${scrname}\"@g;s@^BUSER=.*@BUSER=\"${sys_user}\"@g" brisk-init.sh.wrk
+        su -c "cp brisk-init.sh.wrk /etc/init.d/${scrname}"
+        rm brisk-init.sh.wrk
+        echo "sysv script installed as /etc/init.d/${scrname}"
+        sys_todo="${sys_todo}  su -c 'update-rc.d $scrname defaults'\n"
+    fi
+
     echo
     echo "... DONE."
-    echo "DON'T FORGET: after the first installation you MUST configure your run-levels accordingly"
-    echo
-    echo "Example: su -c 'update-rc.d $scrname defaults'"
-    echo
+    if [ -n "$sys_todo" ]; then
+        echo "DON'T FORGET: nothing above is in place yet. To put it there:"
+        echo
+        printf "$sys_todo"
+        echo
+    fi
     exit 0
 fi
 #
@@ -1116,32 +1177,6 @@ elif [ ! -f "$etc_path/.htaccess" ]; then
 EOEOF
 fi
 
-# nginx on the daemon machine of a split installation has nothing to do: the
-# configuration belongs to the front. And the historic mode needs a
-# descriptor handover module this configuration knows nothing about.
-if [ "$web_server" = "nginx" ]; then
-    if [ "$install_mode" = "server" ]; then
-        echo "nginx configuration not written: it goes on the front machine (-m front)."
-    elif [ "$http_direct" != "TRUE" ]; then
-        echo "nginx configuration not written: -D FALSE needs the descriptor handover"
-        echo "module, see WARNING.txt."
-    else
-        echo "nginx configuration:"
-        nginx_conf_gen
-    fi
-fi
-
-# The daemon machine of a split installation: whatever the http server of the
-# front, the ports here have to be closed to everybody but the front.
-if [ "$install_mode" = "server" ] && echo "$usock_path_pfx" | grep -q '^tcp://'; then
-    if [ -z "$front_ip" ]; then
-        echo "nftables rules not written: pass the address of the front with -I."
-    else
-        echo "nftables rules:"
-        nft_conf_gen
-    fi
-fi
-
 if [ -d ${web_path} ]; then
     mv ${web_path} ${web_path}.old
 fi
@@ -1167,6 +1202,13 @@ case "$install_mode" in
         echo "install those on the daemon machine with -m server."
         echo ;;
 esac
+
+# The files of the machine - nginx, nftables, the way the daemon starts - are
+# not touched by an install: they follow the shape of the machine, not the
+# code. On a first installation they are still missing.
+echo "The files of the MACHINE (nginx configuration, nftables rules, systemd unit)"
+echo "are written by \"$0 system\" with these same options, not from here."
+echo
 
 if [ -f WARNING.txt ]; then
     echo ; echo "    ==== WARNING ===="

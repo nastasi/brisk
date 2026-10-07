@@ -18,16 +18,22 @@ Sample configuration, ready to be adapted:
     system/nginx/brisk.conf        -> /etc/nginx/sites-available/brisk
     system/nginx/brisk-daemon.inc  -> /etc/nginx/brisk-daemon.inc
 
-Or let INSTALL.sh write it with -S nginx: three files in Etc, beside the
-brisk configuration, already aligned with -P, -U and the root of the site
-(nginx-<name>.conf at http level, nginx-<name>-server.conf inside the
-server {}, nginx-<name>-daemon.inc for the nine daemon urls). -F and -B say
-where php-fpm is when it does not run on the same machine.
+Or let "INSTALL.sh system" write it with -S nginx: three files in Etc,
+beside the brisk configuration, already aligned with -P, -U and the root of
+the site (nginx-<name>.conf at http level, nginx-<name>-server.conf inside
+the server {}, nginx-<name>-daemon.inc for the nine daemon urls). -F and -B
+say where php-fpm is when it does not run on the same machine.
 
 With the daemon on a machine of its own (-m server -U tcp://...), pass -I
-with the address of the front: INSTALL.sh writes in Etc <name>.nft, the
-nftables rules that leave the daemon ports, and php-fpm when it listens on
-tcp there, reachable by the front alone. Copy it into /etc/nftables.d/.
+with the address of the front and the same action writes in Etc <name>.nft,
+the nftables rules that leave the daemon ports, and php-fpm when it listens
+on tcp there, reachable by the front alone. Copy it into /etc/nftables.d/.
+
+Everything that belongs to the machine rather than to the tree of the site -
+these files and the way the daemon is started - comes from that one action,
+with the same options as the install. An ordinary install writes none of it:
+it is run whenever the code changes, while these follow the shape of the
+machine, which changes almost never.
 
 The values to keep aligned with those passed to INSTALL.sh are listed at the
 top of brisk.conf: the root of the site, the url prefix and the path of the
@@ -103,7 +109,7 @@ usermgmt.php, the .css and the .js) is still served by apache.
 13 that script is never run: the sysv compatibility generator of systemd is
 gone, so nothing turns it into a service and nothing starts it at boot.
 
-Where systemd is in charge, the action now writes a unit in Etc instead,
+Where systemd is in charge the action writes a unit instead, in Etc as
 <name>.service beside the other generated files, and leaves /etc/init.d
 alone. It is only written: copy it, reload, enable.
 
