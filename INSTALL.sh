@@ -48,6 +48,13 @@ web_server="apache"
 # daemon host. An empty fpm_root means the root of the site here.
 fpm_pass="unix:/run/php/php8.4-fpm.sock"
 fpm_root=""
+# With -m server and the daemon on tcp, INSTALL.sh writes in Etc the nftables
+# rules that let only the front reach the daemon ports - and php-fpm, when
+# the php-fpm of this machine serves the front. front_ip is the address of the
+# front as this machine sees it; fpm_pool_glob is where the php-fpm pools are
+# looked for.
+front_ip=""
+fpm_pool_glob="/etc/php/*/fpm/pool.d/*.conf"
 #
 # functions
 function usage () {
@@ -55,7 +62,7 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-I <front_ip>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -88,6 +95,8 @@ function usage () {
     echo "  -F php-fpm address for nginx    - def. \"$fpm_pass\""
     echo "     (e.g. 10.0.0.6:9000 when php-fpm runs on the daemon machine)"
     echo "  -B site root on the php-fpm host - def. the root of the site here"
+    echo "  -I address of the front machine - def. \"$front_ip\""
+    echo "     (-m server with -U tcp://: nftables rules written in Etc)"
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
@@ -144,6 +153,122 @@ function ngx_put() {
     fi
 }
 
+# The name of the installation, from the prefix: "/brisk26/" -> "brisk26".
+# It names the generated files and, made safe for identifiers, the nginx
+# upstream and map variable and the nftables table.
+function inst_name() {
+    echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;'
+}
+
+function inst_var() {
+    inst_name | sed 's/[^A-Za-z0-9_]/_/g'
+}
+
+# USOCK_POOL_N as the installed tree defines it
+function pool_size() {
+    local n
+
+    n="$(sed -n "s/^define('USOCK_POOL_N', *\([0-9]\+\)).*/\1/p" "${web_path}__/spush/brisk-spush.phh")"
+    echo "${n:-10}"
+}
+
+# The tcp ports the php-fpm pools of this machine listen on for other
+# machines. php-fpm serves the front only when it listens on tcp on an
+# address that is not loopback: a unix socket, or 127.0.0.1, serves this
+# machine alone. Nothing printed means php-fpm does not serve the front.
+function fpm_front_ports() {
+    local f l host port
+
+    for f in $fpm_pool_glob; do
+        [ -f "$f" ] || continue
+        sed -n 's/^[ \t]*listen[ \t]*=[ \t]*\([^ \t;]*\).*/\1/p' "$f"
+    done | while read l; do
+        case "$l" in
+            /*) continue ;;                    # unix socket
+            *:*) host="${l%:*}"; port="${l##*:}" ;;
+            *) host=""; port="$l" ;;            # port alone: every address
+        esac
+        echo "$port" | grep -q '^[0-9]\+$' || continue
+        case "$host" in
+            127.*|"[::1]"|localhost) continue ;;
+        esac
+        echo "$port"
+    done | sort -un
+}
+
+# The nftables rules of the daemon machine of a split installation, written
+# in Etc as <name>.nft, to be copied by hand into /etc/nftables.d/. Over tcp
+# the daemon believes X-Real-Ip, which the bans are built on, and its control
+# channel holds the whole daemon up to 3 seconds per connection; php-fpm on
+# tcp runs any php file of this machine for whoever reaches it. Only the
+# front may reach the pool and php-fpm, and nobody but this machine the
+# control channel.
+function nft_conf_gen() {
+    local name var hp port pool_n fpm_ports ports_front ports_all nft_f tmp saddr
+
+    name="$(inst_name)"
+    var="$(inst_var)"
+    nft_f="$etc_path/${name}.nft"
+    hp="${usock_path_pfx#*://}"
+    port="${hp##*:}"
+    pool_n="$(pool_size)"
+
+    fpm_ports="$(fpm_front_ports | tr '\n' ' ' | sed 's/ *$//;s/ /, /g')"
+    ports_front="${port}-$((port + pool_n - 1))"
+    ports_all="${port}-$((port + pool_n))"
+    if [ -n "$fpm_ports" ]; then
+        ports_front="${ports_front}, ${fpm_ports}"
+        ports_all="${ports_all}, ${fpm_ports}"
+    fi
+    case "$front_ip" in
+        *:*) saddr="ip6 saddr" ;;
+        *)   saddr="ip saddr" ;;
+    esac
+
+    tmp="$(mktemp)"
+    {
+        echo "#!/usr/sbin/nft -f"
+        echo "# brisk /${name}/ - nftables rules of the daemon machine."
+        echo "# Generated by INSTALL.sh, do not edit: run INSTALL.sh again instead."
+        echo "# Copy it into /etc/nftables.d/, include that directory from"
+        echo '# /etc/nftables.conf (include "/etc/nftables.d/*.nft") and load it:'
+        echo "#   nft -c -f /etc/nftables.d/${name}.nft && nft -f /etc/nftables.d/${name}.nft"
+        echo "#"
+        echo "# The table accepts by default and drops only the ports of brisk. With a"
+        echo "# firewall whose policy is drop, an accept here is not enough: the two"
+        echo "# accept rules have to go into that chain."
+        echo "#"
+        echo "#   daemon pool     ${port}-$((port + pool_n - 1))   the front only"
+        echo "#   control channel $((port + pool_n))         this machine only (usermgmt.php)"
+        if [ -n "$fpm_ports" ]; then
+            echo "#   php-fpm         ${fpm_ports}         the front only"
+        else
+            echo "#   php-fpm         not listed: no pool listens on tcp for other machines"
+        fi
+        echo
+        echo "table inet ${var} {"
+        echo "    chain input {"
+        echo "        type filter hook input priority filter; policy accept;"
+        echo
+        echo "        # the daemon listens on its own address, not on 127.0.0.1: the"
+        echo "        # connections of this machine to itself come in from lo"
+        echo "        iif lo accept"
+        echo
+        echo "        ${saddr} ${front_ip} tcp dport { ${ports_front} } accept"
+        echo
+        echo "        tcp dport { ${ports_all} } drop"
+        echo "    }"
+        echo "}"
+    } > "$tmp"
+    ngx_put "$tmp" "$nft_f"
+    if [ -n "$fpm_ports" ]; then
+        echo "  php-fpm serves the front from here (port ${fpm_ports}): included"
+    else
+        echo "  php-fpm does not listen on tcp here: only the daemon ports are covered."
+        echo "  Configure php-fpm first and run INSTALL.sh again if it has to serve the front."
+    fi
+}
+
 # The nginx configuration of the site, for direct mode (-D TRUE), written in
 # Etc beside the brisk configuration. system/nginx/brisk.conf is the same
 # thing as a commented template; this one comes out already aligned with the
@@ -158,11 +283,11 @@ function ngx_put() {
 # of the upstream: two installations, or another site with its own
 # $connection_upgrade, can share one nginx without a duplicate definition.
 function nginx_conf_gen() {
-    local name var pfx fpmr pool_n inet hp host port i f tmp
+    local name var pfx fpmr pool_n hp host port i f tmp
     local http_f srv_f inc_f prbuf ngx ngx_ver etc_rel
 
-    name="$(echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;')"
-    var="$(echo "$name" | sed 's/[^A-Za-z0-9_]/_/g')"
+    name="$(inst_name)"
+    var="$(inst_var)"
     pfx="/$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"
     fpmr="$(echo "${fpm_root:-$document_root}" | sed 's:/*$::')"
 
@@ -170,10 +295,7 @@ function nginx_conf_gen() {
     srv_f="$etc_path/nginx-${name}-server.conf"
     inc_f="$etc_path/nginx-${name}-daemon.inc"
 
-    pool_n="$(sed -n "s/^define('USOCK_POOL_N', *\([0-9]\+\)).*/\1/p" "${web_path}__/spush/brisk-spush.phh")"
-    if [ -z "$pool_n" ]; then
-        pool_n=10
-    fi
+    pool_n="$(pool_size)"
 
     # proxy_request_buffering exists from nginx 1.7.11: older ones refuse
     # the whole configuration with "unknown directive". When the nginx of
@@ -434,6 +556,7 @@ while [ $# -gt 0 ]; do
         -S*) web_server="$(get_param "-S" "$1" "$2")"; sh=$?;;
         -F*) fpm_pass="$(get_param "-F" "$1" "$2")"; sh=$?;;
         -B*) fpm_root="$(get_param "-B" "$1" "$2")"; sh=$?;;
+        -I*) front_ip="$(get_param "-I" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
         -W) web_only="TRUE";;
         -x) test_add="TRUE";;
@@ -478,6 +601,7 @@ echo "    install_mode: \"$install_mode\""
 echo "    web_server: \"$web_server\""
 echo "    fpm_pass:   \"$fpm_pass\""
 echo "    fpm_root:   \"$fpm_root\""
+echo "    front_ip:   \"$front_ip\""
 echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
@@ -508,6 +632,7 @@ if [ ! -z "$outconf" ]; then
     echo "web_server=\"$web_server\""
     echo "fpm_pass=\"$fpm_pass\""
     echo "fpm_root=\"$fpm_root\""
+    echo "front_ip=\"$front_ip\""
     echo "test_add=\"$test_add\""
   ) > "$outconf"
 fi
@@ -895,6 +1020,17 @@ if [ "$web_server" = "nginx" ]; then
     else
         echo "nginx configuration:"
         nginx_conf_gen
+    fi
+fi
+
+# The daemon machine of a split installation: whatever the http server of the
+# front, the ports here have to be closed to everybody but the front.
+if [ "$install_mode" = "server" ] && echo "$usock_path_pfx" | grep -q '^tcp://'; then
+    if [ -z "$front_ip" ]; then
+        echo "nftables rules not written: pass the address of the front with -I."
+    else
+        echo "nftables rules:"
+        nft_conf_gen
     fi
 fi
 
