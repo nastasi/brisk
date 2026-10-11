@@ -205,6 +205,64 @@ function fpm_front_ports() {
     done | sort -un
 }
 
+# The debian package that brings a php extension. pcntl and zlib are built
+# into the interpreter, so a machine that has php has them.
+function php_ext_pkg() {
+    case "$1" in
+        mbstring)        echo "php8.4-mbstring" ;;
+        pgsql)           echo "php8.4-pgsql" ;;
+        sysvshm|sysvsem) echo "php8.4-common" ;;
+        *)               echo "php8.4-cli" ;;
+    esac
+}
+
+# The extensions brisk needs, asked of the interpreter that will run it.
+# None of them is missed at startup: mb_strlen is reached only when a request
+# is being read, so a daemon without mbstring comes up, listens, and dies on
+# the first player - or on the "shutdown" of the first systemctl stop, which
+# is how this was found on a debian 13 without php8.4-mbstring. The shared
+# memory and ftok hold the room, the challenges and the hardbans, pcntl
+# carries the signals of the daemon, zlib compresses the stream, pgsql is
+# the database unless $G_dbasetype says "file".
+function php_ext_check() {
+    local cand label exts bin b m miss pkgs
+
+    cand="$1"
+    label="$2"
+    exts="$3"
+
+    bin=""
+    for b in $cand; do
+        if command -v "$b" >/dev/null 2>&1; then
+            bin="$b"
+            break
+        fi
+    done
+    if [ -z "$bin" ]; then
+        echo "  $label: no interpreter found ($(echo $cand)), NOT checked"
+        return 0
+    fi
+
+    miss=""
+    for m in $exts; do
+        if ! "$bin" -m 2>/dev/null | grep -qix "$m"; then
+            miss="$miss $m"
+        fi
+    done
+    if [ -z "$miss" ]; then
+        echo "  $label [$bin]: ok"
+        return 0
+    fi
+
+    pkgs=""
+    for m in $miss; do
+        pkgs="$pkgs $(php_ext_pkg "$m")"
+    done
+    echo "  $label [$bin] is MISSING:$miss"
+    echo "      $(as_root "apt install$(echo "$pkgs" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/^ *//;s/ *$//' | sed 's/^/ /')")"
+    return 1
+}
+
 # How to say "as root" on this machine. debian 13 installs sudo and leaves
 # the root account without a password, so a "su -c" printed there is a
 # command nobody can run; where sudo is missing, su is still the way.
@@ -856,6 +914,36 @@ dsta="$(dirname "$web_path")"
 etc_path="$(searchetc "$dsta" Etc)"
 if [ $? -ne 0 ]; then
     echo "Etc directory not found"
+    exit 1
+fi
+
+# The php extensions, of the daemon and of the pages, each where they run.
+# The tree installs fine without them and the trouble turns up later, far
+# from here, so this is a stop and not a warning.
+db_ext="pgsql"
+if [ -f "$etc_path/$brisk_conf" ]; then
+    _dbt="$(sed -n 's/^\$G_dbasetype *= *"\([a-z]*\)".*/\1/p' "$etc_path/$brisk_conf" | tail -1)"
+    if [ "$_dbt" = "file" ]; then
+        db_ext=""
+    fi
+fi
+echo "php extensions:"
+php_ext_ok=0
+if [ "$install_mode" != "front" ]; then
+    php_ext_check "php php8.4" "the daemon" "mbstring sysvshm sysvsem zlib pcntl $db_ext" || php_ext_ok=1
+fi
+if [ "$install_mode" != "server" ]; then
+    # The pages of the front can be served by a php-fpm of another machine,
+    # and then it is that machine that has to carry the extensions.
+    case "$fpm_pass" in
+        unix:*|127.*|localhost:*|"")
+            php_ext_check "php-fpm8.4 /usr/sbin/php-fpm8.4" "the pages" "mbstring sysvshm sysvsem zlib $db_ext" || php_ext_ok=1 ;;
+        *)
+            echo "  the pages: php-fpm is on another machine ($fpm_pass), check it there" ;;
+    esac
+fi
+if [ $php_ext_ok -ne 0 ]; then
+    echo "Install what is missing and run again."
     exit 1
 fi
 
