@@ -109,9 +109,11 @@ first run copies the template of the configuration into
     $G_domain = "<host name>";
     $G_alarm_passwd = "<another password>";
 
-and run it again:
-
-    ./INSTALL.sh
+No second run is needed: the installed files name the configuration and
+do not copy its values, which the daemon and the pages read from there
+when they start. Edited before step 7, it is what the daemon starts
+with; edited later, it takes a restart of the daemon (systemctl restart
+brisk), not a new install.
 
 
 ==== 7. Files of the machine ====
