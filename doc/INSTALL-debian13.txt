@@ -1,0 +1,161 @@
+===== Installing brisk on debian 13 (trixie), one machine, nginx =====
+
+The whole of brisk on one machine (-m full): nginx terminates the tls, the
+daemon and php-fpm run beside it, postgresql holds a new, empty database.
+
+The paths are the defaults of INSTALL.sh, all under /home/nastasi; with
+other ones add -w, -k, -y, -l and -U to the INSTALL.sh command line of
+step 6. Where "sudo" is written and sudo is not installed, use a root
+shell (su -).
+
+Checked on debian 13.6: nginx 1.26.3, php 8.4.24, postgresql 17.
+
+
+==== Behind a forwarder on another port ====
+
+The browser may reach the site on a port other than the one nginx listens
+on, for example a machine that forwards its port 10443 to port 443 of this
+one, with the tls closed here. Nothing has to be configured for that:
+
+- the websocket is opened on the port of the page (xynt-streaming.js);
+- the nginx configuration written by "INSTALL.sh system" and
+  system/nginx/brisk.conf say "absolute_redirect off", so /brisk answers
+  "Location: /brisk/" and the browser keeps its port;
+- error.php redirects with a relative url.
+
+The forwarder must keep the address of the players (a DNAT with this
+machine routing back through it): if every connection arrives from the
+forwarder, a single ban hits every player.
+
+
+==== 1. Packages ====
+
+    sudo apt update
+    sudo apt install git acl nginx postgresql \
+         php8.4-cli php8.4-fpm php8.4-mbstring php8.4-pgsql
+
+sysvshm and sysvsem come with php8.4-common, pulled in by the others;
+pcntl and zlib are built into php. INSTALL.sh checks every extension
+brisk needs and stops, naming it, when one is missing.
+
+
+==== 2. Access of www-data to the home ====
+
+debian 13 creates the homes with mode 0700 (HOME_MODE in /etc/login.defs).
+nginx, php-fpm and the daemon run as www-data and would not get past
+/home/nastasi. Crossing it is enough, reading it is not needed:
+
+    sudo setfacl -m u:www-data:x /home/nastasi
+
+
+==== 3. Sources ====
+
+    mkdir -p ~/git && cd ~/git
+    git clone -b php84-port-en-remote git@github.com:nastasi/brisk.git
+    git clone <brisk-img url> brisk-img
+
+brisk-img goes beside brisk: without it the site is installed without
+images, and INSTALL.sh says so.
+
+
+==== 4. php settings ====
+
+For the daemon (cli) and for the pages (fpm):
+
+    sudo cp ~/git/brisk/system/etc_php8.4_conf.d_brisk.ini /etc/php/8.4/cli/conf.d/90-brisk.ini
+    sudo cp ~/git/brisk/system/etc_php8.4_conf.d_brisk.ini /etc/php/8.4/fpm/conf.d/90-brisk.ini
+    sudo systemctl restart php8.4-fpm
+
+
+==== 5. Database ====
+
+sql/builder.sh reads the credentials from ~/.brisk-db.conf:
+
+    cat > ~/.brisk-db.conf <<'EOF'
+    DBHOST=127.0.0.1
+    DBUSER=brisk
+    DBPORT=5432
+    DBBASE=brisk
+    DBPASS=<db password>
+    PFX="bsk_"
+    EOF
+    chmod 600 ~/.brisk-db.conf
+
+builder.sh looks for sql.d/ in the current directory:
+
+    cd ~/git/brisk/sql
+    ./builder.sh create        # asks the password twice: the same as DBPASS
+    ./builder.sh build -s      # the tables; -s prints only the errors
+
+build skips the _devel files, so the database has no user. The first
+administrator is inserted by hand, the way 900-anagr_devel.sql does it
+(type 0x450000: admin, certified, normal user; guar_code is itself):
+
+    ./builder.sh psql -c "INSERT INTO bsk_users (code, login, pass, email, type, guar_code)
+      VALUES (10101, '<login>', md5('<password>'), '<email>', CAST(X'00450000' AS integer), 10101);"
+
+
+==== 6. Installation ====
+
+    mkdir -p ~/web/Etc ~/brisk-priv/ftok/brisk ~/brisk-priv/proxy/brisk
+    cd ~/git/brisk
+    ./INSTALL.sh -m full -S nginx -p ~/.brisk_install
+
+-p saves the options in ~/.brisk_install, read by every later run. The
+first run copies the template of the configuration into
+~/web/Etc/brisk_spu.conf.pho; set at least:
+
+    $G_dbauth = "host=127.0.0.1 port=5432 user=brisk password=<db password> dbname=brisk options='--client_encoding=UTF8'";
+    $G_domain = "<host name>";
+    $G_alarm_passwd = "<another password>";
+
+and run it again:
+
+    ./INSTALL.sh
+
+
+==== 7. Files of the machine ====
+
+    ./INSTALL.sh system
+
+It writes in ~/web/Etc the nginx configuration (nginx-brisk.conf,
+nginx-brisk-server.conf, nginx-brisk-daemon.inc) and the systemd unit
+(brisk.service), and prints the commands that put them in place:
+
+    sudo ln -s /home/nastasi/web/Etc/nginx-brisk.conf /etc/nginx/conf.d/
+    sudo cp /home/nastasi/web/Etc/brisk.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now brisk
+
+
+==== 8. The site in nginx ====
+
+/etc/nginx/sites-available/brisk:
+
+    server {
+        listen 443 ssl;
+        server_name <host name>;
+        ssl_certificate     /etc/ssl/certs/<cert>.pem;
+        ssl_certificate_key /etc/ssl/private/<key>.pem;
+        include /home/nastasi/web/Etc/nginx-brisk-server.conf;
+    }
+
+    sudo ln -s /etc/nginx/sites-available/brisk /etc/nginx/sites-enabled/
+    sudo nginx -t && sudo systemctl reload nginx
+
+The certificate is the one of the name the browsers use. A let's encrypt
+http challenge needs port 80 of this machine reachable from outside, which
+a forwarder of the https port alone does not give.
+
+
+==== 9. Checks ====
+
+    systemctl status brisk php8.4-fpm nginx postgresql
+    journalctl -u brisk -n 30
+    curl -kI https://127.0.0.1/brisk/                     # 200
+    curl -kI https://127.0.0.1/brisk                      # 301, "Location: /brisk/"
+    curl -kI https://127.0.0.1/Etc/brisk_spu.conf.pho     # 404: the configuration is not served
+
+Then open https://<host name>[:<port>]/brisk/ from outside and log in with
+the user of step 5: in the console of the browser the websocket opens on
+wss://<host name>[:<port>]/..., the port of the page.
