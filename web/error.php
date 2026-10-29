@@ -44,9 +44,10 @@ $mlang_error = array( 'headline'     => array('it' => 'briscola chiamata in sals
                       'content'      => array('it' => 'C\'è qualche problema sul server.<br><br>Tra qualche istante questa pagina proverà a riconnettersi automaticamente.<br><br>Ci dispiace del disagio.',
                                               'en' => 'EN E\' occorso qualche problema sul server.<br>Questa pagina proverà automaticamente a riconnettersi tra qualche istante.<br>Ci dispiace per il disagio.' ) );
 
-$host  = $_SERVER['HTTP_HOST'];
+/* relative: an absolute url with "http://" and the Host header broke the
+   https sites, and the ones the browser reaches on a forwarded port */
 $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-$redir_url = "http://$host$uri/";
+$redir_url = "$uri/";
 
 mt_srand(make_seed());
 $redir_rnd = rand(15, 25);
