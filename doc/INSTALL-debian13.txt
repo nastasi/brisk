@@ -115,6 +115,34 @@ when they start. Edited before step 7, it is what the daemon starts
 with; edited later, it takes a restart of the daemon (systemctl restart
 brisk), not a new install.
 
+Permissions. nginx, php-fpm and the daemon run as www-data, and the
+directories made by hand above belong to you, with the modes of your
+umask. INSTALL.sh sees to its own: the tree of the site, the ftok files,
+the proxy and legal directories. The rest is up to you:
+
+    chmod 711 ~/web
+    sudo chgrp www-data ~/web/Etc ~/web/Etc/brisk_spu.conf.pho
+    chmod 750 ~/web/Etc
+    chmod 640 ~/web/Etc/brisk_spu.conf.pho
+    sudo chgrp www-data ~/brisk-priv
+    chmod 2770 ~/brisk-priv
+
+- ~/web is the root of the site: www-data has to cross it, to reach the
+  tree of brisk and the files nginx serves from the root. Without it the
+  daemon does not even start: "Failed at step CHDIR ... Permission
+  denied" in the journal.
+- Etc holds the database password in clear, and with the debian umask
+  (0002) the configuration is born readable by everybody: only the
+  group www-data needs it.
+- the daemon creates its sockets in the directory of the -U prefix, and
+  with the default -U /home/nastasi/brisk-priv/brisk that is
+  ~/brisk-priv itself: www-data has to write there. The setgid keeps
+  what is born inside in the group www-data.
+
+To see where www-data stops on a path:
+
+    namei -l /home/nastasi/web/brisk/spush
+
 
 ==== 7. Files of the machine ====
 
