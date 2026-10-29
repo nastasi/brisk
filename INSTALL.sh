@@ -54,6 +54,12 @@ fpm_root=""
 # front as this machine sees it; fpm_pool_glob is where the php-fpm pools are
 # looked for.
 front_ip=""
+# With -S nginx, the address of a tcp forwarder in front of this nginx (a
+# port forwarded as it is, the tls closed here). Such a forwarder hides the
+# players behind its own address, and every ban would hit all of them: it has
+# to send the PROXY protocol, and nginx takes the player address from there,
+# trusting it from this address only. Empty: nothing in front.
+tcp_proxy_ip=""
 fpm_pool_glob="/etc/php/*/fpm/pool.d/*.conf"
 #
 # functions
@@ -64,7 +70,7 @@ function usage () {
     echo "$1 pkg                          - build brisk packages."
     echo "$1 system [same options]        - write in Etc the files of the machine:"
     echo "                                 nginx conf, nftables rules, systemd unit."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-I <front_ip>] [-x]"
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-I <front_ip>] [-X <tcp_proxy_ip>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
@@ -99,6 +105,8 @@ function usage () {
     echo "  -B site root on the php-fpm host - def. the root of the site here"
     echo "  -I address of the front machine - def. \"$front_ip\""
     echo "     (-m server with -U tcp://: \"system\" writes the nftables rules)"
+    echo "  -X address of a tcp forwarder   - def. \"$tcp_proxy_ip\""
+    echo "     (-S nginx: it sends the PROXY protocol, nginx reads the player address there)"
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
@@ -427,6 +435,30 @@ function nft_conf_gen() {
     fi
 }
 
+# The root of the site, see the comment where it is called. A function
+# because the "system" action needs it too, and runs before the install.
+function document_root_get() {
+    if [ ! -z "$document_root_in" ]; then
+        document_root="$(echo "$document_root_in" | sed 's:/*$::')"
+    else
+        _pfx="$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"    # brisk
+        _web="$(echo "$web_path"    | sed 's:/*$::')"            # .../web/brisk
+        document_root="$(echo "$_web" | sed "s:/*$_pfx\$::")"
+        if [ "$document_root" = "$_web" -o -z "$document_root" ]; then
+            # web_path does not end with prefix_path: fall back on the server
+            # configuration file, accepting both DocumentRoot and root
+            document_root="$(grep -iE '^[ \t]*(DocumentRoot|root)[ \t]' "${apache_conf}" 2>/dev/null \
+                             | grep -v '^[ \t]*#' | head -1 \
+                             | awk '{ print $2 }' | tr -d '";' | sed 's:/*$::')"
+        fi
+    fi
+    if [ -z "$document_root" ]; then
+        echo "Cannot determine the root of the site: use -R <document_root>"
+        exit 1
+    fi
+    echo "    document_root: \"$document_root\""
+}
+
 # The nginx configuration of the site, for direct mode (-D TRUE), written in
 # Etc beside the brisk configuration. system/nginx/brisk.conf is the same
 # thing as a commented template; this one comes out already aligned with the
@@ -442,7 +474,7 @@ function nft_conf_gen() {
 # $connection_upgrade, can share one nginx without a duplicate definition.
 function nginx_conf_gen() {
     local name var pfx fpmr pool_n hp host port i f tmp
-    local http_f srv_f inc_f prbuf ngx ngx_ver etc_rel
+    local http_f srv_f inc_f prbuf ngx ngx_ver etc_rel lstn absr
 
     name="$(inst_name)"
     var="$(inst_var)"
@@ -468,6 +500,13 @@ function nginx_conf_gen() {
     if [ -n "$ngx_ver" ] && \
        [ "$(printf '%s\n1.7.11\n' "$ngx_ver" | sort -V | head -1)" != "1.7.11" ]; then
         prbuf="# proxy_request_buffering off;   # needs nginx >= 1.7.11, here $ngx_ver"
+    fi
+    # absolute_redirect exists from nginx 1.11.8: without it the redirects
+    # stay absolute, and wrong only behind a forwarder on another port
+    absr="absolute_redirect off;"
+    if [ -n "$ngx_ver" ] && \
+       [ "$(printf '%s\n1.11.8\n' "$ngx_ver" | sort -V | head -1)" != "1.11.8" ]; then
+        absr="# absolute_redirect off;   # needs nginx >= 1.11.8, here $ngx_ver"
     fi
 
     # --- http level ---
@@ -536,17 +575,36 @@ EOF
     gen_put "$tmp" "$inc_f"
 
     # --- inside the server {} ---
+    lstn="listen 443 ssl;"
+    if [ -n "$tcp_proxy_ip" ]; then
+        lstn="listen 443 ssl proxy_protocol;"
+    fi
     tmp="$(mktemp)"
     {
         echo "# brisk ${pfx}/ - nginx, inside the server {} that terminates the tls."
         echo "# Generated by INSTALL.sh, do not edit: run \"INSTALL.sh system\" again instead."
         echo "#   server {"
-        echo "#       listen 443 ssl;"
+        echo "#       ${lstn}"
         echo "#       ..."
         echo "#       include $srv_f;"
         echo "#   }"
+        if [ -n "$tcp_proxy_ip" ]; then
+            echo "# proxy_protocol is an option of the listening socket: every server {}"
+            echo "# on that address and port gets it, and only $tcp_proxy_ip can talk to it."
+            echo
+            echo "# $tcp_proxy_ip forwards the connections as they are: the player address"
+            echo "# comes in the PROXY protocol, believed from that machine only. It becomes"
+            echo "# \$remote_addr, so the X-Real-Ip of the daemon and the REMOTE_ADDR of php-fpm."
+            echo "set_real_ip_from ${tcp_proxy_ip};"
+            echo "real_ip_header   proxy_protocol;"
+        fi
         echo
-        echo "location = ${pfx} { return 301 ${pfx}/; }"
+        echo "# relative redirects: the browser may reach this nginx through a"
+        echo "# forwarder on another port, which an absolute one would lose"
+        echo "location = ${pfx} {"
+        echo "    ${absr}"
+        echo "    return 301 ${pfx}/;"
+        echo "}"
         echo
         echo "# the urls the daemon serves: exact matches, they win over everything"
         for f in index.php index_wr.php index_rd.php index_rd_wss.php \
@@ -560,6 +618,7 @@ EOF
         echo "location ^~ ${pfx}/ {"
         echo "    root  ${document_root};"
         echo "    index index.php;"
+        echo "    ${absr}"
         echo
         echo "    # nginx does not read .htaccess files: these replace them. Without"
         echo "    # them the .phh/.pho, not associated with php, download as text."
@@ -717,6 +776,7 @@ while [ $# -gt 0 ]; do
         -F*) fpm_pass="$(get_param "-F" "$1" "$2")"; sh=$?;;
         -B*) fpm_root="$(get_param "-B" "$1" "$2")"; sh=$?;;
         -I*) front_ip="$(get_param "-I" "$1" "$2")"; sh=$?;;
+        -X*) tcp_proxy_ip="$(get_param "-X" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
         -W) web_only="TRUE";;
         -x) test_add="TRUE";;
@@ -762,6 +822,7 @@ echo "    web_server: \"$web_server\""
 echo "    fpm_pass:   \"$fpm_pass\""
 echo "    fpm_root:   \"$fpm_root\""
 echo "    front_ip:   \"$front_ip\""
+echo "    tcp_proxy_ip: \"$tcp_proxy_ip\""
 echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
@@ -793,6 +854,7 @@ if [ ! -z "$outconf" ]; then
     echo "fpm_pass=\"$fpm_pass\""
     echo "fpm_root=\"$fpm_root\""
     echo "front_ip=\"$front_ip\""
+    echo "tcp_proxy_ip=\"$tcp_proxy_ip\""
     echo "test_add=\"$test_add\""
   ) > "$outconf"
 fi
@@ -837,6 +899,9 @@ if [ "$action" = "system" ]; then
     fi
 
     sys_todo=""
+
+    # the nginx configuration names the root of the site
+    document_root_get
 
     # --- nginx ---
     # The daemon machine of a split installation has no nginx: the
@@ -1177,25 +1242,7 @@ sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path
 # Now it is derived from the parameters already known: web_path ends with
 # prefix_path, so removing the latter from the former leaves the root. No
 # server to ask. An explicit value can still be forced with -R.
-if [ ! -z "$document_root_in" ]; then
-    document_root="$(echo "$document_root_in" | sed 's:/*$::')"
-else
-    _pfx="$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"    # brisk
-    _web="$(echo "$web_path"    | sed 's:/*$::')"            # .../web/brisk
-    document_root="$(echo "$_web" | sed "s:/*$_pfx\$::")"
-    if [ "$document_root" = "$_web" -o -z "$document_root" ]; then
-        # web_path does not end with prefix_path: fall back on the server
-        # configuration file, accepting both DocumentRoot and root
-        document_root="$(grep -iE '^[ \t]*(DocumentRoot|root)[ \t]' "${apache_conf}" 2>/dev/null \
-                         | grep -v '^[ \t]*#' | head -1 \
-                         | awk '{ print $2 }' | tr -d '";' | sed 's:/*$::')"
-    fi
-fi
-if [ -z "$document_root" ]; then
-    echo "Cannot determine the root of the site: use -R <document_root>"
-    exit 1
-fi
-echo "    document_root: \"$document_root\""
+document_root_get
 sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph* ${web_path}__/donometer.php
 
 # The files under docroot/ belong in the root of the site, not in the
