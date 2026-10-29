@@ -17,8 +17,8 @@ usage () {
     echo "       clean"
     echo "       build"
     echo "       rebuild"
-    echo "       psql"
-    echo "       piped"
+    echo "       psql [-- <psql args>]"
+    echo "       piped [-- <psql args>]"
     echo "       add <filesql> [<filesql2> [..]]"
     echo "       del <filesql> [<filesql2> [..]]"
     echo "       res <filesql> [<filesql2> [..]]"
@@ -111,6 +111,10 @@ while [ $# -gt 0 ]; do
         -h|--help|help)
             CMD=help
             ;;
+        --)
+            shift
+            break
+            ;;
         *)
             break
             ;;
@@ -170,11 +174,11 @@ case $CMD in
             | sqlexe
         ;;
     "psql")
-        psql $pg_args $@
+        psql $pg_args "$@"
         ;;
 
     "piped")
-        psql $pg_args -t -q -A -F '|' $@
+        psql $pg_args -t -q -A -F '|' "$@"
         ;;
     "dump")
         if [ $# -eq 1 ]; then

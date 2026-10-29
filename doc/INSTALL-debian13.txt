@@ -91,7 +91,7 @@ build skips the _devel files, so the database has no user. The first
 administrator is inserted by hand, the way 900-anagr_devel.sql does it
 (type 0x450000: admin, certified, normal user; guar_code is itself):
 
-    ./builder.sh psql -c "INSERT INTO bsk_users (code, login, pass, email, type, guar_code)
+    ./builder.sh psql -- -c "INSERT INTO bsk_users (code, login, pass, email, type, guar_code)
       VALUES (10101, '<login>', md5('<password>'), '<email>', CAST(X'00450000' AS integer), 10101);"
 
 
