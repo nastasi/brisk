@@ -687,14 +687,17 @@ xynt_streaming.prototype = {
         this.page = url_complete(this.win.location.href, this.page);
 
         // DEFAULT TRANSPORT PROTOCOL HERE websocketsec, websocket
+        // The websocket goes to the port the page came from: behind a tcp
+        // forwarder the site can answer on a port other than 443 or 80.
         if (this.transp_fback > 0) {
             if (location.protocol == 'https:') {
                 transp_type = "websocketsec";
-                transp_port = 443;
+                transp_port = (location.port != "" ? parseInt(location.port, 10) : 443);
             }
             else {
                 transp_type = "websocket";
-                transp_port = (this.transp_fback == 2 ? 80 : 8080);
+                transp_port = (this.transp_fback == 2 ?
+                               (location.port != "" ? parseInt(location.port, 10) : 80) : 8080);
             }
 
         }
@@ -720,8 +723,9 @@ xynt_streaming.prototype = {
             end_proto = newpage.indexOf("://");
             first_slash = newpage.substring(end_proto+3).indexOf("/");
 
+            // the host of the page, without the port it may already carry
             page = (transp_type == "websocketsec" ? "wss://" : "ws://")
-                + newpage.substring(end_proto+3, end_proto+3 + first_slash) + ":"
+                + newpage.substring(end_proto+3, end_proto+3 + first_slash).replace(/:[0-9]+$/, "") + ":"
                 + transp_port + newpage.substring(end_proto+3 + first_slash);
             // this.log("MOP WS: " + page);
         }
