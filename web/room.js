@@ -28,7 +28,7 @@
 
 */
 
-function state_add(flags, comp)
+function state_add(username, flags, comp)
 {
     var content = "", supercont = "";
     var st, superst, name = "", supername = "", supersfx = "";
@@ -104,22 +104,35 @@ function state_add(flags, comp)
         }
     }
 
-    if ((flags & 0xf0000) != 0) {
-        superst = flags & 0x20000;
-        if (name != "") {
-            supersfx = "_side";
-        }
 
-        switch (superst) {
-        case 0x20000:
-            if (comp != null) {
-                supername = "suprend.php?comp="+comp+"&sfx="+supersfx;
+    var is_custom_bedge = false;
+    if (window.custom_bedge) {
+        var ret = window.custom_bedge(username, name, flags);
+        if (ret != null) {
+            supername = ret.supername;
+            supertit = ret.supertit;
+            // console.log(ret);
+            is_custom_bedge = true;
+        }
+    }
+    if (!is_custom_bedge) {
+        if ((flags & 0xf0000) != 0) {
+            superst = flags & 0x20000;
+            if (name != "") {
+                supersfx = "_side";
             }
-            else {
-                supername = "img/superuser"+supersfx+".png";
+
+            switch (superst) {
+            case 0x20000:
+                if (comp != null) {
+                    supername = "suprend.php?comp="+comp+"&sfx="+supersfx;
+                }
+                else {
+                    supername = "img/superuser"+supersfx+".png";
+                }
+                supertit = (g_lang == 'en' ? "Brisk Supporter" : "Brisk Supporter");
+                break;
             }
-            supertit = (g_lang == 'en' ? "Brisk Supporter" : "Brisk Supporter");
-            break;
         }
     }
 
@@ -332,6 +345,9 @@ function j_stand_cont(ddata)
         for (i = 0 ; i < standup_data_old.length ; i++) {
             for (e = 0 ; e < data.length ; e++) {
                 if (standup_data_old[i][1] == data[e][1]) {
+                    if (data[e][1] == window.myname) {
+                        data[e][0] |= 1;
+                    }
                     break;
                 }
             }
@@ -344,6 +360,9 @@ function j_stand_cont(ddata)
                 if (standup_data_old[i][0] != data[e][0] ||
                     standup_data_old[i].length != data[e].length ||
                     (data[e].length == 3 && standup_data_old[i][2] != data[e][2])) {
+                    if (data[e][1] == window.myname) {
+                        data[e][0] |= 1;
+                    }
                     arr_mod[idx_mod_n] = data[e];
                     idx_mod[idx_mod_n++] = i;
                 }
@@ -359,6 +378,9 @@ function j_stand_cont(ddata)
                 }
             }
             if (i == standup_data_old.length) {
+                if (data[e][1] == window.myname) {
+                    data[e][0] |= 1;
+                }
                 // console.log("ADD: "+data[e][1]);
                 arr_add[idx_add_n]   = data[e];
                 map_add[idx_add_n++] = e;
@@ -852,4 +874,23 @@ sideslide.prototype = {
         }
     }
 
+}
+
+/*
+ *  a double click on the chat makes it four times higher, upwards and
+ *  opaque, another one brings it back (.chatt_big in room.css); the
+ *  double click selects a word too: the selection is dropped
+ */
+function chatt_big_toggle(box)
+{
+    if (box.className.match(/\bchatt_big\b/)) {
+        box.className = box.className.replace(/\s*\bchatt_big\b/, "");
+    }
+    else {
+        box.className += " chatt_big";
+    }
+    if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+    }
+    box.scrollTop = box.scrollHeight;
 }

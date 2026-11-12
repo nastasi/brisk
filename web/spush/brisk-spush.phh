@@ -26,32 +26,113 @@ $DOCUMENT_ROOT="";
 $HTTP_HOST="dodo.birds.lan";
 define('USOCK_PATH_PFX', "/tmp/brisk");
 define('USOCK_POOL_N', 10);
+/* length of the listen queue of every socket in the pool: with the php
+   default (128) a burst of simultaneous entries is partly refused */
+define('USOCK_BACKLOG', 511);
+
+/* Where the daemon listens, and where whoever wants to reach it connects.
+ *
+ * USOCK_PATH_PFX is a path by default, and the pool is the set of unix
+ * sockets <pfx>0.sock .. <pfx>(USOCK_POOL_N-1).sock, plus <pfx>_admin.sock
+ * for the control channel. That is what it has always been, and it requires
+ * the frontend and the daemon to share a filesystem.
+ *
+ * It can also be an address, "tcp://<host>:<port>", and then the pool is the
+ * ports <port> .. <port>+USOCK_POOL_N-1 on that host, with <port>+USOCK_POOL_N
+ * for the control channel. The frontend can then sit on another machine. The
+ * shape is deliberately the same: the daemon opens USOCK_POOL_N listening
+ * sockets to spread the accepts over the pool, and nginx lists them as that
+ * many upstream servers either way.
+ *
+ * Two things change with the address form, and neither is optional:
+ *
+ * - the daemon believes X-Real-Ip (see Sac_a_push::run), and that address is
+ *   what feeds the bans, the blacklist and the cloud check. Over a unix
+ *   socket only a local process could set it; over tcp anybody who reaches
+ *   the port can claim to be anybody, so a reachable port is a way around
+ *   every ban.
+ * - the daemon speaks plain http: it is nginx that terminates the tls. Between
+ *   the two machines the session cookies travel in clear.
+ *
+ * So bind it to an address only the frontend can reach, and keep the two ends
+ * on a segment you trust or inside a tunnel.
+ */
+function spu_is_inet($pfx)
+{
+    return (strpos($pfx, "://") !== FALSE);
+}
+
+function spu_listen_url($pfx, $idx)
+{
+    if (!spu_is_inet($pfx)) {
+        return (sprintf("unix://%s%d.sock", $pfx, $idx));
+    }
+
+    /* "tcp://host:port" -> "tcp://host:port+idx". The port is after the last
+       colon, which is also right for a bracketed ipv6 address. */
+    $i = strrpos($pfx, ":");
+    return (substr($pfx, 0, $i + 1) . (intval(substr($pfx, $i + 1)) + $idx));
+}
+
+function spu_admin_url($pfx)
+{
+    if (!spu_is_inet($pfx)) {
+        return ("unix://".$pfx."_admin.sock");
+    }
+
+    return (spu_listen_url($pfx, USOCK_POOL_N));
+}
+
+/* How the daemon gets the player connection.
+
+   TRUE  (direct mode, the default): the frontend opens an ordinary http
+         connection on one of the unix sockets of the pool and the daemon
+         reads the request from it. Neither the php ancillary extension nor a
+         descriptor handover module in the frontend (mod_proxy_fdpass2 for
+         apache, ngx_http_fdpass_module for nginx) are needed, nor kTLS: the
+         packaged nginx is enough. The frontend however stays in the middle
+         for the whole life of the connection, which in a comet application
+         is long. Sample configuration in system/nginx/.
+
+   FALSE (historic mode): the frontend reads the request, then hands the live
+         client descriptor to the daemon with SCM_RIGHTS and steps aside.
+         It requires the C components mentioned above. If the frontend
+         terminates the TLS and hands over the encrypted socket, kTLS is
+         needed as well.
+
+   The code for both modes is in Obj/sac-a-push.phh, in the branch that
+   accepts new connections. */
+define('SPU_HTTP_DIRECT', TRUE);
 define('SOCK_SHARD_N', 2);
 
 define('PENDINGPAGE_CONTINUE', 0);
 define('PENDINGPAGE_WAITDATA', 1);
 define('PENDINGPAGE_FLUSH',    2);
+/* waiting for the head of the http request: used only in SPU_HTTP_DIRECT
+   mode, where the daemon has to read it from the network and cannot do so by
+   blocking the event loop, which serves every player */
+define('PENDINGPAGE_WAITHEAD', 3);
 
 class PendingPage {
-  var $socket; // socket handler of page stream
-  var $status; // status can be 0: waiting for data, 1: flush phase
+  public $socket; // socket handler of page stream
+  public $status; // status can be 0: waiting for data, 1: flush phase
 
-  var $kalive; // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
-  var $msg;    // place where store failed fwrite data
-  var $msg_sz; // size of content
+  public $kalive; // if no message are sent after RD_KEEPALIVE_TOUT secs we send a keepalive from server
+  public $msg;    // place where store failed fwrite data
+  public $msg_sz; // size of content
 
-  var $method; // method used to request the page
-  var $header; // array of header fields
-  var $get;    // array of get args
-  var $post;   // array of post args
-  var $cookie; // array of cookie args
-  var $path;   // requested path
-  var $addr;   // source address
-  var $contsz; // expected content size
-  var $rest;   // number of missing bytes
-  var $cont;   // content of unfinished POST
+  public $method; // method used to request the page
+  public $header; // array of header fields
+  public $get;    // array of get args
+  public $post;   // array of post args
+  public $cookie; // array of cookie args
+  public $path;   // requested path
+  public $addr;   // source address
+  public $contsz; // expected content size
+  public $rest;   // number of missing bytes
+  public $cont;   // content of unfinished POST
 
-  function PendingPage($socket, $curtime, $kalive)
+  function __construct($socket, $curtime, $kalive)
   {
       $this->socket = $socket;
       // fprintf(STDERR, "SOCKET ADD: %s\n", $this->socket);
@@ -92,6 +173,17 @@ class PendingPage {
       $this->status = PENDINGPAGE_CONTINUE;
       $this->msg    = $hea;
       $this->msg_sz = $hea_sz;
+  }
+
+  /* page waiting for the head: nothing is known about the request yet,
+     bytes are accumulated in ->cont until the empty line arrives */
+  static function pendingpage_waithead($socket, $curtime, $kalive)
+  {
+      $thiz = new PendingPage($socket, $curtime, $kalive);
+      $thiz->status = PENDINGPAGE_WAITHEAD;
+      $thiz->cont   = "";
+      $thiz->rest   = 0;
+      return ($thiz);
   }
 
   static function pendingpage_waiting($socket, $curtime, $kalive, $method, $header,
@@ -156,6 +248,24 @@ class PendingPage {
   function try_flush($curtime)
   {
       // fprintf(STDERR, "IMPORTANT: TRY_FLUSH: start %d\n", $this->status);
+      /* a socket closed elsewhere: from php 8 on, writing on it is a
+         TypeError that no @ silences, and it takes the daemon down */
+      if (!is_resource($this->socket))
+          return TRUE;
+
+      /* nothing to write while the head or the body of the request is
+         awaited, but the wait has the same deadline: a client that sends
+         half of it and then neither writes nor closes would hold the
+         page and its socket until the daemon restarts */
+      if ($this->status == PENDINGPAGE_WAITHEAD ||
+          $this->status == PENDINGPAGE_WAITDATA) {
+          if ($this->kalive < $curtime) {
+              @fclose($this->socket);
+              return TRUE;
+          }
+          return (FALSE);
+      }
+
       if ($this->status != PENDINGPAGE_FLUSH &&
           $this->status != PENDINGPAGE_CONTINUE)
           return (FALSE);
@@ -167,8 +277,12 @@ class PendingPage {
       }   
 
       $wret = @fwrite($this->socket, $this->msg, mb_strlen($this->msg, "ASCII"));
-      if ($wret == FALSE && $wret !== FALSE) {
-          // printf("TRY FLUSH PendingPage::try_flush: wret 0 but not FALSE [%d]\n", mb_strlen($this->msg, "ASCII"));
+      /* 0 is a full buffer, to be tried again; FALSE is an error, like the
+         EPIPE of a client gone while the answer was being prepared: there
+         is nobody left to write to */
+      if ($wret === FALSE) {
+          @fclose($this->socket);
+          return TRUE;
       }
       if ($wret == $this->msg_sz) {
           if ($this->status == PENDINGPAGE_CONTINUE) {

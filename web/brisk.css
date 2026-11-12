@@ -27,15 +27,38 @@
     line-height: 120%;
 }
 
+/* width of the big logo in the background (1014x741): its own size, smaller
+   only when the window is narrower or shorter than the image, never enlarged */
+:root {
+    --bg-logo-w: min(1014px, 100vw, calc(100vh * 1014 / 741));
+}
+
 body {
-    background-image: url('img/brisk-bg.png');
-    background-color: #fafafa;
-    background-attachment: fixed;
+    background-color: #ffffff;
     margin: 0px;
     /* height: 800px; */
     padding: 0px;
 
     align: center;
+}
+
+/* the big logo, once, in the middle of the window; its edges are white.
+   It is a layer fixed to the window behind the page, not the background of
+   the body: Safari on iPhone and iPad ignores background-attachment: fixed,
+   and the logo would scroll with the page and sit in the middle of all of it */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('img/brisk-big-bg.jpg');
+    background-position: center center;
+    background-size: var(--bg-logo-w) auto;
+    background-repeat: no-repeat;
 }
 
 div {

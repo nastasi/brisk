@@ -58,11 +58,13 @@ function global_dump()
     GLOBAL $G_with_splash, $G_sidebanner, $G_sidebanner_idx;
     GLOBAL $G_with_topbanner, $G_selfreg_tout, $G_selfreg_mask;
 
-    fprintf(STDERR, "G_alarm_passwd = [%s]\n", print_r($G_alarm_passwd, TRUE));
+    /* the dump only has to show that the globals survived a reload: the two
+       secrets are reported as set or empty, never written to the log */
+    fprintf(STDERR, "G_alarm_passwd = [%s]\n", ($G_alarm_passwd == "" ? "(empty)" : "(set)"));
     fprintf(STDERR, "G_ban_list = [%s]\n", print_r($G_ban_list, TRUE));
     fprintf(STDERR, "G_black_list = [%s]\n", print_r($G_black_list, TRUE));
     fprintf(STDERR, "G_btrace_pref_sub = [%s]\n", print_r($G_btrace_pref_sub, TRUE));
-    fprintf(STDERR, "G_dbauth = [%s]\n", print_r($G_dbauth, TRUE));
+    fprintf(STDERR, "G_dbauth = [%s]\n", ($G_dbauth == "" ? "(empty)" : "(set)"));
     fprintf(STDERR, "G_dbpfx = [%s]\n", print_r($G_dbpfx, TRUE));
     fprintf(STDERR, "G_donors_all = [%s]\n", print_r($G_donors_all, TRUE));
     fprintf(STDERR, "G_donors_cur = [%s]\n", print_r($G_donors_cur, TRUE));
@@ -96,24 +98,60 @@ function global_dump()
 
 }
 
+$G_pid_fp = FALSE;
+
 function pid_save()
 {
-    $pid = getmypid();
+    GLOBAL $G_pid_fp;
+
     $fname = LEGAL_PATH."/brisk.pid";
 
-    if (file_exists($fname)) {
-        log_crit("WARN: brisk.pid already exists");
+    if (($fp = @fopen($fname, 'c+')) == FALSE) {
+        log_crit("REFUSING TO START: cannot open ".$fname);
+        fprintf(STDERR, "REFUSING TO START: cannot open %s\n", $fname);
+        return (FALSE);
     }
-    file_put_contents($fname, sprintf("%d\n", $pid));
+
+    /* The lock is taken for the whole life of the daemon and the kernel drops
+       it when the process dies, however it dies. It is the only check that
+       neither a stale file left by a crash nor two instances starting in the
+       same instant can fool, and both used to get through: the newcomer would
+       unlink the socket files and bind its own, taking every new connection
+       while the first one stayed alive, orphaned, on its own shared memory. */
+    if (flock($fp, LOCK_EX | LOCK_NB) == FALSE) {
+        rewind($fp);
+        $old = intval(trim(stream_get_contents($fp)));
+        log_crit(sprintf("REFUSING TO START: %s is held by %d", $fname, $old));
+        fprintf(STDERR, "REFUSING TO START: %s is held by %d\n", $fname, $old);
+        fclose($fp);
+        return (FALSE);
+    }
+
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, sprintf("%d\n", getmypid()));
+    fflush($fp);
+
+    /* kept open on purpose: closing it would drop the lock */
+    $G_pid_fp = $fp;
+
+    return (TRUE);
 }
 
 function pid_remove()
 {
-    $fname = LEGAL_PATH."/brisk.pid";
+    GLOBAL $G_pid_fp;
 
-    if (file_exists($fname)) {
-        unlink($fname);
+    if ($G_pid_fp == FALSE) {
+        /* the file was never ours: leaving it alone is what keeps the daemon
+           that does own it recorded, and the init script able to stop it */
+        return;
     }
+
+    unlink(LEGAL_PATH."/brisk.pid");
+    flock($G_pid_fp, LOCK_UN);
+    fclose($G_pid_fp);
+    $G_pid_fp = FALSE;
 }
 
 function post_manage(&$post, $line)
@@ -132,12 +170,55 @@ function post_manage(&$post, $line)
     }
 }
 
+/*
+ * "Direct http" mode: nginx (or any reverse proxy) opens an ordinary http
+ * connection on the unix socket instead of handing over the client file
+ * descriptor. The head of the request therefore comes from the network, and
+ * must be read without ever blocking the event loop: the loop itself takes
+ * care of it, with a pending page in the PENDINGPAGE_WAITHEAD state. These
+ * two functions are its two steps.
+ */
+
+/* Offset right after the empty line that closes the head, or FALSE if it
+   has not arrived in full yet. */
+function spu_head_end($buf)
+{
+    if (($pos = strpos($buf, "\r\n\r\n")) !== FALSE) {
+        return ($pos + 4);
+    }
+    if (($pos = strpos($buf, "\n\n")) !== FALSE) {
+        return ($pos + 2);
+    }
+    return (FALSE);
+}
+
+/* Repackages the http request in the same format the control channel of
+   mod_proxy_fdpass2 used to produce:
+
+     The-Request:<request line>\n <header>\n ... \n\n <body, if any>
+
+   so that spu_process_info() need not know where the data came from. The
+   request line has no colon, and without the label the parser would not
+   recognise it. */
+function spu_head_to_info($buf, $sep)
+{
+    $body     = mb_substr($buf, $sep, NULL, "ASCII");
+    $headpart = mb_substr($buf, 0, $sep, "ASCII");
+    $lines    = preg_split("/\r?\n/", rtrim($headpart, "\r\n"));
+    $lines[0] = "The-Request:" . $lines[0];
+
+    return (implode("\n", $lines) . "\n\n" . $body);
+}
+
 function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$cookie, &$rest, &$cont)
 {
     $check_post = FALSE;
     $header = array();
     $get = array();
     $post = array();
+    /* reset here as the others: the first copy of a cookie wins below,
+       and a leftover of a previous request must not be that one */
+    $cookie = array();
     $rest = 0;
     foreach(preg_split("/(\r?\n)/", $stream_info) as $line) {
         // printf("LINE: [%s]\n", $line);
@@ -152,19 +233,26 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
 
                 // LINE: [Cookie:sess=50e053a9511ef; CO_splashdate4=1356420646; CO_list=all; table_idx=7; table_token=510d494986925; lang=it; CO_bin5_pref_ring_endauct=false; CO_splashdate5=1358372822; CO_splashdate1=1363203374; CO_splashdate2=1363374826; __utma=43654517.209888411.1356605271.1356605271.1356605271.1; __utmz=43654517.1356605271.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)]
 
+                /* A name can come more than once, the same cookie stored by the
+                   browser under two paths: it sends the most specific path
+                   first, and that copy is the one to keep, as php does for
+                   $_COOKIE. Keeping the last one, a stale table_token stored
+                   under "/brisk" won over the current one under "/brisk/". */
                 $cookies = explode("; ", $header['Cookie']);
                 for ($i = 0 ; $i < count($cookies) ; $i++) {
                     $name = mb_strstr($cookies[$i], "=", TRUE, 'UTF-8');
                     if ($name == FALSE) {
-                        if (mb_strlen($cookies[$i]) > 0) {
-                            $cookie[$cookies[$i]] = "";
-                        }
-                        else {
+                        if (mb_strlen($cookies[$i]) == 0) {
                             printf("WARNING: malformat cookie element [%s]\n", $cookies[$i]);
+                        }
+                        else if (!array_key_exists($cookies[$i], $cookie)) {
+                            $cookie[$cookies[$i]] = "";
                         }
                         continue;
                     }
 
+                    if (array_key_exists($name, $cookie))
+                        continue;
                     $value = mb_substr($cookies[$i], mb_strlen($name)+1, 10140, 'UTF-8');
                     $cookie[$name] = urldecode($value);
                 }
@@ -213,8 +301,15 @@ function spu_process_info($stream_info, &$method, &$header, &$get, &$post, &$coo
             continue;
         }
         $split = explode(":", $line, 2);
+        if (!isset($split[1])) {
+            continue;
+        }
         $hea_id = trim(mb_convert_case($split[0], MB_CASE_TITLE, 'UTF-8'));
-        $header[$hea_id] = $split[1];
+        /* the value needs trimming: in the control channel dump it arrives
+           as "Name:value", but in a real http request it is "Name: value"
+           and the space would end up inside the value, breaking the cookie
+           parsing and the comparisons on Upgrade. */
+        $header[$hea_id] = trim($split[1]);
     }
     return $path;
 }
@@ -237,6 +332,24 @@ function headers_render($header, $len)
 {
     $cookies = "";
 
+    /* Http header names are case insensitive, php array keys are not. The
+       transports set "Content-type" (lowercase t) while the code below
+       checked for "Content-Type": the check never saw it and the default was
+       added anyway, so two Content-Type headers went out in the same
+       response. Same story for Expires and Cache-Control, already set by
+       force_no_cache() and then added again unconditionally.
+       With apache this went unnoticed, because the daemon wrote the bytes
+       straight to the client and the browser applied the last value. A
+       reverse proxy instead parses the response, keeps the first one and
+       drops the second: the charset was lost, and an application/xml was
+       replaced by text/html.
+       Here a map of the normalised keys is built and used for every
+       check. */
+    $hset = array();
+    foreach ($header as $hk => $hv) {
+        $hset[strtolower($hk)] = TRUE;
+    }
+
     if (isset($header['cookies'])) {
         $cookies = $header['cookies']->render();
         unset($header['cookies']);
@@ -258,11 +371,11 @@ function headers_render($header, $len)
     else {
         $s = "HTTP/1.1 200 OK\r\n";
 
-        if (!isset($header['Date']))
+        if (!isset($hset['date']))
             $s .= sprintf("Date: %s\r\n", date(DATE_RFC822));
-        if (!isset($header['Connection']))
+        if (!isset($hset['connection']))
             $s .= "Connection: close\r\n";
-        if (!isset($header['Content-Type']))
+        if (!isset($hset['content-type']))
             $s .= "Content-Type: text/html\r\n";
         foreach($header as $key => $value) {
             $s .= sprintf("%s: %s\r\n", $key, $value);
@@ -271,11 +384,19 @@ function headers_render($header, $len)
             $s .= sprintf("Content-Length: %d\r\n", $len);
         }
         else {
-            $s .= "Cache-Control: no-cache, must-revalidate\r\n";
-            $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
-            if (!isset($header['Content-Encoding'])) {
-                $s .= "Content-Encoding: chunked\r\n";
+            if (!isset($hset['cache-control'])) {
+                $s .= "Cache-Control: no-cache, must-revalidate\r\n";
             }
+            if (!isset($hset['expires'])) {
+                $s .= "Expires: Mon, 26 Jul 1997 05:00:00 GMT\r\n";
+            }
+            /* No Content-Encoding here: "chunked" is not a content coding
+               but a transfer coding, and it used to be emitted whenever the
+               client asked for no compression. Apache rewrote the response and
+               it went unnoticed; nginx forwards it as it stands, and a browser
+               that meets a content coding it does not know refuses the whole
+               body (ERR_CONTENT_DECODING_FAILED). The line below states the
+               transfer coding, which is the one that is really in use. */
             $s .= "Transfer-Encoding: chunked\r\n";
         }
         $s .= $cookies;
@@ -305,7 +426,24 @@ function get_encoding($header)
 {
     $enc = "plain";
     if (isset($header['Accept-Encoding'])) {
-        $acc = explode(',', $header['Accept-Encoding']);
+        /* "gzip, deflate, br" splits into tokens that carry a leading space
+           and may carry a quality: comparing them as they come made every
+           coding but the first one unreachable, and let through a coding the
+           client had refused with q=0. */
+        $acc = array();
+        foreach (explode(',', $header['Accept-Encoding']) as $tok) {
+            $par = explode(';', $tok);
+            $name = strtolower(trim($par[0]));
+            $qual = 1.0;
+            for ($i = 1 ; $i < count($par) ; $i++) {
+                if (preg_match('/^\s*q\s*=\s*([0-9.]+)\s*$/', $par[$i], $m)) {
+                    $qual = floatval($m[1]);
+                }
+            }
+            if ($qual > 0.0) {
+                $acc[] = $name;
+            }
+        }
 
         if (array_search('gzip', $acc) !== FALSE) {
             $enc = 'gzip';
@@ -319,10 +457,10 @@ function get_encoding($header)
 }
 
 class Cookie {
-    var $attr;
+    public $attr;
     // Set-Cookie: reg_fb_gate=deleted; Expires=Thu, 01-Jan-1970 00:00:01 GMT; Path=/; Domain=.foo.com; HttpOnly
     // string $name  [, string $value  [, int $expire = 0  [, string $path  [, string $domain  [, bool $secure = false  [, bool $httponly = false  ]]]]]] )
-    function Cookie()
+    function __construct()
     {
         $this->attr = array();
     }
@@ -388,9 +526,9 @@ class Cookie {
 }
 
 class Cookies {
-    var $cookies;
+    public $cookies;
 
-    function Cookies()
+    function __construct()
     {
         $this->cookies = array();
     }
@@ -423,37 +561,41 @@ class Sac_a_push {
     static $cnt_master = NULL;
     static $cnt_slave  = NULL;
 
-    var $provider_proxy; // list of provider/browser that offer proxy service
+    public $provider_proxy; // list of provider/browser that offer proxy service
 
-    var $file_socket_pfx;
-    var $unix_socket_pfx;
-    var $direct_socket;   // socket where read direct commands
-    var $socks;
-    var $s2u;             // user associated with input socket
-    var $s2p;             // pending page associated with input socket
-    var $s2c;             // ws sockets in closing phase
-    var $pending_pages;
-    var $is_daemon;
+    public $file_socket_pfx;
+    public $is_inet;         // TRUE when the pool is tcp instead of unix sockets
+    public $direct_socket;   // socket where read direct commands
+    public $socks;
+    public $s2u;             // user associated with input socket
+    public $s2p;             // pending page associated with input socket
+    public $s2c;             // ws sockets in closing phase
+    public $pending_pages;
+    public $is_daemon;
 
-    var $list_web;
-    var $list_cmd;
-    var $in;
+    public $list_web;
+    public $list_cmd;
+    public $in;
 
-    var $debug;
-    var $blocking_mode;
+    public $debug;
+    public $blocking_mode;
 
-    var $app;
+    public $app;
 
-    var $curtime;
+    public $curtime;
 
-    var $rndstr;
-    var $main_loop;
+    public $rndstr;
+    public $main_loop;
 
-    function Sac_a_push()
+    function __construct()
     {
     }
 
-    function sig_handler($sig)
+    /* php8: registered with pcntl_signal() as array("Sac_a_push",
+       "sig_handler"), that is in static form. Not being declared static it is
+       no longer a valid callable and pcntl_signal() raises a TypeError when
+       the daemon starts. It does not use $this, only static::$cnt_master. */
+    static function sig_handler($sig)
     {
         switch ($sig) {
         case SIGINT:
@@ -485,9 +627,14 @@ class Sac_a_push {
 
         $thiz->provider_proxy = ProviderProxy::create();
 
+        /* The scheme is not written in here any more: spu_listen_url() in
+           spush/brisk-spush.phh turns the configured prefix into the url of
+           each socket of the pool, a unix path or a tcp address alike, so the
+           daemon can sit on a machine of its own. See the comment there for
+           what that costs. */
         $thiz->file_socket_pfx = $sockname_pfx;
-        $thiz->unix_socket_pfx = "unix://$sockname_pfx";
-        $thiz->direct_socket = "unix://${sockname_pfx}_admin.sock";
+        $thiz->is_inet = spu_is_inet($sockname_pfx);
+        $thiz->direct_socket = spu_admin_url($sockname_pfx);
         $thiz->debug = $debug;
         $thiz->list_web = array();
         $thiz->socks = array();
@@ -523,26 +670,43 @@ class Sac_a_push {
                 $thiz->rndstr .= chr(mt_rand(65, 90));
         }
 
-        for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
-            $file_socket = $thiz->file_socket_pfx . sprintf("%d.sock", $i);
-            if (file_exists($file_socket)) {
-                unlink($file_socket);
+        /* A unix socket left behind by a previous run would make the bind
+           fail; a tcp port has no file to remove. */
+        if (!$thiz->is_inet) {
+            for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
+                $file_socket = $thiz->file_socket_pfx . sprintf("%d.sock", $i);
+                if (file_exists($file_socket)) {
+                    unlink($file_socket);
+                }
+            }
+            $file_socket_admin = $thiz->file_socket_pfx . "_admin.sock";
+            if (file_exists($file_socket_admin)) {
+                unlink($file_socket_admin);
             }
         }
-        $file_socket_admin = $thiz->file_socket_pfx . "_admin.sock";
-        if (file_exists($file_socket_admin)) {
-            unlink($file_socket_admin);
-        }
+
+        /* The default listen queue (128) is short for a full room: if many
+           players come in at the same instant the frontend gets EAGAIN on the
+           connect and has to fall back on another socket of the pool.
+           Measured: with the default a single socket queues 111 of them and
+           refuses the rest. */
+        $ctx = stream_context_create(array('socket' => array('backlog' => USOCK_BACKLOG)));
 
         $old_umask = umask(0);
         for ($i = 0 ; $i < USOCK_POOL_N ; $i++) {
-            $unix_socket = sprintf("%s%d.sock", $thiz->unix_socket_pfx, $i);
-            if (($list_sock = stream_socket_server($unix_socket, $err, $errs)) === FALSE) {
+            $listen_url = spu_listen_url($sockname_pfx, $i);
+            if (($list_sock = stream_socket_server($listen_url, $err, $errs,
+                                                   STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
+                                                   $ctx)) === FALSE) {
+                fprintf(STDERR, "listen on %s failed: %s\n", $listen_url, $err);
                 return (FALSE);
             }
             array_push($thiz->list_web, $list_sock);
         }
-        if (($thiz->list_cmd = stream_socket_server($thiz->direct_socket, $err, $errs)) === FALSE) {
+        if (($thiz->list_cmd = stream_socket_server($thiz->direct_socket, $err, $errs,
+                                                    STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
+                                                    $ctx)) === FALSE) {
+            fprintf(STDERR, "listen on %s failed: %s\n", $thiz->direct_socket, $err);
             return (FALSE);
         }
         umask($old_umask);
@@ -593,10 +757,13 @@ class Sac_a_push {
                                                            $header,           $get, $post, $cookie,
                                                              $path,          $addr, $rest, $cont);
 
-        $pendpage->try_flush($this->curtime);
-        // Add $pendpage to the pendpage array (in any case)
+        // Add $pendpage to the pendpage array, unless try_flush has
+        // already closed its socket: a closed one in the select set is a
+        // TypeError
         // fprintf(STDERR, "IMPORTANT: Pendadd: %d\n", $pendpage->status);
-        $this->pendpage_add($pendpage);
+        if ($pendpage->try_flush($this->curtime) == FALSE) {
+            $this->pendpage_add($pendpage);
+        }
     }
 
     function pendpage_try_addflush(&$new_socket, $tout, $enc, $header_out, $content)
@@ -625,7 +792,12 @@ class Sac_a_push {
             fprintf(STDERR, "WARNING: pendpage not found\n");
         }
         $this->socks_unset($sock);
-        fprintf(STDERR, "PP_REM: %d\n", intval($sock));
+        /* in direct http mode every request goes through a pending page:
+           this trace, occasional before, would become one log line for
+           every request of every player */
+        if ($this->debug > 1) {
+            fprintf(STDERR, "PP_REM: %d\n", intval($sock));
+        }
     }
 
 
@@ -677,11 +849,21 @@ class Sac_a_push {
     function check_globals()
     {
         GLOBAL $_globals_list;
+        /* all the missing ones on one line: stopping at the first one made
+           it one name per restart */
+        $missing = array();
         foreach ($_globals_list as $g) {
-            if (!array_search($g, $GLOBALS) || !isset($GLOBALS[$g])) {
-                error_log(sprintf("Global [%s] not declared", $g));
-                return FALSE;
+            /* by name: array_search looked for a global whose value was the
+               name, with ==, and found one only by chance - any 0 under
+               php 7, only a TRUE under php 8, so with no option switched on
+               every name looked missing */
+            if (!array_key_exists($g, $GLOBALS) || !isset($GLOBALS[$g])) {
+                $missing[] = $g;
             }
+        }
+        if (count($missing) > 0) {
+            error_log(sprintf("Globals not declared: [%s]", implode("] [", $missing)));
+            return FALSE;
         }
         return TRUE;
     }
@@ -702,9 +884,11 @@ class Sac_a_push {
         GLOBAL $G_with_topbanner;
         GLOBAL $G_tos_vers, $G_tos_fname, $G_tos_dtsoft, $G_tos_dthard, $G_tos_idx, $G_doc_path;
 
+        /* a warning, not a stop: the line stays in the log. The sleep(10)
+           that followed only kept the players out for ten seconds, and at
+           a reload froze the whole room, the loop being one for everybody */
         if (!$this->check_globals()) {
             fprintf(STDERR, "Take a look to the phplog file, GLOBALS missing!\n");
-            sleep(10);
         }
 
         if ($this->main_loop) {
@@ -823,7 +1007,27 @@ class Sac_a_push {
                         $cookie      = array();
                         $rest        = 0;
                         $cont        = "";
-                        if (($new_socket = ancillary_getstream($new_unix, $stream_info)) !== FALSE) {
+                        /* Two ways of getting the client connection:
+                           - direct http: nginx opens an ordinary http connection on the unix
+                             socket, and the accepted one is already the one to use
+                           - descriptor handover: the frontend passes the client socket with
+                             SCM_RIGHTS plus a channel carrying the headers (needs the
+                             ancillary extension and, without a cleartext layer in front,
+                             kTLS) */
+                        if (defined('SPU_HTTP_DIRECT') && SPU_HTTP_DIRECT) {
+                            /* The head of the request has not arrived yet and cannot be
+                               waited for here: there is a single event loop for every
+                               player, and a blocking read would stop them all. The
+                               connection is added to the watched ones in the WAITHEAD
+                               state; the loop will complete it when select() reports it
+                               readable. */
+                            stream_set_blocking($new_unix, 0);
+                            $this->pendpage_add(
+                                PendingPage::pendingpage_waithead($new_unix, $this->curtime, 20));
+                            continue;
+                        }
+                        $new_socket = ancillary_getstream($new_unix, $stream_info);
+                        if ($new_socket !== FALSE) {
                             // printf("NEW_SOCKET: %d\n", intval($new_socket));
                             stream_set_blocking($new_socket, $this->blocking_mode); // Set the stream to non-blocking
                             // error_log(sprintf("RECEIVED HEADER:\n%s", $stream_info));
@@ -915,6 +1119,13 @@ class Sac_a_push {
                                     }
                                     unset($this->s2u[$id]);
                                 }
+                                /* a page still waiting on this socket - an answer
+                                   not yet delivered, a request not yet complete -
+                                   leaves with it: left in the list, its next
+                                   try_flush would write on the closed socket */
+                                if (isset($this->s2p[$id])) {
+                                    $this->pendpage_rem($this->s2p[$id]);
+                                }
                             }
                             if ($postclose != NULL) {
                                 // print("POSTCLOSE found!");
@@ -952,7 +1163,6 @@ class Sac_a_push {
                                                        $G_cloud_smasher);
                                     if (!$this->check_globals()) {
                                         fprintf(STDERR, "Take a look to the phplog file, GLOBALS missing!\n");
-                                        sleep(10);
                                     }
                                     global_dump();
                                 }
@@ -987,8 +1197,18 @@ class Sac_a_push {
                                         $clie_cmd = json_decode($clie_cmd, TRUE);
                                         // fprintf(STDERR, "HERE WE ARE INCOMING DATA [%s]\n", print_r($clie_cmd, TRUE));
 
-                                        $wr_addr = substr(parse_url($clie_cmd["target"])["path"], strlen(SITE_PREFIX));
-                                        if ($wr_addr == "index_wr.php") {
+                                        /* an empty or non-JSON frame (ping, close) has no target:
+                                           with PHP 8 it raised "array offset on null", skip it */
+                                        $wr_addr = "";
+                                        if (is_array($clie_cmd) && isset($clie_cmd["target"]) && is_string($clie_cmd["target"])) {
+                                            $wr_url = parse_url($clie_cmd["target"]);
+                                            if (is_array($wr_url) && isset($wr_url["path"]))
+                                                $wr_addr = substr($wr_url["path"], strlen(SITE_PREFIX));
+                                        }
+                                        if ($wr_addr == "") {
+                                            /* nothing to do */
+                                        }
+                                        else if ($wr_addr == "index_wr.php") {
                                             ob_start();
                                             // complete: index_wr_main($this->app, $addr, $get, $post, $cookie);
                                             index_wr_main($this->app, $addr, $clie_cmd, NULL, NULL);
@@ -1030,11 +1250,60 @@ class Sac_a_push {
                                         */
                                     }
                                 }
-                                else {
+                                else if (!isset($this->s2p[$id]) && !isset($this->s2c[$id])) {
+                                    /* the message only makes sense if the socket belongs
+                                       to none of the known lists. Pending pages
+                                       (s2p) and postcloses (s2c) are handled
+                                       further down and have no user attached: in
+                                       direct http mode the head of EVERY request
+                                       goes through here, and this branch filled
+                                       the log with errors that were not. */
                                     fprintf(STDERR, "User associated with ID: %s not found\n", $id);
                                 }
 
-                                if (isset($this->s2p[$id])) {
+                                /* direct http mode: the head of the request arrives in
+                                   pieces like any other data, and here it is
+                                   accumulated without ever blocking */
+                                if (isset($this->s2p[$id])
+                                    && $this->s2p[$id]->status == PENDINGPAGE_WAITHEAD) {
+                                    $pp = $this->s2p[$id];
+                                    $pp->cont .= $buf;
+                                    $sep = spu_head_end($pp->cont);
+                                    if ($sep === FALSE) {
+                                        if (mb_strlen($pp->cont, "ASCII") > 32768) {
+                                            $this->pendpage_rem($pp);
+                                            fclose($sock);
+                                            $this->socks_unset($sock);
+                                        }
+                                        continue;      /* testa incompleta: si riprende al prossimo giro */
+                                    }
+                                    $stream_info = spu_head_to_info($pp->cont, $sep);
+                                    $new_socket  = $pp->socket_get();
+                                    $this->pendpage_rem($pp);
+
+                                    $method = ""; $get = array(); $post = array();
+                                    $cookie = array(); $rest = 0; $cont = "";
+                                    if (($path = spu_process_info($stream_info, $method, $header,
+                                                                  $get, $post, $cookie, $rest, $cont)) == FALSE) {
+                                        fclose($new_socket);
+                                        $this->socks_unset($new_socket);
+                                        continue;
+                                    }
+                                    $addr = (array_key_exists('X-Real-Ip', $header) ? $header['X-Real-Ip']
+                                             : addrtoipv4(stream_socket_get_name($new_socket, TRUE)));
+                                    $addr = $this->pproxy_realip($header, $addr);
+
+                                    if ($method == "POST" && $rest > 0) {
+                                        /* the body is still missing: the machinery already in
+                                           place for partial POSTs takes over */
+                                        $this->pendpage_try_addwait($new_socket, 20, $method, $header,
+                                                                    $get, $post, $cookie, $path, $addr,
+                                                                    $rest, $cont);
+                                        continue;
+                                    }
+                                    $manage_page = TRUE;
+                                }
+                                else if (isset($this->s2p[$id])) {
                                     $this->s2p[$id]->rest -= mb_strlen($buf, "ASCII");
                                     $this->s2p[$id]->cont .= $buf;
                                     if ($this->s2p[$id]->rest <= 0) {
@@ -1105,6 +1374,9 @@ class Sac_a_push {
             foreach ($this->pending_pages as $k => $pendpage) {
                 // TODO: try_flush if exists in the class
                 if ($pendpage->try_flush($this->curtime) == TRUE) {
+                    /* the socket is closed: out of the select set too, or
+                       socks and s2p keep a dead entry for every page */
+                    $this->socks_unset($pendpage->socket_get());
                     unset($this->pending_pages[$k]);
                 }
             }
@@ -1240,15 +1512,31 @@ class Sac_a_push {
             if (!isset($cmd['sess']) || !isset($cmd['private'])) {
                 return cmd_return(401, 'malformed cmd');
             }
+            /* The reply goes back to whoever reached the control channel, so
+               the three refusals answer alike: telling them apart would let
+               anyone probing sessions learn which ones exist and which belong
+               to an admin. usermgmt.php only looks for 200. The reason goes
+               to the log, without the session, which is a credential, and
+               never with G_alarm_passwd, which is also the password of
+               admin.php and the key of the mail verification hashes.
+               hash_equals: a != stops at the first differing byte. */
             $idx = -1;
-            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE)
-                return cmd_return(402, 'user not found');
+            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE) {
+                fprintf(STDERR, "DIRECT: userauth refused: no such session\n");
+                return cmd_return(403, 'denied');
+            }
 
-            if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00)
-                return cmd_return(403, 'permission denied');
+            if (($user->flags & USER_FLAG_TY_ADMIN) == 0x00) {
+                fprintf(STDERR, "DIRECT: userauth refused: [%s] from [%s] is not an admin\n",
+                        $user->name, $user->ip);
+                return cmd_return(403, 'denied');
+            }
 
-            if (md5($G_alarm_passwd.$user->ip.$user->sess) != $cmd['private'])
-                return cmd_return(404, 'authentication failed ['.$cmd['private'].']['.$G_alarm_passwd.$user->ip.$user->sess.']');
+            if (!hash_equals(md5($G_alarm_passwd.$user->ip.$user->sess), (string)$cmd['private'])) {
+                fprintf(STDERR, "DIRECT: userauth refused: wrong hash for admin [%s] from [%s]\n",
+                        $user->name, $user->ip);
+                return cmd_return(403, 'denied');
+            }
 
             return cmd_return(200, 'success');
         }

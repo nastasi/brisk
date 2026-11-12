@@ -24,6 +24,12 @@
 
 $G_base = "";
 
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
 require_once("Obj/brisk.phh");
 require_once("Obj/dbase_pgsql.phh");
 
@@ -31,20 +37,22 @@ ini_set("max_execution_time",  "300");
 
 class ImpPoints
 {
-    var $time;
-    var $tsess;
-    var $user_sess;
-    var $isauth;
-    var $username;
-    var $useraddr;
-    var $where;
-    var $ttok;
-    var $tidx;
-    var $nplayers;
-    var $logins;
-    var $pts;
+    public $time;
+    public $tsess;
+    public $user_sess;
+    public $isauth;
+    public $username;
+    public $useraddr;
+    public $where;
+    public $ttok;
+    public $tidx;
+    public $nplayers;
+    public $logins;
+    public $pts;
+    /* php8: declared, dynamic properties are deprecated since 8.2 */
+    public $usess;
 
-    function ImpPoints($s)
+    function __construct($s)
     {
         $arr = explode('|', $s);
 
@@ -151,7 +159,7 @@ function main()
                  * matches management
                  */
                 $mtc_sql = sprintf("SELECT * FROM %sbin5_matches WHERE ttok = '%s';", $G_dbpfx, escsql($pts->ttok));
-                if (($mtc_pg  = pg_query($dbconn->db(), $mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+                if (($mtc_pg  = pg_query($dbconn->db(), $mtc_sql)) == FALSE || pg_num_rows($mtc_pg) != 1) {
                     // match not exists, insert it
                     $mtc_sql = sprintf("INSERT INTO %sbin5_matches (ttok, tidx) VALUES ('%s', %d) RETURNING *;",
                                        $G_dbpfx, escsql($pts->ttok), $pts->tidx);
@@ -172,7 +180,7 @@ function main()
                  */
                 $gam_sql = sprintf("SELECT * FROM %sbin5_games WHERE mcode = %d and tstamp = to_timestamp(%d);",
                                    $G_dbpfx, $mtc_obj->code, $pts->time);
-                if (($gam_pg  = pg_query($dbconn->db(), $gam_sql)) == FALSE || pg_numrows($gam_pg) != 1) {
+                if (($gam_pg  = pg_query($dbconn->db(), $gam_sql)) == FALSE || pg_num_rows($gam_pg) != 1) {
                     // match not exists, insert it
                     $gam_sql = sprintf("INSERT INTO %sbin5_games (mcode, tstamp) 
                                                VALUES (%d, to_timestamp(%d)) RETURNING *;",
@@ -195,7 +203,7 @@ function main()
                     /* get the login associated code */
                     $usr_sql = sprintf("SELECT * FROM %susers WHERE login = '%s';",
                                        $G_dbpfx, escsql($pts->logins[$i]));
-                    if (($usr_pg  = pg_query($dbconn->db(), $usr_sql)) == FALSE || pg_numrows($usr_pg) != 1) {
+                    if (($usr_pg  = pg_query($dbconn->db(), $usr_sql)) == FALSE || pg_num_rows($usr_pg) != 1) {
                         $cont .= sprintf("User [%s] not found [%s]<br>\n", eschtml($pts->logins[$i]), eschtml($usr_sql));
                         save_rej($pts->logins[$i]);
                         continue;
@@ -244,7 +252,7 @@ main();
     echo "$cont";
 ?>
 <b>Append users from a file</b><br>
-<form accept-charset="utf-8" method="post" action="<?php echo $PHP_SELF;?>">
+<form accept-charset="utf-8" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
       <input type="hidden" name="F_ACT" value="append">
       <table><tr><td>Admin Password:</td>
       <td><input name="F_pass_private" type="password" value=""></td></tr>
@@ -255,7 +263,7 @@ main();
 </form>
 <hr>
 <b>Points importer from file to db</b><br>
-<form accept-charset="utf-8" method="post" action="<?php echo $PHP_SELF;?>">
+<form accept-charset="utf-8" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
       <input type="hidden" name="F_ACT" value="pointsimp">
       <table><tr><td>Admin Password:</td>
       <td><input name="F_pass_private" type="password" value=""></td></tr>

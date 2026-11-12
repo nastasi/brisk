@@ -53,7 +53,7 @@ ini_set("max_execution_time",  "240");
 require_once("../Obj/brisk.phh");
 require_once("../Obj/user.phh");
 require_once("../Obj/auth.phh");
-require_once("../Obj/dbase_${G_dbasetype}.phh");
+require_once("../Obj/dbase_{$G_dbasetype}.phh");
 require_once("Obj/briskin5.phh");
 require_once("Obj/placing.phh");
 
@@ -99,7 +99,7 @@ function main_pgsql($curtime)
                 break;
             }
 
-            $tmt_n = pg_numrows($tmt_pg);
+            $tmt_n = pg_num_rows($tmt_pg);
             // get matches
             for ($m = 0 ; $m < $tmt_n ; $m++) {
                 $tmt_obj = pg_fetch_object($tmt_pg, $m);
@@ -107,7 +107,7 @@ function main_pgsql($curtime)
                 $mtc_sql = sprintf("SELECT * from %sbin5_matches WHERE code = %d",
                                    $G_dbpfx, $tmt_obj->code);
 
-                if (($mtc_pg  = pg_query($bdb->dbconn->db(), $mtc_sql)) == FALSE || pg_numrows($mtc_pg) != 1) {
+                if (($mtc_pg  = pg_query($bdb->dbconn->db(), $mtc_sql)) == FALSE || pg_num_rows($mtc_pg) != 1) {
                     log_crit("statadm: matches row select failed");
                     break;
                 }
@@ -128,7 +128,7 @@ function main_pgsql($curtime)
                     break;
                 }
 
-                $gam_n = pg_numrows($gam_pg);
+                $gam_n = pg_num_rows($gam_pg);
                 for ($g = 0 ; $g < $gam_n ; $g++) {
                     $gam_obj = pg_fetch_object($gam_pg, $g);
 
@@ -141,7 +141,7 @@ function main_pgsql($curtime)
                         log_crit("statadm: points row select [$pts_sql] failed");
                         break;
                     }
-                    $pts_n = pg_numrows($pts_pg);
+                    $pts_n = pg_num_rows($pts_pg);
                     for ($p = 0 ; $p < $pts_n ; $p++) {
                         $pts_obj = pg_fetch_object($pts_pg, $p);
 
@@ -204,7 +204,7 @@ function main_pgsql($curtime)
                 break;
             }
 
-            for ($i = 0 ; $i < pg_numrows($pla_pg) ; $i++) {
+            for ($i = 0 ; $i < pg_num_rows($pla_pg) ; $i++) {
                 $pla_obj = pg_fetch_object($pla_pg,$i);
                 if ($pla_obj->games < $ming[$dtime])
                     continue;
@@ -231,8 +231,8 @@ function main_pgsql($curtime)
 
                 $old_gam[$subty]   = $pla_obj->games;
                 $old_score[$subty] = $pla_obj->score;
-            } // for ($i = 0 ; $i < pg_numrows($pla_pg) ; $i++) {
-            if ($i < pg_numrows($pla_pg)) {
+            } // for ($i = 0 ; $i < pg_num_rows($pla_pg) ; $i++) {
+            if ($i < pg_num_rows($pla_pg)) {
                 break;
             }
         } // for ($dtime = 0 ; $dtime < count($limi) ; $dtime++) {
@@ -271,7 +271,7 @@ function main()
         exit;
     }
 
-    $fun_name = "main_${G_dbasetype}";
+    $fun_name = "main_{$G_dbasetype}";
 
     $ctime = time();
 

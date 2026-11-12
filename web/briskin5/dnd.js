@@ -46,8 +46,8 @@ var cards_we_n;
 var takes_we_n;
 
 /* width of images */
-var cards_widths = {'xx': 65, 'yy': 54};
-var cards_heights = {'xx': 111, 'yy': 111};
+var cards_widths = {'xx': 65, 'nb': 56, 'yy': 54};
+var cards_heights = {'xx': 111, 'nb': 102, 'yy': 111};
 
 var cards_width = cards_widths[g_deck];
 var cards_width_d2 =  Math.ceil(cards_width / 2);

@@ -139,8 +139,8 @@ table.placings td
 }
 
 table.placing {
-    background-image: url('img/brisk-bg-light.png');
-    background-attachment: fixed;
+    /* white at 25% (75% transparent): the big logo of the body shows through */
+    background-color: rgba(255, 255, 255, 0.25);
 
     border: 1px solid gray;
     border-collapse: collapse;
@@ -182,8 +182,17 @@ table.macro td {
     text-align: center;
 }
 
+/*
+ *  the list of the tables follows the height of the window: 2.8 rows
+ *  (346px; every row is a 120px cell plus 4px of border-spacing) at least,
+ *  four whole rows (500px: 4px + 4 x 124px) at most. 373px is the rest of
+ *  the room: header, standing players, chat, its input and the company
+ *  line, so from 719px to 873px of window the room fills it exactly
+ */
 div.room_tab {
     height: 346px;
+    height: clamp(346px, 100vh - 373px, 500px);
+    height: clamp(346px, 100dvh - 373px, 500px);
     margin-left: auto;
     margin-right: auto;
     min-width: 680px;
@@ -203,8 +212,8 @@ table.room_tab td {
     -moz-border-radius: 8px;
     border-radius: 8px;
 
-    background-image: url('img/brisk-bg-light.png');
-    background-attachment: fixed;
+    /* white at 25% (75% transparent): the big logo of the body shows through */
+    background-color: rgba(255, 255, 255, 0.25);
 
     width: 25%;
     height: 120px;
@@ -251,8 +260,8 @@ table.room_standup {
     border-spacing: 0px;
     padding: 0px;
 
-    background-image: url('img/brisk-bg-light.png');
-    background-attachment: fixed;
+    /* white at 25% (75% transparent): the big logo of the body shows through */
+    background-color: rgba(255, 255, 255, 0.25);
 }
 
 table.room_standup td {
@@ -271,8 +280,8 @@ table.login {
     border: 1px solid gray;
     margin-top: 8px;
 
-    background-image: url('img/brisk-bg-light.png');
-    background-attachment: fixed;
+    /* white at 25% (75% transparent): the big logo of the body shows through */
+    background-color: rgba(255, 255, 255, 0.25);
  }
 
 table.login td {
@@ -323,8 +332,27 @@ div.esco {
     -moz-border-radius: 4px;
     border-radius: 4px;
 
-    background-image: url('img/brisk-bg-light.png');
-    background-attachment: fixed;
+    /* white at 25% (75% transparent): the big logo of the body shows through */
+    background-color: rgba(255, 255, 255, 0.25);
+
+    /* a double tap is a double click, not a zoom of the page */
+    touch-action: manipulation;
+}
+
+/*
+ *  the chat enlarged by a double click (chatt_big_toggle() in room.js):
+ *  four times higher, upwards over the standing players and the tables
+ *  (the negative margin keeps its place in the page, so nothing below
+ *  moves), opaque so what is behind does not disturb. Over the title and
+ *  the buttons of the standing players (z-index: 20), under the menu
+ *  (.webstart, z-index: 50)
+ */
+.chatt.chatt_big {
+    position: relative;
+    z-index: 21;
+    height: 400px;
+    margin-top: -300px;
+    background-color: #ffffff;
 }
 
 .txtt {
@@ -640,4 +668,58 @@ body.explain h4 {
 body.explain h5 {
     font-size: 120%;
     background-color: #fafafa;
+}
+
+/*
+ *  diagnostic area (watchdog, loaded images, ...): hidden at every page
+ *  load, diag_toggle() (commons.js) shows it
+ */
+div.diagbox {
+    display: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 80%;
+    padding: 2px 4px;
+    margin: 2px;
+    overflow-wrap: anywhere;
+
+    /* the colors of .webstart_hilite (start, actions, ... menu), background at 50% */
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background-color: rgba(255, 215, 128, 0.5);   /* #ffd780 */
+    border: 1px solid #ffae00;
+}
+
+div.diagbox.diag_on {
+    display: block;
+}
+
+img.stm_stat {
+    cursor: pointer;
+}
+
+/* one-line company details at the bottom of the room ($G_company_line) */
+div.company_line {
+    text-align: center;
+    font-size: 80%;
+    padding: 0px 4px 2px 4px;
+}
+
+/*
+ *  on windows taller than the room the spare space goes one third above
+ *  it and two thirds below, instead of being all below: a little high is
+ *  handier on the mobile devices. The other children of the body are
+ *  popups out of the flow or empty elements, and do not take space
+ */
+body.room {
+    display: grid;
+    grid-template-rows: 1fr auto 2fr;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+body.room > div.container {
+    grid-row: 2;
 }

@@ -23,6 +23,8 @@
  *
  */
 
+date_default_timezone_set('Europe/Rome');
+
 $G_base = "../";
 
 require_once($G_base."Obj/sac-a-push.phh");
@@ -64,9 +66,18 @@ function main($argv)
 {
     GLOBAL $G_ban_list, $G_black_list, $G_cloud_smasher, $G_provider_proxy;
 
-    pid_save();
+    if (pid_save() == FALSE) {
+        exit(3);
+    }
     do {
-        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list, $G_cloud_smasher)) == FALSE) {
+        if (($brisk = Brisk::create(LEGAL_PATH."/brisk-crystal.data", $G_ban_list, $G_black_list,
+                                    $G_cloud_smasher, $misfit)) == FALSE) {
+            if ($misfit) {
+                /* not 0: under systemd, Restart=on-failure brings the daemon
+                   back, and back it comes with a new room */
+                $ret = 13;
+                break;
+            }
             log_crit("Brisk::create failed");
             $ret = 1;
             break;

@@ -1,11 +1,11 @@
 <?php
 class ZLibStream {
-    var $s;
-    var $head;
-    var $type;
-    var $filter;
+    public $s;
+    public $head;
+    public $type;
+    public $filter;
 
-    function ZLibStream($type)
+    function __construct($type)
     {
         $this->type = $type;
         $this->s = array( FALSE, FALSE );
@@ -37,7 +37,14 @@ class ZLibStream {
             $thiz->head = "\037\213\010\000\000\000\000\000\000\003";
         }
         else if ($type  == 'deflate') {
-            if (($thiz->filter = stream_filter_append($thiz->s[1], "zlib.deflate", STREAM_FILTER_READ)) == FALSE) {
+            /* The window has to be stated: left to itself the filter emits a
+               raw deflate stream (no 78 9c header), while Content-Encoding:
+               deflate promises the zlib wrapper of RFC 1950. A positive window
+               asks for that wrapper; gzip above asks for the raw stream with a
+               negative one, and prepends its own header by hand. */
+            $params = array('level' => 6, 'window' => 15, 'memory' => 9);
+
+            if (($thiz->filter = stream_filter_append($thiz->s[1], "zlib.deflate", STREAM_FILTER_READ, $params)) == FALSE) {
                 return (FALSE);
             }
         }
@@ -79,7 +86,12 @@ class ZLibStream {
         for ($to_be_proc = $s_in_l, $max_fail = 0 ; $to_be_proc > 0 && $max_fail < 2 ; $max_fail++) {
             if ($to_be_proc > 0) {
                 $max_fail = 0;
-                if (($ct = fwrite($this->s[0], $s_in)) == FALSE) 
+                /* Only the part that is still missing gets written: passing
+                   $s_in whole again after a short write fed the already
+                   compressed bytes to the deflater a second time, and the
+                   client inflated a chunk with duplicated content in it. */
+                if (($ct = fwrite($this->s[0], mb_substr($s_in, $s_in_l - $to_be_proc,
+                                                         $to_be_proc, 'ASCII'))) == FALSE)
                     return FALSE;
                 
                 $to_be_proc -= $ct;

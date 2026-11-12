@@ -616,6 +616,7 @@ xynt_streaming.prototype = {
     cookiepath: "/brisk/",
     watchdog_hdl:      null,
     hbit:              function () {},
+    hlog:              null,  /* traffic line, set only while it is shown */
     keepalive_old:    -1,
     keepalive_new:    -1,
     keepalives_equal:  0,
@@ -687,14 +688,17 @@ xynt_streaming.prototype = {
         this.page = url_complete(this.win.location.href, this.page);
 
         // DEFAULT TRANSPORT PROTOCOL HERE websocketsec, websocket
+        // The websocket goes to the port the page came from: behind a tcp
+        // forwarder the site can answer on a port other than 443 or 80.
         if (this.transp_fback > 0) {
             if (location.protocol == 'https:') {
                 transp_type = "websocketsec";
-                transp_port = 443;
+                transp_port = (location.port != "" ? parseInt(location.port, 10) : 443);
             }
             else {
                 transp_type = "websocket";
-                transp_port = (this.transp_fback == 2 ? 80 : 8080);
+                transp_port = (this.transp_fback == 2 ?
+                               (location.port != "" ? parseInt(location.port, 10) : 80) : 8080);
             }
 
         }
@@ -720,8 +724,9 @@ xynt_streaming.prototype = {
             end_proto = newpage.indexOf("://");
             first_slash = newpage.substring(end_proto+3).indexOf("/");
 
+            // the host of the page, without the port it may already carry
             page = (transp_type == "websocketsec" ? "wss://" : "ws://")
-                + newpage.substring(end_proto+3, end_proto+3 + first_slash) + ":"
+                + newpage.substring(end_proto+3, end_proto+3 + first_slash).replace(/:[0-9]+$/, "") + ":"
                 + transp_port + newpage.substring(end_proto+3 + first_slash);
             // this.log("MOP WS: " + page);
         }
@@ -784,6 +789,10 @@ xynt_streaming.prototype = {
 
     hbit_set: function (hbit) {
         this.hbit = hbit;
+    },
+
+    hlog_set: function (hlog) { /* public: null to stop it */
+        this.hlog = hlog;
     },
 
 
@@ -866,11 +875,40 @@ xynt_streaming.prototype = {
             }
 
             if (this.keepalives_equal >= this.keepalives_eq_max) {
-                this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
-                this.reload();
-                // alert("watchdog return reload");
-                this.hbit_status();
-                return;
+                /* The keepalive counter only moves forward when the client
+                   manages to consume the incoming data. If it is stuck it can
+                   mean two very different things: that nothing arrives any
+                   more (the connection is gone) or that it does arrive but we
+                   are late in processing it, for instance because the browser
+                   is busy redrawing the list of a crowded room.
+                   In the second case reloading the page throws the work away
+                   for nothing, and the user gets the splash back.
+                   So, before declaring it dead, we look at whether there is
+                   still something left to consume. */
+                var to_consume = 0;
+                try {
+                    if (this.transp.ctx_new_is_set() && this.transp.ctx_old_len_is_set()) {
+                        to_consume = this.transp.ctx_new_curlen_get() - this.transp.ctx_old_len_get();
+                    }
+                }
+                catch (b) {
+                    to_consume = 0;
+                }
+                if (to_consume > 0 || this.gst.comms.length > 0
+                    || this.gst.st_loc < this.gst.st_loc_new) {
+                    this.log("hs::watchdog: still to consume ("+to_consume
+                             +" bytes, "+this.gst.comms.length
+                             +" commands): the connection is alive, not reloading");
+                    this.keepalives_equal = 0;
+                }
+                else {
+                    this.log("hs::watchdog: MAX ACHIEVED "+this.keepalives_equal);
+                    if (this.hlog) this.hlog("X");
+                    this.reload();
+                    // alert("watchdog return reload");
+                    this.hbit_status();
+                    return;
+                }
             }
         }
 
@@ -906,6 +944,7 @@ xynt_streaming.prototype = {
                 }
                 this.mon_update();
                 this.hbit_status();
+                if (this.hlog) this.hlog("/\\");
 
                 // else {
                 //     this.log("ctx_new.charAt(i) == '_'");
@@ -962,6 +1001,8 @@ xynt_streaming.prototype = {
 	        // alert("EXE"+gugu);
 	        // $("xhrdeltalog").innerHTML = "EVALL: "+singlecomm.replace("<", "&lt;", "g"); +"<br>";
 	        //xx this.hbit("+");
+                /* an empty command is the ping of the server */
+                if (this.hlog) this.hlog(singlecomm == "" ? "/\\" : "+");
 
                 // alert("SINGLE: ["+singlecomm+"]");
                 // window.console.log("["+singlecomm+"]");
@@ -981,6 +1022,7 @@ xynt_streaming.prototype = {
             }
             this.watchdog_hdl = setTimeout(function(obj) { /* obj.log("tout2"); */ obj.watchdog(); }, this.watchdog_timeout, this);
             this.hbit_status();
+            if (this.hlog) this.hlog("_");
         }
         // alert("watchdog return normal");
 

@@ -27,6 +27,11 @@ body {
     text-align: center;
 }
 
+/* no big logo at the table (brisk.css) */
+body::before {
+    content: none;
+}
+
 .chattshort {
     height: 70px;
     overflow: auto;

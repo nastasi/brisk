@@ -322,6 +322,7 @@ function set_iscalling(idx)
 var preferences = new Preferences(true, 'xx', 'xx');
 // FIXME move it in the html dynamic generation scope
 var deck_list = { 'xx': 'Normal cards',
+                  'nb': 'No border cards',
                   'yy': 'Slim cards' }
 function preferences_init()
 {

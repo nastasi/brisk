@@ -1,0 +1,7 @@
+Files that belong in the ROOT of the site, not inside the subdirectory of
+the application.
+
+index.php references them with a leading slash ("/cookie_law.js"), so the
+browser asks the DocumentRoot for them and not $prefix_path. INSTALL.sh copies
+them from here into "$document_root", the same value it writes into
+$DOCUMENT_ROOT.

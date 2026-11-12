@@ -19,12 +19,42 @@ web_path="/home/nastasi/web/brisk"
 ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
 proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
 usock_path_pfx="/home/nastasi/brisk-priv/brisk"
+http_direct="TRUE"
 sys_user="www-data"
 legal_path="/home/nastasi/brisk-priv/brisk"
 prefix_path="/brisk/"
 brisk_conf="brisk_spu.conf.pho"
 web_only="FALSE"
 test_add="FALSE"
+# Which machine this installation is for. The daemon and the frontend can sit
+# on two different hosts: nginx terminates the tls and proxies the nine game
+# endpoints to the daemon over tcp, and serves everything else itself.
+#   full    one machine, as it has always been
+#   server  the machine that runs brisk-spush: the php the daemon executes,
+#           its private directories, no image and no static asset
+#   front   the machine that runs nginx and php-fpm: everything it serves,
+#           images included, and none of the daemon's private directories
+install_mode="full"
+# Which http server faces the browser. Only apache reads the .htaccess files:
+# with nginx they protect nothing, and the same rules live in
+# system/nginx/brisk.conf instead.
+#   apache  install the .htaccess files, as it has always done
+#   nginx   install none of them
+web_server="apache"
+# With -S nginx the "system" action writes the nginx configuration of the site
+# next to the brisk configuration, in Etc. The pages the daemon does not serve go to
+# php-fpm: where it listens (anything fastcgi_pass accepts) and where the
+# tree is on that machine, which is not this one when php-fpm runs on the
+# daemon host. An empty fpm_root means the root of the site here.
+fpm_pass="unix:/run/php/php8.4-fpm.sock"
+fpm_root=""
+# With -m server and the daemon on tcp, the "system" action writes in Etc the
+# nftables rules that let only the front reach the daemon ports - and php-fpm, when
+# the php-fpm of this machine serves the front. front_ip is the address of the
+# front as this machine sees it; fpm_pool_glob is where the php-fpm pools are
+# looked for.
+front_ip=""
+fpm_pool_glob="/etc/php/*/fpm/pool.d/*.conf"
 #
 # functions
 function usage () {
@@ -32,12 +62,15 @@ function usage () {
     echo "$1 -h"
     echo "$1 chk                          - run lintian on all ph* files."
     echo "$1 pkg                          - build brisk packages."
-    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-x]"
+    echo "$1 system [same options]        - write in Etc the files of the machine:"
+    echo "                                 nginx conf, nftables rules, systemd unit."
+    echo "$1 [-W] [-n 3|5] [-c 2|8] [-t <(n>=4)>] [-T <auth_tab>] [-r <appr_tab>] [-G <cert_tab>] [-A <apache-conf>] [-a <auth_file_name>] [-f <conffile>] [-p <outconf>] [-U <usock_path_pfx>] [-D <TRUE|FALSE>] [-u <sys_user>] [-d <TRUE|FALSE>] [-w <web_dir>] [-k <ftok_dir>] [-l <legal_path>] [-y <proxy_path>] [-P <prefix_path>] [-m <full|server|front>] [-S <apache|nginx>] [-F <fpm_pass>] [-B <fpm_root>] [-I <front_ip>] [-x]"
     echo "  -h this help"
     echo "  -f use this config file"
     echo "  -p save preferences in the file"
     echo "  -W web files only"
-    echo "  -A apache_conf                  - def. $apache_conf"
+    echo "  -A server conf (for DocumentRoot) - def. $apache_conf"
+    echo "  -R document_root                - def. ricavato da -w meno -P"
     echo "  -c number cards in hand         - def. $card_hand"
     echo "  -n number of players            - def. $players_n"
     echo "  -t number of tables             - def. $tables_n"
@@ -52,8 +85,20 @@ function usage () {
     echo "  -y dir where place proxy files  - def. \"$proxy_path\""
     echo "  -P prefix path                  - def. \"$prefix_path\""
     echo "  -C config filename              - def. \"$brisk_conf\""
-    echo "  -U unix socket path prefix      - def. \"$usock_path_pfx\""
+    echo "  -U socket path prefix, or       - def. \"$usock_path_pfx\""
+    echo "     tcp://<host>:<port> to put the daemon on another machine"
+    echo "  -D nginx speaks http with the daemon - def. \"$http_direct\""
+    echo "     (FALSE: the frontend hands over the descriptor, see WARNING.txt)"
     echo "  -u system user to run brisk dae - def. \"$sys_user\""
+    echo "  -m machine role: full|server|front - def. \"$install_mode\""
+    echo "     (server: no images, no static; front: no private dirs)"
+    echo "  -S http server: apache|nginx    - def. \"$web_server\""
+    echo "     (nginx: no .htaccess installed; \"system\" writes the nginx conf)"
+    echo "  -F php-fpm address for nginx    - def. \"$fpm_pass\""
+    echo "     (e.g. 10.0.0.6:9000 when php-fpm runs on the daemon machine)"
+    echo "  -B site root on the php-fpm host - def. the root of the site here"
+    echo "  -I address of the front machine - def. \"$front_ip\""
+    echo "     (-m server with -U tcp://: \"system\" writes the nftables rules)"
     echo "  -x copy tests as normal php     - def. \"$test_add\""
     echo
 }
@@ -89,6 +134,526 @@ function searchetc() {
     return 1
 }
 
+# Put a freshly generated file in place: left alone when nothing changed,
+# otherwise the previous version is kept as .old, because these files are
+# also the ones somebody may have touched by hand.
+function gen_put() {
+    local tmp dst
+    tmp="$1"
+    dst="$2"
+
+    if [ -f "$dst" ] && cmp -s "$tmp" "$dst"; then
+        rm -f "$tmp"
+        echo "  $dst unchanged"
+    elif [ -f "$dst" ]; then
+        mv "$dst" "$dst.old"
+        mv "$tmp" "$dst"
+        echo "  $dst written, the previous one kept as $(basename "$dst").old"
+    else
+        mv "$tmp" "$dst"
+        echo "  $dst written"
+    fi
+}
+
+# The name of the installation, from the prefix: "/brisk26/" -> "brisk26".
+# It names the generated files and, made safe for identifiers, the nginx
+# upstream and map variable and the nftables table.
+function inst_name() {
+    echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;'
+}
+
+function inst_var() {
+    inst_name | sed 's/[^A-Za-z0-9_]/_/g'
+}
+
+# USOCK_POOL_N as the tree defines it. During an installation the tree being
+# built is the one to read; the "system" action runs on its own, with only the
+# installed tree to look at.
+function pool_size() {
+    local f n
+
+    for f in "${web_path}__/spush/brisk-spush.phh" "${web_path}/spush/brisk-spush.phh"; do
+        if [ -f "$f" ]; then
+            n="$(sed -n "s/^define('USOCK_POOL_N', *\([0-9]\+\)).*/\1/p" "$f")"
+            break
+        fi
+    done
+    echo "${n:-10}"
+}
+
+# The tcp ports the php-fpm pools of this machine listen on for other
+# machines. php-fpm serves the front only when it listens on tcp on an
+# address that is not loopback: a unix socket, or 127.0.0.1, serves this
+# machine alone. Nothing printed means php-fpm does not serve the front.
+function fpm_front_ports() {
+    local f l host port
+
+    for f in $fpm_pool_glob; do
+        [ -f "$f" ] || continue
+        sed -n 's/^[ \t]*listen[ \t]*=[ \t]*\([^ \t;]*\).*/\1/p' "$f"
+    done | while read l; do
+        case "$l" in
+            /*) continue ;;                    # unix socket
+            *:*) host="${l%:*}"; port="${l##*:}" ;;
+            *) host=""; port="$l" ;;            # port alone: every address
+        esac
+        echo "$port" | grep -q '^[0-9]\+$' || continue
+        case "$host" in
+            127.*|"[::1]"|localhost) continue ;;
+        esac
+        echo "$port"
+    done | sort -un
+}
+
+# The debian package that brings a php extension. pcntl and zlib are built
+# into the interpreter, so a machine that has php has them.
+function php_ext_pkg() {
+    case "$1" in
+        mbstring)        echo "php8.4-mbstring" ;;
+        pgsql)           echo "php8.4-pgsql" ;;
+        gd)              echo "php8.4-gd" ;;
+        sysvshm|sysvsem) echo "php8.4-common" ;;
+        *)               echo "php8.4-cli" ;;
+    esac
+}
+
+# The extensions brisk needs, asked of the interpreter that will run it.
+# None of them is missed at startup: mb_strlen is reached only when a request
+# is being read, so a daemon without mbstring comes up, listens, and dies on
+# the first player - or on the "shutdown" of the first systemctl stop, which
+# is how this was found on a debian 13 without php8.4-mbstring. The shared
+# memory and ftok hold the room, the challenges and the hardbans, pcntl
+# carries the signals of the daemon, zlib compresses the stream, pgsql is
+# the database unless $G_dbasetype says "file". gd is needed by the pages
+# only: suprend.php and donometer.php draw their images with it, and without
+# it they die with a fatal error that the browser sees as a broken image.
+function php_ext_check() {
+    local cand label exts bin b m miss pkgs
+
+    cand="$1"
+    label="$2"
+    exts="$3"
+
+    bin=""
+    for b in $cand; do
+        if command -v "$b" >/dev/null 2>&1; then
+            bin="$b"
+            break
+        fi
+    done
+    if [ -z "$bin" ]; then
+        echo "  $label: no interpreter found ($(echo $cand)), NOT checked"
+        return 0
+    fi
+
+    miss=""
+    for m in $exts; do
+        if ! "$bin" -m 2>/dev/null | grep -qix "$m"; then
+            miss="$miss $m"
+        fi
+    done
+    if [ -z "$miss" ]; then
+        echo "  $label [$bin]: ok"
+        return 0
+    fi
+
+    pkgs=""
+    for m in $miss; do
+        pkgs="$pkgs $(php_ext_pkg "$m")"
+    done
+    echo "  $label [$bin] is MISSING:$miss"
+    echo "      $(as_root "apt install$(echo "$pkgs" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/^ *//;s/ *$//' | sed 's/^/ /')")"
+    return 1
+}
+
+# How to say "as root" on this machine. debian 13 installs sudo and leaves
+# the root account without a password, so a "su -c" printed there is a
+# command nobody can run; where sudo is missing, su is still the way.
+function as_root() {
+    if command -v sudo >/dev/null 2>&1; then
+        echo "sudo $1"
+    else
+        echo "su -c '$1'"
+    fi
+}
+
+# Whether this machine is run by systemd. A /etc/init.d script is of no use
+# where it is: debian 13 dropped the sysv compatibility generator, so the
+# script is never turned into a service and nothing starts it at boot.
+function has_systemd() {
+    [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1
+}
+
+# The systemd unit of the daemon, written in Etc as <name>.service by the
+# "system" action, to be
+# copied by hand into /etc/systemd/system/. It replaces bin/brisk-init.sh,
+# which wrapped the daemon in a screen session and respawned it with a shell
+# loop: Restart= is that loop, and the log goes to the journal instead of
+# staying inside a screen nobody attaches to.
+function systemd_unit_gen() {
+    local name unit_f tmp
+    local pfx_ws
+
+    name="$(inst_name)"
+    unit_f="$etc_path/${name}.service"
+    pfx_ws="$(echo "$web_path" | sed 's:/*$::')"
+
+    tmp="$(mktemp)"
+    cat > "$tmp" <<EOF
+# brisk ${name} - systemd unit of the brisk-spush daemon.
+# Generated by INSTALL.sh, do not edit: run "INSTALL.sh system" again instead.
+#   $(as_root "cp ${unit_f} /etc/systemd/system/${name}.service")
+#   $(as_root "systemctl daemon-reload")
+#   $(as_root "systemctl enable --now ${name}")
+
+[Unit]
+Description=Brisk daemon (${name})
+# postgresql.service in After= is simply ignored when the database is on
+# another machine or is not postgres
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=${sys_user}
+# the daemon reaches its own files by relative paths ("./brisk-spush.phh",
+# and "../" for Obj/), so it has to start from spush/
+WorkingDirectory=${pfx_ws}/spush
+# -d is NOT optional: without it the daemon keeps stdin in its select set,
+# and stdin being /dev/null here it reads EOF at once and exits with 22.
+# brisk-init.sh got away without it because screen gave it a tty.
+ExecStart=${pfx_ws}/spush/brisk-spush.php -d
+ExecReload=/bin/kill -HUP \$MAINPID
+# SIGTERM makes the daemon serialize the room into
+# ${legal_path}/brisk-crystal.data and exit 0, and the next start picks the
+# room up from there. SIGINT would exit without saving anything, so the
+# signal of the stop has to stay SIGTERM.
+KillSignal=SIGTERM
+# measured at 56ms on an empty room; the room of a busy evening takes longer
+# to serialize, and after this systemd resorts to SIGKILL, which saves nothing
+TimeoutStopSec=15
+# a deliberate stop exits 0 and stays stopped; a crash, or a SIGKILL, comes
+# back up
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=multi-user.target
+
+# The daemon writes a line to stdout and one to stderr every four seconds,
+# and from here they go to the journal. To keep them out of it, add
+#   StandardOutput=null
+#   StandardError=null
+# to [Service], and the loss is only those two lines: what matters, from the
+# refused starts to the failed admin checks, is on stderr as well.
+EOF
+    gen_put "$tmp" "$unit_f"
+}
+
+# The nftables rules of the daemon machine of a split installation, written
+# in Etc as <name>.nft, to be copied by hand into /etc/nftables.d/. Over tcp
+# the daemon believes X-Real-Ip, which the bans are built on, and its control
+# channel holds the whole daemon up to 3 seconds per connection; php-fpm on
+# tcp runs any php file of this machine for whoever reaches it. Only the
+# front may reach the pool and php-fpm, and nobody but this machine the
+# control channel.
+function nft_conf_gen() {
+    local name var hp port pool_n fpm_ports ports_front ports_all nft_f tmp saddr
+
+    name="$(inst_name)"
+    var="$(inst_var)"
+    nft_f="$etc_path/${name}.nft"
+    hp="${usock_path_pfx#*://}"
+    port="${hp##*:}"
+    pool_n="$(pool_size)"
+
+    fpm_ports="$(fpm_front_ports | tr '\n' ' ' | sed 's/ *$//;s/ /, /g')"
+    ports_front="${port}-$((port + pool_n - 1))"
+    ports_all="${port}-$((port + pool_n))"
+    if [ -n "$fpm_ports" ]; then
+        ports_front="${ports_front}, ${fpm_ports}"
+        ports_all="${ports_all}, ${fpm_ports}"
+    fi
+    case "$front_ip" in
+        *:*) saddr="ip6 saddr" ;;
+        *)   saddr="ip saddr" ;;
+    esac
+
+    tmp="$(mktemp)"
+    {
+        echo "#!/usr/sbin/nft -f"
+        echo "# brisk /${name}/ - nftables rules of the daemon machine."
+        echo "# Generated by INSTALL.sh, do not edit: run \"INSTALL.sh system\" again instead."
+        echo "# Copy it into /etc/nftables.d/ - it cannot be included where it is,"
+        echo "# because nftables.service runs with ProtectHome=true and reads nothing"
+        echo "# under /home - include that directory from /etc/nftables.conf and load it:"
+        echo "#   $(as_root "mkdir -p /etc/nftables.d") ; $(as_root "cp <this file> /etc/nftables.d/")"
+        echo "#   add  include \"/etc/nftables.d/*.nft\"  to /etc/nftables.conf"
+        echo "#   $(as_root "nft -c -f /etc/nftables.conf") && $(as_root "systemctl enable --now nftables")"
+        echo "# /etc/nftables.d is not a directory of the nftables package: it exists"
+        echo "# only because of that include. And /etc/nftables.conf begins with"
+        echo "# \"flush ruleset\", so loading it replaces whatever is active: look at"
+        echo "# \"nft list ruleset\" first."
+        echo "#"
+        echo "# The table accepts by default and drops only the ports of brisk. With a"
+        echo "# firewall whose policy is drop, an accept here is not enough: the two"
+        echo "# accept rules have to go into that chain."
+        echo "#"
+        echo "#   daemon pool     ${port}-$((port + pool_n - 1))   the front only"
+        echo "#   control channel $((port + pool_n))         this machine only (usermgmt.php)"
+        if [ -n "$fpm_ports" ]; then
+            echo "#   php-fpm         ${fpm_ports}         the front only"
+        else
+            echo "#   php-fpm         not listed: no pool listens on tcp for other machines"
+        fi
+        echo
+        echo "table inet ${var} {"
+        echo "    chain input {"
+        echo "        type filter hook input priority filter; policy accept;"
+        echo
+        echo "        # the daemon listens on its own address, not on 127.0.0.1: the"
+        echo "        # connections of this machine to itself come in from lo"
+        echo "        iif lo accept"
+        echo
+        echo "        ${saddr} ${front_ip} tcp dport { ${ports_front} } accept"
+        echo
+        echo "        tcp dport { ${ports_all} } drop"
+        echo "    }"
+        echo "}"
+    } > "$tmp"
+    gen_put "$tmp" "$nft_f"
+    if [ -n "$fpm_ports" ]; then
+        echo "  php-fpm serves the front from here (port ${fpm_ports}): included"
+    else
+        echo "  php-fpm does not listen on tcp here: only the daemon ports are covered."
+        echo "  Configure php-fpm first and run \"INSTALL.sh system\" again if it has to serve the front."
+    fi
+}
+
+# The root of the site, see the comment where it is called. A function
+# because the "system" action needs it too, and runs before the install.
+function document_root_get() {
+    if [ ! -z "$document_root_in" ]; then
+        document_root="$(echo "$document_root_in" | sed 's:/*$::')"
+    else
+        _pfx="$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"    # brisk
+        _web="$(echo "$web_path"    | sed 's:/*$::')"            # .../web/brisk
+        document_root="$(echo "$_web" | sed "s:/*$_pfx\$::")"
+        if [ "$document_root" = "$_web" -o -z "$document_root" ]; then
+            # web_path does not end with prefix_path: fall back on the server
+            # configuration file, accepting both DocumentRoot and root
+            document_root="$(grep -iE '^[ \t]*(DocumentRoot|root)[ \t]' "${apache_conf}" 2>/dev/null \
+                             | grep -v '^[ \t]*#' | head -1 \
+                             | awk '{ print $2 }' | tr -d '";' | sed 's:/*$::')"
+        fi
+    fi
+    if [ -z "$document_root" ]; then
+        echo "Cannot determine the root of the site: use -R <document_root>"
+        exit 1
+    fi
+    echo "    document_root: \"$document_root\""
+}
+
+# The nginx configuration of the site, for direct mode (-D TRUE), written in
+# Etc beside the brisk configuration. system/nginx/brisk.conf is the same
+# thing as a commented template; this one comes out already aligned with the
+# parameters of the installation. Three files, because nginx wants their
+# parts in three different places:
+#
+#   nginx-<name>.conf         http level: the upgrade map and the upstream
+#   nginx-<name>-server.conf  inside the server {} that terminates the tls
+#   nginx-<name>-daemon.inc   included by each of the nine daemon urls
+#
+# <name> comes from the prefix, and so do the names of the map variable and
+# of the upstream: two installations, or another site with its own
+# $connection_upgrade, can share one nginx without a duplicate definition.
+function nginx_conf_gen() {
+    local name var pfx fpmr pool_n hp host port i f tmp
+    local http_f srv_f inc_f prbuf ngx ngx_ver etc_rel absr
+
+    name="$(inst_name)"
+    var="$(inst_var)"
+    pfx="/$(echo "$prefix_path" | sed 's:^/*::;s:/*$::')"
+    fpmr="$(echo "${fpm_root:-$document_root}" | sed 's:/*$::')"
+
+    http_f="$etc_path/nginx-${name}.conf"
+    srv_f="$etc_path/nginx-${name}-server.conf"
+    inc_f="$etc_path/nginx-${name}-daemon.inc"
+
+    pool_n="$(pool_size)"
+
+    # proxy_request_buffering exists from nginx 1.7.11: older ones refuse
+    # the whole configuration with "unknown directive". When the nginx of
+    # this machine can be asked, the line is commented out for it.
+    prbuf="proxy_request_buffering off;"
+    for ngx in nginx /usr/sbin/nginx; do
+        if command -v "$ngx" >/dev/null 2>&1; then
+            ngx_ver="$("$ngx" -v 2>&1 | sed -n 's@.*nginx/\([0-9.]*\).*@\1@p')"
+            break
+        fi
+    done
+    if [ -n "$ngx_ver" ] && \
+       [ "$(printf '%s\n1.7.11\n' "$ngx_ver" | sort -V | head -1)" != "1.7.11" ]; then
+        prbuf="# proxy_request_buffering off;   # needs nginx >= 1.7.11, here $ngx_ver"
+    fi
+    # absolute_redirect exists from nginx 1.11.8: without it the redirects
+    # stay absolute, and wrong only behind a forwarder on another port
+    absr="absolute_redirect off;"
+    if [ -n "$ngx_ver" ] && \
+       [ "$(printf '%s\n1.11.8\n' "$ngx_ver" | sort -V | head -1)" != "1.11.8" ]; then
+        absr="# absolute_redirect off;   # needs nginx >= 1.11.8, here $ngx_ver"
+    fi
+
+    # --- http level ---
+    tmp="$(mktemp)"
+    {
+        echo "# brisk ${pfx}/ - nginx, http level. Generated by INSTALL.sh, do not edit:"
+        echo "# run \"INSTALL.sh system\" again instead. Include it at http level, for example"
+        echo "#   $(as_root "ln -s $http_f /etc/nginx/conf.d/")"
+        echo
+        echo "map \$http_upgrade \$${var}_connection_upgrade {"
+        echo "    default upgrade;"
+        echo "    ''      close;"
+        echo "}"
+        echo
+        echo "# max_fails=0: when the daemon restarts nginx would mark every member"
+        echo "# as dead and answer 502 \"no live upstreams\" even after it is back."
+        echo "upstream ${var}_daemon {"
+        if echo "$usock_path_pfx" | grep -q '://'; then
+            hp="${usock_path_pfx#*://}"
+            host="${hp%:*}"
+            port="${hp##*:}"
+            for i in $(seq 0 $((pool_n - 1))); do
+                echo "    server ${host}:$((port + i)) max_fails=0;"
+            done
+        else
+            for i in $(seq 0 $((pool_n - 1))); do
+                echo "    server unix:${usock_path_pfx}${i}.sock max_fails=0;"
+            done
+        fi
+        echo "}"
+    } > "$tmp"
+    gen_put "$tmp" "$http_f"
+
+    # --- the nine daemon urls ---
+    tmp="$(mktemp)"
+    cat > "$tmp" <<EOF
+# brisk ${pfx}/ - directives of every url served by the daemon.
+# Generated by INSTALL.sh, do not edit: run "INSTALL.sh system" again instead.
+# brisk is a comet application: the response of index_rd.php is a stream
+# that stays open for hours, none of these lines is decorative.
+
+proxy_pass              http://${var}_daemon;
+proxy_http_version      1.1;
+# without this nginx buffers the response and the comet stream never arrives
+proxy_buffering         off;
+# the daemon reads the POST body by itself
+${prbuf}
+proxy_read_timeout      3600s;
+proxy_send_timeout      3600s;
+# the daemon already compresses by itself when the client says so
+gzip                    off;
+
+proxy_set_header        Host              \$host;
+# the daemon takes the player address from X-Real-Ip: bans and blacklist
+# are built on it
+proxy_set_header        X-Real-Ip         \$remote_addr;
+proxy_set_header        X-Forwarded-Proto \$scheme;
+proxy_set_header        Upgrade           \$http_upgrade;
+proxy_set_header        Connection        \$${var}_connection_upgrade;
+
+# the courtesy page when the daemon cannot be reached: static, served from
+# this machine, because error.php needs php-fpm and the database, which may
+# be down together with the daemon
+error_page              502 503 504 ${pfx}/daemon-down.html;
+EOF
+    gen_put "$tmp" "$inc_f"
+
+    # --- inside the server {} ---
+    tmp="$(mktemp)"
+    {
+        echo "# brisk ${pfx}/ - nginx, inside the server {} that terminates the tls."
+        echo "# Generated by INSTALL.sh, do not edit: run \"INSTALL.sh system\" again instead."
+        echo "#   server {"
+        echo "#       listen 443 ssl;"
+        echo "#       ..."
+        echo "#       include $srv_f;"
+        echo "#   }"
+        echo
+        echo "# relative redirects: the browser may reach this nginx through a"
+        echo "# forwarder on another port, which an absolute one would lose"
+        echo "location = ${pfx} {"
+        echo "    ${absr}"
+        echo "    return 301 ${pfx}/;"
+        echo "}"
+        echo
+        echo "# the urls the daemon serves: exact matches, they win over everything"
+        for f in index.php index_wr.php index_rd.php index_rd_wss.php \
+                 briskin5/index.php briskin5/index_wr.php briskin5/index_rd.php \
+                 briskin5/index_rd_wss.php briskin5/briskin5/index.php; do
+            printf "location = %-38s { include %s; }\n" "${pfx}/$f" "$inc_f"
+        done
+        echo
+        echo "# ^~ : the regex locations of the rest of the site (a \"location ~ \\.php\$\""
+        echo "# of its own) must not take the requests of ${pfx}/"
+        echo "location ^~ ${pfx}/ {"
+        echo "    root  ${document_root};"
+        echo "    index index.php;"
+        echo "    ${absr}"
+        echo
+        echo "    # nginx does not read .htaccess files: these replace them. Without"
+        echo "    # them the .phh/.pho, not associated with php, download as text."
+        echo "    location ^~ ${pfx}/Obj/          { return 404; }"
+        echo "    location ^~ ${pfx}/spush/        { return 404; }"
+        echo "    location ^~ ${pfx}/briskin5/Obj/ { return 404; }"
+        echo "    location ~ \\.(phh|pho)\$          { return 404; }"
+        echo "    location ~ /\\.                   { return 404; }"
+        echo
+        echo "    # every other php page"
+        echo "    location ~ \\.php\$ {"
+        echo "        include       fastcgi_params;"
+        echo "        fastcgi_pass  ${fpm_pass};"
+        echo "        fastcgi_param SCRIPT_FILENAME ${fpmr}\$fastcgi_script_name;"
+        echo "        fastcgi_param DOCUMENT_ROOT   ${fpmr};"
+        echo "    }"
+        echo
+        echo "    location ~* \\.(js|css)\$ {"
+        echo "        expires 1d;"
+        echo "        add_header Cache-Control \"public, must-revalidate\";"
+        echo "    }"
+        echo "    location ~* \\.(png|jpe?g|gif|mp3|swf)\$ {"
+        echo "        expires 4d;"
+        echo "    }"
+        echo "}"
+        # Etc holds the database credentials in clear: when it falls inside
+        # the root of the site it has to be denied explicitly.
+        case "$etc_path" in
+            "$document_root"/*)
+                etc_rel="${etc_path#$document_root}"
+                echo
+                echo "# the brisk configuration, with the database credentials in clear"
+                echo "location ^~ ${etc_rel}/ { return 404; }"
+                ;;
+        esac
+        # docroot/: index.php asks for these at the root of the site
+        if [ -d docroot ]; then
+            echo
+            echo "# index.php asks for these at the root of the site: they hold for the"
+            echo "# whole server {}, not only for ${pfx}/"
+            for f in $(find docroot -maxdepth 1 -type f ! -name 'README' | sort); do
+                echo "location = /$(basename "$f") { root ${document_root}; }"
+            done
+        fi
+    } > "$tmp"
+    gen_put "$tmp" "$srv_f"
+
+    if [ -n "$ngx_ver" ]; then
+        echo "  written for the nginx found here, $ngx_ver: check it with nginx -t"
+    else
+        echo "  no nginx found here to ask the version: written for nginx >= 1.7.11"
+    fi
+}
+
 #
 #  MAIN
 #
@@ -99,7 +664,7 @@ if [ "$1" = "chk" ]; then
     IFS='
 '
     for i in $(find -name '*.pho' -o -name '*.phh' -o -name '*.php'); do
-        php5 -l $i
+        php -l $i
     done
 
     taggit="$(git describe --tags | sed 's/^v//g')"
@@ -167,6 +732,7 @@ while [ $# -gt 0 ]; do
     conffile=""
     case $1 in
         -A*) apache_conf="$(get_param "-A" "$1" "$2")"; sh=$?;;
+        -R*) document_root_in="$(get_param "-R" "$1" "$2")"; sh=$?;;
         -f*) conffile="$(get_param "-f" "$1" "$2")"; sh=$?;;
         -p*) outconf="$(get_param "-p" "$1" "$2")"; sh=$?;;
         -c*) card_hand="$(get_param "-c" "$1" "$2")"; sh=$?;;
@@ -184,10 +750,16 @@ while [ $# -gt 0 ]; do
         -C*) brisk_conf="$(get_param "-C" "$1" "$2")"; sh=$?;;
         -l*) legal_path="$(get_param "-l" "$1" "$2")"; sh=$?;;
         -U*) usock_path_pfx="$(get_param "-U" "$1" "$2")"; sh=$?;;
+        -D*) http_direct="$(get_param "-D" "$1" "$2")"; sh=$?;;
         -u*) sys_user="$(get_param "-u" "$1" "$2")"; sh=$?;;
+        -m*) install_mode="$(get_param "-m" "$1" "$2")"; sh=$?;;
+        -S*) web_server="$(get_param "-S" "$1" "$2")"; sh=$?;;
+        -F*) fpm_pass="$(get_param "-F" "$1" "$2")"; sh=$?;;
+        -B*) fpm_root="$(get_param "-B" "$1" "$2")"; sh=$?;;
+        -I*) front_ip="$(get_param "-I" "$1" "$2")"; sh=$?;;
         system) action=system ; sh=1;;
-        -W) web_only="TRUE";;
-        -x) test_add="TRUE";;
+        -W) web_only="TRUE"; sh=1;;
+        -x) test_add="TRUE"; sh=1;;
         -h) usage $0; exit 0;;
 	*) usage $0; exit 1;;
     esac
@@ -222,8 +794,14 @@ echo "    proxy_path: \"$proxy_path\""
 echo "    prefix_path:\"$prefix_path\""
 echo "    brisk_conf: \"$brisk_conf\""
 echo "    usock_path_pfx: \"$usock_path_pfx\""
+echo "    http_direct: \"$http_direct\""
 echo "    sys_user:   \"$sys_user\""
 echo "    web_only:   \"$web_only\""
+echo "    install_mode: \"$install_mode\""
+echo "    web_server: \"$web_server\""
+echo "    fpm_pass:   \"$fpm_pass\""
+echo "    fpm_root:   \"$fpm_root\""
+echo "    front_ip:   \"$front_ip\""
 echo "    test_add:   \"$test_add\""
 
 if [ ! -z "$outconf" ]; then
@@ -247,35 +825,128 @@ if [ ! -z "$outconf" ]; then
     echo "prefix_path=\"$prefix_path\""
     echo "brisk_conf=\"$brisk_conf\""
     echo "usock_path_pfx=\"$usock_path_pfx\""
+    echo "http_direct=\"$http_direct\""
     echo "sys_user=\"$sys_user\""
     echo "web_only=\"$web_only\""
+    echo "install_mode=\"$install_mode\""
+    echo "web_server=\"$web_server\""
+    echo "fpm_pass=\"$fpm_pass\""
+    echo "fpm_root=\"$fpm_root\""
+    echo "front_ip=\"$front_ip\""
     echo "test_add=\"$test_add\""
   ) > "$outconf"
 fi
 
 max_players=$((40 + players_n * tables_n))
 
+# The "system" action writes every file that belongs to the machine rather
+# than to the tree of the site: the nginx configuration, the nftables rules
+# and the way the daemon is started. None of them is installed, because none
+# of their directories belongs to this user: they are written in Etc, beside
+# the brisk configuration, and the action says what to copy where.
+#
+# They are not written by an ordinary installation on purpose: an install is
+# run whenever the code changes, while these follow the shape of the machine,
+# which changes almost never.
 if [ "$action" = "system" ]; then
-    scrname="$(echo "$prefix_path" | sed 's@^/@@g;s@/$@@g;s@/@_@g;')"
+    scrname="$(inst_name)"
     echo
     echo "script name:  [$scrname]"
     echo "brisk path:   [$web_path]"
     echo "private path: [$legal_path]"
     echo "system user:  [$sys_user]"
+    echo "machine role: [$install_mode]"
+    echo "http server:  [$web_server]"
+    echo
+    if [ "$install_mode" = "front" ]; then
+        echo "init system:  [-] no daemon on a front"
+    elif has_systemd; then
+        echo "init system:  [systemd] -> a unit, written in Etc"
+    else
+        echo "init system:  [no systemd] -> the sysv script, in /etc/init.d"
+    fi
     echo
     read -p "press enter to continue" sure
-    cp bin/brisk-init.sh brisk-init.sh.wrk
-    sed -i "s@^BPATH=.*@BPATH=\"${web_path}\"@g;s@^PPATH=.*@PPATH=\"${legal_path}\"@g;s@^SSUFF=.*@SSUFF=\"${scrname}\"@g;s@^BUSER=.*@BUSER=\"${sys_user}\"@g" brisk-init.sh.wrk
 
-    su -c "cp brisk-init.sh.wrk /etc/init.d/${scrname}"
+    # Etc is where the generated files go. This action runs before the
+    # pre-check that looks it up, so it is looked up here.
+    etc_path="$(searchetc "$(dirname "$web_path")" Etc)"
+    if [ $? -ne 0 ]; then
+        echo "Etc directory not found above $(dirname "$web_path")"
+        exit 1
+    fi
 
-    rm brisk-init.sh.wrk
+    sys_todo=""
+
+    # the nginx configuration names the root of the site
+    document_root_get
+
+    # --- nginx ---
+    # The daemon machine of a split installation has no nginx: the
+    # configuration belongs to the front. And the historic mode needs a
+    # descriptor handover module this configuration knows nothing about.
+    if [ "$web_server" != "nginx" ]; then
+        echo "nginx configuration not written: -S apache."
+    elif [ "$install_mode" = "server" ]; then
+        echo "nginx configuration not written: it goes on the front machine (-m front)."
+    elif [ "$http_direct" != "TRUE" ]; then
+        echo "nginx configuration not written: -D FALSE needs the descriptor handover"
+        echo "module, see WARNING.txt."
+    else
+        echo "nginx configuration:"
+        nginx_conf_gen
+        sys_todo="${sys_todo}  $(as_root "ln -s $etc_path/nginx-${scrname}.conf /etc/nginx/conf.d/")\n"
+        sys_todo="${sys_todo}  include $etc_path/nginx-${scrname}-server.conf  inside the server {} of the site\n"
+        sys_todo="${sys_todo}  $(as_root "nginx -t") && $(as_root "systemctl reload nginx")\n"
+    fi
+
+    # --- nftables ---
+    # Over tcp the ports of the daemon have to be closed to everybody but
+    # the front, whatever the http server of the front is.
+    if [ "$install_mode" != "server" ] || ! echo "$usock_path_pfx" | grep -q '^tcp://'; then
+        :
+    elif [ -z "$front_ip" ]; then
+        echo "nftables rules not written: pass the address of the front with -I."
+    else
+        echo "nftables rules:"
+        nft_conf_gen
+        sys_todo="${sys_todo}  $(as_root "mkdir -p /etc/nftables.d") ; $(as_root "cp $etc_path/${scrname}.nft /etc/nftables.d/")\n"
+        sys_todo="${sys_todo}  add  include \"/etc/nftables.d/*.nft\"  to /etc/nftables.conf   (once)\n"
+        sys_todo="${sys_todo}  $(as_root "nft -c -f /etc/nftables.conf") && $(as_root "systemctl enable --now nftables")\n"
+    fi
+
+    # --- how the daemon is started ---
+    if [ "$install_mode" = "front" ]; then
+        : # no daemon here
+    elif has_systemd; then
+        echo "systemd unit:"
+        systemd_unit_gen
+        sys_todo="${sys_todo}  $(as_root "cp $etc_path/${scrname}.service /etc/systemd/system/")\n"
+        sys_todo="${sys_todo}  $(as_root "systemctl daemon-reload")\n"
+        sys_todo="${sys_todo}  $(as_root "systemctl enable --now ${scrname}")\n"
+    else
+        # No systemd: the sysv script is what starts the daemon, and this is
+        # the one file the action installs itself, as it always has.
+        cp bin/brisk-init.sh brisk-init.sh.wrk
+        sed -i "s@^BPATH=.*@BPATH=\"${web_path}\"@g;s@^PPATH=.*@PPATH=\"${legal_path}\"@g;s@^SSUFF=.*@SSUFF=\"${scrname}\"@g;s@^BUSER=.*@BUSER=\"${sys_user}\"@g" brisk-init.sh.wrk
+        if command -v sudo >/dev/null 2>&1; then
+            sudo cp brisk-init.sh.wrk "/etc/init.d/${scrname}"
+        else
+            su -c "cp brisk-init.sh.wrk /etc/init.d/${scrname}"
+        fi
+        rm brisk-init.sh.wrk
+        echo "sysv script installed as /etc/init.d/${scrname}"
+        sys_todo="${sys_todo}  $(as_root "update-rc.d $scrname defaults")\n"
+    fi
+
     echo
     echo "... DONE."
-    echo "DON'T FORGET: after the first installation you MUST configure your run-levels accordingly"
-    echo
-    echo "Example: su -c 'update-rc.d $scrname defaults'"
-    echo
+    if [ -n "$sys_todo" ]; then
+        echo "DON'T FORGET: nothing above is in place yet. To put it there:"
+        echo
+        printf "$sys_todo"
+        echo
+    fi
     exit 0
 fi
 #
@@ -286,6 +957,36 @@ dsta="$(dirname "$web_path")"
 etc_path="$(searchetc "$dsta" Etc)"
 if [ $? -ne 0 ]; then
     echo "Etc directory not found"
+    exit 1
+fi
+
+# The php extensions, of the daemon and of the pages, each where they run.
+# The tree installs fine without them and the trouble turns up later, far
+# from here, so this is a stop and not a warning.
+db_ext="pgsql"
+if [ -f "$etc_path/$brisk_conf" ]; then
+    _dbt="$(sed -n 's/^\$G_dbasetype *= *"\([a-z]*\)".*/\1/p' "$etc_path/$brisk_conf" | tail -1)"
+    if [ "$_dbt" = "file" ]; then
+        db_ext=""
+    fi
+fi
+echo "php extensions:"
+php_ext_ok=0
+if [ "$install_mode" != "front" ]; then
+    php_ext_check "php php8.4" "the daemon" "mbstring sysvshm sysvsem zlib pcntl $db_ext" || php_ext_ok=1
+fi
+if [ "$install_mode" != "server" ]; then
+    # The pages of the front can be served by a php-fpm of another machine,
+    # and then it is that machine that has to carry the extensions.
+    case "$fpm_pass" in
+        unix:*|127.*|localhost:*|"")
+            php_ext_check "php-fpm8.4 /usr/sbin/php-fpm8.4" "the pages" "mbstring sysvshm sysvsem zlib gd $db_ext" || php_ext_ok=1 ;;
+        *)
+            echo "  the pages: php-fpm is on another machine ($fpm_pass), check it there" ;;
+    esac
+fi
+if [ $php_ext_ok -ne 0 ]; then
+    echo "Install what is missing and run again."
     exit 1
 fi
 
@@ -303,6 +1004,27 @@ fi
 
 if [ $players_n -ne 3 -a $players_n -ne 5 ]; then
     echo "players_n ($players_n) out of range (3|5)"
+    exit 1
+fi
+
+case "$install_mode" in
+    full|server|front) ;;
+    *) echo "install_mode (\"$install_mode\") must be full, server or front"; exit 1;;
+esac
+# The frontend machine has no daemon, so none of the private directories the
+# daemon needs - ftok, legal, proxy - makes sense there. That is exactly what
+# -W already meant, so "front" simply implies it.
+if [ "$install_mode" = "front" ]; then
+    web_only="TRUE"
+fi
+
+case "$web_server" in
+    apache|nginx) ;;
+    *) echo "web_server (\"$web_server\") must be apache or nginx"; exit 1;;
+esac
+
+if [ "$http_direct" != "TRUE" -a "$http_direct" != "FALSE" ]; then
+    echo "http_direct ($http_direct) out of range (TRUE|FALSE)"
     exit 1
 fi
 
@@ -364,11 +1086,25 @@ if [ "$web_only" = "FALSE" ]; then
     done
     chmod -R 777 ${proxy_path}/bin5
 
+    # The donation button is a fragment of html that index.php reads from
+    # FTOK_PATH. It is installed only if it is not there already, so as not to
+    # overwrite the one of the installation: whoever does not want it simply
+    # does not put it there.
+    if [ -f data/brisk_donate.txt -a ! -f "${ftokk_path}/brisk_donate.txt" ]; then
+        install -m 644 data/brisk_donate.txt "${ftokk_path}/brisk_donate.txt"
+        echo "  installed brisk_donate.txt in ${ftok_path}"
+    fi
+
     mkdir -p "${legal_path}"
     chmod 777 "${legal_path}"
 fi
 
 bsk_busting="$(git rev-parse --short HEAD 2>/dev/null|| true)"
+# with uncommitted changes the commit alone does not change between two
+# installs, and the browsers keep the old .css and .js: add the time
+if [ "$bsk_busting" != "" ] && [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+    bsk_busting="${bsk_busting}-$(date +%s)"
+fi
 if [ "$bsk_busting" = "" ]; then
     bsk_busting=$(grep '^\$G_brisk_version'  web/Obj/brisk.phh | sed 's/^[^"'"'"']*["'"'"']/v/g;s/["'"'"'].*//g')
 fi
@@ -382,20 +1118,45 @@ for i in $(find web -type d | grep '/' | sed 's/^....//g'); do
     install -d ${web_path}__/$i
 done
 
-for i in $(find web -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^....//g'); do
+# The php goes on both machines, and so do the .js. The frontend serves
+# admin.php, usermgmt.php and the others with php-fpm, and those include the
+# same Obj/ tree: usermgmt.php and mailmgr.php even reach spush/brisk-spush.phh
+# for USOCK_PATH_PFX. The .js are needed daemon side too, because index.php
+# decides whether to emit the custom.js tag by looking for the file on disk.
+#
+# What the daemon does not need is what only a browser ever asks for: the
+# stylesheets, the sounds and, further down, the images of brisk-img and the
+# files of docroot/.
+find_names=( -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho'
+             -o -name '*.js' -o -name 'LICENSE' -o -name 'VENDOR.txt'
+             -o -name 'terms-of-service*' )
+if [ "$install_mode" != "server" ]; then
+    find_names+=( -o -name '*.css' -o -name '*.mp3' -o -name '*.swf'
+                  -o -name 'daemon-down.html' )
+fi
+for i in $(find web "${find_names[@]}" | sed 's/^....//g'); do
     install -m 644 "web/$i" "${web_path}__/$i"
 done
 
-# hardlink for nginx managed websocket files.
-ln "${web_path}__/xynt_test01.php" "${web_path}__/xynt_test01_wss.php"
-
+# The pages of webtest/ are laboratory tools, installed only with -x: they
+# write what they are asked into the page as it comes, and on a production
+# site a link to one of them would run its own code in the pages of brisk.
 if [ "$test_add" = "TRUE" ]; then
     for i in $(find webtest -name '.htaccess' -o -name '*.php' -o -name '*.phh' -o -name '*.pho' -o -name '*.css' -o -name '*.js' -o -name '*.mp3' -o -name '*.swf' -o -name 'terms-of-service*' | sed 's/^........//g'); do
         install -m 644 "webtest/$i" "${web_path}__/$i"
     done
+    # hardlink for nginx managed websocket files.
+    ln "${web_path}__/xynt_test01.php" "${web_path}__/xynt_test01_wss.php"
 fi
 
-chmod 755 "${web_path}__/spush/brisk-spush.php"
+# brisk-spush.php is the daemon itself: on the frontend it would be an entry
+# point that nothing there is meant to run. The .phh beside it stays, because
+# usermgmt.php and mailmgr.php include it for USOCK_PATH_PFX.
+if [ "$install_mode" = "front" ]; then
+    rm -f "${web_path}__/spush/brisk-spush.php"
+else
+    chmod 755 "${web_path}__/spush/brisk-spush.php"
+fi
 
 prefix_path_len=$(echo -n "$prefix_path" | wc -c)
 
@@ -423,7 +1184,8 @@ sed -i "s@define *( *'FTOK_PATH',[^)]*)@define('FTOK_PATH', \"$ftok_path\")@g" $
 sed -i "s@define *( *'SITE_PREFIX',[^)]*)@define('SITE_PREFIX', \"$prefix_path\")@g;
 s@define *( *'SITE_PREFIX_LEN',[^)]*)@define('SITE_PREFIX_LEN', $prefix_path_len)@g" ${web_path}__/Obj/sac-a-push.phh
 
-sed -i "s@define *( *'USOCK_PATH_PFX',[^)]*)@define('USOCK_PATH_PFX', \"$usock_path_pfx\")@g" ${web_path}__/spush/brisk-spush.phh
+sed -i "s@define *( *'USOCK_PATH_PFX',[^)]*)@define('USOCK_PATH_PFX', \"$usock_path_pfx\")@g;
+s@define *( *'SPU_HTTP_DIRECT',[^)]*)@define('SPU_HTTP_DIRECT', $http_direct)@g" ${web_path}__/spush/brisk-spush.phh
 
 sed -i "s@define *( *'TABLES_N',[^)]*)@define('TABLES_N', $tables_n)@g;
 s@define *( *'TABLES_APPR_N',[^)]*)@define('TABLES_APPR_N', $tables_appr_n)@g;
@@ -435,20 +1197,74 @@ s@define *( *'PROXY_PATH',[^)]*)@define('PROXY_PATH', \"$proxy_path\")@g;
 s@define *( *'BSK_BUSTING',[^)]*)@define('BSK_BUSTING', \"$bsk_busting\")@g;
 s@define *( *'BRISK_CONF',[^)]*)@define('BRISK_CONF', \"$brisk_conf\")@g;" ${web_path}__/Obj/brisk.phh
 
-sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" ${web_path}__/Obj/auth.phh
+# The define is not in Obj/auth.phh, where this sed looked for it without
+# ever finding it and without saying so: -a was silently useless. It is in
+# Obj/dbase_file.phh. It is now looked for where it actually is, so that a
+# future move does not break the option again.
+auth_conf_file="$(find ${web_path}__ -type f -name '*.ph*' -exec grep -l "define *( *'BRISK_AUTH_CONF'" {} \;)"
+if [ -z "$auth_conf_file" ]; then
+    echo "WARNING: define BRISK_AUTH_CONF not found, -a not applied"
+else
+    sed -i "s@define *( *'BRISK_AUTH_CONF',[^)]*)@define('BRISK_AUTH_CONF', \"$brisk_auth_conf\")@g" $auth_conf_file
+fi
 
 sed -i "s@var \+cookiepath \+= \+\"[^\"]*\";@var cookiepath = \"$prefix_path\";@g" ${web_path}__/commons.js
 
+# the courtesy page of nginx reaches its images and the room through <base>
+if [ -f "${web_path}__/daemon-down.html" ]; then
+    sed -i "s@<base href=\"[^\"]*\">@<base href=\"$prefix_path\">@" "${web_path}__/daemon-down.html"
+fi
+
 sed -i "s@\( \+cookiepath *: *\)\"[^\"]*\" *,@\1 \"$prefix_path\",@g" ${web_path}__/xynt-streaming.js
 
-document_root="$(grep DocumentRoot "${apache_conf}"  | grep -v '^[ 	]*#' | awk '{ print $2 }')"
+# The root of the site is needed for two things: substituting
+# $DOCUMENT_ROOT in the sources and installing the files from docroot/. It
+# used to be derived by grepping DocumentRoot out of the apache configuration
+# file, which tied INSTALL.sh to apache (nginx uses "root", not
+# "DocumentRoot"), took the first match in any VirtualHost, and did not cope
+# with quotes.
+#
+# Now it is derived from the parameters already known: web_path ends with
+# prefix_path, so removing the latter from the former leaves the root. No
+# server to ask. An explicit value can still be forced with -R.
+document_root_get
 sed -i "s@^\(\$DOCUMENT_ROOT *= *[\"']\)[^\"']*\([\"']\)@\1$document_root\2@g" ${web_path}__/spush/*.ph* ${web_path}__/donometer.php
 
-if [ -d ../brisk-img ]; then
+# The files under docroot/ belong in the root of the site, not in the
+# subdirectory of the application: index.php references them with a leading
+# slash ("/cookie_law.js"), so the browser asks the DocumentRoot for them.
+if [ -d docroot ] && [ ! -z "$document_root" ] && [ "$install_mode" != "server" ]; then
+    for i in $(find docroot -maxdepth 1 -type f ! -name 'README'); do
+        install -m 644 "$i" "${document_root}/$(basename "$i")"
+        echo "  installed $(basename "$i") in ${document_root}"
+    done
+elif [ "$install_mode" = "server" ]; then
+    echo "  docroot/ skipped: the browser asks the frontend for those files"
+fi
+
+# brisk-img carries every image of the site: the cards, the table, the icons.
+# Without it the tree installed here is complete as far as the code goes and
+# has no image at all, so the pages come up and every img answers 404. It used
+# to be skipped without a word, and a run that had quietly dropped the images
+# looked exactly like a good one.
+if [ "$install_mode" = "server" ]; then
+    # The daemon never serves an image: nginx answers for those off its own
+    # root. Pulling brisk-img in here would only copy 800 files nobody asks
+    # this machine for.
+    echo "  brisk-img skipped: the frontend serves the images"
+elif [ -d ../brisk-img ]; then
     cd ../brisk-img
     ./INSTALL.sh -w ${web_path}__
     cd - >/dev/null 2>&1
+else
+    echo
+    echo "WARNING: ../brisk-img not found: INSTALLING A SITE WITHOUT IMAGES."
+    echo "         The cards and every other image will answer 404. Put the"
+    echo "         brisk-img repository beside this one and run again."
+    echo
 fi
+# curl-de-sac is optional: the code that uses it is guarded by
+# defined('CURL_DE_SAC_VERS'), so without it the feature is simply absent.
 if [ -d ../curl-de-sac ]; then
     cd ../curl-de-sac
     if [ ! -z "$conffile_in" ]; then
@@ -457,6 +1273,15 @@ if [ -d ../curl-de-sac ]; then
         ./INSTALL.sh -w ${web_path}__
     fi
     cd - >/dev/null 2>&1
+else
+    echo "note: ../curl-de-sac not found, the site is installed without it"
+fi
+
+# nginx never reads a .htaccess. They come not only from web/ and webtest/
+# but also from brisk-img and curl-de-sac, so they are dropped here, once the
+# whole tree is in place, rather than filtered out of each install.
+if [ "$web_server" = "nginx" ]; then
+    find "${web_path}__" -name '.htaccess' -type f -delete
 fi
 
 # config file installation or diff
@@ -472,6 +1297,29 @@ else
     cp  "${web_path}__""/Obj/brisk.conf-templ.pho" "$etc_path/$brisk_conf"
 fi
 
+# The Etc directory holds the configuration with the database credentials in
+# clear, and it falls inside the DocumentRoot: without this file
+# "$brisk_conf" can be downloaded as plain text, because the .pho extension
+# is not associated with php. Checked on apache 2.4.68: without the deny the
+# url /Etc/<conf> answers 200 with the content.
+# NOTE: nginx does not read .htaccess files, the same rule has to be written
+# in the server configuration.
+if [ "$web_server" = "nginx" ]; then
+    echo "Etc is NOT protected by a .htaccess with nginx: the nginx configuration"
+    echo "has to deny $etc_path itself (the one written by -m full|front does it)."
+elif [ ! -f "$etc_path/.htaccess" ]; then
+    echo "Protect $etc_path from the web."
+    cat > "$etc_path/.htaccess" <<'EOEOF'
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from All
+</IfModule>
+EOEOF
+fi
+
 if [ -d ${web_path} ]; then
     mv ${web_path} ${web_path}.old
 fi
@@ -483,6 +1331,28 @@ fi
 if [ "$web_only" = "FALSE" ]; then
     mv "$ftokk_path" "$ftok_path"
 fi
+case "$install_mode" in
+    server)
+        echo
+        echo "Installed the SERVER part in ${web_path}: the php the daemon runs and"
+        echo "its private directories. No image, no stylesheet, nothing from docroot/:"
+        echo "the machine running nginx answers for those. Install it there with -m front."
+        echo ;;
+    front)
+        echo
+        echo "Installed the FRONT part in ${web_path}: everything nginx and php-fpm"
+        echo "serve, images included. No ftok, legal or proxy directory and no daemon:"
+        echo "install those on the daemon machine with -m server."
+        echo ;;
+esac
+
+# The files of the machine - nginx, nftables, the way the daemon starts - are
+# not touched by an install: they follow the shape of the machine, not the
+# code. On a first installation they are still missing.
+echo "The files of the MACHINE (nginx configuration, nftables rules, systemd unit)"
+echo "are written by \"$0 system\" with these same options, not from here."
+echo
+
 if [ -f WARNING.txt ]; then
     echo ; echo "    ==== WARNING ===="
     echo

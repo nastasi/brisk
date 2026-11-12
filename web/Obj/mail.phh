@@ -1,38 +1,127 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
+
 if (isset($argv) && __FILE__ == realpath($argv[0])) {
-    $G_base = "web/";
+    // cd <$DOCUMENT_ROOT>
+    // php ./brisk/Obj/mail.phh  # to run send mail test
+    $DOCUMENT_ROOT = "/home/nastasi/web";
+    $G_base = "/home/nastasi/web/brisk/";
 }
-require_once("${G_base}Obj/class.phpmailer.php");
 
-function brisk_mail($to, $subject, $text, $html)
+/* php8: the old class.phpmailer.php 5.1 (2009) used each(),
+   set_magic_quotes_runtime() and php4 constructors, all removed in php 8.
+   Replaced by PHPMailer 7.1.1, vendored in Obj/PHPMailer/ (see VENDOR.txt).
+   No autoloader: the three files are required by hand, like the rest of the
+   project. */
+require_once("{$G_base}Obj/PHPMailer/src/Exception.php");
+require_once("{$G_base}Obj/PHPMailer/src/PHPMailer.php");
+require_once("{$G_base}Obj/PHPMailer/src/SMTP.php");
+
+if (file_exists("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho")) {
+    require("$DOCUMENT_ROOT/Etc/brisk_mail_secrets.pho");
+    printf("secrets file found\n");
+}
+
+if (!function_exists('mail_secrets')) {
+    function mail_secrets(&$mail)
+    {
+        return;
+    }
+}
+
+function brisk_mail($to, $to_name, $subject, $text, $html, $reply_to=NULL)
 {
-    GLOBAL $G_admin_mail;
+    GLOBAL $G_admin_mail, $DOCUMENT_ROOT;
 
-    $mail = new PHPMailer(TRUE);
-    $mail->CharSet = "UTF-8";
+    try {
+        $mail = new PHPMailer(TRUE);
+        $mail->CharSet = "UTF-8";
 
-    $mail->From = $G_admin_mail;
-    $mail->FromName = 'Brisk Admin';
-    $mail->addAddress($to);     // Add a recipient
-    $mail->addReplyTo($G_admin_mail, 'Brisk Admin');
+        mail_secrets($mail);
+        $mail->setFrom($G_admin_mail, 'Brisk Admin');
 
-    $mail->Subject = $subject;
-    $mail->AltBody = $text;
+        // Temporarily disabled because gmail smtp server cut away mail with unknown ReplyTo header
+        // if ($reply_to) {
+        //     error_log(sprintf("[%s][%s]", $reply_to[1], $reply_to[0]));
+        //     $mail->addReplyTo($reply_to[1], $reply_to[0]);
+        // }
+        $mail->addAddress($to, $to_name);     // Add a recipient
 
-    $body_html = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
-                             $subject, $html);
+        $mail->Subject = $subject;
+        /* NOTE: msgHTML() overwrites AltBody with its own conversion of the
+           html, so $text is discarded. This was already the case with 5.1:
+           the behaviour is left untouched. To really use $text, move this
+           line after the msgHTML() call. */
+        $mail->AltBody = $text;
 
-    $mail->MsgHTML($body_html);
+        if ($html) {
+            $re_to = rawurlencode("{$reply_to[0]} <{$reply_to[1]}>");
+            // 1. Normalize line endings and split the text line by line
+            $lines = explode("\n", str_replace("\r", "", $html));
+
+            // 2. Loop through each line and prepend the "> " citation character
+            $quoted_text = "";
+            foreach ($lines as $line) {
+                $quoted_text .= "> " . $line . "\n";
+            }
+
+            // 3. Construct the full response body, leaving space at the top to type the reply
+            $reply_body = "--- Original Message ---\n" . $quoted_text;
+
+            // 4. Encode the text into a URL-safe format using %20 for spaces instead of '+'
+            $encoded_body = rawurlencode($reply_body);
+
+            // 2. Converti i testi usando rawurlencode per metterli in sicurezza
+            $subject_encoded = rawurlencode($subject);
+
+            // 3. Costruisci il link mailto finale
+            $mailto_url = "mailto:{$re_to}?subject=" . $subject_encoded . "&body=" . $encoded_body;
+
+            $body_html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>{$subject}</title></head><body>
 
 
-    return ($mail->Send());
+    <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; max-width: 600px;'>
+        <table>
+          <tr><th style='text-align: left;'>Da:</th><td>{$reply_to[0]} &lt;{$reply_to[1]}&gt;</td></tr>
+          <tr><th style='text-align: left;'>Soggetto:</th><td>{$subject}</td></tr>
+          <tr><th style='text-align: left; vertical-align: top;'>Corpo:</th><td>
+              <div style='white-space: pre-wrap;'>{$html}</div>
+              </td>
+          </tr>
+        </table>
+        <br>
+
+        <!-- QUESTO TASTO SOSTITUISCE IL REPLY-TO IN MODO SICURO -->
+        <a href='{$mailto_url}'
+           style='display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 5px;'>
+           ↩️ Clicca qui per rispondere all'utente
+        </a>
+    </div>
+</body></html>";
+            $mail->msgHTML($body_html);
+        }
+        // To enable debug uncomment the two statements below
+        // $mail->SMTPDebug = 2;
+        // $mail->Debugoutput = 'html';
+        return ($mail->send());
+    }
+    catch (PHPMailerException $e) {
+        /* With exceptions=TRUE send() throws instead of returning FALSE, and
+           none of the callers catches: an exception here killed the spush
+           daemon. They all test for "== FALSE", so the error is reported
+           that way. */
+        error_log("brisk_mail: ".$e->getMessage());
+        return (FALSE);
+    }
 }
 
 
 if (isset($argv) && __FILE__ == realpath($argv[0])) {
     $G_admin_mail = "brisk@alternativeoutput.it";
 
-    $to = "brisk@alternativeoutput.it";
+    $to = "nastasi@alternativeoutput.it";
+    $to_name = "Utente Brisk mop";
     $subject = "Brisk: credenziali di accesso.";
     $body_txt = "Ciao, sono l' amministratore del sito di Brisk.
 
@@ -48,7 +137,7 @@ Benvenuto e buone partite, mop.<br>";
                              $subject, $body_htm);
 
 
-    if (brisk_mail("brisk@alternativeoutput.it", $subject, $body_txt, $body_htm)) {
+    if (brisk_mail($to, $to_name, $subject, $body_txt, $body_htm, ["Brisk Team", "brisk@alternativeoutput.it"])) {
         echo "SUCCESS";
     }
     else {

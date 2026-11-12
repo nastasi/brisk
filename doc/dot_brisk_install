@@ -1,0 +1,36 @@
+#
+# This is an example of production install defaults.
+# Adjust and copy it in the user home directory as
+# .brisk_install file and read INSTALL-debian13.txt
+# for detailed installation instructions
+#
+##################################################
+#
+#  Produced automatically by brisk::INSTALL.sh
+#
+apache_conf=/etc/apache2/sites-available/default
+card_hand=8
+players_n=5
+tables_n=148
+tables_appr_n=40
+tables_auth_n=20
+tables_cert_n=4
+brisk_auth_conf="brisk_spu_auth.conf.pho"
+brisk_debug="0x0400"
+web_path="/home/nastasi/web/brisk"
+ftok_path="/home/nastasi/brisk-priv/ftok/brisk"
+proxy_path="/home/nastasi/brisk-priv/proxy/brisk"
+legal_path="/home/nastasi/brisk-priv/brisk"
+prefix_path="/brisk/"
+brisk_conf="brisk_spu.conf.pho"
+usock_path_pfx="/home/nastasi/brisk-priv/brisk"
+http_direct="TRUE"
+sys_user="www-data"
+web_only="FALSE"
+install_mode="full"
+web_server="nginx"
+fpm_pass="unix:/run/php/php8.4-fpm.sock"
+fpm_root=""
+front_ip=""
+test_add="FALSE"
+

@@ -72,7 +72,7 @@ require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/mail.phh");
 require_once($G_base."Obj/dbase_base.phh");
-require_once($G_base."Obj/dbase_${G_dbasetype}.phh");
+require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."briskin5/Obj/briskin5.phh");
 require_once($G_base."briskin5/Obj/placing.phh");
 require_once($G_base."spush/brisk-spush.phh");
@@ -97,7 +97,9 @@ function check_auth()
     $cmd_len = mb_strlen($cmd_ser, "ASCII");
 
     do {
-        if (($socket = stream_socket_client('unix://'.USOCK_PATH_PFX.'_admin.sock')) == FALSE)
+        /* the control channel follows the daemon: a unix socket beside the
+           pool, or a port on the machine it runs on. See brisk-spush.phh. */
+        if (($socket = stream_socket_client(spu_admin_url(USOCK_PATH_PFX))) == FALSE)
             break;
         $stp = 1;
         if (($rwr = fwrite($socket, $cmd_ser, $cmd_len)) == FALSE
@@ -195,7 +197,7 @@ SELECT usr.*, guar.login AS guar_login
                         log_crit("stat-day: select from tournaments failed");
                         break;
                     }
-                    $usr_n = pg_numrows($usr_pg);
+                    $usr_n = pg_num_rows($usr_pg);
                     if ($usr_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $usr_n);
@@ -240,7 +242,7 @@ SELECT usr.*, guar.login AS guar_login
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                    if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($usr_obj->email, 'Utente Brisk {$usr_obj->login}', $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
@@ -251,7 +253,7 @@ SELECT usr.*, guar.login AS guar_login
                         fprintf(STDERR, "ERROR: store mail FAILED\n");
                         break;
                     }
-                    $status .= sprintf("status change for %s: SUCCESS<br>", $usr_obj->login);
+                    $status .= sprintf("status change for %s: SUCCESS<br>", eschtml($usr_obj->login));
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -293,7 +295,7 @@ SELECT usr.*, guar.login AS guar_login
                         log_crit("stat-day: select from tournaments failed");
                         break;
                     }
-                    $usr_n = pg_numrows($usr_pg);
+                    $usr_n = pg_num_rows($usr_pg);
                     if ($usr_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $usr_n);
@@ -317,7 +319,7 @@ SELECT usr.*, guar.login AS guar_login
                         break;
                     }
 
-                    $status .= sprintf("User %s removed: SUCCESS<br>", $usr_obj->login);
+                    $status .= sprintf("User %s removed: SUCCESS<br>", eschtml($usr_obj->login));
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -352,7 +354,7 @@ SELECT usr.*, guar.login AS guar_login
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
-            $usr_n = pg_numrows($usr_pg);
+            $usr_n = pg_num_rows($usr_pg);
             $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
@@ -373,7 +375,7 @@ SELECT usr.*, guar.login AS guar_login
 <body>
 <h2> New imported users management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
-<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
 <table class="the_tab">
 <?php
      echo $tab_lines;
@@ -419,7 +421,7 @@ SELECT usr.*, guar.login AS guar_login
                     }
                     // retrieve list added users
                     $mai_sql = sprintf("
-SELECT mail.*, usr.email AS email
+SELECT mail.*, usr.email AS email, user.login AS login
      FROM %susers AS usr
      JOIN %smails AS mail ON mail.ucode = usr.code
      WHERE mail.ucode = %d AND mail.type = %d",
@@ -429,7 +431,7 @@ SELECT mail.*, usr.email AS email
                         $status .= "2<br>";
                         break;
                     }
-                    $mai_n = pg_numrows($mai_pg);
+                    $mai_n = pg_num_rows($mai_pg);
                     if ($mai_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $mai_n);
@@ -438,7 +440,7 @@ SELECT mail.*, usr.email AS email
                     $mai_obj = pg_fetch_object($mai_pg, 0);
                     $mail = MailDBItem::MailDBItemFromRecord($mai_obj);
 
-                    if (brisk_mail($mai_obj->email, $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
+                    if (brisk_mail($mai_obj->email, 'Utente Brisk {$mai_obj->login}', $mail->subj, $mail->body_txt, $mail->body_htm) == FALSE) {
                         // mail error
                         $status .= sprintf("Send mail filed for user id %d<br>\n", $id);
                         break;
@@ -472,7 +474,7 @@ SELECT usr.*, guar.login AS guar_login
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
-            $usr_n = pg_numrows($usr_pg);
+            $usr_n = pg_num_rows($usr_pg);
             $tab_lines = "<tr><th></th><th>User</th><th>Guar</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
@@ -491,7 +493,7 @@ SELECT usr.*, guar.login AS guar_login
 <body>
 <h2> New mailed users management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
-<form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+<form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
 <table class="the_tab">
 <?php
      echo $tab_lines;
@@ -522,7 +524,12 @@ SELECT usr.*, guar.login AS guar_login
         if ($action == "accept") {
             if (($bdb = BriskDB::create()) == FALSE) {
                 log_crit("stat-day: database connection failed");
-                break;
+                /* php8: there used to be a "break" outside any loop or switch here.
+                   On php5 it was a runtime fatal (the script died if the db did
+                   not answer); since php7 it is a compile time fatal, so the
+                   whole of usermgmt.php was not even loaded any more.
+                   The block ends with exit anyway (see the foreach below). */
+                exit;
             }
 
             foreach($_POST as $key => $value) {
@@ -550,7 +557,7 @@ SELECT usr.*, guar.login AS guar_login
                 }
                 $usr_obj = pg_fetch_object($usr_pg, 0);
 
-                printf("KEY: %s: %s %s<br>\n", $id, $value, $usr_obj->login);
+                printf("KEY: %s: %s %s<br>\n", $id, eschtml($value), eschtml($usr_obj->login));
                 // change state
                 $passwd = passwd_gen();
 
@@ -578,7 +585,7 @@ SELECT usr.*, guar.login AS guar_login
                 log_step(sprintf("[%s], [%s], [%s], [%s]\n", $usr_obj->email, $subj, $body_txt, $body_htm));
 
 
-                if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                if (brisk_mail($usr_obj->email, 'Utente Brisk {$usr_obj->login}', $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     break;
@@ -618,7 +625,7 @@ SELECT usr.*, guar.login AS guar_login
                         log_crit("stat-day: select from tournaments failed");
                         break;
                     }
-                    $usr_n = pg_numrows($usr_pg);
+                    $usr_n = pg_num_rows($usr_pg);
                     if ($usr_n != 1) {
                         $status .= sprintf("Inconsistency for code %d, returned %d records, skipped.<br>",
                                           $id, $usr_n);
@@ -668,12 +675,12 @@ Saluti e buone partite, mop.', $usr_obj->login);
                     /*                         $usr_obj->guar_login, $usr_obj->login, $confirm_page); */
                     /* } */
 
-                    if (brisk_mail($usr_obj->email, $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
                     }
-                    $status .= sprintf("user delete for %s: SUCCESS<br>", $usr_obj->login);
+                    $status .= sprintf("user delete for %s: SUCCESS<br>", eschtml($usr_obj->login));
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -683,7 +690,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         $bdb->transaction('ROLLBACK');
                     break;
                 }
-                printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, $usr_obj->login);
+                printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
             }
         }
         else {
@@ -708,7 +715,7 @@ SELECT usr.*, guar.login AS guar_login
                 break;
             }
 
-            $usr_n = pg_numrows($usr_pg);
+            $usr_n = pg_num_rows($usr_pg);
             $tab_lines = "<tr><th></th><th>User</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
@@ -729,7 +736,7 @@ SELECT usr.*, guar.login AS guar_login
      <body>
      <h2> E-mail verified user management.</h2>
      <?php if ($status != "") { echo "$status"; } ?>
-     <form action="<?php echo $_SERVER['REQUEST_URI']; ?>" method="POST">
+     <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <table class="the_tab">
      <?php
      echo $tab_lines;

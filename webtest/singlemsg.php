@@ -27,7 +27,7 @@ $G_base = "";
 require_once("Obj/brisk.phh");
 require_once("Obj/user.phh");
 require_once("Obj/auth.phh");
-require_once("Obj/dbase_${G_dbasetype}.phh");
+require_once("Obj/dbase_{$G_dbasetype}.phh");
 require_once("Obj/singlemsg.phh");
 
 

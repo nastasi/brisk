@@ -70,7 +70,7 @@ ini_set("max_execution_time",  "240");
 require_once("../Obj/brisk.phh");
 require_once("../Obj/user.phh");
 require_once("../Obj/auth.phh");
-require_once("../Obj/dbase_${G_dbasetype}.phh");
+require_once("../Obj/dbase_{$G_dbasetype}.phh");
 require_once("Obj/briskin5.phh");
 require_once("Obj/placing.phh");
 
@@ -107,7 +107,7 @@ function main_pgsql($from, $to)
             break;
         }
 
-        $trn_n = pg_numrows($trn_pg);
+        $trn_n = pg_num_rows($trn_pg);
         printf("Number of tournaments: %d\n", $trn_n);
 
         // loop on tournaments
@@ -133,7 +133,7 @@ SELECT m.code AS code, m.ttype AS ttype, m.mazzo_next AS minus_one_is_old
             //
             // store matches before clean them
             //
-            $tmt_n = pg_numrows($tmt_pg);
+            $tmt_n = pg_num_rows($tmt_pg);
             // get matches
             if ($tmt_n == 0)
                 continue;
@@ -188,11 +188,11 @@ SELECT p.pts AS pts
                         break;
                     }
                     if ($u == 0) {
-                        $num_games = pg_numrows($pts_pg[$u]);
+                        $num_games = pg_num_rows($pts_pg[$u]);
                     }
                     else {
-                        if ($num_games != pg_numrows($pts_pg[$u])) {
-                            log_crit("stat-day: num_games != pg_numrows");
+                        if ($num_games != pg_num_rows($pts_pg[$u])) {
+                            log_crit("stat-day: num_games != pg_num_rows");
                             break;
                         }
                     }
@@ -342,7 +342,7 @@ function main()
         exit;
     }
 
-    $fun_name = "main_${G_dbasetype}";
+    $fun_name = "main_{$G_dbasetype}";
 
     if ($ret = $fun_name($from, $to))
         echo "Success.<br>\n";

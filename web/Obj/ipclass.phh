@@ -23,13 +23,13 @@
  */
 
 class IPClassItem {
-    var $addr;
-    var $mask;
+    public $addr;
+    public $mask;
 
-    function IPClassItem($ipset)
+    function __construct($ipset)
     {
         //split
-        $elem = split("/", $ipset, 2);
+        $elem = explode("/", $ipset, 2);
         $addr = $elem[0];
         if (!isset($elem[1])) {
             fprintf(STDERR, "ORIG: %s\n", $ipset);
@@ -60,9 +60,9 @@ class IPClassItem {
 }
 
 class IPClass {
-    var $ipcl;
+    public $ipcl;
 
-    function IPClass()
+    function __construct()
     {
         $this->ipcl = NULL;
     }

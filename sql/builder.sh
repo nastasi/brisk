@@ -17,8 +17,8 @@ usage () {
     echo "       clean"
     echo "       build"
     echo "       rebuild"
-    echo "       psql"
-    echo "       piped"
+    echo "       psql [-- <psql args>]"
+    echo "       piped [-- <psql args>]"
     echo "       add <filesql> [<filesql2> [..]]"
     echo "       del <filesql> [<filesql2> [..]]"
     echo "       res <filesql> [<filesql2> [..]]"
@@ -111,6 +111,10 @@ while [ $# -gt 0 ]; do
         -h|--help|help)
             CMD=help
             ;;
+        --)
+            shift
+            break
+            ;;
         *)
             break
             ;;
@@ -145,16 +149,18 @@ test "$DBUSER" != "" && pg_args="$pg_args -U $DBUSER"
 test "$DBPORT" != "" && pg_args="$pg_args -p $DBPORT"
 test "$DBBASE" != "" && pg_args="$pg_args $DBBASE"
 
-
 case $CMD in
     "create")
-        echo "su root"
-        su root -c "su postgres -c \"echo \\\"DBUser passwd: $DBPASS\\\" ; createuser -S -D -R -P $DBUSER && createdb -E utf8 -O $DBUSER $DBBASE\""
+        echo "sudo -u postgres"
+        echo "DBUser passwd: $DBPASS"
+        sudo -u postgres createuser -S -D -R -P "$DBUSER" \
+            && sudo -u postgres createdb -E utf8 -O "$DBUSER" "$DBBASE"
         ;;
 
     "destroy")
-        echo "su root"
-        su root -c "su postgres -c \"dropdb $DBBASE && dropuser $DBUSER\""
+        echo "sudo -u postgres"
+        sudo -u postgres dropdb "$DBBASE" \
+            && sudo -u postgres dropuser "$DBUSER"
         ;;
     "clean")
         ( echo "-- MESG: clean start" ; one_or_all $2 | egrep "$MATCH_DROP|^-- MESG|^-- FILE " | tac ; echo "-- MESG: clean end" ;   ) | sqlexe
@@ -168,11 +174,11 @@ case $CMD in
             | sqlexe
         ;;
     "psql")
-        psql $pg_args $@
+        psql $pg_args "$@"
         ;;
 
     "piped")
-        psql $pg_args -t -q -A -F '|' $@
+        psql $pg_args -t -q -A -F '|' "$@"
         ;;
     "dump")
         if [ $# -eq 1 ]; then

@@ -1,0 +1,176 @@
+Load test bench
+===============
+
+Tools used to check the port to php 8.4 on debian 13. They exercise the daemon
+with many players connected and reproduce the corner cases of the transport
+(duplicate sessions, expired sessions, full queues).
+
+They are not part of the application: they are laboratory tools, meant to run
+on a test machine, never in production.
+
+
+What is needed first
+--------------------
+
+Test users in the database. The authenticated scripts use names of the form
+loadNNN with the password equal to the name:
+
+  insert into bsk_users (code, login, pass, email, type, tos_vers, guar_code)
+  select 20000+i, 'load'||to_char(i,'FM000'), md5('load'||to_char(i,'FM000')),
+         'load'||to_char(i,'FM000')||'@example.invalid', 65536, '1.4', <guarantor>
+  from generate_series(1,400) i;
+
+where <guarantor> is the code of a user that already exists: the guar_code
+column has a foreign key constraint and the default value (-1) violates it.
+
+tos_vers has to be set to the current version, otherwise every login opens the
+dialog to accept the terms of service and pollutes the measurements.
+
+game.sh and hand.sh instead use the five users uno/due/tre/qua/cin with the
+passwords one/two/thr/for/fiv.
+
+The paths and ports are those of the test container (/home/brisk, 8444 for
+https, 8082 for plain http): they have to be adapted elsewhere.
+
+
+How to run them
+---------------
+
+From this directory, straight out of the repository:
+
+  ./brisk_step.sh 150 90 3 --tls
+  ./stop.sh
+
+They used to be a copy kept in /root/load, run as root, with those paths
+written into them; the copy went stale more than once. Now every script finds
+its own directory and reads common.sh, which holds the three settings they all
+share:
+
+  BRISK_WORK    where the working files go.  Default /var/tmp/brisk-load.
+                NOT /tmp: that is a tmpfs here, and a restart of the container
+                wipes it in the middle of a session. Not this directory either,
+                or auth.txt and the captured streams would be left in the git
+                tree.
+  BRISK_LEGAL   where the daemon keeps its log and its pid file: the path
+                given to INSTALL.sh with -l.  Default /home/brisk/legal.
+  SUDO          the daemon runs as another user, so restarting the service and
+                reading its open descriptors need root while the bench itself
+                does not. Set SUDO= to empty when already running as root.
+
+Nothing here needs to run as root.
+
+
+The load
+--------
+
+brisk_load.py    generator: N players that come in, keep the comet stream open
+                 and write in the chat. A single process, asyncio, because the
+                 generator has to be cheap: it runs on the same machine as the
+                 daemon. It measures the write latency (p50/p95/p99), the
+                 messages broadcast and how well the streams hold.
+                   --clients N --base N --auth --silent --period S --port P
+                   --encoding plain|gzip|deflate
+
+                 With --encoding it asks for a content coding on the stream,
+                 walks the chunked framing by hand and inflates it, so it
+                 checks three things a plain reader cannot see: that every
+                 chunk is whole and closed by its CRLF, that the compressed
+                 stream inflates from beginning to end across all of them, and
+                 that the coding announced in the headers is the one that was
+                 asked for. They are counted in the "stream integrity" line;
+                 anything but zero means the stream is coming apart.
+
+                 Careful with what is read out of it: the write count and the
+                 bytes on the wire are steady from one run to the next, but the
+                 messages delivered swing by a factor of two at the same load
+                 and with the same coding. It is the readers draining at
+                 different rates, not a property of the coding: do not compare
+                 codings on that number.
+
+brisk_step.sh    one complete step: restarts the daemon so as to start from an
+                 empty room, launches the generator and samples the resources.
+
+brisk_sample.sh  sampler: cpu and memory of the daemon and of the frontend,
+                 open descriptors, connections towards the sockets of the pool.
+
+ramp_probe.sh    measures what a client receives while N others come into the
+                 room: it weighs the cost of the protocol (every entry sends
+                 everybody the complete list of the people present).
+
+
+A real game
+-----------
+
+game.sh [table] [port]   five players come in, sit down, the table forms; they
+                         stay connected.
+hand.sh [table] [port]   plays the hand: auction, call and forty cards.
+
+sit4.sh                  four automatic players waiting for a fifth, human one
+play_human.sh            drives the four while the fifth plays from the browser
+
+
+The corner cases of the transport
+---------------------------------
+
+wsprobe.py      opens a real websocket and counts the frames: it tells a server
+                defect apart from the state of one browser tab.
+takeover.py     two streams on the same session: the first one must be
+                dismissed, not closed in silence.
+ghostswap.py    second access by the same user from another session: the first
+                one must go back to the login, where ghost_sess explains why.
+slowprobe.py    slow client: it connects and stops reading while a burst
+                arrives, to see whether the message queue overflows.
+burst.py        burst of simultaneous connections on the unix sockets: it
+                measures how many the backlog queues before refusing.
+partial.py      forces a short write on the daemon and checks what comes out
+                of it: it talks to a daemon socket directly with a tiny
+                SO_RCVBUF and stops reading, then validates the chunked
+                framing and the @BEGIN@/@END@ blocks. A chunk shorter than
+                its declared length, or one without its terminator, is the
+                resumption after the short write going wrong.
+                  partial.py [user] [socket] [rcvbuf] [pause]
+hangup.py       client gone while the daemon prepares the answer: it sends a
+                login to a daemon socket and closes a few milliseconds
+                later, as nginx does when the browser goes away. The write
+                fails on the closed peer, and the daemon has to drop the
+                page, not die on it at the next flush.
+                  hangup.py [socket] [user] [rounds]
+halfhead.py     half a request and then silence: half of a head, and a POST
+                with half of its body, neither written to nor closed. The
+                daemon has to close both at the deadline of their pending
+                page, 20 seconds, instead of holding them until it restarts.
+                  halfhead.py [socket] [wait]
+
+
+At the end of a session
+-----------------------
+
+  ./stop.sh
+
+It shuts everything down and prints the state: running scripts, running curls,
+descriptors of the daemon, disk space, load. To be run ALWAYS.
+
+The scripts that start background loops carry a trap, bench_reap, that kills
+their own descendants on the way out. Without it the loops outlive their
+parent and are left spinning for nothing: that happened for two days, with
+eighty processes alive and the machine load at 19.
+
+It used to be "trap 'kill 0'", which signals the whole process group. That is
+almost always wider than the script: it killed the script itself, so the exit
+status was always a death by signal, and it reached whatever else shared the
+group - whoever launched it, or the other half of a pipeline, so that
+"brisk_step.sh | tail" printed nothing at all. Running everything through
+"incus exec" gave each script a session of its own and hid all of it.
+
+Two traps of the same family, both of which have already cost time here:
+
+  - stop.sh does not use "pkill -f": the pattern would end up in the command
+    line of the script itself, which would kill itself and leave the targets
+    alive.
+  - when counting leftovers by hand, the grep matches its own command line.
+    Split the pattern ("ga""me.sh") or use "[g]ame.sh", otherwise a clean
+    machine looks busy and a busy one looks clean.
+
+The working files (auth.txt, tok.txt, mani.txt, *.stream) are created in
+BRISK_WORK and can grow large: the read streams grow all the time. stop.sh
+deletes them.

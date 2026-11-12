@@ -8,11 +8,20 @@
 # Short-Description: manage brisk daemon
 ### END INIT INFO
 
+# NOTE: this script is for machines without systemd. Where systemd is in
+# charge, "INSTALL.sh system" writes a unit in Etc instead and does not touch
+# /etc/init.d: debian 13 dropped the sysv compatibility generator, so this
+# script would simply never be run. See WARNING.txt.
+
 BPATH="xx/home/nastasi/web/brisk"
 PPATH="xx/home/nastasi/brisk-priv"
 # screen suffix
 SSUFF="xxbrisk"
 BUSER="xxwww-data"
+# NOTE: the two "su" below pass "-s /bin/bash". The system user that runs the
+# daemon usually has /usr/sbin/nologin as its shell (that is the case for
+# www-data on debian), and without this "su - www-data" answers "This account
+# is currently not available" and the daemon does not start.
 # seconds to wait exit of the process
 WAITLOOP_MAX=5
 
@@ -45,14 +54,26 @@ case "$1" in
                 kill -KILL $pid_old 2>/dev/null || true
             fi
         fi
+        #
+        #  Then close our screen sessions. Each one carries the loop that
+        #  respawns the daemon, so killing the process alone is not enough;
+        #  and a session left behind by a start that was refused, because the
+        #  daemon was already running, would wait there and take the daemon
+        #  over at the next stop. That is how the instances used to pile up.
+        su -s /bin/bash - ${BUSER} -c "screen -ls" 2>/dev/null \
+          | sed -n "s/^[[:space:]]*\([0-9][0-9]*\.${SSUFF}\)[[:space:]].*/\1/p" \
+          | while read scr ; do
+                su -s /bin/bash - ${BUSER} -c "screen -S $scr -X quit" >/dev/null 2>&1 || true
+            done
+        su -s /bin/bash - ${BUSER} -c "screen -wipe" >/dev/null 2>&1 || true
         ;;
 
     devstart)
-        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; ./brisk-spush.php'
+        su -s /bin/bash - ${BUSER} -c 'cd '"$BPATH"'/spush ; ./brisk-spush.php'
         ;;
 
     start)
-        su - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php \| grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; done'"'"
+        su -s /bin/bash - ${BUSER} -c 'cd '"$BPATH"'/spush ; screen -d -m -S '"${SSUFF}"' bash -c '"'"'while [ 1 ]; do cd . ; ./brisk-spush.php | grep "IN LOOP" ; if [ $? -eq 0 ]; then break ; fi ; sleep 1 ; done'"'"
         ;;
     restart)
         $0 stop

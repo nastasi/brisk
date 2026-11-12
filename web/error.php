@@ -24,19 +24,30 @@
 
 $G_base = "";
 
+/* Obj/brisk.phh needs $DOCUMENT_ROOT to find the configuration file under
+   Etc/. With mod_php it was not filled in by itself and this script failed;
+   it is taken from $_SERVER, as usermgmt.php, mailmgr.php and the others
+   already do. */
+foreach (array("HTTP_HOST", "DOCUMENT_ROOT") as $i) {
+    if (isset($_SERVER[$i])) {
+        $$i = $_SERVER[$i];
+        }
+    }
+
 require_once("Obj/brisk.phh");
 require_once("Obj/user.phh");
 require_once("Obj/auth.phh");
-require_once("Obj/dbase_${G_dbasetype}.phh");
+require_once("Obj/dbase_{$G_dbasetype}.phh");
 
 $mlang_error = array( 'headline'     => array('it' => 'briscola chiamata in salsa ajax',
                                               'en' => 'declaration briscola in ajax sauce <b>(Beta)</b>'),
                       'content'      => array('it' => 'C\'è qualche problema sul server.<br><br>Tra qualche istante questa pagina proverà a riconnettersi automaticamente.<br><br>Ci dispiace del disagio.',
                                               'en' => 'EN E\' occorso qualche problema sul server.<br>Questa pagina proverà automaticamente a riconnettersi tra qualche istante.<br>Ci dispiace per il disagio.' ) );
 
-$host  = $_SERVER['HTTP_HOST'];
+/* relative: an absolute url with "http://" and the Host header broke the
+   https sites, and the ones the browser reaches on a forwarded port */
 $uri   = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-$redir_url = "http://$host$uri/";
+$redir_url = "$uri/";
 
 mt_srand(make_seed());
 $redir_rnd = rand(15, 25);

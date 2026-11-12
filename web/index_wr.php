@@ -21,6 +21,7 @@
  * Suite 330, Boston, MA 02111-1307, USA.
  *
  */
+date_default_timezone_set('Europe/Rome');
 
 $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                                 'en' => 'unknown error'),
@@ -80,6 +81,10 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                             'en' => "login already in use"),
                       'nu_emailau' => array('it' => "email già utilizzata",
                                             'en' => "email already in use"),
+                      'nu_loginiv' => array('it' => "login non valido",
+                                            'en' => "invalid login"),
+                      'nu_emailiv' => array('it' => "email non valida",
+                                            'en' => "invalid email"),
                       'nu_msubj' => array( 'it' => 'Brisk: verifica email',
                                            'en' => 'Brisk: email verification'),
                       // %s(guar) %s(login) %s(baseurl) %d(code) %s(hash)
@@ -134,7 +139,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
     GLOBAL $G_proto, $G_domain, $G_webbase, $G_mail_seed, $G_notguar_code;
     GLOBAL $G_shutdown, $G_alarm_passwd, $G_ban_list, $G_black_list, $G_lang, $G_room_help, $G_room_about;
     GLOBAL $G_room_passwdhowto, $mlang_indwr;
-    GLOBAL $G_tos_vers;
+    GLOBAL $G_tos_vers, $G_admin_mail;
 
     log_load("index_wr.php");
     $remote_addr = addrtoipv4($remote_addr_full);
@@ -170,12 +175,14 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         $argz = explode('|', xcapemesg($mesg));
 
         if ($argz[0] == 'getchallenge') {
-            if (isset($get['cli_name']))
-                $cli_name = $get['cli_name'];
+            /* without a name in the query the answer is a failure, 1|, as
+               ever; left undefined it also put two lines of php warnings
+               into the log of the daemon */
+            $cli_name = (isset($get['cli_name']) ? $get['cli_name'] : "");
             if (($a_sem = Challenges::lock_data(TRUE)) != FALSE) {
                 log_main("chal lock data success");
 
-                if (($chals = &Challenges::load_data()) != FALSE) {
+                if (($chals = Challenges::load_data()) != FALSE) {
 
                     $token =  uniqid("");
                     // echo '2|'.$argz[1].'|'.$token.'|'.$remote_addr.'|'.$curtime.'|';
@@ -314,7 +321,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     break;
                 }
 
-                if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                if (brisk_mail($cli_email, "Utente Brisk {$cli_name}",
+                               $subj, $body_txt, $body_htm) == FALSE) {
                     // mail error
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     $mesg_to_user = "Fallito invio email.";
@@ -333,7 +341,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
         else {
             log_wr("Get User Error");
-            echo "Get User Error:" + $argz[0];
+            /* php8: it used to be "+", a javascript style concatenation. On php5/7
+               it evaluated to 0+0 with a warning; since php 8 "string + string"
+               on non numeric strings is a fatal TypeError, and here it killed
+               the daemon. */
+            echo "Get User Error:" . $argz[0];
             return FALSE;
         }
         return TRUE;
@@ -466,6 +478,18 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $cli_name = trim(urldecode($cli_name));
                     $cli_email = trim(urldecode($cli_email));
 
+                    /* the login is shown to the admins and, once in, to every
+                       player: it has to be a name that validate_name takes as
+                       it is, or its owner could not even type it at the login */
+                    if (validate_name($cli_name) !== $cli_name) {
+                        $mesg_to_user = nickserv_msg($dt, $mlang_indwr['nu_loginiv'][$G_lang]);
+                        break;
+                    }
+                    if (filter_var($cli_email, FILTER_VALIDATE_EMAIL) === FALSE) {
+                        $mesg_to_user = nickserv_msg($dt, $mlang_indwr['nu_emailiv'][$G_lang]);
+                        break;
+                    }
+
                     // check for already used fields
                     if (($idret = $bdb->check_record_by_login_or_email($cli_name, $cli_email)) != 0) {
                         $mesg_to_user = nickserv_msg($dt, ($idret == 1 ?  $mlang_indwr['nu_loginau'][$G_lang] :
@@ -499,7 +523,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
 
-                    if (brisk_mail($cli_email, $subj, $body_txt, $body_htm) == FALSE) {
+                    if (brisk_mail($cli_email, "Utente Brisk {$cli_name}", $subj, $body_txt, $body_htm) == FALSE) {
                         // mail error
                         fprintf(STDERR, "ERROR: mail send FAILED\n");
                         break;
@@ -550,7 +574,24 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     if (($ema = $bdb->getmail($user->name)) != FALSE) {
                         //  mail("nastasi",
-                        mail("brisk@alternativeoutput.it", urldecode($cli_subj), urldecode($cli_mesg), sprintf("From: %s <%s>", $user->name, $ema));
+                        /* php8: mbstring.func_overload was removed, so mail() is no
+                           longer remapped onto mb_send_mail(): the subject and
+                           the user name have to be encoded by hand, otherwise
+                           they end up as raw UTF-8 in the headers (forbidden by
+                           RFC 5322). */
+                        if (brisk_mail($G_admin_mail, 'Brisk Team',
+                                       urldecode($cli_subj), urldecode($cli_mesg),
+                                       urldecode($cli_mesg), ["Utente Brisk {$user->name}", $ema]) == FALSE) {
+                                       # urldecode($cli_mesg), NULL) == FALSE) {
+                            // mail error
+                            fprintf(STDERR, "ERROR: mail send FAILED\n");
+                        }
+
+                        //    mail("brisk@alternativeoutput.it",
+                        //        mb_encode_mimeheader(urldecode($cli_subj), "UTF-8"),
+                        //     urldecode($cli_mesg),
+                        //     sprintf("From: %s <%s>\r\nContent-Type: text/plain; charset=UTF-8",
+                        //             mb_encode_mimeheader($user->name, "UTF-8"), $ema));
                     }
 
                     if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
@@ -813,7 +854,16 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 }
 
                 // Take parameters
-                $table_idx = (int)$argz[1];
+                /* the index comes from the request: out of range, the table
+                   is null and the first method call on it is a fatal error
+                   that takes the whole room down. And it has to be checked
+                   before the reference below, which would create the
+                   missing element. */
+                $table_idx = (isset($argz[1]) ? (int)$argz[1] : -1);
+                if ($table_idx < 0 || $table_idx >= TABLES_N) {
+                    log_wr("INFO:SKIP:argz == sitdown && table out of range => ignore request.");
+                    return FALSE;
+                }
                 $table = &$brisk->table[$table_idx];
 
                 $not_allowed_msg = "";

@@ -4,10 +4,16 @@ header append Cache-Control "public, last-modified, must-revalidate"
 <FilesMatch "\.php$">
 header append Pragma "no-cache"
 header append Expires "-1"
-php_value mbstring.http_input           "auto"
-php_value mbstring.internal_encoding    "UTF-8" 
+# php 8.4: mbstring.func_overload was REMOVED (it used to be 7 =
+# mail+string+regex). strlen/substr/strpos are back to byte semantics: the
+# places that need character semantics now call mb_* explicitly in the source.
+# mbstring.internal_encoding/http_input are deprecated: default_charset is used
+# instead. php_value/php_flag only work with mod_php; with PHP-FPM Apache
+# answers 500, hence the block is conditional.
+<IfModule mod_php.c>
+php_value default_charset               "UTF-8"
 php_flag  mbstring.encoding_translation  On
-php_value mbstring.func_overload        "7"
+</IfModule>
 </FilesMatch>
 ExpiresActive On
 ExpiresByType image/jpg "access plus 4 days"

@@ -72,8 +72,8 @@ $mlang_bin5_rules = array(
                           );
 
 abstract class Rules {
-    var $table;
-    var $id;
+    public $table;
+    public $id;
 
     abstract function engine(&$bri, $curtime, $action, $user);
 
