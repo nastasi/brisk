@@ -44,6 +44,7 @@ require_once($G_base."Obj/user.phh");
 require_once($G_base."Obj/auth.phh");
 require_once($G_base."Obj/dbase_{$G_dbasetype}.phh");
 require_once($G_base."Obj/singlemsg.phh");
+require_once($G_base."Obj/iscrizione.phh");
 
 require_once($G_base."spush/brisk-spush.phh");
 
@@ -72,9 +73,15 @@ function main() {
                 break;
             }
 
+            /* new signup (temporary nickname): the account works at once with the
+               password chosen by the player; NU_TOBECHK stays as reason until the
+               requested nickname is checked in usermgmt.php */
+            $is_nicktmp = (($usr_rec = $bdb->getrecord_bycode($mai->ucode)) != FALSE
+                           && ($usr_rec->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP);
+
             if (($bdb->user_update_flag_ty($mai->ucode, USER_FLAG_TY_DISABLE,
                                         TRUE, USER_DIS_REA_NU_MAILED,
-                                        TRUE, USER_DIS_REA_NU_TOBECHK)) == FALSE) {
+                                        !$is_nicktmp, USER_DIS_REA_NU_TOBECHK)) == FALSE) {
                 $errcode = 10003;
                 break;
             }
@@ -85,13 +92,18 @@ function main() {
             }
             $bdb->transaction('COMMIT');
 
-            singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Riceverai a breve una email con la tua nuova password.<br>Benvenuto!");
+            if ($is_nicktmp) {
+                isc_page_activated(($usr_rec->nick_req != "" ? $usr_rec->nick_req : $usr_rec->login));
+            }
+            else {
+                singlemsg("Verifica della e-mail andata a buon fine.", "Verifica della e-mail andata a buon fine.<br>Riceverai a breve una email con la tua nuova password.<br>Benvenuto!");
+            }
             $errcode = 0;
         } while (FALSE);
         if ($errcode) {
             if ($errcode == 10002) {
-                singlemsg("L'email è già stata verificata con successo.",
-                          "L'email è già stata verificata con successo, ora attenda che le venga recapitata la password.");
+                /* link already used, or signup removed after 48 hours */
+                isc_page_link_not_valid();
             }
             else {
                 singlemsg("E' occorso un errore durante la verifica della e-mail.",

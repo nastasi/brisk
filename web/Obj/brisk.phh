@@ -2508,6 +2508,11 @@ class Brisk
 
               if ($authenticate != FALSE) {
                   $user_type = $authenticate->type_get();
+                  /* easy signup: entered with the requested nickname, plays with
+                     the temporary one, that is the login of the account */
+                  if (strcasecmp($authenticate->login_get(), $name_new) != 0) {
+                      $name_new = $authenticate->login_get();
+                  }
               }
               else {
                   $idx = -3;

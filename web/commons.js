@@ -1104,13 +1104,16 @@ function user_decorator(user, is_real)
         }
     }
 
+    /* USER_FLAG_TY_NICKTMP: temporary nickname, the requested one is not checked yet */
+    var nick = user[1] + ((user[0] & 0x100000) ? '<span style="color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal">&#10033;</span>' : "");
+
     if (flags != 0) {
         name = "<span class='" + cl + "'><span class='" +
         (is_real && (flags & 0xfffffe && ((flags & 0x01) == 0)) ? "id_usr" : "") +
-        "'>" + user[1] + "</span></span>";
+        "'>" + nick + "</span></span>";
     }
     else {
-        name = user[1];
+        name = nick;
     }
 
     return (name);
