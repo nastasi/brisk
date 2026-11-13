@@ -55,7 +55,14 @@ function brisk_mail($to, $to_name, $subject, $text, $html, $reply_to=NULL)
            line after the msgHTML() call. */
         $mail->AltBody = $text;
 
-        if ($html) {
+        if ($html && $reply_to == NULL) {
+            /* a mail to a player: nobody to answer to, so the plain page,
+               as before the frame for the replies was added */
+            $body_html = sprintf("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><title>%s</title></head><body>%s</body></html>",
+                                 $subject, $html);
+            $mail->msgHTML($body_html);
+        }
+        else if ($html) {
             $re_to = rawurlencode("{$reply_to[0]} <{$reply_to[1]}>");
             // 1. Normalize line endings and split the text line by line
             $lines = explode("\n", str_replace("\r", "", $html));
