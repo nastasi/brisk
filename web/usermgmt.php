@@ -78,21 +78,13 @@ require_once($G_base."briskin5/Obj/placing.phh");
 require_once($G_base."spush/brisk-spush.phh");
 require_once($G_base."index_wr.php");
 
-function check_auth()
+/* one command on the control channel of the daemon: its reply, FALSE if
+   the channel did not answer */
+function auth_ask($cmd)
 {
-    GLOBAL $G_alarm_passwd, $sess, $_POST, $_SERVER;
-
     $socket = FALSE;
     $ret = FALSE;
-    if (array_key_exists("HTTP_X_REAL_IP", $_SERVER)) {
-        $ip = $_SERVER["HTTP_X_REAL_IP"];
-    }
-    else {
-        $ip = $_SERVER["REMOTE_ADDR"];
-    }
     $stp = 0;
-    $private = md5($G_alarm_passwd.$ip.$sess);
-    $cmd = array ("cmd" => "userauth", "sess" => $sess, "private" => $private, "the_end" => "true");
     $cmd_ser = cmd_serialize($cmd);
     $cmd_len = mb_strlen($cmd_ser, "ASCII");
 
@@ -111,9 +103,9 @@ function check_auth()
             break;
         $res = cmd_deserialize($buf);
         $stp = 3;
-        if (!isset($res['val']) || $res['val'] != 200)
+        if (!isset($res['val']))
             break;
-        $ret = TRUE;
+        $ret = $res;
         $stp = 4;
     } while (0);
     if ($socket != FALSE)
@@ -123,6 +115,76 @@ function check_auth()
         echo "STP: $stp<br>";
     }
     return ($ret);
+}
+
+/* "admin" for who knows the password of the site, as before; "moder" for
+   a login of $G_moderators with its own session; FALSE for the others.
+   $G_umgmt_who: who is acting, for the log of the actions */
+$G_umgmt_who = "";
+
+function check_auth()
+{
+    GLOBAL $G_alarm_passwd, $G_umgmt_who, $sess, $_SERVER;
+
+    if (array_key_exists("HTTP_X_REAL_IP", $_SERVER)) {
+        $ip = $_SERVER["HTTP_X_REAL_IP"];
+    }
+    else {
+        $ip = $_SERVER["REMOTE_ADDR"];
+    }
+    $private = md5($G_alarm_passwd.$ip.$sess);
+    $res = auth_ask(array("cmd" => "userauth", "sess" => $sess, "private" => $private,
+                          "the_end" => "true"));
+    if ($res != FALSE && $res['val'] == 200) {
+        $G_umgmt_who = "admin";
+        return ("admin");
+    }
+    $res = auth_ask(array("cmd" => "modauth", "sess" => $sess, "the_end" => "true"));
+    if ($res != FALSE && $res['val'] == 200 && isset($res['desc'])) {
+        $G_umgmt_who = $res['desc'];
+        return ("moder");
+    }
+    return (FALSE);
+}
+
+/* every action of the page, with who did it: LEGAL_PATH/usermgmt.log
+   (unix time | who | ip | action | login) */
+function umgmt_log($action, $login)
+{
+    GLOBAL $G_umgmt_who, $_SERVER;
+
+    $ip = (array_key_exists("HTTP_X_REAL_IP", $_SERVER) ? $_SERVER["HTTP_X_REAL_IP"]
+           : $_SERVER["REMOTE_ADDR"]);
+    if (($fp = @fopen(LEGAL_PATH."/usermgmt.log", 'a')) != FALSE) {
+        fwrite($fp, sprintf("%ld|%s|%s|%s|%s|\n", time(), $G_umgmt_who, $ip, $action, $login));
+        fclose($fp);
+    }
+}
+
+/* a moderator blocking more than one player at once confirms with his password */
+function umgmt_moder_passwd_ok()
+{
+    GLOBAL $G_dbpfx, $G_umgmt_who, $_POST;
+
+    if (!isset($_POST['f_banpass']) || $_POST['f_banpass'] == "")
+        return (FALSE);
+    if (($bdb = BriskDB::create()) == FALSE)
+        return (FALSE);
+    $sql = sprintf("SELECT pass FROM %susers WHERE login = lower('%s');",
+                   $G_dbpfx, escsql($G_umgmt_who));
+    if (($pg = pg_query($bdb->dbconn->db(), $sql)) == FALSE || pg_num_rows($pg) != 1)
+        return (FALSE);
+    $rec = pg_fetch_object($pg, 0);
+    return (hash_equals((string)$rec->pass, md5($_POST['f_banpass'])));
+}
+
+/* the moderators do not delete: deleting frees the e-mail */
+function umgmt_admin_only($role, &$status)
+{
+    if ($role == "admin")
+        return (TRUE);
+    $status .= "Only the administrator can delete (for an offensive nickname use \"Refuse and block\").<br>";
+    return (FALSE);
 }
 
 $s_style = "
@@ -140,16 +202,18 @@ $s_style = "
 
 function main() {
     GLOBAL $s_style, $G_dbpfx, $G_lang, $G_alarm_passwd, $G_proto, $G_domain, $G_webbase;
-    GLOBAL $mlang_umgmt, $mlang_indwr, $f_mailusers, $sess, $_POST, $_SERVER;
+    GLOBAL $mlang_umgmt, $mlang_indwr, $f_mailusers, $sess, $_POST, $_SERVER, $G_umgmt_who;
 
 
     $curtime = time();
     $status = "";
 
-    if (check_auth() == FALSE) {
+    if (($role = check_auth()) == FALSE) {
         echo "Authentication failed";
         exit;
     }
+    $who_line = sprintf("<p>Logged as <b>%s</b>%s</p>", eschtml($G_umgmt_who),
+                        ($role == "moder" ? " (moderator)" : ""));
 
     $nocheck = FALSE;
     if (isset($_GET['f_nocheck'])) {
@@ -157,6 +221,11 @@ function main() {
     }
 
     if (isset($_GET['do']) && $_GET['do'] == 'newuser') {
+        /* the users imported by hand are a matter of the administrator */
+        if ($role != "admin") {
+            echo "Only the administrator can manage the imported users.";
+            exit;
+        }
         if (isset($_POST['f_accept'])) {
             $action = "accept";
         }
@@ -254,6 +323,7 @@ SELECT usr.*, guar.login AS guar_login
                         break;
                     }
                     $status .= sprintf("status change for %s: SUCCESS<br>", eschtml($usr_obj->login));
+                    umgmt_log("newuser-accept", $usr_obj->login);
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -320,6 +390,7 @@ SELECT usr.*, guar.login AS guar_login
                     }
 
                     $status .= sprintf("User %s removed: SUCCESS<br>", eschtml($usr_obj->login));
+                    umgmt_log("newuser-delete", $usr_obj->login);
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -397,7 +468,7 @@ SELECT usr.*, guar.login AS guar_login
         if (isset($_POST['f_resend'])) {
             $action = "resend";
         }
-        else if (isset($_POST['f_delete'])) {
+        else if (isset($_POST['f_delete']) && umgmt_admin_only($role, $status)) {
             $action = "delete";
         }
         else {
@@ -445,6 +516,7 @@ SELECT mail.*, usr.email AS email, user.login AS login
                         $status .= sprintf("Send mail filed for user id %d<br>\n", $id);
                         break;
                     }
+                    umgmt_log("mailed-resend", $mai_obj->login);
                     $res = TRUE;
                 } while(FALSE);
                 if ($res == FALSE) {
@@ -511,16 +583,33 @@ SELECT usr.*, guar.login AS guar_login
         exit;
     }
     else { // if ($_GET['do'] ...
+        /* the buttons at the right of a row: the same action, on that player only */
+        if (isset($_POST['f_row']) && preg_match('/^(accept|delete|ban)_([0-9]+)$/', $_POST['f_row'], $m)) {
+            foreach (array_keys($_POST) as $key) {
+                if (substr($key, 0, 9) == "f_newuser")
+                    unset($_POST[$key]);
+            }
+            unset($_POST['f_accept'], $_POST['f_delete'], $_POST['f_ban']);
+            $_POST['f_newuser'.$m[2]] = "on";
+            $_POST['f_'.$m[1]] = "1";
+            $_POST['f_single'] = "1";
+        }
         if (isset($_POST['f_accept'])) {
             $action = "accept";
         }
         else if (isset($_POST['f_delete'])) {
             $action = "delete";
         }
+        else if (isset($_POST['f_ban'])) {
+            $action = "ban";
+        }
         else {
             $action = "show";
         }
 
+        /* the results of an action are shown above the list, which comes
+           back at once: no page with no way out, nothing that moves by itself */
+        ob_start();
         if ($action == "accept") {
             if (($bdb = BriskDB::create()) == FALSE) {
                 log_crit("stat-day: database connection failed");
@@ -546,10 +635,8 @@ SELECT usr.*, guar.login AS guar_login
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
-         AND usr.disa_reas = %d AND usr.code = %d;",
+     WHERE usr.disa_reas = %d AND usr.code = %d;",
                                    $G_dbpfx, $G_dbpfx,
-                                   USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                    USER_DIS_REA_NU_TOBECHK, $id);
                 if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                     log_crit("stat-day: select from tournaments failed");
@@ -558,20 +645,58 @@ SELECT usr.*, guar.login AS guar_login
                 $usr_obj = pg_fetch_object($usr_pg, 0);
 
                 printf("KEY: %s: %s %s<br>\n", $id, eschtml($value), eschtml($usr_obj->login));
-                // change state
+                /* new signup: the account already works with a temporary nickname,
+                   the requested one becomes the login and the "*" goes away */
+                if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
+                    if ($usr_obj->nick_req === NULL || $usr_obj->nick_req == "") {
+                        echo "no nickname requested yet<br>";
+                        continue;
+                    }
+                    $nick_old = $usr_obj->login;
+                    if ($bdb->user_nick_approve($usr_obj->code) == FALSE) {
+                        echo "fail nick approval (nickname already used ?)<br>";
+                        continue;
+                    }
+                    $subj = "Brisk: nickname approvato";
+                    $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
+
+Il nickname \'%s\' che hai chiesto è stato approvato.
+D\' ora in poi entra con \'%s\' e la tua solita password
+(il nickname provvisorio \'%s\' non vale più).
+
+Saluti e buone partite, mop.', $usr_obj->nick_req, $usr_obj->nick_req, $nick_old);
+                    $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
+Il nickname <b>\'%s\'</b> che hai chiesto è stato approvato.<br>
+D\' ora in poi entra con <b>\'%s\'</b> e la tua solita password
+(il nickname provvisorio \'%s\' non vale più).<br><br>
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($usr_obj->nick_req), eschtml($nick_old));
+                    if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
+                        fprintf(STDERR, "ERROR: mail send FAILED\n");
+                    }
+                    printf("nickname %s approved, it was %s<br>\n", eschtml($usr_obj->nick_req), eschtml($nick_old));
+                    umgmt_log("accept-nick", $nick_old . " -> " . $usr_obj->nick_req);
+                    continue;
+                }
+                /* change state first and the password after, in one transaction:
+                   before, the password was changed even when the account was not
+                   in the expected state, and the player got no mail */
                 $passwd = passwd_gen();
 
-                if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
-                    echo "fail 1.5<br>";
-                    break;
-                }
-
+                $bdb->transaction('BEGIN');
                 if (($bdb->user_update_flag_ty($usr_obj->code, USER_FLAG_TY_DISABLE,
                                                TRUE, USER_DIS_REA_NU_TOBECHK,
                                                FALSE, USER_DIS_REA_NONE)) == FALSE) {
-                    echo "fail 2<br>";
-                    break;
+                    $bdb->transaction('ROLLBACK');
+                    printf("%s is not waiting for acceptance (unexpected state), skipped<br>\n",
+                           eschtml($usr_obj->login));
+                    continue;
                 }
+                if (($bdb->user_update_passwd($usr_obj->code, $passwd)) == FALSE) {
+                    $bdb->transaction('ROLLBACK');
+                    printf("password update failed for %s, skipped<br>\n", eschtml($usr_obj->login));
+                    continue;
+                }
+                $bdb->transaction('COMMIT');
 
                 $bdb->user_update_login_time($usr_obj->code, 0);
 
@@ -590,8 +715,8 @@ SELECT usr.*, guar.login AS guar_login
                     fprintf(STDERR, "ERROR: mail send FAILED\n");
                     break;
                 }
+                umgmt_log("accept", $usr_obj->login);
             }
-            exit;
         }
         else if ($action == "delete") {
             foreach($_POST as $key => $value) {
@@ -614,10 +739,8 @@ SELECT usr.*, guar.login AS guar_login
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
-         AND usr.disa_reas = %d AND usr.code = %d;",
+     WHERE usr.disa_reas = %d AND usr.code = %d;",
                                $G_dbpfx, $G_dbpfx,
-                                       USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
                                        USER_DIS_REA_NU_TOBECHK, $id);
 
 
@@ -633,6 +756,55 @@ SELECT usr.*, guar.login AS guar_login
                     }
 
                     $usr_obj = pg_fetch_object($usr_pg, 0);
+
+                    /* a moderator refuses the requested nickname, he does not delete */
+                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP
+                        && umgmt_admin_only($role, $status) == FALSE) {
+                        $res = TRUE;
+                        break;
+                    }
+
+                    /* new signup: the account stays with its temporary nickname, only
+                       the requested one is refused; the player can ask another one
+                       from nickreq.php */
+                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP
+                        && ($usr_obj->nick_req === NULL || $usr_obj->nick_req == "")) {
+                        $status .= sprintf("%s has not asked a nickname yet: nothing to refuse<br>",
+                                           eschtml($usr_obj->login));
+                        $res = TRUE;
+                        break;
+                    }
+                    if (($usr_obj->type & USER_FLAG_TY_NICKTMP) == USER_FLAG_TY_NICKTMP) {
+                        /* the request stays: the player keeps entering with the refused
+                           nickname until he asks another one from nickreq.php */
+                        $nick_page = sprintf("%s://%s/%s/nickreq.php", $G_proto, $G_domain, $G_webbase);
+                        $subj = "Brisk: nickname rifiutato";
+                        $body_txt = sprintf('Ciao, sono l\' amministratore del sito di Brisk.
+
+Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.
+Scegline un altro qui: <%s>
+Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.
+
+Saluti e buone partite, mop.', $usr_obj->nick_req, $nick_page, $usr_obj->login);
+                        $body_htm = sprintf('Ciao, sono l\' amministratore del sito di Brisk.<br><br>
+Il nickname \'%s\' che hai chiesto non ha superato la verifica manuale.<br>
+Scegline un altro qui:<br>%s<br>
+Fino ad allora entri ancora con quel nome e nel gioco ti vedono come \'%s\'.<br><br>
+Saluti e buone partite, mop.<br>', eschtml($usr_obj->nick_req), eschtml($nick_page), eschtml($usr_obj->login));
+                        if (brisk_mail($usr_obj->email, "Utente Brisk {$usr_obj->login}", $subj, $body_txt, $body_htm) == FALSE) {
+                            fprintf(STDERR, "ERROR: mail send FAILED\n");
+                            break;
+                        }
+                        /* the refused request stays (the player still enters with it)
+                           but it is marked, so nobody accepts it by mistake */
+                        $bdb->query(sprintf("UPDATE %susers SET disa_reas = %d WHERE code = %d AND disa_reas = %d;",
+                                            $G_dbpfx, USER_DIS_REA_NU_NICKREF, $usr_obj->code,
+                                            USER_DIS_REA_NU_TOBECHK));
+                        $status .= sprintf("nickname refused for %s: SUCCESS<br>", eschtml($usr_obj->login));
+                        umgmt_log("refuse-nick", $usr_obj->login . " (" . $usr_obj->nick_req . ")");
+                        $res = TRUE;
+                        break;
+                    }
 
                     $bdb->transaction('BEGIN');
                     $is_trans = TRUE;
@@ -681,6 +853,7 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         break;
                     }
                     $status .= sprintf("user delete for %s: SUCCESS<br>", eschtml($usr_obj->login));
+                    umgmt_log("delete", $usr_obj->login);
                     $bdb->transaction('COMMIT');
                     $res = TRUE;
                 } while(FALSE);
@@ -690,10 +863,57 @@ Saluti e buone partite, mop.', $usr_obj->login);
                         $bdb->transaction('ROLLBACK');
                     break;
                 }
-                printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
+                if (($usr_obj->type & USER_FLAG_TY_NICKTMP) != USER_FLAG_TY_NICKTMP) {
+                    if ($role == "admin")
+                        printf("Registration %s for login %s deleted<br>\n", $usr_obj->code, eschtml($usr_obj->login));
+                }
+                else if ($usr_obj->nick_req !== NULL && $usr_obj->nick_req != "")
+                    printf("Nickname %s refused, %s keeps playing with the temporary one<br>\n", eschtml($usr_obj->nick_req), eschtml($usr_obj->login));
             }
         }
-        else {
+        else if ($action == "ban" && $role == "moder" && !isset($_POST['f_single'])
+                 && umgmt_moder_passwd_ok() == FALSE) {
+            echo "To block more than one player at once, write your password.<br>";
+        }
+        else if ($action == "ban") {
+            /* refuse and block (offensive nickname): the account is not deleted
+               but disabled as banned, so its e-mail cannot sign up again
+               (mail_is_used()) and "password dimenticata" ignores it */
+            if (($bdb = BriskDB::create()) == FALSE) {
+                log_crit("usermgmt: database connection failed");
+                exit;
+            }
+            foreach($_POST as $key => $value) {
+                if (substr($key, 0, 9) != "f_newuser")
+                    continue;
+
+                $id = (int)substr($key, 9);
+                if ($id <= 0)
+                    continue;
+
+                $usr_sql = sprintf("SELECT * FROM %susers WHERE disa_reas IN (%d, %d) AND code = %d;",
+                                   $G_dbpfx, USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF, $id);
+                if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE
+                    || pg_num_rows($usr_pg) != 1) {
+                    printf("Inconsistency for code %d, skipped<br>\n", $id);
+                    continue;
+                }
+                $usr_obj = pg_fetch_object($usr_pg, 0);
+                /* a new signup plays with its temporary nickname, so it is enabled */
+                $is_on = (($usr_obj->type & USER_FLAG_TY_DISABLE) == USER_FLAG_TY_DISABLE);
+                if ($bdb->user_update_flag_ty($usr_obj->code, USER_FLAG_TY_DISABLE,
+                                              $is_on, (int)$usr_obj->disa_reas,
+                                              TRUE, USER_DIS_REA_BANNED) == FALSE) {
+                    printf("Block of %s failed<br>\n", eschtml($usr_obj->login));
+                    continue;
+                }
+                umgmt_log("ban", $usr_obj->login . " (" . (string)$usr_obj->nick_req . ") " . $usr_obj->email);
+                printf("%s refused and blocked: the e-mail cannot be used again<br>\n",
+                       eschtml($usr_obj->login . ($usr_obj->nick_req ? " (" . $usr_obj->nick_req . ")" : "")));
+            }
+        }
+        $status .= ob_get_clean();
+        {
             do {
             if (($bdb = BriskDB::create()) == FALSE) {
                 log_crit("stat-day: database connection failed");
@@ -705,26 +925,46 @@ Saluti e buone partite, mop.', $usr_obj->login);
 SELECT usr.*, guar.login AS guar_login
      FROM %susers AS usr
      JOIN %susers AS guar ON guar.code = usr.guar_code
-     WHERE usr.type & (CAST (X'%x' as integer)) = (CAST (X'%x' as integer))
-         AND usr.disa_reas = %d ORDER BY usr.lintm;",
+     WHERE usr.disa_reas IN (%d, %d) ORDER BY usr.lintm;",
                                $G_dbpfx, $G_dbpfx,
-                               USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
-                               USER_DIS_REA_NU_TOBECHK);
+                               USER_DIS_REA_NU_TOBECHK, USER_DIS_REA_NU_NICKREF);
             if (($usr_pg = pg_query($bdb->dbconn->db(), $usr_sql)) == FALSE) {
                 log_crit("stat-day: select from tournaments failed");
                 break;
             }
 
             $usr_n = pg_num_rows($usr_pg);
-            $tab_lines = "<tr><th></th><th>User</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th></tr>";
+            $tab_lines = "<tr><th></th><th>User</th><th>Requested nick</th><th>EMail</th><th>Guar</th><th>Apprendice</th><th>Date</th><th></th></tr>";
             for ($i = 0 ; $i < $usr_n ; $i++) {
                 $usr_obj = pg_fetch_object($usr_pg, $i);
+                /* a moderator sees only the domain of the e-mail: enough to spot
+                   the odd ones, without the address of the player */
+                $email = $usr_obj->email;
+                if ($role != "admin")
+                    $email = (($at = strrpos($email, "@")) === FALSE ? "..." : "..." . substr($email, $at));
+                $is_ref = ($usr_obj->disa_reas == USER_DIS_REA_NU_NICKREF);
+                $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"accept_%d\">Accept</button> "
+                                    . "<button type=\"submit\" name=\"f_row\" value=\"delete_%d\">%s</button> "
+                                    . "<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
+                                    $usr_obj->code, $usr_obj->code, ($role == "admin" ? "Delete" : "Refuse nickname"),
+                                    $usr_obj->code, eschtml(addslashes($usr_obj->login)));
+                /* refused nickname: nothing to accept until the player asks another one */
+                if ($is_ref)
+                    $row_btns = sprintf("<button type=\"submit\" name=\"f_row\" value=\"ban_%d\" onclick=\"return confirm('Refuse and block %s?');\">Refuse and block</button>",
+                                        $usr_obj->code, eschtml(addslashes($usr_obj->login)));
 
-                $tab_lines .= sprintf("<tr><td><input name=\"f_newuser%d\" type=\"checkbox\" %s></td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-                                      $usr_obj->code, ($nocheck ? "" : "CHECKED"),
-                                      eschtml($usr_obj->login), eschtml($usr_obj->email), eschtml($usr_obj->guar_login),
+                /* the moderators start with nothing checked: a wrong click on the
+                   buttons at the bottom must not touch every player */
+                $tab_lines .= sprintf("<tr%s><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n",
+                                      ($is_ref ? " style=\"color: #888;\"" : ""),
+                                      ($is_ref ? "" : sprintf("<input name=\"f_newuser%d\" type=\"checkbox\" %s>",
+                                                               $usr_obj->code, (($nocheck || $role != "admin") ? "" : "CHECKED"))),
+                                      eschtml($usr_obj->login) . (($usr_obj->type & USER_FLAG_TY_NICKTMP) ? "*" : ""),
+                                      ($is_ref ? "<s>" . eschtml((string)$usr_obj->nick_req) . "</s> refused, waiting for a new one"
+                                       : eschtml((string)$usr_obj->nick_req)),
+                                      eschtml($email), eschtml($usr_obj->guar_login),
                                       ($usr_obj->type & USER_FLAG_TY_APPR ? "Yes" : "No"),
-                                      $usr_obj->lintm);
+                                      $usr_obj->lintm, $row_btns);
             }
             ?>
 <html>
@@ -735,15 +975,32 @@ SELECT usr.*, guar.login AS guar_login
 </head>
      <body>
      <h2> E-mail verified user management.</h2>
-     <?php if ($status != "") { echo "$status"; } ?>
+     <?php echo $who_line; ?>
+     <?php if ($status != "") { echo "<div style=\"border: 1px solid #888; background: #ffffe0; padding: 8px; margin: 8px 0;\"><b>Result:</b><br>$status</div>"; } ?>
      <form action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="POST">
      <table class="the_tab">
      <?php
      echo $tab_lines;
             ?>
             </table>
-                  <input type="submit" name="f_accept" value="Accept">
-                  <input type="submit" name="f_delete" value="Delete">
+                  <script>
+                  /* the buttons at the bottom act on the checked rows: say how many */
+                  function umgmt_n_checked() {
+                      return document.querySelectorAll('input[type=checkbox][name^=f_newuser]:checked').length;
+                  }
+                  function umgmt_bulk(what) {
+                      var n = umgmt_n_checked();
+                      if (n == 0) { alert("No player checked."); return false; }
+                      return confirm(what + " " + n + " player" + (n == 1 ? "" : "s") + "?");
+                  }
+                  </script>
+                  Checked players:
+                  <input type="submit" name="f_accept" value="Accept" onclick="return umgmt_bulk('Accept');">
+                  <input type="submit" name="f_delete" value="<?php echo ($role == "admin" ? "Delete" : "Refuse nickname"); ?>" onclick="return umgmt_bulk('<?php echo ($role == "admin" ? "Delete" : "Refuse the nickname of"); ?>');">
+                  <input type="submit" name="f_ban" value="Refuse and block" onclick="return umgmt_bulk('Refuse and block (account disabled, e-mail not usable again)');">
+                  <?php if ($role == "moder") { ?>
+                  <br>To block more than one player at once: your password <input type="password" name="f_banpass" autocomplete="current-password">
+                  <?php } ?>
                   </form>
                   </body>
                   </html>

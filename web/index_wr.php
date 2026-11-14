@@ -238,6 +238,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             echo show_notify(str_replace("\n", " ", placings_show(FALSE)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
         }
         else if ($argz[0] == 'apprentice') {
+            /* the old apprentice form is replaced by "Crea il tuo account" (iscriviti.php),
+               that has more checks: no accounts created from here any more */
+            echo "Per creare un account usa il pulsante <b>Crea il tuo account</b> nella pagina di ingresso.";
+            return FALSE;
             if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
                 $cli_name = "";
 

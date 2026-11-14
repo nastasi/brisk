@@ -36,7 +36,7 @@ $_globals_list = array(
 'G_black_list', 'G_brisk_version', 'G_btrace_pref_sub', 'G_cloud_smasher',
 'G_crypt_key', 'G_dbasetype', 'G_dbauth', 'G_dbpfx', 'G_doc_path',
 'G_proto', 'G_domain', 'G_donors_all', 'G_donors_cur', 'G_is_local', 'G_lang', 'G_lng',
-'G_mail_seed', 'G_notguar_code', 'G_PG_cons', 'G_PG_cons_n', 'G_PG_vow',
+'G_mail_seed', 'G_moderators', 'G_notguar_code', 'G_PG_cons', 'G_PG_cons_n', 'G_PG_vow',
 'G_PG_vow_n', 'G_poll_entries', 'G_poll_name', 'G_poll_title',
 'G_provider_proxy', 'G_proxy_white_list', 'G_room_about', 'G_room_help',
 'G_room_passwdhowto', 'G_room_roadmap',
@@ -1539,6 +1539,38 @@ class Sac_a_push {
             }
 
             return cmd_return(200, 'success');
+        }
+
+        // "cmd" => "modauth", "sess" => 'xxxxxxxxxxx', 'the_end' => 'true'
+        // a moderator (a login of $G_moderators) with its own session: no
+        // password of the site; the reply carries the login, for the log
+        if ($cmd['cmd'] == 'modauth') {
+            GLOBAL $G_moderators;
+
+            if (!isset($cmd['sess'])) {
+                return cmd_return(401, 'malformed cmd');
+            }
+            $idx = -1;
+            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE) {
+                fprintf(STDERR, "DIRECT: modauth refused: no such session\n");
+                return cmd_return(403, 'denied');
+            }
+            $is_mod = FALSE;
+            if ($user->is_auth() && isset($G_moderators) && is_array($G_moderators)) {
+                foreach ($G_moderators as $mod) {
+                    if (strcasecmp($mod, $user->name) == 0) {
+                        $is_mod = TRUE;
+                        break;
+                    }
+                }
+            }
+            if (!$is_mod) {
+                fprintf(STDERR, "DIRECT: modauth refused: [%s] from [%s] is not a moderator\n",
+                        $user->name, $user->ip);
+                return cmd_return(403, 'denied');
+            }
+
+            return cmd_return(200, $user->name);
         }
 
         return cmd_return(501, 'no cmd found');

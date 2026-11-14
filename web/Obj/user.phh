@@ -59,6 +59,7 @@ define('USER_FLAG_TY_NORM',    0x010000); // done
 define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_CERT',    0x040000); // done
 define('USER_FLAG_TY_APPR',    0x080000); // done
+define('USER_FLAG_TY_NICKTMP', 0x100000); // temporary nickname, the requested one waits for a check
 //  ... other usefull status ...
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_ADMIN',   0x400000); // done
@@ -73,6 +74,7 @@ define('USER_DIS_REA_MALICIOUS',  4);
 define('USER_DIS_REA_NU_ADDED',   5); // new user: new user added by hand or external sql
 define('USER_DIS_REA_NU_MAILED',  6); // new user: mail sent to be confirmed
 define('USER_DIS_REA_NU_TOBECHK', 7); // new user: name verification
+define('USER_DIS_REA_NU_NICKREF', 8); // new user: requested nickname refused, waiting for another one
 
 
 
@@ -631,8 +633,14 @@ class User {
           }
       }
       $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
-      return (sprintf('window.myname = "%s"; $("myname").innerHTML = "<span class=\"%s\">%s</span>";',
-                      $myname, $cl, $myname));
+      /* USER_FLAG_TY_NICKTMP: temporary nickname, shown with a "*" */
+      /* easy signup: the nickname asked for, to greet the player with it */
+      $myname_req = (($this->flags & USER_FLAG_TY_NICKTMP) && isset($this->rec) && is_object($this->rec)
+                     && isset($this->rec->nick_req) ? xcape($this->rec->nick_req, ENT_COMPAT, "UTF-8") : "");
+      return (sprintf('window.myname_req = "%s"; ', $myname_req) .
+              sprintf('window.myname = "%s"; window.myname_tmp = %d; $("myname").innerHTML = "<span class=\"%s\">%s%s</span>";',
+                      $myname, (($this->flags & USER_FLAG_TY_NICKTMP) ? 1 : 0), $cl, $myname,
+                      (($this->flags & USER_FLAG_TY_NICKTMP) ? "<span style='color:#888;font-size:75%;margin-left:2px;vertical-align:super;font-style:normal'>&#10033;</span>" : "")));
   }
 
   /* INDEX_RD PORT */
