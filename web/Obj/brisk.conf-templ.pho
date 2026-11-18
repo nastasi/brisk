@@ -29,6 +29,9 @@ $G_proto      = "https";
 $G_domain     = "brisk.example.com";
 $G_webbase    = "brisk";
 $G_admin_mail = "admin@$G_domain";
+/* logins of the moderators: they use usermgmt.php with their own session,
+   without the password of the site (see check_auth() in usermgmt.php) */
+$G_moderators = array();
 $G_mail_seed  = 281741;
 
 $G_lang = "it";
