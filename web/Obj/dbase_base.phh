@@ -36,6 +36,7 @@ class LoginDBItem {
     public $guar_code;
     public $match_cnt;
     public $game_cnt;
+    public $nick_req = NULL;   // easy signup: the nickname asked for, while the temporary one is in use
 
     function __construct($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers,
                          $disa_reas, $guar_code, $match_cnt, $game_cnt)
@@ -60,6 +61,8 @@ class LoginDBItem {
                                $rec->email, $rec->type, $rec->last_dona,
                                $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code,
                                $rec->match_cnt, $rec->game_cnt);
+        if (isset($rec->nick_req))
+            $ret->nick_req = $rec->nick_req;
 
         return ($ret);
     }
