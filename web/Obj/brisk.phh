@@ -168,7 +168,7 @@ $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
 $G_lng = langtolng($G_lang);
 
 $G_all_points = array( 11,10,4,3,2, 0,0,0,0,0 );
-$G_brisk_version = "6.0.0";
+$G_brisk_version = "6.1.1";
 
 /* MLANG: ALL THE INFO STRINGS IN brisk.phh */
 $root_wellarr = array( 'it' => array ( 'Brisk (Ver. '.$G_brisk_version.'), <b>NOVITÀ</b>: port a PHP 8.4, corretti diversi errori che impattavano sull\'esperienza utente, nuovo layout, occhio verde/arancio/rosso cliccabile, chat espandibile.' ),
