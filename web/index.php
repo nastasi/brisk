@@ -1132,9 +1132,9 @@ window.onload = function() {
     <input id="passid_private" name="pass_private" type="hidden" value="">
     <table class="login">
     <tr><td>nickname:</td>
-    <td><input id="nameid" class="input_text" name="name" type="text" size="24" maxlength="12" value=""></td></tr>
+    <td><input id="nameid" type="text" autocomplete="username" class="input_text" name="name" size="24" maxlength="12" value=""></td></tr>
     <tr><td>password:</td>
-    <td><input id="passid" class="input_text" name="pass" type="password" size="24" maxlength="64" value=""></td></tr>
+    <td><input id="passid" type="password" autocomplete="current-password" class="input_text" name="pass" size="24" maxlength="64" value=""></td></tr>
     <tr><td colspan="2"><input id="sub" value="<?php echo $mlang_room['btn_enter'][$G_lang];?>" type="submit" class="button"></td></tr>
     </table>
     </form><br>
