@@ -320,20 +320,31 @@ span.au2_off span {
 }
 
 span.au3 {
-    padding-left: 24px;
-    background-image: url('img/books.png');
-    background-repeat: no-repeat;
-    background-position: left center;
 }
 
-span.au3_off span {
-    background-color: transparent;
-}
 span.au3_off {
 }
 
+/* apprentices: light gold background instead of the books icon */
 span.au3 span {
-    background-color: transparent;
+    padding-left: 2px;
+    padding-right: 4px;
+    background-color: #ffe9b3;
+}
+
+span.au3_off span {
+    padding-left: 2px;
+    padding-right: 4px;
+    background-color: #ffe9b3;
+}
+
+/* easy signup: the "*" after a temporary nickname */
+span.nicktmp {
+    color: #888;
+    font-size: 75%;
+    margin-left: 2px;
+    vertical-align: super;
+    font-style: normal;
 }
 
 div.bye_msg {
@@ -416,9 +427,16 @@ a.flat:hover {
 }
 
 /* in the company details the links keep the height of the line (a.flat
-   sets 20px, more than the small text of the details) */
+   sets 20px, more than the small text of the details) and the orange of
+   a.flat (#ffae00); under the mouse they turn lighter, halfway between it
+   and #ffd780, instead of becoming bold */
 div.company_line a.flat {
     line-height: inherit;
+}
+
+div.company_line a.flat:hover {
+    color: #ffc240;
+    font-weight: inherit;
 }
 
 /* the header of the room and of the table (header_render() in brisk.phh) */

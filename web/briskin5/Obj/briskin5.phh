@@ -1273,7 +1273,7 @@ class Bin5 {
                         $remcalc = $this->table[0]->exitlock_calc($this->user, $user_cur->table_pos);
                         if ($remcalc < 3) {
                             require_once("{$G_base}Obj/hardban.phh");
-                            Hardbans::add(($user_cur->is_auth() ? $user_cur->name : FALSE),
+                            Hardbans::add(($user_cur->is_auth() ? $user_cur->login : FALSE),
                                           $user_cur->ip, $user_cur->sess, $user_cur->laccwr + BAN_TIME);
                         }
                         //      $user->bantime = $user->laccwr + BAN_TIME;
@@ -1400,7 +1400,7 @@ class Bin5 {
 
                 $user_cur->comm[$user_cur->step % COMM_N] = "gst.st = ".($user_cur->step+1)."; ";
                 $user_cur->comm[$user_cur->step % COMM_N] .= sprintf('chatt_sub("%s", [%d, "%s"],"%s");',
-                                                                     $dt, $user->flags, xcape($user->name), xcape($user_mesg));
+                                                                     $dt, $user->flags_client(), xcape($user->name), xcape($user_mesg));
                 $user_cur->step_inc();
             }
             log_legal($curtime, $user->ip, $user, ($user->stat == 'room' ? 'room' : 'table '.$user->table_orig),$user_mesg);
@@ -1668,19 +1668,19 @@ function show_table(&$bri, &$user, $sendstep, $is_transition, $is_again)
         /* USERS INFO */
         $ret .= $user->myname_innerHTML();
         $ret .= sprintf('set_names([%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"], [%d, "%s"]); ',
-                        $bri->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->flags,
+                        $bri->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->flags_client(),
                         xcape($bri->user[$table->player[($table_pos) % BIN5_PLAYERS_N]]->name),
 
-                        $bri->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->flags,
+                        $bri->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->flags_client(),
                         xcape($bri->user[$table->player[($table_pos+1) % BIN5_PLAYERS_N]]->name),
 
-                        $bri->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->flags,
+                        $bri->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->flags_client(),
                         xcape($bri->user[$table->player[($table_pos+2) % BIN5_PLAYERS_N]]->name),
 
-                        (BIN5_PLAYERS_N == 3 ? 0 : $bri->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->flags),
+                        (BIN5_PLAYERS_N == 3 ? 0 : $bri->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->flags_client()),
                         (BIN5_PLAYERS_N == 3 ? "" :  xcape($bri->user[$table->player[($table_pos+3) % BIN5_PLAYERS_N]]->name)),
 
-                        (BIN5_PLAYERS_N == 3 ? 0 : $bri->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->flags),
+                        (BIN5_PLAYERS_N == 3 ? 0 : $bri->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->flags_client()),
                         (BIN5_PLAYERS_N == 3 ? "" :  xcape($bri->user[$table->player[($table_pos+4) % BIN5_PLAYERS_N]]->name)));
     }
     /* NOTIFY FOR THE CARD MAKER */

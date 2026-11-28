@@ -232,6 +232,22 @@ img.seed3 {
     padding: 2px;
 }
 
+/*
+ *  the names over the cards in hand and played (z-index up to 8), under
+ *  the card being dragged (10): the box of a name covers the whole area of
+ *  the player, so it lets the pointer through to the cards; only the name
+ *  (span.pname, set_names() in briskin5.js) takes it, for its title
+ */
+#name, #name_ea, #name_ne, #name_nw, #name_we {
+    z-index: 9;
+    pointer-events: none;
+}
+
+#name span.pname, #name_ea span.pname, #name_ne span.pname,
+#name_nw span.pname, #name_we span.pname {
+    pointer-events: auto;
+}
+
 div.table_commands {
     display: inline;
     position: absolute;
@@ -293,8 +309,15 @@ div.table_commands {
     text-align: center;
 }
 
+/*
+ *  the names of the players, at the top of their area of the table: black
+ *  at 50%, about as light as the gray they had, so that the cards under
+ *  them show through the letters (also .pubinfo_ea, _ne, _nw, _we and the
+ *  _iscalling ones). Their place over the cards is set by the rules of
+ *  #name, #name_ea, ... (before div.table_commands)
+ */
 .pubinfo {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 475px;
@@ -304,7 +327,7 @@ div.table_commands {
 }
 
 .pubinfo_iscalling {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 475px;
@@ -337,7 +360,7 @@ div.table_commands {
 }
 
 .pubinfo_we {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -347,7 +370,7 @@ div.table_commands {
 }
 
 .pubinfo_we_iscalling {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -371,7 +394,7 @@ div.table_commands {
 }
 
 .pubinfo_nw {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 125px;
@@ -392,7 +415,7 @@ div.table_commands {
 }
 
 .pubinfo_nw_iscalling {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 124px;
@@ -405,7 +428,7 @@ div.table_commands {
 }
 
 .pubinfo_ne {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 125px;
@@ -415,7 +438,7 @@ div.table_commands {
 }
 
 .pubinfo_ne_iscalling {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 124px;
@@ -439,7 +462,7 @@ div.table_commands {
 }
 
 .pubinfo_ea {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -449,7 +472,7 @@ div.table_commands {
 }
 
 .pubinfo_ea_iscalling {
-    color: gray;
+    color: rgba(0, 0, 0, 0.5);
     visibility: visible;
     position: absolute;
     top: 250px;
@@ -576,6 +599,13 @@ body.table {
 
 body.table > div.table_page {
     grid-row: 2;
+}
+
+/* the company details (company_line_render() in brisk.phh) a couple of
+   lines away from the input of the chat: their links were often clicked
+   by mistake when clicking the input to write */
+body.table div.company_line {
+    margin-top: 3em;
 }
 
 /* the button that shows or hides the header (header_toggle() in briskin5.js):

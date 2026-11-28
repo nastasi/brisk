@@ -1,0 +1,41 @@
+A list, not sorted by importance, of how the code of Brisk has to be written
+
+1) everything except the strings shown to the users has to be in English; a list,
+   not necessarily complete, includes, whatever the language being written
+   (php, html, javascript or SQL):
+     - comments
+     - file names
+     - function names
+     - variable names
+     - class names
+     - object names
+     - method and attribute names
+     - field names
+     - names of tables, views or any other object in SQL
+   the guideline is always the same anyway: anything that is not text shown to the
+   users MUST BE IN ENGLISH.
+
+1 bis) NOT MANDATORY BUT APPRECIATED: the strings shown to the users too should be
+   kept in the multi-language array of the page and, where they are needed,
+   replaced by the element of the array and not by the string itself
+
+2) variables, except when they are used inside small utility functions no longer
+   than about ten lines or are the current variables of a loop,
+   must have a name longer than 2 characters
+
+3) do not put compacted code (javascript or css included) inside the sources,
+   it must always be properly indented; if it hurts the readability it can
+   always be moved to a separate file and included
+
+4) for the DB: changing existing tables has to be done with care, for example: fields
+   that could make sense only temporarily go in new accessory tables and not in the
+   original table
+
+5) the internal consistency of the site has to be kept, for example: if up to a
+   certain point the site has called the word that identifies the users "nickname",
+   "nickname" has to be used in all the other parts of the site too.
+   If "nickname" is to be replaced by something else, it is discussed first and done
+   thoroughly across the whole site.
+
+6) Strings with accented characters: if there are words with accents like "è", "già"
+   or "perché", those are used, and not "e'", "gia'" or "perche'"

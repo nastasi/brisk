@@ -36,6 +36,8 @@ class LoginDBItem {
     public $guar_code;
     public $match_cnt;
     public $game_cnt;
+    public $nick_tmp = NULL;   // easy signup: the temporary nickname, until the login is approved
+    public $vis_login = NULL;  // the name the others see: nick_tmp if there is one, else login
 
     function __construct($code, $login, $pass, $email, $type, $last_dona, $supp_comp, $tos_vers,
                          $disa_reas, $guar_code, $match_cnt, $game_cnt)
@@ -60,6 +62,10 @@ class LoginDBItem {
                                $rec->email, $rec->type, $rec->last_dona,
                                $rec->supp_comp, $rec->tos_vers, $rec->disa_reas, $rec->guar_code,
                                $rec->match_cnt, $rec->game_cnt);
+        if (isset($rec->nick_tmp))
+            $ret->nick_tmp = $rec->nick_tmp;
+        if (isset($rec->vis_login))
+            $ret->vis_login = $rec->vis_login;
 
         return ($ret);
     }
@@ -72,6 +78,13 @@ class LoginDBItem {
     function login_get()
     {
         return $this->login;
+    }
+
+    /* the name the others see: the temporary nickname of an easy signup
+       until its login is approved, the login otherwise */
+    function vis_login_get()
+    {
+        return ($this->vis_login !== NULL ? $this->vis_login : $this->login);
     }
 
     function pass_get()

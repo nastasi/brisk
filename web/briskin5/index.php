@@ -392,7 +392,7 @@ window.onload = function() {
 
 
 <!-- the company details, the last row of the page (div.company_line in brisk.css) -->
-<?php echo company_line_render(); ?>
+<?php echo company_line_render(TRUE); ?>
 </body>
 </html>
 <?php

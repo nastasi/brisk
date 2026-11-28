@@ -289,18 +289,23 @@ function act_reload()
     // document.location.reload();
 }
 
+/*
+ *  the name in a span.pname: the box of the name lies over the cards of the
+ *  area and lets the pointer through to them, only the name itself takes it
+ *  (for its title); see .pubinfo in briskin5.css
+ */
 function set_names(so,ea,ne,nw,we)
 {
     // alert("SET NAME");
-    $("name").innerHTML    = user_decorator(so, false);
+    $("name").innerHTML    = '<span class="pname">' + user_decorator(so, false) + '</span>';
     $("name").title    = unescapeHTML(so[1]); 
-    $("name_ea").innerHTML = user_decorator(ea, false);
+    $("name_ea").innerHTML = '<span class="pname">' + user_decorator(ea, false) + '</span>';
     $("name_ea").title = unescapeHTML(ea[1]);
-    $("name_ne").innerHTML = user_decorator(ne, false);
+    $("name_ne").innerHTML = '<span class="pname">' + user_decorator(ne, false) + '</span>';
     $("name_ne").title = unescapeHTML(ne[1]);
-    $("name_nw").innerHTML = user_decorator(nw, false);
+    $("name_nw").innerHTML = '<span class="pname">' + user_decorator(nw, false) + '</span>';
     $("name_nw").title = unescapeHTML(nw[1]);
-    $("name_we").innerHTML = user_decorator(we, false);
+    $("name_we").innerHTML = '<span class="pname">' + user_decorator(we, false) + '</span>';
     $("name_we").title = unescapeHTML(we[1]);
 
     for (i = 0 ; i < PLAYERS_N ; i++) 

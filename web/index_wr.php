@@ -43,8 +43,8 @@ $mlang_indwr = array( 'unknownerr'    => array( 'it' => 'errore sconosciuto',
                                            'en' => 'To send a message to the administrator you have to be authenticated'),
                       'shutmsg'  => array( 'it' => '<b>Il server sta per essere riavviato, non possono avere inizio nuove partite.</b>',
                                            'en' => '<b>The server is going to be rebooted, new games are not allowed.</b>'),
-                      'mustappr' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica o apprendistato.</b>',
-                                           'en' => '<b>The table where you want to sit require authentication or apprentice</b>'),
+                      'mustappr' => array( 'it' => '<b>Per sederti a questo tavolo devi avere un account Brisk.</b>',
+                                           'en' => '<b>To sit at this table you need a Brisk account.</b>'),
                       'mustauth' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica.</b>',
                                            'en' => '<b>The table where you want to sit require authentication</b>'),
                       'mustcert' => array( 'it' => '<b>Il tavolo a cui volevi sederti richiede autentifica e certificazione.</b>',
@@ -229,7 +229,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             echo show_notify(str_replace("\n", " ", $G_room_passwdhowto[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
         }
         else if ($argz[0] == 'roadmap') {
-            echo show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_close'][$G_lang], 400, 200);
+            echo show_notify(roadmap_get($G_lang), 0, $mlang_indwr['btn_close'][$G_lang], 500, 340);
         }
         else if ($argz[0] == 'placing') {
             require_once("briskin5/Obj/briskin5.phh");
@@ -238,6 +238,10 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
             echo show_notify(str_replace("\n", " ", placings_show(FALSE)), 0, $mlang_indwr['btn_close'][$G_lang], 800, 600);
         }
         else if ($argz[0] == 'apprentice') {
+            /* the old apprentice form is replaced by "Crea il tuo account" (signup.php),
+               that has more checks: no accounts created from here any more */
+            echo "Per creare un account usa il pulsante <b>Crea il tuo account</b> nella pagina di ingresso.";
+            return FALSE;
             if (($cli_name = gpcs_var('cli_name', $get, $post, $cookie)) === FALSE)
                 $cli_name = "";
 
@@ -453,7 +457,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($wa_lock = Warrant::lock_data(TRUE)) != FALSE) {
                     if (($fp = @fopen(LEGAL_PATH."/warrant.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
-                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->name), xcapelt(trim(urldecode($cli_name))), xcapelt(trim(urldecode($cli_email)))));
+                        fwrite($fp, sprintf("%ld|%s|%s|%s|\n", $curtime, xcapelt($user->login), xcapelt(trim(urldecode($cli_name))), xcapelt(trim(urldecode($cli_email)))));
                         fclose($fp);
                     }
                     Warrant::unlock_data($wa_lock);
@@ -516,9 +520,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                                             $G_proto, $G_domain, $G_webbase, $mail_code, $hash);
                     $subj = $mlang_indwr['nu_msubj'][$G_lang];
                     $body_txt = sprintf($mlang_indwr['nu_mtext'][$G_lang],
-                                        $user->name, $cli_name, $confirm_page);
+                                        $user->login, $cli_name, $confirm_page);
                     $body_htm = sprintf($mlang_indwr['nu_mhtml'][$G_lang],
-                                        $user->name, $cli_name, $confirm_page);
+                                        $user->login, $cli_name, $confirm_page);
 
                     $mail_item = new MailDBItem($mail_code, $usr_obj->code, MAIL_TYP_CHECK,
                                                 $curtime, $subj, $body_txt, $body_htm, $hash);
@@ -572,7 +576,8 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 if (($bdb = BriskDB::create()) != FALSE) {
                     $bdb->users_load();
 
-                    if (($ema = $bdb->getmail($user->name)) != FALSE) {
+                    /* by login: the name in the room can be a temporary nickname */
+                    if (($ema = $bdb->getmail($user->login)) != FALSE) {
                         //  mail("nastasi",
                         /* php8: mbstring.func_overload was removed, so mail() is no
                            longer remapped onto mb_send_mail(): the subject and
@@ -581,7 +586,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                            RFC 5322). */
                         if (brisk_mail($G_admin_mail, 'Brisk Team',
                                        urldecode($cli_subj), urldecode($cli_mesg),
-                                       urldecode($cli_mesg), ["Utente Brisk {$user->name}", $ema]) == FALSE) {
+                                       urldecode($cli_mesg), ["Utente Brisk {$user->login}", $ema]) == FALSE) {
                                        # urldecode($cli_mesg), NULL) == FALSE) {
                             // mail error
                             fprintf(STDERR, "ERROR: mail send FAILED\n");
@@ -596,7 +601,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
                     if (($fp = @fopen(LEGAL_PATH."/messages.txt", 'a')) != FALSE) {
                         /* Unix time | session | nickname | IP | where was | mesg */
-                        fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name,
+                        fwrite($fp, sprintf("%ld|%s|%s|%s\n", $curtime, $user->name_log(),
                                             xcapelt(urldecode($cli_subj)), xcapelt(urldecode($cli_mesg))));
                         fclose($fp);
                     }
@@ -801,7 +806,7 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
         }
         else if ($argz[0] == 'roadmap') {
             $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
-            $user->comm[$user->step % COMM_N] .=  show_notify(str_replace("\n", " ", $G_room_roadmap[$G_lang]), 0, $mlang_indwr['btn_backtotab'][$G_lang], 400, 200);
+            $user->comm[$user->step % COMM_N] .=  show_notify(roadmap_get($G_lang), 0, $mlang_indwr['btn_backtotab'][$G_lang], 500, 340);
 
             log_wr($user->comm[$user->step % COMM_N]);
             $user->step_inc();
@@ -899,7 +904,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 // if ($user->bantime > $user->laccwr) {
                 require_once("Obj/hardban.phh");
 
-                if (($bantime = Hardbans::check(($user->is_auth() ? $user->name : FALSE),
+                /* the ban follows the login: it stays if meanwhile a temporary
+                   nickname of an easy signup gets approved */
+                if (($bantime = Hardbans::check(($user->is_auth() ? $user->login : FALSE),
                                                 $user->ip, $user->sess)) != -1) {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ";
                     /* MLANG: "<br>Ti sei alzato da un tavolo senza il consenso degli altri giocatori. <br><br>Dovrai aspettare ancora ".secstoword($user->bantime - $user->laccwr)." prima di poterti sedere nuovamente.", "resta in piedi.", "<br>Tu o qualcuno col tuo stesso indirizzo IP si è alzato da un tavolo senza il consenso degli altri giocatori.<br><br>Dovrai aspettare ancora ".secstoword($bantime - $user->laccwr)." prima di poterti sedere nuovamente.<br><br>Se non sei stato tu ad alzarti e possiedi un login con password, autenticandoti con quello, potrai accedere." */

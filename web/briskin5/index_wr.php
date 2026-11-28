@@ -141,7 +141,7 @@ function bin5_index_wr_main(&$bin5, $remote_addr_full, $get, $post, $cookie)
             }
             else {
                 require_once("../Obj/hardban.phh");
-                Hardbans::add(($user->is_auth() ? $user->name : FALSE),
+                Hardbans::add(($user->is_auth() ? $user->login : FALSE),
                               $user->ip, $user->sess, $user->laccwr + BAN_TIME);
             }
             //      $user->bantime = $user->laccwr + BAN_TIME;

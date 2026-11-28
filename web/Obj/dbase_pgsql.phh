@@ -146,13 +146,16 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        /* check the existence of the nick in the BriskDB */
+        /* check the existence of the nick in the BriskDB: as the login of an
+           account or as the temporary nickname of an easy signup, the name
+           the others see (users_nicktmp) */
         log_main("login_exists: ".$login);
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = '%s'",
-                            $G_dbpfx, escsql($login));
+        $user_sql = sprintf("SELECT code FROM %susers_vis
+                                 WHERE login = '%s' OR lower(nick_tmp) = lower('%s');",
+                            $G_dbpfx, escsql($login), escsql($login));
         if (($user_pg = $this->query($user_sql)) != FALSE)
-            if (pg_num_rows($user_pg) == 1)
+            if (pg_num_rows($user_pg) >= 1)
                 return TRUE;
 
         return FALSE;
@@ -161,16 +164,35 @@ class BriskDB
     function getrecord_bylogin($login) {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",  $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
+        $user_sql = sprintf("SELECT * FROM %susers_vis
+                             WHERE login = lower('%s') AND (type & CAST (X'%08x' as integer)) = 0;",
+                            $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE);
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        $user_obj = pg_fetch_object($user_pg, 0);
+        return (pg_fetch_object($user_pg, 0));
+    }
 
-        return ($user_obj);
+    /* the account the others see as $name (vis_login: the temporary
+       nickname of an easy signup, or the login): for what the players
+       write or click, as the "info" of a player */
+    function getrecord_byvislogin($name) {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("SELECT * FROM %susers_vis
+                             WHERE lower(vis_login) = lower('%s')
+                             AND (type & CAST (X'%08x' as integer)) = 0;",
+                            $G_dbpfx, escsql($name), USER_FLAG_TY_DISABLE);
+        if (($user_pg  = $this->query($user_sql)) == FALSE) {
+            return FALSE;
+        }
+        if (pg_num_rows($user_pg) != 1)
+            return FALSE;
+
+        return (pg_fetch_object($user_pg, 0));
     }
 
     function user_add($login, $pass, $email, $type, $disa_reas, $guar_code) {
@@ -296,16 +318,14 @@ class BriskDB
     function getrecord_bycode($code) {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("SELECT * FROM %susers WHERE code = %d;",  $G_dbpfx, $code);
+        $user_sql = sprintf("SELECT * FROM %susers_vis WHERE code = %d;", $G_dbpfx, $code);
         if (($user_pg  = $this->query($user_sql)) == FALSE) {
             return FALSE;
         }
         if (pg_num_rows($user_pg) != 1)
             return FALSE;
 
-        $user_obj = pg_fetch_object($user_pg, 0);
-
-        return ($user_obj);
+        return (pg_fetch_object($user_pg, 0));
     }
 
     function user_update_login_time($code, $lintm)
@@ -334,6 +354,210 @@ class BriskDB
                 = (CAST (X'%08x' as integer)) AND disa_reas = %d;",
                             $G_dbpfx, $type, ($new_val ? $type : 0), $new_reas,
                             $code, $type, ($old_val ? $type : 0), $old_reas);
+
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    /* TRUE if the account exists but waits for the check of its e-mail */
+    function user_wait_mail($login)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("SELECT code FROM %susers WHERE login = lower('%s')
+                                 AND (type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
+                                 AND disa_reas = %d;",
+                            $G_dbpfx, escsql($login), USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                            USER_DIS_REA_NU_MAILED);
+        if (($user_pg = $this->query($user_sql)) == FALSE) {
+            return FALSE;
+        }
+
+        return (pg_num_rows($user_pg) == 1);
+    }
+
+    /* TRUE if an account uses this e-mail */
+    function mail_is_used($email)
+    {
+        GLOBAL $G_dbpfx;
+
+        $mail_sql = sprintf("SELECT code FROM %susers WHERE lower(email) = lower('%s');",
+                            $G_dbpfx, escsql($email));
+        if (($mail_pg = $this->query($mail_sql)) == FALSE) {
+            return TRUE;
+        }
+
+        return (pg_num_rows($mail_pg) > 0);
+    }
+
+    /* TRUE if nobody uses the nickname as login or as temporary nickname,
+       also apart from the accents (nicolo and nicolò are the same name):
+       unaccent() of PostgreSQL, extension made by sql/sql.d/110-unaccent.sql */
+    function nick_is_free($nick)
+    {
+        GLOBAL $G_dbpfx;
+
+        $nick_sql = sprintf("SELECT code FROM %susers_vis
+                                 WHERE lower(unaccent(login)) = lower(unaccent('%s'))
+                                    OR lower(unaccent(nick_tmp)) = lower(unaccent('%s'));",
+                            $G_dbpfx, escsql((string)$nick), escsql((string)$nick));
+        if (($nick_pg = $this->query($nick_sql)) == FALSE) {
+            return FALSE;
+        }
+
+        return (pg_num_rows($nick_pg) == 0);
+    }
+
+    /* the words of the temporary nickname of an easy signup: an animal
+       and an adjective, like "GattoFurbo" */
+    function nick_fun_words()
+    {
+        $animals = array(
+            'Gatto', 'Cane', 'Orso', 'Lupo', 'Gufo', 'Riccio', 'Merlo', 'Tasso', 'Falco',
+            'Topo', 'Cigno', 'Grillo', 'Ghiro', 'Leone', 'Polpo', 'Panda', 'Koala', 'Fagiano',
+            'Delfino', 'Passero', 'Castoro', 'Pavone');
+        $adjectives = array(
+            'Furbo', 'Allegro', 'Elegante', 'Pigro', 'Saggio', 'Curioso', 'Gentile', 'Ribelle',
+            'Timido', 'Goloso', 'Distratto', 'Romantico', 'Simpatico', 'Sereno', 'Felice',
+            'Audace', 'Fiero', 'Buffo', 'Tenero', 'Sognatore');
+
+        return (array('animals' => $animals, 'adjectives' => $adjectives));
+    }
+
+    /* the temporary nickname made of $animal and $adjective when both are
+       words of nick_fun_words(), it has 12 letters at most and it is free;
+       FALSE otherwise */
+    function nick_fun_check($animal, $adjective)
+    {
+        $words = $this->nick_fun_words();
+
+        if (!in_array($animal, $words['animals'], TRUE) || !in_array($adjective, $words['adjectives'], TRUE))
+            return FALSE;
+        $nick = $animal . $adjective;
+        if (strlen($nick) > 12 || login_consistency($nick) == FALSE)
+            return FALSE;
+        if ($this->nick_is_free($nick) == FALSE)
+            return FALSE;
+
+        return ($nick);
+    }
+
+    /* for every animal, the adjectives that give a temporary nickname that
+       can be used now: at most 12 letters, accepted by login_consistency()
+       and free (one query for all the pairs, the same comparison as
+       nick_is_free()); the animals without such an adjective are left out.
+       FALSE when the query fails */
+    function nick_fun_free_pairs()
+    {
+        GLOBAL $G_dbpfx;
+
+        $words = $this->nick_fun_words();
+        $candidates = array();
+        foreach ($words['animals'] as $animal) {
+            foreach ($words['adjectives'] as $adjective) {
+                $nick = $animal . $adjective;
+                if (strlen($nick) <= 12 && login_consistency($nick) != FALSE)
+                    $candidates[strtolower($nick)] = array($animal, $adjective);
+            }
+        }
+        $pairs = array();
+        if (count($candidates) == 0)
+            return ($pairs);
+
+        $quoted = array();
+        foreach (array_keys($candidates) as $nick)
+            $quoted[] = "'" . escsql($nick) . "'";
+        $list_sql = implode(', ', $quoted);
+        /* one row per account: its login and its temporary nickname (NULL when
+           it has none), both without accents; a candidate is taken if it is one
+           of the two */
+        $taken_sql = sprintf("SELECT lower(unaccent(login)) AS login_plain,
+                                     lower(unaccent(nick_tmp)) AS nick_plain
+                                  FROM %susers_vis
+                                  WHERE lower(unaccent(login)) IN (%s)
+                                     OR lower(unaccent(nick_tmp)) IN (%s);",
+                             $G_dbpfx, $list_sql, $list_sql);
+        if (($taken_pg = $this->query($taken_sql)) == FALSE)
+            return FALSE;
+        for ($row = 0 ; $row < pg_num_rows($taken_pg) ; $row++) {
+            $taken = pg_fetch_object($taken_pg, $row);
+            unset($candidates[$taken->login_plain]);
+            if ($taken->nick_plain !== NULL)
+                unset($candidates[$taken->nick_plain]);
+        }
+        foreach ($candidates as $pair)
+            $pairs[$pair[0]][] = $pair[1];
+
+        return ($pairs);
+    }
+
+    /* a free temporary nickname chosen at random among $pairs (the result of
+       nick_fun_free_pairs(), read here when not given): array(animal,
+       adjective), or FALSE when there is none */
+    function nick_fun_pick($pairs = NULL)
+    {
+        if ($pairs === NULL)
+            $pairs = $this->nick_fun_free_pairs();
+        if ($pairs === FALSE || count($pairs) == 0)
+            return FALSE;
+
+        $animals = array_keys($pairs);
+        $animal = $animals[mt_rand(0, count($animals) - 1)];
+        $adjective = $pairs[$animal][mt_rand(0, count($pairs[$animal]) - 1)];
+
+        return (array($animal, $adjective));
+    }
+
+    /* the temporary nickname of the account $code (easy signup), in
+       users_nicktmp: the name the others see until the login is approved */
+    function user_nicktmp_set($code, $nick)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("INSERT INTO %susers_nicktmp (ucode, nick) VALUES (%d, lower('%s'));",
+                            $G_dbpfx, $code, escsql($nick));
+
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    /* a new login for the account $code, that still plays with the
+       temporary nickname: the player asked for another name after a refusal
+       (nickreq.php, that checks the temporary nickname before); fails if
+       the login is taken */
+    function user_login_change($code, $login)
+    {
+        GLOBAL $G_dbpfx;
+
+        $user_sql = sprintf("UPDATE %susers SET login = lower('%s')
+                                 WHERE code = %d;",
+                            $G_dbpfx, escsql($login), $code);
+
+        if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
+             return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    /* the login of the account $code is approved: its temporary nickname
+       (the row in users_nicktmp) and the "to be checked" reason go away,
+       and from now on the others see the login */
+    function user_nick_approve($code)
+    {
+        GLOBAL $G_dbpfx;
+
+        /* one statement: no temporary nickname, nothing changes */
+        $user_sql = sprintf("WITH tmp AS (DELETE FROM %susers_nicktmp WHERE ucode = %d RETURNING ucode)
+            UPDATE %susers SET disa_reas = %d
+            WHERE code = %d AND EXISTS (SELECT 1 FROM tmp);",
+                            $G_dbpfx, $code, $G_dbpfx, USER_DIS_REA_NONE, $code);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
@@ -412,6 +636,8 @@ class BriskDB
         //O for ($i = 0 ; $i < $this->item_n ; $i++) {
         //O log_main("login_verify: BEGIN");
 
+        /* easy signup: the login is the name the player chose, the others
+           see the temporary one (vis_login) until it is approved */
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE) {
             return FALSE;
         }
@@ -459,6 +685,19 @@ class BriskDB
 
         if (($user_obj = $this->getrecord_bylogin($login)) == FALSE)
             return $ret;
+
+        $id = $user_obj->code;
+        return (LoginDBItem::LoginDBItemFromRecord($user_obj));
+    }
+
+    /* the account of the name the others see: see getrecord_byvislogin() */
+    function getitem_byvislogin($name, &$id) {
+        $id = -1;
+
+        log_main("getitem_byvislogin: ".$name);
+
+        if (($user_obj = $this->getrecord_byvislogin($name)) == FALSE)
+            return FALSE;
 
         $id = $user_obj->code;
         return (LoginDBItem::LoginDBItemFromRecord($user_obj));
@@ -515,22 +754,23 @@ class BriskDB
         GLOBAL $G_dbpfx;
 
         if ($is_newmatch) { // is new
-            $usr_sql = sprintf("SELECT u.code AS code, u.login AS login%s
+            /* the names the others see (users_vis.vis_login) */
+            $usr_sql = sprintf("SELECT u.code AS code, u.vis_login AS login%s
                                   FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p,
-                                       %susers AS u, %sbin5_table_orders AS o
+                                       %susers_vis AS u, %sbin5_table_orders AS o
                                   WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode
                                        AND m.code = o.mcode AND u.code = o.ucode AND m.code = %d
-                                  GROUP BY u.code, u.login%s, o.pos
+                                  GROUP BY u.code, u.vis_login%s, o.pos
                                   ORDER BY o.pos;",
                                ($with_minmaxtidx ? ", min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx" : ""),
                                $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $match_code,
                                ($with_minmaxtidx ? ", m.tidx" : ""));
         }
         else { // is old
-            $usr_sql = sprintf("SELECT u.code AS code, u.login AS login%s
-                                  FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers AS u
+            $usr_sql = sprintf("SELECT u.code AS code, u.vis_login AS login%s
+                                  FROM %sbin5_matches AS m, %sbin5_games AS g, %sbin5_points AS p, %susers_vis AS u
                                   WHERE m.code = g.mcode AND g.code = p.gcode AND u.code = p.ucode AND m.code = %d
-                                  GROUP BY u.code, u.login%s;",
+                                  GROUP BY u.code, u.vis_login%s;",
                                ($with_minmaxtidx ? ", min(g.tstamp) AS first, max(g.tstamp) AS last, m.tidx AS tidx" : ""),
                                $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx, $match_code,
                                ($with_minmaxtidx ? ", m.tidx" : ""));
@@ -1040,8 +1280,8 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                // try to update
                 $net_sql = sprintf("
                     DELETE FROM %susersnet
-                        USING %susers as us
-                        WHERE owner = %d AND us.login = '%s' AND target = us.code;",
+                        USING %susers_vis as us
+                        WHERE owner = %d AND lower(us.vis_login) = '%s' AND target = us.code;",
                                    $G_dbpfx, $G_dbpfx,
                                    $owner_id, escsql(strtolower($json->login)));
 
@@ -1055,8 +1295,8 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                 $net_sql = sprintf("
                     UPDATE %susersnet SET (friend, skill, trust, mtime) =
                         (%d, %d, %d, now())
-                        FROM %susers as us
-                        WHERE owner = %d AND us.login = '%s' AND target = us.code RETURNING *;",
+                        FROM %susers_vis as us
+                        WHERE owner = %d AND lower(us.vis_login) = '%s' AND target = us.code RETURNING *;",
                                    $G_dbpfx,
                                    $friend, $json->skill, $json->trust,
                                    $G_dbpfx,
@@ -1065,7 +1305,7 @@ INSERT INTO %smails (code, ucode, type, tstamp, subj, body_txt, body_htm, hash)
                     $net_sql = sprintf("
                 INSERT INTO %susersnet SELECT %d AS owner, us.code as target,
                         %d as friend, %d as skill, %d as trust
-                    FROM %susers as us WHERE us.login = '%s' RETURNING *;",
+                    FROM %susers_vis as us WHERE lower(us.vis_login) = '%s' RETURNING *;",
                                        $G_dbpfx, $owner_id,
                                        $friend, $json->skill, $json->trust,
                                        $G_dbpfx, escsql(strtolower($json->login)));

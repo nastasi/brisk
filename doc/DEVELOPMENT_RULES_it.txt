@@ -1,0 +1,42 @@
+Un elenco non ordinato per importanza di come deve essere scritto il codice di Brisk
+
+1) tutto, tranne le stringhe visualizzate agli utenti deve essere in inglese, una lista
+   non necessariamente esaustiva include, indipendentemente dal linguaggio in cui
+   si stia scrivendo (php, html, javascript o SQL):
+     - commenti
+     - nome di file
+     - nomi di funzioni
+     - nomi di variabili
+     - nomi di classi
+     - nomi di oggetti
+     - nomi di metodi e attributi
+     - nomi di campi
+     - nomi di tabelle, view o altro oggetto all'interno del SQL
+   la linea guida comunque è sempre una: qualunque cosa non sia testo da mostrare agli
+   utenti DEVE ESSERE IN INGLESE.
+
+1 bis) NON MANDATORIO MA GRADITO: anche le stringhe visualizzate agli utenti andrebbero
+   memorizzate nell'array per il multi-lingua della singola pagina e, dove necessarie,
+   sostituite dall'elemento dell'array e non dalla stringa stessa
+
+2) le variabili, salvo casi in cui sono utilizzate all'interno di microfunzioni di utilità
+   non più lunghe di una decina di righe o siano variabili correnti di loop,
+   devono avere un nome più lungo di 2 caratteri
+
+3) non inserire codice compattato (javascript o css incluso) all'interno dei sorgenti,
+   deve esser sempre correttamente indentato, se compromette la leggibilità lo si può
+   sempre mettere in un file separato ed includerlo
+
+4) per il DB: il modificare tabelle già esistenti va fatto in modo oculato, esempio: campi
+   che potrebbero avere un senso solo temporaneamente andranno messi in nuove tabelle
+   accessorie e non nella tabella originale
+
+5) va mantenuta la coerenza interna del sito: esempio: se fino ad un certo punto il sito
+   ha identificato la parola con cui si identificano gli utenti con "nickname" occorre
+   continuare ad usare "nickname" in tutte le altre parti del sito.
+   Se si vuole sostituire "nickname" con qualcos'altro se ne discute e si fa in maniera
+   esaustiva all'interno di tutto il sito.
+
+6) Stringhe con caratteri accentati: se ci sono parole con gli accenti tipo "è", "già" o
+   "perché", si usano quelle e non "e'", "gia'" o "perche'"
+

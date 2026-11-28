@@ -63,8 +63,10 @@ $G_splash_content = array( 'it' => 'content italico',
 $G_splash_contents = array( "a", "b");
 $G_splash_cont_idx = 0; // (must be moved outside)
 
-// one-line company details shown at the bottom of the room page (HTML allowed, '' to hide)
+// one-line company details shown at the bottom of the login and room pages (HTML allowed, '' to hide)
 $G_company_line = '';
+// the shorter version for the table page (HTML allowed); '' to use $G_company_line there too
+$G_company_line_table = '';
 
 // donometer related variables
 $G_with_donors = TRUE;

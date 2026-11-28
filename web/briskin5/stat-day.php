@@ -169,7 +169,7 @@ SELECT g.* FROM %sbin5_tournaments AS t, %sbin5_matches AS m, %sbin5_games AS g
                     if ($u == 0) {
                         fprintf($fpexp, "<h3>Codice: %d (%s - %s), Tavolo: %s%s</h3>\n",
                         $tmt_obj->code, $users[$u]['first'], $users[$u]['last'], $users[$u]['tidx'],
-                        ($tmt_obj->ttype > 2 ? " (tavolo per apprendisti)" : ""));
+                        ($tmt_obj->ttype > 2 ? " (tavolo aperto ai nuovi utenti)" : ""));
                         fprintf($fpexp, "<table align='center' class='placing'><tr>\n");
                     }
                     fprintf($fpexp, "<th>%s</th>", $users[$u]['login']);

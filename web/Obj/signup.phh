@@ -1,0 +1,404 @@
+<?php
+/*
+ *  brisk - Obj/signup.phh
+ *
+ *  Copyright (C) 2026      Davide Stori
+ *                          mailto: davidestori@gmail.com
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABLILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if
+ * not, write to the Free Software Foundation, Inc, 59 Temple Place -
+ * Suite 330, Boston, MA 02111-1307, USA.
+ *
+ */
+
+/*
+ *  Common functions of the easy signup ("Crea il tuo account"):
+ *  signup.php, nickreq.php, mailmgr.php, forgotten_password.php,
+ *  new_password.php.
+ */
+
+define('ISC_ACCENTS', 'àáèéìíòóùúÀÁÈÉÌÍÒÓÙÚ');
+
+/* the same time zone of the other pages (dates in the e-mails) */
+date_default_timezone_set('Europe/Rome');
+
+function isc_h($s)
+{
+    return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+}
+
+function isc_lower($n)
+{
+    return mb_strtolower((string)$n, 'UTF-8');
+}
+
+function isc_no_accents($n)
+{
+    return strtr(isc_lower($n), array('à' => 'a', 'á' => 'a', 'è' => 'e', 'é' => 'e', 'ì' => 'i',
+                                      'í' => 'i', 'ò' => 'o', 'ó' => 'o', 'ù' => 'u', 'ú' => 'u'));
+}
+
+/* 2-12 letters (also the accented italian vowels) or digits */
+function isc_nick_shape($n)
+{
+    return (preg_match('/^[A-Za-z0-9' . ISC_ACCENTS . ']{2,12}$/uD', $n) === 1);
+}
+
+/* clearly offensive words, anywhere in the nickname (digits read as letters, doubles removed) */
+function isc_nick_forbidden($n)
+{
+    $plain = strtr(isc_no_accents($n), array('0' => 'o', '1' => 'i', '3' => 'e', '4' => 'a', '5' => 's',
+                                         '7' => 't', '8' => 'b', '9' => 'g'));
+    $single = preg_replace('/(.)\1+/', '$1', $plain);
+    $words = array('cazz', 'merd', 'troia', 'puttan', 'stronz', 'vaffa', 'fanculo', 'minchi', 'coglion', 'diocan',
+               'dioporc', 'porcodio', 'porcamadonn', 'madonnaputt', 'froci', 'ricchion', 'hitler', 'mussolin',
+               'porno', 'fuck', 'shit', 'bitch', 'suca', 'bocchin', 'pompin', 'zoccol', 'mignott', 'inculo',
+               'admin', 'amministra', 'staff', 'moderat', 'briskserv', 'nickserv', 'assistenza');
+    foreach ($words as $word) {
+        if (strpos($plain, $word) !== FALSE || strpos($single, $word) !== FALSE)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/* nickname check: array(state 'ok'|'no', message, suggestion) */
+function isc_nick_check($bdb, $nick)
+{
+    $nick = trim((string)$nick);
+    if ($nick == "")
+        return array('no', "Scrivi il nome che vuoi usare.", "");
+    if (mb_strlen($nick, 'UTF-8') < 2)
+        return array('no', "Il nome deve avere almeno 2 caratteri.", "");
+    if (mb_strlen($nick, 'UTF-8') > 12)
+        return array('no', "Il nome può avere al massimo 12 caratteri.", "");
+    if (!preg_match('/^[A-Za-z0-9' . ISC_ACCENTS . ']+$/uD', $nick))
+        return array('no', "Usa solo lettere (anche accentate, come ò) e numeri, senza spazi o simboli.", "");
+    if (isc_nick_forbidden($nick))
+        return array('no', "Questo nome non è permesso. Scegline un altro.", "");
+    if ($bdb->nick_is_free($nick) == FALSE) {
+        $suggestion = "";
+        for ($i = 1 ; $i < 100 && $suggestion == "" ; $i++) {
+            $candidate = mb_substr(isc_lower($nick), 0, 12 - strlen((string)$i), 'UTF-8') . $i;
+            if (isc_nick_shape($candidate) && $bdb->nick_is_free($candidate))
+                $suggestion = $candidate;
+        }
+        return array('no', "Questo nome è già usato da un altro giocatore.", $suggestion);
+    }
+    return array('ok', "Nome libero", "");
+}
+
+/* common typing errors in the e-mail domain */
+function isc_mail_suggest($mail)
+{
+    $mail = strtolower(trim((string)$mail));
+    if (($at_pos = strrpos($mail, '@')) === FALSE)
+        return "";
+    $domain = substr($mail, $at_pos + 1);
+    $right = array('gmial.com' => 'gmail.com', 'gmai.com' => 'gmail.com', 'gamil.com' => 'gmail.com',
+                   'gmil.com' => 'gmail.com', 'gnail.com' => 'gmail.com', 'gmail.it' => 'gmail.com',
+                   'gmail.con' => 'gmail.com', 'hotmial.com' => 'hotmail.com', 'hotmal.it' => 'hotmail.it',
+                   'hotmai.it' => 'hotmail.it', 'libreo.it' => 'libero.it', 'liberi.it' => 'libero.it',
+                   'yaho.it' => 'yahoo.it', 'yahho.it' => 'yahoo.it', 'tiscalli.it' => 'tiscali.it',
+                   'alcie.it' => 'alice.it', 'virgillio.it' => 'virgilio.it', 'outlok.it' => 'outlook.it',
+                   'outlook.con' => 'outlook.com');
+    return (isset($right[$domain]) ? substr($mail, 0, $at_pos + 1) . $right[$domain] : "");
+}
+
+function isc_mail_ok($e)
+{
+    return (filter_var((string)$e, FILTER_VALIDATE_EMAIL) !== FALSE && strlen((string)$e) <= 120);
+}
+
+/* the forms of these pages are accepted only from the pages of the site:
+   when the browser says where the request comes from (Origin), its host must
+   be the one of the site. Only the hosts are compared: HTTP_HOST has the port
+   when it is not the usual one (like :10443), or not, behind a proxy */
+function isc_origin_ok()
+{
+    if (!isset($_SERVER['HTTP_ORIGIN']))
+        return TRUE;
+    $host = parse_url((string)$_SERVER['HTTP_ORIGIN'], PHP_URL_HOST);
+    if ($host === NULL || $host === FALSE || $host == "")
+        return TRUE;
+    return (strcasecmp($host, preg_replace('/:[0-9]+$/', '', (string)$_SERVER['HTTP_HOST'])) == 0);
+}
+
+/* the link to write to the administrator: his address is not shown */
+function isc_admin_link($text)
+{
+    GLOBAL $G_admin_mail;
+
+    return ('<a href="mailto:' . isc_h($G_admin_mail) . '">' . isc_h($text) . '</a>');
+}
+
+/* an error for the player, with the link where it says to contact the administrator */
+function isc_error_html($error)
+{
+    $html = isc_h($error);
+    foreach (array("Contatta l'amministratore", "contatta l'amministratore") as $words)
+        $html = str_replace(isc_h($words), isc_admin_link($words), $html);
+    return ($html);
+}
+
+/* the rules of a new password, the same in signup.php and new_password.php:
+   the error for the player, "" when the password is good */
+function isc_passwd_check($passwd, $passwd2, $nick)
+{
+    if (mb_strlen($passwd, 'UTF-8') < 6)
+        return "La password deve avere almeno 6 caratteri.";
+    if (mb_strlen($passwd, 'UTF-8') > 30 || preg_match('/\s/', $passwd))
+        return "La password può avere al massimo 30 caratteri, senza spazi.";
+    if (strcasecmp($passwd, $nick) == 0)
+        return "La password non può essere uguale al nickname.";
+    if ($passwd2 !== $passwd)
+        return "Le due password non sono uguali: riscrivile.";
+    return "";
+}
+
+/* signups never confirmed: after 48 hours account and mail go away, so nickname and e-mail are free again */
+function isc_clean_expired($bdb)
+{
+    GLOBAL $G_dbpfx;
+
+    /* the signups of this page are the accounts with a requested nickname
+       (users_nicktmp); the row goes away with the account */
+    $del_sql = sprintf("DELETE FROM %susers WHERE (type & (CAST (X'%08x' as integer))) = (CAST (X'%08x' as integer))
+                            AND EXISTS (SELECT 1 FROM %susers_nicktmp WHERE ucode = code)
+                            AND disa_reas = %d AND lintm < now() - interval '48 hours';",
+                       $G_dbpfx, USER_FLAG_TY_DISABLE, USER_FLAG_TY_DISABLE,
+                       $G_dbpfx, USER_DIS_REA_NU_MAILED);
+    $bdb->query($del_sql);
+}
+
+/* brisk_mail() builds the text version of an e-mail from the html, keeping only
+   its real line breaks: one after every <br> and box, so the text is readable */
+function isc_mail_lines($html)
+{
+    return (str_replace(array("<br>", "</div>"), array("<br>\n", "</div>\n"), $html));
+}
+
+/* style of the signup pages */
+function isc_style()
+{
+?>
+<style>
+* {
+    box-sizing: border-box;
+}
+html {
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+    background-color: #fafafa;
+    background-image: url('img/brisk-bg.png');
+    background-attachment: fixed;
+    color: black;
+    font-size: 18px;
+    line-height: 1.45;
+    font-family: Arial,Helvetica,sans-serif;
+}
+.box {
+    max-width: 500px;
+    margin: 20px auto;
+    background-color: white;
+    background-image: url('img/brisk-bg-light.png');
+    border: 1px solid #777;
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+.logo {
+    text-align: center;
+    margin: 0 0 10px;
+}
+.logo img {
+    max-width: 100%;
+}
+h1 {
+    font-size: 22px;
+    margin: 0 0 8px;
+    text-align: center;
+}
+p {
+    margin: 8px 0;
+}
+label {
+    display: block;
+    font-weight: bold;
+    margin: 14px 0 5px;
+}
+.row {
+    display: flex;
+    gap: 8px;
+}
+input {
+    width: 100%;
+    font: inherit;
+    padding: 9px;
+    background-color: #f8f8f8;
+    border: 1px solid gray;
+    border-radius: 4px;
+}
+input:focus {
+    background-color: white;
+    border-color: #ffae00;
+    outline: none;
+}
+input[readonly] {
+    background-color: #eee;
+}
+button,.btn {
+    display: inline-block;
+    font: inherit;
+    border: 1px solid gray;
+    border-radius: 4px;
+    background-color: #f6f6f6;
+    color: black;
+    padding: 9px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+button:hover,.btn:hover {
+    background-color: white;
+}
+button:active,.btn:active {
+    background-color: #ffff99;
+}
+.action {
+    width: 100%;
+    margin-top: 18px;
+    font-weight: bold;
+}
+.show_btn {
+    white-space: nowrap;
+}
+.small {
+    font-size: 15px;
+    color: #555;
+}
+.enter_box {
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    background: #eef7ee;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 20px;
+}
+.tmp_name {
+    background: #ffe9b3;
+    padding: 0 4px 0 2px;
+}
+.notice {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 2px solid #2e7d32;
+    border-radius: 6px;
+    background: #eef7ee;
+    font-size: 17px;
+    color: #222;
+}
+.err {
+    background: #ffdddd;
+    border: 1px solid #d99;
+    border-radius: 6px;
+    padding: 9px 12px;
+    margin: 10px 0;
+}
+.ok {
+    background: #eaf6fc;
+    border: 1px solid #9ac4db;
+    border-radius: 6px;
+    padding: 9px 12px;
+    margin: 10px 0;
+}
+.cbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+.cbox input {
+    width: 28px;
+    height: 28px;
+    flex: none;
+    margin: 0;
+}
+body.big {
+    font-size: 20px;
+}
+body.big h1 {
+    font-size: 25px;
+}
+.back_link {
+    display: block;
+    margin: 14px auto 0;
+    color: #555;
+    text-align: center;
+}
+</style>
+<?php
+}
+
+/* page after the click on the link of the e-mail (mailmgr.php) */
+function isc_page_activated($nick, $nick_tmp = NULL)
+{
+    header('Content-Type: text/html; charset=UTF-8');
+    header('Cache-Control: no-store, max-age=0');
+?><!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attiva il tuo account</title>
+<?php isc_style(); ?>
+</head>
+<body class="big">
+<div class="box">
+<div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
+  <h1>Account attivato! &#127881;</h1>
+  <div class="ok" style="text-align:center;font-size:21px">Benvenuto <b><?php echo isc_h($nick); ?></b>, ora puoi giocare.</div>
+  <div class="enter_box">
+    <b>Per entrare scrivi sempre:</b><br>
+    Nickname: <b><?php echo isc_h($nick); ?></b><br>
+    Password: quella che hai scelto
+  </div>
+<?php if ($nick_tmp !== NULL && $nick_tmp != "") { ?>
+  <p class="small">Gli altri giocatori, per ora, ti vedranno come <span class="tmp_name"><?php echo isc_h($nick_tmp); ?>*</span>.
+     Quando il tuo nickname sarà approvato, ti vedranno come <?php echo isc_h($nick); ?> e riceverai un'email.</p>
+<?php } ?>
+  <p>Quando il browser chiede <b>«Vuoi salvare la password?»</b> clicca <b>Salva</b>: la prossima volta entri da solo.</p>
+  <a class="btn action" href="index.php?n=<?php echo rawurlencode($nick); ?>">Entra a giocare</a>
+</div></body></html>
+<?php
+}
+
+function isc_page_link_not_valid()
+{
+    header('Content-Type: text/html; charset=UTF-8');
+    header('Cache-Control: no-store, max-age=0');
+?><!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attiva il tuo account</title>
+<?php isc_style(); ?>
+</head>
+<body class="big">
+<div class="box">
+<div class="logo"><img src="img/brisk_logo64.png" alt="BRISK"></div>
+  <h1>Link già usato o non valido</h1>
+  <p>Forse avevi già attivato il tuo account: in quel caso entra pure con il tuo nickname e la tua password.</p>
+  <p>Il link vale 48 ore: se è passato, rifai l'iscrizione.</p>
+  <a class="btn action" href="index.php">Vai a giocare</a>
+  <a class="btn action" href="signup.php">Crea il tuo account</a>
+</div></body></html>
+<?php
+}
+?>

@@ -182,14 +182,16 @@ function main_pgsql($curtime)
             $rank      = array(  0,  0);
 
             // TAG: POINTS_MANAGEMENT
-            $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.login as login
-                                FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers as u
+            /* the names the others see (users_vis.vis_login), copied in
+               bin5_places: an approved nickname shows at the next run */
+            $pla_sql = sprintf("SELECT (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) as score, sum(p.pts) as points, count(p.pts) as games, u.code as ucode, u.vis_login as login
+                                FROM %sbin5_points as p, %sbin5_games as g, %sbin5_matches as m, %susers_vis as u
                                 WHERE m.ttype <= 2 AND (m.tcode = %d OR m.tcode = %d) AND m.code = g.mcode AND
                                       ( (u.type & (CAST (X'ff0000' as integer))) <> (CAST (X'800000' as integer)) ) AND
                                       g.tstamp > to_timestamp(%d) AND g.tstamp <= to_timestamp(%d) AND
                                       p.ucode = u.code AND p.gcode = g.code AND
                                       p.pts != 0
-                                GROUP BY u.code, u.login
+                                GROUP BY u.code, u.vis_login
                                 ORDER BY (float4(sum(p.pts)) * 100.0 ) /  float4(count(p.pts)) DESC,
                                          count(p.pts) DESC",
                                $G_dbpfx, $G_dbpfx, $G_dbpfx, $G_dbpfx,

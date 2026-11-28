@@ -59,10 +59,17 @@ define('USER_FLAG_TY_NORM',    0x010000); // done
 define('USER_FLAG_TY_SUPER',   0x020000); // done
 define('USER_FLAG_TY_CERT',    0x040000); // done
 define('USER_FLAG_TY_APPR',    0x080000); // done
+//                             0x100000      free: reserved for the moderators
 //  ... other usefull status ...
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
+
+/* temporary nickname of the easy signup, the requested one waits for a
+   check: only in the flags sent to the players (User::flags_client()),
+   never in users.type or in User->flags; user_decorator() in commons.js
+   shows it with a "*" */
+define('USER_FLAG_TY_NICKTMP', 0x1000000);
 
 // ... reasons for disabling account ...
 define('USER_DIS_REA_NONE',       0);
@@ -164,6 +171,9 @@ class User {
   public $table_token;// token that identify a game on a table
   public $flags;      // Bitfield with: AUTHENTICATE: 0x02 
   public $rec;        // field with user db record or FALSE
+  public $login;      // login of the authenticated account, "" for a guest: logs, mails
+                      // and bans use it; $name is what the others see, for an easy
+                      // signup the temporary nickname (users_vis.vis_login)
   public $the_end;    // Flag to change the end of the session
 
   public $chat_lst;      // Last chat line
@@ -196,6 +206,7 @@ class User {
     $thiz->idx_orig   = $idx;
     $thiz->code       = -1;
     $thiz->name       = $name;
+    $thiz->login      = "";
     $thiz->sess       = $sess;
     $thiz->ip         = $ip;
     $thiz->lacc       = time();
@@ -253,6 +264,7 @@ class User {
     $this->idx_orig   = $from->idx;
     $this->code       = $from->code;
     $this->name       = $from->name;
+    $this->login      = $from->login;
     $this->sess       = $from->sess;
     $this->ip         = $from->ip;
     $this->lacc       = $from->lacc;
@@ -319,6 +331,7 @@ class User {
     $thiz->idx_orig   = $from->idx;
     $thiz->code       = $from->code;
     $thiz->name       = $from->name;
+    $thiz->login      = $from->login;
     $thiz->sess       = $from->sess;
     $thiz->ip         = $from->ip;
     $thiz->lacc       = $from->lacc;
@@ -376,6 +389,16 @@ class User {
       return ($this->flags & USER_FLAG_AUTH);
   }
 
+  /* the name for the logs: the login, and the name the others see when it
+     is a different one (an easy signup with its temporary nickname); the
+     name for a guest */
+  function name_log()
+  {
+      if ((string)$this->login == "" || strcasecmp($this->login, $this->name) == 0)
+          return ($this->name);
+      return (sprintf("%s(%s)", $this->login, $this->name));
+  }
+
   function is_cert()
   {
       return (($this->flags & USER_FLAG_AUTH) && ($this->flags & USER_FLAG_TY_CERT));
@@ -399,6 +422,20 @@ class User {
       $this->flags = ($flags_old | ($flags & $mask));
 
       return ($flags_old);
+  }
+
+  /* easy signup: the player still has a temporary nickname, when the login
+     and the name the others see (vis_login of users_vis) differ */
+  function is_nicktmp()
+  {
+      return ($this->is_auth() && is_object($this->rec)
+              && $this->rec->login_get() != $this->rec->vis_login_get());
+  }
+
+  /* the flags sent to the players: USER_FLAG_TY_NICKTMP is added only here */
+  function flags_client()
+  {
+      return ($this->flags | ($this->is_nicktmp() ? USER_FLAG_TY_NICKTMP : 0));
   }
 
   function prefs_store()
@@ -605,6 +642,7 @@ class User {
     $this->sess = "";
     self::unproxy_step($tmp_sess);
     $this->name = "";  // OK here
+    $this->login = "";
     while (array_pop($this->comm) != NULL);
     $this->step = 0;
     $this->chattime = array_fill(0, CHAT_N, 0);
@@ -617,22 +655,27 @@ class User {
 
   function myname_innerHTML()
   {
+      // 8 -> is an apprentice (new signup): the gold background, as in the lists
       // 4 -> is certified
       // 2 -> is authorized
       // 1 -> is myself
-      $class_ids = (($this->flags & USER_FLAG_TY_CERT) >> 16) | ($this->flags & USER_FLAG_AUTH) | 1;
+      $class_ids = (($this->flags & (USER_FLAG_TY_CERT | USER_FLAG_TY_APPR)) >> 16) | ($this->flags & USER_FLAG_AUTH) | 1;
       $sp = "";
       $cl = "";
 
-      for ($i = 0 ; $i < 3 ; $i++) {
+      for ($i = 0 ; $i < 4 ; $i++) {
           if ($class_ids & (1 << $i)) {
               $cl .= sprintf("%sau%d", $sp, $i);
               $sp = " ";
           }
       }
       $myname = xcape($this->name,ENT_COMPAT,"UTF-8");
-      return (sprintf('window.myname = "%s"; $("myname").innerHTML = "<span class=\"%s\">%s</span>";',
-                      $myname, $cl, $myname));
+      /* easy signup: with a temporary nickname the "*", and the nickname he
+         chose, his login, to greet him in the welcome window (room.js) */
+      $myname_req = ($this->is_nicktmp() ? xcape($this->rec->login_get(), ENT_COMPAT, "UTF-8") : "");
+      return (sprintf('window.myname_req = "%s"; window.myname = "%s"; $("myname").innerHTML = "<span class=\"%s\"><span>%s%s</span></span>";',
+                      $myname_req, $myname, $cl, $myname,
+                      ($myname_req != "" ? "<span class='nicktmp'>&#10033;</span>" : "")));
   }
 
   /* INDEX_RD PORT */
