@@ -465,3 +465,388 @@ input.chatt_big_btn {
     right: 6px;
     z-index: 22;
 }
+
+/*
+ *  tables with a captain (captain.js)
+ */
+
+/* the transparent area of the buttons of a table covered the title: only the real buttons take the touch */
+div.table_act {
+    pointer-events: none;
+}
+div.table_act * {
+    pointer-events: auto;
+}
+
+div.room_tit.captain_tit {
+    padding-bottom: 0px;
+}
+span.captain_key {
+    display: inline-block;
+    height: 1em;
+    line-height: 1em;
+    font-size: 0.85em;
+    vertical-align: baseline;
+    cursor: pointer;
+}
+span.captain_q {
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 0 6px;
+}
+span.captain_state {
+    position: relative;
+    top: 1px;
+    font-size: 10px;
+    font-weight: bold;
+}
+span.captain_dot_wait {
+    display: inline-block;
+    width: 0.95em;
+    height: 0.95em;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e6e6e6 0%, #a9a9a9 45%, #6f6f6f 100%);
+    box-shadow: inset 0 -1px 1px rgba(0,0,0,.25);
+    vertical-align: -0.12em;
+}
+
+div.captain_row {
+    white-space: nowrap;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    padding-left: 6px;
+    box-sizing: border-box;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+span.captain_measure {
+    flex: 1;
+    min-width: 0;
+    display: inline-block;
+    vertical-align: middle;
+}
+div.captain_menu_line {
+    display: inline-flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    white-space: nowrap;
+}
+div.captain_menu_line input {
+    flex: 0 0 auto;
+}
+span.captain_state_small {
+    display: inline-flex;
+    align-items: center;
+    font-size: 7px;
+    letter-spacing: -0.2px;
+    line-height: 1;
+    white-space: nowrap;
+    margin-left: auto;
+}
+span.captain_state_small span {
+    margin-left: 1px;
+}
+input.captain_start {
+    font-size: 11px;
+    padding: 1px 5px;
+    background: #238636;
+    color: #fff;
+    border: 1px solid #17672a;
+    font-weight: bold;
+}
+span.captain_wait {
+    font-size: 11px;
+    font-weight: bold;
+    color: #7a5a00;
+    white-space: nowrap;
+}
+span.captain_closed {
+    font-size: 11px;
+    color: #777;
+}
+
+div.captain_wait_notice {
+    position: absolute;
+    right: 1px;
+    top: 33px;
+    width: 62px;
+    padding: 1px 0 2px 0;
+    text-align: center;
+    background: rgba(250,250,250,0.94);
+    border-radius: 6px;
+    z-index: 20;
+    pointer-events: none;
+}
+div.captain_wait_txt {
+    font-family: ui-rounded, 'SF Pro Rounded', -apple-system, 'Segoe UI', Arial, sans-serif;
+    font-weight: 700;
+    font-size: 9px;
+    line-height: 1.15;
+    color: #0f9d6b;
+    margin-bottom: 2px;
+}
+
+div.captain_popup {
+    position: absolute;
+    z-index: 10000;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.28);
+    white-space: normal;
+    overflow: hidden;
+    text-align: left;
+}
+div.captain_popup_tit {
+    padding: 8px 10px;
+    background: #f2f4f7;
+    font-size: 12px;
+    font-weight: bold;
+}
+div.captain_popup_tit span {
+    float: right;
+    font-size: 10px;
+    font-weight: normal;
+}
+div.captain_popup_sec {
+    padding: 8px 9px;
+    border-top: 1px solid #ddd;
+}
+div.captain_popup_sub {
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+button.captain_popup_btn {
+    font-size: 10px;
+}
+div.captain_popup_help {
+    padding: 9px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    border-top: 1px solid #ddd;
+    background: #fff;
+}
+button.captain_mode_btn {
+    font-size: 10px;
+    padding: 2px 5px;
+    min-width: 54px;
+}
+button.captain_mode_on {
+    font-weight: bold;
+    border: 2px solid #555;
+}
+div.captain_menu_mode {
+    font-size: 11px;
+    margin-top: 4px;
+    color: #555;
+}
+div.captain_menu_mode_on {
+    font-weight: bold;
+    color: inherit;
+}
+
+div.captain_feedback {
+    position: absolute;
+    z-index: 10002;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    background: #fff7d8;
+    border: 1px solid #d5c06b;
+    border-radius: 5px;
+    font-size: 10px;
+    line-height: 1.25;
+    text-align: left;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+}
+
+div.captain_choice {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10001;
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.3);
+    padding: 10px;
+    font: 13px Arial;
+    width: 230px;
+}
+button.captain_choice_btn {
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+    padding: 7px;
+    font-size: 13px;
+    text-align: left;
+}
+div.captain_choice_txt {
+    font-size: 12px;
+    color: #7a5a00;
+    margin-top: 6px;
+}
+
+div.captain_bar_item {
+    border: 1px solid #c8c4b8;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #faf9f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    line-height: 1.25;
+}
+div.captain_bar_item + div.captain_bar_item {
+    margin-top: 6px;
+}
+div.captain_bar_req {
+    border-color: #b8c4df;
+    background: #fff;
+}
+div.captain_bar_item input {
+    padding: 4px 10px;
+}
+div.captain_bar_tit {
+    font-size: 14px;
+    font-weight: bold;
+}
+div.captain_bar_req div.captain_bar_tit {
+    color: #4169E1;
+}
+div.captain_bar_txt {
+    font-size: 12px;
+    margin-top: 2px;
+}
+input.captain_big_btn {
+    min-width: 92px;
+    padding: 5px 14px;
+}
+
+input.captain_kick {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    margin: -3px 0 -3px 6px;
+    vertical-align: middle;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: center;
+    font: normal 10px/14px sans-serif;
+    color: #555;
+    background: #fff;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    cursor: pointer;
+}
+div.captain_expel_back {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100000;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+div.captain_expel {
+    background: #fff;
+    border: 1px solid #999;
+    border-radius: 10px;
+    padding: 18px 20px;
+    max-width: 90%;
+    text-align: center;
+    font: 20px/1.35 sans-serif;
+    color: #222;
+}
+div.captain_expel button {
+    font: bold 19px sans-serif;
+    padding: 10px 18px;
+    margin: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+button.captain_expel_yes {
+    max-width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    border: 1px solid #F09595;
+    background: #FCEBEB;
+    color: #A32D2D;
+}
+button.captain_expel_no {
+    border: 1px solid #666;
+    background: #fff;
+    color: #222;
+}
+
+div.captain_tip {
+    display: none;
+    position: absolute;
+    z-index: 6000;
+    box-sizing: border-box;
+    width: calc(130% + 10px);
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 10px 12px;
+    color: #633806;
+    background: #FAEEDA;
+    border: 1px solid #BA7517;
+    border-radius: 8px;
+    text-align: left;
+}
+div.captain_tip_tit {
+    font-size: 15px;
+    font-weight: bold;
+    color: #412402;
+    margin-bottom: 6px;
+}
+div.captain_tip_row {
+    margin: 2px 0;
+}
+div.captain_tip_row b {
+    color: #412402;
+}
+div.captain_tip_line {
+    border-top: 1px solid #EF9F27;
+    margin: 7px 0 5px 0;
+}
+div.captain_tip_end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+label.captain_tip_never {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+label.captain_tip_never input {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+input.captain_tip_ok {
+    min-width: 60px;
+    font-weight: bold;
+}

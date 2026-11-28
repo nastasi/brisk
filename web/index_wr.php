@@ -134,6 +134,92 @@ define('LICMGR_CHO_ACCEPT', 0);
 define('LICMGR_CHO_REFUSE', 1);
 define('LICMGR_CHO_AFTER',  2);
 
+/*
+ *  Start of the game of a full table (moved here from the 'sitdown' command,
+ *  it is used also by the start of the captain tables, see Obj/captain.phh)
+ */
+function table_game_start(&$brisk, $table_idx, $user, $curtime, $get, $post, $cookie)
+{
+    GLOBAL $G_lang;
+
+    $table = &$brisk->table[$table_idx];
+
+    require_once("briskin5/Obj/briskin5.phh");
+    log_wr("MOP inall");
+
+    // Start game for this table.
+    log_wr("Start game!");
+	
+    //
+    //  START THE SPAWN HERE!!!!
+    //
+
+    // Create new spawned table
+    // $bin5_sem = Bin5::lock_data(TRUE, $table_idx);
+    $table_token = uniqid("");
+    $brisk->table[$table_idx]->table_token = $table_token;
+    $brisk->table[$table_idx]->table_start = $curtime;
+
+    $plist = "$table_token|$user->table|$table->player_n";
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+        $plist .= '|'.$brisk->user[$table->player[$i]]->sess;
+    }
+    log_legal($curtime, $user->ip, $user, "STAT:CREATE_GAME", $plist);
+
+    log_wr("pre new Bin5");
+    if (($bin5 = new Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie)) == FALSE)
+        log_wr("bri create: FALSE");
+    else
+        log_wr("bri create: ".serialize($bin5));
+
+    log_wr("pre init table");
+    // init table
+    $bin5_table = $bin5->table[0];
+    $bin5_table->init($bin5->user);
+    $bin5_table->game_init($bin5->user);
+    //
+    // Init spawned users.
+    //
+    //  MULTIGAME: here init of selected game instead of hardcabled briskin5 init (look subst status)
+    //
+    log_wr("game_init after");
+    for ($i = 0 ; $i < $table->player_n ; $i++) {
+        $bin5_user_cur = $bin5->user[$i];
+        $user_cur = $brisk->user[$table->player[$i]];
+
+        $bin5_user_cur->laccwr = $curtime;
+        $bin5_user_cur->trans_step = $user_cur->step + 1;
+        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
+        $bin5_user_cur->step_inc();
+        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table($bin5, $bin5_user_cur,
+                                                                         $bin5_user_cur->step+1,
+                                                                         TRUE, FALSE);
+        $bin5_user_cur->step_inc();
+
+        log_wr("TRY PRESAVE: ".$bin5_user_cur->step." TRANS STEP: ".$bin5_user_cur->trans_step);
+
+        log_wr("Pre if!");
+
+        //          ARRAY_POP DISABLED
+        // 	    // CHECK
+        while (array_pop($user_cur->comm) != NULL);
+
+        $user_cur->trans_step = $user_cur->step + 1;
+        $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
+        log_wr("TRANS ATTIVATO");
+
+        $user_cur->stat_set('table');
+        $user_cur->subst = 'asta';
+        $user_cur->laccwr = $curtime;
+        $user_cur->step_inc();
+    }
+    log_wr("presave bri");
+    $brisk->match_add($table_idx, $bin5);
+    log_wr("postsave bri");
+
+    return (TRUE);
+}
+
 function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 {
     GLOBAL $G_proto, $G_domain, $G_webbase, $G_mail_seed, $G_notguar_code;
@@ -425,6 +511,11 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 log_main("chatt_send post table update");
             }
         }
+        echo "1";
+        return TRUE;
+    }
+    else if ($argz[0] == 'captain_tip_seen' || $argz[0] == 'captain_tip_hide') {
+        captain_tip_set($user, ($argz[0] == 'captain_tip_seen' ? 'seen' : 'hide'));
         echo "1";
         return TRUE;
     }
@@ -850,6 +941,19 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
          *                    *
          **********************/
         else if ($user->subst == 'standup') {
+            $captain_pass = '';   // 'invite' or 'request' if the captain lets the player sit
+
+            if ($argz[0] == 'captrequest') {
+                captain_cmd_request($brisk, $user, $argz, $curtime);
+                return FALSE;
+            }
+            if ($argz[0] == 'captinvite_accept' || $argz[0] == 'captrequest_join') {
+                if (($join_idx = captain_cmd_join($brisk, $user, $argz, $curtime)) < 0)
+                    return TRUE;
+                $captain_pass = ($argz[0] == 'captinvite_accept' ? 'invite' : 'request');
+                $argz = array('sitdown', $join_idx);
+            }
+
             if ($argz[0] == 'sitdown') {
                 log_wr("SITDOWN command");
 
@@ -894,6 +998,9 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 else if ($user->flags & USER_FLAG_TY_FIRONLY && $table->player_n > 0) {
                     $not_allowed_msg = nickserv_msg($dt, $mlang_indwr['mustfirst'][$G_lang]);
                 }
+                else if (is_captain_table($table_idx)) {
+                    $not_allowed_msg = captain_sitdown_check($table, $user, $captain_pass, $curtime);
+                }
                 if ($not_allowed_msg != "") {
                     $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$not_allowed_msg;
                     $user->step_inc();
@@ -929,83 +1036,14 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
                 $user->subst = "sitdown";
                 $user->table = $table_idx;
                 $user->table_pos = $table->user_add($idx);
+                if (is_captain_table($table_idx) && $table->player_n == 1)
+                    $table->captain_prep_until = $curtime + CAPTAIN_PREP_TOUT;
 
                 log_wr("MOP before");
 
-                if ($table->player_n == PLAYERS_N) {
-                    require_once("briskin5/Obj/briskin5.phh");
-                    log_wr("MOP inall");
-
-                    // Start game for this table.
-                    log_wr("Start game!");
-	
-                    //
-                    //  START THE SPAWN HERE!!!!
-                    //
-
-                    // Create new spawned table
-                    // $bin5_sem = Bin5::lock_data(TRUE, $table_idx);
-                    $table_token = uniqid("");
-                    $brisk->table[$table_idx]->table_token = $table_token;
-                    $brisk->table[$table_idx]->table_start = $curtime;
-
-                    $plist = "$table_token|$user->table|$table->player_n";
-                    for ($i = 0 ; $i < $table->player_n ; $i++) {
-                        $plist .= '|'.$brisk->user[$table->player[$i]]->sess;
-                    }
-                    log_legal($curtime, $user->ip, $user, "STAT:CREATE_GAME", $plist);
-
-                    log_wr("pre new Bin5");
-                    if (($bin5 = new Bin5($brisk, $table_idx, $table_token, $get, $post, $cookie)) == FALSE)
-                        log_wr("bri create: FALSE");
-                    else
-                        log_wr("bri create: ".serialize($bin5));
-
-                    log_wr("pre init table");
-                    // init table
-                    $bin5_table = $bin5->table[0];
-                    $bin5_table->init($bin5->user);
-                    $bin5_table->game_init($bin5->user);
-                    //
-                    // Init spawned users.
-                    //
-                    //  MULTIGAME: here init of selected game instead of hardcabled briskin5 init (look subst status)
-                    //
-                    log_wr("game_init after");
-                    for ($i = 0 ; $i < $table->player_n ; $i++) {
-                        $bin5_user_cur = $bin5->user[$i];
-                        $user_cur = $brisk->user[$table->player[$i]];
-
-                        $bin5_user_cur->laccwr = $curtime;
-                        $bin5_user_cur->trans_step = $user_cur->step + 1;
-                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = "";
-                        $bin5_user_cur->step_inc();
-                        $bin5_user_cur->comm[$bin5_user_cur->step % COMM_N] = show_table($bin5, $bin5_user_cur,
-                                                                                         $bin5_user_cur->step+1,
-                                                                                         TRUE, FALSE);
-                        $bin5_user_cur->step_inc();
-
-                        log_wr("TRY PRESAVE: ".$bin5_user_cur->step." TRANS STEP: ".$bin5_user_cur->trans_step);
-
-                        log_wr("Pre if!");
-
-                        //          ARRAY_POP DISABLED
-                        // 	    // CHECK
-                        while (array_pop($user_cur->comm) != NULL);
-
-                        $user_cur->trans_step = $user_cur->step + 1;
-                        $user_cur->comm[$user_cur->step % COMM_N] = sprintf('gst.st_loc++; gst.st=%d; createCookie("table_idx", %d, 24*365, cookiepath); createCookie("table_token", "%s", 24*365, cookiepath); createCookie("lang", "%s", 24*365, cookiepath); xstm.stop(); window.onunload = null ; window.onbeforeunload = null ; document.location.assign("briskin5/index.php");|', $user_cur->step+1, $table_idx, $table_token, $G_lang);
-                        log_wr("TRANS ATTIVATO");
-
-                        $user_cur->stat_set('table');
-                        $user_cur->subst = 'asta';
-                        $user_cur->laccwr = $curtime;
-                        $user_cur->step_inc();
-                    }
-                    log_wr("presave bri");
-                    $brisk->match_add($table_idx, $bin5);
-                    log_wr("postsave bri");
-                }
+                // a captain table waits for the captain (or for the autostart)
+                if ($table->player_n == PLAYERS_N && !is_captain_table($table_idx))
+                    table_game_start($brisk, $table_idx, $user, $curtime, $get, $post, $cookie);
                 // change room
                 $brisk->room_sitdown($user, $table_idx);
 
@@ -1035,6 +1073,27 @@ function index_wr_main(&$brisk, $remote_addr_full, $get, $post, $cookie)
 
             if ($argz[0] == 'wakeup') {
                 $brisk->room_wakeup($user);
+            }
+            else if ($argz[0] == 'captstart') {
+                captain_cmd_start($brisk, $user, $curtime, $get, $post, $cookie);
+            }
+            else if ($argz[0] == 'captready') {
+                captain_cmd_ready($brisk, $user, $curtime);
+            }
+            else if ($argz[0] == 'captprivate' || $argz[0] == 'captclose') {
+                captain_cmd_mode($brisk, $user, $argz[0]);
+            }
+            else if ($argz[0] == 'captinvite') {
+                captain_cmd_invite($brisk, $user, $argz, $curtime);
+            }
+            else if ($argz[0] == 'captrequest_accept') {
+                captain_cmd_request_accept($brisk, $user, $argz, $curtime);
+            }
+            else if ($argz[0] == 'captrequest_reject') {
+                captain_cmd_request_refuse($brisk, $user, $argz);
+            }
+            else if ($argz[0] == 'captexpel') {
+                captain_cmd_expel($brisk, $user, $argz, $curtime);
             }
             else if ($argz[0] == 'logout') {
                 $brisk->ghost_sess->push($curtime, $user->sess, GHOST_SESS_REAS_LOUT);

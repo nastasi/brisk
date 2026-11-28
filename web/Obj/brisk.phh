@@ -106,6 +106,7 @@ define('BSK_BUSTING', "dev");
 
 require_once("$DOCUMENT_ROOT/Etc/".BRISK_CONF);
 require_once("{$G_base}Obj/ipclass.phh");
+require_once("{$G_base}Obj/captain.phh");
 
 $mlang_brisk = array( 'btn_backstand'=> array( 'it' => 'torna in piedi',
                                                'en' => 'back standing' ),
@@ -692,6 +693,14 @@ class Table {
 
     public $wakeup_time;
 
+    // defaults also for a room reloaded from the file saved by a version without them
+    public $captain = -1;                // user index of the captain (captain tables), -1 if none
+    public $captain_mode = 'open';       // 'open', 'private' (on request) or 'closed' (by invitation only)
+    public $captain_prep_until = 0;      // until this time the captain is choosing the mode
+    public $captain_ban = array();       // players removed by the captain
+    public $captain_invites = array();   // pending invitations, key: user index
+    public $captain_requests = array();  // pending requests, key: user index
+
     function __construct()
     {
     }
@@ -723,7 +732,19 @@ class Table {
 
         $thiz->wakeup_time = 0;
 
+        $thiz->captain_reset();
+
         return ($thiz);
+    }
+
+    function captain_reset()
+    {
+        $this->captain = -1;
+        $this->captain_mode = 'open';
+        $this->captain_prep_until = 0;
+        $this->captain_ban = array();
+        $this->captain_invites = array();
+        $this->captain_requests = array();
     }
 
     function copy($from)
@@ -746,6 +767,21 @@ class Table {
         $this->table_start  = $from->table_start;
 
         $this->wakeup_time = $from->wakeup_time;
+
+        if (isset($from->captain_mode)) {
+            $this->captain = $from->captain;
+            $this->captain_mode = $from->captain_mode;
+            $this->captain_prep_until = $from->captain_prep_until;
+            $this->captain_ban = $from->captain_ban;
+            $this->captain_invites = $from->captain_invites;
+            $this->captain_requests = $from->captain_requests;
+        }
+        else {
+            // room saved by a version without the captain tables
+            $this->captain_reset();
+            if ($this->player_n > 0)
+                $this->captain = $this->player[0];
+        }
     }
 
     function myclone($from)
@@ -819,6 +855,9 @@ class Table {
         $this->player[$this->player_n] = $idx;
         $this->player_n++;
 
+        if ($this->player_n == 1)
+            $this->captain = $idx;
+
         return ($this->player_n - 1);
     }
 
@@ -828,6 +867,7 @@ class Table {
 
         /* verifico la consistenza dei dati */
         if ($brisk->user[$this->player[$tabpos]] == $user) {
+            $was_captain = ($this->captain == $this->player[$tabpos]);
 
             /* aggiorna l'array dei giocatori al tavolo. */
             for ($i = $tabpos ; $i < $this->player_n-1 ; $i++) {
@@ -836,6 +876,22 @@ class Table {
                 $user_cur->table_pos = $i;
             }
             $this->player_n--;
+
+            if ($this->player_n == 0) {
+                // captain table left empty: a game still recorded for it would block the start
+                if (is_captain_table($this->idx) && $this->table_token != "") {
+                    if (isset($brisk->match[$this->idx]))
+                        $brisk->match_del($this->idx);
+                    $this->table_token = "";
+                    $this->table_start = 0;
+                }
+                $this->captain_reset();
+            }
+            else if ($was_captain) {
+                // the first player still seated is the new captain, the table goes back to open
+                $this->captain_reset();
+                $this->captain = $this->player[0];
+            }
         }
         else {
             log_main("INCONSISTENCY ON TABLE.");
@@ -851,6 +907,8 @@ class Table {
         $table = $this->idx;
         $cur_table = $user->table;
         $allowed = TRUE;
+        $is_capt = is_captain_table($table);
+        $prep_left = 0;
 
         if ($isstanding) {
             if ($sitted < PLAYERS_N) {
@@ -877,19 +935,45 @@ class Table {
                     $act = 'sit';
                     break;
                 }
+
+                // the reserved tables stay reserved, then the captain decides
+                if ($is_capt && in_array($act, array('sit', 'sitappr', 'sitreser', 'sitcert'))) {
+                    if ($this->captain_mode == 'closed')
+                        $act = 'captclosed';
+                    else if ($this->captain_mode == 'private')
+                        $act = 'captrequest';
+                    else if ($this->captain_prep_until > time())
+                        $prep_left = $this->captain_prep_until - time();
+                }
             }
             else {
                 $act = 'none';
             }
         }
         else {
-            if ($table == $cur_table)
-                $act = 'wake';
+            if ($table == $cur_table) {
+                if ($is_capt && $this->captain == $user->idx_get() && $this->table_token == "")
+                    $act = ($this->player_n == PLAYERS_N ? 'captstart' : 'captwake');
+                else
+                    $act = 'wake';
+            }
             else
                 $act = 'none';
         }
 
-        if ($act != '')
+        if ($act != '' && $is_capt) {
+            // a full captain table waits for the start: the seated players see the countdown
+            $start_wait = ($this->player_n == PLAYERS_N && $this->table_token == "" &&
+                           $cur_table == $table && !$isstanding);
+            $capt = array('mode' => $this->captain_mode,
+                          'prep' => $prep_left,
+                          'tip_hidden' => captain_tip_hidden($user),
+                          'tip_seen' => captain_tip_seen_recently($user),
+                          'start_wait' => $start_wait,
+                          'start_elapsed' => ($start_wait ? captain_start_elapsed($table) : 0));
+            $ret = sprintf('j_tab_act_cont(%d, \'%s\', %s);', $table, $act, json_encode($capt));
+        }
+        else if ($act != '')
             $ret = sprintf('j_tab_act_cont(%d, \'%s\');', $table, $act);
 
         return ($ret);
@@ -1320,6 +1404,8 @@ class Brisk
         /* Garbage collector degli utenti in timeout */
         $curtime = microtime(TRUE);
 
+        captain_autostart_check($this, (int)$curtime);
+
         $delta = $this->delay_mgr->delta_get($curtime);
 
         if (!$force && !($this->garbage_timeout < $curtime)) {
@@ -1581,6 +1667,10 @@ class Brisk
             $remove_wagon = TRUE;
         }
 
+        // the captain leaves: his pending requests are refused
+        if ($table->captain == $user->idx_get())
+            captain_requests_cancel($this, $table_idx);
+
         /* aggiorna l'array dei giocatori al tavolo. */
         $table->user_rem($this, $user);
 
@@ -1604,15 +1694,15 @@ class Brisk
                 $ret .= $this->standup_content($user_cur);
 
                 // $ret .= table_act_content(FALSE, 0, $table_idx, $user->table, FALSE);
-                $ret .= $table->act_content($user);
+                $ret .= $table->act_content($user_cur);
 
                 if ($user->idx_get() == $i) {
                     // set the new status
-                    $ret .=  'subst = "standup"; tra.show(); ';
+                    $ret .=  'subst = "standup"; tra.show(); captain_requests_clear_all(); ';
                     // clean the action buttons in other tables
                     for ($e = 0 ; $e < TABLES_N ; $e++) {
                         if ($this->table[$e]->player_n < PLAYERS_N) {
-                            $ret .= $this->table[$e]->act_content($user);
+                            $ret .= $this->table[$e]->act_content($user_cur);
                         }
                     }
                 }
@@ -1802,6 +1892,7 @@ class Brisk
       else {
           $jret = json_encode(array("ret" => 0,
                                     "mesg" => "",
+                                    "can_invite" => captain_can_invite($this, $user, $target),
                                     "login" => $target,
                                     // FIXME: state internationalization
                                     "state" =>
@@ -1894,6 +1985,9 @@ class Brisk
 
       $train_app = "";
 
+      if ($user != FALSE)
+          captain_pending_clear($this, $user);
+
       if ($table_idx > -1 && $table_idx < TABLES_N) {
           $table = $this->table[$table_idx];
 
@@ -1921,14 +2015,17 @@ class Brisk
           $ret .= $this->standup_content($user_cur);
 
           if ($user->idx_get() == $i) {
-              $ret .=  'subst = "sitdown"; tra.hide(); ';
+              $ret .=  'subst = "sitdown"; tra.hide(); captain_invites_clear_all(); captain_requests_clear_all(); ';
               // clean the action buttons in other tables
               for ($e = 0 ; $e < TABLES_N ; $e++) {
                   $ret .= $this->table[$e]->act_content($user_cur);
               }
           }
           else if ($table_idx > -1) {
-              if ($table->player_n == PLAYERS_N) {
+              // the captain sits down: the others see that he is choosing the mode
+              if ($table->player_n == PLAYERS_N ||
+                  (is_captain_table($table_idx) && $table->player_n == 1 &&
+                   $table->captain_prep_until > time())) {
 
                   $ret .= $table->act_content($user_cur);
               }
@@ -2786,12 +2883,14 @@ class Brisk
 
           log_main($user_cur->name. sprintf(" IN TABLE [%d]", $table_idx));
           if ($user_cur->is_supp_custom())
-              $supp_comp_s = sprintf(', "%s"', $user_cur->rec->supp_comp_get());
+              $supp_comp_s = sprintf('"%s"', $user_cur->rec->supp_comp_get());
           else
-              $supp_comp_s = '';
+              $supp_comp_s = 'null';
 
-          $content .= sprintf('%s[ %d, "%s"%s ]',($i == 0 ? '' : ', '), $flags,
-          xcape($user_cur->name), $supp_comp_s);
+          // the captain sees the button to remove the other players
+          $content .= sprintf('%s[ %d, "%s", %s, %d, %d, %d ]',($i == 0 ? '' : ', '), $flags,
+          xcape($user_cur->name), $supp_comp_s, $user_cur->idx_get(),
+          (captain_can_kick($table, $user, $user_cur) ? 1 : 0), $table_idx);
       }
 
       $content .= ' ]';
