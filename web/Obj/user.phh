@@ -61,6 +61,7 @@ define('USER_FLAG_TY_CERT',    0x040000); // done
 define('USER_FLAG_TY_APPR',    0x080000); // done
 //                             0x100000      free: reserved for the moderators
 //  ... other usefull status ...
+define('USER_FLAG_TY_MODER',   0x100000); // moderator: accepts or refuses the new users in usermgmt.php
 define('USER_FLAG_TY_FIRONLY', 0x200000); // done
 define('USER_FLAG_TY_ADMIN',   0x400000); // done
 define('USER_FLAG_TY_DISABLE', 0x800000); // done
@@ -80,6 +81,7 @@ define('USER_DIS_REA_MALICIOUS',  4);
 define('USER_DIS_REA_NU_ADDED',   5); // new user: new user added by hand or external sql
 define('USER_DIS_REA_NU_MAILED',  6); // new user: mail sent to be confirmed
 define('USER_DIS_REA_NU_TOBECHK', 7); // new user: name verification
+define('USER_DIS_REA_NU_NICKREF', 8); // new user: requested nickname refused, waiting for another one
 
 
 
@@ -387,6 +389,11 @@ class User {
   function is_auth()
   {
       return ($this->flags & USER_FLAG_AUTH);
+  }
+
+  function is_moder()
+  {
+      return (($this->flags & USER_FLAG_AUTH) && ($this->flags & USER_FLAG_TY_MODER));
   }
 
   /* the name for the logs: the login, and the name the others see when it

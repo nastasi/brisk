@@ -1541,6 +1541,27 @@ class Sac_a_push {
             return cmd_return(200, 'success');
         }
 
+        // "cmd" => "modauth", "sess" => 'xxxxxxxxxxx', 'the_end' => 'true'
+        // a moderator (USER_FLAG_TY_MODER in the type of the user) with its own session: no
+        // password of the site; the reply carries the login, for the log
+        if ($cmd['cmd'] == 'modauth') {
+            if (!isset($cmd['sess'])) {
+                return cmd_return(401, 'malformed cmd');
+            }
+            $idx = -1;
+            if (($user = $this->app->get_user($cmd['sess'], $idx)) == FALSE) {
+                fprintf(STDERR, "DIRECT: modauth refused: no such session\n");
+                return cmd_return(403, 'denied');
+            }
+            if (!$user->is_moder()) {
+                fprintf(STDERR, "DIRECT: modauth refused: [%s] from [%s] is not a moderator\n",
+                        $user->name, $user->ip);
+                return cmd_return(403, 'denied');
+            }
+
+            return cmd_return(200, $user->name);
+        }
+
         return cmd_return(501, 'no cmd found');
     }
 

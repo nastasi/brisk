@@ -83,6 +83,14 @@ elif [ "$act" = "desuper" ]; then
     shift
     usr="$(echo "$1" | sed "s/'/''/g")"
     echo "UPDATE bsk_users SET (type) = ( (type & ~(CAST (X'00020000' as integer))) | (CAST (X'00010000' as integer)) ) WHERE login = '$usr'; "
+elif [ "$act" = "moder" ]; then
+    shift
+    usr="$(echo "$1" | sed "s/'/''/g")"
+    echo "UPDATE bsk_users SET type = type | CAST (X'00100000' as integer) WHERE login = '$usr'; "
+elif [ "$act" = "unmoder" ]; then
+    shift
+    usr="$(echo "$1" | sed "s/'/''/g")"
+    echo "UPDATE bsk_users SET type = type & ~CAST (X'00100000' as integer) WHERE login = '$usr'; "
 elif [ "$act" = "pass" ]; then
     shift
     usr="$(echo "$1" | sed "s/'/''/g")"
@@ -122,6 +130,8 @@ else
     echo "$0 dis <user> <reas_id>"
     echo "$0 ena <user>"
     echo "$0 super <user>"
+    echo "$0 moder <user>  - the user can accept or refuse the new users in usermgmt.php"
+    echo "$0 unmoder <user>"
     echo "$0 pass <user> <newpass>"
     echo "$0 email <user> <newemail>"
     echo "$0 depass <user> <prefix>"

@@ -139,7 +139,7 @@ function main()
         }
 
         if ($bdb->user_login_change($usr->code, $nick) == FALSE) {
-            $msg = "È occorso un errore, riprova più tardi.";
+            $msg = "Puoi proporre un nuovo nickname solo dopo che i moderatori hanno rifiutato quello scelto. Se serve, contatta l'amministratore.";
             break;
         }
 

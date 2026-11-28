@@ -535,9 +535,12 @@ class BriskDB
     {
         GLOBAL $G_dbpfx;
 
-        $user_sql = sprintf("UPDATE %susers SET login = lower('%s')
-                                 WHERE code = %d;",
-                            $G_dbpfx, escsql($login), $code);
+        /* only a refused nickname can change, and it goes back to be checked:
+           a nickname waiting for the moderators cannot change under them */
+        $user_sql = sprintf("UPDATE %susers SET login = lower('%s'), disa_reas = %d
+                                 WHERE code = %d AND disa_reas = %d;",
+                            $G_dbpfx, escsql($login), USER_DIS_REA_NU_TOBECHK,
+                            $code, USER_DIS_REA_NU_NICKREF);
 
         if ( ! (($user_pg  = $this->query($user_sql)) != FALSE && pg_affected_rows($user_pg) == 1) ) {
              return FALSE;
