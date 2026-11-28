@@ -581,9 +581,20 @@ function index_main(&$brisk, $transp_type, $header, &$header_out, $remote_addr_f
             $noauth_class = ($i < TABLES_APPR_N ? "" : "noauth");
             $tables .= sprintf('<td class="%s">', $noauth_class);
 
-            $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
+            if (is_captain_table($i)) {
+                // title with the key and the "?" that explain the table, and the access mode
+                $tables .= '<div class="room_div"><div class="room_tit captain_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.
+                    ' <span class="captain_key" onclick="event.stopPropagation(); captain_tip_help('.$i.');" title="Tavolo con capotavolo: tocca per sapere come funziona">&#128273;</span>'.
+                    '<span class="captain_q" onclick="event.stopPropagation(); captain_tip_help('.$i.');" title="Tavolo con capotavolo: tocca per sapere come funziona">?</span></b>'.
+                    '<br><span class="captain_state">Capotavolo</span></div>';
+            }
+            else {
+                $tables .= '<div class="room_div"><div class="room_tit"><b>'.$mlang_room['tit_tabl'][$G_lang].$i.'</b></div>';
+            }
             $tables .= sprintf('<div class="proxhr" id="table%d"></div>', $i);
             $tables .= sprintf('<div class="table_act" id="table_act%d"></div>', $i);
+            if (is_captain_table($i))
+                $tables .= sprintf('<div class="captain_tip" id="captain_tip%d"></div>', $i);
             $tables .= '</div>';
             $tables .= '</td>'."\n";
 
@@ -1034,6 +1045,7 @@ supported by:<br>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <?php echo $custom_js; ?>
 <script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="captain.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="md5.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="json2.js?v=<?php echo BSK_BUSTING; ?>"></script>
@@ -1050,6 +1062,7 @@ var g_debug = 0;
 var g_lang = "<?php echo $G_lang; ?>";
 var g_lng = "<?php echo $G_lng; ?>";
 var g_tables_n = <?php echo TABLES_N; ?>;
+var g_captain_tables = <?php echo captain_tables_json(); ?>;
 var g_tables_appr_n = <?php echo TABLES_APPR_N; ?>;
 var g_tables_auth_n = <?php echo TABLES_AUTH_N; ?>;
 var g_tables_cert_n = <?php echo TABLES_CERT_N; ?>;
@@ -1187,6 +1200,7 @@ cookie_law(null);
 <script type="text/javascript" src="xynt-streaming.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <?php echo $custom_js; ?>
 <script type="text/javascript" src="room.js?v=<?php echo BSK_BUSTING; ?>"></script>
+<script type="text/javascript" src="captain.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="preload_img<?php echo langtolng($G_lang); ?>.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="probrowser.js?v=<?php echo BSK_BUSTING; ?>"></script>
 <script type="text/javascript" src="json2.js?v=<?php echo BSK_BUSTING; ?>"></script>
@@ -1202,6 +1216,7 @@ cookie_law(null);
    var g_lang = "<?php echo $G_lang; ?>";
    var g_lng = "<?php echo $G_lng; ?>";
    var g_tables_n = <?php echo TABLES_N; ?>;
+   var g_captain_tables = <?php echo captain_tables_json(); ?>;
    var g_tables_appr_n = <?php echo TABLES_APPR_N; ?>;
    var g_tables_auth_n = <?php echo TABLES_AUTH_N; ?>;
    var g_tables_cert_n = <?php echo TABLES_CERT_N; ?>;
@@ -1329,6 +1344,8 @@ cookie_law(null);
     <input id="txt_in" maxlength="128" type="text" autocomplete="off" style="width: 100%;" onkeypress="chatt_checksend(this,event);">
     </td></tr></table>
 </div>
+<div id="captain_invite_bar" style="display: none; margin: 6px auto 0 auto; width: 98%; text-align: center;"></div>
+<div id="captain_request_bar" style="display: none; margin: 6px auto 0 auto; width: 98%; text-align: center;"></div>
 </div>
 
     <div id="authbox" class="notify" style="text-align: center;">
@@ -1485,6 +1502,7 @@ type="submit" class="button" onclick="this.form.elements['realsub'].value = 'chi
 </td></tr>
 </table>
 <div style="position: absolute; bottom: 8px; margin: auto; width: 100%;">
+<input id="captain_invite_btn" type="button" class="input_sub" style="bottom: 4px; display: none; background: #ffffff; color: #4169E1; border: 1px solid #4169E1; border-radius: 5px; padding: 3px 9px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.10);" onclick="captain_invite_from_info();" value="Invita al tavolo"/>
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="$('info').style.visibility = 'hidden';" value="<?php echo $mlang_room['btn_close'][$G_lang]; ?>"/>
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="info_reset();" value="<?php echo $mlang_room['btn_reset'][$G_lang]; ?>"/>
 <input type="submit" class="input_sub" style="bottom: 4px;" onclick="info_save();" value="<?php echo $mlang_room['btn_save'][$G_lang]; ?>"/>

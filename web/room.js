@@ -453,6 +453,7 @@ function j_stand_cont(ddata)
     for (i = 0 ; i < usr.length ; i++) {
         addEvent(usr[i], "click", info_show_cb);
     }
+    captain_guest_invite_refresh();
 }
 
 function esco_cb() {
@@ -480,10 +481,15 @@ function j_tab_cont(table_idx, data)
     for (i = 0 ; i < usr.length ; i++) {
         addEvent(usr[i], "click", info_show_cb);
     }
+    captain_table_full(table_idx, data.length);
 }
 
-function j_tab_act_cont(idx, act)
+/* capt: only for the captain tables, see captain.js */
+function j_tab_act_cont(idx, act, capt)
 {
+    if (capt && captain_act_begin(idx, act, capt))
+        return;
+
     if (act == 'sit') {
         // MLANG 1
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xhenter'+idx+'"  value="'+(g_lang == 'en' ? "Sit down." : "Mi siedo.")+'" onclick="act_sitdown('+idx+');">';
@@ -504,6 +510,15 @@ function j_tab_act_cont(idx, act)
         // MLANG 1
         $("table_act"+idx).innerHTML = '<input type="button" class="button" name="xwakeup"  value="'+(g_lang == 'en' ? "Wake up." : "Mi alzo.")+'" onclick="act_wakeup();">';
     }
+    else if (act == 'captwake' || act == 'captstart') {
+        captain_buttons(idx, act, capt);
+    }
+    else if (act == 'captrequest') {
+        $("table_act"+idx).innerHTML = captain_request_button(idx);
+    }
+    else if (act == 'captclosed') {
+        $("table_act"+idx).innerHTML = captain_closed_label();
+    }
     else if (act == 'resercert') {
         // MLANG 1
         $("table_act"+idx).innerHTML = '<img class="nobo" title="'+(g_lang == 'en' ? "reserved table for authenticated and certified users only" : "tavolo riservato agli utenti registrati e certificati")+'" style="margin-right: 20px;" src="img/onlycert.png">';
@@ -515,6 +530,9 @@ function j_tab_act_cont(idx, act)
     else {
         $("table_act"+idx).innerHTML = '';
     }
+
+    if (capt)
+        captain_act_end(idx, act, capt);
 }
 
 function j_check_login(login, ret)

@@ -1,0 +1,632 @@
+<?php
+/*
+ *  brisk - Obj/captain.phh
+ *
+ *  Copyright (C) 2026      Davide Stori
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+/*
+ *  Tables with a captain.
+ *
+ *  The first player who sits down at one of these tables is the captain:
+ *  he chooses who can sit (open, on request, by invitation only), invites
+ *  players, accepts or refuses the requests, can remove a player and starts
+ *  the game when the table is full (if he doesn't, the game starts by itself
+ *  after CAPTAIN_START_TOUT seconds).
+ *  When the captain leaves, the first player still seated becomes the captain
+ *  and the table goes back to open.
+ */
+
+define('CAPTAIN_PREP_TOUT',     10);   // time the new captain has to choose who can sit
+define('CAPTAIN_START_TOUT',    10);   // a full table starts by itself after this time
+define('CAPTAIN_INVITE_TOUT',  180);   // an invitation expires after this time
+define('CAPTAIN_REQUEST_TOUT', 180);   // a request expires after this time
+define('CAPTAIN_REQUEST_PAUSE', 60);   // after a refusal the same player waits this time to ask again
+define('CAPTAIN_BAN_TOUT',     120);   // a removed player can't sit again at that table for this time
+
+$G_captain_tables = array( 8,  9, 10, 11, 12, 13, 14, 15,
+                          28, 29, 30, 31,
+                          32, 33, 34, 35, 36, 37, 38, 39);
+
+$G_captain_full = array();             // full tables waiting for the start: players and since when
+$G_captain_req_pause = array();        // pause after a refused or expired request
+$G_captain_tip = NULL;                 // content of the captain tip file, read once
+
+function is_captain_table($table_idx)
+{
+    GLOBAL $G_captain_tables;
+
+    return (in_array((int)$table_idx, $G_captain_tables));
+}
+
+function captain_tables_json()
+{
+    GLOBAL $G_captain_tables;
+
+    return (json_encode($G_captain_tables));
+}
+
+/* a captain command not accepted: one line in the log, nothing to the player */
+function captain_refuse($cmd, $user, $why)
+{
+    log_main("CAPTAIN: ".$cmd." refused for [".$user->name."]: ".$why);
+
+    return (FALSE);
+}
+
+function captain_send($user, $js)
+{
+    $user->comm[$user->step % COMM_N] = "gst.st = ".($user->step+1)."; ".$js;
+    $user->step_inc();
+}
+
+/*
+ *  Captain tip: the box that explains the table is shown to the captain at most
+ *  once every 7 days, "Don't show again" hides it forever.
+ *  Registered users are kept by account code, guests by nickname: a guest that
+ *  uses the name of a registered user doesn't change the state of the registered one.
+ *  The file is read once and written again only when something changes.
+ */
+function captain_tip_file()
+{
+    return (LEGAL_PATH."/captain_tip.json");
+}
+
+function captain_tip_key($user)
+{
+    if ($user->is_auth())
+        return ("r:".$user->code);
+
+    return ("g:".strtolower($user->name));
+}
+
+function captain_tip_get($user)
+{
+    GLOBAL $G_captain_tip;
+
+    if ($G_captain_tip === NULL) {
+        $raw = @file_get_contents(captain_tip_file());
+        $data = ($raw === FALSE ? array() : json_decode($raw, TRUE));
+        if (!is_array($data)) {
+            log_crit("CAPTAIN: tip file unreadable, moved aside");
+            @rename(captain_tip_file(), captain_tip_file().".broken");
+            $data = array();
+        }
+        $G_captain_tip = $data;
+    }
+    $key = captain_tip_key($user);
+    $st = (isset($G_captain_tip[$key]) && is_array($G_captain_tip[$key]) ? $G_captain_tip[$key] : array());
+
+    return (array('seen'   => (isset($st['seen']) ? (int)$st['seen'] : 0),
+                  'hidden' => !empty($st['hidden'])));
+}
+
+function captain_tip_seen_recently($user)
+{
+    $st = captain_tip_get($user);
+
+    return (time() - $st['seen'] < 7 * 86400);
+}
+
+function captain_tip_hidden($user)
+{
+    $st = captain_tip_get($user);
+
+    return ($st['hidden']);
+}
+
+function captain_tip_set($user, $what)
+{
+    GLOBAL $G_captain_tip;
+
+    $st = captain_tip_get($user);
+    if ($what == 'seen') {
+        // already seen in the last 7 days: the count doesn't restart
+        if (time() - $st['seen'] < 7 * 86400)
+            return (TRUE);
+        $st['seen'] = time();
+    }
+    else {
+        $st['hidden'] = TRUE;
+    }
+    $G_captain_tip[captain_tip_key($user)] = $st;
+
+    // a new file and then the swap: if something goes wrong the old file stays whole
+    $tmp = captain_tip_file().".tmp";
+    $json = json_encode($G_captain_tip);
+    if ($json === FALSE || @file_put_contents($tmp, $json) !== strlen($json) ||
+        !@rename($tmp, captain_tip_file())) {
+        log_crit("CAPTAIN: tip file not saved");
+        return (FALSE);
+    }
+
+    return (TRUE);
+}
+
+/*
+ *  Removed players: the ban follows the person, not the index in the room
+ *  (it changes leaving and coming back). Same session, same account or same
+ *  network: stricter than Hardbans::check(), that for registered users doesn't
+ *  look at the network, but it lasts CAPTAIN_BAN_TOUT seconds and only at that table.
+ */
+function captain_ban_match($ban, $user)
+{
+    if ($ban['sess'] != "" && $ban['sess'] == $user->sess)
+        return (TRUE);
+    if ($user->is_auth() && $ban['login'] != "" && strcasecmp($ban['login'], $user->name) == 0)
+        return (TRUE);
+
+    return ($ban['ip'] != "" && $ban['ip'] == $user->ip);
+}
+
+function captain_ban_left($table, $user, $curtime)
+{
+    $left = 0;
+    foreach ($table->captain_ban as $k => $ban) {
+        if ($ban['until'] <= $curtime) {
+            unset($table->captain_ban[$k]);
+            continue;
+        }
+        if (captain_ban_match($ban, $user))
+            $left = max($left, $ban['until'] - $curtime);
+    }
+
+    return ($left);
+}
+
+/* invited or accepted by the captain: the old ban is forgotten */
+function captain_ban_remove($table, $user)
+{
+    foreach ($table->captain_ban as $k => $ban) {
+        if (captain_ban_match($ban, $user))
+            unset($table->captain_ban[$k]);
+    }
+}
+
+/* the buttons of the table again to everybody in the room */
+function captain_table_refresh(&$brisk, $table_idx)
+{
+    $table = $brisk->table[$table_idx];
+    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+        $u = $brisk->user[$i];
+        if (!$u->is_active() || $u->stat != 'room')
+            continue;
+
+        captain_send($u, $table->act_content($u));
+    }
+}
+
+/* the pending requests are refused (the captain changed mode or left) */
+function captain_requests_cancel(&$brisk, $table_idx)
+{
+    $table = &$brisk->table[$table_idx];
+
+    foreach ($table->captain_requests as $uid => $req) {
+        $u = $brisk->user[$uid];
+        if ($u->is_active() && $u->stat == 'room' && $u->subst == 'standup' &&
+            $req['sess'] == $u->sess) {
+            captain_send($u, sprintf("captain_request_refused(%d);", $table_idx));
+        }
+    }
+    $table->captain_requests = array();
+
+    if ($table->captain >= 0 && $table->captain < MAX_PLAYERS) {
+        $capt = $brisk->user[$table->captain];
+        if ($capt->is_active() && $capt->stat == 'room')
+            captain_send($capt, "captain_requests_clear_all();");
+    }
+}
+
+/* the user sits down somewhere: his invitations and requests are no more valid */
+function captain_pending_clear(&$brisk, $user)
+{
+    $uid = $user->idx_get();
+    for ($i = 0 ; $i < TABLES_N ; $i++) {
+        unset($brisk->table[$i]->captain_invites[$uid]);
+        unset($brisk->table[$i]->captain_requests[$uid]);
+    }
+}
+
+/* the captain of the table of $user is looking at the info of $target, a player in the room */
+function captain_can_invite(&$brisk, $user, $target)
+{
+    if ($user->stat != 'room' || $user->subst != 'sitdown' ||
+        $user->table < 0 || !is_captain_table($user->table))
+        return (FALSE);
+
+    $table = $brisk->table[$user->table];
+    if ($table->captain != $user->idx_get() || $table->table_token != "" ||
+        $table->player_n >= PLAYERS_N)
+        return (FALSE);
+
+    return (captain_standup_user($brisk, $target) !== FALSE);
+}
+
+/* the active user in the room, standing, with this name */
+function captain_standup_user(&$brisk, $name)
+{
+    for ($i = 0 ; $i < MAX_PLAYERS ; $i++) {
+        $u = $brisk->user[$i];
+        if ($u->is_active() && $u->stat == 'room' && $u->subst == 'standup' &&
+            strcasecmp($u->name, $name) == 0)
+            return ($u);
+    }
+
+    return (FALSE);
+}
+
+/* $user (who looks at the table) is the captain and can remove $user_cur */
+function captain_can_kick($table, $user, $user_cur)
+{
+    return ($user->stat == 'room' && $user->subst == 'sitdown' &&
+            $user->table == $table->idx && is_captain_table($table->idx) &&
+            $table->captain == $user->idx_get() && $table->table_token == "" &&
+            $user_cur->idx_get() != $user->idx_get());
+}
+
+/* seconds since the table is full, to keep the countdown aligned when the page is reloaded */
+function captain_start_elapsed($table_idx)
+{
+    GLOBAL $G_captain_full;
+
+    if (!isset($G_captain_full[$table_idx]))
+        return (0);
+
+    return (max(0, (int)(microtime(TRUE) - $G_captain_full[$table_idx]['since'])));
+}
+
+/* called by Brisk::garbage_manager(): full tables not started by the captain start by themselves */
+function captain_autostart_check(&$brisk, $curtime)
+{
+    GLOBAL $G_captain_full;
+
+    for ($t = 0 ; $t < TABLES_N ; $t++) {
+        if (!is_captain_table($t))
+            continue;
+
+        $table = $brisk->table[$t];
+        // room saved without valid captain fields: the table starts again clean
+        if (!is_array($table->captain_ban) || !is_array($table->captain_invites) ||
+            !is_array($table->captain_requests))
+            $table->captain_reset();
+        // players seated without a captain (room saved by a version without captain tables)
+        if ($table->player_n > 0 && $table->captain < 0)
+            $table->captain = $table->player[0];
+        if ($table->player_n != PLAYERS_N || $table->table_token != "" || $table->captain < 0) {
+            unset($G_captain_full[$t]);
+            continue;
+        }
+        $sig = implode(',', array_slice($table->player, 0, $table->player_n));
+        if (!isset($G_captain_full[$t]) || $G_captain_full[$t]['sig'] != $sig) {
+            $G_captain_full[$t] = array('sig' => $sig, 'since' => $curtime);
+            continue;
+        }
+        if ($curtime - $G_captain_full[$t]['since'] < CAPTAIN_START_TOUT)
+            continue;
+
+        unset($G_captain_full[$t]);
+        $capt = $brisk->user[$table->captain];
+        log_main("CAPTAIN: autostart table ".$t." captain [".$capt->name."]");
+        table_game_start($brisk, $t, $capt, $curtime, NULL, NULL, NULL);
+    }
+}
+
+/*
+ *  Checks for a player that wants to sit at a captain table.
+ *  $pass: 'invite' (invited by the captain), 'request' (request accepted) or ''.
+ *  Returns the message for the player, or "" if he can sit.
+ */
+function captain_sitdown_check($table, $user, $pass, $curtime)
+{
+    GLOBAL $G_lang, $mlang_indwr;
+
+    $msg = "";
+    $btn = $mlang_indwr['btn_stays'][$G_lang];
+
+    if ($pass != 'invite' && ($wait = captain_ban_left($table, $user, $curtime)) > 0) {
+        $msg = show_notify("Sei stato escluso temporaneamente da questo tavolo. Riprova tra ".secstoword($wait).".",
+                           3000, $btn, 420, 160);
+    }
+    else if ($pass != 'invite' && $table->player_n >= 1 && $table->captain_prep_until > $curtime) {
+        // the captain is choosing who can sit; who is invited sits at once
+        $wait = $table->captain_prep_until - $curtime;
+        $msg = show_notify("Il capotavolo sta preparando il tavolo: riprova tra ".$wait." second".($wait == 1 ? "o" : "i").".",
+                           3000, $btn, 420, 140);
+    }
+    else if ($pass != 'invite' && $table->captain_mode == 'closed') {
+        $msg = show_notify("Il tavolo è temporaneamente chiuso dal capotavolo.", 3000, $btn, 420, 160);
+    }
+    else if ($pass == '' && $table->captain_mode == 'private') {
+        $msg = show_notify("Il tavolo è privato: chiedi il permesso al capotavolo.", 3000, $btn, 420, 160);
+    }
+    if ($msg != "")
+        log_main("CAPTAIN: sitdown refused for [".$user->name."] at table ".$table->idx);
+
+    return ($msg);
+}
+
+/*
+ *  Commands of a standing player
+ */
+
+/* ask the captain to sit at a table "on request" */
+function captain_cmd_request(&$brisk, $user, $argz, $curtime)
+{
+    GLOBAL $G_captain_req_pause;
+
+    $table_idx = (isset($argz[1]) ? (int)$argz[1] : -1);
+    if ($table_idx < 0 || $table_idx >= TABLES_N || !is_captain_table($table_idx))
+        return (captain_refuse('captrequest', $user, "wrong table"));
+
+    $table = &$brisk->table[$table_idx];
+    if ($table->table_token != "" || $table->player_n >= PLAYERS_N ||
+        $table->captain < 0 || $table->captain_mode != 'private')
+        return (captain_refuse('captrequest', $user, "table not on request"));
+
+    $uid = $user->idx_get();
+    if (isset($table->captain_requests[$uid]) && $table->captain_requests[$uid]['expires'] > $curtime) {
+        captain_send($user, sprintf("captain_request_duplicate(%d);", $table_idx));
+        return (TRUE);
+    }
+
+    // pause after a refusal or after a request expired without answer
+    $key = $table_idx."_".$uid;
+    $until = 0;
+    if (isset($G_captain_req_pause[$key]) && $G_captain_req_pause[$key]['sess'] == $user->sess)
+        $until = $G_captain_req_pause[$key]['until'];
+    if (isset($table->captain_requests[$uid]) && $table->captain_requests[$uid]['sess'] == $user->sess)
+        $until = max($until, $table->captain_requests[$uid]['expires'] + CAPTAIN_REQUEST_PAUSE);
+    if ($until > $curtime) {
+        captain_send($user, sprintf("captain_request_status('Hai gi&agrave; chiesto di entrare a questo tavolo. Potrai riprovare tra %d secondi.', 2500);",
+                                    $until - $curtime));
+        return (TRUE);
+    }
+
+    $capt = $brisk->user[$table->captain];
+    if (!$capt->is_active() || $capt->stat != 'room' || $capt->subst != 'sitdown')
+        return (captain_refuse('captrequest', $user, "captain not available"));
+
+    $expires = $curtime + CAPTAIN_REQUEST_TOUT;
+    $table->captain_requests[$uid] = array('sess' => $user->sess, 'name' => $user->name,
+                                           'expires' => $expires, 'approved' => FALSE);
+
+    captain_send($capt, sprintf("captain_request_receive(%d, %d, %s, %d);", $table_idx, $uid,
+                                json_encode($user->name), $expires));
+    captain_send($user, sprintf("captain_request_sent(%d);", $table_idx));
+
+    return (TRUE);
+}
+
+/*
+ *  The player sits after an invitation ($argz[0] == 'captinvite_accept')
+ *  or after an accepted request ($argz[0] == 'captrequest_join').
+ *  Returns the table index, or -1 if the invitation or the request isn't valid anymore.
+ */
+function captain_cmd_join(&$brisk, $user, $argz, $curtime)
+{
+    GLOBAL $G_lang, $mlang_indwr;
+
+    $is_invite = ($argz[0] == 'captinvite_accept');
+    $table_idx = (isset($argz[1]) ? (int)$argz[1] : -1);
+    $uid = $user->idx_get();
+    $ok = FALSE;
+
+    if ($table_idx >= 0 && $table_idx < TABLES_N && is_captain_table($table_idx)) {
+        $table = &$brisk->table[$table_idx];
+        $list = ($is_invite ? $table->captain_invites : $table->captain_requests);
+
+        if (isset($list[$uid])) {
+            $item = $list[$uid];
+            $ok = ($item['sess'] == $user->sess && $item['expires'] >= $curtime &&
+                   $table->table_token == "" && $table->player_n < PLAYERS_N &&
+                   $table->captain >= 0);
+            if (!$is_invite)
+                $ok = ($ok && $item['approved'] && $table->captain_mode == 'private');
+        }
+    }
+
+    if (!$ok) {
+        captain_send($user, show_notify(($is_invite ? "L'invito non è più valido." : "La richiesta non è più valida."),
+                                        2000, $mlang_indwr['btn_stays'][$G_lang], 380, 120));
+        return (-1);
+    }
+    captain_ban_remove($table, $user);
+
+    return ($table_idx);
+}
+
+/*
+ *  Commands of the captain
+ */
+
+/* the captain table where $user is the captain, FALSE if none */
+function captain_own_table(&$brisk, $user, $cmd)
+{
+    $table_idx = $user->table;
+
+    if ($user->subst != 'sitdown' || $table_idx < 0 || $table_idx >= TABLES_N ||
+        !is_captain_table($table_idx))
+        return (captain_refuse($cmd, $user, "not seated at a captain table"));
+
+    $table = $brisk->table[$table_idx];
+    if ($table->captain != $user->idx_get())
+        return (captain_refuse($cmd, $user, "not the captain"));
+    if ($table->table_token != "")
+        return (captain_refuse($cmd, $user, "game already started"));
+
+    return ($table_idx);
+}
+
+/* "Start table": the same start of a normal table when it becomes full */
+function captain_cmd_start(&$brisk, $user, $curtime, $get, $post, $cookie)
+{
+    if (($table_idx = captain_own_table($brisk, $user, 'captstart')) === FALSE)
+        return (FALSE);
+    if ($brisk->table[$table_idx]->player_n != PLAYERS_N)
+        return (captain_refuse('captstart', $user, "table not full"));
+
+    return (table_game_start($brisk, $table_idx, $user, $curtime, $get, $post, $cookie));
+}
+
+/* captprivate: open <-> on request, captclose: open <-> invitation only */
+function captain_cmd_mode(&$brisk, $user, $cmd)
+{
+    if (($table_idx = captain_own_table($brisk, $user, $cmd)) === FALSE)
+        return (FALSE);
+
+    $table = &$brisk->table[$table_idx];
+    captain_requests_cancel($brisk, $table_idx);
+
+    $mode = ($cmd == 'captprivate' ? 'private' : 'closed');
+    $table->captain_mode = ($table->captain_mode == $mode ? 'open' : $mode);
+    // the captain has chosen: the waiting time ends for everybody
+    $table->captain_prep_until = 0;
+
+    captain_table_refresh($brisk, $table_idx);
+
+    return (TRUE);
+}
+
+/* the captain keeps the mode the table already has: the waiting time ends */
+function captain_cmd_ready(&$brisk, $user, $curtime)
+{
+    if (($table_idx = captain_own_table($brisk, $user, 'captready')) === FALSE)
+        return (FALSE);
+
+    $table = &$brisk->table[$table_idx];
+    if ($table->captain_prep_until > $curtime) {
+        $table->captain_prep_until = 0;
+        captain_table_refresh($brisk, $table_idx);
+    }
+
+    return (TRUE);
+}
+
+function captain_cmd_invite(&$brisk, $user, $argz, $curtime)
+{
+    if (($table_idx = captain_own_table($brisk, $user, 'captinvite')) === FALSE)
+        return (FALSE);
+
+    $table = &$brisk->table[$table_idx];
+    $name = (isset($argz[1]) ? urldecode($argz[1]) : "");
+    if ($table->player_n >= PLAYERS_N || $name == "")
+        return (captain_refuse('captinvite', $user, "table full or no name"));
+
+    if (($target = captain_standup_user($brisk, $name)) === FALSE)
+        return (captain_refuse('captinvite', $user, "player not standing in the room"));
+
+    $tid = $target->idx_get();
+    if (isset($table->captain_invites[$tid]) && $table->captain_invites[$tid]['expires'] > $curtime)
+        return (captain_refuse('captinvite', $user, "already invited"));
+
+    $expires = $curtime + CAPTAIN_INVITE_TOUT;
+    $table->captain_invites[$tid] = array('sess' => $target->sess, 'expires' => $expires);
+
+    captain_send($target, sprintf("captain_invite_receive(%d, %s, %d);", $table_idx,
+                                  json_encode($user->name), $expires));
+
+    return (TRUE);
+}
+
+function captain_cmd_request_accept(&$brisk, $user, $argz, $curtime)
+{
+    if (($table_idx = captain_own_table($brisk, $user, 'captrequest_accept')) === FALSE)
+        return (FALSE);
+
+    $table = &$brisk->table[$table_idx];
+    $tid = (isset($argz[1]) ? (int)$argz[1] : -1);
+    if ($table->captain_mode != 'private' || $tid < 0 || $tid >= MAX_PLAYERS ||
+        !isset($table->captain_requests[$tid]))
+        return (captain_refuse('captrequest_accept', $user, "no such request"));
+
+    $req = $table->captain_requests[$tid];
+    $target = $brisk->user[$tid];
+    if (!$target->is_active() || $target->stat != 'room' || $target->subst != 'standup' ||
+        $req['sess'] != $target->sess || $req['expires'] < $curtime ||
+        $table->player_n >= PLAYERS_N) {
+        unset($table->captain_requests[$tid]);
+        return (captain_refuse('captrequest_accept', $user, "request not valid anymore"));
+    }
+
+    $table->captain_requests[$tid]['approved'] = TRUE;
+    captain_send($target, sprintf("captain_request_accepted(%d);", $table_idx));
+
+    return (TRUE);
+}
+
+function captain_cmd_request_refuse(&$brisk, $user, $argz)
+{
+    GLOBAL $G_captain_req_pause;
+
+    $table_idx = $user->table;
+    if ($user->subst != 'sitdown' || $table_idx < 0 || $table_idx >= TABLES_N ||
+        !is_captain_table($table_idx))
+        return (captain_refuse('captrequest_reject', $user, "not seated at a captain table"));
+
+    $table = &$brisk->table[$table_idx];
+    $tid = (isset($argz[1]) ? (int)$argz[1] : -1);
+    if ($table->captain != $user->idx_get() || $tid < 0 || $tid >= MAX_PLAYERS ||
+        !isset($table->captain_requests[$tid]))
+        return (captain_refuse('captrequest_reject', $user, "no such request"));
+
+    $req = $table->captain_requests[$tid];
+    unset($table->captain_requests[$tid]);
+
+    // expired pauses are dropped, so the list doesn't grow until the restart
+    $now = time();
+    foreach ($G_captain_req_pause as $k => $p) {
+        if ($p['until'] <= $now)
+            unset($G_captain_req_pause[$k]);
+    }
+    $G_captain_req_pause[$table_idx."_".$tid] = array('sess' => $req['sess'],
+                                                      'until' => $now + CAPTAIN_REQUEST_PAUSE);
+
+    $target = $brisk->user[$tid];
+    if ($target->is_active() && $target->stat == 'room' && $target->subst == 'standup' &&
+        $req['sess'] == $target->sess)
+        captain_send($target, sprintf("captain_request_refused(%d);", $table_idx));
+
+    return (TRUE);
+}
+
+/* the captain removes a player: he can't sit there again for CAPTAIN_BAN_TOUT seconds */
+function captain_cmd_expel(&$brisk, $user, $argz, $curtime)
+{
+    GLOBAL $G_lang, $mlang_indwr;
+
+    if (($table_idx = captain_own_table($brisk, $user, 'captexpel')) === FALSE)
+        return (FALSE);
+
+    $table = &$brisk->table[$table_idx];
+    $tid = (isset($argz[1]) ? (int)$argz[1] : -1);
+    if ($tid < 0 || $tid == $user->idx_get() || !in_array($tid, array_slice($table->player, 0, $table->player_n)))
+        return (captain_refuse('captexpel', $user, "player not at the table"));
+
+    $target = $brisk->user[$tid];
+    $table->captain_ban[] = array('until' => $curtime + CAPTAIN_BAN_TOUT,
+                                  'login' => ($target->is_auth() ? $target->name : ""),
+                                  'sess'  => $target->sess,
+                                  'ip'    => $target->ip);
+    $brisk->room_wakeup($target);
+    // who is removed knows why and when he can come back
+    captain_send($target, show_notify("Il capotavolo ti ha tolto dal tavolo ".$table_idx.". Potrai risederti lì tra ".secstoword(CAPTAIN_BAN_TOUT).".",
+                                      0, $mlang_indwr['btn_close'][$G_lang], 300, 150));
+
+    return (TRUE);
+}
+
+?>

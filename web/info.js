@@ -67,6 +67,8 @@ function info_show(username)
         info = info_fld($('info'));
         info.json2dom(info_in);
         info_onlyifknown_isvisible();
+        if (typeof(captain_info_show) == 'function')
+            captain_info_show(info_in);
         info.visible(true);
         }
     else {
@@ -77,13 +79,13 @@ function info_show(username)
 var g__info_show_target = "";
 function info_show_cb(e)
 {
-    if (g__info_show_target == e.target.innerHTML) {
-        g__info_show_target = "";
-        info_show(e.target.innerHTML);
-    }
-    else {
-        g__info_show_target = e.target.innerHTML;
-    }
+    // one tap opens the info box (the captain invites from it); the captain tip closes
+    var target = (e.currentTarget ? e.currentTarget : e.target);
+
+    if (typeof(captain_tip_dismiss) == 'function')
+        captain_tip_dismiss();
+    g__info_show_target = "";
+    info_show(target.innerHTML);
 }
 
 function info_reset()

@@ -506,6 +506,8 @@ function act_ping()
 
 function act_sitdown(table)
 {
+    if (typeof(captain_sit_time_set) == 'function')
+        captain_sit_time_set(table);
     send_mesg("sitdown|"+table);
 }
 
@@ -1185,6 +1187,9 @@ function user_dec_and_state(el)
 
     content = user_decorator(el, true);
     content += state_add(el[1], el[0],(typeof(el[2]) != 'undefined' ? el[2] : null));
+    // the captain can remove the other players (room tables, see captain.js)
+    if (el[4] == 1)
+        content += captain_kick_button(el);
 
     return (content);
 }
